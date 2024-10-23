@@ -1,4 +1,4 @@
-package pascal.hardscript.exception;
+package pascal.hardscript.util.exception;
 
 public class TodoException extends RuntimeException {
     public TodoException(String message) {
