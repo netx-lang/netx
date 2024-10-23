@@ -3,15 +3,16 @@ grammar HardScript;
 design : module*;
 
 module
-    : 'module' ID ':' pattern module_body
-    ;
-
-module_body
-    : '{' (instantiation | component)* '}'
+    : 'module' ID ':' pattern '{' (instantiation | component | statement)* '}'
     ;
 
 component
     : 'component' ID ':' list_expression
+    ;
+
+statement
+    : 'for' '(' interator (',' interator)* ')' '{' (instantiation | component)* '}'
+    | expression
     ;
 
 instantiation
@@ -21,17 +22,28 @@ instantiation
 expression
     : primary_expression
     | access_expression
+    | conditional_expression
     ;
 
 primary_expression
-    : ID                # Identifier
-    | list_expression   # ListExpr
-    | pattern           # PatternExpr
-    | DECIMAL_LITERAL   # Decimal
+    : ID                 # Identifier
+    | DECIMAL_LITERAL    # Decimal
+    | list_expression    # ListExpr
+    | pattern            # PatternExpr
+    | '(' expression ')' # ParenExpr
+    ;
+
+conditional_expression
+    : 'if' expression 'then' expression 'else' expression
     ;
 
 access_expression
-    : primary_expression ('[' expression ']')+
+    : primary_expression (selector)+
+    ;
+
+selector
+    : '[' expression ']' # BitSelector
+    | '[' expression '..' expression ']' # RangeSelector
     ;
 
 pattern
@@ -46,9 +58,13 @@ list_expression
     ;
 
 qualifier
-    : ID '<-' list_expression # Generator
+    : interator               # Generator
     | 'when' expression       # Filter
     | 'let' ID '=' expression # LocalBinding
+    ;
+
+interator
+    : ID '<-' list_expression
     ;
 
 ID : [a-zA-Z_][a-zA-Z_0-9]*;
