@@ -79,18 +79,37 @@ iterator
     ;
 
 number
-    : INTEGER     # IntNumber
-    | BIN_NUMBER  # BinNumber
-    | HEX_NUMBER  # HexNumber
-    | OCT_NUMBER  # OctNumber
-    | DEC_NUMBER  # DecNumber
+    : INTEGER          # IntNumber
+    | bitvector_number # BitVectorNumberWrapper
     ;
 
-BIN_NUMBER : [+-]? '\'' [sS]? [bB] [01] [01_]*;
-HEX_NUMBER : [+-]? '\'' [sS]? [hH] [0-9a-fA-F] [0-9a-fA-F_]*;
-OCT_NUMBER : [+-]? '\'' [sS]? [oO] [0-7] [0-7_]*;
-DEC_NUMBER : [+-]? '\'' [sS]? [dD] [0-9] [0-9_]*;
+bitvector_number
+    : UNSIGNED_INTEGER  '\'' SIGN? bin_number
+    | UNSIGNED_INTEGER  '\'' SIGN? hex_number
+    | UNSIGNED_INTEGER  '\'' SIGN? oct_number
+    | UNSIGNED_INTEGER  '\'' SIGN? dec_number
+    ;
+
+bin_number : BIN_BASE BIN_REP;
+BIN_BASE : [bB];
+BIN_REP: [01] [01_]*;
+
+hex_number : HEX_BASE HEX_REP;
+HEX_BASE : [hH];
+HEX_REP: [0-9a-fA-F] [0-9a-fA-F_]*;
+
+oct_number : OCT_BASE OCT_REP;
+OCT_BASE : [oO];
+OCT_REP: [0-7] [0-7_]*;
+
+dec_number : DEC_BASE DEC_REP;
+SIGN : [sS];
+DEC_BASE : [dD];
+DEC_REP: [0-9] [0-9_]*;
+
+
 INTEGER : [+-]? [0-9] [0-9_]*;
+UNSIGNED_INTEGER : [0-9] [0-9_]*;
 
 ID : [a-zA-Z_][a-zA-Z_0-9]*;
 

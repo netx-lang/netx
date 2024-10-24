@@ -11,6 +11,7 @@ import pascal.hardscript.compiler.ast.type.PrimitiveCompType;
 import pascal.hardscript.compiler.parser.HardScriptParser.*;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.exception.TodoException;
+import pascal.hardscript.util.lang.BitVector;
 
 public final class HSParser {
 
@@ -131,11 +132,29 @@ public final class HSParser {
     }
 
     private static NumberExpr parseNumberExpr(NumberContext ctx) {
-        // TODO:
         return switch (ctx) {
             case IntNumberContext sub -> IntNumber.of(Integer.parseInt(sub.INTEGER().getText()));
+            case BitVectorNumberWrapperContext sub -> parseBitVectorNumber(sub.bitvector_number());
             default -> throw new TodoException("Numeric Literals");
         };
+    }
+
+    private static BitVectorNumber parseBitVectorNumber(Bitvector_numberContext ctx) {
+        int size = Integer.parseUnsignedInt(ctx.UNSIGNED_INTEGER().getText());
+        boolean isSigned = ctx.SIGN() != null;
+        BitVector rep;
+        if (ctx.bin_number() != null) {
+            rep = BitVector.parse(ctx.bin_number().getText(), size, 2);
+        } else if (ctx.hex_number() != null) {
+            rep = BitVector.parse(ctx.hex_number().getText(), size, 16);
+        } else if (ctx.oct_number() != null) {
+            rep = BitVector.parse(ctx.oct_number().getText(), size, 8);
+        } else if (ctx.dec_number() != null) {
+            rep = BitVector.parse(ctx.dec_number().getText(), size, 10);
+        } else {
+            throw new ShallNotReachHereError();
+        }
+        return BitVectorNumber.of(rep, isSigned);
     }
 
     private static ExprNode parseAccessExpr(Access_expressionContext ctx) {
