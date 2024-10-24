@@ -1,36 +1,52 @@
 grammar HardScript;
 
-design : module*;
+design : module+;
 
 module
-    : 'module' ID ':' pattern '{' (instantiation | component | statement)* '}'
+    : 'module' ID ':' module_type '{' element* '}'
     ;
 
-component
-    : 'component' ID ':' list_expression
+module_type
+    : list_expression '->' list_expression
     ;
 
-statement
-    : 'for' '(' interator (',' interator)* ')' '{' (instantiation | component)* '}'
-    | expression
+element
+    : instantiation # InstantiationWrapper
+    | 'component' ID (',' ID)* ':' component_type  # Component
+    | 'for' '(' iterator (',' iterator)* ')' '{' element* '}' # Loop
     ;
 
 instantiation
-    : ID ':' pattern
+    : instantiation_ref ('<>' instantiation_ref)* ':' list_expression ('->' list_expression)+
+    ;
+
+instantiation_ref
+    : ID              #AtomInstRef
+    | list_expression #CompositeInstRef
+    ;
+
+component_type
+    : atom_expression # PrimitiveCompType
+    | ID '(' component_type (',' component_type)* ')' # CompositeCompType
     ;
 
 expression
-    : primary_expression
-    | access_expression
-    | conditional_expression
+    : primary_expression     # PrimaryExprWrapper
+    | access_expression      # AccessExprWrapper
+    | conditional_expression # ConditionalExprWrapper
+    | '(' expression ')'     # ParenExpr
     ;
 
 primary_expression
-    : ID                 # Identifier
-    | DECIMAL_LITERAL    # Decimal
+    : atom_expression    # AtomExprWrapper
     | list_expression    # ListExpr
-    | pattern            # PatternExpr
-    | '(' expression ')' # ParenExpr
+    | instantiation      # InstExpr
+    ;
+
+atom_expression
+    : ID                      # Identifier
+    | number                  # NumberExpr
+    | '(' atom_expression ')' # ParenAtomExpr
     ;
 
 conditional_expression
@@ -46,28 +62,38 @@ selector
     | '[' expression '..' expression ']' # RangeSelector
     ;
 
-pattern
-    : list_expression '->' list_expression
-    ;
-
 list_expression
-    : '[' expression '..' expression ']' # RangeList
+    : '[' expression '..' expression ']'   # RangeList
     | '[' expression (',' expression)* ']' # CommonList
     | '[' expression '|' qualifier (',' qualifier)* ']' # ListComprehension
     | '[' ']' # EmptyList
     ;
 
 qualifier
-    : interator               # Generator
+    : iterator                # Generator
     | 'when' expression       # Filter
     | 'let' ID '=' expression # LocalBinding
     ;
 
-interator
+iterator
     : ID '<-' list_expression
     ;
 
+number
+    : INTEGER     # IntNumber
+    | BIN_NUMBER  # BinNumber
+    | HEX_NUMBER  # HexNumber
+    | OCT_NUMBER  # OctNumber
+    | DEC_NUMBER  # DecNumber
+    ;
+
+BIN_NUMBER : [+-]? '\'' [sS]? [bB] [01] [01_]*;
+HEX_NUMBER : [+-]? '\'' [sS]? [hH] [0-9a-fA-F] [0-9a-fA-F_]*;
+OCT_NUMBER : [+-]? '\'' [sS]? [oO] [0-7] [0-7_]*;
+DEC_NUMBER : [+-]? '\'' [sS]? [dD] [0-9] [0-9_]*;
+INTEGER : [+-]? [0-9] [0-9_]*;
+
 ID : [a-zA-Z_][a-zA-Z_0-9]*;
-COMMENT: '//' ~('\n')* '\n' -> skip ;
-DECIMAL_LITERAL : [0-9]+;
-WS: [ \t\r\n]+ -> skip;
+
+WHITE_SPACE: [ \t\r\n]+ -> skip;
+COMMENT: '//' ~('\n')* '\n' -> skip;

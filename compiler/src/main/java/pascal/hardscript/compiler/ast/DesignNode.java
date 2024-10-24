@@ -1,5 +1,7 @@
 package pascal.hardscript.compiler.ast;
 
+import pascal.hardscript.compiler.ast.module.ModuleNode;
+
 import java.util.List;
 
 public record DesignNode(List<ModuleNode> modules) implements ASTNode {
