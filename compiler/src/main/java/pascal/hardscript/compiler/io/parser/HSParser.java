@@ -112,7 +112,9 @@ public final class HSParser {
     static ListExpr parseListExpr(List_expressionContext ctx) {
         return switch (ctx) {
             case CommonListContext sub -> CommonList.of(sub.expression().stream().map(HSParser::parseExpr).toList());
-            case RangeListContext sub -> RangeList.of(parseExpr(sub.expression(0)), parseExpr(sub.expression(1)));
+            case RangeListContext sub -> RangeList.of(
+                    parseAtomExpr(sub.atom_expression(0)),
+                    parseAtomExpr(sub.atom_expression(1)));
             case EmptyListContext ignored -> CommonList.ofEmpty();
             case ListComprehensionContext sub -> parseListComprehension(sub);
             default -> throw new ShallNotReachHereError();
@@ -176,6 +178,8 @@ public final class HSParser {
     }
 
     static ExprNode parseConditionalExpr(Conditional_expressionContext ctx) {
-        throw new TodoException(); // TODO:
+        return ConditionalExpr.of(
+                parseAtomExpr(ctx.atom_expression()),
+                parseExpr(ctx.expression(0)), parseExpr(ctx.expression(1)));
     }
 }

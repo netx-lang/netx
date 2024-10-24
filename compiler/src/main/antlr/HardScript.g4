@@ -49,7 +49,7 @@ atom_expression
     ;
 
 conditional_expression
-    : 'if' expression 'then' expression 'else' expression
+    : 'if' atom_expression 'then' expression 'else' expression
     ;
 
 access_expression
@@ -62,8 +62,8 @@ selector
     ;
 
 list_expression
-    : '[' expression '..' expression ']'   # RangeList
-    | '[' expression (',' expression)* ']' # CommonList
+    : '[' expression (',' expression)* ']' # CommonList
+    | '[' atom_expression '..' atom_expression ']'   # RangeList
     | '[' expression '|' qualifier (',' qualifier)* ']' # ListComprehension
     | '[' ']' # EmptyList
     ;
