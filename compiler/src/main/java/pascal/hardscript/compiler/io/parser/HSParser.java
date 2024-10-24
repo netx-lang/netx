@@ -2,10 +2,12 @@ package pascal.hardscript.compiler.io.parser;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import pascal.hardscript.compiler.ast.DesignNode;
-import pascal.hardscript.compiler.ast.Symbol;
-import pascal.hardscript.compiler.ast.Interpolated;
 import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.ast.expr.*;
+import pascal.hardscript.compiler.ast.Interpolated;
+import pascal.hardscript.compiler.ast.Symbol;
+import pascal.hardscript.compiler.ast.expr.ConditionalExpr;
+import pascal.hardscript.compiler.ast.expr.ExprNode;
+import pascal.hardscript.compiler.ast.expr.InstExpr;
 import pascal.hardscript.compiler.ast.expr.access.AccessExpr;
 import pascal.hardscript.compiler.ast.expr.access.BitSelector;
 import pascal.hardscript.compiler.ast.expr.access.PartSelector;
@@ -106,7 +108,7 @@ public final class HSParser {
     static AtomExpr parseAtomExpr(Atom_expressionContext ctx) {
         return switch (ctx) {
             case NumberExprContext sub -> parseNumberExpr(sub.number());
-            case IdentifierWrapperContext sub -> SymbolExpr.of(parseSymbol(sub.symbol()));
+            case SymbolWrapperContext sub -> SymbolExpr.of(parseSymbol(sub.symbol()));
             default -> throw new ShallNotReachHereError();
         };
     }

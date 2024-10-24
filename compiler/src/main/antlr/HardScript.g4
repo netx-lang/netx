@@ -11,9 +11,9 @@ module_type
     ;
 
 element
-    : instantiation                                                # InstantiationWrapper
-    | 'component' symbol (',' symbol)* ':' component_type  # Component
-    | 'for' '(' iterator (',' iterator)* ')' '{' element* '}'      # Loop
+    : instantiation                                            # InstantiationWrapper
+    | 'component' symbol (',' symbol)* ':' component_type      # Component
+    | 'for' '(' iterator (',' iterator)* ')' '{' element* '}'  # Loop
     ;
 
 instantiation
@@ -21,12 +21,12 @@ instantiation
     ;
 
 instantiation_ref
-    : symbol      # AtomInstRef
+    : symbol          # AtomInstRef
     | list_expression # CompositeInstRef
     ;
 
 component_type
-    : atom_expression                                         # PrimitiveCompType
+    : atom_expression                                     # PrimitiveCompType
     | symbol '(' component_type (',' component_type)* ')' # CompositeCompType
     ;
 
@@ -44,8 +44,8 @@ primary_expression
     ;
 
 atom_expression
-    : symbol # IdentifierWrapper
-    | number     # NumberExpr
+    : symbol # SymbolWrapper
+    | number # NumberExpr
     ;
 
 conditional_expression
@@ -69,8 +69,8 @@ list_expression
     ;
 
 qualifier
-    : iterator                        # Generator
-    | 'when' expression               # Filter
+    : iterator                    # Generator
+    | 'when' expression           # Filter
     | 'let' symbol '=' expression # LocalBinding
     ;
 

@@ -1,5 +1,6 @@
 package pascal.hardscript.util.lang;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 
 public final class BitVector {
@@ -13,29 +14,42 @@ public final class BitVector {
         this.data = new byte[(size + 7) / 8];
     }
 
+    private BitVector(int size, byte[] data) {
+        this.size = size;
+        this.data = new byte[(size + 7) / 8];
+        System.arraycopy(data, 0, this.data, 0, Math.min(data.length, this.data.length));
+    }
+
     public static BitVector parse(String rep, int size, int radix) {
-        BitVector result = new BitVector(size);
-        for (int i = 0; i < rep.length(); i++) {
-            int digit = Character.digit(rep.charAt(i), radix);
-            for (int j = 0; j < 4; j++) {
-                if ((digit & (1 << j)) != 0 && i * 4 + j < size) {
-                    result.set(i * 4 + j);
+        if (radix == 10) {
+            BigInteger value = new BigInteger(rep);
+            return new BitVector(size, value.toByteArray());
+        } else {
+            BitVector result = new BitVector(size);
+            int valid = Integer.bitCount(radix - 1);
+            for (int i = 0; i < rep.length(); i++) {
+                int digit = Character.digit(rep.charAt(rep.length() - i - 1), radix);
+                for (int j = 0; j < valid; j++) {
+                    int index = i * valid + j;
+                    if ((digit & (1 << j)) != 0 && index < size) {
+                        result.set(index);
+                    }
                 }
             }
+            return result;
         }
-        return result;
     }
 
     public void set(int index) {
-        data[index >> 3] |= (byte) (1 << (index & 8));
+        data[index >> 3] |= (byte) (1 << (index & 7));
     }
 
     public void clear(int index) {
-        data[index >> 3] &= (byte) ~(1 << (index & 8));
+        data[index >> 3] &= (byte) ~(1 << (index & 7));
     }
 
     public boolean get(int index) {
-        return (data[index >> 3] & (1 << (index & 8))) != 0;
+        return (data[index >> 3] & (1 << (index & 7))) != 0;
     }
 
     public int size() {
@@ -80,7 +94,9 @@ public final class BitVector {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (byte datum : data) {
-            sb.append(datum);
+            for (int i = 0; i < 8; i++) {
+                sb.append((datum & (1 << i)) != 0 ? '1' : '0');
+            }
         }
         return sb.reverse().substring(data.length * 8 - size);
     }

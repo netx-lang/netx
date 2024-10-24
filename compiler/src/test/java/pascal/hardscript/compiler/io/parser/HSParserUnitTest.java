@@ -2,16 +2,16 @@ package pascal.hardscript.compiler.io.parser;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
-import pascal.hardscript.compiler.ast.Interpolated;
 import pascal.hardscript.compiler.ast.Identifier;
+import pascal.hardscript.compiler.ast.Interpolated;
 import pascal.hardscript.compiler.ast.expr.access.AccessExpr;
 import pascal.hardscript.compiler.ast.expr.access.BitSelector;
 import pascal.hardscript.compiler.ast.expr.access.PartSelector;
-import pascal.hardscript.compiler.ast.expr.atom.SymbolExpr;
 import pascal.hardscript.compiler.ast.expr.atom.IntNumber;
+import pascal.hardscript.compiler.ast.expr.atom.SymbolExpr;
 import pascal.hardscript.compiler.ast.expr.list.*;
-import pascal.hardscript.compiler.parser.HardScriptParser;
 import pascal.hardscript.compiler.io.Frontend;
+import pascal.hardscript.compiler.parser.HardScriptParser;
 
 import java.util.List;
 
@@ -28,34 +28,31 @@ class HSParserUnitTest {
     void testParseIdentifier() {
         var context = makeParser("check_${[a, b]}_this_${man}");
         var identifier = HSParser.parseSymbol(context.symbol());
-        assertEquals(identifier,
-                Interpolated.of(
+        assertEquals(Interpolated.of(
                         List.of("check_", "_this_"),
                         List.of(CommonList.of(
                                 List.of(SymbolExpr.of(Identifier.of("a")),
                                         SymbolExpr.of(Identifier.of("b")))),
-                                SymbolExpr.of(Identifier.of("man")))));
+                                SymbolExpr.of(Identifier.of("man")))), identifier);
     }
 
     @Test
     void testParseAccessExpr() {
         var context = makeParser("arr[1][2:0]").access_expression();
         var accessExpr = HSParser.parseAccessExpr(context);
-        assertEquals(accessExpr,
-                AccessExpr.of(AccessExpr.of(
+        assertEquals(AccessExpr.of(AccessExpr.of(
                     SymbolExpr.of(Identifier.of("arr")),
                     BitSelector.of(IntNumber.of(1))),
-                    PartSelector.of(IntNumber.of(2), IntNumber.of(0))));
+                PartSelector.of(IntNumber.of(2), IntNumber.of(0))), accessExpr);
     }
 
     @Test
     void testParseListExpr() {
         var context = makeParser("[port | i <- [0..5], let port = [1, x_${i}]]").list_expression();
         var listExpr = HSParser.parseListExpr(context);
-        System.out.println(listExpr);
-        assertEquals(listExpr, ListComprehension.of(
-                SymbolExpr.of(Identifier.of("port")),
-                List.of(GeneratorQualifier.of(
+        assertEquals(ListComprehension.of(
+                SymbolExpr.of(Identifier.of("port")), List.of(
+                        GeneratorQualifier.of(
                                 SymbolExpr.of(Identifier.of("i")),
                                 RangeList.of(IntNumber.of(0), IntNumber.of(5))),
                         BindingQualifier.of(
@@ -64,8 +61,6 @@ class HSParserUnitTest {
                                         IntNumber.of(1),
                                         SymbolExpr.of(Interpolated.of(
                                                 List.of("x_"),
-                                                List.of(SymbolExpr.of(Identifier.of("i"))))))))))
-        );
-
+                                                List.of(SymbolExpr.of(Identifier.of("i")))))))))), listExpr);
     }
 }
