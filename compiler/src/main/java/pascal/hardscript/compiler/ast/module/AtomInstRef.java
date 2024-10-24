@@ -1,10 +1,10 @@
 package pascal.hardscript.compiler.ast.module;
 
-import pascal.hardscript.compiler.ast.Identifier;
+import pascal.hardscript.compiler.ast.Symbol;
 
-public record AtomInstRef(Identifier id) implements InstRef {
+public record AtomInstRef(Symbol id) implements InstRef {
 
-    public static AtomInstRef of(Identifier id) {
+    public static AtomInstRef of(Symbol id) {
         return new AtomInstRef(id);
     }
 }

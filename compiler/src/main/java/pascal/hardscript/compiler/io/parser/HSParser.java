@@ -1,6 +1,9 @@
 package pascal.hardscript.compiler.io.parser;
 
+import org.antlr.v4.runtime.tree.ParseTree;
 import pascal.hardscript.compiler.ast.DesignNode;
+import pascal.hardscript.compiler.ast.Symbol;
+import pascal.hardscript.compiler.ast.Interpolated;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.ast.expr.*;
 import pascal.hardscript.compiler.ast.expr.access.AccessExpr;
@@ -18,8 +21,6 @@ import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.lang.BitVector;
 
-import java.util.Map;
-
 public final class HSParser {
 
     public static DesignNode parseDesign(DesignContext ctx) {
@@ -27,7 +28,8 @@ public final class HSParser {
     }
 
     static ModuleNode parseModule(ModuleContext ctx) {
-        return ModuleNode.of(Identifier.of(ctx.ID()),
+        return ModuleNode.of(
+                parseSymbol(ctx.symbol()),
                 parseModuleType(ctx.module_type()),
                 ctx.element().stream().map(HSParser::parseElement).toList());
     }
@@ -55,7 +57,7 @@ public final class HSParser {
 
     static InstRef parseInstantiationRef(Instantiation_refContext ctx) {
         return switch (ctx) {
-            case AtomInstRefContext sub -> AtomInstRef.of(Identifier.of(sub.ID()));
+            case AtomInstRefContext sub -> AtomInstRef.of(parseSymbol(sub.symbol()));
             case CompositeInstRefContext sub -> CompositeInstRef.of(parseListExpr(sub.list_expression()));
             default -> throw new ShallNotReachHereError();
         };
@@ -69,14 +71,14 @@ public final class HSParser {
 
     static ComponentNode parseComponent(ComponentContext ctx) {
         return ComponentNode.of(
-                ctx.ID().stream().map(Identifier::of).toList(),
+                ctx.symbol().stream().map(HSParser::parseSymbol).toList(),
                 parseComponentType(ctx.component_type()));
     }
 
     static CompTypeNode parseComponentType(Component_typeContext ctx) {
         return switch (ctx) {
             case PrimitiveCompTypeContext sub -> PrimitiveCompType.of(parseAtomExpr(sub.atom_expression()));
-            case CompositeCompTypeContext sub -> CompositeCompType.of(Identifier.of(sub.ID()),
+            case CompositeCompTypeContext sub -> CompositeCompType.of(parseSymbol(sub.symbol()),
                     sub.component_type().stream().map(HSParser::parseComponentType).toList());
             default -> throw new ShallNotReachHereError();
         };
@@ -104,7 +106,7 @@ public final class HSParser {
     static AtomExpr parseAtomExpr(Atom_expressionContext ctx) {
         return switch (ctx) {
             case NumberExprContext sub -> parseNumberExpr(sub.number());
-            case IdentifierContext sub -> IdentifierExpr.of(Identifier.of(sub.ID()));
+            case IdentifierWrapperContext sub -> IdentifierExpr.of(parseSymbol(sub.symbol()));
             default -> throw new ShallNotReachHereError();
         };
     }
@@ -131,13 +133,14 @@ public final class HSParser {
         return switch (ctx) {
             case GeneratorContext sub -> parseGeneratorQual(sub.iterator());
             case FilterContext sub -> FilterQual.of(parseExpr(sub.expression()));
-            case LocalBindingContext sub -> BindingQual.of(Identifier.of(sub.ID()), parseExpr(sub.expression()));
+            case LocalBindingContext sub ->
+                    BindingQual.of(parseSymbol(sub.symbol()), parseExpr(sub.expression()));
             default -> throw new ShallNotReachHereError();
         };
     }
 
     static GeneratorQual parseGeneratorQual(IteratorContext ctx) {
-        return GeneratorQual.of(Identifier.of(ctx.ID()), parseListExpr(ctx.list_expression()));
+        return GeneratorQual.of(parseSymbol(ctx.symbol()), parseListExpr(ctx.list_expression()));
     }
 
     static NumberExpr parseNumberExpr(NumberContext ctx) {
@@ -181,5 +184,17 @@ public final class HSParser {
         return ConditionalExpr.of(
                 parseAtomExpr(ctx.atom_expression()),
                 parseExpr(ctx.expression(0)), parseExpr(ctx.expression(1)));
+    }
+
+    static Symbol parseSymbol(SymbolContext ctx) {
+        return switch (ctx) {
+            case IdentifierContext sub -> Identifier.of(sub.ID().getText());
+            case InterpolatedContext sub -> Interpolated.of(
+                    sub.ID().stream().map(ParseTree::getText).toList(),
+                    sub.interpolation().stream()
+                            .map(InterpolationContext::expression)
+                            .map(HSParser::parseExpr).toList());
+            default -> throw new ShallNotReachHereError();
+        };
     }
 }

@@ -3,7 +3,7 @@ grammar HardScript;
 design : module+;
 
 module
-    : 'module' ID ':' module_type '{' element* '}'
+    : 'module' symbol ':' module_type '{' element* '}'
     ;
 
 module_type
@@ -11,9 +11,9 @@ module_type
     ;
 
 element
-    : instantiation # InstantiationWrapper
-    | 'component' ID (',' ID)* ':' component_type  # Component
-    | 'for' '(' iterator (',' iterator)* ')' '{' element* '}' # Loop
+    : instantiation                                                # InstantiationWrapper
+    | 'component' symbol (',' symbol)* ':' component_type  # Component
+    | 'for' '(' iterator (',' iterator)* ')' '{' element* '}'      # Loop
     ;
 
 instantiation
@@ -21,13 +21,13 @@ instantiation
     ;
 
 instantiation_ref
-    : ID              # AtomInstRef
+    : symbol      # AtomInstRef
     | list_expression # CompositeInstRef
     ;
 
 component_type
-    : atom_expression # PrimitiveCompType
-    | ID '(' component_type (',' component_type)* ')' # CompositeCompType
+    : atom_expression                                         # PrimitiveCompType
+    | symbol '(' component_type (',' component_type)* ')' # CompositeCompType
     ;
 
 expression
@@ -44,8 +44,8 @@ primary_expression
     ;
 
 atom_expression
-    : ID                      # Identifier
-    | number                  # NumberExpr
+    : symbol # IdentifierWrapper
+    | number     # NumberExpr
     ;
 
 conditional_expression
@@ -57,25 +57,34 @@ access_expression
     ;
 
 selector
-    : '[' expression ']' # BitSelector
+    : '[' expression ']'                # BitSelector
     | '[' expression ':' expression ']' # PartSelector
     ;
 
 list_expression
-    : '[' expression (',' expression)* ']' # CommonList
-    | '[' atom_expression '..' atom_expression ']'   # RangeList
+    : '[' expression (',' expression)* ']'              # CommonList
+    | '[' atom_expression '..' atom_expression ']'      # RangeList
     | '[' expression '|' qualifier (',' qualifier)* ']' # ListComprehension
-    | '[' ']' # EmptyList
+    | '[' ']'                                           # EmptyList
     ;
 
 qualifier
-    : iterator                # Generator
-    | 'when' expression       # Filter
-    | 'let' ID '=' expression # LocalBinding
+    : iterator                        # Generator
+    | 'when' expression               # Filter
+    | 'let' symbol '=' expression # LocalBinding
     ;
 
 iterator
-    : ID '<-' list_expression
+    : symbol '<-' list_expression
+    ;
+
+symbol
+    : ID # Identifier
+    | ID (interpolation | ID)+ # Interpolated
+    ;
+
+interpolation
+    : '$' '{' expression '}'
     ;
 
 number
@@ -84,10 +93,10 @@ number
     ;
 
 bitvector_number
-    : BIN_NUMBER # BinNumber
-    | HEX_NUMBER # HexNumber
-    | OCT_NUMBER # OctNumber
-    | DEC_NUMBER # DecNumber
+    : BIN_NUMBER
+    | HEX_NUMBER
+    | OCT_NUMBER
+    | DEC_NUMBER
     ;
 
 BIN_NUMBER : UNSIGNED_INTEGER '\'' [bB] [01] [01_]*;
