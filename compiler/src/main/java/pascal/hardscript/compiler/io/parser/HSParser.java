@@ -106,7 +106,7 @@ public final class HSParser {
     static AtomExpr parseAtomExpr(Atom_expressionContext ctx) {
         return switch (ctx) {
             case NumberExprContext sub -> parseNumberExpr(sub.number());
-            case IdentifierWrapperContext sub -> IdentifierExpr.of(parseSymbol(sub.symbol()));
+            case IdentifierWrapperContext sub -> SymbolExpr.of(parseSymbol(sub.symbol()));
             default -> throw new ShallNotReachHereError();
         };
     }
@@ -132,15 +132,19 @@ public final class HSParser {
     static Qualifier parserQualifier(QualifierContext ctx) {
         return switch (ctx) {
             case GeneratorContext sub -> parseGeneratorQual(sub.iterator());
-            case FilterContext sub -> FilterQual.of(parseExpr(sub.expression()));
+            case FilterContext sub -> FilterQualifier.of(parseExpr(sub.expression()));
             case LocalBindingContext sub ->
-                    BindingQual.of(parseSymbol(sub.symbol()), parseExpr(sub.expression()));
+                    BindingQualifier.of(
+                            SymbolExpr.of(parseSymbol(sub.symbol())),
+                            parseExpr(sub.expression()));
             default -> throw new ShallNotReachHereError();
         };
     }
 
-    static GeneratorQual parseGeneratorQual(IteratorContext ctx) {
-        return GeneratorQual.of(parseSymbol(ctx.symbol()), parseListExpr(ctx.list_expression()));
+    static GeneratorQualifier parseGeneratorQual(IteratorContext ctx) {
+        return GeneratorQualifier.of(
+                SymbolExpr.of(parseSymbol(ctx.symbol())),
+                parseListExpr(ctx.list_expression()));
     }
 
     static NumberExpr parseNumberExpr(NumberContext ctx) {
