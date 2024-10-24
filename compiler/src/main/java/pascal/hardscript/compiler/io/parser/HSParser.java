@@ -96,7 +96,6 @@ public final class HSParser {
     private static AtomExpr parseAtomExpr(Atom_expressionContext ctx) {
         return switch (ctx) {
             case NumberExprContext sub -> parseNumberExpr(sub.number());
-            case ParenAtomExprContext sub -> parseAtomExpr(sub.atom_expression());
             case IdentifierContext sub -> IdentifierExpr.of(Identifier.of(sub.ID()));
             default -> throw new ShallNotReachHereError();
         };

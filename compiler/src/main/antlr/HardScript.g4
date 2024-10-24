@@ -46,7 +46,6 @@ primary_expression
 atom_expression
     : ID                      # Identifier
     | number                  # NumberExpr
-    | '(' atom_expression ')' # ParenAtomExpr
     ;
 
 conditional_expression
