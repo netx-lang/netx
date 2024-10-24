@@ -26,7 +26,7 @@ public final class Frontend {
         return new Frontend(CharStreams.fromPath(path));
     }
 
-    public DesignNode parse() {
+    public HardScriptParser buildParser() {
         var lexer = new HardScriptLexer(charStream);
         lexer.removeErrorListeners();
         lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
@@ -34,7 +34,11 @@ public final class Frontend {
         var parser = new HardScriptParser(tokenStream);
         parser.removeErrorListeners();
         parser.addErrorListener(ThrowingErrorListener.INSTANCE);
-        return HSParser.parseDesign(parser.design());
+        return parser;
+    }
+
+    public DesignNode parse() {
+        return HSParser.parseDesign(buildParser().design());
     }
 
     private static class ThrowingErrorListener extends BaseErrorListener {

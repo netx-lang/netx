@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.ast.expr;
+package pascal.hardscript.compiler.ast.expr.atom;
 
 public record IntNumber(int value) implements NumberExpr {
 

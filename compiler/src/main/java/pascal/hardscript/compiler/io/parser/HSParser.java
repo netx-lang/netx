@@ -3,6 +3,11 @@ package pascal.hardscript.compiler.io.parser;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.ast.expr.*;
+import pascal.hardscript.compiler.ast.expr.access.AccessExpr;
+import pascal.hardscript.compiler.ast.expr.access.BitSelector;
+import pascal.hardscript.compiler.ast.expr.access.PartSelector;
+import pascal.hardscript.compiler.ast.expr.access.Selector;
+import pascal.hardscript.compiler.ast.expr.atom.*;
 import pascal.hardscript.compiler.ast.expr.list.*;
 import pascal.hardscript.compiler.ast.module.*;
 import pascal.hardscript.compiler.ast.type.CompTypeNode;
@@ -13,25 +18,27 @@ import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.lang.BitVector;
 
+import java.util.Map;
+
 public final class HSParser {
 
     public static DesignNode parseDesign(DesignContext ctx) {
         return DesignNode.of(ctx.module().stream().map(HSParser::parseModule).toList());
     }
 
-    private static ModuleNode parseModule(ModuleContext ctx) {
+    static ModuleNode parseModule(ModuleContext ctx) {
         return ModuleNode.of(Identifier.of(ctx.ID()),
                 parseModuleType(ctx.module_type()),
                 ctx.element().stream().map(HSParser::parseElement).toList());
     }
 
-    private static ModuleTypeNode parseModuleType(Module_typeContext ctx) {
+    static ModuleTypeNode parseModuleType(Module_typeContext ctx) {
         return ModuleTypeNode.of(
                 parseListExpr(ctx.list_expression(0)),
                 parseListExpr(ctx.list_expression(1)));
     }
 
-    private static ElementNode parseElement(ElementContext ctx) {
+    static ElementNode parseElement(ElementContext ctx) {
         return switch (ctx) {
             case InstantiationWrapperContext sub -> parseInstantiation(sub.instantiation());
             case ComponentContext sub -> parseComponent(sub);
@@ -40,13 +47,13 @@ public final class HSParser {
         };
     }
 
-    private static InstantiationNode parseInstantiation(InstantiationContext ctx) {
+    static InstantiationNode parseInstantiation(InstantiationContext ctx) {
         return InstantiationNode.of(
                 ctx.instantiation_ref().stream().map(HSParser::parseInstantiationRef).toList(),
                 ctx.list_expression().stream().map(HSParser::parseListExpr).toList());
     }
 
-    private static InstRef parseInstantiationRef(Instantiation_refContext ctx) {
+    static InstRef parseInstantiationRef(Instantiation_refContext ctx) {
         return switch (ctx) {
             case AtomInstRefContext sub -> AtomInstRef.of(Identifier.of(sub.ID()));
             case CompositeInstRefContext sub -> CompositeInstRef.of(parseListExpr(sub.list_expression()));
@@ -54,19 +61,19 @@ public final class HSParser {
         };
     }
 
-    private static LoopNode parseLoop(LoopContext ctx) {
+    static LoopNode parseLoop(LoopContext ctx) {
         return LoopNode.of(
                 ctx.iterator().stream().map(HSParser::parseGeneratorQual).toList(),
                 ctx.element().stream().map(HSParser::parseElement).toList());
     }
 
-    private static ComponentNode parseComponent(ComponentContext ctx) {
+    static ComponentNode parseComponent(ComponentContext ctx) {
         return ComponentNode.of(
                 ctx.ID().stream().map(Identifier::of).toList(),
                 parseComponentType(ctx.component_type()));
     }
 
-    private static CompTypeNode parseComponentType(Component_typeContext ctx) {
+    static CompTypeNode parseComponentType(Component_typeContext ctx) {
         return switch (ctx) {
             case PrimitiveCompTypeContext sub -> PrimitiveCompType.of(parseAtomExpr(sub.atom_expression()));
             case CompositeCompTypeContext sub -> CompositeCompType.of(Identifier.of(sub.ID()),
@@ -75,7 +82,7 @@ public final class HSParser {
         };
     }
 
-    private static ExprNode parseExpr(ExpressionContext ctx) {
+    static ExprNode parseExpr(ExpressionContext ctx) {
         return switch (ctx) {
             case PrimaryExprWrapperContext sub -> parsePrimaryExpr(sub.primary_expression());
             case AccessExprWrapperContext sub -> parseAccessExpr(sub.access_expression());
@@ -85,7 +92,7 @@ public final class HSParser {
         };
     }
 
-    private static ExprNode parsePrimaryExpr(Primary_expressionContext ctx) {
+    static ExprNode parsePrimaryExpr(Primary_expressionContext ctx) {
         return switch (ctx) {
             case ListExprContext sub -> parseListExpr(sub.list_expression());
             case AtomExprWrapperContext sub -> parseAtomExpr(sub.atom_expression());
@@ -94,7 +101,7 @@ public final class HSParser {
         };
     }
 
-    private static AtomExpr parseAtomExpr(Atom_expressionContext ctx) {
+    static AtomExpr parseAtomExpr(Atom_expressionContext ctx) {
         return switch (ctx) {
             case NumberExprContext sub -> parseNumberExpr(sub.number());
             case IdentifierContext sub -> IdentifierExpr.of(Identifier.of(sub.ID()));
@@ -102,7 +109,7 @@ public final class HSParser {
         };
     }
 
-    private static ListExpr parseListExpr(List_expressionContext ctx) {
+    static ListExpr parseListExpr(List_expressionContext ctx) {
         return switch (ctx) {
             case CommonListContext sub -> CommonList.of(sub.expression().stream().map(HSParser::parseExpr).toList());
             case RangeListContext sub -> RangeList.of(parseExpr(sub.expression(0)), parseExpr(sub.expression(1)));
@@ -112,13 +119,13 @@ public final class HSParser {
         };
     }
 
-    private static ListComprehension parseListComprehension(ListComprehensionContext ctx) {
+    static ListComprehension parseListComprehension(ListComprehensionContext ctx) {
         return ListComprehension.of(
                 parseExpr(ctx.expression()),
                 ctx.qualifier().stream().map(HSParser::parserQualifier).toList());
     }
 
-    private static Qualifier parserQualifier(QualifierContext ctx) {
+    static Qualifier parserQualifier(QualifierContext ctx) {
         return switch (ctx) {
             case GeneratorContext sub -> parseGeneratorQual(sub.iterator());
             case FilterContext sub -> FilterQual.of(parseExpr(sub.expression()));
@@ -127,11 +134,11 @@ public final class HSParser {
         };
     }
 
-    private static GeneratorQual parseGeneratorQual(IteratorContext ctx) {
+    static GeneratorQual parseGeneratorQual(IteratorContext ctx) {
         return GeneratorQual.of(Identifier.of(ctx.ID()), parseListExpr(ctx.list_expression()));
     }
 
-    private static NumberExpr parseNumberExpr(NumberContext ctx) {
+    static NumberExpr parseNumberExpr(NumberContext ctx) {
         return switch (ctx) {
             case IntNumberContext sub -> IntNumber.of(Integer.parseInt(sub.INTEGER().getText()));
             case BitVectorNumberWrapperContext sub -> parseBitVectorNumber(sub.bitvector_number());
@@ -139,29 +146,36 @@ public final class HSParser {
         };
     }
 
-    private static BitVectorNumber parseBitVectorNumber(Bitvector_numberContext ctx) {
-        int size = Integer.parseUnsignedInt(ctx.UNSIGNED_INTEGER().getText());
-        boolean isSigned = ctx.SIGN() != null;
-        BitVector rep;
-        if (ctx.bin_number() != null) {
-            rep = BitVector.parse(ctx.bin_number().getText(), size, 2);
-        } else if (ctx.hex_number() != null) {
-            rep = BitVector.parse(ctx.hex_number().getText(), size, 16);
-        } else if (ctx.oct_number() != null) {
-            rep = BitVector.parse(ctx.oct_number().getText(), size, 8);
-        } else if (ctx.dec_number() != null) {
-            rep = BitVector.parse(ctx.dec_number().getText(), size, 10);
-        } else {
-            throw new ShallNotReachHereError();
-        }
-        return BitVectorNumber.of(rep, isSigned);
+    static BitVectorNumber parseBitVectorNumber(Bitvector_numberContext ctx) {
+        var literal = ctx.getText().toLowerCase().split("'");
+        int size = Integer.parseInt(literal[0]);
+        int radix = switch (literal[1].charAt(0)){
+            case 'b' -> 2;
+            case 'o' -> 8;
+            case 'd' -> 10;
+            case 'h' -> 16;
+            default -> throw new ShallNotReachHereError();
+        };
+        return BitVectorNumber.of(BitVector.parse(literal[1].substring(1), size, radix));
     }
 
-    private static ExprNode parseAccessExpr(Access_expressionContext ctx) {
-        throw new TodoException(); // TODO:
+    static ExprNode parseAccessExpr(Access_expressionContext ctx) {
+        var base = parsePrimaryExpr(ctx.primary_expression());
+        return ctx.selector().stream()
+                .map(HSParser::parseSelector)
+                .reduce(base, AccessExpr::of, (e, _) -> e);
     }
 
-    private static ExprNode parseConditionalExpr(Conditional_expressionContext ctx) {
+    static Selector parseSelector(SelectorContext ctx) {
+        return switch (ctx) {
+            case BitSelectorContext sub -> BitSelector.of(parseExpr(sub.expression()));
+            case PartSelectorContext sub -> PartSelector.of(
+                    parseExpr(sub.expression(0)), parseExpr(sub.expression(1)));
+            default -> throw new ShallNotReachHereError();
+        };
+    }
+
+    static ExprNode parseConditionalExpr(Conditional_expressionContext ctx) {
         throw new TodoException(); // TODO:
     }
 }

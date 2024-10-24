@@ -1,6 +1,6 @@
 package pascal.hardscript.compiler.ast.type;
 
-import pascal.hardscript.compiler.ast.expr.AtomExpr;
+import pascal.hardscript.compiler.ast.expr.atom.AtomExpr;
 
 public record PrimitiveCompType(AtomExpr expr) implements CompTypeNode {
 
