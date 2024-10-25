@@ -2,7 +2,6 @@ package pascal.hardscript.compiler.io;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
-import pascal.hardscript.compiler.analysis.HierarchyAnalysis;
 import pascal.hardscript.compiler.analysis.SourceLocChecker;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.io.parser.HSParser;
@@ -39,10 +38,13 @@ public final class Frontend {
         return parser;
     }
 
+    public DesignNode buildAST() {
+        return HSParser.parseDesign(buildANTLRParser().design());
+    }
+
     public DesignNode parse() {
-        var design = HSParser.parseDesign(buildANTLRParser().design());
+        var design = buildAST();
         new SourceLocChecker(design).analyze();
-        new HierarchyAnalysis(design).analyze();
         return design;
     }
 

@@ -2,7 +2,7 @@ package pascal.hardscript.compiler.analysis;
 
 import pascal.hardscript.compiler.ast.DesignNode;
 
-public abstract class ASTAnalysis {
+public abstract class ASTAnalysis<T> {
 
     protected final DesignNode design;
 
@@ -10,5 +10,5 @@ public abstract class ASTAnalysis {
         this.design = design;
     }
 
-    abstract public void analyze();
+    abstract public T analyze();
 }

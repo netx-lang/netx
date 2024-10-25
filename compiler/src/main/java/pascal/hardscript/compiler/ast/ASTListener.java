@@ -164,6 +164,14 @@ public interface ASTListener {
         exitDefault(node);
     }
 
+    default void enter(WildcardList node) {
+        enterDefault(node);
+    }
+
+    default void exit(WildcardList node) {
+        exitDefault(node);
+    }
+
     default void enter(CommonList node) {
         enterDefault(node);
     }

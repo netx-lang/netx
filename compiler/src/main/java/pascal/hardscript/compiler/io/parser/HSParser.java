@@ -79,8 +79,9 @@ public final class HSParser {
         return switch (ctx) {
             case CommonListContext sub -> CommonList.of(sub.expression().stream().map(HSParser::parseExpr).toList());
             case RangeListContext sub -> RangeList.of(parseExpr(sub.from), parseExpr(sub.to));
-            case EmptyListContext ignored -> CommonList.ofEmpty();
             case ListComprehensionContext sub -> parseListComprehension(sub);
+            case WildcardListContext ignored -> WildcardList.getInstance();
+            case EmptyListContext ignored -> CommonList.ofEmpty();
             default -> throw new ShallNotReachHereError();
         };
     }
