@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.io;
+package pascal.hardscript.compiler.parser;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;

@@ -2,7 +2,7 @@ package pascal.hardscript.compiler.analysis;
 
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.io.Frontend;
+import pascal.hardscript.compiler.parser.Frontend;
 import pascal.hardscript.util.TestUtils;
 
 import java.io.IOException;
@@ -28,7 +28,7 @@ class ASTAnalysisTest {
         var design = Frontend.loadPath(TEST_DIR.resolve("adder.hard")).buildAST();
         var analysis = new HierarchyAnalysis(design);
         var result = analysis.analyze();
-        assertEquals(result.get(0).getIdentifier(), Identifier.of("half_adder"));
-        assertEquals(result.get(1).getIdentifier(), Identifier.of("full_adder"));
+        assertEquals(result.get(0).getIdentifier(), Identifier.of("full_adder"));
+        assertEquals(result.get(1).getIdentifier(), Identifier.of("half_adder"));
     }
 }

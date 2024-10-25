@@ -1,7 +1,8 @@
-package pascal.hardscript.compiler.io.parser;
+package pascal.hardscript.compiler.parser;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import pascal.hardscript.compiler.antlr.HardScriptParser.*;
 import pascal.hardscript.compiler.ast.*;
 import pascal.hardscript.compiler.ast.expr.*;
 import pascal.hardscript.compiler.ast.expr.access.AccessExpr;
@@ -10,7 +11,6 @@ import pascal.hardscript.compiler.ast.expr.access.PartSelector;
 import pascal.hardscript.compiler.ast.expr.access.Selector;
 import pascal.hardscript.compiler.ast.expr.list.*;
 import pascal.hardscript.compiler.ast.module.*;
-import pascal.hardscript.compiler.parser.HardScriptParser.*;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.lang.BitVector;

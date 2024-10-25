@@ -3,7 +3,7 @@ module full_adder: [a, b, cin] -> [out, cout] {
     [half_adder, TO] <> [TO, half_adder] <> [OR, TO] : [a, b, cin] -> [*] -> [cout, out]
 }
 
-module half_adder: [a, b] -> [out, carry] {
+module half_adder: [a, b] -> [carry, out] {
     component a, b, out, carry : bit(1)
     XOR : [a, b] -> out
     AND : [a, b] -> carry

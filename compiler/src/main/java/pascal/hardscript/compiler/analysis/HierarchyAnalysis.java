@@ -43,7 +43,7 @@ public final class HierarchyAnalysis extends ASTAnalysis<List<ModuleNode>> {
         var iterator = new TopologicalOrderIterator<>(dependencies);
         while (iterator.hasNext()) {
             var id = iterator.next();
-            result.addFirst(design.getModules().stream()
+            result.add(design.getModules().stream()
                     .filter(module -> module.getIdentifier().equals(id))
                     .findFirst().orElseThrow());
         }

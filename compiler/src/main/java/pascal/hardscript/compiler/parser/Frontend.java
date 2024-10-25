@@ -1,12 +1,11 @@
-package pascal.hardscript.compiler.io;
+package pascal.hardscript.compiler.parser;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import pascal.hardscript.compiler.analysis.SourceLocChecker;
+import pascal.hardscript.compiler.antlr.HardScriptLexer;
+import pascal.hardscript.compiler.antlr.HardScriptParser;
 import pascal.hardscript.compiler.ast.DesignNode;
-import pascal.hardscript.compiler.io.parser.HSParser;
-import pascal.hardscript.compiler.parser.HardScriptLexer;
-import pascal.hardscript.compiler.parser.HardScriptParser;
 
 import java.io.IOException;
 import java.nio.file.Path;

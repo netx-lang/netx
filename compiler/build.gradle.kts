@@ -10,5 +10,6 @@ dependencies {
 }
 
 tasks.generateGrammarSource {
-    arguments = listOf("-package", "pascal.hardscript.compiler.parser")
+    outputDirectory = file(layout.buildDirectory.dir("generated-src/antlr/main/pascal/hardscript/compiler/antlr"))
+    arguments = listOf("-package", "pascal.hardscript.compiler.antlr")
 }
