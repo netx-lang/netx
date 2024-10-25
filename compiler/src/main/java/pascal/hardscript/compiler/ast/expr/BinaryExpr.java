@@ -1,9 +1,19 @@
 package pascal.hardscript.compiler.ast.expr;
 
+import pascal.hardscript.compiler.ast.ASTListener;
+
 public record BinaryExpr(Operator op, ExprNode lhs, ExprNode rhs) implements ExprNode {
 
     public static BinaryExpr of(Operator op, ExprNode lhs, ExprNode rhs) {
         return new BinaryExpr(op, lhs, rhs);
+    }
+
+    @Override
+    public void walk(ASTListener listener) {
+        listener.enter(this);
+        lhs.walk(listener);
+        rhs.walk(listener);
+        listener.exit(this);
     }
 
     public enum Operator {

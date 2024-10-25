@@ -1,5 +1,5 @@
 package pascal.hardscript.compiler.ast;
 
-public interface Symbol {
+public sealed interface Symbol permits Identifier, Interpolated {
 
 }

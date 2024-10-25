@@ -25,7 +25,7 @@ public final class HSParser {
 
     static ModuleNode parseModule(ModuleContext ctx) {
         return ModuleNode.of(
-                parseSymbol(ctx.symbol()), parseExpr(ctx.type),
+                Identifier.of(ctx.ID().getText()), parseExpr(ctx.type),
                 ctx.element().stream().map(HSParser::parseElement).toList());
     }
 
@@ -50,7 +50,7 @@ public final class HSParser {
 
     static ComponentNode parseComponent(ComponentContext ctx) {
         return ComponentNode.of(
-                ctx.symbol().stream().map(HSParser::parseSymbol).toList(),
+                ctx.symbol().stream().map(HSParser::parseSymbol).map(SymbolExpr::of).toList(),
                 parseExpr(ctx.type));
     }
 
@@ -183,7 +183,9 @@ public final class HSParser {
     }
 
     static CallExpr parseCallExpr(CallExprContext ctx) {
-        return CallExpr.of(parseSymbol(ctx.symbol()), ctx.expression().stream().map(HSParser::parseExpr).toList());
+        return CallExpr.of(
+                Identifier.of(ctx.ID().getText()),
+                ctx.expression().stream().map(HSParser::parseExpr).toList());
     }
 
     static ExprNode parseConditionalExpr(ConditionalExprContext ctx) {

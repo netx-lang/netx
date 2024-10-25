@@ -1,10 +1,19 @@
 package pascal.hardscript.compiler.ast.module;
 
+import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
 
 public record InstantiationNode(ExprNode type, ExprNode connection) implements ElementNode {
 
     public static InstantiationNode of(ExprNode type, ExprNode connection) {
         return new InstantiationNode(type, connection);
+    }
+
+    @Override
+    public void walk(ASTListener listener) {
+        listener.enter(this);
+        type.walk(listener);
+        connection.walk(listener);
+        listener.exit(this);
     }
 }
