@@ -1,4 +1,4 @@
 package pascal.hardscript.compiler.ast.expr;
 
-public interface NumberExpr extends ExprNode {
+public abstract class NumberExpr extends ExprNode {
 }

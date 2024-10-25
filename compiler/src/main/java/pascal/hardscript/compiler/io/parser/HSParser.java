@@ -1,10 +1,8 @@
 package pascal.hardscript.compiler.io.parser;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import pascal.hardscript.compiler.ast.DesignNode;
-import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.ast.Interpolated;
-import pascal.hardscript.compiler.ast.Symbol;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import pascal.hardscript.compiler.ast.*;
 import pascal.hardscript.compiler.ast.expr.*;
 import pascal.hardscript.compiler.ast.expr.access.AccessExpr;
 import pascal.hardscript.compiler.ast.expr.access.BitSelector;
@@ -20,22 +18,28 @@ import pascal.hardscript.util.lang.BitVector;
 public final class HSParser {
 
     public static DesignNode parseDesign(DesignContext ctx) {
-        return DesignNode.of(ctx.module().stream().map(HSParser::parseModule).toList());
+        var result = DesignNode.of(ctx.module().stream().map(HSParser::parseModule).toList());
+        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
+        return result;
     }
 
     static ModuleNode parseModule(ModuleContext ctx) {
-        return ModuleNode.of(
-                Identifier.of(ctx.ID().getText()), parseExpr(ctx.type),
+        var result = ModuleNode.of(
+                parseIdentifier(ctx.ID()), parseExpr(ctx.type),
                 ctx.element().stream().map(HSParser::parseElement).toList());
+        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
+        return result;
     }
 
     static ElementNode parseElement(ElementContext ctx) {
-        return switch (ctx) {
+        var result = switch (ctx) {
             case InstantiationContext sub -> parseInstantiation(sub);
             case ComponentContext sub -> parseComponent(sub);
             case LoopContext sub -> parseLoop(sub);
             default -> throw new ShallNotReachHereError();
         };
+        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
+        return result;
     }
 
     static InstantiationNode parseInstantiation(InstantiationContext ctx) {
@@ -55,7 +59,7 @@ public final class HSParser {
     }
 
     static ExprNode parseExpr(ExpressionContext ctx) {
-        return switch (ctx) {
+        var result = switch (ctx) {
             case SymbolExprContext sub -> SymbolExpr.of(parseSymbol(sub.symbol()));
             case NumberExprContext sub -> parseNumberExpr(sub.number());
             case ListExprContext sub -> parseListExpr(sub.list());
@@ -67,6 +71,8 @@ public final class HSParser {
             case ParenExprContext sub -> parseExpr(sub.expression());
             default -> throw new ShallNotReachHereError();
         };
+        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
+        return result;
     }
 
     static ListExpr parseListExpr(ListContext ctx) {
@@ -86,7 +92,7 @@ public final class HSParser {
     }
 
     static Qualifier parserQualifier(QualifierContext ctx) {
-        return switch (ctx) {
+        var result = switch (ctx) {
             case GeneratorContext sub -> parseGeneratorQualifier(sub.iterator());
             case FilterContext sub -> FilterQualifier.of(parseExpr(sub.expression()));
             case LocalBindingContext sub ->
@@ -95,6 +101,8 @@ public final class HSParser {
                             parseExpr(sub.expression()));
             default -> throw new ShallNotReachHereError();
         };
+        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
+        return result;
     }
 
     static GeneratorQualifier parseGeneratorQualifier(IteratorContext ctx) {
@@ -174,17 +182,19 @@ public final class HSParser {
     }
 
     static Selector parseSelector(SelectorContext ctx) {
-        return switch (ctx) {
+        var result = switch (ctx) {
             case BitSelectorContext sub -> BitSelector.of(parseExpr(sub.expression()));
             case PartSelectorContext sub -> PartSelector.of(
                     parseExpr(sub.expression(0)), parseExpr(sub.expression(1)));
             default -> throw new ShallNotReachHereError();
         };
+        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
+        return result;
     }
 
     static CallExpr parseCallExpr(CallExprContext ctx) {
         return CallExpr.of(
-                Identifier.of(ctx.ID().getText()),
+                parseIdentifier(ctx.ID()),
                 ctx.expression().stream().map(HSParser::parseExpr).toList());
     }
 
@@ -192,8 +202,14 @@ public final class HSParser {
         return ConditionalExpr.of(parseExpr(ctx.cond), parseExpr(ctx.thenBranch), parseExpr(ctx.elseBranch));
     }
 
+    static Identifier parseIdentifier(TerminalNode ID) {
+        var result = Identifier.of(ID.getText());
+        result.setSourceLoc(SourceLoc.from(ID.getSymbol()));
+        return result;
+    }
+
     static Symbol parseSymbol(SymbolContext ctx) {
-        return switch (ctx) {
+        var result = switch (ctx) {
             case IdentifierContext sub -> Identifier.of(sub.ID().getText());
             case InterpolatedContext sub -> Interpolated.of(
                     sub.ID().stream().map(ParseTree::getText).toList(),
@@ -202,5 +218,7 @@ public final class HSParser {
                             .map(HSParser::parseExpr).toList());
             default -> throw new ShallNotReachHereError();
         };
+        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
+        return result;
     }
 }

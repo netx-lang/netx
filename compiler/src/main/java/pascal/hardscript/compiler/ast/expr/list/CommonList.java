@@ -4,8 +4,14 @@ import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
 
 import java.util.List;
+import java.util.Objects;
 
-public record CommonList(List<ExprNode> elements) implements ListExpr {
+public final class CommonList extends ListExpr {
+    private final List<ExprNode> elements;
+
+    private CommonList(List<ExprNode> elements) {
+        this.elements = elements;
+    }
 
     public static CommonList of(List<ExprNode> elements) {
         return new CommonList(elements);
@@ -20,5 +26,28 @@ public record CommonList(List<ExprNode> elements) implements ListExpr {
         listener.enter(this);
         elements.forEach(element -> element.walk(listener));
         listener.exit(this);
+    }
+
+    public List<ExprNode> getElements() {
+        return elements;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (CommonList) obj;
+        return Objects.equals(this.elements, that.elements);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(elements);
+    }
+
+    @Override
+    public String toString() {
+        return "CommonList[" +
+                "elements=" + elements + ']';
     }
 }

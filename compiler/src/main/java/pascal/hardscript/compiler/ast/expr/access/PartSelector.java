@@ -3,7 +3,16 @@ package pascal.hardscript.compiler.ast.expr.access;
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
 
-public record PartSelector(ExprNode start, ExprNode end) implements Selector {
+import java.util.Objects;
+
+public final class PartSelector extends Selector {
+    private ExprNode start;
+    private ExprNode end;
+
+    private PartSelector(ExprNode start, ExprNode end) {
+        this.start = start;
+        this.end = end;
+    }
 
     public static PartSelector of(ExprNode start, ExprNode end) {
         return new PartSelector(start, end);
@@ -15,5 +24,42 @@ public record PartSelector(ExprNode start, ExprNode end) implements Selector {
         start.walk(listener);
         end.walk(listener);
         listener.exit(this);
+    }
+
+    public ExprNode getStart() {
+        return start;
+    }
+
+    public void setStart(ExprNode start) {
+        this.start = start;
+    }
+
+    public ExprNode getEnd() {
+        return end;
+    }
+
+    public void setEnd(ExprNode end) {
+        this.end = end;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (PartSelector) obj;
+        return Objects.equals(this.start, that.start) &&
+                Objects.equals(this.end, that.end);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(start, end);
+    }
+
+    @Override
+    public String toString() {
+        return "PartSelector[" +
+                "start=" + start + ", " +
+                "end=" + end + ']';
     }
 }
