@@ -13,7 +13,9 @@ public final class SymbolExpr extends ExprNode {
     }
 
     public static SymbolExpr of(Symbol symbol) {
-        return new SymbolExpr(symbol);
+        var result = new SymbolExpr(symbol);
+        result.setSourceLoc(symbol.getSourceLoc());
+        return result;
     }
 
     @Override

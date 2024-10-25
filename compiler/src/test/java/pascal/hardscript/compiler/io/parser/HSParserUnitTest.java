@@ -21,7 +21,7 @@ class HSParserUnitTest {
 
     static HardScriptParser makeParser(String code) {
         var frontend = Frontend.load(CharStreams.fromString(code));
-        return frontend.buildParser();
+        return frontend.buildANTLRParser();
     }
 
     @Test

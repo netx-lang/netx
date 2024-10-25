@@ -11,4 +11,8 @@ public record SourceLoc(int line, int column) {
     public static SourceLoc from(Token token) {
         return new SourceLoc(token.getLine(), token.getCharPositionInLine());
     }
+
+    public String toString() {
+        return line + ":" + column;
+    }
 }

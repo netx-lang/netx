@@ -2,6 +2,8 @@ package pascal.hardscript.compiler.io;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import pascal.hardscript.compiler.analysis.HierarchyAnalysis;
+import pascal.hardscript.compiler.analysis.SourceLocChecker;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.io.parser.HSParser;
 import pascal.hardscript.compiler.parser.HardScriptLexer;
@@ -26,7 +28,7 @@ public final class Frontend {
         return new Frontend(CharStreams.fromPath(path));
     }
 
-    public HardScriptParser buildParser() {
+    public HardScriptParser buildANTLRParser() {
         var lexer = new HardScriptLexer(charStream);
         lexer.removeErrorListeners();
         lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
@@ -38,7 +40,10 @@ public final class Frontend {
     }
 
     public DesignNode parse() {
-        return HSParser.parseDesign(buildParser().design());
+        var design = HSParser.parseDesign(buildANTLRParser().design());
+        new SourceLocChecker(design).analyze();
+        new HierarchyAnalysis(design).analyze();
+        return design;
     }
 
     private static class ThrowingErrorListener extends BaseErrorListener {
