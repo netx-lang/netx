@@ -1,7 +1,7 @@
 package pascal.hardscript.compiler.ast.expr.list;
 
 import pascal.hardscript.compiler.ast.expr.ExprNode;
-import pascal.hardscript.compiler.ast.expr.atom.SymbolExpr;
+import pascal.hardscript.compiler.ast.expr.SymbolExpr;
 
 public record BindingQualifier(SymbolExpr head, ExprNode expr) implements Qualifier {
 

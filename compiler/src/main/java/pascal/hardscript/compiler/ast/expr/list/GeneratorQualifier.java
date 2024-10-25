@@ -1,10 +1,11 @@
 package pascal.hardscript.compiler.ast.expr.list;
 
-import pascal.hardscript.compiler.ast.expr.atom.SymbolExpr;
+import pascal.hardscript.compiler.ast.expr.ExprNode;
+import pascal.hardscript.compiler.ast.expr.SymbolExpr;
 
-public record GeneratorQualifier(SymbolExpr head, ListExpr list) implements Qualifier {
+public record GeneratorQualifier(SymbolExpr head, ExprNode from) implements Qualifier {
 
-    public static GeneratorQualifier of(SymbolExpr head, ListExpr list) {
-        return new GeneratorQualifier(head, list);
+    public static GeneratorQualifier of(SymbolExpr head, ExprNode from) {
+        return new GeneratorQualifier(head, from);
     }
 }

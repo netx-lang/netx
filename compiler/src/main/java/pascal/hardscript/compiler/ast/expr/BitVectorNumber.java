@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.ast.expr.atom;
+package pascal.hardscript.compiler.ast.expr;
 
 import pascal.hardscript.util.lang.BitVector;
 

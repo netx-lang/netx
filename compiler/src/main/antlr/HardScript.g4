@@ -3,69 +3,52 @@ grammar HardScript;
 design : module+;
 
 module
-    : 'module' symbol ':' module_type '{' element* '}'
-    ;
-
-module_type
-    : list_expression '->' list_expression
+    : 'module' symbol ':' type=expression '{' element* '}'
     ;
 
 element
-    : instantiation                                            # InstantiationWrapper
-    | 'component' symbol (',' symbol)* ':' component_type      # Component
+    : type=expression ':' connection=expression                # Instantiation
+    | 'component' symbol (',' symbol)* ':' type=expression     # Component
     | 'for' '(' iterator (',' iterator)* ')' '{' element* '}'  # Loop
     ;
 
-instantiation
-    : instantiation_ref ('<>' instantiation_ref)* ':' list_expression ('->' list_expression)+
-    ;
-
-instantiation_ref
-    : symbol          # AtomInstRef
-    | list_expression # CompositeInstRef
-    ;
-
-component_type
-    : atom_expression                                     # PrimitiveCompType
-    | symbol '(' component_type (',' component_type)* ')' # CompositeCompType
-    ;
-
 expression
-    : primary_expression     # PrimaryExprWrapper
-    | access_expression      # AccessExprWrapper
-    | conditional_expression # ConditionalExprWrapper
-    | '(' expression ')'     # ParenExpr
+    : symbol                                                        # SymbolExpr
+    | number                                                        # NumberExpr
+    | '[' list ']'                                                  # ListExpr
+    | op=('+' | '-' | '~' | '!') expression                         # UnaryExpr
+    | lhs=expression op='<>' rhs=expression                         # BinaryExpr
+    | lhs=expression op='->' rhs=expression                         # BinaryExpr
+    | lhs=expression op='**' rhs=expression                         # BinaryExpr
+    | lhs=expression op=('*' | '/' | '%') rhs=expression            # BinaryExpr
+    | lhs=expression op=('+' | '-') rhs=expression                  # BinaryExpr
+    | lhs=expression op=('>>'| '<<' | '>>>' | '<<<') rhs=expression # BinaryExpr
+    | lhs=expression op=('<' | '<=' | '>'  | '>=') rhs=expression   # BinaryExpr
+    | lhs=expression op=('==' | '!=') rhs=expression                # BinaryExpr
+    | lhs=expression op='&' rhs=expression                          # BinaryExpr
+    | lhs=expression op=('^~' | '~^' | '^') rhs=expression          # BinaryExpr
+    | lhs=expression op='|' rhs=expression                          # BinaryExpr
+    | lhs=expression op='&&' rhs=expression                         # BinaryExpr
+    | lhs=expression op='||' rhs=expression                         # BinaryExpr
+    | expression (selector)+                                        # AccessExpr
+    | symbol '(' expression (',' expression)* ')'                   # CallExpr
+    | 'if' cond=expression
+      'then' thenBranch=expression
+      'else' elseBranch=expression                                  # ConditionalExpr
+    | '(' expression ')'                                            # ParenExpr
     ;
 
-primary_expression
-    : atom_expression    # AtomExprWrapper
-    | list_expression    # ListExpr
-    | instantiation      # InstExpr
-    ;
-
-atom_expression
-    : symbol # SymbolWrapper
-    | number # NumberExpr
-    ;
-
-conditional_expression
-    : 'if' atom_expression 'then' expression 'else' expression
-    ;
-
-access_expression
-    : primary_expression (selector)+
-    ;
 
 selector
     : '[' expression ']'                # BitSelector
     | '[' expression ':' expression ']' # PartSelector
     ;
 
-list_expression
-    : '[' expression (',' expression)* ']'              # CommonList
-    | '[' atom_expression '..' atom_expression ']'      # RangeList
-    | '[' expression '|' qualifier (',' qualifier)* ']' # ListComprehension
-    | '[' ']'                                           # EmptyList
+list
+    : expression (',' expression)*               # CommonList
+    | from=expression '..' to=expression         # RangeList
+    | expression '|' qualifier (',' qualifier)*  # ListComprehension
+    |                                            # EmptyList
     ;
 
 qualifier
@@ -75,7 +58,7 @@ qualifier
     ;
 
 iterator
-    : symbol '<-' list_expression
+    : symbol '<-' expression
     ;
 
 symbol

@@ -40,3 +40,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### ANTLR ###
+compiler/src/main/antlr/.antlr/

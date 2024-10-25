@@ -4,11 +4,11 @@ import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.ast.Interpolated;
+import pascal.hardscript.compiler.ast.expr.IntNumber;
+import pascal.hardscript.compiler.ast.expr.SymbolExpr;
 import pascal.hardscript.compiler.ast.expr.access.AccessExpr;
 import pascal.hardscript.compiler.ast.expr.access.BitSelector;
 import pascal.hardscript.compiler.ast.expr.access.PartSelector;
-import pascal.hardscript.compiler.ast.expr.atom.IntNumber;
-import pascal.hardscript.compiler.ast.expr.atom.SymbolExpr;
 import pascal.hardscript.compiler.ast.expr.list.*;
 import pascal.hardscript.compiler.io.Frontend;
 import pascal.hardscript.compiler.parser.HardScriptParser;
@@ -38,8 +38,8 @@ class HSParserUnitTest {
 
     @Test
     void testParseAccessExpr() {
-        var context = makeParser("arr[1][2:0]").access_expression();
-        var accessExpr = HSParser.parseAccessExpr(context);
+        var context = makeParser("arr[1][2:0]").expression();
+        var accessExpr = HSParser.parseExpr(context);
         assertEquals(AccessExpr.of(AccessExpr.of(
                     SymbolExpr.of(Identifier.of("arr")),
                     BitSelector.of(IntNumber.of(1))),
@@ -48,8 +48,8 @@ class HSParserUnitTest {
 
     @Test
     void testParseListExpr() {
-        var context = makeParser("[port | i <- [0..5], let port = [1, x_${i}]]").list_expression();
-        var listExpr = HSParser.parseListExpr(context);
+        var context = makeParser("[port | i <- [0..5], let port = [1, x_${i}]]").expression();
+        var listExpr = HSParser.parseExpr(context);
         assertEquals(ListComprehension.of(
                 SymbolExpr.of(Identifier.of("port")), List.of(
                         GeneratorQualifier.of(
