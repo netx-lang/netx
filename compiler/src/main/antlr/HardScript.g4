@@ -72,14 +72,10 @@ interpolation
 
 number
     : INTEGER          # IntNumber
-    | bitvector_number # BitVectorNumberWrapper
-    ;
-
-bitvector_number
-    : BIN_NUMBER
-    | HEX_NUMBER
-    | OCT_NUMBER
-    | DEC_NUMBER
+    | BIN_NUMBER       # BitVectorNumber
+    | HEX_NUMBER       # BitVectorNumber
+    | OCT_NUMBER       # BitVectorNumber
+    | DEC_NUMBER       # BitVectorNumber
     ;
 
 BIN_NUMBER : UNSIGNED_INTEGER '\'' [bB] [01] [01_]*;

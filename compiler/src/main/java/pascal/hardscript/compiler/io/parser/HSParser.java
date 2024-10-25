@@ -29,7 +29,6 @@ public final class HSParser {
                 ctx.element().stream().map(HSParser::parseElement).toList());
     }
 
-
     static ElementNode parseElement(ElementContext ctx) {
         return switch (ctx) {
             case InstantiationContext sub -> parseInstantiation(sub);
@@ -149,12 +148,12 @@ public final class HSParser {
     static NumberExpr parseNumberExpr(NumberContext ctx) {
         return switch (ctx) {
             case IntNumberContext sub -> IntNumber.of(Integer.parseInt(sub.INTEGER().getText()));
-            case BitVectorNumberWrapperContext sub -> parseBitVectorNumber(sub.bitvector_number());
+            case BitVectorNumberContext sub -> parseBitVectorNumber(sub);
             default -> throw new TodoException("Numeric Literals");
         };
     }
 
-    static BitVectorNumber parseBitVectorNumber(Bitvector_numberContext ctx) {
+    static BitVectorNumber parseBitVectorNumber(BitVectorNumberContext ctx) {
         var literal = ctx.getText().toLowerCase().split("'");
         int size = Integer.parseInt(literal[0]);
         int radix = switch (literal[1].charAt(0)){
