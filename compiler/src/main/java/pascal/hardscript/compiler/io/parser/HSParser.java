@@ -66,7 +66,7 @@ public final class HSParser {
             case UnaryExprContext sub -> parseUnaryExpr(sub);
             case BinaryExprContext sub -> parseBinaryExpr(sub);
             case AccessExprContext sub -> parseAccessExpr(sub);
-            case CallExprContext sub -> parseCallExpr(sub);
+            case ParamSymbolExprContext sub -> parseParamSymbolExpr(sub);
             case ConditionalExprContext sub -> parseConditionalExpr(sub);
             case ParenExprContext sub -> parseExpr(sub.expression());
             default -> throw new ShallNotReachHereError();
@@ -192,9 +192,9 @@ public final class HSParser {
         return result;
     }
 
-    static CallExpr parseCallExpr(CallExprContext ctx) {
-        return CallExpr.of(
-                parseIdentifier(ctx.ID()),
+    static ParamSymbolExpr parseParamSymbolExpr(ParamSymbolExprContext ctx) {
+        return ParamSymbolExpr.of(
+                parseSymbol(ctx.symbol()),
                 ctx.expression().stream().map(HSParser::parseExpr).toList());
     }
 

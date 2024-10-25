@@ -3,7 +3,11 @@ grammar HardScript;
 design : module+;
 
 module
-    : 'module' ID ':' type=expression '{' element* '}'
+    : 'module' ID module_arguments? ':' type=expression '{' element* '}'
+    ;
+
+module_arguments
+    : '(' ID (',' ID)* ')'
     ;
 
 element
@@ -15,6 +19,7 @@ element
 expression
     : symbol                                                        # SymbolExpr
     | number                                                        # NumberExpr
+    | symbol '(' expression (',' expression)* ')'                   # ParamSymbolExpr
     | '[' list ']'                                                  # ListExpr
     | op=('+' | '-' | '~' | '!') expression                         # UnaryExpr
     | lhs=expression op='<>' rhs=expression                         # BinaryExpr
@@ -31,7 +36,6 @@ expression
     | lhs=expression op='&&' rhs=expression                         # BinaryExpr
     | lhs=expression op='||' rhs=expression                         # BinaryExpr
     | expression (selector)+                                        # AccessExpr
-    | ID '(' expression (',' expression)* ')'                       # CallExpr
     | 'if' cond=expression
       'then' thenBranch=expression
       'else' elseBranch=expression                                  # ConditionalExpr

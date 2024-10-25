@@ -1,22 +1,22 @@
 package pascal.hardscript.compiler.ast.expr;
 
 import pascal.hardscript.compiler.ast.ASTListener;
-import pascal.hardscript.compiler.ast.Identifier;
+import pascal.hardscript.compiler.ast.Symbol;
 
 import java.util.List;
 import java.util.Objects;
 
-public final class CallExpr extends ExprNode {
-    private Identifier func;
+public final class ParamSymbolExpr extends ExprNode {
+    private Symbol head;
     private final List<ExprNode> arguments;
 
-    private CallExpr(Identifier func, List<ExprNode> arguments) {
-        this.func = func;
+    private ParamSymbolExpr(Symbol head, List<ExprNode> arguments) {
+        this.head = head;
         this.arguments = arguments;
     }
 
-    public static CallExpr of(Identifier func, List<ExprNode> arguments) {
-        return new CallExpr(func, arguments);
+    public static ParamSymbolExpr of(Symbol head, List<ExprNode> arguments) {
+        return new ParamSymbolExpr(head, arguments);
     }
 
     @Override
@@ -26,12 +26,12 @@ public final class CallExpr extends ExprNode {
         listener.exit(this);
     }
 
-    public Identifier getFunc() {
-        return func;
+    public Symbol getHead() {
+        return head;
     }
 
-    public void setFunc(Identifier func) {
-        this.func = func;
+    public void setHead(Symbol head) {
+        this.head = head;
     }
 
     public List<ExprNode> getArguments() {
@@ -42,20 +42,20 @@ public final class CallExpr extends ExprNode {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (CallExpr) obj;
-        return Objects.equals(this.func, that.func) &&
+        var that = (ParamSymbolExpr) obj;
+        return Objects.equals(this.head, that.head) &&
                 Objects.equals(this.arguments, that.arguments);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(func, arguments);
+        return Objects.hash(head, arguments);
     }
 
     @Override
     public String toString() {
         return "CallExpr[" +
-                "func=" + func + ", " +
+                "func=" + head + ", " +
                 "arguments=" + arguments + ']';
     }
 }
