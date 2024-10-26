@@ -4,6 +4,7 @@ import pascal.hardscript.compiler.analysis.HierarchyAnalysis;
 import pascal.hardscript.compiler.ast.ASTNode;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.module.*;
+import pascal.hardscript.compiler.model.circuit.ModuleEntity;
 import pascal.hardscript.compiler.model.scope.BlockScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.ModuleScope;
@@ -24,6 +25,11 @@ public final class Elaborator {
     }
 
     public void elaborate() {
+        node.getModules().forEach(module -> {
+            var id = module.getIdentifier();
+            design.bind(id, ModuleEntity.of(id));
+        });
+
         var hierarchy = new HierarchyAnalysis(node).analyze();
         hierarchy.topModules().forEach(
                 module -> buildScope(instantiateModuleScopeIn(design, module)));

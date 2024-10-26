@@ -16,6 +16,7 @@ import pascal.hardscript.compiler.model.ListEntity;
 import pascal.hardscript.compiler.model.Wildcard;
 import pascal.hardscript.compiler.model.circuit.Component;
 import pascal.hardscript.compiler.model.circuit.ComponentAccess;
+import pascal.hardscript.compiler.model.circuit.ModuleEntity;
 import pascal.hardscript.compiler.model.circuit.selector.BitSelector;
 import pascal.hardscript.compiler.model.circuit.selector.PartSelector;
 import pascal.hardscript.compiler.model.circuit.selector.Selector;
@@ -36,13 +37,36 @@ import java.util.stream.IntStream;
 public final class Evaluator {
     private static final Logger log = LoggerFactory.getLogger(Evaluator.class);
     private final LinkedList<Binding> bindings = new LinkedList<>();
+    private final Scope scope;
 
     public Evaluator(Scope scope) {
+        this.scope = scope;
         bindings.add(scope.getBinding());
     }
 
     public String evaluateToString(ExprNode expr) {
         throw new TodoException();
+    }
+
+    public ModuleEntity evaluateToModuleEntity(ExprNode expr) {
+        var result = evaluate(expr);
+        if (result instanceof ModuleEntity entity) {
+            return entity;
+        } else {
+            log.error("{}: Expected module entity but got {}", expr.getSourceLoc(), result);
+            throw new CompileCancellationException();
+        }
+    }
+
+
+    public Value evaluateToValue(ExprNode expr) {
+        var result = evaluate(expr);
+        if (result instanceof Value value) {
+            return value;
+        } else {
+            log.error("{}: Expected value expression but got {}", expr.getSourceLoc(), result);
+            throw new CompileCancellationException();
+        }
     }
 
     public IntValue evaluateToInteger(ExprNode expr) {
@@ -221,7 +245,9 @@ public final class Evaluator {
     }
 
     private Entity evaluateParamSymbolExpr(ParamSymbolExpr expr) {
-        throw new TodoException(); // TODO:
+        var result = evaluateToModuleEntity(expr.getHead());
+        expr.getArguments().stream().map(this::evaluateToValue).forEach(result::addParameter);
+        return result;
     }
 
     private Entity evaluateSymbolExpr(SymbolExpr expr) {
@@ -232,8 +258,11 @@ public final class Evaluator {
                 return entity;
             }
         }
-        log.error("{}: Unresolved Symbol {}", expr.getSourceLoc(), id);
-        throw new CompileCancellationException();
+        if (scope.getParent() == null) {
+            log.error("{}: Unresolved Symbol {}", expr.getSourceLoc(), id);
+            throw new CompileCancellationException();
+        }
+        return scope.getParent().getEvaluator().evaluate(expr);
     }
 
     public Identifier evaluateSymbol(Symbol symbol) {
