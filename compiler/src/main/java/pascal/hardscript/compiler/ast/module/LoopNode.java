@@ -7,28 +7,28 @@ import java.util.List;
 import java.util.Objects;
 
 public final class LoopNode extends ElementNode {
-    private final List<GeneratorQualifier> iterators;
+    private final GeneratorQualifier generator;
     private final List<ElementNode> elements;
 
-    private LoopNode(List<GeneratorQualifier> iterators, List<ElementNode> elements) {
-        this.iterators = iterators;
+    private LoopNode(GeneratorQualifier generator, List<ElementNode> elements) {
+        this.generator = generator;
         this.elements = elements;
     }
 
-    public static LoopNode of(List<GeneratorQualifier> iterators, List<ElementNode> elements) {
+    public static LoopNode of(GeneratorQualifier iterators, List<ElementNode> elements) {
         return new LoopNode(iterators, elements);
     }
 
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);
-        iterators.forEach(iterator -> iterator.walk(listener));
+        generator.walk(listener);
         elements.forEach(element -> element.walk(listener));
         listener.exit(this);
     }
 
-    public List<GeneratorQualifier> getIterators() {
-        return iterators;
+    public GeneratorQualifier getGenerator() {
+        return generator;
     }
 
     public List<ElementNode> getElements() {
@@ -40,19 +40,19 @@ public final class LoopNode extends ElementNode {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (LoopNode) obj;
-        return Objects.equals(this.iterators, that.iterators) &&
+        return Objects.equals(this.generator, that.generator) &&
                 Objects.equals(this.elements, that.elements);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(iterators, elements);
+        return Objects.hash(generator, elements);
     }
 
     @Override
     public String toString() {
         return "LoopNode[" +
-                "iterators=" + iterators + ", " +
+                "iterators=" + generator + ", " +
                 "elements=" + elements + ']';
     }
 }

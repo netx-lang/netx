@@ -52,7 +52,7 @@ class HSParserUnitTest {
         assertEquals(ListComprehension.of(
                 SymbolExpr.of(Identifier.of("port")), List.of(
                         GeneratorQualifier.of(
-                                SymbolExpr.of(Identifier.of("i")),
+                                Identifier.of("i"),
                                 RangeList.of(IntNumber.of(0), IntNumber.of(5))),
                         BindingQualifier.of(
                                 SymbolExpr.of(Identifier.of("port")),

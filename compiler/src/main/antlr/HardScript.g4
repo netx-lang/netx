@@ -13,7 +13,7 @@ module_arguments
 element
     : type=expression ':' connection=expression                # Instantiation
     | 'component' symbol (',' symbol)* ':' type=expression     # Component
-    | 'for' '(' iterator (',' iterator)* ')' '{' element* '}'  # Loop
+    | 'for' '(' iterator ')' '{' element* '}'                  # Loop
     ;
 
 expression

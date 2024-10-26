@@ -48,7 +48,7 @@ public final class HSParser {
 
     static LoopNode parseLoop(LoopContext ctx) {
         return LoopNode.of(
-                ctx.iterator().stream().map(HSParser::parseGeneratorQualifier).toList(),
+                parseGeneratorQualifier(ctx.iterator()),
                 ctx.element().stream().map(HSParser::parseElement).toList());
     }
 
@@ -107,9 +107,7 @@ public final class HSParser {
     }
 
     static GeneratorQualifier parseGeneratorQualifier(IteratorContext ctx) {
-        return GeneratorQualifier.of(
-                SymbolExpr.of(parseSymbol(ctx.symbol())),
-                parseExpr(ctx.expression()));
+        return GeneratorQualifier.of(parseSymbol(ctx.symbol()), parseExpr(ctx.expression()));
     }
 
     static ExprNode parseUnaryExpr(UnaryExprContext ctx) {

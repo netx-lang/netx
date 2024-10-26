@@ -1,37 +1,36 @@
 package pascal.hardscript.compiler.ast.expr.list;
 
 import pascal.hardscript.compiler.ast.ASTListener;
+import pascal.hardscript.compiler.ast.Symbol;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
-import pascal.hardscript.compiler.ast.expr.SymbolExpr;
 
 import java.util.Objects;
 
 public final class GeneratorQualifier extends Qualifier {
-    private SymbolExpr head;
+    private Symbol head;
     private ExprNode from;
 
-    private GeneratorQualifier(SymbolExpr head, ExprNode from) {
+    private GeneratorQualifier(Symbol head, ExprNode from) {
         this.head = head;
         this.from = from;
     }
 
-    public static GeneratorQualifier of(SymbolExpr head, ExprNode from) {
+    public static GeneratorQualifier of(Symbol head, ExprNode from) {
         return new GeneratorQualifier(head, from);
     }
 
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);
-        head.walk(listener);
         from.walk(listener);
         listener.exit(this);
     }
 
-    public SymbolExpr getHead() {
+    public Symbol getHead() {
         return head;
     }
 
-    public void setHead(SymbolExpr head) {
+    public void setHead(Symbol head) {
         this.head = head;
     }
 

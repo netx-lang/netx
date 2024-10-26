@@ -11,12 +11,12 @@ import java.util.Objects;
 public final class ModuleNode extends ASTNode {
     private Identifier identifier;
     private ExprNode type;
-    private final List<ElementNode> stmts;
+    private final List<ElementNode> elements;
 
-    private ModuleNode(Identifier identifier, ExprNode type, List<ElementNode> stmts) {
+    private ModuleNode(Identifier identifier, ExprNode type, List<ElementNode> elements) {
         this.identifier = identifier;
         this.type = type;
-        this.stmts = stmts;
+        this.elements = elements;
     }
 
     public static ModuleNode of(Identifier id, ExprNode type, List<ElementNode> stmts) {
@@ -27,7 +27,7 @@ public final class ModuleNode extends ASTNode {
     public void walk(ASTListener listener) {
         listener.enter(this);
         type.walk(listener);
-        stmts.forEach(stmt -> stmt.walk(listener));
+        elements.forEach(stmt -> stmt.walk(listener));
         listener.exit(this);
     }
 
@@ -47,8 +47,8 @@ public final class ModuleNode extends ASTNode {
         this.type = type;
     }
 
-    public List<ElementNode> getStmts() {
-        return stmts;
+    public List<ElementNode> getElements() {
+        return elements;
     }
 
     @Override
@@ -58,12 +58,12 @@ public final class ModuleNode extends ASTNode {
         var that = (ModuleNode) obj;
         return Objects.equals(this.identifier, that.identifier) &&
                 Objects.equals(this.type, that.type) &&
-                Objects.equals(this.stmts, that.stmts);
+                Objects.equals(this.elements, that.elements);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(identifier, type, stmts);
+        return Objects.hash(identifier, type, elements);
     }
 
     @Override
@@ -71,6 +71,6 @@ public final class ModuleNode extends ASTNode {
         return "ModuleNode[" +
                 "id=" + identifier + ", " +
                 "type=" + type + ", " +
-                "stmts=" + stmts + ']';
+                "stmts=" + elements + ']';
     }
 }
