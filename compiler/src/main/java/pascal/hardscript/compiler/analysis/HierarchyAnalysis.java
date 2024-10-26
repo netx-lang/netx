@@ -84,7 +84,7 @@ public final class HierarchyAnalysis extends ASTAnalysis<HierarchyAnalysis.Analy
 
         @Override
         public void enter(ParamSymbolExpr node) {
-            addModuleSymbol(node.getHead());
+            addModuleSymbol(node.getHead().getSymbol());
         }
 
         @Override

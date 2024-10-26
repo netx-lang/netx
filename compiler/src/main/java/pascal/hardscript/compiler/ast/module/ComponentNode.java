@@ -1,22 +1,22 @@
 package pascal.hardscript.compiler.ast.module;
 
 import pascal.hardscript.compiler.ast.ASTListener;
-import pascal.hardscript.compiler.ast.expr.ExprNode;
 import pascal.hardscript.compiler.ast.expr.SymbolExpr;
+import pascal.hardscript.compiler.ast.module.type.ComponentTypeNode;
 
 import java.util.List;
 import java.util.Objects;
 
 public final class ComponentNode extends ElementNode {
     private final List<SymbolExpr> identifiers;
-    private ExprNode type;
+    private ComponentTypeNode type;
 
-    private ComponentNode(List<SymbolExpr> identifiers, ExprNode type) {
+    private ComponentNode(List<SymbolExpr> identifiers, ComponentTypeNode type) {
         this.identifiers = identifiers;
         this.type = type;
     }
 
-    public static ComponentNode of(List<SymbolExpr> ids, ExprNode type) {
+    public static ComponentNode of(List<SymbolExpr> ids, ComponentTypeNode type) {
         return new ComponentNode(ids, type);
     }
 
@@ -32,11 +32,11 @@ public final class ComponentNode extends ElementNode {
         return identifiers;
     }
 
-    public ExprNode getType() {
+    public ComponentTypeNode getType() {
         return type;
     }
 
-    public void setType(ExprNode type) {
+    public void setType(ComponentTypeNode type) {
         this.type = type;
     }
 

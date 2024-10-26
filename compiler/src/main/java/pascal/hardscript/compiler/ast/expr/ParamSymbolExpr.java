@@ -1,21 +1,20 @@
 package pascal.hardscript.compiler.ast.expr;
 
 import pascal.hardscript.compiler.ast.ASTListener;
-import pascal.hardscript.compiler.ast.Symbol;
 
 import java.util.List;
 import java.util.Objects;
 
 public final class ParamSymbolExpr extends ExprNode {
-    private Symbol head;
+    private SymbolExpr head;
     private final List<ExprNode> arguments;
 
-    private ParamSymbolExpr(Symbol head, List<ExprNode> arguments) {
+    private ParamSymbolExpr(SymbolExpr head, List<ExprNode> arguments) {
         this.head = head;
         this.arguments = arguments;
     }
 
-    public static ParamSymbolExpr of(Symbol head, List<ExprNode> arguments) {
+    public static ParamSymbolExpr of(SymbolExpr head, List<ExprNode> arguments) {
         return new ParamSymbolExpr(head, arguments);
     }
 
@@ -26,11 +25,11 @@ public final class ParamSymbolExpr extends ExprNode {
         listener.exit(this);
     }
 
-    public Symbol getHead() {
+    public SymbolExpr getHead() {
         return head;
     }
 
-    public void setHead(Symbol head) {
+    public void setHead(SymbolExpr head) {
         this.head = head;
     }
 
