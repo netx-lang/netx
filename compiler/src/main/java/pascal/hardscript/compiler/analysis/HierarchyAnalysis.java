@@ -100,7 +100,8 @@ public final class HierarchyAnalysis extends ASTAnalysis<HierarchyAnalysis.Analy
                     }
                 }
                 case Interpolated interpolated -> {
-                    log.error("Interpolated identifiers are not allowed in module instantiation: {}", interpolated);
+                    log.error("{}: Interpolated identifiers are not allowed in module instantiation: {}",
+                            interpolated.getSourceLoc(), interpolated);
                     throw new CompileCancellationException();
                 }
             }

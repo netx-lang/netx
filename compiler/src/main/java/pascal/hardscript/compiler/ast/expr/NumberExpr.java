@@ -1,4 +1,4 @@
 package pascal.hardscript.compiler.ast.expr;
 
-public abstract class NumberExpr extends ExprNode {
+public abstract sealed class NumberExpr extends ExprNode permits BitVectorNumber, IntNumber {
 }

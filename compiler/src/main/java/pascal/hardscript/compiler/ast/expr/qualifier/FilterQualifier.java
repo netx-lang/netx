@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.ast.expr.list;
+package pascal.hardscript.compiler.ast.expr.qualifier;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.expr.ExprNode;

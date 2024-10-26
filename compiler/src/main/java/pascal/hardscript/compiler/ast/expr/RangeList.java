@@ -1,7 +1,6 @@
-package pascal.hardscript.compiler.ast.expr.list;
+package pascal.hardscript.compiler.ast.expr;
 
 import pascal.hardscript.compiler.ast.ASTListener;
-import pascal.hardscript.compiler.ast.expr.ExprNode;
 
 import java.util.Objects;
 

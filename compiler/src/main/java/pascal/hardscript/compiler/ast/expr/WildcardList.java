@@ -1,8 +1,8 @@
-package pascal.hardscript.compiler.ast.expr.list;
+package pascal.hardscript.compiler.ast.expr;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 
-public class WildcardList extends ListExpr {
+public final class WildcardList extends ListExpr {
     private static final WildcardList INSTANCE = new WildcardList();
 
     public static WildcardList getInstance() {

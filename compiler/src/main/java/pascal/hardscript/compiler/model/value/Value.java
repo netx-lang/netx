@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.model.meta;
+package pascal.hardscript.compiler.model.value;
 
 import pascal.hardscript.compiler.model.Entity;
 

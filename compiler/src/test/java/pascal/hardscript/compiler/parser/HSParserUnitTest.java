@@ -5,12 +5,11 @@ import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.antlr.HardScriptParser;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.ast.Interpolated;
-import pascal.hardscript.compiler.ast.expr.IntNumber;
-import pascal.hardscript.compiler.ast.expr.SymbolExpr;
-import pascal.hardscript.compiler.ast.expr.access.AccessExpr;
-import pascal.hardscript.compiler.ast.expr.access.BitSelector;
-import pascal.hardscript.compiler.ast.expr.access.PartSelector;
-import pascal.hardscript.compiler.ast.expr.list.*;
+import pascal.hardscript.compiler.ast.expr.*;
+import pascal.hardscript.compiler.ast.expr.qualifier.BindingQualifier;
+import pascal.hardscript.compiler.ast.expr.qualifier.GeneratorQualifier;
+import pascal.hardscript.compiler.ast.expr.selector.BitSelector;
+import pascal.hardscript.compiler.ast.expr.selector.PartSelector;
 
 import java.util.List;
 

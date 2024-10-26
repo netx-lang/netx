@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.ast.expr.access;
+package pascal.hardscript.compiler.ast.expr.selector;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.expr.ExprNode;

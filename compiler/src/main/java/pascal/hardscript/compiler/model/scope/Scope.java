@@ -5,15 +5,14 @@ import pascal.hardscript.compiler.elaborator.Evaluator;
 import pascal.hardscript.compiler.model.Entity;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public abstract class Scope {
     private final Scope parent;
-    private final Evaluator evaluator = new Evaluator(this);
+    private final Binding binding = new Binding();
     private final List<Scope> children = new ArrayList<>();
-    private final Map<Identifier, Entity> binding = new HashMap<>();
+
+    private final Evaluator evaluator = new Evaluator(this);
 
     protected Scope(Scope parent) {
         this.parent = parent;
@@ -23,12 +22,16 @@ public abstract class Scope {
         return parent;
     }
 
+    public Binding getBinding() {
+        return binding;
+    }
+
     public Evaluator getEvaluator() {
         return evaluator;
     }
 
     public void bind(Identifier identifier, Entity entity) {
-        binding.put(identifier, entity);
+        binding.bind(identifier, entity);
     }
 
     public ModuleScope instantiateModuleScope(Identifier identifier) {

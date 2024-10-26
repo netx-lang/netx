@@ -1,7 +1,7 @@
 package pascal.hardscript.compiler.ast.module;
 
 import pascal.hardscript.compiler.ast.ASTListener;
-import pascal.hardscript.compiler.ast.expr.list.GeneratorQualifier;
+import pascal.hardscript.compiler.ast.expr.qualifier.GeneratorQualifier;
 
 import java.util.List;
 import java.util.Objects;
