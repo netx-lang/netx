@@ -50,8 +50,8 @@ public final class Elaborator {
         var evaluator = parent.getEvaluator();
         var generator = loop.getGenerator();
         var id = evaluator.evaluateSymbol(generator.getHead());
-        var list = evaluator.evaluateToList(generator.getFrom());
-        for (var value : list.values()) {
+        var list = evaluator.evaluateToValueList(generator.getFrom());
+        for (var value : list.entities()) {
             var scope = instantiateBlockScopeIn(parent, loop);
             scope.bind(id, value);
             dispatchElementBuilder(scope, loop.getElements());

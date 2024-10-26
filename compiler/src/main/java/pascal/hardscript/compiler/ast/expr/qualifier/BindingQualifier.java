@@ -1,37 +1,36 @@
 package pascal.hardscript.compiler.ast.expr.qualifier;
 
 import pascal.hardscript.compiler.ast.ASTListener;
+import pascal.hardscript.compiler.ast.Symbol;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
-import pascal.hardscript.compiler.ast.expr.SymbolExpr;
 
 import java.util.Objects;
 
 public final class BindingQualifier extends Qualifier {
-    private SymbolExpr head;
+    private Symbol head;
     private ExprNode expr;
 
-    private BindingQualifier(SymbolExpr head, ExprNode expr) {
+    private BindingQualifier(Symbol head, ExprNode expr) {
         this.head = head;
         this.expr = expr;
     }
 
-    public static BindingQualifier of(SymbolExpr head, ExprNode expr) {
+    public static BindingQualifier of(Symbol head, ExprNode expr) {
         return new BindingQualifier(head, expr);
     }
 
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);
-        head.walk(listener);
         expr.walk(listener);
         listener.exit(this);
     }
 
-    public SymbolExpr getHead() {
+    public Symbol getHead() {
         return head;
     }
 
-    public void setHead(SymbolExpr head) {
+    public void setHead(Symbol head) {
         this.head = head;
     }
 

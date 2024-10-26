@@ -12,6 +12,12 @@ import java.util.Objects;
 public final class Binding {
     private final Map<Identifier, Entity> bindings = new HashMap<>();
 
+    public static Binding of(Identifier identifier, Entity entity) {
+        var binding = new Binding();
+        binding.bind(identifier, entity);
+        return binding;
+    }
+
     public void bind(Identifier identifier, Entity entity) {
         bindings.put(identifier, entity);
     }

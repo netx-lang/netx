@@ -98,10 +98,7 @@ public final class HSParser {
         var result = switch (ctx) {
             case GeneratorContext sub -> parseGeneratorQualifier(sub.iterator());
             case FilterContext sub -> FilterQualifier.of(parseExpr(sub.expression()));
-            case LocalBindingContext sub ->
-                    BindingQualifier.of(
-                            SymbolExpr.of(parseSymbol(sub.symbol())),
-                            parseExpr(sub.expression()));
+            case LocalBindingContext sub -> BindingQualifier.of(parseSymbol(sub.symbol()), parseExpr(sub.expression()));
             default -> throw new ShallNotReachHereError();
         };
         result.setSourceLoc(SourceLoc.from(ctx.getStart()));

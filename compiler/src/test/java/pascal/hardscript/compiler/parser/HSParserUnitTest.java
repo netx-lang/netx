@@ -54,7 +54,7 @@ class HSParserUnitTest {
                                 Identifier.of("i"),
                                 RangeList.of(IntNumber.of(0), IntNumber.of(5))),
                         BindingQualifier.of(
-                                SymbolExpr.of(Identifier.of("port")),
+                                Identifier.of("port"),
                                 CommonList.of(List.of(
                                         IntNumber.of(1),
                                         SymbolExpr.of(Interpolated.of(
