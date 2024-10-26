@@ -13,23 +13,30 @@ import pascal.hardscript.compiler.ast.module.InstantiationNode;
 import pascal.hardscript.compiler.ast.module.ModuleNode;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-public final class HierarchyAnalysis extends ASTAnalysis<List<ModuleNode>> {
-
+public final class HierarchyAnalysis extends ASTAnalysis<HierarchyAnalysis.AnalysisResult> {
     private static final Logger log = LoggerFactory.getLogger(HierarchyAnalysis.class);
-
     private final Graph<Identifier, DefaultEdge> dependencies = new SimpleDirectedGraph<>(DefaultEdge.class);
+    private final Map<Identifier, ModuleNode> dict = new HashMap<>();
 
     public HierarchyAnalysis(DesignNode design) {
         super(design);
     }
 
     @Override
-    public List<ModuleNode> analyze() {
+    public AnalysisResult analyze() {
+        buildDependencies();
+        return buildResult();
+    }
+
+    private void buildDependencies() {
+        for (var module : design.getModules()) {
+            var identifier = module.getIdentifier();
+            dependencies.addVertex(identifier);
+            dict.put(identifier, module);
+        }
+
         design.getModules().stream().map(ModuleNode::getIdentifier).forEach(dependencies::addVertex);
         for (var module : design.getModules()) {
             var from = module.getIdentifier();
@@ -39,15 +46,20 @@ public final class HierarchyAnalysis extends ASTAnalysis<List<ModuleNode>> {
                 dependencies.addEdge(from, to);
             }
         }
-        List<ModuleNode> result = new LinkedList<>();
+    }
+
+    private AnalysisResult buildResult() {
+        List<ModuleNode> topModules = new ArrayList<>();
+        List<ModuleNode> topology = new ArrayList<>();
         var iterator = new TopologicalOrderIterator<>(dependencies);
-        while (iterator.hasNext()) {
-            var id = iterator.next();
-            result.add(design.getModules().stream()
-                    .filter(module -> module.getIdentifier().equals(id))
-                    .findFirst().orElseThrow());
-        }
-        return result;
+        iterator.forEachRemaining(id -> {
+            var module = dict.get(id);
+            if (dependencies.inDegreeOf(id) == 0) {
+                topModules.add(module);
+            }
+            topology.add(module);
+        });
+        return new AnalysisResult(topModules, topology);
     }
 
     private class InstantiationCollector implements ASTListener {
@@ -93,5 +105,10 @@ public final class HierarchyAnalysis extends ASTAnalysis<List<ModuleNode>> {
                 }
             }
         }
+
+    }
+
+    public record AnalysisResult(List<ModuleNode> topModules, List<ModuleNode> topology) {
+
     }
 }

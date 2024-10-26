@@ -9,4 +9,7 @@ import java.util.Map;
 public final class ModuleScope extends Scope {
     private final Map<Identifier, MetaVariable> paramBindings = new HashMap<>();
 
+    private ModuleScope(Scope parent) {
+        super(parent);
+    }
 }
