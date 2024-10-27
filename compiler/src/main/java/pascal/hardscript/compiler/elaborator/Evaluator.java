@@ -15,11 +15,11 @@ import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
 import pascal.hardscript.compiler.model.ParameteriezedEntity;
 import pascal.hardscript.compiler.model.Wildcard;
-import pascal.hardscript.compiler.model.circuit.Component;
-import pascal.hardscript.compiler.model.circuit.ComponentAccess;
-import pascal.hardscript.compiler.model.circuit.selector.BitSelector;
-import pascal.hardscript.compiler.model.circuit.selector.PartSelector;
-import pascal.hardscript.compiler.model.circuit.selector.Selector;
+import pascal.hardscript.compiler.model.components.Component;
+import pascal.hardscript.compiler.model.components.ComponentAccess;
+import pascal.hardscript.compiler.model.components.selector.BitSelector;
+import pascal.hardscript.compiler.model.components.selector.PartSelector;
+import pascal.hardscript.compiler.model.components.selector.Selector;
 import pascal.hardscript.compiler.model.scope.Binding;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.compiler.model.value.*;
@@ -201,7 +201,7 @@ public final class Evaluator {
     }
 
     private Entity evaluateBinaryExpr(BinaryExpr expr) {
-        throw new TodoException(); // TODO:
+        throw new TodoException();
     }
 
     private Entity evaluateParamSymbolExpr(ParamSymbolExpr expr) {

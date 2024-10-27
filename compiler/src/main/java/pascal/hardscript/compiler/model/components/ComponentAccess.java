@@ -1,6 +1,6 @@
-package pascal.hardscript.compiler.model.circuit;
+package pascal.hardscript.compiler.model.components;
 
-import pascal.hardscript.compiler.model.circuit.selector.Selector;
+import pascal.hardscript.compiler.model.components.selector.Selector;
 
 public record ComponentAccess(Component base, Selector selector) implements Component {
 

@@ -1,10 +1,10 @@
-package pascal.hardscript.compiler.model.circuit;
+package pascal.hardscript.compiler.model.components;
 
 import pascal.hardscript.compiler.ast.Identifier;
 
-public record Wire(Identifier id, int width) implements Component {
+public record Register(Identifier id, int width) implements Component {
 
-    public static class Factory implements Component.Factory<Wire> {
+    public static class Factory implements Component.Factory<Register> {
         private final int width;
 
         private Factory(int width) {
@@ -16,8 +16,8 @@ public record Wire(Identifier id, int width) implements Component {
         }
 
         @Override
-        public Wire create(Identifier id) {
-            return new Wire(id, width);
+        public Register create(Identifier id) {
+            return new Register(id, width);
         }
     }
 }

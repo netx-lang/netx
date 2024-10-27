@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.model.circuit.selector;
+package pascal.hardscript.compiler.model.components.selector;
 
 import pascal.hardscript.compiler.model.value.IntegerValue;
 

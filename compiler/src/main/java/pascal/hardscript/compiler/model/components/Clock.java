@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.model.circuit;
+package pascal.hardscript.compiler.model.components;
 
 import pascal.hardscript.compiler.ast.Identifier;
 
