@@ -124,7 +124,7 @@ public final class Elaborator {
         var sourceLoc = type.getIdentifier().getSourceLoc();
         if ("bit".equals(type.identifier().string())) {
             Types.requiresArgumentSize(1, type);
-            return Types.requiresIntValue(sourceLoc, type.parameters().getFirst()).value();
+            return Types.requiresIntegerValue(sourceLoc, type.parameters().getFirst()).toInt();
         } else {
             log.error("{}: Expected bit type but got {}", sourceLoc, type);
             throw new CompileCancellationException();

@@ -22,10 +22,7 @@ import pascal.hardscript.compiler.model.circuit.selector.PartSelector;
 import pascal.hardscript.compiler.model.circuit.selector.Selector;
 import pascal.hardscript.compiler.model.scope.Binding;
 import pascal.hardscript.compiler.model.scope.Scope;
-import pascal.hardscript.compiler.model.value.BitVectorValue;
-import pascal.hardscript.compiler.model.value.BooleanValue;
-import pascal.hardscript.compiler.model.value.IntValue;
-import pascal.hardscript.compiler.model.value.Value;
+import pascal.hardscript.compiler.model.value.*;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.exception.TodoException;
 
@@ -45,8 +42,8 @@ public final class Evaluator {
         bindings.add(scope.getBinding());
     }
 
-    public IntValue evaluateToIntValue(ExprNode expr) {
-        return requiresIntValue(expr.getSourceLoc(), evaluate(expr));
+    public IntegerValue evaluateToIntegerValue(ExprNode expr) {
+        return requiresIntegerValue(expr.getSourceLoc(), evaluate(expr));
     }
 
     public BooleanValue evaluateToBoolean(ExprNode expr) {
@@ -95,10 +92,10 @@ public final class Evaluator {
     private Selector evaluateSelector(pascal.hardscript.compiler.ast.expr.selector.Selector selector) {
         return switch (selector) {
             case pascal.hardscript.compiler.ast.expr.selector.BitSelector bitSelector ->
-                    BitSelector.of(evaluateToIntValue(bitSelector.getIndex()));
+                    BitSelector.of(evaluateToIntegerValue(bitSelector.getIndex()));
             case pascal.hardscript.compiler.ast.expr.selector.PartSelector partSelector -> PartSelector.of(
-                    evaluateToIntValue(partSelector.getStart()),
-                    evaluateToIntValue(partSelector.getEnd()));
+                    evaluateToIntegerValue(partSelector.getStart()),
+                    evaluateToIntegerValue(partSelector.getEnd()));
         };
     }
 
@@ -132,11 +129,11 @@ public final class Evaluator {
     }
 
     private ListEntity evaluateRangeList(RangeList list) {
-        var from = evaluateToIntValue(list.getFrom()).value();
-        var to = evaluateToIntValue(list.getTo()).value();
+        var from = evaluateToIntegerValue(list.getFrom()).toInt();
+        var to = evaluateToIntegerValue(list.getTo()).toInt();
         return ListEntity.of(
                 IntStream.range(Integer.min(from, to), Integer.max(from, to))
-                        .mapToObj(IntValue::of)
+                        .mapToObj(Int32Value::of)
                         .map(Entity.class::cast).toList());
     }
 
@@ -190,12 +187,17 @@ public final class Evaluator {
     private Entity evaluateNumberExpr(NumberExpr expr) {
         return switch (expr) {
             case BitVectorNumber bitVectorNumber -> BitVectorValue.of(bitVectorNumber.getRepresentation());
-            case IntNumber intNumber -> IntValue.of(intNumber.getValue());
+            case IntNumber intNumber -> Int32Value.of(intNumber.getValue());
         };
     }
 
     private Entity evaluateUnaryExpr(UnaryExpr expr) {
-        throw new TodoException(); // TODO:
+        return switch (expr.getOp()) {
+            case ADD -> evaluateToIntegerValue(expr.getOperand());
+            case SUB -> evaluateToIntegerValue(expr.getOperand()).negative();
+            case NOT -> evaluateToBoolean(expr.getOperand()).not();
+            case BITWISE_NOT -> evaluateToIntegerValue(expr.getOperand()).bitwiseNot();
+        };
     }
 
     private Entity evaluateBinaryExpr(BinaryExpr expr) {

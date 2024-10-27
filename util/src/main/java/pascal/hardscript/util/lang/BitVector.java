@@ -64,6 +64,29 @@ public final class BitVector {
         System.arraycopy(other.data, 0, data, 0, data.length);
     }
 
+    public BitVector negative() {
+        BitVector result = bitwiseNot();
+        for (int i = 0; i < data.length; i++) {
+            result.data[i]++;
+            if (result.data[i] != 0) {
+                break;
+            }
+        }
+        return result;
+    }
+
+    public BitVector bitwiseNot() {
+        BitVector result = new BitVector(size);
+        for (int i = 0; i < data.length; i++) {
+            result.data[i] = (byte) ~data[i];
+        }
+        return result;
+    }
+
+    public int toInt() {
+        return new BigInteger(data).intValue();
+    }
+
     public void or(BitVector other) {
         for (int i = 0; i < data.length; i++) {
             data[i] |= other.data[i];

@@ -8,7 +8,7 @@ import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
 import pascal.hardscript.compiler.model.ParameteriezedEntity;
 import pascal.hardscript.compiler.model.value.BooleanValue;
-import pascal.hardscript.compiler.model.value.IntValue;
+import pascal.hardscript.compiler.model.value.IntegerValue;
 import pascal.hardscript.compiler.model.value.Value;
 
 import java.util.function.Predicate;
@@ -53,9 +53,9 @@ public final class Types {
         }
     }
 
-    public static IntValue requiresIntValue(SourceLoc loc, Entity entity) {
-        if (entity instanceof IntValue intValue) {
-            return intValue;
+    public static IntegerValue requiresIntegerValue(SourceLoc loc, Entity entity) {
+        if (entity instanceof IntegerValue integerValue) {
+            return integerValue;
         } else {
             log.error("{}: Expected integer value but got {}", loc, entity);
             throw new CompileCancellationException();

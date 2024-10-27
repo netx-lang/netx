@@ -10,10 +10,10 @@ public record ListEntity(List<Entity> entities) implements Entity {
 
     public Entity select(Selector selector) {
         return switch (selector) {
-            case BitSelector bitSelector -> entities.get(bitSelector.index().value());
+            case BitSelector bitSelector -> entities.get(bitSelector.index().toInt());
             case PartSelector partSelector -> {
-                int start = partSelector.start().value();
-                int end = partSelector.end().value();
+                int start = partSelector.start().toInt();
+                int end = partSelector.end().toInt();
                 yield ListEntity.of(entities.subList(
                         Integer.min(start, end), Integer.max(start, end) + 1));
             }

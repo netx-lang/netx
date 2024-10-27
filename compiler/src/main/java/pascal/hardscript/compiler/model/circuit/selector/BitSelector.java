@@ -1,10 +1,10 @@
 package pascal.hardscript.compiler.model.circuit.selector;
 
-import pascal.hardscript.compiler.model.value.IntValue;
+import pascal.hardscript.compiler.model.value.IntegerValue;
 
-public record BitSelector(IntValue index) implements Selector {
+public record BitSelector(IntegerValue index) implements Selector {
 
-    public static BitSelector of(IntValue index) {
+    public static BitSelector of(IntegerValue index) {
         return new BitSelector(index);
     }
 }

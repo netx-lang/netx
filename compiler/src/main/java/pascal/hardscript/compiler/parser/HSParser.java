@@ -110,8 +110,8 @@ public final class HSParser {
 
     static ExprNode parseUnaryExpr(UnaryExprContext ctx) {
         UnaryExpr.Operator op = switch (ctx.op.getText()) {
-            case "+" -> UnaryExpr.Operator.PLUS;
-            case "-" -> UnaryExpr.Operator.MINUS;
+            case "+" -> UnaryExpr.Operator.ADD;
+            case "-" -> UnaryExpr.Operator.SUB;
             case "!" -> UnaryExpr.Operator.NOT;
             case "~" -> UnaryExpr.Operator.BITWISE_NOT;
             default -> throw new ShallNotReachHereError();

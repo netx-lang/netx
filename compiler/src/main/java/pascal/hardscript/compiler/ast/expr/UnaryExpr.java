@@ -62,6 +62,6 @@ public final class UnaryExpr extends ExprNode {
     }
 
     public enum Operator {
-        PLUS, MINUS, NOT, BITWISE_NOT
+        ADD, SUB, NOT, BITWISE_NOT
     }
 }
