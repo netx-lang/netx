@@ -12,24 +12,8 @@ module_arguments
 
 element
     : type=expression ':' connection=expression                # Instantiation
-    | 'component' symbol (',' symbol)* ':' component_type      # Component
+    | 'component' symbol (',' symbol)* ':' type=expression     # Component
     | 'for' '(' iterator ')' '{' element* '}'                  # Loop
-    ;
-
-component_type
-    : BIT '(' expression ')'                                                  # BitType
-    | 'reg' '(' BIT '(' expression ')' ',' trigger_type (',' reset_type)? ')' # RegType
-    | 'clock'                                                                   # ClockType
-    ;
-
-BIT : 'bit';
-
-trigger_type
-    : 'trigger_on' '(' edge=('pos' | 'neg') ',' expression ')'
-    ;
-
-reset_type
-    : 'reset_on' '(' edge=('pos' | 'neg') ',' expression ')'
     ;
 
 expression
@@ -39,7 +23,7 @@ expression
     | '[' list ']'                                                  # ListExpr
     | op=('+' | '-' | '~' | '!') expression                         # UnaryExpr
     | lhs=expression op='<>' rhs=expression                         # BinaryExpr
-    | lhs=expression op='->' rhs=expression                         # BinaryExpr
+    | lhs=expression op=('->' | '->*') rhs=expression               # BinaryExpr
     | lhs=expression op='**' rhs=expression                         # BinaryExpr
     | lhs=expression op=('*' | '/' | '%') rhs=expression            # BinaryExpr
     | lhs=expression op=('+' | '-') rhs=expression                  # BinaryExpr

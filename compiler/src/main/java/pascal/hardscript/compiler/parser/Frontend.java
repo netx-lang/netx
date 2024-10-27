@@ -6,6 +6,8 @@ import pascal.hardscript.compiler.analysis.SourceLocChecker;
 import pascal.hardscript.compiler.antlr.HardScriptLexer;
 import pascal.hardscript.compiler.antlr.HardScriptParser;
 import pascal.hardscript.compiler.ast.DesignNode;
+import pascal.hardscript.compiler.elaborator.Elaborator;
+import pascal.hardscript.compiler.model.scope.DesignScope;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -45,6 +47,10 @@ public final class Frontend {
         var design = buildAST();
         new SourceLocChecker(design).analyze();
         return design;
+    }
+
+    public DesignScope elaborate() {
+        return new Elaborator(parse()).elaborate();
     }
 
     private static class ThrowingErrorListener extends BaseErrorListener {

@@ -75,7 +75,7 @@ public final class BinaryExpr extends ExprNode {
     }
 
     public enum Operator {
-        COMBINE, MAPS_TO,
+        COMBINE, MAPSTO, MAPSTO_CLOSURE,
         POW, MUL, DIV, MOD, ADD, SUB,
         ARITH_SHL, ARITH_SHR, LOGIC_SHR, LOGIC_SHL,
         EQ, NE, LT, LE, GT, GE,

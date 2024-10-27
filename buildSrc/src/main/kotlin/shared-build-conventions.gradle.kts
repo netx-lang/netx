@@ -28,9 +28,9 @@ dependencies {
     implementation("com.google.code.findbugs:jsr305:3.0.2")
 
     implementation("org.slf4j:slf4j-api:2.0.9")
-//    testRuntimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
-//    testRuntimeOnly("org.apache.logging.log4j:log4j-api:2.20.0")
-//    testRuntimeOnly("org.apache.logging.log4j:log4j-core:2.20.0")
+    testRuntimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
+    testRuntimeOnly("org.apache.logging.log4j:log4j-api:2.20.0")
+    testRuntimeOnly("org.apache.logging.log4j:log4j-core:2.20.0")
 
     implementation("org.jgrapht:jgrapht-core:1.5.2")
     implementation("org.jgrapht:jgrapht-io:1.5.2")

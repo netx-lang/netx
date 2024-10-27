@@ -1,42 +1,41 @@
 package pascal.hardscript.compiler.ast.module;
 
 import pascal.hardscript.compiler.ast.ASTListener;
-import pascal.hardscript.compiler.ast.expr.SymbolExpr;
-import pascal.hardscript.compiler.ast.module.type.ComponentTypeNode;
+import pascal.hardscript.compiler.ast.Symbol;
+import pascal.hardscript.compiler.ast.expr.ExprNode;
 
 import java.util.List;
 import java.util.Objects;
 
 public final class ComponentNode extends ElementNode {
-    private final List<SymbolExpr> identifiers;
-    private ComponentTypeNode type;
+    private final List<Symbol> symbols;
+    private ExprNode type;
 
-    private ComponentNode(List<SymbolExpr> identifiers, ComponentTypeNode type) {
-        this.identifiers = identifiers;
+    private ComponentNode(List<Symbol> symbols, ExprNode type) {
+        this.symbols = symbols;
         this.type = type;
     }
 
-    public static ComponentNode of(List<SymbolExpr> ids, ComponentTypeNode type) {
+    public static ComponentNode of(List<Symbol> ids, ExprNode type) {
         return new ComponentNode(ids, type);
     }
 
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);
-        identifiers.forEach(id -> id.walk(listener));
         type.walk(listener);
         listener.exit(this);
     }
 
-    public List<SymbolExpr> getIdentifiers() {
-        return identifiers;
+    public List<Symbol> getSymbols() {
+        return symbols;
     }
 
-    public ComponentTypeNode getType() {
+    public ExprNode getType() {
         return type;
     }
 
-    public void setType(ComponentTypeNode type) {
+    public void setType(ExprNode type) {
         this.type = type;
     }
 
@@ -45,19 +44,19 @@ public final class ComponentNode extends ElementNode {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (ComponentNode) obj;
-        return Objects.equals(this.identifiers, that.identifiers) &&
+        return Objects.equals(this.symbols, that.symbols) &&
                 Objects.equals(this.type, that.type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(identifiers, type);
+        return Objects.hash(symbols, type);
     }
 
     @Override
     public String toString() {
         return "ComponentNode[" +
-                "ids=" + identifiers + ", " +
+                "ids=" + symbols + ", " +
                 "type=" + type + ']';
     }
 }

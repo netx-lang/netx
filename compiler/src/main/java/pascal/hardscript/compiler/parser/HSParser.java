@@ -13,10 +13,6 @@ import pascal.hardscript.compiler.ast.expr.selector.BitSelector;
 import pascal.hardscript.compiler.ast.expr.selector.PartSelector;
 import pascal.hardscript.compiler.ast.expr.selector.Selector;
 import pascal.hardscript.compiler.ast.module.*;
-import pascal.hardscript.compiler.ast.module.type.BitType;
-import pascal.hardscript.compiler.ast.module.type.ClockType;
-import pascal.hardscript.compiler.ast.module.type.ComponentTypeNode;
-import pascal.hardscript.compiler.ast.module.type.RegType;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.lang.BitVector;
@@ -60,46 +56,7 @@ public final class HSParser {
 
     static ComponentNode parseComponent(ComponentContext ctx) {
         return ComponentNode.of(
-                ctx.symbol().stream().map(HSParser::parseSymbol).map(SymbolExpr::of).toList(),
-                parseComponentType(ctx.component_type()));
-    }
-
-    static ComponentTypeNode parseComponentType(Component_typeContext ctx) {
-        var result = switch (ctx) {
-            case RegTypeContext sub -> parseRegType(sub);
-            case ClockTypeContext ignored -> ClockType.getInstance();
-            case BitTypeContext sub -> BitType.of(parseExpr(sub.expression()));
-            default -> throw new ShallNotReachHereError();
-        };
-        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
-        return result;
-    }
-
-    static RegType parseRegType(RegTypeContext ctx) {
-        var bitType = BitType.of(parseExpr(ctx.expression()));
-        bitType.setSourceLoc(SourceLoc.from(ctx.BIT().getSymbol()));
-
-        var triggerCtx = ctx.trigger_type();
-        var trigger = RegType.TriggerSpec.of(
-                witchEdge(triggerCtx.edge.getText()),
-                parseExpr(triggerCtx.expression()));
-        var resetCtx = ctx.reset_type();
-        if (resetCtx != null) {
-            var reset = RegType.ResetSpec.of(
-                    witchEdge(resetCtx.edge.getText()),
-                    parseExpr(resetCtx.expression()));
-            return RegType.of(bitType, trigger, reset);
-        } else {
-            return RegType.of(bitType, trigger);
-        }
-    }
-
-    static RegType.Edge witchEdge(String string) {
-        return switch (string) {
-            case "pos" -> RegType.Edge.POSITIVE;
-            case "neg" -> RegType.Edge.NEGATIVE;
-            default -> throw new ShallNotReachHereError();
-        };
+                ctx.symbol().stream().map(HSParser::parseSymbol).toList(), parseExpr(ctx.type));
     }
 
     static ExprNode parseExpr(ExpressionContext ctx) {
@@ -165,7 +122,8 @@ public final class HSParser {
     static ExprNode parseBinaryExpr(BinaryExprContext ctx) {
         BinaryExpr.Operator op = switch (ctx.op.getText()) {
             case "<>" -> BinaryExpr.Operator.COMBINE;
-            case "->" -> BinaryExpr.Operator.MAPS_TO;
+            case "->" -> BinaryExpr.Operator.MAPSTO;
+            case "->*" -> BinaryExpr.Operator.MAPSTO_CLOSURE;
             case "**" -> BinaryExpr.Operator.POW;
             case "+" -> BinaryExpr.Operator.ADD;
             case "-" -> BinaryExpr.Operator.SUB;

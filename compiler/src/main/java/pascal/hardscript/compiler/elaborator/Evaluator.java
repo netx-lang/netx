@@ -13,10 +13,10 @@ import pascal.hardscript.compiler.ast.expr.qualifier.Qualifier;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
+import pascal.hardscript.compiler.model.ParameteriezedEntity;
 import pascal.hardscript.compiler.model.Wildcard;
 import pascal.hardscript.compiler.model.circuit.Component;
 import pascal.hardscript.compiler.model.circuit.ComponentAccess;
-import pascal.hardscript.compiler.model.circuit.ModuleEntity;
 import pascal.hardscript.compiler.model.circuit.selector.BitSelector;
 import pascal.hardscript.compiler.model.circuit.selector.PartSelector;
 import pascal.hardscript.compiler.model.circuit.selector.Selector;
@@ -31,8 +31,9 @@ import pascal.hardscript.util.exception.TodoException;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.IntStream;
+
+import static pascal.hardscript.compiler.elaborator.Types.*;
 
 public final class Evaluator {
     private static final Logger log = LoggerFactory.getLogger(Evaluator.class);
@@ -44,67 +45,24 @@ public final class Evaluator {
         bindings.add(scope.getBinding());
     }
 
-    public String evaluateToString(ExprNode expr) {
-        throw new TodoException();
-    }
-
-    public ModuleEntity evaluateToModuleEntity(ExprNode expr) {
-        var result = evaluate(expr);
-        if (result instanceof ModuleEntity entity) {
-            return entity;
-        } else {
-            log.error("{}: Expected module entity but got {}", expr.getSourceLoc(), result);
-            throw new CompileCancellationException();
-        }
-    }
-
-
-    public Value evaluateToValue(ExprNode expr) {
-        var result = evaluate(expr);
-        if (result instanceof Value value) {
-            return value;
-        } else {
-            log.error("{}: Expected value expression but got {}", expr.getSourceLoc(), result);
-            throw new CompileCancellationException();
-        }
-    }
-
-    public IntValue evaluateToInteger(ExprNode expr) {
-        var result = evaluate(expr);
-        if (result instanceof IntValue intValue) {
-            return intValue;
-        } else {
-            log.error("{}: Expected integer expression but got {}", expr.getSourceLoc(), result);
-            throw new CompileCancellationException();
-        }
+    public IntValue evaluateToIntValue(ExprNode expr) {
+        return requiresIntValue(expr.getSourceLoc(), evaluate(expr));
     }
 
     public BooleanValue evaluateToBoolean(ExprNode expr) {
-        var result = evaluate(expr);
-        if (result instanceof BooleanValue booleanValue) {
-            return booleanValue;
-        } else {
-            log.error("{}: Expected boolean expression but got {}", expr.getSourceLoc(), result);
-            throw new CompileCancellationException();
-        }
+        return requiresBooleanValue(expr.getSourceLoc(), evaluate(expr));
     }
 
-    public ListEntity evaluateToList(ExprNode expr) {
-        var result = evaluate(expr);
-        if (!(result instanceof ListEntity list)) {
-            log.error("{}: Expected list expression but got {}", expr.getSourceLoc(), result);
-            throw new CompileCancellationException();
-        }
-        return list;
+    public Value evaluateToValue(ExprNode expr) {
+        return requiresValue(expr.getSourceLoc(), evaluate(expr));
+    }
+
+    public ParameteriezedEntity evaluateToParameteriezedEntity(ExprNode expr) {
+        return requiresParameterizedEntity(expr.getSourceLoc(), evaluate(expr));
     }
 
     public ListEntity evaluateToValueList(ExprNode expr) {
-        var result = evaluateToList(expr);
-        if (result.entities().stream().anyMatch(Predicate.not(Value.class::isInstance))) {
-            log.error("{}: Expected list of meta values but got {}", expr.getSourceLoc(), result);
-            throw new CompileCancellationException();
-        }
-        return result;
+        return requiresValueList(expr.getSourceLoc(), evaluate(expr));
     }
 
     public Entity evaluate(ExprNode expr) {
@@ -137,10 +95,10 @@ public final class Evaluator {
     private Selector evaluateSelector(pascal.hardscript.compiler.ast.expr.selector.Selector selector) {
         return switch (selector) {
             case pascal.hardscript.compiler.ast.expr.selector.BitSelector bitSelector ->
-                    BitSelector.of(evaluateToInteger(bitSelector.getIndex()));
+                    BitSelector.of(evaluateToIntValue(bitSelector.getIndex()));
             case pascal.hardscript.compiler.ast.expr.selector.PartSelector partSelector -> PartSelector.of(
-                    evaluateToInteger(partSelector.getStart()),
-                    evaluateToInteger(partSelector.getEnd()));
+                    evaluateToIntValue(partSelector.getStart()),
+                    evaluateToIntValue(partSelector.getEnd()));
         };
     }
 
@@ -174,8 +132,8 @@ public final class Evaluator {
     }
 
     private ListEntity evaluateRangeList(RangeList list) {
-        var from = evaluateToInteger(list.getFrom()).value();
-        var to = evaluateToInteger(list.getTo()).value();
+        var from = evaluateToIntValue(list.getFrom()).value();
+        var to = evaluateToIntValue(list.getTo()).value();
         return ListEntity.of(
                 IntStream.range(Integer.min(from, to), Integer.max(from, to))
                         .mapToObj(IntValue::of)
@@ -194,7 +152,7 @@ public final class Evaluator {
             switch (qualifiers.pop()) {
                 case GeneratorQualifier generator -> {
                     result = new LinkedList<>();
-                    var id = evaluateSymbol(generator.getHead());
+                    var id = evaluateToIdentifier(generator.getHead());
                     var list = evaluateToValueList(generator.getFrom());
                     for (var value : list.entities()) {
                         overrideBindings(Binding.of(id, value));
@@ -211,7 +169,7 @@ public final class Evaluator {
                     }
                 }
                 case BindingQualifier binding -> {
-                    var id = evaluateSymbol(binding.getHead());
+                    var id = evaluateToIdentifier(binding.getHead());
                     var value = evaluate(binding.getExpr());
                     overrideBindings(Binding.of(id, value));
                     result = doListComprehension(head, new LinkedList<>(qualifiers));
@@ -245,13 +203,14 @@ public final class Evaluator {
     }
 
     private Entity evaluateParamSymbolExpr(ParamSymbolExpr expr) {
-        var result = evaluateToModuleEntity(expr.getHead());
-        expr.getArguments().stream().map(this::evaluateToValue).forEach(result::addParameter);
+        var template = evaluateToParameteriezedEntity(expr.getHead());
+        var result = ParameteriezedEntity.of(template.getIdentifier());
+        expr.getArguments().stream().map(this::evaluate).forEach(result::addParameter);
         return result;
     }
 
     private Entity evaluateSymbolExpr(SymbolExpr expr) {
-        var id = evaluateSymbol(expr.getSymbol());
+        var id = evaluateToIdentifier(expr.getSymbol());
         for (var binding : bindings) {
             var entity = binding.lookup(id);
             if (entity != null) {
@@ -265,7 +224,7 @@ public final class Evaluator {
         return scope.getParent().getEvaluator().evaluate(expr);
     }
 
-    public Identifier evaluateSymbol(Symbol symbol) {
+    public Identifier evaluateToIdentifier(Symbol symbol) {
         return switch (symbol) {
             case Identifier id -> id;
             case Interpolated interpolated -> evaluateInterpolation(interpolated);
@@ -277,9 +236,9 @@ public final class Evaluator {
         var exprIter = interpolated.exprs().iterator();
         for (var fragment : interpolated.fragments()) {
             sb.append(fragment);
-            sb.append(evaluateToString(exprIter.next()));
+            sb.append(evaluate(exprIter.next()));
         }
-        exprIter.forEachRemaining(expr -> sb.append(evaluateToString(expr)));
+        exprIter.forEachRemaining(expr -> sb.append(evaluate(expr)));
         var result = Identifier.of(sb.toString());
         result.setSourceLoc(interpolated.getSourceLoc());
         return result;

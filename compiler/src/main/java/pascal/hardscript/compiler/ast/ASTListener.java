@@ -10,9 +10,6 @@ import pascal.hardscript.compiler.ast.module.ComponentNode;
 import pascal.hardscript.compiler.ast.module.InstantiationNode;
 import pascal.hardscript.compiler.ast.module.LoopNode;
 import pascal.hardscript.compiler.ast.module.ModuleNode;
-import pascal.hardscript.compiler.ast.module.type.BitType;
-import pascal.hardscript.compiler.ast.module.type.ClockType;
-import pascal.hardscript.compiler.ast.module.type.RegType;
 
 public interface ASTListener {
 
@@ -197,30 +194,6 @@ public interface ASTListener {
     }
 
     default void exit(SymbolExpr node) {
-        exitDefault(node);
-    }
-
-    default void enter(BitType node) {
-        enterDefault(node);
-    }
-
-    default void exit(BitType node) {
-        exitDefault(node);
-    }
-
-    default void enter(RegType node) {
-        enterDefault(node);
-    }
-
-    default void exit(RegType node) {
-        exitDefault(node);
-    }
-
-    default void enter(ClockType node) {
-        enterDefault(node);
-    }
-
-    default void exit(ClockType node) {
         exitDefault(node);
     }
 }
