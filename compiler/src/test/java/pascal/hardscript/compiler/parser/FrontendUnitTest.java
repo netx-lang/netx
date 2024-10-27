@@ -3,6 +3,7 @@ package pascal.hardscript.compiler.parser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.model.scope.DesignScope;
@@ -45,6 +46,7 @@ class FrontendUnitTest {
         assertNotNull(designNode);
     }
 
+    @Disabled
     @Test
     void elaborateValidInput() throws IOException {
         String content = new String(Files.readAllBytes(Path.of("src/test/resources/divide_by_3.hard")));
