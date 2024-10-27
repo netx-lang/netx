@@ -3,14 +3,15 @@ package pascal.hardscript.compiler.model.scope;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.elaborator.Evaluator;
 import pascal.hardscript.compiler.model.Entity;
+import pascal.hardscript.compiler.model.connection.Connection;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public abstract class Scope {
     private final Scope parent;
     private final Binding binding = new Binding();
     private final List<Scope> children = new ArrayList<>();
+    private final Set<Connection> connections = new HashSet<>();
 
     private final Evaluator evaluator = new Evaluator(this);
 
@@ -28,6 +29,14 @@ public abstract class Scope {
 
     public Evaluator getEvaluator() {
         return evaluator;
+    }
+
+    public void addConnection(Connection connection) {
+        connections.add(connection);
+    }
+
+    public Set<Connection> getConnections() {
+        return Collections.unmodifiableSet(connections);
     }
 
     public void bind(Identifier identifier, Entity entity) {

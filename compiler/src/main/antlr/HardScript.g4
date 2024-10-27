@@ -20,6 +20,7 @@ expression
     : symbol                                                        # SymbolExpr
     | number                                                        # NumberExpr
     | symbol '(' expression (',' expression)* ')'                   # ParamSymbolExpr
+    | symbol '(' ')'                                                # ParamSymbolExpr
     | '[' list ']'                                                  # ListExpr
     | op=('+' | '-' | '~' | '!') expression                         # UnaryExpr
     | lhs=expression op='<>' rhs=expression                         # BinaryExpr

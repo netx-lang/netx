@@ -4,55 +4,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.analysis.HierarchyAnalysis;
 import pascal.hardscript.compiler.ast.DesignNode;
-import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.ast.module.*;
-import pascal.hardscript.compiler.exception.CompileCancellationException;
-import pascal.hardscript.compiler.model.ParameteriezedEntity;
-import pascal.hardscript.compiler.model.components.Clock;
-import pascal.hardscript.compiler.model.components.Component;
-import pascal.hardscript.compiler.model.components.Register;
-import pascal.hardscript.compiler.model.components.Wire;
+import pascal.hardscript.compiler.model.connection.Connection;
 import pascal.hardscript.compiler.model.scope.DesignScope;
+import pascal.hardscript.compiler.model.scope.ModuleInfo;
 import pascal.hardscript.compiler.model.scope.Scope;
-import pascal.hardscript.util.exception.TodoException;
 
 import java.util.List;
-import java.util.Set;
 
 public final class Elaborator {
     private static final Logger log = LoggerFactory.getLogger(Elaborator.class);
     private final DesignNode node;
-    private final DesignScope design = DesignScope.newDesign();
-    private static final Set<String> BUILTIN = Set.of(
-            "wire", "reg", "clock", "bit", "trigger_on", "reset_on", "pos", "neg");
+    private final DesignScope design;
 
     public Elaborator(DesignNode node) {
         this.node = node;
-        initialize();
+        design = DesignScope.newDesign(ModuleInfo.of(
+                node.getModules().stream().map(ModuleNode::getIdentifier).toList()));
     }
 
     public DesignScope elaborate() {
         var hierarchy = new HierarchyAnalysis(node).analyze();
         hierarchy.topModules().forEach(this::buildScope);
         return design;
-    }
-
-    private void initialize() {
-        bindBuiltIn();
-        bindModule();
-    }
-
-    private void bindModule() {
-        node.getModules().forEach(module -> {
-            var id = module.getIdentifier();
-            design.bind(id, ParameteriezedEntity.of(id));
-        });
-    }
-
-    private void bindBuiltIn() {
-        BUILTIN.stream().map(Identifier::of)
-                .forEach(id -> design.bind(id, ParameteriezedEntity.of(id)));
     }
 
     private void buildScope(ModuleNode node) {
@@ -74,66 +48,28 @@ public final class Elaborator {
     private void buildElementIntoScope(Scope parent, LoopNode loop) {
         var evaluator = parent.getEvaluator();
         var generator = loop.getGenerator();
-        var id = evaluator.evaluateToIdentifier(generator.getHead());
-        var list = evaluator.evaluateToValueList(generator.getFrom());
-        for (var value : list.entities()) {
+        var id = evaluator.getIdentifierFrom(generator.getHead());
+        var list = evaluator.evaluateToList(generator.getFrom());
+        for (var entity : list.entities()) {
             var scope = parent.instantiateBlockScope();
-            scope.bind(id, value);
+            scope.bind(id, entity);
             dispatchElementBuilder(scope, loop.getElements());
         }
     }
 
     private void buildElementIntoScope(Scope parent, ComponentNode node) {
         var evaluator = parent.getEvaluator();
-        var factory = getFactory(
-                node.getType().getSourceLoc(),
-                evaluator.evaluateToParameteriezedEntity(node.getType()));
+        var factory = evaluator.evaluateToComponentFactory(node.getType());
         node.getSymbols().stream()
-                .map(evaluator::evaluateToIdentifier)
+                .map(evaluator::getIdentifierFrom)
                 .forEach(id -> parent.bind(id, factory.create(id)));
     }
 
-    private Component.Factory<?> getFactory(SourceLoc sourceLoc, ParameteriezedEntity type) {
-        return switch (type.identifier().string()) {
-            case "wire" -> {
-                Types.requiresArgumentSize(1, type);
-                yield Wire.Factory.of(getWidth(
-                        Types.requiresParameterizedEntity(
-                                sourceLoc, type.parameters().getFirst())));
-            }
-            case "clock" -> {
-                Types.requiresArgumentSize(0, type);
-                yield Clock.Factory.of();
-            }
-            case "reg" -> {
-                Types.requiresArgumentSize(2, 3, type);
-                // TODO: trigger_on, reset_on
-                yield Register.Factory.of(getWidth(
-                        Types.requiresParameterizedEntity(
-                                sourceLoc, type.parameters().getFirst())));
-            }
-            default -> {
-                log.error("{}: Unknown component type {}",
-                        type.identifier().getSourceLoc(), type.identifier());
-                throw new CompileCancellationException();
-            }
-        };
-    }
-
-    private int getWidth(ParameteriezedEntity type) {
-        var sourceLoc = type.getIdentifier().getSourceLoc();
-        if ("bit".equals(type.identifier().string())) {
-            Types.requiresArgumentSize(1, type);
-            return Types.requiresIntegerValue(sourceLoc, type.parameters().getFirst()).toInt();
-        } else {
-            log.error("{}: Expected bit type but got {}", sourceLoc, type);
-            throw new CompileCancellationException();
-        }
-    }
-
-
     private void buildElementIntoScope(Scope parent, InstantiationNode instantiation) {
-        throw new TodoException(); // TODO:
+        var evaluator = parent.getEvaluator();
+        var type = evaluator.evaluateToInstanceType(instantiation.getType());
+        var port = evaluator.evaluateToPort(instantiation.getConnection());
+        parent.addConnection(Connection.of(type, port));
     }
 
 }

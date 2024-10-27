@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.ast.Interpolated;
+import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.ast.Symbol;
 import pascal.hardscript.compiler.ast.expr.*;
 import pascal.hardscript.compiler.ast.expr.qualifier.BindingQualifier;
@@ -13,14 +14,18 @@ import pascal.hardscript.compiler.ast.expr.qualifier.Qualifier;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
-import pascal.hardscript.compiler.model.ParameteriezedEntity;
 import pascal.hardscript.compiler.model.Wildcard;
-import pascal.hardscript.compiler.model.components.Component;
-import pascal.hardscript.compiler.model.components.ComponentAccess;
+import pascal.hardscript.compiler.model.components.*;
 import pascal.hardscript.compiler.model.components.selector.BitSelector;
 import pascal.hardscript.compiler.model.components.selector.PartSelector;
 import pascal.hardscript.compiler.model.components.selector.Selector;
+import pascal.hardscript.compiler.model.connection.instantiation.AtomType;
+import pascal.hardscript.compiler.model.connection.instantiation.CombineType;
+import pascal.hardscript.compiler.model.connection.instantiation.InstanceType;
+import pascal.hardscript.compiler.model.connection.instantiation.ParallelType;
+import pascal.hardscript.compiler.model.connection.port.*;
 import pascal.hardscript.compiler.model.scope.Binding;
+import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.compiler.model.value.*;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
@@ -28,6 +33,7 @@ import pascal.hardscript.util.exception.TodoException;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 import static pascal.hardscript.compiler.elaborator.Types.*;
@@ -35,11 +41,28 @@ import static pascal.hardscript.compiler.elaborator.Types.*;
 public final class Evaluator {
     private static final Logger log = LoggerFactory.getLogger(Evaluator.class);
     private final LinkedList<Binding> bindings = new LinkedList<>();
+    private EvaluationMode mode = EvaluationMode.COMMON;
     private final Scope scope;
 
     public Evaluator(Scope scope) {
         this.scope = scope;
         bindings.add(scope.getBinding());
+    }
+
+    public InstanceType evaluateToInstanceType(ExprNode expr) {
+        return requiresInstanceType(expr.getSourceLoc(), evaluate(expr));
+    }
+
+    public Port evaluateToPort(ExprNode expr) {
+        return requiresPort(expr.getSourceLoc(), evaluate(expr));
+    }
+
+    public ListEntity evaluateToList(ExprNode expr) {
+        return requiresList(expr.getSourceLoc(), evaluate(expr));
+    }
+
+    public Component evaluateToComponent(ExprNode expr) {
+        throw new TodoException();
     }
 
     public IntegerValue evaluateToIntegerValue(ExprNode expr) {
@@ -54,15 +77,14 @@ public final class Evaluator {
         return requiresValue(expr.getSourceLoc(), evaluate(expr));
     }
 
-    public ParameteriezedEntity evaluateToParameteriezedEntity(ExprNode expr) {
-        return requiresParameterizedEntity(expr.getSourceLoc(), evaluate(expr));
+    public Component.Factory<?> evaluateToComponentFactory(ExprNode expr) {
+        mode = EvaluationMode.COMPONENT_FACTORY;
+        var result = requiresComponentFactory(expr.getSourceLoc(), evaluate(expr));
+        mode = EvaluationMode.COMMON;
+        return result;
     }
 
-    public ListEntity evaluateToValueList(ExprNode expr) {
-        return requiresValueList(expr.getSourceLoc(), evaluate(expr));
-    }
-
-    public Entity evaluate(ExprNode expr) {
+    private Entity evaluate(ExprNode expr) {
         return switch (expr) {
             case AccessExpr sub -> evaluateAccessExpr(sub);
             case BinaryExpr sub -> evaluateBinaryExpr(sub);
@@ -149,10 +171,10 @@ public final class Evaluator {
             switch (qualifiers.pop()) {
                 case GeneratorQualifier generator -> {
                     result = new LinkedList<>();
-                    var id = evaluateToIdentifier(generator.getHead());
-                    var list = evaluateToValueList(generator.getFrom());
-                    for (var value : list.entities()) {
-                        overrideBindings(Binding.of(id, value));
+                    var id = getIdentifierFrom(generator.getHead());
+                    var list = evaluateToList(generator.getFrom());
+                    for (var entity : list.entities()) {
+                        overrideBindings(Binding.of(id, entity));
                         result.addAll(doListComprehension(head, new LinkedList<>(qualifiers)));
                         restoreBindings();
                     }
@@ -166,7 +188,7 @@ public final class Evaluator {
                     }
                 }
                 case BindingQualifier binding -> {
-                    var id = evaluateToIdentifier(binding.getHead());
+                    var id = getIdentifierFrom(binding.getHead());
                     var value = evaluate(binding.getExpr());
                     overrideBindings(Binding.of(id, value));
                     result = doListComprehension(head, new LinkedList<>(qualifiers));
@@ -201,32 +223,155 @@ public final class Evaluator {
     }
 
     private Entity evaluateBinaryExpr(BinaryExpr expr) {
-        throw new TodoException();
+        var sourceLoc = expr.getSourceLoc();
+        var lhs = evaluate(expr.getLhs());
+        var rhs = evaluate(expr.getRhs());
+        return switch (expr.getOp()) {
+            case COMBINE -> evaluateCombineType(sourceLoc, lhs, rhs);
+            case MAPSTO -> evaluateCommonPort(sourceLoc, lhs, rhs);
+            case MAPSTO_CLOSURE -> evaluateClosurePort(sourceLoc, lhs, rhs);
+            default -> throw new TodoException(); // TODO:
+        };
+    }
+
+    private Entity evaluateCombineType(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
+        if (lhs instanceof ListEntity lhsList) {
+            lhs = makeParallelTypeFromList(sourceLoc, lhsList);
+        }
+        if (rhs instanceof ListEntity rhsList) {
+            rhs = makeParallelTypeFromList(sourceLoc, rhsList);
+        }
+        if (!(lhs instanceof InstanceType lhsType && rhs instanceof InstanceType rhsType)) {
+            log.error("Expected instance type but got {} and {}", lhs, rhs);
+            throw new CompileCancellationException();
+        }
+        return CombineType.from(lhsType, rhsType);
+    }
+
+    private ParallelType makeParallelTypeFromList(SourceLoc sourceLoc, ListEntity list) {
+        if (list.entities().stream().allMatch(Predicate.not(InstanceType.class::isInstance))) {
+            log.error("{}: Expected list of instance types but got {}", sourceLoc, list);
+            throw new CompileCancellationException();
+        }
+        return ParallelType.from(list.entities().stream().map(InstanceType.class::cast).toList());
+    }
+
+    private CommonPort evaluateCommonPort(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
+        if (lhs instanceof ListEntity lhsList) {
+            lhs = makeAtomPortFromList(sourceLoc, lhsList);
+        }
+        if (rhs instanceof ListEntity rhsList) {
+            rhs = makeAtomPortFromList(sourceLoc, rhsList);
+        }
+        if (!(lhs instanceof CommonPort lhsPort && rhs instanceof CommonPort rhsPort)) {
+            log.error("{}: Expected common port but got {} and {}", sourceLoc, lhs, rhs);
+            throw new CompileCancellationException();
+        }
+        return MapstoPort.of(lhsPort, rhsPort);
+    }
+
+    private AtomPort makeAtomPortFromList(SourceLoc sourceLoc, ListEntity list) {
+        if (list.entities().stream().allMatch(Predicate.not(Component.class::isInstance))) {
+            log.error("{}: Expected list of components but got {}", sourceLoc, list);
+            throw new CompileCancellationException();
+        }
+        return AtomPort.from(list.entities().stream().map(Component.class::cast).toList());
+    }
+
+    private ClosurePort evaluateClosurePort(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
+        if (!(lhs instanceof CommonPort lhsPort && rhs instanceof CommonPort rhsPort)) {
+            log.error("{}: Unexpected closure from {} to {}", sourceLoc, lhs, rhs);
+            throw new CompileCancellationException();
+        }
+        return ClosurePort.of(lhsPort, rhsPort);
     }
 
     private Entity evaluateParamSymbolExpr(ParamSymbolExpr expr) {
-        var template = evaluateToParameteriezedEntity(expr.getHead());
-        var result = ParameteriezedEntity.of(template.getIdentifier());
-        expr.getArguments().stream().map(this::evaluate).forEach(result::addParameter);
-        return result;
+        return switch (mode) {
+            case COMPONENT_FACTORY -> evaluateComponentFactory(expr);
+            case COMMON -> evaluateInstanceType(expr);
+        };
+    }
+
+    private Component.Factory<?> evaluateComponentFactory(ParamSymbolExpr expr) {
+        var identifier = getIdentifierFrom(expr.getHead().getSymbol());
+        var sourceLoc = expr.getSourceLoc();
+        return switch (identifier.string()) {
+            case "wire" -> evaluateWireFactory(sourceLoc, expr.getArguments());
+            case "clock" -> evaluateClockFactory(sourceLoc, expr.getArguments());
+            case "reg" -> evaluateRegisterFactory(sourceLoc, expr.getArguments());
+            default -> {
+                log.error("{}: Unknown component type {}", expr.getSourceLoc(), expr);
+                throw new CompileCancellationException();
+            }
+        };
+    }
+
+    private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
+        if (arguments.size() == 1) {
+            return Wire.Factory.of(evaluateBitWidth(arguments.getFirst()));
+        }
+        log.error("{}: Unexpected specification for component type wire: {}", sourceLoc, arguments);
+        throw new CompileCancellationException();
+    }
+
+    private Clock.Factory evaluateClockFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
+        if (arguments.isEmpty()) {
+            return Clock.Factory.of();
+        } else {
+            log.error("{}: Unexpected specification for component type clock: {}", sourceLoc, arguments);
+            throw new CompileCancellationException();
+        }
+    }
+
+    private Register.Factory evaluateRegisterFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
+        // TODO: trigger_on, reset_on
+        if (arguments.size() >= 2) {
+            int width = evaluateBitWidth(arguments.getFirst());
+            return Register.Factory.of(width);
+        }
+        log.error("{}: Unexpected specification for component type reg: {}", sourceLoc, arguments);
+        throw new CompileCancellationException();
+    }
+
+    private int evaluateBitWidth(ExprNode expr) {
+        if (expr instanceof ParamSymbolExpr spec) {
+            var identifier = getIdentifierFrom(spec.getHead().getSymbol());
+            if (identifier.string().equals("bit")) {
+                if (spec.getArguments().size() == 1) {
+                    return evaluateToIntegerValue(spec.getArguments().getFirst()).toInt();
+                }
+            }
+        }
+        log.error("{}: Unexpected bit width specification: {}", expr.getSourceLoc(), expr);
+        throw new CompileCancellationException();
+    }
+
+    private InstanceType evaluateInstanceType(ParamSymbolExpr expr) {
+        var identifier = getIdentifierFrom(expr.getHead().getSymbol());
+        var parameters = expr.getArguments().stream().map(this::evaluate).toList();
+        return AtomType.of(identifier, parameters);
     }
 
     private Entity evaluateSymbolExpr(SymbolExpr expr) {
-        var id = evaluateToIdentifier(expr.getSymbol());
+        var id = getIdentifierFrom(expr.getSymbol());
         for (var binding : bindings) {
             var entity = binding.lookup(id);
             if (entity != null) {
                 return entity;
             }
         }
-        if (scope.getParent() == null) {
+        if (scope instanceof DesignScope design) {
+            if (design.containsInfo(id)) {
+                return AtomType.of(id);
+            }
             log.error("{}: Unresolved Symbol {}", expr.getSourceLoc(), id);
             throw new CompileCancellationException();
         }
         return scope.getParent().getEvaluator().evaluate(expr);
     }
 
-    public Identifier evaluateToIdentifier(Symbol symbol) {
+    public Identifier getIdentifierFrom(Symbol symbol) {
         return switch (symbol) {
             case Identifier id -> id;
             case Interpolated interpolated -> evaluateInterpolation(interpolated);
@@ -252,5 +397,9 @@ public final class Evaluator {
 
     private void restoreBindings() {
         bindings.removeFirst();
+    }
+
+    enum EvaluationMode {
+        COMMON, COMPONENT_FACTORY
     }
 }

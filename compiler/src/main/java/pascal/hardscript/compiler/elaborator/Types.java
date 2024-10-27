@@ -6,7 +6,9 @@ import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
-import pascal.hardscript.compiler.model.ParameteriezedEntity;
+import pascal.hardscript.compiler.model.components.Component;
+import pascal.hardscript.compiler.model.connection.instantiation.InstanceType;
+import pascal.hardscript.compiler.model.connection.port.Port;
 import pascal.hardscript.compiler.model.value.BooleanValue;
 import pascal.hardscript.compiler.model.value.IntegerValue;
 import pascal.hardscript.compiler.model.value.Value;
@@ -16,30 +18,29 @@ import java.util.function.Predicate;
 public final class Types {
     private static final Logger log = LoggerFactory.getLogger(Types.class);
 
-    public static void requiresArgumentSize(int expected, ParameteriezedEntity entity) {
-        int actual = entity.parameters().size();
-        if (expected != actual) {
-            log.error("{}: Expected {} arguments but got {}", entity.identifier().getSourceLoc(), expected, actual);
-            throw new CompileCancellationException();
-        }
-    }
-
-    public static void requiresArgumentSize(int min, int max, ParameteriezedEntity entity) {
-        int actual = entity.parameters().size();
-        if (actual > max) {
-            log.error("{}: Too many arguments in {}", entity.identifier().getSourceLoc(), entity);
-            throw new CompileCancellationException();
-        } else if (actual < min) {
-            log.error("{}: Too few arguments in {}", entity.identifier().getSourceLoc(), entity);
-            throw new CompileCancellationException();
-        }
-    }
-
-    public static ParameteriezedEntity requiresParameterizedEntity(SourceLoc loc, Entity entity) {
-        if (entity instanceof ParameteriezedEntity module) {
-            return module;
+    public static InstanceType requiresInstanceType(SourceLoc loc, Entity entity) {
+        if (entity instanceof InstanceType instanceType) {
+            return instanceType;
         } else {
-            log.error("{}: Expected module entity but got {}", loc, entity);
+            log.error("{}: Expected instance type but got {}", loc, entity);
+            throw new CompileCancellationException();
+        }
+    }
+
+    public static Component.Factory<?> requiresComponentFactory(SourceLoc loc, Entity entity) {
+        if (entity instanceof Component.Factory<?> factory) {
+            return factory;
+        } else {
+            log.error("{}: Expected component factory but got {}", loc, entity);
+            throw new CompileCancellationException();
+        }
+    }
+
+    public static Port requiresPort(SourceLoc loc, Entity entity) {
+        if (entity instanceof Port port) {
+            return port;
+        } else {
+            log.error("{}: Expected port but got {}", loc, entity);
             throw new CompileCancellationException();
         }
     }

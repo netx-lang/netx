@@ -5,7 +5,7 @@ import pascal.hardscript.compiler.model.Entity;
 
 public interface Component extends Entity {
 
-    interface Factory<T extends Component> {
+    interface Factory<T extends Component> extends Entity {
         T create(Identifier id);
     }
 }
