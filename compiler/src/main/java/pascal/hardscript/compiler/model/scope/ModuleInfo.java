@@ -5,15 +5,13 @@ import pascal.hardscript.compiler.ast.Identifier;
 import java.util.ArrayList;
 import java.util.List;
 
-public record ModuleInfo(List<Identifier> modules) {
+import static pascal.hardscript.compiler.model.scope.BuiltInModuleFactory.BUILTIN;
 
-    private static final List<String> builtin = List.of(
-            "NOT", "AND", "OR", "XOR", "TO"
-    );
+public record ModuleInfo(List<Identifier> modules) {
 
     public ModuleInfo(List<Identifier> modules) {
         this.modules = new ArrayList<>(modules);
-        builtin.stream().map(Identifier::of).forEach(this.modules::add);
+        BUILTIN.stream().map(Identifier::of).forEach(this.modules::add);
     }
 
     public boolean contains(Identifier identifier) {

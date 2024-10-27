@@ -4,6 +4,11 @@ import pascal.hardscript.compiler.ast.Identifier;
 
 public record Clock(Identifier id) implements Component {
 
+    @Override
+    public Identifier getIdentifier() {
+        return id;
+    }
+
     public static class Factory implements Component.Factory<Clock> {
 
         public static Factory of() {

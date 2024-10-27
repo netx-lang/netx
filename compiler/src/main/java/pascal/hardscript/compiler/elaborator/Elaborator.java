@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.analysis.HierarchyAnalysis;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.module.*;
-import pascal.hardscript.compiler.model.connection.Connection;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.ModuleInfo;
 import pascal.hardscript.compiler.model.scope.Scope;
@@ -68,8 +67,6 @@ public final class Elaborator {
     private void buildElementIntoScope(Scope parent, InstantiationNode instantiation) {
         var evaluator = parent.getEvaluator();
         var type = evaluator.evaluateToInstanceType(instantiation.getType());
-        var port = evaluator.evaluateToPort(instantiation.getConnection());
-        parent.addConnection(Connection.of(type, port));
+        var port = evaluator.evaluateToPort(instantiation.getPorts());
     }
-
 }

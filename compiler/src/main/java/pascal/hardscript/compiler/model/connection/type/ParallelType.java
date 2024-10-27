@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.model.connection.instantiation;
+package pascal.hardscript.compiler.model.connection.type;
 
 import java.util.List;
 
