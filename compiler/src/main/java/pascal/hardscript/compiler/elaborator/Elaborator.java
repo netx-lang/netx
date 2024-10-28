@@ -83,22 +83,17 @@ public final class Elaborator {
     }
 
     private class TypeInstantiator {
-        private final InstantiationNode instantiation;
         private final SourceLoc sourceLoc;
 
         private TypeInstantiator(InstantiationNode instantiation) {
-            this.instantiation = instantiation;
             this.sourceLoc = instantiation.getSourceLoc();
         }
 
         private Port instantiate(Scope parent, InstanceType type) {
-            var identifier = parent.getNameAllocator().allocateFor(instantiation);
-            identifier.setSourceLoc(sourceLoc);
-            var instance = parent.instantiateModuleScope(identifier);
             return switch (type) {
-                case AtomType atomType -> instantiateAtomType(instance, atomType);
-                case CombineType combineType -> instantiateCombineType(instance, combineType);
-                case ParallelType parallelType -> instantiateParallelType(instance, parallelType);
+                case AtomType atomType -> instantiateAtomType(parent, atomType);
+                case CombineType combineType -> instantiateCombineType(parent, combineType);
+                case ParallelType parallelType -> instantiateParallelType(parent, parallelType);
             };
         }
 
