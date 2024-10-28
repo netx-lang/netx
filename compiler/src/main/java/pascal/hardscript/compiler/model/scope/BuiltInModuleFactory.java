@@ -39,14 +39,14 @@ public class BuiltInModuleFactory {
     }
 
     private static ModuleScope createNOTModule(Scope parent, AtomType type) {
-        var module = parent.instantiateModuleScope(type.identifier());
+        var module = parent.instantiateModuleScope(parent.getNameAllocator().allocateFor(type));
         module.addInput(newWire(module, "input", 1));
         module.addOutput(newWire(module, "output", 1));
         return module;
     }
 
     private static ModuleScope createTOModule(Scope parent, AtomType type) {
-        var module = parent.instantiateModuleScope(type.identifier());
+        var module = parent.instantiateModuleScope(parent.getNameAllocator().allocateFor(type));
         var entity = newWire(module, "entity", 1);
         module.addInput(entity);
         module.addOutput(entity);
@@ -57,7 +57,7 @@ public class BuiltInModuleFactory {
         var sourceLoc = type.identifier().getSourceLoc();
         requiresMatchedSize(sourceLoc, 1, type.parameters());
         var register = requiresRegister(sourceLoc, type.parameters().getFirst());
-        var module = parent.instantiateModuleScope(type.identifier());
+        var module = parent.instantiateModuleScope(parent.getNameAllocator().allocateFor(type));
         var input = newWire(module, "input", register.width());
         module.addInput(input);
         module.alias(input, register);
@@ -70,7 +70,7 @@ public class BuiltInModuleFactory {
         requiresMatchedSize(sourceLoc, 1, type.parameters());
         int split = requiresIntegerValue(sourceLoc, type.parameters().getFirst()).toInt();
 
-        var module = parent.instantiateModuleScope(type.identifier());
+        var module = parent.instantiateModuleScope(parent.getNameAllocator().allocateFor(type));
         var entity = newWire(module, "entity", 1);
         module.addInput(entity);
         for (int i = 0; i < split; ++i) {
@@ -109,7 +109,7 @@ public class BuiltInModuleFactory {
             width = requiresIntegerValue(sourceLoc, type.parameters().getFirst()).toInt();
         }
 
-        var module = parent.instantiateModuleScope(type.identifier());
+        var module = parent.instantiateModuleScope(parent.getNameAllocator().allocateFor(type));
         module.addInput(newWire(module, "input1", width), newWire(module, "input2", width));
         module.addOutput(newWire(module, "output", width));
         return module;

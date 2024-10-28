@@ -2,6 +2,7 @@ package pascal.hardscript.compiler.model.scope;
 
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.elaborator.Evaluator;
+import pascal.hardscript.compiler.elaborator.NameAllocator;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.components.Component;
 import pascal.hardscript.util.type.Pair;
@@ -15,6 +16,7 @@ public abstract class Scope {
     private final Scope parent;
     private final Binding binding = new Binding();
     private final List<Scope> children = new ArrayList<>();
+    private final NameAllocator nameAllocator = new NameAllocator();
     private final Set<Pair<Component, Component>> aliases = new HashSet<>();
 
     private final Evaluator evaluator = new Evaluator(this);
@@ -33,6 +35,10 @@ public abstract class Scope {
 
     public Evaluator getEvaluator() {
         return evaluator;
+    }
+
+    public NameAllocator getNameAllocator() {
+        return nameAllocator;
     }
 
     public void alias(Component a, Component b) {

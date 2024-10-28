@@ -2,7 +2,6 @@ package pascal.hardscript.compiler.elaborator;
 
 import pascal.hardscript.compiler.analysis.HierarchyAnalysis;
 import pascal.hardscript.compiler.ast.DesignNode;
-import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.ast.module.*;
 import pascal.hardscript.compiler.model.components.Component;
@@ -71,7 +70,7 @@ public final class Elaborator {
         var sourceLoc = instantiation.getSourceLoc();
         var evaluator = parent.getEvaluator();
         var parameters = evaluator.evaluateToPort(instantiation.getPort());
-        var arguments = new TypeInstantiator(sourceLoc)
+        var arguments = new TypeInstantiator(instantiation)
                 .instantiate(parent, evaluator.evaluateToInstanceType(instantiation.getType()));
         requiresMatchedSize(sourceLoc, arguments.from(), parameters.from());
         requiresMatchedSize(sourceLoc, arguments.to(), parameters.to());
@@ -84,14 +83,16 @@ public final class Elaborator {
     }
 
     private class TypeInstantiator {
+        private final InstantiationNode instantiation;
         private final SourceLoc sourceLoc;
 
-        private TypeInstantiator(SourceLoc sourceLoc) {
-            this.sourceLoc = sourceLoc;
+        private TypeInstantiator(InstantiationNode instantiation) {
+            this.instantiation = instantiation;
+            this.sourceLoc = instantiation.getSourceLoc();
         }
 
         private Port instantiate(Scope parent, InstanceType type) {
-            var identifier = Identifier.of("$instantiation" + sourceLoc);
+            var identifier = parent.getNameAllocator().allocateFor(instantiation);
             identifier.setSourceLoc(sourceLoc);
             var instance = parent.instantiateModuleScope(identifier);
             return switch (type) {
@@ -126,7 +127,7 @@ public final class Elaborator {
             ModuleScope module;
             if (info.containsModule(atomType.identifier())) {
                 var node = info.getModuleNode(atomType.identifier());
-                module = scope.instantiateModuleScope(atomType.identifier());
+                module = scope.instantiateModuleScope(scope.getNameAllocator().allocateFor(atomType));
                 requiresMatchedSize(sourceLoc, node.getArguments(), atomType.parameters());
                 var iterator = node.getArguments().iterator();
                 for (var entity : atomType.parameters()) {
