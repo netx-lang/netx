@@ -35,7 +35,7 @@ public abstract class Scope {
         return evaluator;
     }
 
-    public void addAlias(Component a, Component b) {
+    public void alias(Component a, Component b) {
         aliases.add(new Pair<>(a, b));
     }
 

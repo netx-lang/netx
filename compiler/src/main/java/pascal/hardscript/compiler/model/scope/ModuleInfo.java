@@ -17,7 +17,7 @@ public final class ModuleInfo {
             this.modules.add(node.getIdentifier());
             this.moduleNodes.put(node.getIdentifier(), node);
         }
-        BUILTIN.stream().map(Identifier::of).forEach(this.modules::add);
+        BUILTIN.stream().map(Identifier::of).forEach(this.builtin::add);
     }
 
     public boolean contains(Identifier identifier) {

@@ -8,16 +8,19 @@ import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.ast.module.*;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.components.Component;
-import pascal.hardscript.compiler.model.connection.port.Port;
+import pascal.hardscript.compiler.model.connection.port.AtomPort;
+import pascal.hardscript.compiler.model.connection.port.ClosurePort;
+import pascal.hardscript.compiler.model.connection.port.CommonPort;
+import pascal.hardscript.compiler.model.connection.port.MapstoPort;
 import pascal.hardscript.compiler.model.connection.type.AtomType;
 import pascal.hardscript.compiler.model.connection.type.CombineType;
 import pascal.hardscript.compiler.model.connection.type.InstanceType;
 import pascal.hardscript.compiler.model.connection.type.ParallelType;
 import pascal.hardscript.compiler.model.scope.*;
-import pascal.hardscript.util.exception.TodoException;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public final class Elaborator {
     private static final Logger log = LoggerFactory.getLogger(Elaborator.class);
@@ -74,42 +77,69 @@ public final class Elaborator {
     }
 
     private void buildElementIntoScope(Scope parent, InstantiationNode instantiation) {
-        var evaluator = parent.getEvaluator();
-        var sourceLoc = instantiation.getSourceLoc();
-        var from = new PortFlattener(sourceLoc).flatten(parent,
-                evaluator.evaluateToPort(instantiation.getPorts()));
-        var to = new TypeInstantiator(sourceLoc).instantiate(parent,
-                evaluator.evaluateToInstanceType(instantiation.getType()));
-        if (from.size() != to.size()) {
-            throwMismatchedSize(sourceLoc, from.size(), to.size());
-        }
-        for (int i = 0; i < from.size(); ++i) {
-            var fromPort = from.get(i);
-            var toPort = to.get(i);
-            if (fromPort.size() != toPort.size()) {
-                throwMismatchedSize(sourceLoc, fromPort.size(), toPort.size());
-            }
-            for (int j = 0; j < fromPort.size(); ++j) {
-                parent.addAlias(fromPort.get(j), toPort.get(j));
-            }
+        FlattenedInstantiation result = flatten(parent, instantiation);
+        for (int i = 0; i < result.size(); ++i) {
+            parent.alias(result.parameters.get(i), result.arguments.get(i));
         }
     }
 
-    private static class PortFlattener {
+    private FlattenedInstantiation flatten(Scope parent, InstantiationNode instantiation) {
+        var evaluator = parent.getEvaluator();
+        var sourceLoc = instantiation.getSourceLoc();
+        var arguments = new TypeInstantiator(sourceLoc).instantiate(parent,
+                evaluator.evaluateToInstanceType(instantiation.getType()));
+        var port = evaluator.evaluateToPort(instantiation.getPorts());
+        List<List<Component>> parameters = switch (port) {
+            case CommonPort common -> flatten(common);
+            case ClosurePort closure -> {
+                List<List<Component>> result = new LinkedList<>();
+                var beginning = flatten(closure.lhs());
+                var ending = flatten(closure.rhs());
+                arguments = arguments.subList(0, beginning.size());
+                arguments = arguments.subList(arguments.size() - ending.size(), arguments.size());
+                result.addAll(beginning);
+                result.addAll(ending);
+                yield result;
+            }
+        };
+        return FlattenedInstantiation.of(sourceLoc, parameters, arguments);
+    }
 
-        private final SourceLoc sourceLoc;
-
-        private PortFlattener(SourceLoc sourceLoc) {
-            this.sourceLoc = sourceLoc;
+    private record FlattenedInstantiation(List<Component> parameters, List<Component> arguments) {
+        static FlattenedInstantiation of(SourceLoc sourceLoc,
+                                         List<List<Component>> parameters,
+                                         List<List<Component>> arguments) {
+            throwIfSizeMismatched(sourceLoc, arguments, parameters);
+            var mismatched = IntStream.range(0, arguments.size())
+                    .filter(i -> arguments.get(i).size() != parameters.get(i).size())
+                    .findFirst();
+            if (mismatched.isPresent()) {
+                var index = mismatched.getAsInt();
+                throwIfSizeMismatched(sourceLoc, arguments.get(index), parameters.get(index));
+            }
+            return new FlattenedInstantiation(
+                    parameters.stream().flatMap(List::stream).toList(),
+                    arguments.stream().flatMap(List::stream).toList());
         }
 
-        public List<List<Component>> flatten(Scope parent, Port port) {
-            throw new TodoException(); // TODO:
+        int size() {
+            return parameters.size();
         }
+    }
+
+    public List<List<Component>> flatten(CommonPort port) {
+        return switch (port) {
+            case MapstoPort mapsto -> {
+                var result = new LinkedList<List<Component>>();
+                result.addAll(flatten(mapsto.from()));
+                result.addAll(flatten(mapsto.to()));
+                yield result;
+            }
+            case AtomPort atom -> List.of(List.copyOf(atom.components()));
+        };
     }
 
     private class TypeInstantiator {
-
         private final SourceLoc sourceLoc;
         private final List<List<Component>> saved = new LinkedList<>();
 
@@ -127,22 +157,19 @@ public final class Elaborator {
 
         private Middleware doInstantiate(boolean save, Scope parent, InstanceType type) {
             return switch (type) {
-                case AtomType atomType -> instantiateAtomType(save, parent, atomType);
+                case AtomType atomType -> instantiateAtomType(parent, atomType);
                 case CombineType combineType -> instantiateCombineType(save, parent, combineType);
-                case ParallelType parallelType -> instantiateParallelType(save, parent, parallelType);
+                case ParallelType parallelType -> instantiateParallelType(parent, parallelType);
             };
         }
 
         private Middleware instantiateCombineType(boolean save, Scope parent, CombineType combineType) {
-            var lhs = doInstantiate(false, parent, combineType.lhs());
-            var rhs = doInstantiate(false, parent, combineType.rhs());
+            var lhs = doInstantiate(save, parent, combineType.lhs());
+            var rhs = doInstantiate(save, parent, combineType.rhs());
 
-            int middleSize = lhs.to.size();
-            if (middleSize != rhs.from.size()) {
-                throwMismatchedSize(sourceLoc, middleSize, rhs.from.size());
-            }
-            for (int i = 0; i < middleSize; ++i) {
-                parent.addAlias(lhs.to.get(i), rhs.from.get(i));
+            throwIfSizeMismatched(sourceLoc, lhs.to, rhs.from);
+            for (int i = 0; i < lhs.to.size(); ++i) {
+                parent.alias(lhs.to.get(i), rhs.from.get(i));
             }
             if (save) {
                 saved.add(lhs.to);
@@ -150,21 +177,26 @@ public final class Elaborator {
             return new Middleware(lhs.from, rhs.to);
         }
 
-        private Middleware instantiateParallelType(boolean save, Scope parent, ParallelType parallelType) {
+        private Middleware instantiateParallelType(Scope parent, ParallelType parallelType) {
             List<Component> input = new LinkedList<>(), output = new LinkedList<>();
             for (var sub : parallelType.types()) {
-                var port = doInstantiate(save, parent, sub);
+                var port = doInstantiate(false, parent, sub);
                 input.addAll(port.from);
                 output.addAll(port.to);
             }
             return new Middleware(input, output);
         }
 
-        private Middleware instantiateAtomType(boolean save, Scope parent, AtomType atomType) {
+        private Middleware instantiateAtomType(Scope parent, AtomType atomType) {
             ModuleScope module;
             if (info.containsModule(atomType.identifier())) {
                 var node = info.getModuleNode(atomType.identifier());
                 module = parent.instantiateModuleScope(atomType.identifier());
+                throwIfSizeMismatched(sourceLoc, node.getArguments(), atomType.parameters());
+                var iterator = node.getArguments().iterator();
+                for (var entity : atomType.parameters()) {
+                    module.bind(iterator.next(), entity);
+                }
                 dispatchElementBuilder(module, node.getElements());
             } else {
                 module = BuiltInModuleFactory.createBuiltInModule(parent, atomType);
@@ -177,8 +209,10 @@ public final class Elaborator {
         }
     }
 
-    private static void throwMismatchedSize(SourceLoc sourceLoc, int from, int to) {
-        log.error("{}: Instantiation with mismatched component size: {} vs {}", sourceLoc, from, to);
-        throw new CompileCancellationException();
+    private static void throwIfSizeMismatched(SourceLoc sourceLoc, List<?> from, List<?> to) {
+        if (from.size() != to.size()) {
+            log.error("{}: Instantiation with mismatched component size: {} vs {}", sourceLoc, from.size(), to.size());
+            throw new CompileCancellationException();
+        }
     }
 }

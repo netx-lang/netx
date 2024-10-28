@@ -11,16 +11,20 @@ import java.util.Objects;
 public final class ModuleNode extends ASTNode {
     private Identifier identifier;
     private ExprNode type;
+    private final List<Identifier> arguments;
     private final List<ElementNode> elements;
 
-    private ModuleNode(Identifier identifier, ExprNode type, List<ElementNode> elements) {
+    private ModuleNode(Identifier identifier, ExprNode type,
+                       List<Identifier> arguments, List<ElementNode> elements) {
         this.identifier = identifier;
         this.type = type;
+        this.arguments = arguments;
         this.elements = elements;
     }
 
-    public static ModuleNode of(Identifier id, ExprNode type, List<ElementNode> stmts) {
-        return new ModuleNode(id, type, stmts);
+    public static ModuleNode of(Identifier id, ExprNode type,
+                                List<Identifier> arguments, List<ElementNode> elements) {
+        return new ModuleNode(id, type, arguments, elements);
     }
 
     @Override
@@ -51,6 +55,10 @@ public final class ModuleNode extends ASTNode {
         return elements;
     }
 
+    public List<Identifier> getArguments() {
+        return arguments;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) return true;
@@ -58,6 +66,7 @@ public final class ModuleNode extends ASTNode {
         var that = (ModuleNode) obj;
         return Objects.equals(this.identifier, that.identifier) &&
                 Objects.equals(this.type, that.type) &&
+                Objects.equals(this.arguments, that.arguments) &&
                 Objects.equals(this.elements, that.elements);
     }
 
@@ -70,6 +79,7 @@ public final class ModuleNode extends ASTNode {
     public String toString() {
         return "ModuleNode[" +
                 "id=" + identifier + ", " +
+                "arguments=" + arguments + ", " +
                 "type=" + type + ", " +
                 "stmts=" + elements + ']';
     }

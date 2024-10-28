@@ -1,23 +1,34 @@
 package pascal.hardscript.compiler.model.components;
 
 import pascal.hardscript.compiler.ast.Identifier;
+import pascal.hardscript.compiler.model.scope.Scope;
 
-public record Clock(Identifier id) implements Component {
+public record Clock(Identifier id, Scope parent) implements Component {
 
     @Override
     public Identifier getIdentifier() {
         return id;
     }
 
-    public static class Factory implements Component.Factory<Clock> {
+    @Override
+    public Scope getParent() {
+        return parent;
+    }
 
-        public static Factory of() {
-            return new Factory();
+    public static class Factory implements Component.Factory<Clock> {
+        private final Scope parent;
+
+        public Factory(Scope parent) {
+            this.parent = parent;
+        }
+
+        public static Factory of(Scope parent) {
+            return new Factory(parent);
         }
 
         @Override
         public Clock create(Identifier id) {
-            return new Clock(id);
+            return new Clock(id, parent);
         }
     }
 }

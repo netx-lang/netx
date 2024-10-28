@@ -17,6 +17,8 @@ import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.lang.BitVector;
 
+import java.util.List;
+
 public final class HSParser {
 
     public static DesignNode parseDesign(DesignContext ctx) {
@@ -26,13 +28,14 @@ public final class HSParser {
     }
 
     static ModuleNode parseModule(ModuleContext ctx) {
-        var result = ModuleNode.of(
-                parseIdentifier(ctx.ID()), parseExpr(ctx.type),
+        List<Identifier> arguments = ctx.module_arguments() != null
+                ? ctx.module_arguments().ID().stream().map(HSParser::parseIdentifier).toList()
+                : List.of();
+        var result = ModuleNode.of(parseIdentifier(ctx.ID()), parseExpr(ctx.type), arguments,
                 ctx.element().stream().map(HSParser::parseElement).toList());
         result.setSourceLoc(SourceLoc.from(ctx.getStart()));
         return result;
     }
-
     static ElementNode parseElement(ElementContext ctx) {
         var result = switch (ctx) {
             case InstantiationContext sub -> parseInstantiation(sub);

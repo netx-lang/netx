@@ -2,5 +2,5 @@ package pascal.hardscript.compiler.model.connection.port;
 
 import pascal.hardscript.compiler.model.Entity;
 
-public interface Port extends Entity {
+public sealed interface Port extends Entity permits ClosurePort, CommonPort {
 }

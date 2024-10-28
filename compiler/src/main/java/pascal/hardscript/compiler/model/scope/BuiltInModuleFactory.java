@@ -36,8 +36,8 @@ public class BuiltInModuleFactory {
 
     private static ModuleScope createNOTModule(Scope parent, Identifier id) {
         var module = parent.instantiateModuleScope(id);
-        var input = Wire.of(Identifier.of("input"), 1);
-        var output = Wire.of(Identifier.of("output"), 1);
+        var input = Wire.of(Identifier.of("input"), module, 1);
+        var output = Wire.of(Identifier.of("output"), module, 1);
         module.bind(input.getIdentifier(), input);
         module.bind(output.getIdentifier(), output);
         module.addInput(input);
@@ -47,7 +47,7 @@ public class BuiltInModuleFactory {
 
     private static ModuleScope createTOModule(Scope parent, Identifier id) {
         var module = parent.instantiateModuleScope(id);
-        var entity = Wire.of(Identifier.of("entity"), 1);
+        var entity = Wire.of(Identifier.of("entity"), module, 1);
         module.bind(entity.getIdentifier(), entity);
         module.addInput(entity);
         module.addOutput(entity);
@@ -76,9 +76,9 @@ public class BuiltInModuleFactory {
 
     private static ModuleScope makeDualInputGateModule(Scope parent, Identifier id) {
         var module = parent.instantiateModuleScope(id);
-        var input1 = Wire.of(Identifier.of("input1"), 1);
-        var input2 = Wire.of(Identifier.of("input2"), 1);
-        var output = Wire.of(Identifier.of("output"), 1);
+        var input1 = Wire.of(Identifier.of("input1"), module, 1);
+        var input2 = Wire.of(Identifier.of("input2"), module, 1);
+        var output = Wire.of(Identifier.of("output"), module, 1);
         module.bind(input1.getIdentifier(), input1);
         module.bind(input2.getIdentifier(), input2);
         module.bind(output.getIdentifier(), output);

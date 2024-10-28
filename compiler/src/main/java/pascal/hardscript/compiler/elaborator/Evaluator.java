@@ -309,7 +309,7 @@ public final class Evaluator {
 
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         if (arguments.size() == 1) {
-            return Wire.Factory.of(evaluateBitWidth(arguments.getFirst()));
+            return Wire.Factory.of(scope, evaluateBitWidth(arguments.getFirst()));
         }
         log.error("{}: Unexpected specification for component type wire: {}", sourceLoc, arguments);
         throw new CompileCancellationException();
@@ -317,7 +317,7 @@ public final class Evaluator {
 
     private Clock.Factory evaluateClockFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         if (arguments.isEmpty()) {
-            return Clock.Factory.of();
+            return Clock.Factory.of(scope);
         } else {
             log.error("{}: Unexpected specification for component type clock: {}", sourceLoc, arguments);
             throw new CompileCancellationException();
@@ -328,7 +328,7 @@ public final class Evaluator {
         // TODO: trigger_on, reset_on
         if (arguments.size() >= 2) {
             int width = evaluateBitWidth(arguments.getFirst());
-            return Register.Factory.of(width);
+            return Register.Factory.of(scope, width);
         }
         log.error("{}: Unexpected specification for component type reg: {}", sourceLoc, arguments);
         throw new CompileCancellationException();
