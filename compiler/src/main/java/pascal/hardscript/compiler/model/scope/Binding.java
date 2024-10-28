@@ -5,30 +5,11 @@ import pascal.hardscript.compiler.model.Entity;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
-public final class Binding {
-    private final Map<Identifier, Entity> bindings = new HashMap<>();
-
-    public static Binding of(Identifier identifier, Entity entity) {
-        var binding = new Binding();
-        binding.bind(identifier, entity);
-        return binding;
-    }
-
-    public void bind(Identifier identifier, Entity entity) {
-        bindings.put(identifier, entity);
-    }
-
+public interface Binding {
     @Nullable
-    public Entity lookup(Identifier identifier) {
-        return bindings.get(identifier);
-    }
+    Entity lookup(Identifier identifier);
 
     @Nonnull
-    public Entity resolve(Identifier identifier) {
-        return Objects.requireNonNull(bindings.get(identifier));
-    }
+    Entity resolve(Identifier identifier);
 }

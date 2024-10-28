@@ -14,7 +14,7 @@ import java.util.Set;
 
 public abstract class Scope {
     private final Scope parent;
-    private final Binding binding = new Binding();
+    private final MapBinding binding = new MapBinding();
     private final List<Scope> children = new ArrayList<>();
     private final NameAllocator nameAllocator = new NameAllocator();
     private final Set<Pair<Component, Component>> aliases = new HashSet<>();
@@ -29,7 +29,7 @@ public abstract class Scope {
         return parent;
     }
 
-    public Binding getBinding() {
+    public MapBinding getBinding() {
         return binding;
     }
 

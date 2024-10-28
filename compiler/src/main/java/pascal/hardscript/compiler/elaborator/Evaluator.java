@@ -22,6 +22,7 @@ import pascal.hardscript.compiler.model.connection.*;
 import pascal.hardscript.compiler.model.scope.Binding;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
+import pascal.hardscript.compiler.model.scope.SingleBinding;
 import pascal.hardscript.compiler.model.value.BitVectorValue;
 import pascal.hardscript.compiler.model.value.BooleanValue;
 import pascal.hardscript.compiler.model.value.Int32Value;
@@ -158,7 +159,7 @@ public final class Evaluator {
                     var id = getIdentifierFrom(generator.getHead());
                     var list = evaluateToList(generator.getFrom());
                     for (var entity : list.entities()) {
-                        overrideBindings(Binding.of(id, entity));
+                        overrideBindings(SingleBinding.of(id, entity));
                         result.addAll(doListComprehension(head, new LinkedList<>(qualifiers)));
                         restoreBindings();
                     }
@@ -174,7 +175,7 @@ public final class Evaluator {
                 case BindingQualifier binding -> {
                     var id = getIdentifierFrom(binding.getHead());
                     var value = evaluate(binding.getExpr());
-                    overrideBindings(Binding.of(id, value));
+                    overrideBindings(SingleBinding.of(id, value));
                     result = doListComprehension(head, new LinkedList<>(qualifiers));
                     restoreBindings();
                 }
