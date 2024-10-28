@@ -1,5 +1,5 @@
 package pascal.hardscript.compiler.ast.expr;
 
 public abstract sealed class ListExpr extends ExprNode permits
-        RangeList, WildcardList, ListComprehension, CommonList {
+        RangeList, ListComprehension, CommonList {
 }

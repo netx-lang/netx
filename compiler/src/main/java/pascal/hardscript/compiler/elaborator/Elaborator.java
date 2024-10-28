@@ -1,13 +1,10 @@
 package pascal.hardscript.compiler.elaborator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.analysis.HierarchyAnalysis;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.ast.module.*;
-import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.components.Component;
 import pascal.hardscript.compiler.model.connection.*;
 import pascal.hardscript.compiler.model.scope.*;
@@ -15,8 +12,9 @@ import pascal.hardscript.compiler.model.scope.*;
 import java.util.LinkedList;
 import java.util.List;
 
+import static pascal.hardscript.compiler.elaborator.Types.requiresMatchedSize;
+
 public final class Elaborator {
-    private static final Logger log = LoggerFactory.getLogger(Elaborator.class);
     private final DesignNode node;
     private final ModuleInfo info;
     private final DesignScope design;
@@ -75,8 +73,8 @@ public final class Elaborator {
         var parameters = evaluator.evaluateToPort(instantiation.getPort());
         var arguments = new TypeInstantiator(sourceLoc)
                 .instantiate(parent, evaluator.evaluateToInstanceType(instantiation.getType()));
-        throwIfSizeMismatched(sourceLoc, arguments.from(), parameters.from());
-        throwIfSizeMismatched(sourceLoc, arguments.to(), parameters.to());
+        requiresMatchedSize(sourceLoc, arguments.from(), parameters.from());
+        requiresMatchedSize(sourceLoc, arguments.to(), parameters.to());
         for (int i = 0; i < arguments.from().size(); ++i) {
             parent.alias(parameters.from().get(i), arguments.from().get(i));
         }
@@ -107,7 +105,7 @@ public final class Elaborator {
             var lhs = instantiate(scope, combineType.lhs());
             var rhs = instantiate(scope, combineType.rhs());
 
-            throwIfSizeMismatched(sourceLoc, lhs.to(), rhs.from());
+            requiresMatchedSize(sourceLoc, lhs.to(), rhs.from());
             for (int i = 0; i < lhs.to().size(); ++i) {
                 scope.alias(lhs.to().get(i), rhs.from().get(i));
             }
@@ -129,7 +127,7 @@ public final class Elaborator {
             if (info.containsModule(atomType.identifier())) {
                 var node = info.getModuleNode(atomType.identifier());
                 module = scope.instantiateModuleScope(atomType.identifier());
-                throwIfSizeMismatched(sourceLoc, node.getArguments(), atomType.parameters());
+                requiresMatchedSize(sourceLoc, node.getArguments(), atomType.parameters());
                 var iterator = node.getArguments().iterator();
                 for (var entity : atomType.parameters()) {
                     module.bind(iterator.next(), entity);
@@ -139,13 +137,6 @@ public final class Elaborator {
                 module = BuiltInModuleFactory.createBuiltInModule(scope, atomType);
             }
             return Port.of(module.getInputs(), module.getOutputs());
-        }
-    }
-
-    private static void throwIfSizeMismatched(SourceLoc sourceLoc, List<?> from, List<?> to) {
-        if (from.size() != to.size()) {
-            log.error("{}: Instantiation with mismatched component size: {} vs {}", sourceLoc, from.size(), to.size());
-            throw new CompileCancellationException();
         }
     }
 }

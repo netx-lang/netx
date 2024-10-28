@@ -11,11 +11,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 
+import static pascal.hardscript.compiler.elaborator.Types.*;
+
 public class BuiltInModuleFactory {
     private static final Logger log = LoggerFactory.getLogger(BuiltInModuleFactory.class);
-    private static final Map<String, BiFunction<Scope, Identifier, ModuleScope>> BUILTIN_FACTORY = Map.of(
+    private static final Map<String, BiFunction<Scope, AtomType, ModuleScope>> BUILTIN_FACTORY = Map.of(
             "TO", BuiltInModuleFactory::createTOModule,
             "OR", BuiltInModuleFactory::createORModule,
+            "STORE", BuiltInModuleFactory::createSTOREModule,
+            "SPLIT", BuiltInModuleFactory::createSPLITModule,
             "NOT", BuiltInModuleFactory::createNOTModule,
             "AND", BuiltInModuleFactory::createANDModule,
             "XOR", BuiltInModuleFactory::createXORModule,
@@ -31,59 +35,89 @@ public class BuiltInModuleFactory {
             log.error("{}: Unknown built-in module: {}", identifier.getSourceLoc(), identifier);
             throw new CompileCancellationException();
         }
-        return factory.apply(parent, identifier);
+        return factory.apply(parent, type);
     }
 
-    private static ModuleScope createNOTModule(Scope parent, Identifier id) {
-        var module = parent.instantiateModuleScope(id);
-        var input = Wire.of(Identifier.of("input"), module, 1);
-        var output = Wire.of(Identifier.of("output"), module, 1);
-        module.bind(input.getIdentifier(), input);
-        module.bind(output.getIdentifier(), output);
-        module.addInput(input);
-        module.addOutput(output);
+    private static ModuleScope createNOTModule(Scope parent, AtomType type) {
+        var module = parent.instantiateModuleScope(type.identifier());
+        module.addInput(newWire(module, "input", 1));
+        module.addOutput(newWire(module, "output", 1));
         return module;
     }
 
-    private static ModuleScope createTOModule(Scope parent, Identifier id) {
-        var module = parent.instantiateModuleScope(id);
-        var entity = Wire.of(Identifier.of("entity"), module, 1);
-        module.bind(entity.getIdentifier(), entity);
+    private static ModuleScope createTOModule(Scope parent, AtomType type) {
+        var module = parent.instantiateModuleScope(type.identifier());
+        var entity = newWire(module, "entity", 1);
         module.addInput(entity);
         module.addOutput(entity);
         return module;
     }
 
-    private static ModuleScope createANDModule(Scope parent, Identifier id) {
-        return makeDualInputGateModule(parent, id);
-    }
-
-    private static ModuleScope createORModule(Scope parent, Identifier id) {
-        return makeDualInputGateModule(parent, id);
-    }
-
-    private static ModuleScope createXORModule(Scope parent, Identifier id) {
-        return makeDualInputGateModule(parent, id);
-    }
-
-    private static ModuleScope createNANDModule(Scope parent, Identifier id) {
-        return makeDualInputGateModule(parent, id);
-    }
-
-    private static ModuleScope createNORModule(Scope parent, Identifier id) {
-        return makeDualInputGateModule(parent, id);
-    }
-
-    private static ModuleScope makeDualInputGateModule(Scope parent, Identifier id) {
-        var module = parent.instantiateModuleScope(id);
-        var input1 = Wire.of(Identifier.of("input1"), module, 1);
-        var input2 = Wire.of(Identifier.of("input2"), module, 1);
-        var output = Wire.of(Identifier.of("output"), module, 1);
-        module.bind(input1.getIdentifier(), input1);
-        module.bind(input2.getIdentifier(), input2);
-        module.bind(output.getIdentifier(), output);
-        module.addInput(input1, input2);
-        module.addOutput(output);
+    private static ModuleScope createSTOREModule(Scope parent, AtomType type) {
+        var sourceLoc = type.identifier().getSourceLoc();
+        requiresMatchedSize(sourceLoc, 1, type.parameters());
+        var register = requiresRegister(sourceLoc, type.parameters().getFirst());
+        var module = parent.instantiateModuleScope(type.identifier());
+        var input = newWire(module, "input", register.width());
+        module.addInput(input);
+        module.alias(input, register);
+        module.addOutput(register);
         return module;
+    }
+
+    private static ModuleScope createSPLITModule(Scope parent, AtomType type) {
+        var sourceLoc = type.identifier().getSourceLoc();
+        requiresMatchedSize(sourceLoc, 1, type.parameters());
+        int split = requiresIntegerValue(sourceLoc, type.parameters().getFirst()).toInt();
+
+        var module = parent.instantiateModuleScope(type.identifier());
+        var entity = newWire(module, "entity", 1);
+        module.addInput(entity);
+        for (int i = 0; i < split; ++i) {
+            module.addOutput(entity);
+        }
+        return module;
+    }
+
+    private static ModuleScope createANDModule(Scope parent, AtomType type) {
+        return makeDualInputGateModule(parent, type);
+    }
+
+    private static ModuleScope createORModule(Scope parent, AtomType type) {
+        return makeDualInputGateModule(parent, type);
+    }
+
+    private static ModuleScope createXORModule(Scope parent, AtomType type) {
+        return makeDualInputGateModule(parent, type);
+    }
+
+    private static ModuleScope createNANDModule(Scope parent, AtomType type) {
+        return makeDualInputGateModule(parent, type);
+    }
+
+    private static ModuleScope createNORModule(Scope parent, AtomType type) {
+        return makeDualInputGateModule(parent, type);
+    }
+
+    private static ModuleScope makeDualInputGateModule(Scope parent, AtomType type) {
+        int width;
+        if (type.parameters().isEmpty()) {
+            width = 1;
+        } else {
+            var sourceLoc = type.identifier().getSourceLoc();
+            requiresMatchedSize(sourceLoc, 1, type.parameters());
+            width = requiresIntegerValue(sourceLoc, type.parameters().getFirst()).toInt();
+        }
+
+        var module = parent.instantiateModuleScope(type.identifier());
+        module.addInput(newWire(module, "input1", width), newWire(module, "input2", width));
+        module.addOutput(newWire(module, "output", width));
+        return module;
+    }
+
+    private static Wire newWire(ModuleScope module, String name, int size) {
+        var wire = Wire.of(Identifier.of(name), module, size);
+        module.bind(wire.getIdentifier(), wire);
+        return wire;
     }
 }

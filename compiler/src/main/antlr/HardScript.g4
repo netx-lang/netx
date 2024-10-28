@@ -53,7 +53,6 @@ list
     : expression (',' expression)*               # CommonList
     | from=expression '..' to=expression         # RangeList
     | expression '|' qualifier (',' qualifier)*  # ListComprehension
-    | '*'                                        # WildcardList
     |                                            # EmptyList
     ;
 

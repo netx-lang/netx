@@ -7,22 +7,46 @@ import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
 import pascal.hardscript.compiler.model.components.Component;
+import pascal.hardscript.compiler.model.components.Register;
 import pascal.hardscript.compiler.model.connection.InstanceType;
 import pascal.hardscript.compiler.model.connection.Port;
 import pascal.hardscript.compiler.model.value.BooleanValue;
 import pascal.hardscript.compiler.model.value.IntegerValue;
 import pascal.hardscript.compiler.model.value.Value;
 
-import java.util.function.Predicate;
+import java.util.List;
 
 public final class Types {
     private static final Logger log = LoggerFactory.getLogger(Types.class);
+
+    public static void requiresMatchedSize(SourceLoc sourceLoc, List<?> from, List<?> to) {
+        if (from.size() != to.size()) {
+            log.error("{}: Instantiation with mismatched component size: {} vs {}", sourceLoc, from.size(), to.size());
+            throw new CompileCancellationException();
+        }
+    }
+
+    public static void requiresMatchedSize(SourceLoc sourceLoc, int expected, List<?> actual) {
+        if (expected != actual.size()) {
+            log.error("{}: Expected list of size {} but got {}", sourceLoc, expected, actual);
+            throw new CompileCancellationException();
+        }
+    }
 
     public static InstanceType requiresInstanceType(SourceLoc loc, Entity entity) {
         if (entity instanceof InstanceType instanceType) {
             return instanceType;
         } else {
             log.error("{}: Expected instance type but got {}", loc, entity);
+            throw new CompileCancellationException();
+        }
+    }
+
+    public static Register requiresRegister(SourceLoc loc, Entity entity) {
+        if (entity instanceof Register register) {
+            return register;
+        } else {
+            log.error("{}: Expected component factory but got {}", loc, entity);
             throw new CompileCancellationException();
         }
     }
@@ -81,12 +105,4 @@ public final class Types {
         }
     }
 
-    public static ListEntity requiresValueList(SourceLoc loc, Entity entity) {
-        var list = requiresList(loc, entity);
-        if (list.entities().stream().anyMatch(Predicate.not(Value.class::isInstance))) {
-            log.error("{}: Expected list of values but got {}", loc, list);
-            throw new CompileCancellationException();
-        }
-        return list;
-    }
 }

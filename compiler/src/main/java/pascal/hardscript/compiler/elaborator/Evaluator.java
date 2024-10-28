@@ -14,7 +14,6 @@ import pascal.hardscript.compiler.ast.expr.qualifier.Qualifier;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
-import pascal.hardscript.compiler.model.Wildcard;
 import pascal.hardscript.compiler.model.components.*;
 import pascal.hardscript.compiler.model.components.selector.BitSelector;
 import pascal.hardscript.compiler.model.components.selector.PartSelector;
@@ -23,8 +22,10 @@ import pascal.hardscript.compiler.model.connection.*;
 import pascal.hardscript.compiler.model.scope.Binding;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
-import pascal.hardscript.compiler.model.value.*;
-import pascal.hardscript.util.exception.ShallNotReachHereError;
+import pascal.hardscript.compiler.model.value.BitVectorValue;
+import pascal.hardscript.compiler.model.value.BooleanValue;
+import pascal.hardscript.compiler.model.value.Int32Value;
+import pascal.hardscript.compiler.model.value.IntegerValue;
 import pascal.hardscript.util.exception.TodoException;
 
 import java.util.LinkedList;
@@ -57,20 +58,12 @@ public final class Evaluator {
         return requiresList(expr.getSourceLoc(), evaluate(expr));
     }
 
-    public Component evaluateToComponent(ExprNode expr) {
-        throw new TodoException();
-    }
-
     public IntegerValue evaluateToIntegerValue(ExprNode expr) {
         return requiresIntegerValue(expr.getSourceLoc(), evaluate(expr));
     }
 
     public BooleanValue evaluateToBoolean(ExprNode expr) {
         return requiresBooleanValue(expr.getSourceLoc(), evaluate(expr));
-    }
-
-    public Value evaluateToValue(ExprNode expr) {
-        return requiresValue(expr.getSourceLoc(), evaluate(expr));
     }
 
     public Component.Factory<?> evaluateToComponentFactory(ExprNode expr) {
@@ -118,15 +111,10 @@ public final class Evaluator {
     }
 
     private Entity evaluateListExpr(ListExpr expr) {
-        if (expr instanceof WildcardList) {
-            return Wildcard.getInstance();
-        }
-
         var list = switch (expr) {
             case CommonList sub -> evaluateCommonList(sub);
             case RangeList sub -> evaluateRangeList(sub);
             case ListComprehension sub -> evaluateListComprehension(sub);
-            default -> throw new ShallNotReachHereError();
         };
         if (!list.entities().isEmpty()) {
             var type = list.entities().getFirst().getClass();
