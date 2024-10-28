@@ -7,11 +7,11 @@ import java.util.Objects;
 
 public final class InstantiationNode extends ElementNode {
     private ExprNode type;
-    private ExprNode ports;
+    private ExprNode port;
 
-    private InstantiationNode(ExprNode type, ExprNode ports) {
+    private InstantiationNode(ExprNode type, ExprNode port) {
         this.type = type;
-        this.ports = ports;
+        this.port = port;
     }
 
     public static InstantiationNode of(ExprNode type, ExprNode connection) {
@@ -22,7 +22,7 @@ public final class InstantiationNode extends ElementNode {
     public void walk(ASTListener listener) {
         listener.enter(this);
         type.walk(listener);
-        ports.walk(listener);
+        port.walk(listener);
         listener.exit(this);
     }
 
@@ -34,12 +34,12 @@ public final class InstantiationNode extends ElementNode {
         this.type = type;
     }
 
-    public ExprNode getPorts() {
-        return ports;
+    public ExprNode getPort() {
+        return port;
     }
 
-    public void setPorts(ExprNode ports) {
-        this.ports = ports;
+    public void setPort(ExprNode port) {
+        this.port = port;
     }
 
     @Override
@@ -48,18 +48,18 @@ public final class InstantiationNode extends ElementNode {
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (InstantiationNode) obj;
         return Objects.equals(this.type, that.type) &&
-                Objects.equals(this.ports, that.ports);
+                Objects.equals(this.port, that.port);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, ports);
+        return Objects.hash(type, port);
     }
 
     @Override
     public String toString() {
         return "InstantiationNode[" +
                 "type=" + type + ", " +
-                "connection=" + ports + ']';
+                "connection=" + port + ']';
     }
 }

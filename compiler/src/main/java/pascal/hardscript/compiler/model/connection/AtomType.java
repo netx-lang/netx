@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.model.connection.type;
+package pascal.hardscript.compiler.model.connection;
 
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.model.Entity;

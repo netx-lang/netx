@@ -126,7 +126,6 @@ public final class HSParser {
         BinaryExpr.Operator op = switch (ctx.op.getText()) {
             case "<>" -> BinaryExpr.Operator.COMBINE;
             case "->" -> BinaryExpr.Operator.MAPSTO;
-            case "->*" -> BinaryExpr.Operator.MAPSTO_CLOSURE;
             case "**" -> BinaryExpr.Operator.POW;
             case "+" -> BinaryExpr.Operator.ADD;
             case "-" -> BinaryExpr.Operator.SUB;

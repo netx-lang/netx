@@ -24,7 +24,7 @@ expression
     | '[' list ']'                                                  # ListExpr
     | op=('+' | '-' | '~' | '!') expression                         # UnaryExpr
     | lhs=expression op='<>' rhs=expression                         # BinaryExpr
-    | lhs=expression op=('->' | '->*') rhs=expression               # BinaryExpr
+    | lhs=expression op='->' rhs=expression                         # BinaryExpr
     | lhs=expression op='**' rhs=expression                         # BinaryExpr
     | lhs=expression op=('*' | '/' | '%') rhs=expression            # BinaryExpr
     | lhs=expression op=('+' | '-') rhs=expression                  # BinaryExpr

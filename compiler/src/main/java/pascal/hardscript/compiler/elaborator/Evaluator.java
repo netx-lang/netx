@@ -19,11 +19,7 @@ import pascal.hardscript.compiler.model.components.*;
 import pascal.hardscript.compiler.model.components.selector.BitSelector;
 import pascal.hardscript.compiler.model.components.selector.PartSelector;
 import pascal.hardscript.compiler.model.components.selector.Selector;
-import pascal.hardscript.compiler.model.connection.port.*;
-import pascal.hardscript.compiler.model.connection.type.AtomType;
-import pascal.hardscript.compiler.model.connection.type.CombineType;
-import pascal.hardscript.compiler.model.connection.type.InstanceType;
-import pascal.hardscript.compiler.model.connection.type.ParallelType;
+import pascal.hardscript.compiler.model.connection.*;
 import pascal.hardscript.compiler.model.scope.Binding;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
@@ -228,8 +224,7 @@ public final class Evaluator {
         var rhs = evaluate(expr.getRhs());
         return switch (expr.getOp()) {
             case COMBINE -> evaluateCombineType(sourceLoc, lhs, rhs);
-            case MAPSTO -> evaluateCommonPort(sourceLoc, lhs, rhs);
-            case MAPSTO_CLOSURE -> evaluateClosurePort(sourceLoc, lhs, rhs);
+            case MAPSTO -> evaluatePort(sourceLoc, lhs, rhs);
             default -> throw new TodoException(); // TODO:
         };
     }
@@ -256,34 +251,20 @@ public final class Evaluator {
         return ParallelType.from(list.entities().stream().map(InstanceType.class::cast).toList());
     }
 
-    private CommonPort evaluateCommonPort(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
-        if (lhs instanceof ListEntity lhsList) {
-            lhs = makeAtomPortFromList(sourceLoc, lhsList);
-        }
-        if (rhs instanceof ListEntity rhsList) {
-            rhs = makeAtomPortFromList(sourceLoc, rhsList);
-        }
-        if (!(lhs instanceof CommonPort lhsPort && rhs instanceof CommonPort rhsPort)) {
-            log.error("{}: Expected common port but got {} and {}", sourceLoc, lhs, rhs);
+    private Port evaluatePort(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
+        if (!(lhs instanceof ListEntity lhsList && rhs instanceof ListEntity rhsList)) {
+            log.error("{}: Expected list of components but got {} and {}", sourceLoc, lhs, rhs);
             throw new CompileCancellationException();
         }
-        return MapstoPort.of(lhsPort, rhsPort);
+        return Port.of(makeAtomPortFromList(sourceLoc, lhsList), makeAtomPortFromList(sourceLoc, rhsList));
     }
 
-    private AtomPort makeAtomPortFromList(SourceLoc sourceLoc, ListEntity list) {
+    private List<Component> makeAtomPortFromList(SourceLoc sourceLoc, ListEntity list) {
         if (list.entities().stream().allMatch(Predicate.not(Component.class::isInstance))) {
             log.error("{}: Expected list of components but got {}", sourceLoc, list);
             throw new CompileCancellationException();
         }
-        return AtomPort.from(list.entities().stream().map(Component.class::cast).toList());
-    }
-
-    private ClosurePort evaluateClosurePort(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
-        if (!(lhs instanceof CommonPort lhsPort && rhs instanceof CommonPort rhsPort)) {
-            log.error("{}: Unexpected closure from {} to {}", sourceLoc, lhs, rhs);
-            throw new CompileCancellationException();
-        }
-        return ClosurePort.of(lhsPort, rhsPort);
+        return list.entities().stream().map(Component.class::cast).toList();
     }
 
     private Entity evaluateParamSymbolExpr(ParamSymbolExpr expr) {

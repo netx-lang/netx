@@ -2,6 +2,7 @@ module Divide_by_3 : [clk] -> [clk_3] {
     component clk, clk_3 : clock()
     component a, b       : reg(bit(1), trigger_on(pos, clk))
     component c          : reg(bit(1), trigger_on(neg, clk))
-    [NOT, NOT] <> AND <> TO <> TO : [a, b] -> [a] -> [b] -> [c]
-    OR : [b, c] -> [clk_3]
+    [NOT, NOT] <> AND <>
+    STORE(a) <> STORE(b) <> SPLIT(2) <>
+    [STORE(c), TO] <> OR : [a, b] -> [clk_3]
 }

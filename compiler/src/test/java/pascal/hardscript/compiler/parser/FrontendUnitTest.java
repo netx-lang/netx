@@ -25,7 +25,7 @@ class FrontendUnitTest {
 
     @Test
     void loadPathWithValidPath() throws IOException {
-        Path path = Path.of("src/test/resources/divide_by_3.hard");
+        Path path = Path.of("src/test/resources/adder.hard");
         Frontend frontend = Frontend.loadPath(path);
         assertNotNull(frontend);
     }
@@ -38,7 +38,7 @@ class FrontendUnitTest {
 
     @Test
     void parseValidInput() throws IOException {
-        String content = new String(Files.readAllBytes(Path.of("src/test/resources/divide_by_3.hard")));
+        String content = new String(Files.readAllBytes(Path.of("src/test/resources/adder.hard")));
 
         CharStream charStream = CharStreams.fromString(content);
         Frontend frontend = Frontend.load(charStream);
@@ -49,7 +49,7 @@ class FrontendUnitTest {
     @Disabled
     @Test
     void elaborateValidInput() throws IOException {
-        String content = new String(Files.readAllBytes(Path.of("src/test/resources/divide_by_3.hard")));
+        String content = new String(Files.readAllBytes(Path.of("src/test/resources/adder.hard")));
 
         CharStream charStream = CharStreams.fromString(content);
         Frontend frontend = Frontend.load(charStream);

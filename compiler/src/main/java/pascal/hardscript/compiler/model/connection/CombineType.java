@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.model.connection.type;
+package pascal.hardscript.compiler.model.connection;
 
 public record CombineType(InstanceType lhs, InstanceType rhs) implements InstanceType {
 

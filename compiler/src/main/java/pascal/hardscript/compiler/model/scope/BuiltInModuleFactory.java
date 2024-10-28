@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.components.Wire;
-import pascal.hardscript.compiler.model.connection.type.AtomType;
+import pascal.hardscript.compiler.model.connection.AtomType;
 
 import java.util.Map;
 import java.util.Set;
