@@ -40,6 +40,10 @@ public final class BitVector {
         }
     }
 
+    public static BitVector fromInt(int value) {
+        return new BitVector(Integer.SIZE, BigInteger.valueOf(value).toByteArray());
+    }
+
     public void set(int index) {
         data[index >> 3] |= (byte) (1 << (index & 7));
     }
@@ -60,8 +64,14 @@ public final class BitVector {
         Arrays.fill(data, (byte) 0);
     }
 
-    public void copy(BitVector other) {
-        System.arraycopy(other.data, 0, data, 0, data.length);
+    public BitVector copyOf() {
+        var result = new BitVector(size);
+        System.arraycopy(data, 0, result.data, 0, data.length);
+        return result;
+    }
+
+    public int toInt() {
+        return new BigInteger(data).intValue();
     }
 
     public BitVector negative() {
@@ -83,26 +93,19 @@ public final class BitVector {
         return result;
     }
 
-    public int toInt() {
-        return new BigInteger(data).intValue();
+    public BitVector add(BitVector other) {
+        BitVector result = new BitVector(size);
+        int carry = 0;
+        for (int i = 0; i < data.length; i++) {
+            int sum = (data[i] & 0xff) + (other.data[i] & 0xff) + carry;
+            result.data[i] = (byte) sum;
+            carry = sum >> 8;
+        }
+        return result;
     }
 
-    public void or(BitVector other) {
-        for (int i = 0; i < data.length; i++) {
-            data[i] |= other.data[i];
-        }
-    }
-
-    public void and(BitVector other) {
-        for (int i = 0; i < data.length; i++) {
-            data[i] &= other.data[i];
-        }
-    }
-
-    public void xor(BitVector other) {
-        for (int i = 0; i < data.length; i++) {
-            data[i] ^= other.data[i];
-        }
+    public BitVector sub(BitVector other) {
+        return add(other.negative());
     }
 
     public boolean equals(BitVector other) {

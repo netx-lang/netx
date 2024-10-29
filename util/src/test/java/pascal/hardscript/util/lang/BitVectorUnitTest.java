@@ -69,38 +69,6 @@ class BitVectorUnitTest {
     }
 
     @Test
-    void copy() {
-        BitVector bv1 = BitVector.parse("01101011", 8, 2);
-        BitVector bv2 = BitVector.parse("11010101", 8, 2);
-        bv1.copy(bv2);
-        assertEquals("11010101", bv1.toString());
-    }
-
-    @Test
-    void or() {
-        BitVector bv1 = BitVector.parse("01101011", 8, 2);
-        BitVector bv2 = BitVector.parse("11010101", 8, 2);
-        bv1.or(bv2);
-        assertEquals("11111111", bv1.toString());
-    }
-
-    @Test
-    void and() {
-        BitVector bv1 = BitVector.parse("01101011", 8, 2);
-        BitVector bv2 = BitVector.parse("11010101", 8, 2);
-        bv1.and(bv2);
-        assertEquals("01000001", bv1.toString());
-    }
-
-    @Test
-    void xor() {
-        BitVector bv1 = BitVector.parse("01101011", 8, 2);
-        BitVector bv2 = BitVector.parse("11010101", 8, 2);
-        bv1.xor(bv2);
-        assertEquals("10111110", bv1.toString());
-    }
-
-    @Test
     void testEquals() {
         BitVector bv1 = BitVector.parse("01101011", 8, 2);
         BitVector bv2 = BitVector.parse("01101011", 8, 2);

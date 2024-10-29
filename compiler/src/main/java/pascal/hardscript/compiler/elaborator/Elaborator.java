@@ -7,6 +7,7 @@ import pascal.hardscript.compiler.ast.module.*;
 import pascal.hardscript.compiler.model.components.Component;
 import pascal.hardscript.compiler.model.connection.*;
 import pascal.hardscript.compiler.model.scope.*;
+import pascal.hardscript.util.exception.ShallNotReachHereError;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -44,6 +45,12 @@ public final class Elaborator {
 
         public void build(ModuleNode node) {
             dispatchElementBuilder(node.getElements());
+            var portType = evaluator.evaluateToPort(node.getType());
+            if (!(scope instanceof ModuleScope module)) {
+                throw new ShallNotReachHereError();
+            }
+            portType.from().forEach(module::addInput);
+            portType.to().forEach(module::addOutput);
         }
 
         public void build(LoopNode node) {

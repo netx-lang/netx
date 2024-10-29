@@ -201,7 +201,7 @@ public final class Evaluator {
     private Entity evaluateUnaryExpr(UnaryExpr expr) {
         return switch (expr.getOp()) {
             case ADD -> evaluateToIntegerValue(expr.getOperand());
-            case SUB -> evaluateToIntegerValue(expr.getOperand()).negative();
+            case SUB -> evaluateToIntegerValue(expr.getOperand()).neg();
             case NOT -> evaluateToBoolean(expr.getOperand()).not();
             case BITWISE_NOT -> evaluateToIntegerValue(expr.getOperand()).bitwiseNot();
         };
@@ -209,12 +209,12 @@ public final class Evaluator {
 
     private Entity evaluateBinaryExpr(BinaryExpr expr) {
         var sourceLoc = expr.getSourceLoc();
-        var lhs = evaluate(expr.getLhs());
-        var rhs = evaluate(expr.getRhs());
         return switch (expr.getOp()) {
-            case COMBINE -> evaluateCombineType(sourceLoc, lhs, rhs);
-            case MAPSTO -> evaluatePort(sourceLoc, lhs, rhs);
-            default -> throw new TodoException(); // TODO:
+            case COMBINE -> evaluateCombineType(sourceLoc, evaluate(expr.getLhs()), evaluate(expr.getRhs()));
+            case MAPSTO -> evaluatePort(sourceLoc, evaluate(expr.getLhs()), evaluate(expr.getRhs()));
+            case ADD -> evaluateToIntegerValue(expr.getLhs()).add(evaluateToIntegerValue(expr.getRhs()));
+            case SUB -> evaluateToIntegerValue(expr.getLhs()).sub(evaluateToIntegerValue(expr.getRhs()));
+            default -> throw new TodoException("Support more binary expressions"); // TODO:
         };
     }
 

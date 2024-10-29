@@ -1,5 +1,7 @@
 package pascal.hardscript.compiler.model.value;
 
+import pascal.hardscript.util.lang.BitVector;
+
 public record Int32Value(int value) implements Value, IntegerValue {
     public static Int32Value of(int value) {
         return new Int32Value(value);
@@ -11,7 +13,22 @@ public record Int32Value(int value) implements Value, IntegerValue {
     }
 
     @Override
-    public Int32Value negative() {
+    public BitVector toBitVector() {
+        return BitVector.fromInt(value);
+    }
+
+    @Override
+    public Int32Value add(IntegerValue other) {
+        return Int32Value.of(value + other.toInt());
+    }
+
+    @Override
+    public Int32Value sub(IntegerValue other) {
+        return Int32Value.of(value - other.toInt());
+    }
+
+    @Override
+    public Int32Value neg() {
         return Int32Value.of(-value);
     }
 

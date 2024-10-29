@@ -24,16 +24,12 @@ public final class ModuleScope extends Scope {
         return Collections.unmodifiableList(outputs);
     }
 
-    public void addInput(Component input) {
-        inputs.add(input);
+    public void addInput(Component... inputs) {
+        Collections.addAll(this.inputs, inputs);
     }
 
-    public void addInput(Component... input) {
-        Collections.addAll(inputs, input);
-    }
-
-    public void addOutput(Component output) {
-        outputs.add(output);
+    public void addOutput(Component... outputs) {
+        Collections.addAll(this.outputs, outputs);
     }
 
     ModuleScope(Scope parent, Identifier identifier) {

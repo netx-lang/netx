@@ -41,6 +41,10 @@ public abstract class Scope {
         return nameAllocator;
     }
 
+    public List<Scope> getChildren() {
+        return children;
+    }
+
     public void alias(Component a, Component b) {
         aliases.add(new Pair<>(a, b));
     }
