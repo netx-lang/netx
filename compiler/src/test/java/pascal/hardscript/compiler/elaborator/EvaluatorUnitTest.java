@@ -3,12 +3,12 @@ package pascal.hardscript.compiler.elaborator;
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.ast.Identifier;
+import pascal.hardscript.compiler.io.Frontend;
 import pascal.hardscript.compiler.model.components.Component;
 import pascal.hardscript.compiler.model.components.ComponentAccess;
 import pascal.hardscript.compiler.model.components.selector.BitSelector;
 import pascal.hardscript.compiler.model.scope.ModuleScope;
 import pascal.hardscript.compiler.model.value.Int32Value;
-import pascal.hardscript.compiler.parser.Frontend;
 
 import java.util.ArrayList;
 import java.util.Collections;

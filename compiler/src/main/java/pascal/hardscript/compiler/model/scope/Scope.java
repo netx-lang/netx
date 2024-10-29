@@ -7,10 +7,7 @@ import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.components.Component;
 import pascal.hardscript.util.type.Pair;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public abstract class Scope {
     private final Scope parent;
@@ -47,6 +44,10 @@ public abstract class Scope {
 
     public void alias(Component a, Component b) {
         aliases.add(new Pair<>(a, b));
+    }
+
+    public Set<Pair<Component, Component>> getAliases() {
+        return Collections.unmodifiableSet(aliases);
     }
 
     public void bind(Identifier identifier, Entity entity) {

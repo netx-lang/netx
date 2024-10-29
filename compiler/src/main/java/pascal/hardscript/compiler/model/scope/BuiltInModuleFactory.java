@@ -116,7 +116,7 @@ public class BuiltInModuleFactory {
     }
 
     private static Wire newWire(ModuleScope module, String name, int size) {
-        var wire = Wire.of(Identifier.of(name), module, size);
+        var wire = Wire.of(Identifier.of("$" + name), module, size);
         module.bind(wire.getIdentifier(), wire);
         return wire;
     }

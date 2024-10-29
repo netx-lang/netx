@@ -31,9 +31,6 @@ dependencies {
     testRuntimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
     testRuntimeOnly("org.apache.logging.log4j:log4j-api:2.20.0")
     testRuntimeOnly("org.apache.logging.log4j:log4j-core:2.20.0")
-
-    implementation("org.jgrapht:jgrapht-core:1.5.2")
-    implementation("org.jgrapht:jgrapht-io:1.5.2")
 }
 
 tasks.test {

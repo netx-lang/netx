@@ -2,7 +2,7 @@ package pascal.hardscript.compiler.analysis;
 
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.parser.Frontend;
+import pascal.hardscript.compiler.io.Frontend;
 import pascal.hardscript.util.TestUtils;
 
 import java.io.IOException;

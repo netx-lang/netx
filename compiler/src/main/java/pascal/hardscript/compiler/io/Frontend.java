@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.parser;
+package pascal.hardscript.compiler.io;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;

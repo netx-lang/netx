@@ -12,4 +12,12 @@ public interface Component extends Entity {
     interface Factory<T extends Component> extends Entity {
         T create(Identifier id);
     }
+
+    default boolean isBuiltin() {
+        return getIdentifier().string().startsWith("$");
+    }
+
+    default boolean isUserDefined() {
+        return !isBuiltin();
+    }
 }
