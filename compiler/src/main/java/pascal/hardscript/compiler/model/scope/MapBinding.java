@@ -5,6 +5,7 @@ import pascal.hardscript.compiler.model.Entity;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -20,6 +21,10 @@ public final class MapBinding implements Binding {
 
     public void bind(Identifier identifier, Entity entity) {
         bindings.put(identifier, entity);
+    }
+
+    public Collection<Entity> getEntities() {
+        return bindings.values();
     }
 
     @Override

@@ -7,6 +7,7 @@ import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.util.collection.UnionFind;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -46,8 +47,13 @@ public class AliasAnalysis extends ModelAnalysis<AliasAnalysis.Result> {
             this.representatives = representatives;
         }
 
+        @Nullable
+        public Component sourceRepOf(Component component) {
+            return representatives.get(aliases.find(component));
+        }
+
         @Nonnull
-        public Component representativeOf(Component component) {
+        public Component repOf(Component component) {
             var root = aliases.find(component);
             return Objects.requireNonNullElse(representatives.get(root), root);
         }

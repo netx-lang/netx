@@ -8,8 +8,9 @@ import pascal.hardscript.compiler.model.components.Component;
 import pascal.hardscript.util.type.Pair;
 
 import java.util.*;
+import java.util.function.Consumer;
 
-public abstract class Scope {
+public abstract sealed class Scope permits BlockScope, DesignScope, ModuleScope {
     private final Scope parent;
     private final MapBinding binding = new MapBinding();
     private final List<Scope> children = new ArrayList<>();
@@ -28,6 +29,10 @@ public abstract class Scope {
 
     public MapBinding getBinding() {
         return binding;
+    }
+
+    public Collection<Entity> getEntities() {
+        return binding.getEntities();
     }
 
     public Evaluator getEvaluator() {
@@ -64,5 +69,15 @@ public abstract class Scope {
         var child = new BlockScope(this);
         children.add(child);
         return child;
+    }
+
+    public void forEachScope(Consumer<Scope> consumer) {
+        Stack<Scope> stack = new Stack<>();
+        stack.push(this);
+        while (!stack.isEmpty()) {
+            Scope scope = stack.pop();
+            consumer.accept(scope);
+            stack.addAll(scope.getChildren());
+        }
     }
 }

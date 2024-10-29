@@ -4,7 +4,7 @@ import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.scope.Scope;
 
-public interface Component extends Entity {
+public sealed interface Component extends Entity permits Clock, ComponentAccess, Register, Wire {
     Identifier getIdentifier();
 
     Scope getParent();
@@ -18,6 +18,6 @@ public interface Component extends Entity {
     }
 
     default boolean isUserDefined() {
-        return !isBuiltin();
+        return !isBuiltin() && !(this instanceof ComponentAccess);
     }
 }

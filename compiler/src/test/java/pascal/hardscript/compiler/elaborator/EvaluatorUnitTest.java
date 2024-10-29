@@ -7,6 +7,7 @@ import pascal.hardscript.compiler.io.Frontend;
 import pascal.hardscript.compiler.model.components.Component;
 import pascal.hardscript.compiler.model.components.ComponentAccess;
 import pascal.hardscript.compiler.model.components.selector.BitSelector;
+import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.ModuleScope;
 import pascal.hardscript.compiler.model.value.Int32Value;
 
@@ -18,9 +19,13 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class EvaluatorUnitTest {
+
+    private static DesignScope loadDesign(String code) {
+        return Frontend.load(CharStreams.fromString(code)).elaborate();
+    }
+
     private static ModuleScope loadSingleModule(String code) {
-        var design = Frontend.load(CharStreams.fromString(code)).elaborate();
-        return (ModuleScope) design.getChildren().getFirst();
+        return (ModuleScope) loadDesign(code).getChildren().getFirst();
     }
 
     @Test
