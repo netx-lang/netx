@@ -31,6 +31,7 @@ import pascal.hardscript.util.exception.TodoException;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BinaryOperator;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
@@ -64,7 +65,7 @@ public final class Evaluator {
     }
 
     public BooleanValue evaluateToBoolean(ExprNode expr) {
-        return requiresBooleanValue(expr.getSourceLoc(), evaluate(expr));
+        return castToBooleanValue(expr.getSourceLoc(), evaluate(expr));
     }
 
     public Component.Factory<?> evaluateToComponentFactory(ExprNode expr) {
@@ -212,10 +213,17 @@ public final class Evaluator {
         return switch (expr.getOp()) {
             case COMBINE -> evaluateCombineType(sourceLoc, evaluate(expr.getLhs()), evaluate(expr.getRhs()));
             case MAPSTO -> evaluatePort(sourceLoc, evaluate(expr.getLhs()), evaluate(expr.getRhs()));
-            case ADD -> evaluateToIntegerValue(expr.getLhs()).add(evaluateToIntegerValue(expr.getRhs()));
-            case SUB -> evaluateToIntegerValue(expr.getLhs()).sub(evaluateToIntegerValue(expr.getRhs()));
+            case ADD -> evaluateBinaryIntExpr(expr, IntegerValue::add);
+            case SUB -> evaluateBinaryIntExpr(expr, IntegerValue::sub);
+            case POW -> evaluateBinaryIntExpr(expr, IntegerValue::pow);
+            case AND -> evaluateBinaryIntExpr(expr, IntegerValue::and);
+            case ARITH_SHL, LOGIC_SHL -> evaluateBinaryIntExpr(expr, IntegerValue::shl);
             default -> throw new TodoException("Support more binary expressions"); // TODO:
         };
+    }
+
+    private IntegerValue evaluateBinaryIntExpr(BinaryExpr expr, BinaryOperator<IntegerValue> op) {
+        return op.apply(evaluateToIntegerValue(expr.getLhs()), evaluateToIntegerValue(expr.getRhs()));
     }
 
     private Entity evaluateCombineType(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
@@ -249,7 +257,8 @@ public final class Evaluator {
     }
 
     private List<Component> makeAtomPortFromList(SourceLoc sourceLoc, ListEntity list) {
-        if (list.entities().stream().allMatch(Predicate.not(Component.class::isInstance))) {
+        if (!list.entities().isEmpty()
+                && list.entities().stream().allMatch(Predicate.not(Component.class::isInstance))) {
             log.error("{}: Expected list of components but got {}", sourceLoc, list);
             throw new CompileCancellationException();
         }

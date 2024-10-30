@@ -28,6 +28,21 @@ public record Int32Value(int value) implements Value, IntegerValue {
     }
 
     @Override
+    public IntegerValue pow(IntegerValue other) {
+        return Int32Value.of((int) Math.pow(value, other.toInt()));
+    }
+
+    @Override
+    public IntegerValue and(IntegerValue other) {
+        return Int32Value.of(value & other.toInt());
+    }
+
+    @Override
+    public IntegerValue shl(IntegerValue other) {
+        return Int32Value.of(value << other.toInt());
+    }
+
+    @Override
     public Int32Value neg() {
         return Int32Value.of(-value);
     }

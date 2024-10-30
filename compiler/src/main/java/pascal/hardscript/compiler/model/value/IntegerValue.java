@@ -12,6 +12,12 @@ public interface IntegerValue extends Value {
 
     IntegerValue sub(IntegerValue other);
 
+    IntegerValue pow(IntegerValue other);
+
+    IntegerValue and(IntegerValue other);
+
+    IntegerValue shl(IntegerValue other);
+
     IntegerValue neg();
 
     IntegerValue bitwiseNot();

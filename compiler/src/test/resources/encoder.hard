@@ -1,0 +1,17 @@
+module top : [] -> [] {
+    component input : wire(bit(8))
+    component output : wire(bit(3))
+    encoder(3) : [input] -> [output]
+}
+
+module encoder(width) : [code] -> [output] {
+    component code : wire(bit(2**width))
+    component output : wire(bit(width))
+
+    for (i <- [0..width]) {
+        OR(width + 1) :
+            [input[j] | j <- [0..2**width],
+                        when j & (1 << i)
+            ] -> [output[i]]
+    }
+}

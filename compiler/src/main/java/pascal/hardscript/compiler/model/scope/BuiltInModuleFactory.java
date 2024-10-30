@@ -100,18 +100,20 @@ public class BuiltInModuleFactory {
     }
 
     private static ModuleScope makeDualInputGateModule(Scope parent, AtomType type) {
-        int width;
+        int ports;
         if (type.parameters().isEmpty()) {
-            width = 1;
+            ports = 2;
         } else {
             var sourceLoc = type.identifier().getSourceLoc();
             requiresMatchedSize(sourceLoc, 1, type.parameters());
-            width = requiresIntegerValue(sourceLoc, type.parameters().getFirst()).toInt();
+            ports = requiresIntegerValue(sourceLoc, type.parameters().getFirst()).toInt();
         }
 
         var module = parent.instantiateModuleScope(parent.getNameAllocator().allocateFor(type));
-        module.addInput(newWire(module, "input1", width), newWire(module, "input2", width));
-        module.addOutput(newWire(module, "output", width));
+        for (int i = 1; i <= ports; i++) {
+            module.addInput(newWire(module, "input" + i, 1));
+        }
+        module.addOutput(newWire(module, "output", 1));
         return module;
     }
 

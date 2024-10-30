@@ -36,6 +36,21 @@ public record BitVectorValue(BitVector value) implements Value, IntegerValue {
     }
 
     @Override
+    public IntegerValue and(IntegerValue other) {
+        return BitVectorValue.of(value.and(other.toBitVector()));
+    }
+
+    @Override
+    public IntegerValue pow(IntegerValue other) {
+        return BitVectorValue.of(value.pow(other.toBitVector()));
+    }
+
+    @Override
+    public IntegerValue shl(IntegerValue other) {
+        return BitVectorValue.of(value.shl(other.toInt()));
+    }
+
+    @Override
     public BitVectorValue neg() {
         return BitVectorValue.of(value.negative());
     }

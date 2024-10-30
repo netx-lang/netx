@@ -87,6 +87,17 @@ public final class Types {
         }
     }
 
+    public static BooleanValue castToBooleanValue(SourceLoc loc, Entity entity) {
+        return switch (entity) {
+            case BooleanValue booleanValue -> booleanValue;
+            case IntegerValue integerValue -> BooleanValue.of(integerValue.toInt() != 0);
+            default -> {
+                log.error("{}: Cannot cast {} to boolean", loc, entity);
+                throw new CompileCancellationException();
+            }
+        };
+    }
+
     public static BooleanValue requiresBooleanValue(SourceLoc loc, Entity entity) {
         if (entity instanceof BooleanValue booleanValue) {
             return booleanValue;

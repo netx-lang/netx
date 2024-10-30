@@ -107,7 +107,9 @@ public final class HSParser {
     }
 
     static GeneratorQualifier parseGeneratorQualifier(IteratorContext ctx) {
-        return GeneratorQualifier.of(parseSymbol(ctx.symbol()), parseExpr(ctx.expression()));
+        var result = GeneratorQualifier.of(parseSymbol(ctx.symbol()), parseExpr(ctx.expression()));
+        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
+        return result;
     }
 
     static ExprNode parseUnaryExpr(UnaryExprContext ctx) {

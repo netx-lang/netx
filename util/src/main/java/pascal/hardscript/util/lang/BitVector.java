@@ -44,6 +44,10 @@ public final class BitVector {
         return new BitVector(Integer.SIZE, BigInteger.valueOf(value).toByteArray());
     }
 
+    public static BitVector fromBigInteger(int size, BigInteger value) {
+        return new BitVector(size, value.toByteArray());
+    }
+
     public void set(int index) {
         data[index >> 3] |= (byte) (1 << (index & 7));
     }
@@ -70,8 +74,12 @@ public final class BitVector {
         return result;
     }
 
+    public BigInteger toBigInteger() {
+        return new BigInteger(data);
+    }
+
     public int toInt() {
-        return new BigInteger(data).intValue();
+        return toBigInteger().intValue();
     }
 
     public BitVector negative() {
@@ -106,6 +114,30 @@ public final class BitVector {
 
     public BitVector sub(BitVector other) {
         return add(other.negative());
+    }
+
+    public BitVector pow(BitVector other) {
+        return fromBigInteger(size, toBigInteger().pow(other.toInt()));
+    }
+
+    public BitVector and(BitVector other) {
+        BitVector result = new BitVector(size);
+        for (int i = 0; i < data.length; i++) {
+            result.data[i] = (byte) (data[i] & other.data[i]);
+        }
+        return result;
+    }
+
+    public BitVector shl(int offset) {
+        BitVector result = new BitVector(size);
+        int byteOffset = offset >> 3, bitOffset = offset & 7;
+        for (int i = 0; i < data.length - byteOffset; i++) {
+            result.data[i + byteOffset] |= (byte) (data[i] << bitOffset);
+            if (bitOffset > 0 && i + byteOffset + 1 < result.data.length) {
+                result.data[i + byteOffset + 1] |= (byte) (data[i] >> (8 - bitOffset));
+            }
+        }
+        return result;
     }
 
     public boolean equals(BitVector other) {
