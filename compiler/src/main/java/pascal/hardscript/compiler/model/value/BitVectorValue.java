@@ -41,6 +41,16 @@ public record BitVectorValue(BitVector value) implements Value, IntegerValue {
     }
 
     @Override
+    public IntegerValue ashr(IntegerValue other) {
+        return BitVectorValue.of(value.ahsr(other.toInt()));
+    }
+
+    @Override
+    public IntegerValue lshr(IntegerValue other) {
+        return BitVectorValue.of(value.lshr(other.toInt()));
+    }
+
+    @Override
     public IntegerValue pow(IntegerValue other) {
         return BitVectorValue.of(value.pow(other.toBitVector()));
     }
@@ -57,6 +67,6 @@ public record BitVectorValue(BitVector value) implements Value, IntegerValue {
 
     @Override
     public IntegerValue bitwiseNot() {
-        return BitVectorValue.of(value.bitwiseNot());
+        return BitVectorValue.of(value.invert());
     }
 }

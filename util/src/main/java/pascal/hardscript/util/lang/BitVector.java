@@ -1,5 +1,7 @@
 package pascal.hardscript.util.lang;
 
+import pascal.hardscript.util.exception.TodoException;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -17,7 +19,8 @@ public final class BitVector {
     private BitVector(int size, byte[] data) {
         this.size = size;
         this.data = new byte[(size + 7) / 8];
-        System.arraycopy(data, 0, this.data, 0, Math.min(data.length, this.data.length));
+        int start = Math.max(0, data.length - this.data.length);
+        System.arraycopy(data, start, this.data, 0, Math.min(data.length, this.data.length));
     }
 
     public static BitVector parse(String rep, int size, int radix) {
@@ -75,6 +78,7 @@ public final class BitVector {
     }
 
     public BigInteger toBigInteger() {
+        normalize();
         return new BigInteger(data);
     }
 
@@ -83,7 +87,7 @@ public final class BitVector {
     }
 
     public BitVector negative() {
-        BitVector result = bitwiseNot();
+        BitVector result = invert();
         for (int i = 0; i < data.length; i++) {
             result.data[i]++;
             if (result.data[i] != 0) {
@@ -93,7 +97,7 @@ public final class BitVector {
         return result;
     }
 
-    public BitVector bitwiseNot() {
+    public BitVector invert() {
         BitVector result = new BitVector(size);
         for (int i = 0; i < data.length; i++) {
             result.data[i] = (byte) ~data[i];
@@ -128,6 +132,14 @@ public final class BitVector {
         return result;
     }
 
+    public BitVector ahsr(int offset) {
+        throw new TodoException();
+    }
+
+    public BitVector lshr(int offset) {
+        throw new TodoException();
+    }
+
     public BitVector shl(int offset) {
         BitVector result = new BitVector(size);
         int byteOffset = offset >> 3, bitOffset = offset & 7;
@@ -140,13 +152,26 @@ public final class BitVector {
         return result;
     }
 
-    public boolean equals(BitVector other) {
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+
+        var that = (BitVector) obj;
+        this.normalize();
+        that.normalize();
         for (int i = 0; i < data.length; i++) {
-            if (data[i] != other.data[i]) {
+            if (data[i] != that.data[i]) {
                 return false;
             }
         }
         return true;
+    }
+
+    private void normalize() {
+        int offset = 8 - ((data.length << 3) - size);
+        var mask = (byte) ((1 << offset) - 1);
+        data[data.length - 1] &= mask;
     }
 
     public String toString() {

@@ -16,6 +16,10 @@ public interface IntegerValue extends Value {
 
     IntegerValue and(IntegerValue other);
 
+    IntegerValue ashr(IntegerValue other);
+
+    IntegerValue lshr(IntegerValue other);
+
     IntegerValue shl(IntegerValue other);
 
     IntegerValue neg();

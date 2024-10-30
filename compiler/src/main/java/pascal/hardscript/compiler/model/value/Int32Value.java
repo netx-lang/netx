@@ -38,6 +38,16 @@ public record Int32Value(int value) implements Value, IntegerValue {
     }
 
     @Override
+    public IntegerValue ashr(IntegerValue other) {
+        return Int32Value.of(value >> other.toInt());
+    }
+
+    @Override
+    public IntegerValue lshr(IntegerValue other) {
+        return Int32Value.of(value >>> other.toInt());
+    }
+
+    @Override
     public IntegerValue shl(IntegerValue other) {
         return Int32Value.of(value << other.toInt());
     }

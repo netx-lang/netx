@@ -217,6 +217,8 @@ public final class Evaluator {
             case SUB -> evaluateBinaryIntExpr(expr, IntegerValue::sub);
             case POW -> evaluateBinaryIntExpr(expr, IntegerValue::pow);
             case AND -> evaluateBinaryIntExpr(expr, IntegerValue::and);
+            case ARITH_SHR -> evaluateBinaryIntExpr(expr, IntegerValue::ashr);
+            case LOGIC_SHR -> evaluateBinaryIntExpr(expr, IntegerValue::lshr);
             case ARITH_SHL, LOGIC_SHL -> evaluateBinaryIntExpr(expr, IntegerValue::shl);
             default -> throw new TodoException("Support more binary expressions"); // TODO:
         };
