@@ -1,0 +1,125 @@
+{
+  "type": "design",
+  "members": [
+    {
+      "type": "module",
+      "id": "Divide_by_3",
+      "input": [
+        "clk@1"
+      ],
+      "output": [
+        "clk_3@2"
+      ],
+      "members": [
+        {
+          "type": "clock",
+          "id": "clk@1"
+        },
+        {
+          "type": "clock",
+          "id": "clk_3@2"
+        },
+        {
+          "type": "register",
+          "id": "b@3",
+          "width": 1
+        },
+        {
+          "type": "builtin",
+          "id": "NOT",
+          "input": [
+            "b@3"
+          ],
+          "output": [
+            "$i1@4"
+          ]
+        },
+        {
+          "type": "builtin",
+          "id": "NOT",
+          "input": [
+            "b@3"
+          ],
+          "output": [
+            "$i2@5"
+          ]
+        },
+        {
+          "type": "builtin",
+          "id": "AND",
+          "members": [
+            {
+              "type": "wire",
+              "id": "$i1@4",
+              "width": 1
+            },
+            {
+              "type": "wire",
+              "id": "$i2@5",
+              "width": 1
+            }
+          ],
+          "input": [
+            "$i1@4",
+            "$i2@5"
+          ],
+          "output": [
+            "b@3"
+          ]
+        },
+        {
+          "type": "builtin",
+          "id": "STORE",
+          "input": [
+            "b@3"
+          ],
+          "output": [
+            "b@3"
+          ]
+        },
+        {
+          "type": "builtin",
+          "id": "STORE",
+          "input": [
+            "b@3"
+          ],
+          "output": [
+            "b@3"
+          ]
+        },
+        {
+          "type": "builtin",
+          "id": "SPLIT",
+          "input": [
+            "b@3"
+          ],
+          "output": [
+            "b@3",
+            "b@3"
+          ]
+        },
+        {
+          "type": "builtin",
+          "id": "STORE",
+          "input": [
+            "b@3"
+          ],
+          "output": [
+            "b@3"
+          ]
+        },
+        {
+          "type": "builtin",
+          "id": "OR",
+          "input": [
+            "b@3",
+            "b@3"
+          ],
+          "output": [
+            "clk_3@2"
+          ]
+        }
+      ]
+    }
+  ]
+}

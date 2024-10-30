@@ -56,6 +56,10 @@ public class AliasAnalysis extends ModelAnalysis<AliasAnalysis.Result> {
             this.sourceRep = sourceRep;
         }
 
+        public boolean isBuiltinRep(Component component) {
+            return !hasSourceAlias(component) && aliases.find(component) == component;
+        }
+
         public boolean hasSourceAlias(Component component) {
             if (aliases.contains(component)) {
                 return sourceRep.containsKey(aliases.find(component));

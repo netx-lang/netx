@@ -40,14 +40,14 @@ public class BuiltInModuleFactory {
 
     private static ModuleScope createNOTModule(Scope parent, AtomType type) {
         var module = parent.instantiateModuleScope(parent.getNameAllocator().allocateFor(type));
-        module.addInput(newWire(module, "input", 1));
-        module.addOutput(newWire(module, "output", 1));
+        module.addInput(newWire(module, "i", 1));
+        module.addOutput(newWire(module, "o", 1));
         return module;
     }
 
     private static ModuleScope createTOModule(Scope parent, AtomType type) {
         var module = parent.instantiateModuleScope(parent.getNameAllocator().allocateFor(type));
-        var entity = newWire(module, "entity", 1);
+        var entity = newWire(module, "t", 1);
         module.addInput(entity);
         module.addOutput(entity);
         return module;
@@ -111,9 +111,9 @@ public class BuiltInModuleFactory {
 
         var module = parent.instantiateModuleScope(parent.getNameAllocator().allocateFor(type));
         for (int i = 1; i <= ports; i++) {
-            module.addInput(newWire(module, "input" + i, 1));
+            module.addInput(newWire(module, "i" + i, 1));
         }
-        module.addOutput(newWire(module, "output", 1));
+        module.addOutput(newWire(module, "o", 1));
         return module;
     }
 

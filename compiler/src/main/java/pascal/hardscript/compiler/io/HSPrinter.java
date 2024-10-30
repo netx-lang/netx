@@ -50,10 +50,8 @@ public final class HSPrinter {
         dumpModuleIO(result, "output", module.getOutputs());
         var members = makeMembersIn(result);
         for (var entity : module.getEntities()) {
-            if (entity instanceof Component component) {
-                if (needDump(component)) {
-                    members.add(dump(component));
-                }
+            if (entity instanceof Component component && needDump(component)) {
+                members.add(dump(component));
             }
         }
         for (var sub : extractSubModules(module)) {
@@ -72,13 +70,24 @@ public final class HSPrinter {
     private boolean needDump(Component component) {
         return (component.isUserDefined()
                 && alias.repOf(component) == component
-        ) || !alias.hasSourceAlias(component);
+        ) || alias.isBuiltinRep(component);
     }
 
     private void dumpBuiltinModule(ModuleScope sub, Identifier instID, ArrayNode members) {
         var builtin = createObjectNode();
         setType(builtin, "builtin");
         setIdentifier(builtin, instID);
+
+        List<Component> needDump = new LinkedList<>();
+        for (var entity : sub.getEntities()) {
+            if (entity instanceof Component component && needDump(component)) {
+                needDump.add(component);
+            }
+        }
+        if (!needDump.isEmpty()) {
+            var subarray = makeMembersIn(builtin);
+            needDump.forEach(c -> subarray.add(dump(c)));
+        }
         dumpModuleIO(builtin, "input", sub.getInputs());
         dumpModuleIO(builtin, "output", sub.getOutputs());
         members.add(builtin);
@@ -114,24 +123,24 @@ public final class HSPrinter {
 
     private ObjectNode dumpWire(Wire wire) {
         var result = createObjectNode();
+        setType(result, "wire");
         setIdentifier(result, wire);
         result.put("width", wire.width());
-        setType(result, "wire");
         return result;
     }
 
     private ObjectNode dumpClock(Clock clock) {
         var result = createObjectNode();
-        setIdentifier(result, clock);
         setType(result, "clock");
+        setIdentifier(result, clock);
         return result;
     }
 
     private ObjectNode dumpRegister(Register register) {
         var result = createObjectNode();
+        setType(result, "register");
         setIdentifier(result, register);
         result.put("width", register.width());
-        setType(result, "register");
         return result;
     }
 

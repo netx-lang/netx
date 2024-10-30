@@ -1,0 +1,143 @@
+{
+  "type": "design",
+  "members": [
+    {
+      "type": "module",
+      "id": "full_adder",
+      "input": [
+        "a@1",
+        "b@2",
+        "cin@3"
+      ],
+      "output": [
+        "out@4",
+        "cout@5"
+      ],
+      "members": [
+        {
+          "type": "wire",
+          "id": "a@1",
+          "width": 1
+        },
+        {
+          "type": "wire",
+          "id": "b@2",
+          "width": 1
+        },
+        {
+          "type": "wire",
+          "id": "cout@5",
+          "width": 1
+        },
+        {
+          "type": "wire",
+          "id": "cin@3",
+          "width": 1
+        },
+        {
+          "type": "wire",
+          "id": "out@4",
+          "width": 1
+        },
+        {
+          "type": "module",
+          "id": "half_adder",
+          "input": [
+            "a@1",
+            "b@2"
+          ],
+          "output": [
+            "carry@6",
+            "a@7"
+          ],
+          "members": [
+            {
+              "type": "wire",
+              "id": "carry@6",
+              "width": 1
+            },
+            {
+              "type": "builtin",
+              "id": "XOR",
+              "input": [
+                "a@1",
+                "b@2"
+              ],
+              "output": [
+                "a@7"
+              ]
+            },
+            {
+              "type": "builtin",
+              "id": "AND",
+              "input": [
+                "a@1",
+                "b@2"
+              ],
+              "output": [
+                "carry@6"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "module",
+          "id": "half_adder",
+          "input": [
+            "a@7",
+            "cin@3"
+          ],
+          "output": [
+            "carry@8",
+            "out@4"
+          ],
+          "members": [
+            {
+              "type": "wire",
+              "id": "a@7",
+              "width": 1
+            },
+            {
+              "type": "wire",
+              "id": "carry@8",
+              "width": 1
+            },
+            {
+              "type": "builtin",
+              "id": "XOR",
+              "input": [
+                "a@7",
+                "cin@3"
+              ],
+              "output": [
+                "out@4"
+              ]
+            },
+            {
+              "type": "builtin",
+              "id": "AND",
+              "input": [
+                "a@7",
+                "cin@3"
+              ],
+              "output": [
+                "carry@8"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "builtin",
+          "id": "OR",
+          "input": [
+            "carry@6",
+            "carry@8"
+          ],
+          "output": [
+            "cout@5"
+          ]
+        }
+      ]
+    }
+  ]
+}

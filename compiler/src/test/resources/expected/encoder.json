@@ -1,0 +1,78 @@
+{
+  "type": "design",
+  "members": [
+    {
+      "type": "module",
+      "id": "top",
+      "input": [
+        "input@1"
+      ],
+      "output": [
+        "output@2"
+      ],
+      "members": [
+        {
+          "type": "wire",
+          "id": "output@2",
+          "width": 3
+        },
+        {
+          "type": "wire",
+          "id": "input@1",
+          "width": 8
+        },
+        {
+          "type": "module",
+          "id": "encoder",
+          "input": [
+            "input@1"
+          ],
+          "output": [
+            "output@2"
+          ],
+          "members": [
+            {
+              "type": "builtin",
+              "id": "OR",
+              "input": [
+                "input@1[1]",
+                "input@1[3]",
+                "input@1[5]",
+                "input@1[7]"
+              ],
+              "output": [
+                "output@2[0]"
+              ]
+            },
+            {
+              "type": "builtin",
+              "id": "OR",
+              "input": [
+                "input@1[2]",
+                "input@1[3]",
+                "input@1[6]",
+                "input@1[7]"
+              ],
+              "output": [
+                "output@2[1]"
+              ]
+            },
+            {
+              "type": "builtin",
+              "id": "OR",
+              "input": [
+                "input@1[4]",
+                "input@1[5]",
+                "input@1[6]",
+                "input@1[7]"
+              ],
+              "output": [
+                "output@2[2]"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
