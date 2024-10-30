@@ -10,6 +10,10 @@ public final class DesignScope extends Scope {
         this.moduleInfo = moduleInfo;
     }
 
+    public ModuleInfo getModuleInfo() {
+        return moduleInfo;
+    }
+
     public boolean containsInfo(Identifier identifier) {
         return moduleInfo.contains(identifier);
     }

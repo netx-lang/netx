@@ -71,6 +71,14 @@ public abstract sealed class Scope permits BlockScope, DesignScope, ModuleScope 
         return child;
     }
 
+    public ModuleScope getUpperModule() {
+        return switch (parent) {
+            case ModuleScope module -> module;
+            case DesignScope ignored -> null;
+            default -> parent.getUpperModule();
+        };
+    }
+
     public void forEachScope(Consumer<Scope> consumer) {
         Stack<Scope> stack = new Stack<>();
         stack.push(this);

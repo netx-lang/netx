@@ -1,6 +1,5 @@
 package pascal.hardscript.compiler.io;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -10,10 +9,7 @@ import pascal.hardscript.compiler.model.components.Clock;
 import pascal.hardscript.compiler.model.components.Component;
 import pascal.hardscript.compiler.model.components.Register;
 import pascal.hardscript.compiler.model.components.Wire;
-import pascal.hardscript.compiler.model.scope.BlockScope;
-import pascal.hardscript.compiler.model.scope.DesignScope;
-import pascal.hardscript.compiler.model.scope.ModuleScope;
-import pascal.hardscript.compiler.model.scope.Scope;
+import pascal.hardscript.compiler.model.scope.*;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 
 import java.util.LinkedList;
@@ -21,19 +17,22 @@ import java.util.List;
 
 public final class HSPrinter {
     private final DesignScope design;
+    private final ModuleInfo moduleInfo;
     private final AliasAnalysis.Result alias;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public HSPrinter(DesignScope design) {
         this.design = design;
+        this.moduleInfo = design.getModuleInfo();
         this.alias = new AliasAnalysis(design).analyze();
     }
 
-    public JsonNode dump() {
+    public ObjectNode dump() {
         return dump(design);
     }
 
-    private JsonNode dump(DesignScope design) {
-        var result = new ObjectMapper().createObjectNode();
+    private ObjectNode dump(DesignScope design) {
+        var result = createObjectNode();
         setType(result, "design");
         var members = makeMembersIn(result);
         design.getChildren().stream()
@@ -42,8 +41,8 @@ public final class HSPrinter {
         return result;
     }
 
-    private JsonNode dump(ModuleScope module) {
-        var result = new ObjectMapper().createObjectNode();
+    private ObjectNode dump(ModuleScope module) {
+        var result = createObjectNode();
         setType(result, "module");
         setIdentifier(result, module.getIdentifier());
 
@@ -55,10 +54,33 @@ public final class HSPrinter {
                 }
             }
         }
-        for (var instantiation : extractSubModules(module)) {
-            members.add(dump(instantiation));
+        for (var sub : extractSubModules(module)) {
+            var instID = sub.getIdentifier();
+            if (moduleInfo.containsBuiltin(instID)) {
+                if (!instID.string().equals("TO")) {
+                    dumpBuiltinModule(sub, instID, members);
+                }
+            } else {
+                members.add(dump(sub));
+            }
         }
         return result;
+    }
+
+    private void dumpBuiltinModule(ModuleScope sub, Identifier instID, ArrayNode members) {
+        var builtin = createObjectNode();
+        setType(builtin, "builtin");
+        setIdentifier(builtin, instID);
+        dumpBuiltinPorts(builtin, "input", sub.getInputs());
+        dumpBuiltinPorts(builtin, "output", sub.getOutputs());
+        members.add(builtin);
+    }
+
+    private void dumpBuiltinPorts(ObjectNode builtin, String port, List<Component> sub) {
+        var outputs = makeArrayIn(builtin, port);
+        sub.stream().map(alias::repOf)
+                .map(this::dumpIdentifierOf)
+                .forEach(outputs::add);
     }
 
     private List<ModuleScope> extractSubModules(Scope module) {
@@ -73,7 +95,7 @@ public final class HSPrinter {
         return result;
     }
 
-    private JsonNode dump(Component component) {
+    private ObjectNode dump(Component component) {
         return switch (component) {
             case Wire wire -> dumpWire(wire);
             case Clock clock -> dumpClock(clock);
@@ -82,24 +104,24 @@ public final class HSPrinter {
         };
     }
 
-    private JsonNode dumpWire(Wire wire) {
-        var result = new ObjectMapper().createObjectNode();
-        setIdentifier(result, wire.getIdentifier());
+    private ObjectNode dumpWire(Wire wire) {
+        var result = createObjectNode();
+        setIdentifier(result, wire);
         result.put("width", wire.width());
         setType(result, "wire");
         return result;
     }
 
-    private JsonNode dumpClock(Clock clock) {
-        var result = new ObjectMapper().createObjectNode();
-        setIdentifier(result, clock.getIdentifier());
+    private ObjectNode dumpClock(Clock clock) {
+        var result = createObjectNode();
+        setIdentifier(result, clock);
         setType(result, "clock");
         return result;
     }
 
-    private JsonNode dumpRegister(Register register) {
-        var result = new ObjectMapper().createObjectNode();
-        setIdentifier(result, register.getIdentifier());
+    private ObjectNode dumpRegister(Register register) {
+        var result = createObjectNode();
+        setIdentifier(result, register);
         result.put("width", register.width());
         setType(result, "register");
         return result;
@@ -109,11 +131,32 @@ public final class HSPrinter {
         node.put("type", type);
     }
 
+    private String dumpIdentifierOf(Component component) {
+        return component.getIdentifier().string() + "@" +
+                Integer.toHexString(System.identityHashCode(component));
+    }
+
+    private void setIdentifier(ObjectNode node, Component component) {
+        setIdentifier(node, dumpIdentifierOf(component));
+    }
+
     private void setIdentifier(ObjectNode node, Identifier identifier) {
-        node.put("id", identifier.string());
+        setIdentifier(node, identifier.string());
+    }
+
+    private void setIdentifier(ObjectNode node, String value) {
+        node.put("id", value);
+    }
+
+    private ArrayNode makeArrayIn(ObjectNode node, String key) {
+        return node.putArray(key);
     }
 
     private ArrayNode makeMembersIn(ObjectNode node) {
-        return node.putArray("members");
+        return makeArrayIn(node, "members");
+    }
+
+    private ObjectNode createObjectNode() {
+        return objectMapper.createObjectNode();
     }
 }

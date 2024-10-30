@@ -5,6 +5,6 @@ module full_adder: [a, b, cin] -> [out, cout] {
 
 module half_adder: [a, b] -> [carry, out] {
     component a, b, out, carry : wire(bit(1))
-    XOR : [a, b] -> out
-    AND : [a, b] -> carry
+    XOR : [a, b] -> [out]
+    AND : [a, b] -> [carry]
 }

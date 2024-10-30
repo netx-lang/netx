@@ -12,6 +12,11 @@ public final class ModuleScope extends Scope {
     private final List<Component> inputs = new ArrayList<>();
     private final List<Component> outputs = new ArrayList<>();
 
+    public ModuleScope(Scope parent, Identifier identifier) {
+        super(parent);
+        this.identifier = identifier;
+    }
+
     public Identifier getIdentifier() {
         return identifier;
     }
@@ -30,10 +35,5 @@ public final class ModuleScope extends Scope {
 
     public void addOutput(Component... outputs) {
         Collections.addAll(this.outputs, outputs);
-    }
-
-    ModuleScope(Scope parent, Identifier identifier) {
-        super(parent);
-        this.identifier = identifier;
     }
 }
