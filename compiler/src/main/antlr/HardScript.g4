@@ -11,9 +11,9 @@ module_arguments
     ;
 
 element
-    : type=expression ':' connection=expression                # Instantiation
-    | 'component' symbol (',' symbol)* ':' type=expression     # Component
-    | 'for' '(' iterator ')' '{' element* '}'                  # Loop
+    : type=expression ':' connection=expression           # Instantiation
+    | 'inst' symbol (',' symbol)* ':' type=expression     # Component
+    | 'for' '(' iterator ')' '{' element* '}'             # Loop
     ;
 
 expression
@@ -63,7 +63,7 @@ qualifier
     ;
 
 iterator
-    : symbol '<-' expression
+    : symbol 'in' expression
     ;
 
 symbol

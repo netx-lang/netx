@@ -46,7 +46,7 @@ class HSParserUnitTest {
 
     @Test
     void testParseListExpr() {
-        var context = makeParser("[port | i <- [0..5], let port = [1, x_${i}]]").expression();
+        var context = makeParser("[port | i in [0..5], let port = [1, x_${i}]]").expression();
         var listExpr = HSParser.parseExpr(context);
         assertEquals(ListComprehension.of(
                 SymbolExpr.of(Identifier.of("port")), List.of(

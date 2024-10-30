@@ -31,8 +31,8 @@ class EvaluatorUnitTest {
     @Test
     void testListComprehension() {
         var module = loadSingleModule("""
-                module inverter : [x[i] | i <- [0..4]] -> [x[j] | i <- [0..4], let j = 3 - i] {
-                    component x : wire(bit(4))
+                module inverter : [x[i] | i in [0..4]] -> [x[j] | i in [0..4], let j = 3 - i] {
+                    inst x : wire(bit(4))
                 }
                 """);
         var component = (Component) module.getBinding().resolve(Identifier.of("x"));
@@ -48,12 +48,12 @@ class EvaluatorUnitTest {
     void testInstanceType() {
         var code = """
                 module test : [a] -> [b] {
-                    component a : wire(bit(4))
-                    component b : wire(bit(1))
+                    inst a : wire(bit(4))
+                    inst b : wire(bit(1))
                     [gate |
-                        i <- [0..2],
+                        i in [0..2],
                         let gate = [NOT, NOT] <> AND <> NOT
-                    ] <> AND : [a[i] | i <- [0..4]] -> [b]
+                    ] <> AND : [a[i] | i in [0..4]] -> [b]
                 }
                 """;
         assertDoesNotThrow(() -> loadSingleModule(code));

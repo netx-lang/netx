@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 public final class ModuleScope extends Scope {
+    private final int depth;
     private final Identifier identifier;
     private final List<Component> inputs = new ArrayList<>();
     private final List<Component> outputs = new ArrayList<>();
@@ -15,10 +16,15 @@ public final class ModuleScope extends Scope {
     public ModuleScope(Scope parent, Identifier identifier) {
         super(parent);
         this.identifier = identifier;
+        this.depth = (getUpperModule() != null) ? getUpperModule().getDepth() + 1 : 0;
     }
 
     public Identifier getIdentifier() {
         return identifier;
+    }
+
+    public int getDepth() {
+        return depth;
     }
 
     public List<Component> getInputs() {

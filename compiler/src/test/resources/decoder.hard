@@ -1,16 +1,16 @@
 module top : [] -> [] {
-    component input : wire(bit(3))
-    component output : wire(bit(8))
+    inst input : wire(bit(3))
+    inst output : wire(bit(8))
     decoder(3) : [input] -> [output]
 }
 
 module decoder(width) : [code] -> [output] {
-    component code : wire(bit(width))
-    component output : wire(bit(2**width))
+    inst code : wire(bit(width))
+    inst output : wire(bit(2**width))
 
-    for (i <- [0..2**width]) {
-        [port | j <- [0..width],
+    for (i in [0..2**width]) {
+        [port | j in [0..width],
                 let port = if i & (1 << j) then TO else NOT
-        ] <> AND(width) : [code[j] | j <- [0..width]] -> [output[i]]
+        ] <> AND(width) : [code[j] | j in [0..width]] -> [output[i]]
     }
 }

@@ -46,10 +46,12 @@ public final class HSPrinter {
         setType(result, "module");
         setIdentifier(result, module.getIdentifier());
 
+        dumpModuleIO(result, "input", module.getInputs());
+        dumpModuleIO(result, "output", module.getOutputs());
         var members = makeMembersIn(result);
         for (var entity : module.getEntities()) {
             if (entity instanceof Component component) {
-                if (component.isUserDefined() || alias.sourceRepOf(component) == null) {
+                if (needDump(component)) {
                     members.add(dump(component));
                 }
             }
@@ -67,16 +69,22 @@ public final class HSPrinter {
         return result;
     }
 
+    private boolean needDump(Component component) {
+        return (component.isUserDefined()
+                && alias.repOf(component) == component
+        ) || !alias.hasSourceAlias(component);
+    }
+
     private void dumpBuiltinModule(ModuleScope sub, Identifier instID, ArrayNode members) {
         var builtin = createObjectNode();
         setType(builtin, "builtin");
         setIdentifier(builtin, instID);
-        dumpBuiltinPorts(builtin, "input", sub.getInputs());
-        dumpBuiltinPorts(builtin, "output", sub.getOutputs());
+        dumpModuleIO(builtin, "input", sub.getInputs());
+        dumpModuleIO(builtin, "output", sub.getOutputs());
         members.add(builtin);
     }
 
-    private void dumpBuiltinPorts(ObjectNode builtin, String port, List<Component> sub) {
+    private void dumpModuleIO(ObjectNode builtin, String port, List<Component> sub) {
         var outputs = makeArrayIn(builtin, port);
         sub.stream().map(alias::repOf)
                 .map(this::dumpIdentifierOf)
