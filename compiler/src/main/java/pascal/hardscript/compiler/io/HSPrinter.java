@@ -5,20 +5,20 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import pascal.hardscript.compiler.analysis.AliasAnalysis;
 import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.model.components.Clock;
-import pascal.hardscript.compiler.model.components.Component;
-import pascal.hardscript.compiler.model.components.Register;
-import pascal.hardscript.compiler.model.components.Wire;
+import pascal.hardscript.compiler.model.components.*;
 import pascal.hardscript.compiler.model.scope.*;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public final class HSPrinter {
     private final DesignScope design;
     private final ModuleInfo moduleInfo;
     private final AliasAnalysis.Result alias;
+    private final Map<Component, Integer> addrMap = new HashMap<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public HSPrinter(DesignScope design) {
@@ -132,8 +132,15 @@ public final class HSPrinter {
     }
 
     private String dumpIdentifierOf(Component component) {
-        return component.getIdentifier().string() + "@" +
-                Integer.toHexString(System.identityHashCode(component));
+        if (component instanceof ComponentAccess access) {
+            return component.getIdentifier().string() + "@" +
+                    addrMap.computeIfAbsent(access.base(), _ -> addrMap.size() + 1) +
+                    access.selector();
+
+        } else {
+            return component.getIdentifier().string() + "@" +
+                    addrMap.computeIfAbsent(component, _ -> addrMap.size() + 1);
+        }
     }
 
     private void setIdentifier(ObjectNode node, Component component) {

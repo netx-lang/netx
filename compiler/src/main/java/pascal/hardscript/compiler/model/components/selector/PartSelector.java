@@ -7,4 +7,9 @@ public record PartSelector(IntegerValue start, IntegerValue end) implements Sele
     public static PartSelector of(IntegerValue start, IntegerValue end) {
         return new PartSelector(start, end);
     }
+
+    @Override
+    public String toString() {
+        return String.format("[%d : %d]", start.toInt(), end.toInt());
+    }
 }

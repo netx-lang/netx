@@ -26,6 +26,6 @@ public sealed interface Component extends Entity permits Clock, ComponentAccess,
     }
 
     default boolean isUserDefined() {
-        return !isBuiltin() && !(this instanceof ComponentAccess);
+        return !isBuiltin();
     }
 }
