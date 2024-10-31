@@ -1,9 +1,9 @@
-package pascal.hardscript.compiler.model.components;
+package pascal.hardscript.compiler.model.data;
 
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.model.scope.Scope;
 
-public record Wire(Identifier id, Scope parent, int width) implements Component {
+public record Wire(Identifier id, Scope parent, int width) implements Data {
 
     public static Wire of(Identifier id, Scope parent, int width) {
         return new Wire(id, parent, width);
@@ -24,7 +24,7 @@ public record Wire(Identifier id, Scope parent, int width) implements Component 
         return width;
     }
 
-    public static class Factory implements Component.Factory<Wire> {
+    public static class Factory implements Data.Factory<Wire> {
         private final int width;
         private final Scope parent;
 

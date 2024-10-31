@@ -4,11 +4,11 @@ import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.io.Frontend;
-import pascal.hardscript.compiler.model.components.Component;
-import pascal.hardscript.compiler.model.components.ComponentAccess;
-import pascal.hardscript.compiler.model.components.selector.BitSelector;
+import pascal.hardscript.compiler.model.data.Data;
+import pascal.hardscript.compiler.model.data.DataAccess;
+import pascal.hardscript.compiler.model.data.selector.BitSelector;
+import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
-import pascal.hardscript.compiler.model.scope.ModuleScope;
 import pascal.hardscript.compiler.model.value.Int32Value;
 
 import java.util.ArrayList;
@@ -24,30 +24,30 @@ class EvaluatorUnitTest {
         return Frontend.load(CharStreams.fromString(code)).elaborate();
     }
 
-    private static ModuleScope loadSingleModule(String code) {
-        return (ModuleScope) loadDesign(code).getChildren().getFirst();
+    private static ComponentScope loadSingleComponent(String code) {
+        return (ComponentScope) loadDesign(code).getChildren().getFirst();
     }
 
     @Test
     void testListComprehension() {
-        var module = loadSingleModule("""
-                module inverter : [x[i] | i in [0..4]] -> [x[j] | i in [0..4], let j = 3 - i] {
+        var component = loadSingleComponent("""
+                component inverter : [x[i] | i in [0..4]] -> [x[j] | i in [0..4], let j = 3 - i] {
                     inst x of wire(bit(4))
                 }
                 """);
-        var component = (Component) module.getBinding().resolve(Identifier.of("x"));
+        var data = (Data) component.getBinding().resolve(Identifier.of("x"));
         var expected = new ArrayList<>(IntStream.range(0, 4)
                 .mapToObj(Int32Value::of).map(BitSelector::of)
-                .map(selector -> ComponentAccess.of(component, selector)).toList());
-        assertEquals(expected, module.getInputs());
+                .map(selector -> DataAccess.of(data, selector)).toList());
+        assertEquals(expected, component.getInputs());
         Collections.reverse(expected);
-        assertEquals(expected, module.getOutputs());
+        assertEquals(expected, component.getOutputs());
     }
 
     @Test
     void testInstanceType() {
         var code = """
-                module test : [a] -> [b] {
+                component test : [a] -> [b] {
                     inst a of wire(bit(4))
                     inst b of wire(bit(1))
                     [gate |
@@ -56,6 +56,6 @@ class EvaluatorUnitTest {
                     ] <> AND : [a[i] | i in [0..4]] -> [b]
                 }
                 """;
-        assertDoesNotThrow(() -> loadSingleModule(code));
+        assertDoesNotThrow(() -> loadSingleComponent(code));
     }
 }

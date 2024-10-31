@@ -5,10 +5,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import pascal.hardscript.compiler.analysis.AliasAnalysis;
 import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.model.components.Clock;
-import pascal.hardscript.compiler.model.components.Component;
-import pascal.hardscript.compiler.model.components.ComponentAccess;
-import pascal.hardscript.compiler.model.components.Wire;
+import pascal.hardscript.compiler.model.data.Clock;
+import pascal.hardscript.compiler.model.data.Data;
+import pascal.hardscript.compiler.model.data.DataAccess;
+import pascal.hardscript.compiler.model.data.Wire;
 import pascal.hardscript.compiler.model.scope.*;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 
@@ -19,14 +19,14 @@ import java.util.Map;
 
 public final class HSPrinter {
     private final DesignScope design;
-    private final ModuleInfo moduleInfo;
+    private final ComponentInfo componentInfo;
     private final AliasAnalysis.Result alias;
-    private final Map<Component, Integer> addrMap = new HashMap<>();
+    private final Map<Data, Integer> addrMap = new HashMap<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public HSPrinter(DesignScope design) {
         this.design = design;
-        this.moduleInfo = design.getModuleInfo();
+        this.componentInfo = design.getComponentInfo();
         this.alias = new AliasAnalysis(design).analyze();
     }
 
@@ -39,29 +39,29 @@ public final class HSPrinter {
         setType(result, "design");
         var members = makeMembersIn(result);
         design.getChildren().stream()
-                .map(ModuleScope.class::cast)
+                .map(ComponentScope.class::cast)
                 .map(this::dump).forEach(members::add);
         return result;
     }
 
-    private ObjectNode dump(ModuleScope module) {
+    private ObjectNode dump(ComponentScope module) {
         var result = createObjectNode();
         setType(result, "module");
         setIdentifier(result, module.getIdentifier());
 
-        dumpModuleIO(result, "input", module.getInputs());
-        dumpModuleIO(result, "output", module.getOutputs());
+        dumpComponentIO(result, "input", module.getInputs());
+        dumpComponentIO(result, "output", module.getOutputs());
         var members = makeMembersIn(result);
         for (var entity : module.getEntities()) {
-            if (entity instanceof Component component && needDump(component)) {
-                members.add(dump(component));
+            if (entity instanceof Data data && needDump(data)) {
+                members.add(dump(data));
             }
         }
-        for (var sub : extractSubModules(module)) {
+        for (var sub : extractSubComponent(module)) {
             var instID = sub.getIdentifier();
-            if (moduleInfo.containsBuiltin(instID)) {
+            if (componentInfo.containsBuiltin(instID)) {
                 if (!instID.string().equals("TO")) {
-                    dumpBuiltinModule(sub, instID, members);
+                    dumpBuiltinComponent(sub, instID, members);
                 }
             } else {
                 members.add(dump(sub));
@@ -70,53 +70,53 @@ public final class HSPrinter {
         return result;
     }
 
-    private boolean needDump(Component component) {
-        return (component.isUserDefined()
-                && alias.repOf(component) == component
-        ) || alias.isBuiltinRep(component);
+    private boolean needDump(Data data) {
+        return (data.isUserDefined()
+                && alias.repOf(data) == data
+        ) || alias.isBuiltinRep(data);
     }
 
-    private void dumpBuiltinModule(ModuleScope sub, Identifier instID, ArrayNode members) {
+    private void dumpBuiltinComponent(ComponentScope sub, Identifier instID, ArrayNode members) {
         var builtin = createObjectNode();
         setType(builtin, "builtin");
         setIdentifier(builtin, instID);
 
-        List<Component> needDump = new LinkedList<>();
+        List<Data> needDump = new LinkedList<>();
         for (var entity : sub.getEntities()) {
-            if (entity instanceof Component component && needDump(component)) {
-                needDump.add(component);
+            if (entity instanceof Data data && needDump(data)) {
+                needDump.add(data);
             }
         }
         if (!needDump.isEmpty()) {
             var subarray = makeMembersIn(builtin);
             needDump.forEach(c -> subarray.add(dump(c)));
         }
-        dumpModuleIO(builtin, "input", sub.getInputs());
-        dumpModuleIO(builtin, "output", sub.getOutputs());
+        dumpComponentIO(builtin, "input", sub.getInputs());
+        dumpComponentIO(builtin, "output", sub.getOutputs());
         members.add(builtin);
     }
 
-    private void dumpModuleIO(ObjectNode builtin, String port, List<Component> sub) {
+    private void dumpComponentIO(ObjectNode builtin, String port, List<Data> sub) {
         var outputs = makeArrayIn(builtin, port);
         sub.stream().map(alias::repOf)
                 .map(this::dumpIdentifierOf)
                 .forEach(outputs::add);
     }
 
-    private List<ModuleScope> extractSubModules(Scope module) {
-        List<ModuleScope> result = new LinkedList<>();
+    private List<ComponentScope> extractSubComponent(Scope module) {
+        List<ComponentScope> result = new LinkedList<>();
         for (var subScope : module.getChildren()) {
             switch (subScope) {
-                case ModuleScope sub -> result.add(sub);
-                case BlockScope sub -> result.addAll(extractSubModules(sub));
+                case ComponentScope sub -> result.add(sub);
+                case BlockScope sub -> result.addAll(extractSubComponent(sub));
                 case DesignScope ignored -> throw new ShallNotReachHereError();
             }
         }
         return result;
     }
 
-    private ObjectNode dump(Component component) {
-        return switch (component) {
+    private ObjectNode dump(Data data) {
+        return switch (data) {
             case Wire wire -> dumpWire(wire);
             case Clock clock -> dumpClock(clock);
             default -> throw new ShallNotReachHereError();
@@ -142,20 +142,20 @@ public final class HSPrinter {
         node.put("type", type);
     }
 
-    private String dumpIdentifierOf(Component component) {
-        if (component instanceof ComponentAccess access) {
-            return component.getIdentifier().string() + "@" +
+    private String dumpIdentifierOf(Data data) {
+        if (data instanceof DataAccess access) {
+            return data.getIdentifier().string() + "@" +
                     addrMap.computeIfAbsent(access.base(), _ -> addrMap.size() + 1) +
                     access.selector();
 
         } else {
-            return component.getIdentifier().string() + "@" +
-                    addrMap.computeIfAbsent(component, _ -> addrMap.size() + 1);
+            return data.getIdentifier().string() + "@" +
+                    addrMap.computeIfAbsent(data, _ -> addrMap.size() + 1);
         }
     }
 
-    private void setIdentifier(ObjectNode node, Component component) {
-        setIdentifier(node, dumpIdentifierOf(component));
+    private void setIdentifier(ObjectNode node, Data data) {
+        setIdentifier(node, dumpIdentifierOf(data));
     }
 
     private void setIdentifier(ObjectNode node, Identifier identifier) {

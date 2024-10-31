@@ -1,12 +1,12 @@
 package pascal.hardscript.compiler.ast;
 
+import pascal.hardscript.compiler.ast.component.*;
 import pascal.hardscript.compiler.ast.expr.*;
 import pascal.hardscript.compiler.ast.expr.qualifier.BindingQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.FilterQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.GeneratorQualifier;
 import pascal.hardscript.compiler.ast.expr.selector.BitSelector;
 import pascal.hardscript.compiler.ast.expr.selector.PartSelector;
-import pascal.hardscript.compiler.ast.module.*;
 
 public interface ASTListener {
 
@@ -42,11 +42,11 @@ public interface ASTListener {
         exitDefault(node);
     }
 
-    default void enter(InstantiationNode node) {
+    default void enter(ComponentInstantiationNode node) {
         enterDefault(node);
     }
 
-    default void exit(InstantiationNode node) {
+    default void exit(ComponentInstantiationNode node) {
         exitDefault(node);
     }
 
@@ -58,19 +58,19 @@ public interface ASTListener {
         exitDefault(node);
     }
 
-    default void enter(Binding node) {
+    default void enter(BindingNode node) {
         enterDefault(node);
     }
 
-    default void exit(Binding node) {
+    default void exit(BindingNode node) {
         exitDefault(node);
     }
 
-    default void enter(ComponentNode node) {
+    default void enter(DataInstantiationNode node) {
         enterDefault(node);
     }
 
-    default void exit(ComponentNode node) {
+    default void exit(DataInstantiationNode node) {
         exitDefault(node);
     }
 
@@ -82,11 +82,11 @@ public interface ASTListener {
         exitDefault(node);
     }
 
-    default void enter(ModuleNode node) {
+    default void enter(ComponentNode node) {
         enterDefault(node);
     }
 
-    default void exit(ModuleNode node) {
+    default void exit(ComponentNode node) {
         exitDefault(node);
     }
 
@@ -111,6 +111,14 @@ public interface ASTListener {
     }
 
     default void exit(IntNumber node) {
+        exitDefault(node);
+    }
+
+    default void enter(BoolNumber node) {
+        enterDefault(node);
+    }
+
+    default void exit(BoolNumber node) {
         exitDefault(node);
     }
 

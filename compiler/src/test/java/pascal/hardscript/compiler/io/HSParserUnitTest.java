@@ -4,12 +4,12 @@ import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.antlr.HardScriptParser;
 import pascal.hardscript.compiler.ast.Identifier;
+import pascal.hardscript.compiler.ast.component.BindingNode;
 import pascal.hardscript.compiler.ast.expr.*;
 import pascal.hardscript.compiler.ast.expr.qualifier.BindingQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.GeneratorQualifier;
 import pascal.hardscript.compiler.ast.expr.selector.BitSelector;
 import pascal.hardscript.compiler.ast.expr.selector.PartSelector;
-import pascal.hardscript.compiler.ast.module.Binding;
 
 import java.util.List;
 
@@ -53,7 +53,7 @@ class HSParserUnitTest {
                         GeneratorQualifier.of(
                                 IdentifierSymbol.of(Identifier.of("i")),
                                 RangeList.of(IntNumber.of(0), IntNumber.of(5))),
-                        BindingQualifier.of(Binding.of(
+                        BindingQualifier.of(BindingNode.of(
                                 IdentifierSymbol.of(Identifier.of("port")),
                                 CommonList.of(List.of(
                                         IntNumber.of(1),

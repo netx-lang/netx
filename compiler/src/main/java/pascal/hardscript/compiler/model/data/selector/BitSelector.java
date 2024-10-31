@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.model.components.selector;
+package pascal.hardscript.compiler.model.data.selector;
 
 import pascal.hardscript.compiler.model.value.IntegerValue;
 

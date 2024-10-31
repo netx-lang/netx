@@ -1,10 +1,10 @@
-module top : [input] -> [output] {
+component top : [input] -> [output] {
     inst input of wire(bit(8))
     inst output of wire(bit(3))
     encoder(3) : [input] -> [output]
 }
 
-module encoder(width) : [code] -> [output] {
+component encoder(width) : [code] -> [output] {
     inst code of wire(bit(2**width))
     inst output of wire(bit(width))
 

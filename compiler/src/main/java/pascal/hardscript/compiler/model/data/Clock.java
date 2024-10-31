@@ -1,9 +1,9 @@
-package pascal.hardscript.compiler.model.components;
+package pascal.hardscript.compiler.model.data;
 
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.model.scope.Scope;
 
-public record Clock(Identifier id, Scope parent) implements Component {
+public record Clock(Identifier id, Scope parent) implements Data {
 
     @Override
     public Identifier getIdentifier() {
@@ -20,7 +20,7 @@ public record Clock(Identifier id, Scope parent) implements Component {
         return 1;
     }
 
-    public static class Factory implements Component.Factory<Clock> {
+    public static class Factory implements Data.Factory<Clock> {
         private final Scope parent;
 
         public Factory(Scope parent) {

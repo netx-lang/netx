@@ -1,30 +1,30 @@
 package pascal.hardscript.compiler.ast;
 
-import pascal.hardscript.compiler.ast.module.ModuleNode;
+import pascal.hardscript.compiler.ast.component.ComponentNode;
 
 import java.util.List;
 import java.util.Objects;
 
 public final class DesignNode extends ASTNode {
-    private final List<ModuleNode> modules;
+    private final List<ComponentNode> components;
 
-    private DesignNode(List<ModuleNode> modules) {
-        this.modules = modules;
+    private DesignNode(List<ComponentNode> components) {
+        this.components = components;
     }
 
-    public static DesignNode of(List<ModuleNode> modules) {
+    public static DesignNode of(List<ComponentNode> modules) {
         return new DesignNode(modules);
     }
 
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);
-        modules.forEach(module -> module.walk(listener));
+        components.forEach(module -> module.walk(listener));
         listener.exit(this);
     }
 
-    public List<ModuleNode> getModules() {
-        return modules;
+    public List<ComponentNode> getComponents() {
+        return components;
     }
 
     @Override
@@ -32,17 +32,17 @@ public final class DesignNode extends ASTNode {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (DesignNode) obj;
-        return Objects.equals(this.modules, that.modules);
+        return Objects.equals(this.components, that.components);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(modules);
+        return Objects.hash(components);
     }
 
     @Override
     public String toString() {
         return "DesignNode[" +
-                "modules=" + modules + ']';
+                "modules=" + components + ']';
     }
 }

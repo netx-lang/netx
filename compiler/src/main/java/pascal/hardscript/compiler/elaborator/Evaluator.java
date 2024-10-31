@@ -12,14 +12,14 @@ import pascal.hardscript.compiler.ast.expr.qualifier.Qualifier;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
-import pascal.hardscript.compiler.model.components.Clock;
-import pascal.hardscript.compiler.model.components.Component;
-import pascal.hardscript.compiler.model.components.ComponentAccess;
-import pascal.hardscript.compiler.model.components.Wire;
-import pascal.hardscript.compiler.model.components.selector.BitSelector;
-import pascal.hardscript.compiler.model.components.selector.PartSelector;
-import pascal.hardscript.compiler.model.components.selector.Selector;
-import pascal.hardscript.compiler.model.connection.*;
+import pascal.hardscript.compiler.model.component.*;
+import pascal.hardscript.compiler.model.data.Clock;
+import pascal.hardscript.compiler.model.data.Data;
+import pascal.hardscript.compiler.model.data.DataAccess;
+import pascal.hardscript.compiler.model.data.Wire;
+import pascal.hardscript.compiler.model.data.selector.BitSelector;
+import pascal.hardscript.compiler.model.data.selector.PartSelector;
+import pascal.hardscript.compiler.model.data.selector.Selector;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.compiler.model.scope.SingleBinding;
@@ -46,11 +46,11 @@ public final class Evaluator {
         bindings.add(scope.getBinding());
     }
 
-    public InstanceType evaluateToInstanceType(ExprNode expr) {
+    public ComponentType evaluateToInstanceType(ExprNode expr) {
         return requiresInstanceType(expr.getSourceLoc(), evaluate(expr));
     }
 
-    public Port evaluateToPort(ExprNode expr) {
+    public ComponentPort evaluateToPort(ExprNode expr) {
         return requiresPort(expr.getSourceLoc(), evaluate(expr));
     }
 
@@ -66,9 +66,9 @@ public final class Evaluator {
         return castToBooleanValue(expr.getSourceLoc(), evaluate(expr));
     }
 
-    public Component.Factory<?> evaluateToComponentFactory(ExprNode expr) {
-        mode = EvaluationMode.COMPONENT_FACTORY;
-        var result = requiresComponentFactory(expr.getSourceLoc(), evaluate(expr));
+    public Data.Factory<?> evaluateToDataFactory(ExprNode expr) {
+        mode = EvaluationMode.DATA_FACTORY;
+        var result = requiresDataFactory(expr.getSourceLoc(), evaluate(expr));
         mode = EvaluationMode.COMMON;
         return result;
     }
@@ -89,7 +89,7 @@ public final class Evaluator {
         var base = evaluate(expr.getBase());
         var selector = evaluateSelector(expr.getSelector());
         return switch (base) {
-            case Component component -> ComponentAccess.of(component, selector);
+            case Data data -> DataAccess.of(data, selector);
             case ListEntity listValue -> listValue.select(selector);
             default -> {
                 log.error("{}: Expected component or list but got {}",
@@ -193,6 +193,7 @@ public final class Evaluator {
     private Entity evaluateNumberExpr(NumberExpr expr) {
         return switch (expr) {
             case BitVectorNumber bitVectorNumber -> BitVectorValue.of(bitVectorNumber.getRepresentation());
+            case BoolNumber boolNumber -> BooleanValue.of(boolNumber.getValue());
             case IntNumber intNumber -> Int32Value.of(intNumber.getValue());
         };
     }
@@ -258,7 +259,7 @@ public final class Evaluator {
         if (rhs instanceof ListEntity rhsList) {
             rhs = makeParallelTypeFromList(sourceLoc, rhsList);
         }
-        if (!(lhs instanceof InstanceType lhsType && rhs instanceof InstanceType rhsType)) {
+        if (!(lhs instanceof ComponentType lhsType && rhs instanceof ComponentType rhsType)) {
             log.error("Expected instance type but got {} and {}", lhs, rhs);
             throw new CompileCancellationException();
         }
@@ -266,28 +267,28 @@ public final class Evaluator {
     }
 
     private ParallelType makeParallelTypeFromList(SourceLoc sourceLoc, ListEntity list) {
-        if (list.entities().stream().allMatch(Predicate.not(InstanceType.class::isInstance))) {
+        if (list.entities().stream().allMatch(Predicate.not(ComponentType.class::isInstance))) {
             log.error("{}: Expected list of instance types but got {}", sourceLoc, list);
             throw new CompileCancellationException();
         }
-        return ParallelType.from(list.entities().stream().map(InstanceType.class::cast).toList());
+        return ParallelType.from(list.entities().stream().map(ComponentType.class::cast).toList());
     }
 
-    private Port evaluatePort(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
+    private ComponentPort evaluatePort(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
         if (!(lhs instanceof ListEntity lhsList && rhs instanceof ListEntity rhsList)) {
             log.error("{}: Expected list of components but got {} and {}", sourceLoc, lhs, rhs);
             throw new CompileCancellationException();
         }
-        return Port.of(makeAtomPortFromList(sourceLoc, lhsList), makeAtomPortFromList(sourceLoc, rhsList));
+        return ComponentPort.of(makeAtomPortFromList(sourceLoc, lhsList), makeAtomPortFromList(sourceLoc, rhsList));
     }
 
-    private List<Component> makeAtomPortFromList(SourceLoc sourceLoc, ListEntity list) {
+    private List<Data> makeAtomPortFromList(SourceLoc sourceLoc, ListEntity list) {
         if (!list.entities().isEmpty()
-                && list.entities().stream().allMatch(Predicate.not(Component.class::isInstance))) {
+                && list.entities().stream().allMatch(Predicate.not(Data.class::isInstance))) {
             log.error("{}: Expected list of components but got {}", sourceLoc, list);
             throw new CompileCancellationException();
         }
-        return list.entities().stream().map(Component.class::cast).toList();
+        return list.entities().stream().map(Data.class::cast).toList();
     }
 
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
@@ -347,12 +348,12 @@ public final class Evaluator {
 
     private Entity evaluateParamSymbolExpr(ParamSymbolExpr expr) {
         return switch (mode) {
-            case COMPONENT_FACTORY -> evaluateComponentFactory(expr);
+            case DATA_FACTORY -> evaluateComponentFactory(expr);
             case COMMON -> evaluateInstanceType(expr);
         };
     }
 
-    private Component.Factory<?> evaluateComponentFactory(ParamSymbolExpr expr) {
+    private Data.Factory<?> evaluateComponentFactory(ParamSymbolExpr expr) {
         var identifier = getIdentifierFrom(expr.getHead());
         var sourceLoc = expr.getSourceLoc();
         return switch (identifier.string()) {
@@ -365,7 +366,7 @@ public final class Evaluator {
         };
     }
 
-    private InstanceType evaluateInstanceType(ParamSymbolExpr expr) {
+    private ComponentType evaluateInstanceType(ParamSymbolExpr expr) {
         var identifier = getIdentifierFrom(expr.getHead());
         var parameters = expr.getArguments().stream().map(this::evaluate).toList();
         return AtomType.of(identifier, parameters);
@@ -400,6 +401,6 @@ public final class Evaluator {
     }
 
     enum EvaluationMode {
-        COMMON, COMPONENT_FACTORY
+        COMMON, DATA_FACTORY
     }
 }

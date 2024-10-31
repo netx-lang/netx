@@ -1,21 +1,21 @@
-package pascal.hardscript.compiler.ast.module;
+package pascal.hardscript.compiler.ast.component;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
 
 import java.util.Objects;
 
-public final class InstantiationNode extends ElementNode {
+public final class ComponentInstantiationNode extends ElementNode {
     private ExprNode type;
     private ExprNode port;
 
-    private InstantiationNode(ExprNode type, ExprNode port) {
+    private ComponentInstantiationNode(ExprNode type, ExprNode port) {
         this.type = type;
         this.port = port;
     }
 
-    public static InstantiationNode of(ExprNode type, ExprNode connection) {
-        return new InstantiationNode(type, connection);
+    public static ComponentInstantiationNode of(ExprNode type, ExprNode connection) {
+        return new ComponentInstantiationNode(type, connection);
     }
 
     @Override
@@ -46,7 +46,7 @@ public final class InstantiationNode extends ElementNode {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (InstantiationNode) obj;
+        var that = (ComponentInstantiationNode) obj;
         return Objects.equals(this.type, that.type) &&
                 Objects.equals(this.port, that.port);
     }

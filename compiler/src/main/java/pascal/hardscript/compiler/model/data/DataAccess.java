@@ -1,13 +1,13 @@
-package pascal.hardscript.compiler.model.components;
+package pascal.hardscript.compiler.model.data;
 
 import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.model.components.selector.Selector;
+import pascal.hardscript.compiler.model.data.selector.Selector;
 import pascal.hardscript.compiler.model.scope.Scope;
 
-public record ComponentAccess(Component base, Selector selector) implements Component {
+public record DataAccess(Data base, Selector selector) implements Data {
 
-    public static ComponentAccess of(Component base, Selector selector) {
-        return new ComponentAccess(base, selector);
+    public static DataAccess of(Data base, Selector selector) {
+        return new DataAccess(base, selector);
     }
 
     @Override

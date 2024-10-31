@@ -4,18 +4,18 @@ import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.elaborator.Evaluator;
 import pascal.hardscript.compiler.elaborator.NameAllocator;
 import pascal.hardscript.compiler.model.Entity;
-import pascal.hardscript.compiler.model.components.Component;
+import pascal.hardscript.compiler.model.data.Data;
 import pascal.hardscript.util.type.Pair;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-public abstract sealed class Scope permits BlockScope, DesignScope, ModuleScope {
+public abstract sealed class Scope permits BlockScope, DesignScope, ComponentScope {
     private final Scope parent;
     private final MapBinding binding = new MapBinding();
     private final List<Scope> children = new ArrayList<>();
     private final NameAllocator nameAllocator = new NameAllocator();
-    private final Set<Pair<Component, Component>> aliases = new HashSet<>();
+    private final Set<Pair<Data, Data>> aliases = new HashSet<>();
 
     private final Evaluator evaluator = new Evaluator(this);
 
@@ -47,11 +47,11 @@ public abstract sealed class Scope permits BlockScope, DesignScope, ModuleScope 
         return children;
     }
 
-    public void alias(Component a, Component b) {
+    public void alias(Data a, Data b) {
         aliases.add(new Pair<>(a, b));
     }
 
-    public Set<Pair<Component, Component>> getAliases() {
+    public Set<Pair<Data, Data>> getAliases() {
         return Collections.unmodifiableSet(aliases);
     }
 
@@ -59,8 +59,8 @@ public abstract sealed class Scope permits BlockScope, DesignScope, ModuleScope 
         binding.bind(identifier, entity);
     }
 
-    public ModuleScope instantiateModuleScope(Identifier identifier) {
-        var child = new ModuleScope(this, identifier);
+    public ComponentScope instantiateComponentScope(Identifier identifier) {
+        var child = new ComponentScope(this, identifier);
         children.add(child);
         return child;
     }
@@ -71,11 +71,11 @@ public abstract sealed class Scope permits BlockScope, DesignScope, ModuleScope 
         return child;
     }
 
-    public ModuleScope getUpperModule() {
+    public ComponentScope getUpperComponent() {
         return switch (parent) {
-            case ModuleScope module -> module;
+            case ComponentScope module -> module;
             case DesignScope ignored -> null;
-            default -> parent.getUpperModule();
+            default -> parent.getUpperComponent();
         };
     }
 

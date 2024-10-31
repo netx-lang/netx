@@ -20,15 +20,15 @@
           "id": "clk_3@2"
         },
         {
-          "type": "register",
-          "id": "c@3",
+          "type": "wire",
+          "id": "a@3",
           "width": 1
         },
         {
           "type": "builtin",
           "id": "NOT",
           "input": [
-            "c@3"
+            "a@3"
           ],
           "output": [
             "$i1@4"
@@ -38,7 +38,7 @@
           "type": "builtin",
           "id": "NOT",
           "input": [
-            "c@3"
+            "a@3"
           ],
           "output": [
             "$i2@5"
@@ -64,56 +64,56 @@
             "$i2@5"
           ],
           "output": [
-            "c@3"
+            "a@3"
           ]
         },
         {
           "type": "builtin",
-          "id": "STORE",
+          "id": "REG",
           "input": [
-            "c@3"
+            "a@3"
           ],
           "output": [
-            "c@3"
+            "a@3"
           ]
         },
         {
           "type": "builtin",
-          "id": "STORE",
+          "id": "REG",
           "input": [
-            "c@3"
+            "a@3"
           ],
           "output": [
-            "c@3"
+            "a@3"
           ]
         },
         {
           "type": "builtin",
           "id": "SPLIT",
           "input": [
-            "c@3"
+            "a@3"
           ],
           "output": [
-            "c@3",
-            "c@3"
+            "a@3",
+            "a@3"
           ]
         },
         {
           "type": "builtin",
-          "id": "STORE",
+          "id": "REG",
           "input": [
-            "c@3"
+            "a@3"
           ],
           "output": [
-            "c@3"
+            "a@3"
           ]
         },
         {
           "type": "builtin",
           "id": "OR",
           "input": [
-            "c@3",
-            "c@3"
+            "a@3",
+            "a@3"
           ],
           "output": [
             "clk_3@2"

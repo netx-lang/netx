@@ -1,22 +1,22 @@
 package pascal.hardscript.compiler.model.scope;
 
 import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.model.components.Component;
+import pascal.hardscript.compiler.model.data.Data;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public final class ModuleScope extends Scope {
+public final class ComponentScope extends Scope {
     private final int depth;
     private final Identifier identifier;
-    private final List<Component> inputs = new ArrayList<>();
-    private final List<Component> outputs = new ArrayList<>();
+    private final List<Data> inputs = new ArrayList<>();
+    private final List<Data> outputs = new ArrayList<>();
 
-    public ModuleScope(Scope parent, Identifier identifier) {
+    public ComponentScope(Scope parent, Identifier identifier) {
         super(parent);
         this.identifier = identifier;
-        this.depth = (getUpperModule() != null) ? getUpperModule().getDepth() + 1 : 0;
+        this.depth = (getUpperComponent() != null) ? getUpperComponent().getDepth() + 1 : 0;
     }
 
     public Identifier getIdentifier() {
@@ -27,19 +27,19 @@ public final class ModuleScope extends Scope {
         return depth;
     }
 
-    public List<Component> getInputs() {
+    public List<Data> getInputs() {
         return Collections.unmodifiableList(inputs);
     }
 
-    public List<Component> getOutputs() {
+    public List<Data> getOutputs() {
         return Collections.unmodifiableList(outputs);
     }
 
-    public void addInput(Component... inputs) {
+    public void addInput(Data... inputs) {
         Collections.addAll(this.inputs, inputs);
     }
 
-    public void addOutput(Component... outputs) {
+    public void addOutput(Data... outputs) {
         Collections.addAll(this.outputs, outputs);
     }
 }

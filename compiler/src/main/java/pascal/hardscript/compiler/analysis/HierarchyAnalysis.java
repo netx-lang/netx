@@ -9,18 +9,18 @@ import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.Identifier;
+import pascal.hardscript.compiler.ast.component.ComponentInstantiationNode;
+import pascal.hardscript.compiler.ast.component.ComponentNode;
 import pascal.hardscript.compiler.ast.expr.IdentifierSymbol;
 import pascal.hardscript.compiler.ast.expr.InterpolatedSymbol;
 import pascal.hardscript.compiler.ast.expr.ParamSymbolExpr;
-import pascal.hardscript.compiler.ast.module.InstantiationNode;
-import pascal.hardscript.compiler.ast.module.ModuleNode;
 
 import java.util.*;
 
 public final class HierarchyAnalysis extends ASTAnalysis<HierarchyAnalysis.AnalysisResult> {
     private static final Logger log = LoggerFactory.getLogger(HierarchyAnalysis.class);
     private final Graph<Identifier, DefaultEdge> dependencies = new SimpleDirectedGraph<>(DefaultEdge.class);
-    private final Map<Identifier, ModuleNode> dict = new HashMap<>();
+    private final Map<Identifier, ComponentNode> dict = new HashMap<>();
 
     public HierarchyAnalysis(DesignNode design) {
         super(design);
@@ -33,14 +33,14 @@ public final class HierarchyAnalysis extends ASTAnalysis<HierarchyAnalysis.Analy
     }
 
     private void buildDependencies() {
-        for (var module : design.getModules()) {
+        for (var module : design.getComponents()) {
             var identifier = module.getIdentifier();
             dependencies.addVertex(identifier);
             dict.put(identifier, module);
         }
 
-        design.getModules().stream().map(ModuleNode::getIdentifier).forEach(dependencies::addVertex);
-        for (var module : design.getModules()) {
+        design.getComponents().stream().map(ComponentNode::getIdentifier).forEach(dependencies::addVertex);
+        for (var module : design.getComponents()) {
             var from = module.getIdentifier();
             var collector = new InstantiationCollector();
             module.walk(collector);
@@ -51,8 +51,8 @@ public final class HierarchyAnalysis extends ASTAnalysis<HierarchyAnalysis.Analy
     }
 
     private AnalysisResult buildResult() {
-        List<ModuleNode> topModules = new ArrayList<>();
-        List<ModuleNode> topology = new ArrayList<>();
+        List<ComponentNode> topModules = new ArrayList<>();
+        List<ComponentNode> topology = new ArrayList<>();
         var iterator = new TopologicalOrderIterator<>(dependencies);
         iterator.forEachRemaining(id -> {
             var module = dict.get(id);
@@ -65,19 +65,19 @@ public final class HierarchyAnalysis extends ASTAnalysis<HierarchyAnalysis.Analy
     }
 
     private class InstantiationCollector implements ASTListener {
-        private final ModuleCollector moduleCollector = new ModuleCollector();
+        private final ComponentCollector componentCollector = new ComponentCollector();
 
         public Set<Identifier> references() {
-            return moduleCollector.references();
+            return componentCollector.references();
         }
 
         @Override
-        public void enter(InstantiationNode node) {
-            node.getType().walk(moduleCollector);
+        public void enter(ComponentInstantiationNode node) {
+            node.getType().walk(componentCollector);
         }
     }
 
-    private class ModuleCollector implements ASTListener {
+    private class ComponentCollector implements ASTListener {
         private final Set<Identifier> references = new HashSet<>();
 
         public Set<Identifier> references() {
@@ -104,7 +104,7 @@ public final class HierarchyAnalysis extends ASTAnalysis<HierarchyAnalysis.Analy
         }
     }
 
-    public record AnalysisResult(List<ModuleNode> topModules, List<ModuleNode> topology) {
+    public record AnalysisResult(List<ComponentNode> topModules, List<ComponentNode> topology) {
 
     }
 }

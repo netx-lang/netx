@@ -1,18 +1,18 @@
-package pascal.hardscript.compiler.model.components;
+package pascal.hardscript.compiler.model.data;
 
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.model.Entity;
-import pascal.hardscript.compiler.model.scope.ModuleScope;
+import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 
-public sealed interface Component extends Entity permits Clock, ComponentAccess, Wire {
+public sealed interface Data extends Entity permits Clock, DataAccess, Wire {
     Scope getParent();
 
     default int getDepth() {
-        if (getParent() instanceof ModuleScope module) {
+        if (getParent() instanceof ComponentScope module) {
             return module.getDepth();
         } else {
-            return getParent().getUpperModule().getDepth();
+            return getParent().getUpperComponent().getDepth();
         }
     }
 
@@ -20,7 +20,7 @@ public sealed interface Component extends Entity permits Clock, ComponentAccess,
 
     Identifier getIdentifier();
 
-    interface Factory<T extends Component> extends Entity {
+    interface Factory<T extends Data> extends Entity {
         T create(Identifier id);
     }
 

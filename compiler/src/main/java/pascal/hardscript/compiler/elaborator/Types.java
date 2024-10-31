@@ -6,12 +6,11 @@ import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
-import pascal.hardscript.compiler.model.components.Component;
-import pascal.hardscript.compiler.model.connection.InstanceType;
-import pascal.hardscript.compiler.model.connection.Port;
+import pascal.hardscript.compiler.model.component.ComponentPort;
+import pascal.hardscript.compiler.model.component.ComponentType;
+import pascal.hardscript.compiler.model.data.Data;
 import pascal.hardscript.compiler.model.value.BooleanValue;
 import pascal.hardscript.compiler.model.value.IntegerValue;
-import pascal.hardscript.compiler.model.value.Value;
 
 import java.util.List;
 
@@ -32,26 +31,26 @@ public final class Types {
         }
     }
 
-    public static InstanceType requiresInstanceType(SourceLoc loc, Entity entity) {
-        if (entity instanceof InstanceType instanceType) {
-            return instanceType;
+    public static ComponentType requiresInstanceType(SourceLoc loc, Entity entity) {
+        if (entity instanceof ComponentType componentType) {
+            return componentType;
         } else {
             log.error("{}: Expected instance type but got {}", loc, entity);
             throw new CompileCancellationException();
         }
     }
 
-    public static Component requiresComponent(SourceLoc loc, Entity entity) {
-        if (entity instanceof Component component) {
-            return component;
+    public static Data requiresComponent(SourceLoc loc, Entity entity) {
+        if (entity instanceof Data data) {
+            return data;
         } else {
             log.error("{}: Expected component but got {}", loc, entity);
             throw new CompileCancellationException();
         }
     }
 
-    public static Component.Factory<?> requiresComponentFactory(SourceLoc loc, Entity entity) {
-        if (entity instanceof Component.Factory<?> factory) {
+    public static Data.Factory<?> requiresDataFactory(SourceLoc loc, Entity entity) {
+        if (entity instanceof Data.Factory<?> factory) {
             return factory;
         } else {
             log.error("{}: Expected component factory but got {}", loc, entity);
@@ -59,20 +58,11 @@ public final class Types {
         }
     }
 
-    public static Port requiresPort(SourceLoc loc, Entity entity) {
-        if (entity instanceof Port port) {
+    public static ComponentPort requiresPort(SourceLoc loc, Entity entity) {
+        if (entity instanceof ComponentPort port) {
             return port;
         } else {
             log.error("{}: Expected port but got {}", loc, entity);
-            throw new CompileCancellationException();
-        }
-    }
-
-    public static Value requiresValue(SourceLoc loc, Entity entity) {
-        if (entity instanceof Value value) {
-            return value;
-        } else {
-            log.error("{}: Expected value but got {}", loc, entity);
             throw new CompileCancellationException();
         }
     }
@@ -95,15 +85,6 @@ public final class Types {
                 throw new CompileCancellationException();
             }
         };
-    }
-
-    public static BooleanValue requiresBooleanValue(SourceLoc loc, Entity entity) {
-        if (entity instanceof BooleanValue booleanValue) {
-            return booleanValue;
-        } else {
-            log.error("{}: Expected boolean value but got {}", loc, entity);
-            throw new CompileCancellationException();
-        }
     }
 
     public static ListEntity requiresList(SourceLoc loc, Entity entity) {

@@ -1,26 +1,26 @@
 package pascal.hardscript.compiler.ast.expr.qualifier;
 
 import pascal.hardscript.compiler.ast.ASTListener;
-import pascal.hardscript.compiler.ast.module.Binding;
+import pascal.hardscript.compiler.ast.component.BindingNode;
 
 import java.util.Objects;
 
 public final class BindingQualifier extends Qualifier {
-    private Binding binding;
+    private BindingNode binding;
 
-    private BindingQualifier(Binding binding) {
+    private BindingQualifier(BindingNode binding) {
         this.binding = binding;
     }
 
-    public static BindingQualifier of(Binding binding) {
+    public static BindingQualifier of(BindingNode binding) {
         return new BindingQualifier(binding);
     }
 
-    public Binding getBinding() {
+    public BindingNode getBinding() {
         return binding;
     }
 
-    public void setBinding(Binding binding) {
+    public void setBinding(BindingNode binding) {
         this.binding = binding;
     }
 

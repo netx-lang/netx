@@ -1,20 +1,20 @@
 grammar HardScript;
 
-design : module+;
+design : component+;
 
-module
-    : 'module' ID module_arguments? ':' type=expression '{' element* '}'
+component
+    : 'component' ID component_arguments? ':' type=expression '{' element* '}'
     ;
 
-module_arguments
+component_arguments
     : '(' ID (',' ID)* ')'
     ;
 
 element
-    : type=expression ':' connection=expression           # Instantiation
+    : type=expression ':' connection=expression           # ComponentInstantiation
     | 'for' '(' iterator ')' '{' element* '}'             # Loop
     | binding                                             # BindingStatement
-    | 'inst' primary_symbol (',' primary_symbol)* 'of' type=expression    # Component
+    | 'inst' primary_symbol (',' primary_symbol)* 'of' type=expression    # DataInstantiation
     ;
 
 expression
@@ -86,11 +86,14 @@ interpolation
 
 number
     : INTEGER          # IntNumber
+    | BOOLEAN          # BoolNumber
     | BIN_NUMBER       # BitVectorNumber
     | HEX_NUMBER       # BitVectorNumber
     | OCT_NUMBER       # BitVectorNumber
     | DEC_NUMBER       # BitVectorNumber
     ;
+
+BOOLEAN : 'true' | 'false';
 
 BIN_NUMBER : UNSIGNED_INTEGER '\'' [bB] [01] [01_]*;
 HEX_NUMBER : UNSIGNED_INTEGER '\'' [hH] [0-9a-fA-F] [0-9a-fA-F_]*;

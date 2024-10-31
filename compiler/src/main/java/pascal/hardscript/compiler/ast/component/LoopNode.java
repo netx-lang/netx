@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.ast.module;
+package pascal.hardscript.compiler.ast.component;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.expr.qualifier.GeneratorQualifier;

@@ -1,7 +1,7 @@
 package pascal.hardscript.compiler.analysis;
 
-import pascal.hardscript.compiler.model.components.Component;
-import pascal.hardscript.compiler.model.components.ComponentAccess;
+import pascal.hardscript.compiler.model.data.Data;
+import pascal.hardscript.compiler.model.data.DataAccess;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.util.collection.UnionFind;
 
@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.Objects;
 
 public class AliasAnalysis extends ModelAnalysis<AliasAnalysis.Result> {
-    private final UnionFind<Component> aliases = new UnionFind<>();
-    private final Map<Component, Component> representatives = new HashMap<>();
+    private final UnionFind<Data> aliases = new UnionFind<>();
+    private final Map<Data, Data> representatives = new HashMap<>();
 
     public AliasAnalysis(DesignScope design) {
         super(design);
@@ -33,7 +33,7 @@ public class AliasAnalysis extends ModelAnalysis<AliasAnalysis.Result> {
         return new Result(aliases, representatives);
     }
 
-    private boolean needUpdate(Component element, Component root) {
+    private boolean needUpdate(Data element, Data root) {
         if (representatives.containsKey(root)) {
             // replace when there is a higher level component
             var top = representatives.get(root);
@@ -41,56 +41,56 @@ public class AliasAnalysis extends ModelAnalysis<AliasAnalysis.Result> {
                 return true;
             }
             // ensure there is a fixed point
-            return !(element instanceof ComponentAccess) && top instanceof ComponentAccess;
+            return !(element instanceof DataAccess) && top instanceof DataAccess;
         }
         return true;
     }
 
     public static class Result {
-        private final UnionFind<Component> aliases;
-        private final Map<Component, Component> sourceRep;
+        private final UnionFind<Data> aliases;
+        private final Map<Data, Data> sourceRep;
 
-        public Result(UnionFind<Component> aliases,
-                      Map<Component, Component> sourceRep) {
+        public Result(UnionFind<Data> aliases,
+                      Map<Data, Data> sourceRep) {
             this.aliases = aliases;
             this.sourceRep = sourceRep;
         }
 
-        public boolean isBuiltinRep(Component component) {
-            return !hasSourceAlias(component) && aliases.find(component) == component;
+        public boolean isBuiltinRep(Data data) {
+            return !hasSourceAlias(data) && aliases.find(data) == data;
         }
 
-        public boolean hasSourceAlias(Component component) {
-            if (aliases.contains(component)) {
-                return sourceRep.containsKey(aliases.find(component));
+        public boolean hasSourceAlias(Data data) {
+            if (aliases.contains(data)) {
+                return sourceRep.containsKey(aliases.find(data));
             }
             return false;
         }
 
         @Nonnull
-        public Component repOf(Component component) {
+        public Data repOf(Data data) {
             while (true) {
-                var next = getNextRep(component);
-                if (next == component) {
-                    return component;
+                var next = getNextRep(data);
+                if (next == data) {
+                    return data;
                 }
-                component = next;
+                data = next;
             }
         }
 
         @Nonnull
-        private Component getNextRep(Component component) {
-            if (component instanceof ComponentAccess access) {
+        private Data getNextRep(Data data) {
+            if (data instanceof DataAccess access) {
                 var base = access.base();
                 if (hasSourceAlias(base) && repOf(base) != base) {
-                    return ComponentAccess.of(repOf(base), access.selector());
+                    return DataAccess.of(repOf(base), access.selector());
                 }
             }
-            if (aliases.contains(component)) {
-                var result = aliases.find(component);
+            if (aliases.contains(data)) {
+                var result = aliases.find(data);
                 return Objects.requireNonNullElse(sourceRep.get(result), result);
             }
-            return component;
+            return data;
         }
 
     }

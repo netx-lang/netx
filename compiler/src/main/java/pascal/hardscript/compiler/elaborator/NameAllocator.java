@@ -2,7 +2,7 @@ package pascal.hardscript.compiler.elaborator;
 
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.ast.SourceLoc;
-import pascal.hardscript.compiler.model.connection.AtomType;
+import pascal.hardscript.compiler.model.component.AtomType;
 
 public final class NameAllocator {
 

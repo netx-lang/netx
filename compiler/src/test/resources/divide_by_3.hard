@@ -1,4 +1,4 @@
-module Divide_by_3 : [clk] -> [clk_3] {
+component Divide_by_3 : [clk] -> [clk_3] {
     inst clk, clk_3 of clock()
     inst a, b, c    of wire(bit(1))
     [NOT, NOT] <> AND <> REG(a) <> REG(b) <> SPLIT(2) <> [REG(c), TO] <> OR : [a, b] -> [clk_3]

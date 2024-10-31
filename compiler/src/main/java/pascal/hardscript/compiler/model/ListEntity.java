@@ -1,8 +1,8 @@
 package pascal.hardscript.compiler.model;
 
-import pascal.hardscript.compiler.model.components.selector.BitSelector;
-import pascal.hardscript.compiler.model.components.selector.PartSelector;
-import pascal.hardscript.compiler.model.components.selector.Selector;
+import pascal.hardscript.compiler.model.data.selector.BitSelector;
+import pascal.hardscript.compiler.model.data.selector.PartSelector;
+import pascal.hardscript.compiler.model.data.selector.Selector;
 
 import java.util.List;
 

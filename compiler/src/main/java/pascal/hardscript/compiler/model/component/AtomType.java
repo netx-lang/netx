@@ -1,11 +1,11 @@
-package pascal.hardscript.compiler.model.connection;
+package pascal.hardscript.compiler.model.component;
 
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.model.Entity;
 
 import java.util.List;
 
-public record AtomType(Identifier identifier, List<Entity> parameters) implements InstanceType {
+public record AtomType(Identifier identifier, List<Entity> parameters) implements ComponentType {
 
     public static AtomType of(Identifier identifier) {
         return new AtomType(identifier, List.of());

@@ -1,9 +1,9 @@
-module full_adder: [a, b, cin] -> [out, cout] {
+component full_adder: [a, b, cin] -> [out, cout] {
     inst a, b, cin, out, cout of wire(bit(1))
     [half_adder, TO] <> [TO, half_adder] <> [OR, TO] : [a, b, cin] -> [cout, out]
 }
 
-module half_adder: [a, b] -> [carry, out] {
+component half_adder: [a, b] -> [carry, out] {
     inst a, b, out, carry of wire(bit(1))
     XOR : [a, b] -> [out]
     AND : [a, b] -> [carry]

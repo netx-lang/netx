@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.ast.module;
+package pascal.hardscript.compiler.ast.component;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.ASTNode;
@@ -8,23 +8,23 @@ import pascal.hardscript.compiler.ast.expr.ExprNode;
 import java.util.List;
 import java.util.Objects;
 
-public final class ModuleNode extends ASTNode {
+public final class ComponentNode extends ASTNode {
     private Identifier identifier;
     private ExprNode type;
     private final List<Identifier> arguments;
     private final List<ElementNode> elements;
 
-    private ModuleNode(Identifier identifier, ExprNode type,
-                       List<Identifier> arguments, List<ElementNode> elements) {
+    private ComponentNode(Identifier identifier, ExprNode type,
+                          List<Identifier> arguments, List<ElementNode> elements) {
         this.identifier = identifier;
         this.type = type;
         this.arguments = arguments;
         this.elements = elements;
     }
 
-    public static ModuleNode of(Identifier id, ExprNode type,
-                                List<Identifier> arguments, List<ElementNode> elements) {
-        return new ModuleNode(id, type, arguments, elements);
+    public static ComponentNode of(Identifier id, ExprNode type,
+                                   List<Identifier> arguments, List<ElementNode> elements) {
+        return new ComponentNode(id, type, arguments, elements);
     }
 
     @Override
@@ -63,7 +63,7 @@ public final class ModuleNode extends ASTNode {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (ModuleNode) obj;
+        var that = (ComponentNode) obj;
         return Objects.equals(this.identifier, that.identifier) &&
                 Objects.equals(this.type, that.type) &&
                 Objects.equals(this.arguments, that.arguments) &&
@@ -77,7 +77,7 @@ public final class ModuleNode extends ASTNode {
 
     @Override
     public String toString() {
-        return "ModuleNode[" +
+        return "Component[" +
                 "id=" + identifier + ", " +
                 "arguments=" + arguments + ", " +
                 "type=" + type + ", " +

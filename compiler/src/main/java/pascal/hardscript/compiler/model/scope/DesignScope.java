@@ -3,22 +3,22 @@ package pascal.hardscript.compiler.model.scope;
 import pascal.hardscript.compiler.ast.Identifier;
 
 public final class DesignScope extends Scope {
-    private final ModuleInfo moduleInfo;
+    private final ComponentInfo componentInfo;
 
-    DesignScope(Scope parent, ModuleInfo moduleInfo) {
+    DesignScope(Scope parent, ComponentInfo componentInfo) {
         super(parent);
-        this.moduleInfo = moduleInfo;
+        this.componentInfo = componentInfo;
     }
 
-    public ModuleInfo getModuleInfo() {
-        return moduleInfo;
+    public ComponentInfo getComponentInfo() {
+        return componentInfo;
     }
 
     public boolean containsInfo(Identifier identifier) {
-        return moduleInfo.contains(identifier);
+        return componentInfo.contains(identifier);
     }
 
-    public static DesignScope newDesign(ModuleInfo moduleInfo) {
-        return new DesignScope(null, moduleInfo);
+    public static DesignScope newDesign(ComponentInfo componentInfo) {
+        return new DesignScope(null, componentInfo);
     }
 }

@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.ast.module;
+package pascal.hardscript.compiler.ast.component;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
@@ -7,17 +7,17 @@ import pascal.hardscript.compiler.ast.expr.PrimarySymbol;
 import java.util.List;
 import java.util.Objects;
 
-public final class ComponentNode extends ElementNode {
+public final class DataInstantiationNode extends ElementNode {
     private final List<PrimarySymbol> symbols;
     private ExprNode type;
 
-    private ComponentNode(List<PrimarySymbol> symbols, ExprNode type) {
+    private DataInstantiationNode(List<PrimarySymbol> symbols, ExprNode type) {
         this.symbols = symbols;
         this.type = type;
     }
 
-    public static ComponentNode of(List<PrimarySymbol> ids, ExprNode type) {
-        return new ComponentNode(ids, type);
+    public static DataInstantiationNode of(List<PrimarySymbol> ids, ExprNode type) {
+        return new DataInstantiationNode(ids, type);
     }
 
     @Override
@@ -43,7 +43,7 @@ public final class ComponentNode extends ElementNode {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (ComponentNode) obj;
+        var that = (DataInstantiationNode) obj;
         return Objects.equals(this.symbols, that.symbols) &&
                 Objects.equals(this.type, that.type);
     }
@@ -55,7 +55,7 @@ public final class ComponentNode extends ElementNode {
 
     @Override
     public String toString() {
-        return "ComponentNode[" +
+        return "DataInst[" +
                 "ids=" + symbols + ", " +
                 "type=" + type + ']';
     }

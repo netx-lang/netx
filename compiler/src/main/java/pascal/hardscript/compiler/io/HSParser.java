@@ -6,6 +6,7 @@ import pascal.hardscript.compiler.antlr.HardScriptParser.*;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.ast.SourceLoc;
+import pascal.hardscript.compiler.ast.component.*;
 import pascal.hardscript.compiler.ast.expr.*;
 import pascal.hardscript.compiler.ast.expr.qualifier.BindingQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.FilterQualifier;
@@ -14,9 +15,7 @@ import pascal.hardscript.compiler.ast.expr.qualifier.Qualifier;
 import pascal.hardscript.compiler.ast.expr.selector.BitSelector;
 import pascal.hardscript.compiler.ast.expr.selector.PartSelector;
 import pascal.hardscript.compiler.ast.expr.selector.Selector;
-import pascal.hardscript.compiler.ast.module.*;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
-import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.lang.BitVector;
 
 import java.util.List;
@@ -24,16 +23,16 @@ import java.util.List;
 public final class HSParser {
 
     public static DesignNode parseDesign(DesignContext ctx) {
-        var result = DesignNode.of(ctx.module().stream().map(HSParser::parseModule).toList());
+        var result = DesignNode.of(ctx.component().stream().map(HSParser::parseComponent).toList());
         result.setSourceLoc(SourceLoc.from(ctx.getStart()));
         return result;
     }
 
-    static ModuleNode parseModule(ModuleContext ctx) {
-        List<Identifier> arguments = ctx.module_arguments() != null
-                ? ctx.module_arguments().ID().stream().map(HSParser::parseIdentifier).toList()
+    static ComponentNode parseComponent(ComponentContext ctx) {
+        List<Identifier> arguments = ctx.component_arguments() != null
+                ? ctx.component_arguments().ID().stream().map(HSParser::parseIdentifier).toList()
                 : List.of();
-        var result = ModuleNode.of(parseIdentifier(ctx.ID()), parseExpr(ctx.type), arguments,
+        var result = ComponentNode.of(parseIdentifier(ctx.ID()), parseExpr(ctx.type), arguments,
                 ctx.element().stream().map(HSParser::parseElement).toList());
         result.setSourceLoc(SourceLoc.from(ctx.getStart()));
         return result;
@@ -41,8 +40,8 @@ public final class HSParser {
     static ElementNode parseElement(ElementContext ctx) {
         var result = switch (ctx) {
             case BindingStatementContext sub -> parseBinding(sub.binding());
-            case InstantiationContext sub -> parseInstantiation(sub);
-            case ComponentContext sub -> parseComponent(sub);
+            case DataInstantiationContext sub -> parseDataInstantiationNode(sub);
+            case ComponentInstantiationContext sub -> parseComponentInstantiation(sub);
             case LoopContext sub -> parseLoop(sub);
             default -> throw new ShallNotReachHereError();
         };
@@ -50,8 +49,8 @@ public final class HSParser {
         return result;
     }
 
-    static InstantiationNode parseInstantiation(InstantiationContext ctx) {
-        return InstantiationNode.of(parseExpr(ctx.type), parseExpr(ctx.connection));
+    static ComponentInstantiationNode parseComponentInstantiation(ComponentInstantiationContext ctx) {
+        return ComponentInstantiationNode.of(parseExpr(ctx.type), parseExpr(ctx.connection));
     }
 
     static LoopNode parseLoop(LoopContext ctx) {
@@ -60,8 +59,8 @@ public final class HSParser {
                 ctx.element().stream().map(HSParser::parseElement).toList());
     }
 
-    static ComponentNode parseComponent(ComponentContext ctx) {
-        return ComponentNode.of(
+    static DataInstantiationNode parseDataInstantiationNode(DataInstantiationContext ctx) {
+        return DataInstantiationNode.of(
                 ctx.primary_symbol().stream().map(HSParser::parsePrimarySymbol).toList(), parseExpr(ctx.type));
     }
 
@@ -122,8 +121,8 @@ public final class HSParser {
         return result;
     }
 
-    static Binding parseBinding(BindingContext ctx) {
-        return Binding.of(parsePrimarySymbol(ctx.primary_symbol()), parseExpr(ctx.expression()));
+    static BindingNode parseBinding(BindingContext ctx) {
+        return BindingNode.of(parsePrimarySymbol(ctx.primary_symbol()), parseExpr(ctx.expression()));
     }
 
     static ExprNode parseUnaryExpr(UnaryExprContext ctx) {
@@ -171,8 +170,9 @@ public final class HSParser {
     static NumberExpr parseNumberExpr(NumberContext ctx) {
         return switch (ctx) {
             case IntNumberContext sub -> IntNumber.of(Integer.parseInt(sub.INTEGER().getText()));
+            case BoolNumberContext sub -> BoolNumber.of(Boolean.parseBoolean(sub.BOOLEAN().getText()));
             case BitVectorNumberContext sub -> parseBitVectorNumber(sub);
-            default -> throw new TodoException("Numeric Literals");
+            default -> throw new ShallNotReachHereError();
         };
     }
 
