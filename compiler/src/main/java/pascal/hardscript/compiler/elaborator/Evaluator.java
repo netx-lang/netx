@@ -3,14 +3,12 @@ package pascal.hardscript.compiler.elaborator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.ast.Interpolated;
 import pascal.hardscript.compiler.ast.SourceLoc;
-import pascal.hardscript.compiler.ast.Symbol;
 import pascal.hardscript.compiler.ast.expr.*;
-import pascal.hardscript.compiler.ast.expr.qualifier.BindingQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.FilterQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.GeneratorQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.Qualifier;
+import pascal.hardscript.compiler.ast.module.Binding;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
@@ -19,7 +17,6 @@ import pascal.hardscript.compiler.model.components.selector.BitSelector;
 import pascal.hardscript.compiler.model.components.selector.PartSelector;
 import pascal.hardscript.compiler.model.components.selector.Selector;
 import pascal.hardscript.compiler.model.connection.*;
-import pascal.hardscript.compiler.model.scope.Binding;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.compiler.model.scope.SingleBinding;
@@ -37,7 +34,7 @@ import static pascal.hardscript.compiler.elaborator.Types.*;
 
 public final class Evaluator {
     private static final Logger log = LoggerFactory.getLogger(Evaluator.class);
-    private final LinkedList<Binding> bindings = new LinkedList<>();
+    private final LinkedList<pascal.hardscript.compiler.model.scope.Binding> bindings = new LinkedList<>();
     private EvaluationMode mode = EvaluationMode.COMMON;
     private final Scope scope;
 
@@ -171,7 +168,7 @@ public final class Evaluator {
                         result = List.of();
                     }
                 }
-                case BindingQualifier binding -> {
+                case Binding binding -> {
                     var id = getIdentifierFrom(binding.getHead());
                     var value = evaluate(binding.getExpr());
                     overrideBindings(SingleBinding.of(id, value));
@@ -378,14 +375,14 @@ public final class Evaluator {
     public Identifier getIdentifierFrom(Symbol symbol) {
         return switch (symbol) {
             case Identifier id -> id;
-            case Interpolated interpolated -> evaluateInterpolation(interpolated);
+            case InterpolatedSymbol interpolated -> evaluateInterpolation(interpolated);
         };
     }
 
-    private Identifier evaluateInterpolation(Interpolated interpolated) {
+    private Identifier evaluateInterpolation(InterpolatedSymbol interpolated) {
         var sb = new StringBuilder();
-        var exprIter = interpolated.exprs().iterator();
-        for (var fragment : interpolated.fragments()) {
+        var exprIter = interpolated.getExprs().iterator();
+        for (var fragment : interpolated.getFragments()) {
             sb.append(fragment);
             sb.append(evaluate(exprIter.next()));
         }
@@ -395,7 +392,7 @@ public final class Evaluator {
         return result;
     }
 
-    private void overrideBindings(Binding binding) {
+    private void overrideBindings(pascal.hardscript.compiler.model.scope.Binding binding) {
         bindings.addFirst(binding);
     }
 

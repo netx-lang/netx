@@ -1,12 +1,12 @@
 module top : [input] -> [output] {
-    inst input : wire(bit(8))
-    inst output : wire(bit(3))
+    inst input of wire(bit(8))
+    inst output of wire(bit(3))
     encoder(3) : [input] -> [output]
 }
 
 module encoder(width) : [code] -> [output] {
-    inst code : wire(bit(2**width))
-    inst output : wire(bit(width))
+    inst code of wire(bit(2**width))
+    inst output of wire(bit(width))
 
     for (i in [0..width]) {
         OR(width + 1) :

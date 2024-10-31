@@ -1,45 +1,27 @@
 package pascal.hardscript.compiler.ast.expr.qualifier;
 
 import pascal.hardscript.compiler.ast.ASTListener;
-import pascal.hardscript.compiler.ast.Symbol;
-import pascal.hardscript.compiler.ast.expr.ExprNode;
+import pascal.hardscript.compiler.ast.module.Binding;
 
 import java.util.Objects;
 
 public final class BindingQualifier extends Qualifier {
-    private Symbol head;
-    private ExprNode expr;
+    private Binding binding;
 
-    private BindingQualifier(Symbol head, ExprNode expr) {
-        this.head = head;
-        this.expr = expr;
+    private BindingQualifier(Binding binding) {
+        this.binding = binding;
     }
 
-    public static BindingQualifier of(Symbol head, ExprNode expr) {
-        return new BindingQualifier(head, expr);
+    public static BindingQualifier of(Binding binding) {
+        return new BindingQualifier(binding);
     }
 
-    @Override
-    public void walk(ASTListener listener) {
-        listener.enter(this);
-        expr.walk(listener);
-        listener.exit(this);
+    public Binding getBinding() {
+        return binding;
     }
 
-    public Symbol getHead() {
-        return head;
-    }
-
-    public void setHead(Symbol head) {
-        this.head = head;
-    }
-
-    public ExprNode getExpr() {
-        return expr;
-    }
-
-    public void setExpr(ExprNode expr) {
-        this.expr = expr;
+    public void setBinding(Binding binding) {
+        this.binding = binding;
     }
 
     @Override
@@ -47,19 +29,22 @@ public final class BindingQualifier extends Qualifier {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (BindingQualifier) obj;
-        return Objects.equals(this.head, that.head) &&
-                Objects.equals(this.expr, that.expr);
+        return Objects.equals(this.binding, that.binding);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(head, expr);
+        return Objects.hash(binding);
     }
 
     @Override
     public String toString() {
         return "BindingQualifier[" +
-                "head=" + head + ", " +
-                "expr=" + expr + ']';
+                "binding=" + binding + ']';
+    }
+
+    @Override
+    public void walk(ASTListener listener) {
+
     }
 }

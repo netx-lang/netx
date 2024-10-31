@@ -1,12 +1,12 @@
 module top : [] -> [] {
-    inst input : wire(bit(3))
-    inst output : wire(bit(8))
+    inst input of wire(bit(3))
+    inst output of wire(bit(8))
     decoder(3) : [input] -> [output]
 }
 
 module decoder(width) : [code] -> [output] {
-    inst code : wire(bit(width))
-    inst output : wire(bit(2**width))
+    inst code of wire(bit(width))
+    inst output of wire(bit(2**width))
 
     for (i in [0..2**width]) {
         [port | j in [0..width],

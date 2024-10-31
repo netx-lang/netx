@@ -6,10 +6,7 @@ import pascal.hardscript.compiler.ast.expr.qualifier.FilterQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.GeneratorQualifier;
 import pascal.hardscript.compiler.ast.expr.selector.BitSelector;
 import pascal.hardscript.compiler.ast.expr.selector.PartSelector;
-import pascal.hardscript.compiler.ast.module.ComponentNode;
-import pascal.hardscript.compiler.ast.module.InstantiationNode;
-import pascal.hardscript.compiler.ast.module.LoopNode;
-import pascal.hardscript.compiler.ast.module.ModuleNode;
+import pascal.hardscript.compiler.ast.module.*;
 
 public interface ASTListener {
 
@@ -58,6 +55,14 @@ public interface ASTListener {
     }
 
     default void exit(LoopNode node) {
+        exitDefault(node);
+    }
+
+    default void enter(Binding node) {
+        enterDefault(node);
+    }
+
+    default void exit(Binding node) {
         exitDefault(node);
     }
 
@@ -125,14 +130,6 @@ public interface ASTListener {
         exitDefault(node);
     }
 
-    default void enter(ParamSymbolExpr node) {
-        enterDefault(node);
-    }
-
-    default void exit(ParamSymbolExpr node) {
-        exitDefault(node);
-    }
-
     default void enter(BinaryExpr node) {
         enterDefault(node);
     }
@@ -181,11 +178,27 @@ public interface ASTListener {
         exitDefault(node);
     }
 
-    default void enter(SymbolExpr node) {
+    default void enter(IdentifierSymbol node) {
         enterDefault(node);
     }
 
-    default void exit(SymbolExpr node) {
+    default void exit(IdentifierSymbol node) {
+        exitDefault(node);
+    }
+
+    default void enter(InterpolatedSymbol node) {
+        enterDefault(node);
+    }
+
+    default void exit(InterpolatedSymbol node) {
+        exitDefault(node);
+    }
+
+    default void enter(ParamSymbolExpr node) {
+        enterDefault(node);
+    }
+
+    default void exit(ParamSymbolExpr node) {
         exitDefault(node);
     }
 }

@@ -4,12 +4,11 @@ import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.antlr.HardScriptParser;
 import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.ast.Interpolated;
 import pascal.hardscript.compiler.ast.expr.*;
-import pascal.hardscript.compiler.ast.expr.qualifier.BindingQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.GeneratorQualifier;
 import pascal.hardscript.compiler.ast.expr.selector.BitSelector;
 import pascal.hardscript.compiler.ast.expr.selector.PartSelector;
+import pascal.hardscript.compiler.ast.module.Binding;
 
 import java.util.List;
 
@@ -25,13 +24,13 @@ class HSParserUnitTest {
     @Test
     void testParseIdentifier() {
         var context = makeParser("check_${[a, b]}_this_${man}");
-        var identifier = HSParser.parseSymbol(context.symbol());
-        assertEquals(Interpolated.of(
+        var identifier = HSParser.parsePrimarySymbol(context.primary_symbol());
+        assertEquals(InterpolatedSymbol.of(
                         List.of("check_", "_this_"),
                         List.of(CommonList.of(
-                                List.of(SymbolExpr.of(Identifier.of("a")),
-                                        SymbolExpr.of(Identifier.of("b")))),
-                                SymbolExpr.of(Identifier.of("man")))), identifier);
+                                        List.of(IdentifierSymbol.of(Identifier.of("a")),
+                                                IdentifierSymbol.of(Identifier.of("b")))),
+                                IdentifierSymbol.of(Identifier.of("man")))), identifier);
     }
 
     @Test
@@ -53,11 +52,11 @@ class HSParserUnitTest {
                         GeneratorQualifier.of(
                                 Identifier.of("i"),
                                 RangeList.of(IntNumber.of(0), IntNumber.of(5))),
-                        BindingQualifier.of(
+                        Binding.of(
                                 Identifier.of("port"),
                                 CommonList.of(List.of(
                                         IntNumber.of(1),
-                                        SymbolExpr.of(Interpolated.of(
+                                        SymbolExpr.of(InterpolatedSymbol.of(
                                                 List.of("x_"),
                                                 List.of(SymbolExpr.of(Identifier.of("i")))))))))), listExpr);
     }

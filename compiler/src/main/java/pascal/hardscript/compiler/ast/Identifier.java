@@ -2,8 +2,9 @@ package pascal.hardscript.compiler.ast;
 
 import java.util.Objects;
 
-public final class Identifier extends Symbol {
+public final class Identifier {
     private final String string;
+    private SourceLoc sourceLoc;
 
     private Identifier(String string) {
         this.string = string;
@@ -15,6 +16,18 @@ public final class Identifier extends Symbol {
 
     public String string() {
         return string;
+    }
+
+    public String getString() {
+        return string;
+    }
+
+    public SourceLoc getSourceLoc() {
+        return sourceLoc;
+    }
+
+    public void setSourceLoc(SourceLoc sourceLoc) {
+        this.sourceLoc = sourceLoc;
     }
 
     @Override

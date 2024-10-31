@@ -1,22 +1,22 @@
 package pascal.hardscript.compiler.ast.module;
 
 import pascal.hardscript.compiler.ast.ASTListener;
-import pascal.hardscript.compiler.ast.Symbol;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
+import pascal.hardscript.compiler.ast.expr.PrimarySymbol;
 
 import java.util.List;
 import java.util.Objects;
 
 public final class ComponentNode extends ElementNode {
-    private final List<Symbol> symbols;
+    private final List<PrimarySymbol> symbols;
     private ExprNode type;
 
-    private ComponentNode(List<Symbol> symbols, ExprNode type) {
+    private ComponentNode(List<PrimarySymbol> symbols, ExprNode type) {
         this.symbols = symbols;
         this.type = type;
     }
 
-    public static ComponentNode of(List<Symbol> ids, ExprNode type) {
+    public static ComponentNode of(List<PrimarySymbol> ids, ExprNode type) {
         return new ComponentNode(ids, type);
     }
 
@@ -27,7 +27,7 @@ public final class ComponentNode extends ElementNode {
         listener.exit(this);
     }
 
-    public List<Symbol> getSymbols() {
+    public List<PrimarySymbol> getSymbols() {
         return symbols;
     }
 

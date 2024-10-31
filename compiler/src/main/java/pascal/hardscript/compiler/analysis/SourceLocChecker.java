@@ -3,7 +3,7 @@ package pascal.hardscript.compiler.analysis;
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.ASTNode;
 import pascal.hardscript.compiler.ast.DesignNode;
-import pascal.hardscript.compiler.ast.expr.SymbolExpr;
+import pascal.hardscript.compiler.ast.expr.IdentifierSymbol;
 
 import java.util.Objects;
 
@@ -25,7 +25,7 @@ public final class SourceLocChecker extends ASTAnalysis<Void> implements ASTList
     }
 
     @Override
-    public void enter(SymbolExpr node) {
-        Objects.requireNonNull(node.getSymbol().getSourceLoc());
+    public void enter(IdentifierSymbol node) {
+        Objects.requireNonNull(node.getIdentifier().getSourceLoc());
     }
 }

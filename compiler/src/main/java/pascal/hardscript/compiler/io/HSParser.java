@@ -3,7 +3,9 @@ package pascal.hardscript.compiler.io;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import pascal.hardscript.compiler.antlr.HardScriptParser.*;
-import pascal.hardscript.compiler.ast.*;
+import pascal.hardscript.compiler.ast.DesignNode;
+import pascal.hardscript.compiler.ast.Identifier;
+import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.ast.expr.*;
 import pascal.hardscript.compiler.ast.expr.qualifier.BindingQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.FilterQualifier;
@@ -38,6 +40,7 @@ public final class HSParser {
     }
     static ElementNode parseElement(ElementContext ctx) {
         var result = switch (ctx) {
+            case BindingStatementContext sub -> parseBinding(sub.binding());
             case InstantiationContext sub -> parseInstantiation(sub);
             case ComponentContext sub -> parseComponent(sub);
             case LoopContext sub -> parseLoop(sub);
@@ -59,24 +62,31 @@ public final class HSParser {
 
     static ComponentNode parseComponent(ComponentContext ctx) {
         return ComponentNode.of(
-                ctx.symbol().stream().map(HSParser::parseSymbol).toList(), parseExpr(ctx.type));
+                ctx.primary_symbol().stream().map(HSParser::parsePrimarySymbol).toList(), parseExpr(ctx.type));
     }
 
     static ExprNode parseExpr(ExpressionContext ctx) {
         var result = switch (ctx) {
-            case SymbolExprContext sub -> SymbolExpr.of(parseSymbol(sub.symbol()));
+            case SymbolExprContext sub -> parseSymbolExpr(sub.symbol());
             case NumberExprContext sub -> parseNumberExpr(sub.number());
             case ListExprContext sub -> parseListExpr(sub.list());
             case UnaryExprContext sub -> parseUnaryExpr(sub);
             case BinaryExprContext sub -> parseBinaryExpr(sub);
             case AccessExprContext sub -> parseAccessExpr(sub);
-            case ParamSymbolExprContext sub -> parseParamSymbolExpr(sub);
             case ConditionalExprContext sub -> parseConditionalExpr(sub);
             case ParenExprContext sub -> parseExpr(sub.expression());
             default -> throw new ShallNotReachHereError();
         };
         result.setSourceLoc(SourceLoc.from(ctx.getStart()));
         return result;
+    }
+
+    static SymbolExpr parseSymbolExpr(SymbolContext ctx) {
+        return switch (ctx) {
+            case PrimarySymbolExprContext sub -> parsePrimarySymbol(sub.primary_symbol());
+            case ParamSymbolExprContext sub -> parseParamSymbolExpr(sub);
+            default -> throw new ShallNotReachHereError();
+        };
     }
 
     static ListExpr parseListExpr(ListContext ctx) {
@@ -99,7 +109,7 @@ public final class HSParser {
         var result = switch (ctx) {
             case GeneratorContext sub -> parseGeneratorQualifier(sub.iterator());
             case FilterContext sub -> FilterQualifier.of(parseExpr(sub.expression()));
-            case LocalBindingContext sub -> BindingQualifier.of(parseSymbol(sub.symbol()), parseExpr(sub.expression()));
+            case LocalBindingContext sub -> BindingQualifier.of(parseBinding(sub.binding()));
             default -> throw new ShallNotReachHereError();
         };
         result.setSourceLoc(SourceLoc.from(ctx.getStart()));
@@ -107,9 +117,13 @@ public final class HSParser {
     }
 
     static GeneratorQualifier parseGeneratorQualifier(IteratorContext ctx) {
-        var result = GeneratorQualifier.of(parseSymbol(ctx.symbol()), parseExpr(ctx.expression()));
+        var result = GeneratorQualifier.of(parsePrimarySymbol(ctx.primary_symbol()), parseExpr(ctx.expression()));
         result.setSourceLoc(SourceLoc.from(ctx.getStart()));
         return result;
+    }
+
+    static Binding parseBinding(BindingContext ctx) {
+        return Binding.of(parsePrimarySymbol(ctx.primary_symbol()), parseExpr(ctx.expression()));
     }
 
     static ExprNode parseUnaryExpr(UnaryExprContext ctx) {
@@ -195,7 +209,7 @@ public final class HSParser {
 
     static ParamSymbolExpr parseParamSymbolExpr(ParamSymbolExprContext ctx) {
         return ParamSymbolExpr.of(
-                SymbolExpr.of(parseSymbol(ctx.symbol())),
+                parsePrimarySymbol(ctx.primary_symbol()),
                 ctx.expression().stream().map(HSParser::parseExpr).toList());
     }
 
@@ -209,10 +223,10 @@ public final class HSParser {
         return result;
     }
 
-    static Symbol parseSymbol(SymbolContext ctx) {
+    static PrimarySymbol parsePrimarySymbol(Primary_symbolContext ctx) {
         var result = switch (ctx) {
-            case IdentifierContext sub -> Identifier.of(sub.ID().getText());
-            case InterpolatedContext sub -> Interpolated.of(
+            case IdentifierContext sub -> IdentifierSymbol.of(Identifier.of(sub.ID().getText()));
+            case InterpolatedContext sub -> InterpolatedSymbol.of(
                     sub.ID().stream().map(ParseTree::getText).toList(),
                     sub.interpolation().stream()
                             .map(InterpolationContext::expression)

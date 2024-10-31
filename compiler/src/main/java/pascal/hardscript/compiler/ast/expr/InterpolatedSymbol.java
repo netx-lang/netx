@@ -1,28 +1,35 @@
-package pascal.hardscript.compiler.ast;
+package pascal.hardscript.compiler.ast.expr;
 
-import pascal.hardscript.compiler.ast.expr.ExprNode;
+import pascal.hardscript.compiler.ast.ASTListener;
 
 import java.util.List;
 import java.util.Objects;
 
-public final class Interpolated extends Symbol {
+public final class InterpolatedSymbol extends PrimarySymbol {
     private final List<String> fragments;
     private final List<ExprNode> exprs;
 
-    private Interpolated(List<String> fragments, List<ExprNode> exprs) {
+    private InterpolatedSymbol(List<String> fragments, List<ExprNode> exprs) {
         this.fragments = fragments;
         this.exprs = exprs;
     }
 
-    public static Interpolated of(List<String> fragments, List<ExprNode> exprs) {
-        return new Interpolated(fragments, exprs);
+    public static InterpolatedSymbol of(List<String> fragments, List<ExprNode> exprs) {
+        return new InterpolatedSymbol(fragments, exprs);
     }
 
-    public List<String> fragments() {
+    @Override
+    public void walk(ASTListener listener) {
+        listener.enter(this);
+        exprs.forEach(expr -> expr.walk(listener));
+        listener.exit(this);
+    }
+
+    public List<String> getFragments() {
         return fragments;
     }
 
-    public List<ExprNode> exprs() {
+    public List<ExprNode> getExprs() {
         return exprs;
     }
 
@@ -30,7 +37,7 @@ public final class Interpolated extends Symbol {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (Interpolated) obj;
+        var that = (InterpolatedSymbol) obj;
         return Objects.equals(this.fragments, that.fragments) &&
                 Objects.equals(this.exprs, that.exprs);
     }

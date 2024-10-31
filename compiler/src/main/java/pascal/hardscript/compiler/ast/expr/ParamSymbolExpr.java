@@ -5,7 +5,7 @@ import pascal.hardscript.compiler.ast.ASTListener;
 import java.util.List;
 import java.util.Objects;
 
-public final class ParamSymbolExpr extends ExprNode {
+public final class ParamSymbolExpr extends SymbolExpr {
     private SymbolExpr head;
     private final List<ExprNode> arguments;
 

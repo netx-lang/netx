@@ -12,15 +12,14 @@ module_arguments
 
 element
     : type=expression ':' connection=expression           # Instantiation
-    | 'inst' symbol (',' symbol)* ':' type=expression     # Component
     | 'for' '(' iterator ')' '{' element* '}'             # Loop
+    | binding                                             # BindingStatement
+    | 'inst' primary_symbol (',' primary_symbol)* 'of' type=expression    # Component
     ;
 
 expression
     : symbol                                                        # SymbolExpr
     | number                                                        # NumberExpr
-    | symbol '(' expression (',' expression)* ')'                   # ParamSymbolExpr
-    | symbol '(' ')'                                                # ParamSymbolExpr
     | '[' list ']'                                                  # ListExpr
     | op=('+' | '-' | '~' | '!') expression                         # UnaryExpr
     | lhs=expression op='<>' rhs=expression                         # BinaryExpr
@@ -59,14 +58,24 @@ list
 qualifier
     : iterator                    # Generator
     | 'when' expression           # Filter
-    | 'let' symbol '=' expression # LocalBinding
+    | binding                     # LocalBinding
     ;
 
 iterator
-    : symbol 'in' expression
+    : primary_symbol 'in' expression
+    ;
+
+binding
+    : 'let' primary_symbol '=' expression
     ;
 
 symbol
+    : primary_symbol                                      # PrimarySymbolExpr
+    | primary_symbol '(' expression (',' expression)* ')' # ParamSymbolExpr
+    | primary_symbol '(' ')'                              # ParamSymbolExpr
+    ;
+
+primary_symbol
     : ID # Identifier
     | ID (interpolation | ID)+ # Interpolated
     ;

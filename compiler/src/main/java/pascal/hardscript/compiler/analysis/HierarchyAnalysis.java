@@ -6,7 +6,10 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pascal.hardscript.compiler.ast.*;
+import pascal.hardscript.compiler.ast.ASTListener;
+import pascal.hardscript.compiler.ast.DesignNode;
+import pascal.hardscript.compiler.ast.Identifier;
+import pascal.hardscript.compiler.ast.expr.InterpolatedSymbol;
 import pascal.hardscript.compiler.ast.expr.ParamSymbolExpr;
 import pascal.hardscript.compiler.ast.expr.SymbolExpr;
 import pascal.hardscript.compiler.ast.module.InstantiationNode;
@@ -99,7 +102,7 @@ public final class HierarchyAnalysis extends ASTAnalysis<HierarchyAnalysis.Analy
                         references.add(id);
                     }
                 }
-                case Interpolated interpolated -> {
+                case InterpolatedSymbol interpolated -> {
                     log.error("{}: Interpolated identifiers are not allowed in module instantiation: {}",
                             interpolated.getSourceLoc(), interpolated);
                     throw new CompileCancellationException();
