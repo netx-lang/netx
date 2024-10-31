@@ -1,6 +1,7 @@
 package pascal.hardscript.compiler.model.scope;
 
 import pascal.hardscript.compiler.ast.Identifier;
+import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.model.data.Data;
 
 import java.util.ArrayList;
@@ -17,6 +18,10 @@ public final class ComponentScope extends Scope {
         super(parent);
         this.identifier = identifier;
         this.depth = (getUpperComponent() != null) ? getUpperComponent().getDepth() + 1 : 0;
+    }
+
+    public SourceLoc getSourceLoc() {
+        return identifier.getSourceLoc();
     }
 
     public Identifier getIdentifier() {

@@ -12,16 +12,14 @@ import pascal.hardscript.compiler.model.data.Wire;
 import pascal.hardscript.compiler.model.scope.*;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 public final class HSPrinter {
     private final DesignScope design;
     private final ComponentInfo componentInfo;
     private final AliasAnalysis.Result alias;
-    private final Map<Data, Integer> addrMap = new HashMap<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public HSPrinter(DesignScope design) {
@@ -143,14 +141,15 @@ public final class HSPrinter {
     }
 
     private String dumpIdentifierOf(Data data) {
+        var sourceLoc = Objects.requireNonNullElse(
+                data.getSourceLoc(),
+                data.getUpperComponent().getSourceLoc());
+
         if (data instanceof DataAccess access) {
-            return data.getIdentifier().string() + "@" +
-                    addrMap.computeIfAbsent(access.base(), _ -> addrMap.size() + 1) +
-                    access.selector();
+            return String.format("%s@(%s)%s", data.getIdentifier().string(), sourceLoc, access.selector());
 
         } else {
-            return data.getIdentifier().string() + "@" +
-                    addrMap.computeIfAbsent(data, _ -> addrMap.size() + 1);
+            return String.format("%s@(%s)", data.getIdentifier().string(), sourceLoc);
         }
     }
 
