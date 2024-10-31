@@ -20,6 +20,7 @@ import pascal.hardscript.util.exception.ShallNotReachHereError;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public final class HSPrinter {
     private final DesignScope design;
@@ -47,6 +48,8 @@ public final class HSPrinter {
         return result;
     }
 
+    private static final Set<String> NO_DUMP = Set.of("SPLIT", "TO");
+
     private ObjectNode dump(ComponentScope module) {
         var result = createObjectNode();
         setType(result, "module");
@@ -63,7 +66,7 @@ public final class HSPrinter {
         for (var sub : extractSubComponent(module)) {
             var instID = sub.getIdentifier();
             if (componentInfo.containsBuiltin(instID)) {
-                if (!instID.string().equals("TO")) {
+                if (!NO_DUMP.contains(instID.string())) {
                     dumpBuiltinComponent(sub, instID, members);
                 }
             } else {

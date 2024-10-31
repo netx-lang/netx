@@ -72,11 +72,6 @@
       }
     }, {
       "type" : "builtin",
-      "id" : "SPLIT",
-      "input" : [ "b@(3:12)" ],
-      "output" : [ "b@(3:12)", "b@(3:12)" ]
-    }, {
-      "type" : "builtin",
       "id" : "REGISTER",
       "input" : [ "b@(3:12)" ],
       "output" : [ "c@(3:15)" ],
