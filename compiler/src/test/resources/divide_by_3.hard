@@ -2,6 +2,10 @@ component Divide_by_3 : [clk] -> [clk_3] {
     inst clk, clk_3 of clock()
     inst a, b, c    of wire(bit(1))
     let REG_WRAPPER = (clk, isPos, x) => REGISTER(clk, isPos, x)
-    let REG = (x) => REG_WRAPPER(clk, true, x)
-    [NOT, NOT] <> AND <> REG(a) <> REG(b) <> SPLIT(2) <> [REG(c), TO] <> OR : [a, b] -> [clk_3]
+    let POS_REG = (x) => REG_WRAPPER(clk, true, x)
+    let NEG_REG = (x) => REG_WRAPPER(clk, false, x)
+    [NOT, NOT] <> AND
+    <> POS_REG(a)
+    <> POS_REG(b) <> SPLIT(2)
+    <> [NEG_REG(c), TO] <> OR : [a, b] -> [clk_3]
 }

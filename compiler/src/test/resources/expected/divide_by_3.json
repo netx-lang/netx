@@ -27,25 +27,25 @@
       "type" : "builtin",
       "id" : "NOT",
       "input" : [ "a@(3:9)" ],
-      "output" : [ "$i1@(6:18)" ]
+      "output" : [ "$i1@(7:18)" ]
     }, {
       "type" : "builtin",
       "id" : "NOT",
       "input" : [ "b@(3:12)" ],
-      "output" : [ "$i2@(6:18)" ]
+      "output" : [ "$i2@(7:18)" ]
     }, {
       "type" : "builtin",
       "id" : "AND",
       "members" : [ {
         "type" : "wire",
-        "id" : "$i1@(6:18)",
+        "id" : "$i1@(7:18)",
         "width" : 1
       }, {
         "type" : "wire",
-        "id" : "$i2@(6:18)",
+        "id" : "$i2@(7:18)",
         "width" : 1
       } ],
-      "input" : [ "$i1@(6:18)", "$i2@(6:18)" ],
+      "input" : [ "$i1@(7:18)", "$i2@(7:18)" ],
       "output" : [ "$i@(4:41)" ]
     }, {
       "type" : "builtin",
@@ -81,7 +81,7 @@
       "input" : [ "b@(3:12)" ],
       "output" : [ "c@(3:15)" ],
       "attribute" : {
-        "isPosTrigger" : "true",
+        "isPosTrigger" : "false",
         "clock" : "clk@(2:9)"
       }
     }, {
