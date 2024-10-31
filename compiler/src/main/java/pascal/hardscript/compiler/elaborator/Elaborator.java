@@ -121,7 +121,6 @@ public final class Elaborator {
                     case AtomType atomType -> instantiateAtomType(atomType);
                     case CombineType combineType -> instantiateCombineType(combineType);
                     case ParallelType parallelType -> instantiateParallelType(parallelType);
-                    case LambdaType lambdaType -> instantiate(lambdaType.value());
                 };
             }
 

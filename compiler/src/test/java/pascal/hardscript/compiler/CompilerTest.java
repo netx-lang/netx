@@ -42,6 +42,7 @@ class CompilerTest {
         var design = Frontend.loadPath(TEST_DIR.resolve(fileName + ".hard")).elaborate();
         var json = new HSPrinter(design).dump();
 
+//        mapper.writerWithDefaultPrettyPrinter().writeValue(System.out, json);
         if (GENERATE_EXPECTED) {
             mapper.writerWithDefaultPrettyPrinter()
                     .writeValue(EXPECTED_DIR.resolve(fileName + ".json").toFile(), json);

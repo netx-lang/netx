@@ -97,11 +97,10 @@ public final class Evaluator {
         var evaluator = lambda.capture().getEvaluator();
         requiresMatchedSize(caller.identifier().getSourceLoc(), lambda.identifiers(), caller.parameters());
         int size = lambda.identifiers().size();
-        var bindings = MapBinding.of(IntStream.range(0, size).mapToObj(i -> Map.entry(
-                lambda.identifiers().get(i),
-                caller.parameters().get(i))).toList());
+        var bindings = MapBinding.of(IntStream.range(0, size).mapToObj(
+                i -> Map.entry(lambda.identifiers().get(i), caller.parameters().get(i))).toList());
         evaluator.overrideBindings(bindings);
-        var result = LambdaType.of(evaluator.evaluateToComponentType(lambda.body()));
+        var result = evaluator.evaluateToComponentType(lambda.body());
         evaluator.restoreBindings();
         return result;
     }

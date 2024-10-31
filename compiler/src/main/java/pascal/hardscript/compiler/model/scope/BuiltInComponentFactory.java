@@ -16,9 +16,9 @@ import static pascal.hardscript.compiler.elaborator.Types.*;
 public class BuiltInComponentFactory {
     private static final Logger log = LoggerFactory.getLogger(BuiltInComponentFactory.class);
     private static final Map<String, BiFunction<Scope, AtomType, ComponentScope>> BUILTIN_FACTORY = Map.of(
+            "REGISTER", BuiltInComponentFactory::createREGISTERComponent,
             "TO", BuiltInComponentFactory::createTOComponent,
             "OR", BuiltInComponentFactory::createORComponent,
-            "REGISTER", BuiltInComponentFactory::createREGISTERComponent,
             "SPLIT", BuiltInComponentFactory::createSPLITComponent,
             "NOT", BuiltInComponentFactory::createNOTComponent,
             "AND", BuiltInComponentFactory::createANDComponent,
@@ -64,9 +64,8 @@ public class BuiltInComponentFactory {
         result.addAttribute("isPosTrigger", isPosTrigger);
 
         var data = requiresData(sourceLoc, type.parameters().get(2));
-        var input = newWire(result, "input", data.getWidth());
+        var input = newWire(result, "i", data.getWidth());
         result.addInput(input);
-        result.alias(input, data);
         result.addOutput(data);
         return result;
     }
