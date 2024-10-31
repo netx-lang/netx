@@ -1,7 +1,5 @@
 package pascal.hardscript.util.lang;
 
-import pascal.hardscript.util.exception.TodoException;
-
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -68,7 +66,11 @@ public final class BitVector {
     }
 
     public void clear() {
-        Arrays.fill(data, (byte) 0);
+        setAllBytes((byte) 0);
+    }
+
+    private void setAllBytes(byte value) {
+        Arrays.fill(data, value);
     }
 
     public BitVector copyOf() {
@@ -132,21 +134,54 @@ public final class BitVector {
         return result;
     }
 
-    public BitVector ahsr(int offset) {
-        throw new TodoException();
+    public BitVector ashr(int offset) {
+        var result = new BitVector(size);
+        if (get(size - 1)) {
+            int maskOffset = 8 - ((data.length << 3) - size);
+            data[data.length - 1] |= (byte) (0xff << maskOffset);
+            result.setAllBytes((byte) 0xff);
+        }
+        doShiftRight(result, offset);
+        return result;
     }
 
     public BitVector lshr(int offset) {
-        throw new TodoException();
+        var result = new BitVector(size);
+        doShiftRight(result, offset);
+        return result;
+    }
+
+    private void doShiftRight(BitVector result, int offset) {
+        int byteOffset = offset >> 3, bitOffset = offset & 7;
+        if (byteOffset >= data.length) {
+            return;
+        }
+        if (bitOffset == 0) {
+            System.arraycopy(data, byteOffset, result.data, 0, data.length - byteOffset);
+        } else {
+            result.data[data.length - byteOffset - 1] = (byte) (data[data.length - 1] >> bitOffset);
+            for (int i = 0; i < data.length - byteOffset - 1; i++) {
+                result.data[i] = (byte) (
+                        (data[i + byteOffset] >>> bitOffset) |
+                                (data[i + byteOffset + 1] << (8 - bitOffset)));
+            }
+        }
     }
 
     public BitVector shl(int offset) {
         BitVector result = new BitVector(size);
         int byteOffset = offset >> 3, bitOffset = offset & 7;
-        for (int i = 0; i < data.length - byteOffset; i++) {
-            result.data[i + byteOffset] |= (byte) (data[i] << bitOffset);
-            if (bitOffset > 0 && i + byteOffset + 1 < result.data.length) {
-                result.data[i + byteOffset + 1] |= (byte) (data[i] >> (8 - bitOffset));
+        if (byteOffset >= data.length) {
+            return result;
+        }
+        if (bitOffset == 0) {
+            System.arraycopy(data, 0, result.data, byteOffset, data.length);
+        } else {
+            result.data[byteOffset] = (byte) (data[0] << bitOffset);
+            for (int i = byteOffset + 1; i < data.length; i++) {
+                result.data[i] = (byte) (
+                        (data[i - byteOffset] << bitOffset) |
+                                (data[i - byteOffset - 1] >>> (8 - bitOffset)));
             }
         }
         return result;

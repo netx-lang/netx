@@ -42,7 +42,7 @@ public record BitVectorValue(BitVector value) implements Value, IntegerValue {
 
     @Override
     public IntegerValue ashr(IntegerValue other) {
-        return BitVectorValue.of(value.ahsr(other.toInt()));
+        return BitVectorValue.of(value.ashr(other.toInt()));
     }
 
     @Override

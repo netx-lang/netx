@@ -21,14 +21,14 @@
         },
         {
           "type": "register",
-          "id": "b@3",
+          "id": "c@3",
           "width": 1
         },
         {
           "type": "builtin",
           "id": "NOT",
           "input": [
-            "b@3"
+            "c@3"
           ],
           "output": [
             "$i1@4"
@@ -38,7 +38,7 @@
           "type": "builtin",
           "id": "NOT",
           "input": [
-            "b@3"
+            "c@3"
           ],
           "output": [
             "$i2@5"
@@ -64,56 +64,56 @@
             "$i2@5"
           ],
           "output": [
-            "b@3"
+            "c@3"
           ]
         },
         {
           "type": "builtin",
           "id": "STORE",
           "input": [
-            "b@3"
+            "c@3"
           ],
           "output": [
-            "b@3"
+            "c@3"
           ]
         },
         {
           "type": "builtin",
           "id": "STORE",
           "input": [
-            "b@3"
+            "c@3"
           ],
           "output": [
-            "b@3"
+            "c@3"
           ]
         },
         {
           "type": "builtin",
           "id": "SPLIT",
           "input": [
-            "b@3"
+            "c@3"
           ],
           "output": [
-            "b@3",
-            "b@3"
+            "c@3",
+            "c@3"
           ]
         },
         {
           "type": "builtin",
           "id": "STORE",
           "input": [
-            "b@3"
+            "c@3"
           ],
           "output": [
-            "b@3"
+            "c@3"
           ]
         },
         {
           "type": "builtin",
           "id": "OR",
           "input": [
-            "b@3",
-            "b@3"
+            "c@3",
+            "c@3"
           ],
           "output": [
             "clk_3@2"

@@ -143,12 +143,26 @@ class BitVectorUnitTest {
 
     @Test
     void testAshr() {
-
+        BitVector bv1 = BitVector.parse("01101011", 8, 2);
+        BitVector bv2 = BitVector.parse("00000011", 8, 2);
+        BitVector bv3 = BitVector.parse("00001101", 8, 2);
+        BitVector bv4 = BitVector.parse("1010010111111010000010111", 25, 2);
+        BitVector bv5 = BitVector.parse("00001010", 8, 2);
+        BitVector bv6 = BitVector.parse("1111111111101001011111101", 25, 2);
+        assertEquals(bv3, bv1.ashr(bv2.toInt()));
+        assertEquals(bv6, bv4.ashr(bv5.toInt()));
     }
 
     @Test
     void testLshr() {
-
+        BitVector bv1 = BitVector.parse("01101011", 8, 2);
+        BitVector bv2 = BitVector.parse("00000011", 8, 2);
+        BitVector bv3 = BitVector.parse("00001101", 8, 2);
+        BitVector bv4 = BitVector.parse("1010010111111010000010111", 25, 2);
+        BitVector bv5 = BitVector.parse("00001010", 8, 2);
+        BitVector bv6 = BitVector.parse("0000000000101001011111101", 25, 2);
+        assertEquals(bv3, bv1.lshr(bv2.toInt()));
+        assertEquals(bv6, bv4.lshr(bv5.toInt()));
     }
 
     @Test
