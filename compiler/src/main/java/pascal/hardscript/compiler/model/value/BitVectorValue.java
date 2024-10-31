@@ -36,8 +36,38 @@ public record BitVectorValue(BitVector value) implements Value, IntegerValue {
     }
 
     @Override
+    public IntegerValue mul(IntegerValue other) {
+        return BitVectorValue.of(value.mul(other.toBitVector()));
+    }
+
+    @Override
+    public IntegerValue div(IntegerValue other) {
+        return BitVectorValue.of(value.div(other.toBitVector()));
+    }
+
+    @Override
+    public IntegerValue mod(IntegerValue other) {
+        return BitVectorValue.of(value.mod(other.toBitVector()));
+    }
+
+    @Override
     public IntegerValue and(IntegerValue other) {
         return BitVectorValue.of(value.and(other.toBitVector()));
+    }
+
+    @Override
+    public IntegerValue or(IntegerValue other) {
+        return BitVectorValue.of(value.or(other.toBitVector()));
+    }
+
+    @Override
+    public IntegerValue xor(IntegerValue other) {
+        return BitVectorValue.of(value.xor(other.toBitVector()));
+    }
+
+    @Override
+    public IntegerValue xnor(IntegerValue other) {
+        return BitVectorValue.of(value.xnor(other.toBitVector()));
     }
 
     @Override
@@ -58,6 +88,36 @@ public record BitVectorValue(BitVector value) implements Value, IntegerValue {
     @Override
     public IntegerValue shl(IntegerValue other) {
         return BitVectorValue.of(value.shl(other.toInt()));
+    }
+
+    @Override
+    public BooleanValue eq(IntegerValue other) {
+        return BooleanValue.of(value.eq(other.toBitVector()));
+    }
+
+    @Override
+    public BooleanValue ne(IntegerValue other) {
+        return BooleanValue.of(value.ne(other.toBitVector()));
+    }
+
+    @Override
+    public BooleanValue gt(IntegerValue other) {
+        return BooleanValue.of(value.gt(other.toBitVector()));
+    }
+
+    @Override
+    public BooleanValue ge(IntegerValue other) {
+        return BooleanValue.of(value.ge(other.toBitVector()));
+    }
+
+    @Override
+    public BooleanValue lt(IntegerValue other) {
+        return BooleanValue.of(value.lt(other.toBitVector()));
+    }
+
+    @Override
+    public BooleanValue le(IntegerValue other) {
+        return BooleanValue.of(value.le(other.toBitVector()));
     }
 
     @Override

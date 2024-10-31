@@ -23,14 +23,12 @@ import pascal.hardscript.compiler.model.scope.Binding;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.compiler.model.scope.SingleBinding;
-import pascal.hardscript.compiler.model.value.BitVectorValue;
-import pascal.hardscript.compiler.model.value.BooleanValue;
-import pascal.hardscript.compiler.model.value.Int32Value;
-import pascal.hardscript.compiler.model.value.IntegerValue;
-import pascal.hardscript.util.exception.TodoException;
+import pascal.hardscript.compiler.model.value.*;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -208,24 +206,49 @@ public final class Evaluator {
         };
     }
 
+    private static final Map<BinaryExpr.Operator, BiFunction<IntegerValue, IntegerValue, Value>> BINARY_OPERATOR_MAP = Map.ofEntries(
+            Map.entry(BinaryExpr.Operator.ADD, IntegerValue::add),
+            Map.entry(BinaryExpr.Operator.SUB, IntegerValue::sub),
+            Map.entry(BinaryExpr.Operator.MUL, IntegerValue::mul),
+            Map.entry(BinaryExpr.Operator.DIV, IntegerValue::div),
+            Map.entry(BinaryExpr.Operator.MOD, IntegerValue::mod),
+            Map.entry(BinaryExpr.Operator.POW, IntegerValue::pow),
+            Map.entry(BinaryExpr.Operator.AND, IntegerValue::and),
+            Map.entry(BinaryExpr.Operator.OR, IntegerValue::or),
+            Map.entry(BinaryExpr.Operator.XOR, IntegerValue::xor),
+            Map.entry(BinaryExpr.Operator.XNOR, IntegerValue::xnor),
+            Map.entry(BinaryExpr.Operator.ARITH_SHR, IntegerValue::ashr),
+            Map.entry(BinaryExpr.Operator.LOGIC_SHR, IntegerValue::lshr),
+            Map.entry(BinaryExpr.Operator.ARITH_SHL, IntegerValue::shl),
+            Map.entry(BinaryExpr.Operator.LOGIC_SHL, IntegerValue::shl),
+            Map.entry(BinaryExpr.Operator.EQ, IntegerValue::eq),
+            Map.entry(BinaryExpr.Operator.NE, IntegerValue::ne),
+            Map.entry(BinaryExpr.Operator.LT, IntegerValue::lt),
+            Map.entry(BinaryExpr.Operator.LE, IntegerValue::le),
+            Map.entry(BinaryExpr.Operator.GT, IntegerValue::gt),
+            Map.entry(BinaryExpr.Operator.GE, IntegerValue::ge)
+    );
+
     private Entity evaluateBinaryExpr(BinaryExpr expr) {
         var sourceLoc = expr.getSourceLoc();
         return switch (expr.getOp()) {
             case COMBINE -> evaluateCombineType(sourceLoc, evaluate(expr.getLhs()), evaluate(expr.getRhs()));
             case MAPSTO -> evaluatePort(sourceLoc, evaluate(expr.getLhs()), evaluate(expr.getRhs()));
-            case ADD -> evaluateBinaryIntExpr(expr, IntegerValue::add);
-            case SUB -> evaluateBinaryIntExpr(expr, IntegerValue::sub);
-            case POW -> evaluateBinaryIntExpr(expr, IntegerValue::pow);
-            case AND -> evaluateBinaryIntExpr(expr, IntegerValue::and);
-            case ARITH_SHR -> evaluateBinaryIntExpr(expr, IntegerValue::ashr);
-            case LOGIC_SHR -> evaluateBinaryIntExpr(expr, IntegerValue::lshr);
-            case ARITH_SHL, LOGIC_SHL -> evaluateBinaryIntExpr(expr, IntegerValue::shl);
-            default -> throw new TodoException("Support more binary expressions"); // TODO:
+            case ADD, SUB, MUL, DIV, MOD, POW, AND, OR, XOR, XNOR,
+                 EQ, NE, LT, LE, GT, GE, ARITH_SHR, ARITH_SHL, LOGIC_SHR, LOGIC_SHL ->
+                    evaluateBinaryExpr(expr, BINARY_OPERATOR_MAP.get(expr.getOp()));
+            case LOGIC_OR -> evaluateBinaryExpr(expr, BooleanValue::or);
+            case LOGIC_AND -> evaluateBinaryExpr(expr, BooleanValue::and);
         };
     }
 
-    private IntegerValue evaluateBinaryIntExpr(BinaryExpr expr, BinaryOperator<IntegerValue> op) {
+    private Value evaluateBinaryExpr(BinaryExpr expr,
+                                     BiFunction<IntegerValue, IntegerValue, Value> op) {
         return op.apply(evaluateToIntegerValue(expr.getLhs()), evaluateToIntegerValue(expr.getRhs()));
+    }
+
+    private Value evaluateBinaryExpr(BinaryExpr expr, BinaryOperator<BooleanValue> op) {
+        return op.apply(evaluateToBoolean(expr.getLhs()), evaluateToBoolean(expr.getRhs()));
     }
 
     private Entity evaluateCombineType(SourceLoc sourceLoc, Entity lhs, Entity rhs) {

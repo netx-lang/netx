@@ -108,6 +108,7 @@ public final class BitVector {
     }
 
     public BitVector add(BitVector other) {
+        requiresSameSize(this, other);
         BitVector result = new BitVector(size);
         int carry = 0;
         for (int i = 0; i < data.length; i++) {
@@ -119,7 +120,23 @@ public final class BitVector {
     }
 
     public BitVector sub(BitVector other) {
+        requiresSameSize(this, other);
         return add(other.negative());
+    }
+
+    public BitVector mul(BitVector other) {
+        requiresSameSize(this, other);
+        return fromBigInteger(size, toBigInteger().multiply(other.toBigInteger()));
+    }
+
+    public BitVector div(BitVector other) {
+        requiresSameSize(this, other);
+        return fromBigInteger(size, toBigInteger().divide(other.toBigInteger()));
+    }
+
+    public BitVector mod(BitVector other) {
+        requiresSameSize(this, other);
+        return fromBigInteger(size, toBigInteger().mod(other.toBigInteger()));
     }
 
     public BitVector pow(BitVector other) {
@@ -127,11 +144,35 @@ public final class BitVector {
     }
 
     public BitVector and(BitVector other) {
+        requiresSameSize(this, other);
         BitVector result = new BitVector(size);
         for (int i = 0; i < data.length; i++) {
             result.data[i] = (byte) (data[i] & other.data[i]);
         }
         return result;
+    }
+
+    public BitVector or(BitVector other) {
+        requiresSameSize(this, other);
+        BitVector result = new BitVector(size);
+        for (int i = 0; i < data.length; i++) {
+            result.data[i] = (byte) (data[i] | other.data[i]);
+        }
+        return result;
+    }
+
+    public BitVector xor(BitVector other) {
+        requiresSameSize(this, other);
+        BitVector result = new BitVector(size);
+        for (int i = 0; i < data.length; i++) {
+            result.data[i] = (byte) (data[i] ^ other.data[i]);
+        }
+        return result;
+    }
+
+    public BitVector xnor(BitVector other) {
+        requiresSameSize(this, other);
+        return xor(other).invert();
     }
 
     public BitVector ashr(int offset) {
@@ -187,20 +228,45 @@ public final class BitVector {
         return result;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-
-        var that = (BitVector) obj;
+    public boolean eq(BitVector other) {
+        if (size != other.size) {
+            return false;
+        }
         this.normalize();
-        that.normalize();
+        other.normalize();
         for (int i = 0; i < data.length; i++) {
-            if (data[i] != that.data[i]) {
+            if (data[i] != other.data[i]) {
                 return false;
             }
         }
         return true;
+    }
+
+    public boolean ne(BitVector other) {
+        return !eq(other);
+    }
+
+    public boolean gt(BitVector other) {
+        return toBigInteger().compareTo(other.toBigInteger()) > 0;
+    }
+
+    public boolean ge(BitVector other) {
+        return toBigInteger().compareTo(other.toBigInteger()) >= 0;
+    }
+
+    public boolean lt(BitVector other) {
+        return toBigInteger().compareTo(other.toBigInteger()) < 0;
+    }
+
+    public boolean le(BitVector other) {
+        return toBigInteger().compareTo(other.toBigInteger()) <= 0;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        return eq((BitVector) obj);
     }
 
     private void normalize() {
@@ -217,5 +283,11 @@ public final class BitVector {
             }
         }
         return sb.reverse().substring(data.length * 8 - size);
+    }
+
+    private static void requiresSameSize(BitVector a, BitVector b) {
+        if (a.size() != b.size()) {
+            throw new IllegalArgumentException("Bit vectors must have the same size");
+        }
     }
 }

@@ -28,6 +28,21 @@ public record Int32Value(int value) implements Value, IntegerValue {
     }
 
     @Override
+    public IntegerValue mul(IntegerValue other) {
+        return Int32Value.of(value * other.toInt());
+    }
+
+    @Override
+    public IntegerValue div(IntegerValue other) {
+        return Int32Value.of(value / other.toInt());
+    }
+
+    @Override
+    public IntegerValue mod(IntegerValue other) {
+        return Int32Value.of(value % other.toInt());
+    }
+
+    @Override
     public IntegerValue pow(IntegerValue other) {
         return Int32Value.of((int) Math.pow(value, other.toInt()));
     }
@@ -35,6 +50,21 @@ public record Int32Value(int value) implements Value, IntegerValue {
     @Override
     public IntegerValue and(IntegerValue other) {
         return Int32Value.of(value & other.toInt());
+    }
+
+    @Override
+    public IntegerValue or(IntegerValue other) {
+        return Int32Value.of(value | other.toInt());
+    }
+
+    @Override
+    public IntegerValue xor(IntegerValue other) {
+        return Int32Value.of(value ^ other.toInt());
+    }
+
+    @Override
+    public IntegerValue xnor(IntegerValue other) {
+        return Int32Value.of(~(value ^ other.toInt()));
     }
 
     @Override
@@ -50,6 +80,36 @@ public record Int32Value(int value) implements Value, IntegerValue {
     @Override
     public IntegerValue shl(IntegerValue other) {
         return Int32Value.of(value << other.toInt());
+    }
+
+    @Override
+    public BooleanValue eq(IntegerValue other) {
+        return BooleanValue.of(value == other.toInt());
+    }
+
+    @Override
+    public BooleanValue ne(IntegerValue other) {
+        return BooleanValue.of(value != other.toInt());
+    }
+
+    @Override
+    public BooleanValue gt(IntegerValue other) {
+        return BooleanValue.of(value > other.toInt());
+    }
+
+    @Override
+    public BooleanValue ge(IntegerValue other) {
+        return BooleanValue.of(value >= other.toInt());
+    }
+
+    @Override
+    public BooleanValue lt(IntegerValue other) {
+        return BooleanValue.of(value < other.toInt());
+    }
+
+    @Override
+    public BooleanValue le(IntegerValue other) {
+        return BooleanValue.of(value <= other.toInt());
     }
 
     @Override
