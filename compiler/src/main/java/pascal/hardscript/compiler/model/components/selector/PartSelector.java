@@ -12,4 +12,9 @@ public record PartSelector(IntegerValue start, IntegerValue end) implements Sele
     public String toString() {
         return String.format("[%d : %d]", start.toInt(), end.toInt());
     }
+
+    @Override
+    public int getWidth() {
+        return Math.abs(end.toInt() - start.toInt()) + 1;
+    }
 }

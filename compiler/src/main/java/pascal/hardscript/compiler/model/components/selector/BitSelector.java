@@ -12,4 +12,9 @@ public record BitSelector(IntegerValue index) implements Selector {
     public String toString() {
         return String.format("[%d]", index.toInt());
     }
+
+    @Override
+    public int getWidth() {
+        return 1;
+    }
 }

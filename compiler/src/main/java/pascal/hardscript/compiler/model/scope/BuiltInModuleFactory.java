@@ -18,7 +18,7 @@ public class BuiltInModuleFactory {
     private static final Map<String, BiFunction<Scope, AtomType, ModuleScope>> BUILTIN_FACTORY = Map.of(
             "TO", BuiltInModuleFactory::createTOModule,
             "OR", BuiltInModuleFactory::createORModule,
-            "STORE", BuiltInModuleFactory::createSTOREModule,
+            "REG", BuiltInModuleFactory::createREGModule,
             "SPLIT", BuiltInModuleFactory::createSPLITModule,
             "NOT", BuiltInModuleFactory::createNOTModule,
             "AND", BuiltInModuleFactory::createANDModule,
@@ -53,15 +53,15 @@ public class BuiltInModuleFactory {
         return module;
     }
 
-    private static ModuleScope createSTOREModule(Scope parent, AtomType type) {
+    private static ModuleScope createREGModule(Scope parent, AtomType type) {
         var sourceLoc = type.identifier().getSourceLoc();
         requiresMatchedSize(sourceLoc, 1, type.parameters());
-        var register = requiresRegister(sourceLoc, type.parameters().getFirst());
+        var component = requiresComponent(sourceLoc, type.parameters().getFirst());
         var module = parent.instantiateModuleScope(parent.getNameAllocator().allocateFor(type));
-        var input = newWire(module, "input", register.width());
+        var input = newWire(module, "input", component.getWidth());
         module.addInput(input);
-        module.alias(input, register);
-        module.addOutput(register);
+        module.alias(input, component);
+        module.addOutput(component);
         return module;
     }
 

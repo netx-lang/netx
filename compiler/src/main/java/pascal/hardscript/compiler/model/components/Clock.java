@@ -15,6 +15,11 @@ public record Clock(Identifier id, Scope parent) implements Component {
         return parent;
     }
 
+    @Override
+    public int getWidth() {
+        return 1;
+    }
+
     public static class Factory implements Component.Factory<Clock> {
         private final Scope parent;
 

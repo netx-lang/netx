@@ -32,7 +32,7 @@ class EvaluatorUnitTest {
     void testListComprehension() {
         var module = loadSingleModule("""
                 module inverter : [x[i] | i in [0..4]] -> [x[j] | i in [0..4], let j = 3 - i] {
-                    inst x : wire(bit(4))
+                    inst x of wire(bit(4))
                 }
                 """);
         var component = (Component) module.getBinding().resolve(Identifier.of("x"));
@@ -48,8 +48,8 @@ class EvaluatorUnitTest {
     void testInstanceType() {
         var code = """
                 module test : [a] -> [b] {
-                    inst a : wire(bit(4))
-                    inst b : wire(bit(1))
+                    inst a of wire(bit(4))
+                    inst b of wire(bit(1))
                     [gate |
                         i in [0..2],
                         let gate = [NOT, NOT] <> AND <> NOT

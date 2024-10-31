@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import pascal.hardscript.compiler.analysis.AliasAnalysis;
 import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.model.components.*;
+import pascal.hardscript.compiler.model.components.Clock;
+import pascal.hardscript.compiler.model.components.Component;
+import pascal.hardscript.compiler.model.components.ComponentAccess;
+import pascal.hardscript.compiler.model.components.Wire;
 import pascal.hardscript.compiler.model.scope.*;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 
@@ -116,7 +119,6 @@ public final class HSPrinter {
         return switch (component) {
             case Wire wire -> dumpWire(wire);
             case Clock clock -> dumpClock(clock);
-            case Register register -> dumpRegister(register);
             default -> throw new ShallNotReachHereError();
         };
     }
@@ -133,14 +135,6 @@ public final class HSPrinter {
         var result = createObjectNode();
         setType(result, "clock");
         setIdentifier(result, clock);
-        return result;
-    }
-
-    private ObjectNode dumpRegister(Register register) {
-        var result = createObjectNode();
-        setType(result, "register");
-        setIdentifier(result, register);
-        result.put("width", register.width());
         return result;
     }
 

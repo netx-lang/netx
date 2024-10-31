@@ -6,30 +6,31 @@ import java.util.List;
 import java.util.Objects;
 
 public final class ParamSymbolExpr extends SymbolExpr {
-    private SymbolExpr head;
+    private PrimarySymbol head;
     private final List<ExprNode> arguments;
 
-    private ParamSymbolExpr(SymbolExpr head, List<ExprNode> arguments) {
+    private ParamSymbolExpr(PrimarySymbol head, List<ExprNode> arguments) {
         this.head = head;
         this.arguments = arguments;
     }
 
-    public static ParamSymbolExpr of(SymbolExpr head, List<ExprNode> arguments) {
+    public static ParamSymbolExpr of(PrimarySymbol head, List<ExprNode> arguments) {
         return new ParamSymbolExpr(head, arguments);
     }
 
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);
+        head.walk(listener);
         arguments.forEach(argument -> argument.walk(listener));
         listener.exit(this);
     }
 
-    public SymbolExpr getHead() {
+    public PrimarySymbol getHead() {
         return head;
     }
 
-    public void setHead(SymbolExpr head) {
+    public void setHead(PrimarySymbol head) {
         this.head = head;
     }
 

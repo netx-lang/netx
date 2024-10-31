@@ -5,7 +5,7 @@ import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.scope.ModuleScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 
-public sealed interface Component extends Entity permits Clock, ComponentAccess, Register, Wire {
+public sealed interface Component extends Entity permits Clock, ComponentAccess, Wire {
     Scope getParent();
 
     default int getDepth() {
@@ -15,6 +15,8 @@ public sealed interface Component extends Entity permits Clock, ComponentAccess,
             return getParent().getUpperModule().getDepth();
         }
     }
+
+    int getWidth();
 
     Identifier getIdentifier();
 

@@ -3,6 +3,7 @@ package pascal.hardscript.compiler.elaborator;
 import pascal.hardscript.compiler.analysis.HierarchyAnalysis;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.SourceLoc;
+import pascal.hardscript.compiler.ast.module.Binding;
 import pascal.hardscript.compiler.ast.module.*;
 import pascal.hardscript.compiler.model.components.Component;
 import pascal.hardscript.compiler.model.connection.*;
@@ -61,6 +62,7 @@ public final class Elaborator {
             for (var element : list) {
                 switch (element) {
                     case LoopNode loop -> buildElementIntoScope(loop);
+                    case Binding binding -> buildElementIntoScope(binding);
                     case ComponentNode component -> buildElementIntoScope(component);
                     case InstantiationNode instantiation -> buildElementIntoScope(instantiation);
                 }
@@ -76,6 +78,12 @@ public final class Elaborator {
                 subScope.bind(id, entity);
                 new ScopeElaborator(subScope).build(loop);
             }
+        }
+
+        private void buildElementIntoScope(Binding binding) {
+            var head = evaluator.getIdentifierFrom(binding.getHead());
+            var expr = evaluator.evaluate(binding.getExpr());
+            scope.bind(head, expr);
         }
 
         private void buildElementIntoScope(ComponentNode node) {

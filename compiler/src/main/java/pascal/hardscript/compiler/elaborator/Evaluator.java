@@ -5,14 +5,17 @@ import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.ast.expr.*;
+import pascal.hardscript.compiler.ast.expr.qualifier.BindingQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.FilterQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.GeneratorQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.Qualifier;
-import pascal.hardscript.compiler.ast.module.Binding;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
-import pascal.hardscript.compiler.model.components.*;
+import pascal.hardscript.compiler.model.components.Clock;
+import pascal.hardscript.compiler.model.components.Component;
+import pascal.hardscript.compiler.model.components.ComponentAccess;
+import pascal.hardscript.compiler.model.components.Wire;
 import pascal.hardscript.compiler.model.components.selector.BitSelector;
 import pascal.hardscript.compiler.model.components.selector.PartSelector;
 import pascal.hardscript.compiler.model.components.selector.Selector;
@@ -70,14 +73,13 @@ public final class Evaluator {
         return result;
     }
 
-    private Entity evaluate(ExprNode expr) {
+    public Entity evaluate(ExprNode expr) {
         return switch (expr) {
             case AccessExpr sub -> evaluateAccessExpr(sub);
             case BinaryExpr sub -> evaluateBinaryExpr(sub);
             case ConditionalExpr sub -> evaluateConditionalExpr(sub);
             case ListExpr sub -> evaluateListExpr(sub);
             case NumberExpr sub -> evaluateNumberExpr(sub);
-            case ParamSymbolExpr sub -> evaluateParamSymbolExpr(sub);
             case SymbolExpr sub -> evaluateSymbolExpr(sub);
             case UnaryExpr sub -> evaluateUnaryExpr(sub);
         };
@@ -168,10 +170,11 @@ public final class Evaluator {
                         result = List.of();
                     }
                 }
-                case Binding binding -> {
-                    var id = getIdentifierFrom(binding.getHead());
-                    var value = evaluate(binding.getExpr());
-                    overrideBindings(SingleBinding.of(id, value));
+                case BindingQualifier qualifier -> {
+                    var binding = qualifier.getBinding();
+                    overrideBindings(SingleBinding.of(
+                            getIdentifierFrom(binding.getHead()),
+                            evaluate(binding.getExpr())));
                     result = doListComprehension(head, new LinkedList<>(qualifiers));
                     restoreBindings();
                 }
@@ -287,27 +290,6 @@ public final class Evaluator {
         return list.entities().stream().map(Component.class::cast).toList();
     }
 
-    private Entity evaluateParamSymbolExpr(ParamSymbolExpr expr) {
-        return switch (mode) {
-            case COMPONENT_FACTORY -> evaluateComponentFactory(expr);
-            case COMMON -> evaluateInstanceType(expr);
-        };
-    }
-
-    private Component.Factory<?> evaluateComponentFactory(ParamSymbolExpr expr) {
-        var identifier = getIdentifierFrom(expr.getHead().getSymbol());
-        var sourceLoc = expr.getSourceLoc();
-        return switch (identifier.string()) {
-            case "wire" -> evaluateWireFactory(sourceLoc, expr.getArguments());
-            case "clock" -> evaluateClockFactory(sourceLoc, expr.getArguments());
-            case "reg" -> evaluateRegisterFactory(sourceLoc, expr.getArguments());
-            default -> {
-                log.error("{}: Unknown component type {}", expr.getSourceLoc(), expr);
-                throw new CompileCancellationException();
-            }
-        };
-    }
-
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         if (arguments.size() == 1) {
             return Wire.Factory.of(scope, evaluateBitWidth(arguments.getFirst()));
@@ -325,19 +307,9 @@ public final class Evaluator {
         }
     }
 
-    private Register.Factory evaluateRegisterFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
-        // TODO: trigger_on, reset_on
-        if (arguments.size() >= 2) {
-            int width = evaluateBitWidth(arguments.getFirst());
-            return Register.Factory.of(scope, width);
-        }
-        log.error("{}: Unexpected specification for component type reg: {}", sourceLoc, arguments);
-        throw new CompileCancellationException();
-    }
-
     private int evaluateBitWidth(ExprNode expr) {
         if (expr instanceof ParamSymbolExpr spec) {
-            var identifier = getIdentifierFrom(spec.getHead().getSymbol());
+            var identifier = getIdentifierFrom(spec.getHead());
             if (identifier.string().equals("bit")) {
                 if (spec.getArguments().size() == 1) {
                     return evaluateToIntegerValue(spec.getArguments().getFirst()).toInt();
@@ -348,14 +320,15 @@ public final class Evaluator {
         throw new CompileCancellationException();
     }
 
-    private InstanceType evaluateInstanceType(ParamSymbolExpr expr) {
-        var identifier = getIdentifierFrom(expr.getHead().getSymbol());
-        var parameters = expr.getArguments().stream().map(this::evaluate).toList();
-        return AtomType.of(identifier, parameters);
+    private Entity evaluateSymbolExpr(SymbolExpr expr) {
+        return switch (expr) {
+            case PrimarySymbol sub -> evaluatePrimarySymbolExpr(sub);
+            case ParamSymbolExpr sub -> evaluateParamSymbolExpr(sub);
+        };
     }
 
-    private Entity evaluateSymbolExpr(SymbolExpr expr) {
-        var id = getIdentifierFrom(expr.getSymbol());
+    private Entity evaluatePrimarySymbolExpr(PrimarySymbol expr) {
+        var id = getIdentifierFrom(expr);
         for (var binding : bindings) {
             var entity = binding.lookup(id);
             if (entity != null) {
@@ -372,9 +345,35 @@ public final class Evaluator {
         return scope.getParent().getEvaluator().evaluate(expr);
     }
 
-    public Identifier getIdentifierFrom(Symbol symbol) {
+    private Entity evaluateParamSymbolExpr(ParamSymbolExpr expr) {
+        return switch (mode) {
+            case COMPONENT_FACTORY -> evaluateComponentFactory(expr);
+            case COMMON -> evaluateInstanceType(expr);
+        };
+    }
+
+    private Component.Factory<?> evaluateComponentFactory(ParamSymbolExpr expr) {
+        var identifier = getIdentifierFrom(expr.getHead());
+        var sourceLoc = expr.getSourceLoc();
+        return switch (identifier.string()) {
+            case "wire" -> evaluateWireFactory(sourceLoc, expr.getArguments());
+            case "clock" -> evaluateClockFactory(sourceLoc, expr.getArguments());
+            default -> {
+                log.error("{}: Unknown component type {}", expr.getSourceLoc(), expr);
+                throw new CompileCancellationException();
+            }
+        };
+    }
+
+    private InstanceType evaluateInstanceType(ParamSymbolExpr expr) {
+        var identifier = getIdentifierFrom(expr.getHead());
+        var parameters = expr.getArguments().stream().map(this::evaluate).toList();
+        return AtomType.of(identifier, parameters);
+    }
+
+    public Identifier getIdentifierFrom(PrimarySymbol symbol) {
         return switch (symbol) {
-            case Identifier id -> id;
+            case IdentifierSymbol id -> id.getIdentifier();
             case InterpolatedSymbol interpolated -> evaluateInterpolation(interpolated);
         };
     }

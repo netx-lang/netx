@@ -20,4 +20,9 @@ public record ComponentAccess(Component base, Selector selector) implements Comp
         // FIXME: check
         return base.getParent();
     }
+
+    @Override
+    public int getWidth() {
+        return selector.getWidth();
+    }
 }

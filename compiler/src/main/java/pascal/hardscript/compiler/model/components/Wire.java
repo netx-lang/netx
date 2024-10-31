@@ -19,6 +19,11 @@ public record Wire(Identifier id, Scope parent, int width) implements Component 
         return parent;
     }
 
+    @Override
+    public int getWidth() {
+        return width;
+    }
+
     public static class Factory implements Component.Factory<Wire> {
         private final int width;
         private final Scope parent;

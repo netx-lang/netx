@@ -225,7 +225,7 @@ public final class HSParser {
 
     static PrimarySymbol parsePrimarySymbol(Primary_symbolContext ctx) {
         var result = switch (ctx) {
-            case IdentifierContext sub -> IdentifierSymbol.of(Identifier.of(sub.ID().getText()));
+            case IdentifierContext sub -> IdentifierSymbol.of(parseIdentifier(sub.ID()));
             case InterpolatedContext sub -> InterpolatedSymbol.of(
                     sub.ID().stream().map(ParseTree::getText).toList(),
                     sub.interpolation().stream()

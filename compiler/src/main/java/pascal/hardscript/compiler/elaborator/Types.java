@@ -7,7 +7,6 @@ import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
 import pascal.hardscript.compiler.model.components.Component;
-import pascal.hardscript.compiler.model.components.Register;
 import pascal.hardscript.compiler.model.connection.InstanceType;
 import pascal.hardscript.compiler.model.connection.Port;
 import pascal.hardscript.compiler.model.value.BooleanValue;
@@ -42,11 +41,11 @@ public final class Types {
         }
     }
 
-    public static Register requiresRegister(SourceLoc loc, Entity entity) {
-        if (entity instanceof Register register) {
-            return register;
+    public static Component requiresComponent(SourceLoc loc, Entity entity) {
+        if (entity instanceof Component component) {
+            return component;
         } else {
-            log.error("{}: Expected component factory but got {}", loc, entity);
+            log.error("{}: Expected component but got {}", loc, entity);
             throw new CompileCancellationException();
         }
     }

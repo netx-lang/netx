@@ -9,12 +9,11 @@ import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.Identifier;
+import pascal.hardscript.compiler.ast.expr.IdentifierSymbol;
 import pascal.hardscript.compiler.ast.expr.InterpolatedSymbol;
 import pascal.hardscript.compiler.ast.expr.ParamSymbolExpr;
-import pascal.hardscript.compiler.ast.expr.SymbolExpr;
 import pascal.hardscript.compiler.ast.module.InstantiationNode;
 import pascal.hardscript.compiler.ast.module.ModuleNode;
-import pascal.hardscript.compiler.exception.CompileCancellationException;
 
 import java.util.*;
 
@@ -87,29 +86,22 @@ public final class HierarchyAnalysis extends ASTAnalysis<HierarchyAnalysis.Analy
 
         @Override
         public void enter(ParamSymbolExpr node) {
-            addModuleSymbol(node.getHead().getSymbol());
+
         }
 
         @Override
-        public void enter(SymbolExpr node) {
-            addModuleSymbol(node.getSymbol());
-        }
-
-        private void addModuleSymbol(Symbol symbol) {
-            switch (symbol) {
-                case Identifier id -> {
-                    if (dependencies.containsVertex(id)) {
-                        references.add(id);
-                    }
-                }
-                case InterpolatedSymbol interpolated -> {
-                    log.error("{}: Interpolated identifiers are not allowed in module instantiation: {}",
-                            interpolated.getSourceLoc(), interpolated);
-                    throw new CompileCancellationException();
-                }
+        public void enter(IdentifierSymbol node) {
+            var id = node.getIdentifier();
+            if (dependencies.containsVertex(id)) {
+                references.add(id);
             }
         }
 
+        @Override
+        public void enter(InterpolatedSymbol node) {
+            log.error("{}: Interpolated identifiers are not allowed in module instantiation: {}",
+                    node.getSourceLoc(), node);
+        }
     }
 
     public record AnalysisResult(List<ModuleNode> topModules, List<ModuleNode> topology) {

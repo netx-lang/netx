@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.antlr.HardScriptParser;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.ast.expr.*;
+import pascal.hardscript.compiler.ast.expr.qualifier.BindingQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.GeneratorQualifier;
 import pascal.hardscript.compiler.ast.expr.selector.BitSelector;
 import pascal.hardscript.compiler.ast.expr.selector.PartSelector;
@@ -38,7 +39,7 @@ class HSParserUnitTest {
         var context = makeParser("arr[1][2:0]").expression();
         var accessExpr = HSParser.parseExpr(context);
         assertEquals(AccessExpr.of(AccessExpr.of(
-                        SymbolExpr.of(Identifier.of("arr")),
+                        IdentifierSymbol.of(Identifier.of("arr")),
                         BitSelector.of(IntNumber.of(1))),
                 PartSelector.of(IntNumber.of(2), IntNumber.of(0))), accessExpr);
     }
@@ -48,16 +49,16 @@ class HSParserUnitTest {
         var context = makeParser("[port | i in [0..5], let port = [1, x_${i}]]").expression();
         var listExpr = HSParser.parseExpr(context);
         assertEquals(ListComprehension.of(
-                SymbolExpr.of(Identifier.of("port")), List.of(
+                IdentifierSymbol.of(Identifier.of("port")), List.of(
                         GeneratorQualifier.of(
-                                Identifier.of("i"),
+                                IdentifierSymbol.of(Identifier.of("i")),
                                 RangeList.of(IntNumber.of(0), IntNumber.of(5))),
-                        Binding.of(
-                                Identifier.of("port"),
+                        BindingQualifier.of(Binding.of(
+                                IdentifierSymbol.of(Identifier.of("port")),
                                 CommonList.of(List.of(
                                         IntNumber.of(1),
-                                        SymbolExpr.of(InterpolatedSymbol.of(
+                                        InterpolatedSymbol.of(
                                                 List.of("x_"),
-                                                List.of(SymbolExpr.of(Identifier.of("i")))))))))), listExpr);
+                                                List.of(IdentifierSymbol.of(Identifier.of("i")))))))))), listExpr);
     }
 }
