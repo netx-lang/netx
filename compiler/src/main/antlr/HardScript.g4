@@ -12,8 +12,8 @@ component_arguments
 
 element
     : type=expression ':' connection=expression           # ComponentInstantiation
-    | 'for' '(' iterator ')' '{' element* '}'             # Loop
     | binding                                             # BindingStatement
+    | 'for' '(' iterator ')' '{' element* '}'             # Loop
     | 'inst' primary_symbol (',' primary_symbol)* 'of' type=expression    # DataInstantiation
     ;
 
@@ -38,8 +38,9 @@ expression
     | expression (selector)+                                        # AccessExpr
     | 'if' cond=expression
       'then' thenBranch=expression
-      'else' elseBranch=expression                                  # ConditionalExpr
-    | '(' expression ')'                                            # ParenExpr
+      'else' elseBranch=expression                                    # ConditionalExpr
+    | '(' (primary_symbol (',' primary_symbol)*)? ')' '=>' expression # LambdaExpr
+    | '(' expression ')'                                              # ParenExpr
     ;
 
 

@@ -12,6 +12,7 @@ import pascal.hardscript.compiler.ast.expr.qualifier.Qualifier;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
+import pascal.hardscript.compiler.model.UnresolvedLambda;
 import pascal.hardscript.compiler.model.component.*;
 import pascal.hardscript.compiler.model.data.Clock;
 import pascal.hardscript.compiler.model.data.Data;
@@ -21,6 +22,7 @@ import pascal.hardscript.compiler.model.data.selector.BitSelector;
 import pascal.hardscript.compiler.model.data.selector.PartSelector;
 import pascal.hardscript.compiler.model.data.selector.Selector;
 import pascal.hardscript.compiler.model.scope.DesignScope;
+import pascal.hardscript.compiler.model.scope.MapBinding;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.compiler.model.scope.SingleBinding;
 import pascal.hardscript.compiler.model.value.*;
@@ -46,11 +48,11 @@ public final class Evaluator {
         bindings.add(scope.getBinding());
     }
 
-    public ComponentType evaluateToInstanceType(ExprNode expr) {
-        return requiresInstanceType(expr.getSourceLoc(), evaluate(expr));
+    public ComponentType evaluateToComponentType(ExprNode expr) {
+        return requiresComponentType(expr.getSourceLoc(), evaluate(expr));
     }
 
-    public ComponentPort evaluateToPort(ExprNode expr) {
+    public ComponentPort evaluateToComponentPort(ExprNode expr) {
         return requiresPort(expr.getSourceLoc(), evaluate(expr));
     }
 
@@ -82,7 +84,26 @@ public final class Evaluator {
             case NumberExpr sub -> evaluateNumberExpr(sub);
             case SymbolExpr sub -> evaluateSymbolExpr(sub);
             case UnaryExpr sub -> evaluateUnaryExpr(sub);
+            case LambdaExpr sub -> evaluateLambdaExpr(sub);
         };
+    }
+
+    private Entity evaluateLambdaExpr(LambdaExpr expr) {
+        var arguments = expr.getArguments().stream().map(this::getIdentifierFrom).toList();
+        return UnresolvedLambda.of(scope, arguments, expr.getBody());
+    }
+
+    public ComponentType reEvaluateLambdaType(UnresolvedLambda lambda, AtomType caller) {
+        var evaluator = lambda.capture().getEvaluator();
+        requiresMatchedSize(caller.identifier().getSourceLoc(), lambda.identifiers(), caller.parameters());
+        int size = lambda.identifiers().size();
+        var bindings = MapBinding.of(IntStream.range(0, size).mapToObj(i -> Map.entry(
+                lambda.identifiers().get(i),
+                caller.parameters().get(i))).toList());
+        evaluator.overrideBindings(bindings);
+        var result = LambdaType.of(evaluator.evaluateToComponentType(lambda.body()));
+        evaluator.restoreBindings();
+        return result;
     }
 
     private Entity evaluateAccessExpr(AccessExpr expr) {

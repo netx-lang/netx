@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.hardscript.util.lang.BitVector;
 
-public record BitVectorValue(BitVector value) implements Value, IntegerValue {
+public record BitVectorValue(BitVector value) implements IntegerValue {
 
     private static final Logger log = LoggerFactory.getLogger(BitVectorValue.class);
 

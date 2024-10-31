@@ -2,6 +2,7 @@ package pascal.hardscript.compiler.ast.expr;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -11,7 +12,7 @@ public final class ParamSymbolExpr extends SymbolExpr {
 
     private ParamSymbolExpr(PrimarySymbol head, List<ExprNode> arguments) {
         this.head = head;
-        this.arguments = arguments;
+        this.arguments = new LinkedList<>(arguments);
     }
 
     public static ParamSymbolExpr of(PrimarySymbol head, List<ExprNode> arguments) {

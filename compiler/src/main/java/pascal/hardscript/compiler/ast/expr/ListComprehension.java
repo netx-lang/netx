@@ -3,6 +3,7 @@ package pascal.hardscript.compiler.ast.expr;
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.expr.qualifier.Qualifier;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -12,7 +13,7 @@ public final class ListComprehension extends ListExpr {
 
     private ListComprehension(ExprNode head, List<Qualifier> qualifiers) {
         this.head = head;
-        this.qualifiers = qualifiers;
+        this.qualifiers = new LinkedList<>(qualifiers);
     }
 
     public static ListComprehension of(ExprNode head, List<Qualifier> qualifiers) {

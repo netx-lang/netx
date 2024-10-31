@@ -13,56 +13,101 @@
       "id" : "clk_3@(2:14)"
     }, {
       "type" : "wire",
-      "id" : "a@(3:9)",
+      "id": "c@(3:15)",
       "width" : 1
     }, {
       "type" : "builtin",
       "id" : "NOT",
-      "input" : [ "a@(3:9)" ],
-      "output" : [ "$i1@(4:18)" ]
+      "input": [
+        "c@(3:15)"
+      ],
+      "output": [
+        "$i1@(6:18)"
+      ]
     }, {
       "type" : "builtin",
       "id" : "NOT",
-      "input" : [ "a@(3:9)" ],
-      "output" : [ "$i2@(4:18)" ]
+      "input": [
+        "c@(3:15)"
+      ],
+      "output": [
+        "$i2@(6:18)"
+      ]
     }, {
       "type" : "builtin",
       "id" : "AND",
       "members" : [ {
         "type" : "wire",
-        "id" : "$i1@(4:18)",
+        "id": "$i1@(6:18)",
         "width" : 1
       }, {
         "type" : "wire",
-        "id" : "$i2@(4:18)",
+        "id": "$i2@(6:18)",
         "width" : 1
       } ],
-      "input" : [ "$i1@(4:18)", "$i2@(4:18)" ],
-      "output" : [ "a@(3:9)" ]
+      "input": [
+        "$i1@(6:18)",
+        "$i2@(6:18)"
+      ],
+      "output": [
+        "c@(3:15)"
+      ]
     }, {
       "type" : "builtin",
-      "id" : "REG",
-      "input" : [ "a@(3:9)" ],
-      "output" : [ "a@(3:9)" ]
+      "id": "REGISTER",
+      "input": [
+        "c@(3:15)"
+      ],
+      "output": [
+        "c@(3:15)"
+      ],
+      "attribute": {
+        "isPosTrigger": "true",
+        "clock": "clk@(2:9)"
+      }
     }, {
       "type" : "builtin",
-      "id" : "REG",
-      "input" : [ "a@(3:9)" ],
-      "output" : [ "a@(3:9)" ]
+      "id": "REGISTER",
+      "input": [
+        "c@(3:15)"
+      ],
+      "output": [
+        "c@(3:15)"
+      ],
+      "attribute": {
+        "isPosTrigger": "true",
+        "clock": "clk@(2:9)"
+      }
     }, {
       "type" : "builtin",
       "id" : "SPLIT",
-      "input" : [ "a@(3:9)" ],
-      "output" : [ "a@(3:9)", "a@(3:9)" ]
+      "input": [
+        "c@(3:15)"
+      ],
+      "output": [
+        "c@(3:15)",
+        "c@(3:15)"
+      ]
     }, {
       "type" : "builtin",
-      "id" : "REG",
-      "input" : [ "a@(3:9)" ],
-      "output" : [ "a@(3:9)" ]
+      "id": "REGISTER",
+      "input": [
+        "c@(3:15)"
+      ],
+      "output": [
+        "c@(3:15)"
+      ],
+      "attribute": {
+        "isPosTrigger": "true",
+        "clock": "clk@(2:9)"
+      }
     }, {
       "type" : "builtin",
       "id" : "OR",
-      "input" : [ "a@(3:9)", "a@(3:9)" ],
+      "input": [
+        "c@(3:15)",
+        "c@(3:15)"
+      ],
       "output" : [ "clk_3@(2:14)" ]
     } ]
   } ]

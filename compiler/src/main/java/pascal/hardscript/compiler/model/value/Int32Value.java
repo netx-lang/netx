@@ -2,7 +2,7 @@ package pascal.hardscript.compiler.model.value;
 
 import pascal.hardscript.util.lang.BitVector;
 
-public record Int32Value(int value) implements Value, IntegerValue {
+public record Int32Value(int value) implements IntegerValue {
     public static Int32Value of(int value) {
         return new Int32Value(value);
     }

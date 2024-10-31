@@ -4,6 +4,7 @@ import pascal.hardscript.compiler.analysis.HierarchyAnalysis;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.ast.component.*;
+import pascal.hardscript.compiler.model.UnresolvedLambda;
 import pascal.hardscript.compiler.model.component.*;
 import pascal.hardscript.compiler.model.data.Data;
 import pascal.hardscript.compiler.model.scope.*;
@@ -45,7 +46,7 @@ public final class Elaborator {
 
         public void build(ComponentNode node) {
             dispatchElementBuilder(node.getElements());
-            var portType = evaluator.evaluateToPort(node.getType());
+            var portType = evaluator.evaluateToComponentPort(node.getType());
             if (!(scope instanceof ComponentScope module)) {
                 throw new ShallNotReachHereError();
             }
@@ -94,9 +95,9 @@ public final class Elaborator {
 
         private void buildElementIntoScope(ComponentInstantiationNode instantiation) {
             var sourceLoc = instantiation.getSourceLoc();
-            var parameters = evaluator.evaluateToPort(instantiation.getPort());
+            var parameters = evaluator.evaluateToComponentPort(instantiation.getPort());
             var arguments = new Instantiator(instantiation).instantiate(
-                    evaluator.evaluateToInstanceType(instantiation.getType()));
+                    evaluator.evaluateToComponentType(instantiation.getType()));
 
             requiresMatchedSize(sourceLoc, arguments.from(), parameters.from());
             requiresMatchedSize(sourceLoc, arguments.to(), parameters.to());
@@ -120,6 +121,7 @@ public final class Elaborator {
                     case AtomType atomType -> instantiateAtomType(atomType);
                     case CombineType combineType -> instantiateCombineType(combineType);
                     case ParallelType parallelType -> instantiateParallelType(parallelType);
+                    case LambdaType lambdaType -> instantiate(lambdaType.value());
                 };
             }
 
@@ -145,10 +147,17 @@ public final class Elaborator {
             }
 
             private ComponentPort instantiateAtomType(AtomType atomType) {
-                ComponentScope module = info.containsComponent(atomType.identifier())
-                        ? instantiateSubComponent(atomType)
-                        : BuiltInComponentFactory.createBuiltInComponent(scope, atomType);
-                return ComponentPort.of(module.getInputs(), module.getOutputs());
+                var bindsTo = scope.getBinding().lookup(atomType.identifier());
+                if (bindsTo == null) {
+                    ComponentScope module = info.containsComponent(atomType.identifier())
+                            ? instantiateSubComponent(atomType)
+                            : BuiltInComponentFactory.createBuiltInComponent(scope, atomType);
+                    return ComponentPort.of(module.getInputs(), module.getOutputs());
+                } else if (bindsTo instanceof UnresolvedLambda lambdaType) {
+                    return instantiate(evaluator.reEvaluateLambdaType(lambdaType, atomType));
+                } else {
+                    throw new ShallNotReachHereError();
+                }
             }
 
             private ComponentScope instantiateSubComponent(AtomType atomType) {

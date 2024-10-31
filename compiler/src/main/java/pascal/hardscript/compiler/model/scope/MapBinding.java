@@ -5,10 +5,7 @@ import pascal.hardscript.compiler.model.Entity;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public final class MapBinding implements Binding {
     private final Map<Identifier, Entity> bindings = new HashMap<>();
@@ -16,6 +13,14 @@ public final class MapBinding implements Binding {
     public static MapBinding of(Identifier identifier, Entity entity) {
         var binding = new MapBinding();
         binding.bind(identifier, entity);
+        return binding;
+    }
+
+    public static MapBinding of(List<Map.Entry<Identifier, Entity>> entries) {
+        var binding = new MapBinding();
+        for (var entry : entries) {
+            binding.bind(entry.getKey(), entry.getValue());
+        }
         return binding;
     }
 

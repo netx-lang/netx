@@ -209,4 +209,12 @@ public interface ASTListener {
     default void exit(ParamSymbolExpr node) {
         exitDefault(node);
     }
+
+    default void enter(LambdaExpr node) {
+        enterDefault(node);
+    }
+
+    default void exit(LambdaExpr node) {
+        exitDefault(node);
+    }
 }

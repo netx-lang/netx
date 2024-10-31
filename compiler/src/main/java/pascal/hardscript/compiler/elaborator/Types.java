@@ -31,7 +31,7 @@ public final class Types {
         }
     }
 
-    public static ComponentType requiresInstanceType(SourceLoc loc, Entity entity) {
+    public static ComponentType requiresComponentType(SourceLoc loc, Entity entity) {
         if (entity instanceof ComponentType componentType) {
             return componentType;
         } else {
@@ -40,7 +40,7 @@ public final class Types {
         }
     }
 
-    public static Data requiresComponent(SourceLoc loc, Entity entity) {
+    public static Data requiresData(SourceLoc loc, Entity entity) {
         if (entity instanceof Data data) {
             return data;
         } else {
@@ -72,6 +72,15 @@ public final class Types {
             return integerValue;
         } else {
             log.error("{}: Expected integer value but got {}", loc, entity);
+            throw new CompileCancellationException();
+        }
+    }
+
+    public static BooleanValue requiresBooleanValue(SourceLoc loc, Entity entity) {
+        if (entity instanceof BooleanValue booleanValue) {
+            return booleanValue;
+        } else {
+            log.error("{}: Expected boolean value but got {}", loc, entity);
             throw new CompileCancellationException();
         }
     }

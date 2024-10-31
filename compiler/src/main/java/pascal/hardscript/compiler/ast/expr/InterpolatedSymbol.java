@@ -2,6 +2,7 @@ package pascal.hardscript.compiler.ast.expr;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -10,8 +11,8 @@ public final class InterpolatedSymbol extends PrimarySymbol {
     private final List<ExprNode> exprs;
 
     private InterpolatedSymbol(List<String> fragments, List<ExprNode> exprs) {
-        this.fragments = fragments;
-        this.exprs = exprs;
+        this.fragments = new LinkedList<>(fragments);
+        this.exprs = new LinkedList<>(exprs);
     }
 
     public static InterpolatedSymbol of(List<String> fragments, List<ExprNode> exprs) {

@@ -73,6 +73,7 @@ public final class HSParser {
             case BinaryExprContext sub -> parseBinaryExpr(sub);
             case AccessExprContext sub -> parseAccessExpr(sub);
             case ConditionalExprContext sub -> parseConditionalExpr(sub);
+            case LambdaExprContext sub -> parseLambdaExpr(sub);
             case ParenExprContext sub -> parseExpr(sub.expression());
             default -> throw new ShallNotReachHereError();
         };
@@ -215,6 +216,12 @@ public final class HSParser {
 
     static ExprNode parseConditionalExpr(ConditionalExprContext ctx) {
         return ConditionalExpr.of(parseExpr(ctx.cond), parseExpr(ctx.thenBranch), parseExpr(ctx.elseBranch));
+    }
+
+    static ExprNode parseLambdaExpr(LambdaExprContext ctx) {
+        return LambdaExpr.of(
+                ctx.primary_symbol().stream().map(HSParser::parsePrimarySymbol).toList(),
+                parseExpr(ctx.expression()));
     }
 
     static Identifier parseIdentifier(TerminalNode ID) {

@@ -2,6 +2,7 @@ package pascal.hardscript.compiler.ast.expr;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -9,7 +10,7 @@ public final class CommonList extends ListExpr {
     private final List<ExprNode> elements;
 
     private CommonList(List<ExprNode> elements) {
-        this.elements = elements;
+        this.elements = new LinkedList<>(elements);
     }
 
     public static CommonList of(List<ExprNode> elements) {
