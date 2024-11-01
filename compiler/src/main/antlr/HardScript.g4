@@ -38,9 +38,9 @@ expression
     | expression (selector)+                                        # AccessExpr
     | 'if' cond=expression
       'then' thenBranch=expression
-      'else' elseBranch=expression                                    # ConditionalExpr
-    | '(' (primary_symbol (',' primary_symbol)*)? ')' '=>' expression # LambdaExpr
-    | '(' expression ')'                                              # ParenExpr
+      'else' elseBranch=expression                                       # ConditionalExpr
+    | '(' expression ')'                                                 # ParenExpr
+    | 'component' (primary_symbol (',' primary_symbol)*)? ':' expression # LambdaExpr
     ;
 
 

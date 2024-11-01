@@ -4,6 +4,6 @@ component test {
     inst input, reg_out of wire(bit(3))
     [ gate(reg_out[i]) |
         i in [0..3],
-        let gate = (x) => [TO, SOURCE(a)] <> AND <> REGISTER(clk, true, x)
+        let gate = component x : [TO, SOURCE(a)] <> AND <> REGISTER(clk, true, x)
     ] <> AND(3) : [input[i] | i in [0..3]] -> [out]
 }

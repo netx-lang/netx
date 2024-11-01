@@ -28,16 +28,20 @@
       "type" : "builtin",
       "id" : "AND",
       "input" : [ "input@(4:9)[0]", "a@(3:9)" ],
-      "output" : [ "$i@(7:52)" ]
+      "output": [
+        "$i@(7:59)"
+      ]
     }, {
       "type" : "builtin",
       "id" : "REGISTER",
       "members" : [ {
         "type" : "wire",
-        "id" : "$i@(7:52)",
+        "id": "$i@(7:59)",
         "width" : 1
       } ],
-      "input" : [ "$i@(7:52)" ],
+      "input": [
+        "$i@(7:59)"
+      ],
       "output" : [ "reg_out@(4:16)[0]" ],
       "attribute" : {
         "isPosTrigger" : "true",
@@ -47,16 +51,20 @@
       "type" : "builtin",
       "id" : "AND",
       "input" : [ "input@(4:9)[1]", "a@(3:9)" ],
-      "output" : [ "$i@(7:52)" ]
+      "output": [
+        "$i@(7:59)"
+      ]
     }, {
       "type" : "builtin",
       "id" : "REGISTER",
       "members" : [ {
         "type" : "wire",
-        "id" : "$i@(7:52)",
+        "id": "$i@(7:59)",
         "width" : 1
       } ],
-      "input" : [ "$i@(7:52)" ],
+      "input": [
+        "$i@(7:59)"
+      ],
       "output" : [ "reg_out@(4:16)[1]" ],
       "attribute" : {
         "isPosTrigger" : "true",
@@ -66,16 +74,20 @@
       "type" : "builtin",
       "id" : "AND",
       "input" : [ "input@(4:9)[2]", "a@(3:9)" ],
-      "output" : [ "$i@(7:52)" ]
+      "output": [
+        "$i@(7:59)"
+      ]
     }, {
       "type" : "builtin",
       "id" : "REGISTER",
       "members" : [ {
         "type" : "wire",
-        "id" : "$i@(7:52)",
+        "id": "$i@(7:59)",
         "width" : 1
       } ],
-      "input" : [ "$i@(7:52)" ],
+      "input": [
+        "$i@(7:59)"
+      ],
       "output" : [ "reg_out@(4:16)[2]" ],
       "attribute" : {
         "isPosTrigger" : "true",
