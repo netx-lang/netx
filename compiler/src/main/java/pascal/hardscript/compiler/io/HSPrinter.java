@@ -48,11 +48,11 @@ public final class HSPrinter {
         return result;
     }
 
-    private static final Set<String> NO_DUMP = Set.of("SPLIT", "TO");
+    private static final Set<String> NO_DUMP = Set.of("SPLIT", "TO", "SOURCE", "IGNORE");
 
     private ObjectNode dump(ComponentScope module) {
         var result = createObjectNode();
-        setType(result, "module");
+        setType(result, "component");
         setIdentifier(result, module.getIdentifier());
 
         dumpComponentIO(result, "input", module.getInputs());

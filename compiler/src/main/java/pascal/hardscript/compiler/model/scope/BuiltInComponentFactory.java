@@ -15,16 +15,18 @@ import static pascal.hardscript.compiler.elaborator.Types.*;
 
 public class BuiltInComponentFactory {
     private static final Logger log = LoggerFactory.getLogger(BuiltInComponentFactory.class);
-    private static final Map<String, BiFunction<Scope, AtomType, ComponentScope>> BUILTIN_FACTORY = Map.of(
-            "REGISTER", BuiltInComponentFactory::createREGISTERComponent,
-            "TO", BuiltInComponentFactory::createTOComponent,
-            "OR", BuiltInComponentFactory::createORComponent,
-            "SPLIT", BuiltInComponentFactory::createSPLITComponent,
-            "NOT", BuiltInComponentFactory::createNOTComponent,
-            "AND", BuiltInComponentFactory::createANDComponent,
-            "XOR", BuiltInComponentFactory::createXORComponent,
-            "NOR", BuiltInComponentFactory::createNORComponent,
-            "NAND", BuiltInComponentFactory::createNANDComponent
+    private static final Map<String, BiFunction<Scope, AtomType, ComponentScope>> BUILTIN_FACTORY = Map.ofEntries(
+            Map.entry("REGISTER", BuiltInComponentFactory::createREGISTERComponent),
+            Map.entry("SOURCE", BuiltInComponentFactory::createSOURCEComponent),
+            Map.entry("IGNORE", BuiltInComponentFactory::createIGNOREComponent),
+            Map.entry("SPLIT", BuiltInComponentFactory::createSPLITComponent),
+            Map.entry("TO", BuiltInComponentFactory::createTOComponent),
+            Map.entry("OR", BuiltInComponentFactory::createORComponent),
+            Map.entry("NOT", BuiltInComponentFactory::createNOTComponent),
+            Map.entry("AND", BuiltInComponentFactory::createANDComponent),
+            Map.entry("XOR", BuiltInComponentFactory::createXORComponent),
+            Map.entry("NOR", BuiltInComponentFactory::createNORComponent),
+            Map.entry("NAND", BuiltInComponentFactory::createNANDComponent)
     );
     public static final Set<String> BUILTIN = BUILTIN_FACTORY.keySet();
 
@@ -38,6 +40,22 @@ public class BuiltInComponentFactory {
         return factory.apply(parent, type);
     }
 
+    public static ComponentScope createSOURCEComponent(Scope parent, AtomType type) {
+        var result = parent.instantiateComponentScope(parent.getNameAllocator().allocateFor(type));
+        var sourceLoc = type.identifier().getSourceLoc();
+        requiresMatchedSize(sourceLoc, 1, type.parameters());
+        var data = requiresData(sourceLoc, type.parameters().getFirst());
+        result.addOutput(data);
+        return result;
+    }
+
+    public static ComponentScope createIGNOREComponent(Scope parent, AtomType type) {
+        var result = parent.instantiateComponentScope(parent.getNameAllocator().allocateFor(type));
+        result.addInput(newWire(result, "i", 1));
+        return result;
+    }
+
+    @SuppressWarnings("JavaExistingMethodCanBeUsed")
     private static ComponentScope createNOTComponent(Scope parent, AtomType type) {
         var result = parent.instantiateComponentScope(parent.getNameAllocator().allocateFor(type));
         result.addInput(newWire(result, "i", 1));

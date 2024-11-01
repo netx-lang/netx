@@ -3,7 +3,7 @@ grammar HardScript;
 design : component+;
 
 component
-    : 'component' ID component_arguments? ':' type=expression '{' element* '}'
+    : 'component' ID component_arguments? (':' type=expression)? '{' element* '}'
     ;
 
 component_arguments

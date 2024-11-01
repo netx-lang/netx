@@ -1,7 +1,7 @@
 {
   "type" : "design",
   "members" : [ {
-    "type" : "module",
+    "type" : "component",
     "id" : "top",
     "input" : [ "input@(2:9)" ],
     "output" : [ "output@(3:9)" ],
@@ -14,7 +14,7 @@
       "id" : "input@(2:9)",
       "width" : 8
     }, {
-      "type" : "module",
+      "type" : "component",
       "id" : "encoder",
       "input" : [ "input@(2:9)" ],
       "output" : [ "output@(3:9)" ],

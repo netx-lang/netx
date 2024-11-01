@@ -12,7 +12,6 @@ import pascal.hardscript.compiler.ast.expr.qualifier.Qualifier;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
-import pascal.hardscript.compiler.model.UnresolvedLambda;
 import pascal.hardscript.compiler.model.component.*;
 import pascal.hardscript.compiler.model.data.Clock;
 import pascal.hardscript.compiler.model.data.Data;
@@ -26,6 +25,7 @@ import pascal.hardscript.compiler.model.scope.MapBinding;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.compiler.model.scope.SingleBinding;
 import pascal.hardscript.compiler.model.value.*;
+import pascal.hardscript.util.exception.TodoException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -90,17 +90,17 @@ public final class Evaluator {
 
     private Entity evaluateLambdaExpr(LambdaExpr expr) {
         var arguments = expr.getArguments().stream().map(this::getIdentifierFrom).toList();
-        return UnresolvedLambda.of(scope, arguments, expr.getBody());
+        return LazyType.of(scope, arguments, expr.getBody());
     }
 
-    public ComponentType reEvaluateLambdaType(UnresolvedLambda lambda, AtomType caller) {
-        var evaluator = lambda.capture().getEvaluator();
-        requiresMatchedSize(caller.identifier().getSourceLoc(), lambda.identifiers(), caller.parameters());
-        int size = lambda.identifiers().size();
+    public ComponentType evaluateLazyExpr(LazyType lazy, AtomType caller) {
+        var evaluator = lazy.capture().getEvaluator();
+        requiresMatchedSize(caller.identifier().getSourceLoc(), lazy.identifiers(), caller.parameters());
+        int size = lazy.identifiers().size();
         var bindings = MapBinding.of(IntStream.range(0, size).mapToObj(
-                i -> Map.entry(lambda.identifiers().get(i), caller.parameters().get(i))).toList());
+                i -> Map.entry(lazy.identifiers().get(i), caller.parameters().get(i))).toList());
         evaluator.overrideBindings(bindings);
-        var result = evaluator.evaluateToComponentType(lambda.body());
+        var result = evaluator.evaluateToComponentType(lazy.expr());
         evaluator.restoreBindings();
         return result;
     }
@@ -130,19 +130,11 @@ public final class Evaluator {
     }
 
     private Entity evaluateListExpr(ListExpr expr) {
-        var list = switch (expr) {
+        return switch (expr) {
             case CommonList sub -> evaluateCommonList(sub);
             case RangeList sub -> evaluateRangeList(sub);
             case ListComprehension sub -> evaluateListComprehension(sub);
         };
-        if (!list.entities().isEmpty()) {
-            var type = list.entities().getFirst().getClass();
-            if (!list.entities().stream().allMatch(type::isInstance)) {
-                log.error("{}: list containing different types of elements: {}", expr.getSourceLoc(), list);
-                throw new CompileCancellationException();
-            }
-        }
-        return list;
     }
 
     private ListEntity evaluateCommonList(CommonList list) {
@@ -350,12 +342,8 @@ public final class Evaluator {
 
     private Entity evaluatePrimarySymbolExpr(PrimarySymbol expr) {
         var id = getIdentifierFrom(expr);
-        for (var binding : bindings) {
-            var entity = binding.lookup(id);
-            if (entity != null) {
-                return entity;
-            }
-        }
+        Entity entity = resolveIdentifier(id);
+        if (entity != null) return entity;
         if (scope instanceof DesignScope design) {
             if (design.containsInfo(id)) {
                 return AtomType.of(id);
@@ -364,6 +352,16 @@ public final class Evaluator {
             throw new CompileCancellationException();
         }
         return scope.getParent().getEvaluator().evaluate(expr);
+    }
+
+    private Entity resolveIdentifier(Identifier id) {
+        for (var binding : bindings) {
+            var entity = binding.lookup(id);
+            if (entity != null) {
+                return entity;
+            }
+        }
+        return null;
     }
 
     private Entity evaluateParamSymbolExpr(ParamSymbolExpr expr) {
@@ -389,7 +387,16 @@ public final class Evaluator {
     private ComponentType evaluateInstanceType(ParamSymbolExpr expr) {
         var identifier = getIdentifierFrom(expr.getHead());
         var parameters = expr.getArguments().stream().map(this::evaluate).toList();
-        return AtomType.of(identifier, parameters);
+        var atom = AtomType.of(identifier, parameters);
+
+        var bindsTo = resolveIdentifier(identifier);
+        if (bindsTo == null) {
+            return atom;
+        } else if (bindsTo instanceof LazyType lambdaType) {
+            return evaluateLazyExpr(lambdaType, atom);
+        } else {
+            throw new TodoException();
+        }
     }
 
     public Identifier getIdentifierFrom(PrimarySymbol symbol) {

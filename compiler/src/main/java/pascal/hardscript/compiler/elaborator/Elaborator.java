@@ -1,10 +1,12 @@
 package pascal.hardscript.compiler.elaborator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.analysis.HierarchyAnalysis;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.ast.component.*;
-import pascal.hardscript.compiler.model.UnresolvedLambda;
+import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.component.*;
 import pascal.hardscript.compiler.model.data.Data;
 import pascal.hardscript.compiler.model.scope.*;
@@ -16,6 +18,7 @@ import java.util.List;
 import static pascal.hardscript.compiler.elaborator.Types.requiresMatchedSize;
 
 public final class Elaborator {
+    private static final Logger log = LoggerFactory.getLogger(Elaborator.class);
     private final DesignNode node;
     private final ComponentInfo info;
     private final DesignScope design;
@@ -46,12 +49,14 @@ public final class Elaborator {
 
         public void build(ComponentNode node) {
             dispatchElementBuilder(node.getElements());
-            var portType = evaluator.evaluateToComponentPort(node.getType());
-            if (!(scope instanceof ComponentScope module)) {
-                throw new ShallNotReachHereError();
+            if (node.getType() != null) {
+                var portType = evaluator.evaluateToComponentPort(node.getType());
+                if (!(scope instanceof ComponentScope module)) {
+                    throw new ShallNotReachHereError();
+                }
+                portType.from().forEach(module::addInput);
+                portType.to().forEach(module::addOutput);
             }
-            portType.from().forEach(module::addInput);
-            portType.to().forEach(module::addOutput);
         }
 
         public void build(LoopNode node) {
@@ -121,6 +126,10 @@ public final class Elaborator {
                     case AtomType atomType -> instantiateAtomType(atomType);
                     case CombineType combineType -> instantiateCombineType(combineType);
                     case ParallelType parallelType -> instantiateParallelType(parallelType);
+                    case LazyType lazyType -> {
+                        log.error("{}: Unexpected Lambda Type {}", sourceLoc, lazyType);
+                        throw new CompileCancellationException();
+                    }
                 };
             }
 
@@ -146,31 +155,24 @@ public final class Elaborator {
             }
 
             private ComponentPort instantiateAtomType(AtomType atomType) {
-                var bindsTo = scope.getBinding().lookup(atomType.identifier());
-                if (bindsTo == null) {
-                    ComponentScope module = info.containsComponent(atomType.identifier())
-                            ? instantiateSubComponent(atomType)
-                            : BuiltInComponentFactory.createBuiltInComponent(scope, atomType);
-                    return ComponentPort.of(module.getInputs(), module.getOutputs());
-                } else if (bindsTo instanceof UnresolvedLambda lambdaType) {
-                    return instantiate(evaluator.reEvaluateLambdaType(lambdaType, atomType));
-                } else {
-                    throw new ShallNotReachHereError();
-                }
+                ComponentScope module = info.containsComponent(atomType.identifier())
+                        ? instantiateSubComponent(atomType)
+                        : BuiltInComponentFactory.createBuiltInComponent(scope, atomType);
+                return ComponentPort.of(module.getInputs(), module.getOutputs());
             }
 
             private ComponentScope instantiateSubComponent(AtomType atomType) {
                 var node = info.getComponentNode(atomType.identifier());
-                var moduleScope = scope.instantiateComponentScope(
+                var componentScope = scope.instantiateComponentScope(
                         scope.getNameAllocator().allocateFor(atomType));
 
                 requiresMatchedSize(sourceLoc, node.getArguments(), atomType.parameters());
                 var iterator = node.getArguments().iterator();
                 for (var entity : atomType.parameters()) {
-                    moduleScope.bind(iterator.next(), entity);
+                    componentScope.bind(iterator.next(), entity);
                 }
-                new ScopeElaborator(moduleScope).build(node);
-                return moduleScope;
+                new ScopeElaborator(componentScope).build(node);
+                return componentScope;
             }
         }
     }

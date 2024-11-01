@@ -30,7 +30,9 @@ public final class ComponentNode extends ASTNode {
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);
-        type.walk(listener);
+        if (type != null) {
+            type.walk(listener);
+        }
         elements.forEach(stmt -> stmt.walk(listener));
         listener.exit(this);
     }

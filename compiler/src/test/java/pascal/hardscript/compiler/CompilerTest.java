@@ -38,6 +38,13 @@ class CompilerTest {
         test("divide_by_3");
     }
 
+    @Test
+    void testBind() throws IOException {
+        test("bind_1");
+        test("bind_2");
+//        test("bind_3");
+    }
+
     private static void test(String fileName) throws IOException {
         var design = Frontend.loadPath(TEST_DIR.resolve(fileName + ".hard")).elaborate();
         var json = new HSPrinter(design).dump();

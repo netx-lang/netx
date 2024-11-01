@@ -32,7 +32,8 @@ public final class HSParser {
         List<Identifier> arguments = ctx.component_arguments() != null
                 ? ctx.component_arguments().ID().stream().map(HSParser::parseIdentifier).toList()
                 : List.of();
-        var result = ComponentNode.of(parseIdentifier(ctx.ID()), parseExpr(ctx.type), arguments,
+        ExprNode type = ctx.type != null ? parseExpr(ctx.type) : null;
+        var result = ComponentNode.of(parseIdentifier(ctx.ID()), type, arguments,
                 ctx.element().stream().map(HSParser::parseElement).toList());
         result.setSourceLoc(SourceLoc.from(ctx.getStart()));
         return result;
