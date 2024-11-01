@@ -40,8 +40,8 @@ class CompilerTest {
 
     @Test
     void testBind() throws IOException {
-//        test("bind_1");
-//        test("bind_2");
+        test("bind_1");
+        test("bind_2");
         test("bind_3");
     }
 
@@ -54,9 +54,9 @@ class CompilerTest {
             mapper.writerWithDefaultPrettyPrinter()
                     .writeValue(EXPECTED_DIR.resolve(fileName + ".json").toFile(), json);
         } else {
-            String expected = new String(Files.readAllBytes(EXPECTED_DIR.resolve(fileName + ".json")));
-            var actual = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
-            assertEquals(expected, actual);
+            var expected = mapper.reader()
+                    .readTree(Files.newBufferedReader(EXPECTED_DIR.resolve(fileName + ".json")));
+            assertEquals(expected, json);
         }
 
     }

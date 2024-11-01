@@ -36,13 +36,13 @@ public class AliasAnalysis extends ModelAnalysis<AliasAnalysis.Result> {
     private boolean needUpdate(Data element, Data root) {
         if (representatives.containsKey(root)) {
             var top = representatives.get(root);
-            if (!(element instanceof DataAccess) && top instanceof DataAccess) {
-                return true;
+            if (element.getDepth() == top.getDepth()) {
+                if (!(element instanceof DataAccess) && top instanceof DataAccess) {
+                    return true;
+                }
+                return element.getSourceLoc().compareTo(top.getSourceLoc()) > 0;
             }
-            if (element.getDepth() < top.getDepth()) {
-                return true;
-            }
-            return element.getSourceLoc().compareTo(top.getSourceLoc()) < 0;
+            return element.getDepth() < top.getDepth();
         }
         return true;
     }
