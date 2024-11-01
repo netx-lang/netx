@@ -25,7 +25,6 @@ import pascal.hardscript.compiler.model.scope.MapBinding;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.compiler.model.scope.SingleBinding;
 import pascal.hardscript.compiler.model.value.*;
-import pascal.hardscript.util.exception.TodoException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -343,7 +342,12 @@ public final class Evaluator {
     private Entity evaluatePrimarySymbolExpr(PrimarySymbol expr) {
         var id = getIdentifierFrom(expr);
         Entity entity = resolveIdentifier(id);
-        if (entity != null) return entity;
+        if (entity != null) {
+            if (entity instanceof LazyType lambdaType) {
+                return evaluateLazyExpr(lambdaType, AtomType.of(id));
+            }
+            return entity;
+        }
         if (scope instanceof DesignScope design) {
             if (design.containsInfo(id)) {
                 return AtomType.of(id);
@@ -388,15 +392,10 @@ public final class Evaluator {
         var identifier = getIdentifierFrom(expr.getHead());
         var parameters = expr.getArguments().stream().map(this::evaluate).toList();
         var atom = AtomType.of(identifier, parameters);
-
-        var bindsTo = resolveIdentifier(identifier);
-        if (bindsTo == null) {
-            return atom;
-        } else if (bindsTo instanceof LazyType lambdaType) {
+        if (resolveIdentifier(identifier) instanceof LazyType lambdaType) {
             return evaluateLazyExpr(lambdaType, atom);
-        } else {
-            throw new TodoException();
         }
+        return atom;
     }
 
     public Identifier getIdentifierFrom(PrimarySymbol symbol) {

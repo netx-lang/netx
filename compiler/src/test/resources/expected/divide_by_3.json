@@ -46,16 +46,20 @@
         "width" : 1
       } ],
       "input" : [ "$i1@(7:18)", "$i2@(7:18)" ],
-      "output" : [ "$i@(4:36)" ]
+      "output": [
+        "$i@(4:42)"
+      ]
     }, {
       "type" : "builtin",
       "id" : "REGISTER",
       "members" : [ {
         "type" : "wire",
-        "id" : "$i@(4:36)",
+        "id": "$i@(4:42)",
         "width" : 1
       } ],
-      "input" : [ "$i@(4:36)" ],
+      "input": [
+        "$i@(4:42)"
+      ],
       "output" : [ "a@(3:9)" ],
       "attribute" : {
         "isPosTrigger" : "true",

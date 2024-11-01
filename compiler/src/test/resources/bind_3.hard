@@ -1,0 +1,18 @@
+component top {
+    inst data of wire(bit(4))
+    let LAMBDA = component a, b, c, d: [SOURCE(a), SOURCE(b), SOURCE(c), SOURCE(d)] <> many_ports
+
+    let A = component a, b, c: LAMBDA(a, b, c, data[3])
+    let B = component a, b: A(a, b, data[2])
+    let C = component a: B(a, data[1])
+    let D = component: C(data[0])
+    D <> [IGNORE | i in [0..4]] : [] -> []
+}
+
+component many_ports : [input[i] | i in [0..4]] -> [output[i] | i in [0..4]] {
+    inst input of wire(bit(4))
+    inst output of wire(bit(4))
+    for (i in [0..4]) {
+        TO : [input[i]] -> [output[(i + 1) % 4]]
+    }
+}

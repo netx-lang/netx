@@ -6,7 +6,6 @@ import pascal.hardscript.compiler.analysis.HierarchyAnalysis;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.ast.component.*;
-import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.component.*;
 import pascal.hardscript.compiler.model.data.Data;
 import pascal.hardscript.compiler.model.scope.*;
@@ -126,10 +125,6 @@ public final class Elaborator {
                     case AtomType atomType -> instantiateAtomType(atomType);
                     case CombineType combineType -> instantiateCombineType(combineType);
                     case ParallelType parallelType -> instantiateParallelType(parallelType);
-                    case LazyType lazyType -> {
-                        log.error("{}: Unexpected Lambda Type {}", sourceLoc, lazyType);
-                        throw new CompileCancellationException();
-                    }
                 };
             }
 
