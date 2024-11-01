@@ -38,28 +38,26 @@
       "id" : "AND",
       "members" : [ {
         "type" : "wire",
-        "id" : "$i1@(7:18)",
-        "width" : 1
+          "id": "$i1@(7:18)"
       }, {
         "type" : "wire",
-        "id" : "$i2@(7:18)",
-        "width" : 1
+          "id": "$i2@(7:18)"
       } ],
       "input" : [ "$i1@(7:18)", "$i2@(7:18)" ],
-      "output": [
-        "$i@(4:42)"
-      ]
+        "output": [
+            "$i@(4:42)"
+        ]
     }, {
       "type" : "builtin",
       "id" : "REGISTER",
       "members" : [ {
         "type" : "wire",
-        "id": "$i@(4:42)",
+          "id": "$i@(4:42)",
         "width" : 1
       } ],
-      "input": [
-        "$i@(4:42)"
-      ],
+        "input": [
+            "$i@(4:42)"
+        ],
       "output" : [ "a@(3:9)" ],
       "attribute" : {
         "isPosTrigger" : "true",

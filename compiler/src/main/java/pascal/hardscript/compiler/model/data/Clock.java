@@ -5,6 +5,8 @@ import pascal.hardscript.compiler.model.scope.Scope;
 
 public record Clock(Identifier id, Scope parent) implements Data {
 
+    private static final BitType TYPE = new BitType(1);
+
     @Override
     public Identifier getIdentifier() {
         return id;
@@ -16,8 +18,8 @@ public record Clock(Identifier id, Scope parent) implements Data {
     }
 
     @Override
-    public int getWidth() {
-        return 1;
+    public DataType getType() {
+        return TYPE;
     }
 
     public static class Factory implements Data.Factory<Clock> {

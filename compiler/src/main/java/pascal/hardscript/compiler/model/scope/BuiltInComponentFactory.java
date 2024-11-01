@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.component.AtomType;
+import pascal.hardscript.compiler.model.data.DataType;
+import pascal.hardscript.compiler.model.data.ImplicitType;
 import pascal.hardscript.compiler.model.data.Wire;
 
 import java.util.Map;
@@ -51,21 +53,21 @@ public class BuiltInComponentFactory {
 
     public static ComponentScope createIGNOREComponent(Scope parent, AtomType type) {
         var result = parent.instantiateComponentScope(parent.getNameAllocator().allocateFor(type));
-        result.addInput(newWire(result, "i", 1));
+        result.addInput(newWire(result, "i"));
         return result;
     }
 
     @SuppressWarnings("JavaExistingMethodCanBeUsed")
     private static ComponentScope createNOTComponent(Scope parent, AtomType type) {
         var result = parent.instantiateComponentScope(parent.getNameAllocator().allocateFor(type));
-        result.addInput(newWire(result, "i", 1));
-        result.addOutput(newWire(result, "o", 1));
+        result.addInput(newWire(result, "i"));
+        result.addOutput(newWire(result, "o"));
         return result;
     }
 
     private static ComponentScope createTOComponent(Scope parent, AtomType type) {
         var result = parent.instantiateComponentScope(parent.getNameAllocator().allocateFor(type));
-        var entity = newWire(result, "t", 1);
+        var entity = newWire(result, "t");
         result.addInput(entity);
         result.addOutput(entity);
         return result;
@@ -82,7 +84,7 @@ public class BuiltInComponentFactory {
         result.addAttribute("isPosTrigger", isPosTrigger);
 
         var data = requiresData(sourceLoc, type.parameters().get(2));
-        var input = newWire(result, "i", data.getWidth());
+        var input = newWire(result, "i", data.getType());
         result.addInput(input);
         result.addOutput(data);
         return result;
@@ -94,7 +96,7 @@ public class BuiltInComponentFactory {
         int split = requiresIntegerValue(sourceLoc, type.parameters().getFirst()).toInt();
 
         var Component = parent.instantiateComponentScope(parent.getNameAllocator().allocateFor(type));
-        var entity = newWire(Component, "entity", 1);
+        var entity = newWire(Component, "entity");
         Component.addInput(entity);
         for (int i = 0; i < split; ++i) {
             Component.addOutput(entity);
@@ -134,14 +136,18 @@ public class BuiltInComponentFactory {
 
         var result = parent.instantiateComponentScope(parent.getNameAllocator().allocateFor(type));
         for (int i = 1; i <= ports; i++) {
-            result.addInput(newWire(result, "i" + i, 1));
+            result.addInput(newWire(result, "i" + i));
         }
-        result.addOutput(newWire(result, "o", 1));
+        result.addOutput(newWire(result, "o"));
         return result;
     }
 
-    private static Wire newWire(ComponentScope result, String name, int size) {
-        var wire = Wire.of(Identifier.of("$" + name), result, size);
+    private static Wire newWire(ComponentScope result, String name) {
+        return newWire(result, name, ImplicitType.getInstance());
+    }
+
+    private static Wire newWire(ComponentScope result, String name, DataType type) {
+        var wire = Wire.of(Identifier.of("$" + name), result, type);
         result.bind(wire.getIdentifier(), wire);
         return wire;
     }

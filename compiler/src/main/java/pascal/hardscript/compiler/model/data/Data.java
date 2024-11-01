@@ -9,7 +9,7 @@ import pascal.hardscript.compiler.model.scope.Scope;
 public sealed interface Data extends Entity permits Clock, DataAccess, Wire {
     Scope getParent();
 
-    int getWidth();
+    DataType getType();
 
     Identifier getIdentifier();
 

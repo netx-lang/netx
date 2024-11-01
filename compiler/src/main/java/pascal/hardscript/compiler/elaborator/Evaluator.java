@@ -13,10 +13,7 @@ import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
 import pascal.hardscript.compiler.model.component.*;
-import pascal.hardscript.compiler.model.data.Clock;
-import pascal.hardscript.compiler.model.data.Data;
-import pascal.hardscript.compiler.model.data.DataAccess;
-import pascal.hardscript.compiler.model.data.Wire;
+import pascal.hardscript.compiler.model.data.*;
 import pascal.hardscript.compiler.model.data.selector.BitSelector;
 import pascal.hardscript.compiler.model.data.selector.PartSelector;
 import pascal.hardscript.compiler.model.data.selector.Selector;
@@ -319,16 +316,16 @@ public final class Evaluator {
         }
     }
 
-    private int evaluateBitWidth(ExprNode expr) {
+    private DataType evaluateBitWidth(ExprNode expr) {
         if (expr instanceof ParamSymbolExpr spec) {
             var identifier = getIdentifierFrom(spec.getHead());
             if (identifier.string().equals("bit")) {
                 if (spec.getArguments().size() == 1) {
-                    return evaluateToIntegerValue(spec.getArguments().getFirst()).toInt();
+                    return BitType.of(evaluateToIntegerValue(spec.getArguments().getFirst()).toInt());
                 }
             }
         }
-        log.error("{}: Unexpected bit width specification: {}", expr.getSourceLoc(), expr);
+        log.error("{}: Unexpected bit type specification: {}", expr.getSourceLoc(), expr);
         throw new CompileCancellationException();
     }
 

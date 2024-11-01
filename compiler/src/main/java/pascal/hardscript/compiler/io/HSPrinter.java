@@ -6,10 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import pascal.hardscript.compiler.analysis.AliasAnalysis;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.model.Entity;
-import pascal.hardscript.compiler.model.data.Clock;
-import pascal.hardscript.compiler.model.data.Data;
-import pascal.hardscript.compiler.model.data.DataAccess;
-import pascal.hardscript.compiler.model.data.Wire;
+import pascal.hardscript.compiler.model.data.*;
 import pascal.hardscript.compiler.model.scope.*;
 import pascal.hardscript.compiler.model.value.BitVectorValue;
 import pascal.hardscript.compiler.model.value.BooleanValue;
@@ -145,7 +142,11 @@ public final class HSPrinter {
         var result = createObjectNode();
         setType(result, "wire");
         setIdentifier(result, wire);
-        result.put("width", wire.width());
+        switch (wire.getType()) {
+            case BitType type -> result.put("width", type.width());
+            case ImplicitType ignored -> {
+            }
+        }
         return result;
     }
 

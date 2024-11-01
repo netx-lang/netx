@@ -22,7 +22,7 @@ public record DataAccess(Data base, Selector selector) implements Data {
     }
 
     @Override
-    public int getWidth() {
-        return selector.getWidth();
+    public DataType getType() {
+        return BitType.of(selector.getWidth());
     }
 }
