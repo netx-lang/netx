@@ -2,7 +2,6 @@ package pascal.hardscript.compiler.elaborator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pascal.hardscript.compiler.analysis.HierarchyAnalysis;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.ast.component.*;
@@ -19,8 +18,9 @@ import static pascal.hardscript.compiler.elaborator.Types.requiresMatchedSize;
 public final class Elaborator {
     private static final Logger log = LoggerFactory.getLogger(Elaborator.class);
     private final DesignNode node;
-    private final ComponentInfo info;
     private final DesignScope design;
+    private final ComponentInfo info;
+    private final String TOP_COMPONENT = "top";
 
     public Elaborator(DesignNode node) {
         this.node = node;
@@ -29,11 +29,14 @@ public final class Elaborator {
     }
 
     public DesignScope elaborate() {
-        var hierarchy = new HierarchyAnalysis(node).analyze();
-        for (var node : hierarchy.topModules()) {
-            var scope = design.instantiateComponentScope(node.getIdentifier());
-            new ScopeElaborator(scope).build(node);
-        }
+        var topNode = node.getComponents().stream()
+                .filter(n -> TOP_COMPONENT.equals(n.getIdentifier().string()))
+                .findFirst().orElseGet(() -> {
+                    log.warn("No component named '{}' found, using the first component as top", TOP_COMPONENT);
+                    return node.getComponents().getFirst();
+                });
+        var scope = design.instantiateComponentScope(topNode.getIdentifier());
+        new ScopeElaborator(scope).build(topNode);
         return design;
     }
 

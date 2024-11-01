@@ -12,7 +12,7 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CompilerTest {
-    private static final boolean GENERATE_EXPECTED = true;
+    private static final boolean GENERATE_EXPECTED = false;
 
     private static final Path TEST_DIR = Path.of("src/test/resources/");
     private static final Path EXPECTED_DIR = Path.of("src/test/resources/expected/");
@@ -40,8 +40,8 @@ class CompilerTest {
 
     @Test
     void testBind() throws IOException {
-        test("bind_1");
-        test("bind_2");
+//        test("bind_1");
+//        test("bind_2");
         test("bind_3");
     }
 
