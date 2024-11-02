@@ -3,7 +3,6 @@ package pascal.hardscript.compiler.io;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import pascal.hardscript.compiler.analysis.AliasAnalysis;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.data.*;
@@ -27,7 +26,6 @@ public final class HSPrinter {
     public HSPrinter(DesignScope design) {
         this.design = design;
         this.componentInfo = design.getComponentInfo();
-        new AliasAnalysis(design).analyze();
     }
 
     public ObjectNode dump() {

@@ -2,10 +2,9 @@ package pascal.hardscript.compiler.model.scope;
 
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.ast.component.ComponentNode;
+import pascal.hardscript.util.lang.BuiltinComponent;
 
 import java.util.*;
-
-import static pascal.hardscript.compiler.model.scope.BuiltInComponentFactory.BUILTIN;
 
 public final class ComponentInfo {
     private final Set<Identifier> components = new HashSet<>();
@@ -17,7 +16,9 @@ public final class ComponentInfo {
             this.components.add(node.getIdentifier());
             this.componentNodes.put(node.getIdentifier(), node);
         }
-        BUILTIN.stream().map(Identifier::of).forEach(this.builtin::add);
+        for (var component : BuiltinComponent.values()) {
+            this.builtin.add(Identifier.of(component.name()));
+        }
     }
 
     public boolean contains(Identifier identifier) {

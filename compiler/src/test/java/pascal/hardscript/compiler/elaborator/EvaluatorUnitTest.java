@@ -10,22 +10,30 @@ import pascal.hardscript.compiler.model.data.selector.BitSelector;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.value.Int32Value;
+import pascal.hardscript.util.lang.BuiltinComponent;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class EvaluatorUnitTest {
 
     private static DesignScope loadDesign(String code) {
-        return Frontend.load(CharStreams.fromString(code)).elaborate();
+        return new Elaborator(Frontend.load(CharStreams.fromString(code)).parse()).elaborate();
     }
 
     private static ComponentScope loadSingleComponent(String code) {
         return (ComponentScope) loadDesign(code).getChildren().getFirst();
+    }
+
+    @Test
+    void testBuiltinFactoryIntegrity() {
+        assertEquals(BuiltInComponentFactory.BUILTIN_FACTORY.size(), BuiltinComponent.values().length);
+        for (var component : BuiltinComponent.values()) {
+            assertTrue(BuiltInComponentFactory.BUILTIN_FACTORY.containsKey(component));
+        }
     }
 
     @Test

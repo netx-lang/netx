@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.model.scope;
+package pascal.hardscript.compiler.elaborator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,33 +8,35 @@ import pascal.hardscript.compiler.model.component.AtomType;
 import pascal.hardscript.compiler.model.data.AutoInferenceType;
 import pascal.hardscript.compiler.model.data.DataType;
 import pascal.hardscript.compiler.model.data.Wire;
+import pascal.hardscript.compiler.model.scope.ComponentScope;
+import pascal.hardscript.compiler.model.scope.Scope;
+import pascal.hardscript.util.lang.BuiltinComponent;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiFunction;
 
 import static pascal.hardscript.compiler.elaborator.Types.*;
+import static pascal.hardscript.util.lang.BuiltinComponent.*;
 
 public class BuiltInComponentFactory {
     private static final Logger log = LoggerFactory.getLogger(BuiltInComponentFactory.class);
-    private static final Map<String, BiFunction<Scope, AtomType, ComponentScope>> BUILTIN_FACTORY = Map.ofEntries(
-            Map.entry("REGISTER", BuiltInComponentFactory::createREGISTERComponent),
-            Map.entry("SOURCE", BuiltInComponentFactory::createSOURCEComponent),
-            Map.entry("IGNORE", BuiltInComponentFactory::createIGNOREComponent),
-            Map.entry("SPLIT", BuiltInComponentFactory::createSPLITComponent),
-            Map.entry("TO", BuiltInComponentFactory::createTOComponent),
-            Map.entry("OR", BuiltInComponentFactory::createORComponent),
-            Map.entry("NOT", BuiltInComponentFactory::createNOTComponent),
-            Map.entry("AND", BuiltInComponentFactory::createANDComponent),
-            Map.entry("XOR", BuiltInComponentFactory::createXORComponent),
-            Map.entry("NOR", BuiltInComponentFactory::createNORComponent),
-            Map.entry("NAND", BuiltInComponentFactory::createNANDComponent)
+    static final Map<BuiltinComponent, BiFunction<Scope, AtomType, ComponentScope>> BUILTIN_FACTORY = Map.ofEntries(
+            Map.entry(REGISTER, BuiltInComponentFactory::createREGISTERComponent),
+            Map.entry(SOURCE, BuiltInComponentFactory::createSOURCEComponent),
+            Map.entry(IGNORE, BuiltInComponentFactory::createIGNOREComponent),
+            Map.entry(SPLIT, BuiltInComponentFactory::createSPLITComponent),
+            Map.entry(TO, BuiltInComponentFactory::createTOComponent),
+            Map.entry(OR, BuiltInComponentFactory::createORComponent),
+            Map.entry(NOT, BuiltInComponentFactory::createNOTComponent),
+            Map.entry(AND, BuiltInComponentFactory::createANDComponent),
+            Map.entry(XOR, BuiltInComponentFactory::createXORComponent),
+            Map.entry(NOR, BuiltInComponentFactory::createNORComponent),
+            Map.entry(NAND, BuiltInComponentFactory::createNANDComponent)
     );
-    public static final Set<String> BUILTIN = BUILTIN_FACTORY.keySet();
 
     public static ComponentScope createBuiltInComponent(Scope parent, AtomType type) {
         var identifier = type.identifier();
-        var factory = BUILTIN_FACTORY.get(identifier.string());
+        var factory = BUILTIN_FACTORY.get(BuiltinComponent.of(identifier.string()));
         if (factory == null) {
             log.error("{}: Unknown built-in Component: {}", identifier.getSourceLoc(), identifier);
             throw new CompileCancellationException();
@@ -147,7 +149,9 @@ public class BuiltInComponentFactory {
     }
 
     private static Wire newWire(ComponentScope result, String name, DataType type) {
-        var wire = Wire.of(Identifier.of("$" + name), result, type);
+        var identifier = Identifier.of("$" + name);
+        identifier.setSourceLoc(result.getSourceLoc());
+        var wire = Wire.of(identifier, result, type);
         result.bind(wire.getIdentifier(), wire);
         return wire;
     }

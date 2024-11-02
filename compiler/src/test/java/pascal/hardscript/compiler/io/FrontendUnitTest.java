@@ -4,7 +4,6 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.jupiter.api.Test;
-import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 
 import java.io.IOException;
@@ -41,8 +40,8 @@ class FrontendUnitTest {
 
         CharStream charStream = CharStreams.fromString(content);
         Frontend frontend = Frontend.load(charStream);
-        DesignNode designNode = frontend.parse();
-        assertNotNull(designNode);
+        DesignScope designScope = frontend.compile();
+        assertNotNull(designScope);
     }
 
     @Test
@@ -51,7 +50,7 @@ class FrontendUnitTest {
 
         CharStream charStream = CharStreams.fromString(content);
         Frontend frontend = Frontend.load(charStream);
-        DesignScope scope = frontend.elaborate();
+        DesignScope scope = frontend.compile();
         assertNotNull(scope);
     }
 
@@ -59,6 +58,6 @@ class FrontendUnitTest {
     void parseInvalidInput() {
         CharStream charStream = CharStreams.fromString("invalid input");
         Frontend frontend = Frontend.load(charStream);
-        assertThrows(ParseCancellationException.class, frontend::parse);
+        assertThrows(ParseCancellationException.class, frontend::compile);
     }
 }

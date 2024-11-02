@@ -46,7 +46,7 @@ class CompilerTest {
     }
 
     private static void test(String fileName) throws IOException {
-        var design = Frontend.loadPath(TEST_DIR.resolve(fileName + ".hard")).elaborate();
+        var design = Frontend.loadPath(TEST_DIR.resolve(fileName + ".hard")).compile();
         var json = new HSPrinter(design).dump();
 
 //        mapper.writerWithDefaultPrettyPrinter().writeValue(System.out, json);

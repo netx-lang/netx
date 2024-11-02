@@ -10,4 +10,9 @@ public final class AutoInferenceType implements DataType {
     public static AutoInferenceType getInstance() {
         return INSTANCE;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return false;
+    }
 }

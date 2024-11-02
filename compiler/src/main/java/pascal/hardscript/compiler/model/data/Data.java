@@ -11,6 +11,8 @@ public sealed interface Data extends Entity permits Clock, DataAccess, Wire {
 
     DataType getType();
 
+    void setType(DataType type);
+
     Identifier getIdentifier();
 
     default SourceLoc getSourceLoc() {
@@ -38,8 +40,6 @@ public sealed interface Data extends Entity permits Clock, DataAccess, Wire {
     }
 
     interface Factory<T extends Data> extends Entity {
-
         T create(Identifier id);
-
     }
 }

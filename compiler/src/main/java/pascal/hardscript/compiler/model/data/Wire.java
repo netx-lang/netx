@@ -3,7 +3,16 @@ package pascal.hardscript.compiler.model.data;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.model.scope.Scope;
 
-public record Wire(Identifier id, Scope parent, DataType type) implements Data {
+public final class Wire implements Data {
+    private final Identifier id;
+    private final Scope parent;
+    private DataType type;
+
+    public Wire(Identifier id, Scope parent, DataType type) {
+        this.id = id;
+        this.parent = parent;
+        this.type = type;
+    }
 
     public static Wire of(Identifier id, Scope parent, DataType width) {
         return new Wire(id, parent, width);
@@ -22,6 +31,11 @@ public record Wire(Identifier id, Scope parent, DataType type) implements Data {
     @Override
     public DataType getType() {
         return type;
+    }
+
+    @Override
+    public void setType(DataType type) {
+        this.type = type;
     }
 
     public static class Factory implements Data.Factory<Wire> {
