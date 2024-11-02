@@ -4,15 +4,11 @@ import org.jgrapht.Graph;
 import org.jgrapht.graph.SimpleGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pascal.hardscript.compiler.analysis.constraint.BinaryConstraint;
-import pascal.hardscript.compiler.analysis.constraint.ClockConstraint;
-import pascal.hardscript.compiler.analysis.constraint.DataConstraint;
-import pascal.hardscript.compiler.analysis.constraint.EqualTypeConstraint;
+import pascal.hardscript.compiler.analysis.constraint.*;
 import pascal.hardscript.compiler.exception.TypeInferenceException;
 import pascal.hardscript.compiler.model.data.AutoInferenceType;
 import pascal.hardscript.compiler.model.data.Data;
 import pascal.hardscript.compiler.model.data.DataAccess;
-import pascal.hardscript.compiler.model.data.DataType;
 import pascal.hardscript.compiler.model.scope.ComponentInfo;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
@@ -73,34 +69,47 @@ public class DataTypeInference extends ModelAnalysis {
         var dataList = Stream.concat(component.getInputs().stream(), component.getOutputs().stream()).toList();
         for (int i = 0; i < dataList.size(); i++) {
             for (int j = i + 1; j < dataList.size(); j++) {
-                var constraint = EqualTypeConstraint.of(dataList.get(i), dataList.get(j));
-                constraints.add(constraint);
-                addBinaryConstraint(constraint);
-                addBinaryConstraint(constraint);
+                addConstraint(EqualTypeConstraint.of(dataList.get(i), dataList.get(j)));
             }
         }
     }
 
     private void addContainsForRegister(ComponentScope component) {
         Data input = component.getInputs().getFirst(), output = component.getOutputs().getFirst();
-        var constraint = EqualTypeConstraint.of(input, output);
-        addBinaryConstraint(constraint);
-        addBinaryConstraint(constraint);
-        constraints.add(constraint);
-
-        var clock = (Data) component.getAttributes().get("clock");
-        constraints.add(ClockConstraint.of(clock));
+        addConstraint(EqualTypeConstraint.of(input, output));
+        addConstraint(ClockConstraint.of((Data) component.getAttributes().get("clock")));
     }
 
-    private void addBinaryConstraint(BinaryConstraint constraint) {
-        Data lhs = constraint.getLhs(), rhs = constraint.getRhs();
-        graph.addVertex(lhs);
-        graph.addVertex(rhs);
-        graph.addEdge(lhs, rhs, constraint);
+    private void addConstraint(DataConstraint constraint) {
+        switch (constraint) {
+            case UnaryConstraint unary -> addUnaryConstraint(unary);
+            case BinaryConstraint binary -> addBinaryConstraint(binary);
+        }
+    }
+
+    private void addUnaryConstraint(UnaryConstraint unary) {
+        constraints.add(unary);
+    }
+
+    private void addBinaryConstraint(BinaryConstraint binary) {
+        Data lhs = binary.getLhs(), rhs = binary.getRhs();
+        if (lhs instanceof DataAccess && rhs instanceof DataAccess) {
+            throwIfConstraintNotHolds(binary);
+        } else if (lhs instanceof DataAccess && rhs.getType() instanceof AutoInferenceType) {
+            rhs.setType(binary.expectedRhs());
+            workList.add(rhs);
+        } else if (lhs.getType() instanceof AutoInferenceType && rhs instanceof DataAccess) {
+            lhs.setType(binary.expectedLhs());
+            workList.add(lhs);
+        } else {
+            constraints.add(binary);
+            graph.addVertex(lhs);
+            graph.addVertex(rhs);
+            graph.addEdge(lhs, rhs, binary);
+        }
     }
 
     private void doBinaryTypeInference() {
-        handleSelectorInference();
         while (!workList.isEmpty()) {
             var data = workList.poll();
             if (graph.containsVertex(data)) {
@@ -118,22 +127,6 @@ public class DataTypeInference extends ModelAnalysis {
         }
     }
 
-    private void handleSelectorInference() {
-        for (var constraint : constraints) {
-            if (constraint instanceof BinaryConstraint binary) {
-                Data lhs = binary.getLhs(), rhs = binary.getRhs();
-                DataType lhsType = lhs.getType(), rhsType = rhs.getType();
-                if (lhs instanceof DataAccess && rhsType instanceof AutoInferenceType) {
-                    rhs.setType(binary.expectedRhs());
-                    workList.add(rhs);
-                } else if (rhs instanceof DataAccess && lhsType instanceof AutoInferenceType) {
-                    lhs.setType(binary.expectedLhs());
-                    workList.add(lhs);
-                }
-            }
-        }
-    }
-
     private void checkAllTyped() {
         design.forEachScope(scope -> {
             for (var entity : scope.getEntities()) {
@@ -146,12 +139,13 @@ public class DataTypeInference extends ModelAnalysis {
                 }
             }
         });
+        constraints.forEach(DataTypeInference::throwIfConstraintNotHolds);
+    }
 
-        for (var constraint : constraints) {
-            if (!constraint.holds()) {
-                log.error("Type constraint violation: {}", constraint.error());
-                throw new TypeInferenceException();
-            }
+    private static void throwIfConstraintNotHolds(DataConstraint constraint) {
+        if (!constraint.holds()) {
+            log.error("Type constraint violation: {}", constraint.error());
+            throw new TypeInferenceException();
         }
     }
 
