@@ -1,7 +1,9 @@
 package pascal.hardscript.compiler.analysis;
 
+import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.data.Data;
 import pascal.hardscript.compiler.model.data.DataAccess;
+import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.util.collection.UnionFind;
 
@@ -9,33 +11,38 @@ import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 
-public class AliasAnalysis extends ModelAnalysis<AliasAnalysis.Result> {
+public final class AliasAnalysis extends ModelAnalysis {
     private final UnionFind<Data> aliases = new UnionFind<>();
-    private final Map<Data, Data> representatives = new HashMap<>();
+    private final Map<Data, Data> sourceRep = new HashMap<>();
 
     public AliasAnalysis(DesignScope design) {
         super(design);
     }
 
     @Override
-    public Result analyze() {
+    public void analyze() {
+        collectAlias();
+        eliminateDuplicate();
+    }
+
+    private void collectAlias() {
         design.forEachScope(scope -> scope.getAliases()
                 .forEach(pair -> pair.accept(aliases::union)));
         for (var element : aliases.elements()) {
             if (element.isUserDefined()) {
                 var root = aliases.find(element);
                 if (needUpdate(element, root)) {
-                    representatives.put(root, element);
+                    sourceRep.put(root, element);
                 }
             }
         }
-        return new Result(aliases, representatives);
     }
 
     private boolean needUpdate(Data element, Data root) {
-        if (representatives.containsKey(root)) {
-            var top = representatives.get(root);
+        if (sourceRep.containsKey(root)) {
+            var top = sourceRep.get(root);
             if (element.getDepth() == top.getDepth()) {
                 if (!(element instanceof DataAccess) && top instanceof DataAccess) {
                     return true;
@@ -47,52 +54,56 @@ public class AliasAnalysis extends ModelAnalysis<AliasAnalysis.Result> {
         return true;
     }
 
-    public static class Result {
-        private final UnionFind<Data> aliases;
-        private final Map<Data, Data> sourceRep;
-
-        public Result(UnionFind<Data> aliases,
-                      Map<Data, Data> sourceRep) {
-            this.aliases = aliases;
-            this.sourceRep = sourceRep;
-        }
-
-        public boolean isBuiltinRep(Data data) {
-            return !hasSourceAlias(data) && aliases.find(data) == data;
-        }
-
-        public boolean hasSourceAlias(Data data) {
-            if (aliases.contains(data)) {
-                return sourceRep.containsKey(aliases.find(data));
+    public void eliminateDuplicate() {
+        design.forEachScope(scope -> {
+            scope.getEntities().removeIf(Predicate.not(this::needDump));
+            if (scope instanceof ComponentScope componentScope) {
+                componentScope.getInputs().replaceAll(this::repOf);
+                componentScope.getOutputs().replaceAll(this::repOf);
             }
-            return false;
-        }
+        });
+    }
 
-        @Nonnull
-        public Data repOf(Data data) {
-            while (true) {
-                var next = getNextRep(data);
-                if (next == data) {
-                    return data;
-                }
-                data = next;
+    private boolean needDump(Entity entity) {
+        return entity instanceof Data data
+                && ((data.isUserDefined() && repOf(data) == data) || isBuiltinRep(data));
+    }
+
+
+    boolean isBuiltinRep(Data data) {
+        return !hasSourceAlias(data) && aliases.find(data) == data;
+    }
+
+    boolean hasSourceAlias(Data data) {
+        if (aliases.contains(data)) {
+            return sourceRep.containsKey(aliases.find(data));
+        }
+        return false;
+    }
+
+    @Nonnull
+    Data repOf(Data data) {
+        while (true) {
+            var next = getNextRep(data);
+            if (next == data) {
+                return data;
+            }
+            data = next;
+        }
+    }
+
+    @Nonnull
+    private Data getNextRep(Data data) {
+        if (data instanceof DataAccess access) {
+            var base = access.base();
+            if (hasSourceAlias(base) && repOf(base) != base) {
+                return DataAccess.of(repOf(base), access.selector());
             }
         }
-
-        @Nonnull
-        private Data getNextRep(Data data) {
-            if (data instanceof DataAccess access) {
-                var base = access.base();
-                if (hasSourceAlias(base) && repOf(base) != base) {
-                    return DataAccess.of(repOf(base), access.selector());
-                }
-            }
-            if (aliases.contains(data)) {
-                var result = aliases.find(data);
-                return Objects.requireNonNullElse(sourceRep.get(result), result);
-            }
-            return data;
+        if (aliases.contains(data)) {
+            var result = aliases.find(data);
+            return Objects.requireNonNullElse(sourceRep.get(result), result);
         }
-
+        return data;
     }
 }

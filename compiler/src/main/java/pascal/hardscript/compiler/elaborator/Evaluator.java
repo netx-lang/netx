@@ -300,11 +300,11 @@ public final class Evaluator {
     }
 
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
-        if (arguments.size() == 1) {
-            return Wire.Factory.of(scope, evaluateBitWidth(arguments.getFirst()));
-        }
-        log.error("{}: Unexpected specification for component type wire: {}", sourceLoc, arguments);
-        throw new CompileCancellationException();
+        requiresMatchedSize(sourceLoc, 1, arguments);
+        var dataType = arguments.getFirst() == null
+                ? AutoInferenceType.getInstance()
+                : evaluateBitWidth(arguments.getFirst());
+        return Wire.Factory.of(scope, dataType);
     }
 
     private Clock.Factory evaluateClockFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {

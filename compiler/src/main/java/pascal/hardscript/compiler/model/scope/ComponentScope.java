@@ -33,11 +33,11 @@ public final class ComponentScope extends Scope {
     }
 
     public List<Data> getInputs() {
-        return Collections.unmodifiableList(inputs);
+        return inputs;
     }
 
     public List<Data> getOutputs() {
-        return Collections.unmodifiableList(outputs);
+        return outputs;
     }
 
     public void addInput(Data... inputs) {

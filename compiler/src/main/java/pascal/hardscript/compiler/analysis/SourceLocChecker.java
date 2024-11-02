@@ -7,16 +7,15 @@ import pascal.hardscript.compiler.ast.expr.IdentifierSymbol;
 
 import java.util.Objects;
 
-public final class SourceLocChecker extends ASTAnalysis<Void> implements ASTListener {
+public final class SourceLocChecker extends ASTAnalysis implements ASTListener {
 
     public SourceLocChecker(DesignNode design) {
         super(design);
     }
 
     @Override
-    public Void analyze() {
+    public void analyze() {
         design.walk(this);
-        return null;
     }
 
     @Override

@@ -14,7 +14,7 @@ element
     : type=expression ':' connection=expression           # ComponentInstantiation
     | binding                                             # BindingStatement
     | 'for' '(' iterator ')' '{' element* '}'             # Loop
-    | 'inst' primary_symbol (',' primary_symbol)* 'of' type=expression    # DataInstantiation
+    | 'inst' primary_symbol (',' primary_symbol)* 'of' type=type_expression    # DataInstantiation
     ;
 
 expression
@@ -43,6 +43,14 @@ expression
     | 'component' (primary_symbol (',' primary_symbol)*)? ':' expression # LambdaExpr
     ;
 
+type_expression
+    : primary_symbol '(' (type_argument (',' type_argument)*)? ')'
+    ;
+
+type_argument
+    : 'auto'
+    | expression
+    ;
 
 selector
     : '[' expression ']'                # BitSelector

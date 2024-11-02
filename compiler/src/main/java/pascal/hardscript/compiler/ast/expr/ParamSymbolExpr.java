@@ -23,7 +23,11 @@ public final class ParamSymbolExpr extends SymbolExpr {
     public void walk(ASTListener listener) {
         listener.enter(this);
         head.walk(listener);
-        arguments.forEach(argument -> argument.walk(listener));
+        arguments.forEach(argument -> {
+            if (argument != null) {
+                argument.walk(listener);
+            }
+        });
         listener.exit(this);
     }
 

@@ -5,8 +5,8 @@ import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.component.AtomType;
+import pascal.hardscript.compiler.model.data.AutoInferenceType;
 import pascal.hardscript.compiler.model.data.DataType;
-import pascal.hardscript.compiler.model.data.ImplicitType;
 import pascal.hardscript.compiler.model.data.Wire;
 
 import java.util.Map;
@@ -143,7 +143,7 @@ public class BuiltInComponentFactory {
     }
 
     private static Wire newWire(ComponentScope result, String name) {
-        return newWire(result, name, ImplicitType.getInstance());
+        return newWire(result, name, AutoInferenceType.getInstance());
     }
 
     private static Wire newWire(ComponentScope result, String name, DataType type) {

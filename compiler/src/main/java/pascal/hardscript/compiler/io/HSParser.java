@@ -62,7 +62,18 @@ public final class HSParser {
 
     static DataInstantiationNode parseDataInstantiationNode(DataInstantiationContext ctx) {
         return DataInstantiationNode.of(
-                ctx.primary_symbol().stream().map(HSParser::parsePrimarySymbol).toList(), parseExpr(ctx.type));
+                ctx.primary_symbol().stream().map(HSParser::parsePrimarySymbol).toList(), parseTypeExpr(ctx.type));
+    }
+
+    static ExprNode parseTypeExpr(Type_expressionContext ctx) {
+        var result = ParamSymbolExpr.of(
+                parsePrimarySymbol(ctx.primary_symbol()),
+                ctx.type_argument().stream()
+                        .map(Type_argumentContext::expression)
+                        .map(HSParser::parseExpr)
+                        .toList());
+        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
+        return result;
     }
 
     static ExprNode parseExpr(ExpressionContext ctx) {

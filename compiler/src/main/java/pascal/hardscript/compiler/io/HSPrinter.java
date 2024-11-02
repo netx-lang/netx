@@ -22,13 +22,12 @@ import java.util.Set;
 public final class HSPrinter {
     private final DesignScope design;
     private final ComponentInfo componentInfo;
-    private final AliasAnalysis.Result alias;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public HSPrinter(DesignScope design) {
         this.design = design;
         this.componentInfo = design.getComponentInfo();
-        this.alias = new AliasAnalysis(design).analyze();
+        new AliasAnalysis(design).analyze();
     }
 
     public ObjectNode dump() {
@@ -56,9 +55,7 @@ public final class HSPrinter {
         dumpComponentIO(result, "output", module.getOutputs());
         var members = makeMembersIn(result);
         for (var entity : module.getEntities()) {
-            if (entity instanceof Data data && needDump(data)) {
-                members.add(dump(data));
-            }
+            members.add(dump((Data) entity));
         }
         for (var sub : extractSubComponent(module)) {
             var instID = sub.getIdentifier();
@@ -74,12 +71,6 @@ public final class HSPrinter {
         return result;
     }
 
-    private boolean needDump(Data data) {
-        return (data.isUserDefined()
-                && alias.repOf(data) == data
-        ) || alias.isBuiltinRep(data);
-    }
-
     private void dumpBuiltinComponent(ComponentScope sub, Identifier instID, ArrayNode members) {
         var builtin = createObjectNode();
         setType(builtin, "builtin");
@@ -87,9 +78,7 @@ public final class HSPrinter {
 
         List<Data> needDump = new LinkedList<>();
         for (var entity : sub.getEntities()) {
-            if (entity instanceof Data data && needDump(data)) {
-                needDump.add(data);
-            }
+            needDump.add((Data) entity);
         }
         if (!needDump.isEmpty()) {
             var subarray = makeMembersIn(builtin);
@@ -103,9 +92,7 @@ public final class HSPrinter {
 
     private void dumpComponentIO(ObjectNode builtin, String port, List<Data> sub) {
         var outputs = makeArrayIn(builtin, port);
-        sub.stream().map(alias::repOf)
-                .map(this::dumpIdentifierOf)
-                .forEach(outputs::add);
+        sub.stream().map(this::dumpIdentifierOf).forEach(outputs::add);
     }
 
     private void dumpComponentAttribute(ObjectNode node, ComponentScope module) {
@@ -144,7 +131,7 @@ public final class HSPrinter {
         setIdentifier(result, wire);
         switch (wire.getType()) {
             case BitType type -> result.put("width", type.width());
-            case ImplicitType ignored -> {
+            case AutoInferenceType ignored -> {
             }
         }
         return result;
