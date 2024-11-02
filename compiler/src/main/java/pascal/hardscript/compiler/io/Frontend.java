@@ -22,6 +22,10 @@ public final class Frontend {
         this.charStream = charStream;
     }
 
+    public static Frontend load(String string) {
+        return new Frontend(CharStreams.fromString(string));
+    }
+
     public static Frontend load(CharStream charStream) {
         return new Frontend(charStream);
     }

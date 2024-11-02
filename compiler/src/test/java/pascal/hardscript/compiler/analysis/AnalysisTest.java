@@ -3,10 +3,13 @@ package pascal.hardscript.compiler.analysis;
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.io.Frontend;
 import pascal.hardscript.compiler.io.HSParser;
+import pascal.hardscript.compiler.io.HSPrinter;
 import pascal.hardscript.util.TestUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 class AnalysisTest {
@@ -23,6 +26,33 @@ class AnalysisTest {
     }
 
     @Test
-    void testBuiltinConstraints() {
+    void testDataTypeInference() {
+        var expected = """
+                component top {
+                    inst clk of clock()
+                    inst a of wire(bit(4))
+                    inst b of wire(bit(4))
+                    inst x of wire(bit(4))
+                    inst c of wire(bit(2))
+                    inst d of wire(bit(2))
+                    OR : [a, b] -> [x] 
+                    AND <> REGISTER(clk, true, c) <> NOT : [a[1:0], b[1:0]] -> [d]
+                }
+                """;
+        var actual = """
+                component top {
+                    inst clk of clock()
+                    inst a of wire(bit(4))
+                    inst b of wire(auto)
+                    inst x of wire(auto)
+                    inst c of wire(auto)
+                    inst d of wire(auto)
+                    OR : [a, b] -> [x]
+                    AND <> REGISTER(clk, true, c) <> NOT : [a[1:0], b[1:0]] -> [d]
+                }
+                """;
+        assertEquals(
+                new HSPrinter(Frontend.load(expected).compile()).dump(),
+                new HSPrinter(Frontend.load(actual).compile()).dump());
     }
 }

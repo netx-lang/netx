@@ -18,6 +18,7 @@ import pascal.hardscript.compiler.ast.expr.selector.Selector;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BitVector;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public final class HSParser {
@@ -66,12 +67,15 @@ public final class HSParser {
     }
 
     static ExprNode parseTypeExpr(Type_expressionContext ctx) {
-        var result = ParamSymbolExpr.of(
-                parsePrimarySymbol(ctx.primary_symbol()),
-                ctx.type_argument().stream()
-                        .map(Type_argumentContext::expression)
-                        .map(HSParser::parseExpr)
-                        .toList());
+        var arguments = new LinkedList<ExprNode>();
+        for (var arg : ctx.type_argument()) {
+            if (arg.expression() != null) {
+                arguments.add(parseExpr(arg.expression()));
+            } else {
+                arguments.add(null);
+            }
+        }
+        var result = ParamSymbolExpr.of(parsePrimarySymbol(ctx.primary_symbol()), arguments);
         result.setSourceLoc(SourceLoc.from(ctx.getStart()));
         return result;
     }
