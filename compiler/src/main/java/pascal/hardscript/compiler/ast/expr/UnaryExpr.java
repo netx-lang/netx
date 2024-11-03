@@ -2,6 +2,7 @@ package pascal.hardscript.compiler.ast.expr;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 
+import java.util.Map;
 import java.util.Objects;
 
 public final class UnaryExpr extends ExprNode {
@@ -54,11 +55,14 @@ public final class UnaryExpr extends ExprNode {
         return Objects.hash(op, operand);
     }
 
+    private static final Map<Operator, String> OPERATOR_MAP = Map.ofEntries(
+            Map.entry(Operator.ADD, "+"), Map.entry(Operator.SUB, "-"),
+            Map.entry(Operator.NOT, "!"), Map.entry(Operator.BITWISE_NOT, "~")
+    );
+
     @Override
     public String toString() {
-        return "UnaryExpr[" +
-                "op=" + op + ", " +
-                "operand=" + operand + ']';
+        return OPERATOR_MAP.get(op) + operand;
     }
 
     public enum Operator {

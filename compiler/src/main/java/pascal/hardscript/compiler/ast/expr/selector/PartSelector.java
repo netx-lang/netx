@@ -58,8 +58,6 @@ public final class PartSelector extends Selector {
 
     @Override
     public String toString() {
-        return "PartSelector[" +
-                "start=" + start + ", " +
-                "end=" + end + ']';
+        return String.format("[%s:%s]", start, end);
     }
 }

@@ -57,8 +57,6 @@ public final class RangeList extends ListExpr {
 
     @Override
     public String toString() {
-        return "RangeList[" +
-                "from=" + from + ", " +
-                "to=" + to + ']';
+        return "[" + from + ".." + to + "]";
     }
 }

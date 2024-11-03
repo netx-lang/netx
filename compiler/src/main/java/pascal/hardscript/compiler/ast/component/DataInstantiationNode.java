@@ -55,8 +55,14 @@ public final class DataInstantiationNode extends ElementNode {
 
     @Override
     public String toString() {
-        return "DataInst[" +
-                "ids=" + symbols + ", " +
-                "type=" + type + ']';
+        var sb = new StringBuilder();
+        sb.append("inst ");
+        sb.append(symbols.getFirst());
+        for (int i = 1; i < symbols.size(); i++) {
+            sb.append(", ").append(symbols.get(i));
+        }
+        sb.append(" of ");
+        sb.append(type);
+        return sb.toString();
     }
 }

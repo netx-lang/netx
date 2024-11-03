@@ -69,9 +69,6 @@ public final class ConditionalExpr extends ExprNode {
 
     @Override
     public String toString() {
-        return "ConditionalExpr[" +
-                "condition=" + condition + ", " +
-                "thenBranch=" + thenBranch + ", " +
-                "elseBranch=" + elseBranch + ']';
+        return "if " + condition + " then " + thenBranch + " else " + elseBranch;
     }
 }

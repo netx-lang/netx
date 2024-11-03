@@ -56,8 +56,14 @@ public final class ListComprehension extends ListExpr {
 
     @Override
     public String toString() {
-        return "ListComprehension[" +
-                "head=" + head + ", " +
-                "qualifiers=" + qualifiers + ']';
+        var sb = new StringBuilder();
+        sb.append("[");
+        sb.append(head).append(" | ");
+        sb.append(qualifiers.getFirst());
+        for (int i = 1; i < qualifiers.size(); i++) {
+            sb.append(", ").append(qualifiers.get(i));
+        }
+        sb.append("]");
+        return sb.toString();
     }
 }

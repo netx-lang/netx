@@ -39,12 +39,13 @@ public final class BindingQualifier extends Qualifier {
 
     @Override
     public String toString() {
-        return "BindingQualifier[" +
-                "binding=" + binding + ']';
+        return binding.toString();
     }
 
     @Override
     public void walk(ASTListener listener) {
-
+        listener.enter(this);
+        binding.walk(listener);
+        listener.exit(this);
     }
 }

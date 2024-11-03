@@ -50,8 +50,15 @@ public final class InterpolatedSymbol extends PrimarySymbol {
 
     @Override
     public String toString() {
-        return "Interpolated[" +
-                "fragments=" + fragments + ", " +
-                "exprs=" + exprs + ']';
+        var sb = new StringBuilder();
+        var iterator = exprs.iterator();
+        for (var fragment : fragments) {
+            sb.append(fragment);
+            sb.append("${").append(iterator.next()).append("}");
+        }
+        while (iterator.hasNext()) {
+            sb.append("${").append(iterator.next()).append("}");
+        }
+        return sb.toString();
     }
 }

@@ -58,8 +58,6 @@ public final class AccessExpr extends ExprNode {
 
     @Override
     public String toString() {
-        return "AccessExpr[" +
-                "base=" + base + ", " +
-                "selector=" + selector + ']';
+        return base.toString() + selector.toString();
     }
 }

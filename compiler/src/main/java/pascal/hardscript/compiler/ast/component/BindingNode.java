@@ -57,8 +57,6 @@ public final class BindingNode extends ElementNode {
 
     @Override
     public String toString() {
-        return "BindingQualifier[" +
-                "head=" + head + ", " +
-                "expr=" + expr + ']';
+        return "let " + head + " = " + expr;
     }
 }

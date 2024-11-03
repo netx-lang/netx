@@ -46,7 +46,6 @@ public final class BitSelector extends Selector {
 
     @Override
     public String toString() {
-        return "BitSelector[" +
-                "index=" + index + ']';
+        return "[" + index + "]";
     }
 }

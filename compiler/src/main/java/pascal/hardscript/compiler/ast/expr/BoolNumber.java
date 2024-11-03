@@ -44,8 +44,7 @@ public final class BoolNumber extends NumberExpr {
 
     @Override
     public String toString() {
-        return "BoolNumber[" +
-                "value=" + value + ']';
+        return String.valueOf(value);
     }
 
 }

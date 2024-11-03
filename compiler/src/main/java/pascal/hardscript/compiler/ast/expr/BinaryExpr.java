@@ -2,6 +2,7 @@ package pascal.hardscript.compiler.ast.expr;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 
+import java.util.Map;
 import java.util.Objects;
 
 public final class BinaryExpr extends ExprNode {
@@ -66,12 +67,25 @@ public final class BinaryExpr extends ExprNode {
         return Objects.hash(op, lhs, rhs);
     }
 
+    private static final Map<Operator, String> OPERATOR_MAP = Map.ofEntries(
+            Map.entry(Operator.COMBINE, "<>"),
+            Map.entry(Operator.MAPSTO, "->"),
+            Map.entry(Operator.POW, "**"), Map.entry(Operator.MUL, "*"),
+            Map.entry(Operator.DIV, "/"), Map.entry(Operator.MOD, "%"),
+            Map.entry(Operator.ADD, "+"), Map.entry(Operator.SUB, "-"),
+            Map.entry(Operator.ARITH_SHL, "<<<"), Map.entry(Operator.ARITH_SHR, ">>>"),
+            Map.entry(Operator.LOGIC_SHR, ">>"), Map.entry(Operator.LOGIC_SHL, "<<"),
+            Map.entry(Operator.EQ, "=="), Map.entry(Operator.NE, "!="),
+            Map.entry(Operator.LT, "<"), Map.entry(Operator.LE, "<="),
+            Map.entry(Operator.GT, ">"), Map.entry(Operator.GE, ">="),
+            Map.entry(Operator.AND, "&"), Map.entry(Operator.OR, "|"),
+            Map.entry(Operator.XOR, "^"), Map.entry(Operator.XNOR, "^^"),
+            Map.entry(Operator.LOGIC_AND, "&&"), Map.entry(Operator.LOGIC_OR, "||")
+    );
+
     @Override
     public String toString() {
-        return "BinaryExpr[" +
-                "op=" + op + ", " +
-                "lhs=" + lhs + ", " +
-                "rhs=" + rhs + ']';
+        return "(" + lhs + " " + OPERATOR_MAP.get(op) + " " + rhs + ")";
     }
 
     public enum Operator {

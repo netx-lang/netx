@@ -42,7 +42,10 @@ public final class DesignNode extends ASTNode {
 
     @Override
     public String toString() {
-        return "DesignNode[" +
-                "modules=" + components + ']';
+        var sb = new StringBuilder();
+        for (var module : components) {
+            sb.append(module).append('\n');
+        }
+        return sb.toString();
     }
 }

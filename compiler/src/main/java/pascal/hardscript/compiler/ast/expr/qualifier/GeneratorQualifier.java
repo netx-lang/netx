@@ -58,8 +58,6 @@ public final class GeneratorQualifier extends Qualifier {
 
     @Override
     public String toString() {
-        return "GeneratorQualifier[" +
-                "head=" + head + ", " +
-                "from=" + from + ']';
+        return String.format("%s in %s", head, from);
     }
 }

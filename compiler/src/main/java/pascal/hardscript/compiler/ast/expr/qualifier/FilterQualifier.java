@@ -46,7 +46,6 @@ public final class FilterQualifier extends Qualifier {
 
     @Override
     public String toString() {
-        return "FilterQualifier[" +
-                "condition=" + condition + ']';
+        return "when " + condition;
     }
 }

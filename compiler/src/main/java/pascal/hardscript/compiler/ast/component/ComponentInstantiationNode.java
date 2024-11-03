@@ -58,8 +58,6 @@ public final class ComponentInstantiationNode extends ElementNode {
 
     @Override
     public String toString() {
-        return "InstantiationNode[" +
-                "type=" + type + ", " +
-                "connection=" + port + ']';
+        return type.toString() + ":" + port.toString();
     }
 }

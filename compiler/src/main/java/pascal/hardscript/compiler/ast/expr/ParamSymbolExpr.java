@@ -59,8 +59,15 @@ public final class ParamSymbolExpr extends SymbolExpr {
 
     @Override
     public String toString() {
-        return "CallExpr[" +
-                "func=" + head + ", " +
-                "arguments=" + arguments + ']';
+        var sb = new StringBuilder();
+        sb.append(head).append("(");
+        if (!arguments.isEmpty()) {
+            sb.append(Objects.requireNonNullElse(arguments.getFirst(), "auto"));
+            for (int i = 1; i < arguments.size(); i++) {
+                sb.append(", ").append(Objects.requireNonNullElse(arguments.get(i), "auto"));
+            }
+        }
+        sb.append(")");
+        return sb.toString();
     }
 }

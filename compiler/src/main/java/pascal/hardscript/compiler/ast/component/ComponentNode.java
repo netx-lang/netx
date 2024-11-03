@@ -79,10 +79,14 @@ public final class ComponentNode extends ASTNode {
 
     @Override
     public String toString() {
-        return "Component[" +
-                "id=" + identifier + ", " +
-                "arguments=" + arguments + ", " +
-                "type=" + type + ", " +
-                "stmts=" + elements + ']';
+        var sb = new StringBuilder();
+        sb.append("component ").append(identifier);
+        if (type != null) {
+            sb.append(" : ").append(type);
+        }
+        sb.append(" {");
+        elements.forEach(stmt -> sb.append("\n").append(stmt));
+        sb.append("\n}");
+        return sb.toString();
     }
 }

@@ -35,7 +35,7 @@ class AnalysisTest {
                     inst x of wire(bit(4))
                     inst c of wire(bit(2))
                     inst d of wire(bit(2))
-                    OR : [a, b] -> [x] 
+                    OR : [a, b] -> [x]
                     AND <> REGISTER(clk, true, c) <> NOT : [a[1:0], b[1:0]] -> [d]
                 }
                 """;

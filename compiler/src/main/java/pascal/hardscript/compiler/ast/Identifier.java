@@ -45,7 +45,6 @@ public final class Identifier {
 
     @Override
     public String toString() {
-        return "Identifier[" +
-                "id=" + string + ']';
+        return string;
     }
 }

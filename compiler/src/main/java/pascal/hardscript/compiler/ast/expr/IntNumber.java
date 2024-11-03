@@ -44,7 +44,6 @@ public final class IntNumber extends NumberExpr {
 
     @Override
     public String toString() {
-        return "IntNumber[" +
-                "value=" + value + ']';
+        return String.valueOf(value);
     }
 }

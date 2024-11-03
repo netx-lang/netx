@@ -47,7 +47,15 @@ public final class CommonList extends ListExpr {
 
     @Override
     public String toString() {
-        return "CommonList[" +
-                "elements=" + elements + ']';
+        var sb = new StringBuilder();
+        sb.append("[");
+        if (!elements.isEmpty()) {
+            sb.append(elements.getFirst());
+            for (int i = 1; i < elements.size(); i++) {
+                sb.append(", ").append(elements.get(i));
+            }
+        }
+        sb.append("]");
+        return sb.toString();
     }
 }

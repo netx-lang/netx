@@ -139,7 +139,9 @@ public final class HSParser {
     }
 
     static BindingNode parseBinding(BindingContext ctx) {
-        return BindingNode.of(parsePrimarySymbol(ctx.primary_symbol()), parseExpr(ctx.expression()));
+        var result = BindingNode.of(parsePrimarySymbol(ctx.primary_symbol()), parseExpr(ctx.expression()));
+        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
+        return result;
     }
 
     static ExprNode parseUnaryExpr(UnaryExprContext ctx) {

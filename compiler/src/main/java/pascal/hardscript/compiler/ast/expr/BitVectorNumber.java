@@ -45,7 +45,6 @@ public final class BitVectorNumber extends NumberExpr {
 
     @Override
     public String toString() {
-        return "BitVectorNumber[" +
-                "rep=" + representation + ']';
+        return representation.toString();
     }
 }

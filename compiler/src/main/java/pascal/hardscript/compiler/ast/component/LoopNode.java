@@ -51,8 +51,14 @@ public final class LoopNode extends ElementNode {
 
     @Override
     public String toString() {
-        return "LoopNode[" +
-                "iterators=" + generator + ", " +
-                "elements=" + elements + ']';
+        var sb = new StringBuilder();
+        sb.append("for (");
+        sb.append(generator);
+        sb.append(") {\n");
+        for (var element : elements) {
+            sb.append(element).append('\n');
+        }
+        sb.append("}");
+        return sb.toString();
     }
 }
