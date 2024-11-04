@@ -26,8 +26,9 @@ public final class Identifier {
         return sourceLoc;
     }
 
-    public void setSourceLoc(SourceLoc sourceLoc) {
+    public Identifier setSourceLoc(SourceLoc sourceLoc) {
         this.sourceLoc = sourceLoc;
+        return this;
     }
 
     @Override

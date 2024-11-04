@@ -45,7 +45,7 @@ public final class Evaluator {
     }
 
     public ComponentType evaluateToComponentType(ExprNode expr) {
-        return requiresComponentType(expr.getSourceLoc(), evaluate(expr));
+        return castToComponentType(expr.getSourceLoc(), evaluate(expr));
     }
 
     public ComponentPort evaluateToComponentPort(ExprNode expr) {
@@ -275,11 +275,9 @@ public final class Evaluator {
     }
 
     private ParallelType makeParallelTypeFromList(SourceLoc sourceLoc, ListEntity list) {
-        if (list.entities().stream().allMatch(Predicate.not(ComponentType.class::isInstance))) {
-            log.error("{}: Expected list of instance types but got {}", sourceLoc, list);
-            throw new CompileCancellationException();
-        }
-        return ParallelType.from(list.entities().stream().map(ComponentType.class::cast).toList());
+        List<ComponentType> result = new LinkedList<>();
+        list.forEach(entity -> result.add(castToComponentType(sourceLoc, entity)));
+        return ParallelType.from(result);
     }
 
     private ComponentPort evaluatePort(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
@@ -410,9 +408,7 @@ public final class Evaluator {
             sb.append(evaluate(exprIter.next()));
         }
         exprIter.forEachRemaining(expr -> sb.append(evaluate(expr)));
-        var result = Identifier.of(sb.toString());
-        result.setSourceLoc(interpolated.getSourceLoc());
-        return result;
+        return Identifier.of(sb.toString()).setSourceLoc(interpolated.getSourceLoc());
     }
 
     private void overrideBindings(pascal.hardscript.compiler.model.scope.Binding binding) {

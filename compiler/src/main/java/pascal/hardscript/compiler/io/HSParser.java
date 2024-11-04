@@ -243,9 +243,7 @@ public final class HSParser {
     }
 
     static Identifier parseIdentifier(TerminalNode ID) {
-        var result = Identifier.of(ID.getText());
-        result.setSourceLoc(SourceLoc.from(ID.getSymbol()));
-        return result;
+        return Identifier.of(ID.getText()).setSourceLoc(SourceLoc.from(ID.getSymbol()));
     }
 
     static PrimarySymbol parsePrimarySymbol(Primary_symbolContext ctx) {

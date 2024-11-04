@@ -149,9 +149,7 @@ public class BuiltInComponentFactory {
     }
 
     private static Wire newWire(ComponentScope result, String name, DataType type) {
-        var identifier = Identifier.of("$" + name);
-        identifier.setSourceLoc(result.getSourceLoc());
-        var wire = Wire.of(identifier, result, type);
+        var wire = Wire.of(Identifier.of("$" + name).setSourceLoc(result.getSourceLoc()), result, type);
         result.bind(wire.getIdentifier(), wire);
         return wire;
     }

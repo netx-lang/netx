@@ -2,10 +2,12 @@ package pascal.hardscript.compiler.elaborator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
+import pascal.hardscript.compiler.model.component.AtomType;
 import pascal.hardscript.compiler.model.component.ComponentPort;
 import pascal.hardscript.compiler.model.component.ComponentType;
 import pascal.hardscript.compiler.model.data.Data;
@@ -91,6 +93,17 @@ public final class Types {
             case IntegerValue integerValue -> BooleanValue.of(integerValue.toInt() != 0);
             default -> {
                 log.error("{}: Cannot cast {} to boolean", loc, entity);
+                throw new CompileCancellationException();
+            }
+        };
+    }
+
+    public static ComponentType castToComponentType(SourceLoc loc, Entity entity) {
+        return switch (entity) {
+            case ComponentType componentType -> componentType;
+            case Data data -> AtomType.of(Identifier.of("SOURCE").setSourceLoc(loc), List.of(data));
+            default -> {
+                log.error("{}: Cannot cast {} to component type", loc, entity);
                 throw new CompileCancellationException();
             }
         };

@@ -11,9 +11,7 @@ public final class NameAllocator {
     }
 
     private Identifier allocate(String name, SourceLoc sourceLoc) {
-        var result = Identifier.of(name);
-        result.setSourceLoc(sourceLoc);
-        return result;
+        return Identifier.of(name).setSourceLoc(sourceLoc);
     }
 
 }
