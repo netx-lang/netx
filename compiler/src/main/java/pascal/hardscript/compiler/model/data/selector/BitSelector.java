@@ -1,6 +1,6 @@
 package pascal.hardscript.compiler.model.data.selector;
 
-import pascal.hardscript.compiler.model.value.IntegerValue;
+import pascal.hardscript.compiler.model.data.IntegerValue;
 
 public record BitSelector(IntegerValue index) implements Selector {
 

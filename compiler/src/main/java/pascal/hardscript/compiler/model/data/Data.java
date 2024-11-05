@@ -6,7 +6,7 @@ import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 
-public sealed interface Data extends Entity permits Clock, DataAccess, Wire {
+public sealed interface Data extends Entity permits Clock, DataAccess, Wire, Value {
     Scope getParent();
 
     DataType getType();

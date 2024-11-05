@@ -6,10 +6,10 @@ import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.io.Frontend;
 import pascal.hardscript.compiler.model.data.Data;
 import pascal.hardscript.compiler.model.data.DataAccess;
+import pascal.hardscript.compiler.model.data.Int32Value;
 import pascal.hardscript.compiler.model.data.selector.BitSelector;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
-import pascal.hardscript.compiler.model.value.Int32Value;
 import pascal.hardscript.util.lang.BuiltinComponent;
 
 import java.util.ArrayList;

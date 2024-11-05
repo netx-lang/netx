@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.model.value;
+package pascal.hardscript.compiler.model.data;
 
 public record BooleanValue(boolean value) implements Value {
 
@@ -16,5 +16,10 @@ public record BooleanValue(boolean value) implements Value {
 
     public BooleanValue or(BooleanValue other) {
         return BooleanValue.of(value || other.value);
+    }
+
+    @Override
+    public DataType getType() {
+        return BitType.forBoolean();
     }
 }

@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.model.value;
+package pascal.hardscript.compiler.model.data;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,5 +128,10 @@ public record BitVectorValue(BitVector value) implements IntegerValue {
     @Override
     public IntegerValue bitwiseNot() {
         return BitVectorValue.of(value.invert());
+    }
+
+    @Override
+    public DataType getType() {
+        return BitType.of(value.size());
     }
 }

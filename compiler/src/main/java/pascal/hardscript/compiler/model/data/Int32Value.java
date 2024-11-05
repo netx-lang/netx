@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.model.value;
+package pascal.hardscript.compiler.model.data;
 
 import pascal.hardscript.util.lang.BitVector;
 
@@ -120,5 +120,10 @@ public record Int32Value(int value) implements IntegerValue {
     @Override
     public Int32Value bitwiseNot() {
         return Int32Value.of(~value);
+    }
+
+    @Override
+    public DataType getType() {
+        return BitType.forInt32();
     }
 }

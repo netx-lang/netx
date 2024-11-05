@@ -7,10 +7,6 @@ import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.data.*;
 import pascal.hardscript.compiler.model.scope.*;
-import pascal.hardscript.compiler.model.value.BitVectorValue;
-import pascal.hardscript.compiler.model.value.BooleanValue;
-import pascal.hardscript.compiler.model.value.Int32Value;
-import pascal.hardscript.compiler.model.value.Value;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 
 import java.util.LinkedList;
@@ -148,9 +144,17 @@ public final class HSPrinter {
 
     private String dumpIdentifierOf(Entity entity) {
         return switch (entity) {
-            case Data data -> dumpIdentifierOf(data);
             case Value value -> dumpIdentifierOf(value);
+            case Data data -> dumpIdentifierOf(data);
             default -> throw new ShallNotReachHereError();
+        };
+    }
+
+    private String dumpIdentifierOf(Value value) {
+        return switch (value) {
+            case BooleanValue v -> String.valueOf(v.value());
+            case Int32Value v -> String.valueOf(v.value());
+            case BitVectorValue v -> v.value().toString();
         };
     }
 
@@ -161,18 +165,9 @@ public final class HSPrinter {
 
         if (data instanceof DataAccess access) {
             return String.format("%s@(%s)%s", data.getIdentifier().string(), sourceLoc, access.selector());
-
         } else {
             return String.format("%s@(%s)", data.getIdentifier().string(), sourceLoc);
         }
-    }
-
-    private String dumpIdentifierOf(Value value) {
-        return switch (value) {
-            case BooleanValue v -> String.valueOf(v.value());
-            case Int32Value v -> String.valueOf(v.value());
-            case BitVectorValue v -> v.value().toString();
-        };
     }
 
     private void setIdentifier(ObjectNode node, Data data) {

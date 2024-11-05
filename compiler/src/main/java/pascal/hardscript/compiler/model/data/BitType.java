@@ -6,6 +6,14 @@ public record BitType(int width) implements DataType {
         return new BitType(width);
     }
 
+    public static BitType forBoolean() {
+        return of(1);
+    }
+
+    public static BitType forInt32() {
+        return of(32);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

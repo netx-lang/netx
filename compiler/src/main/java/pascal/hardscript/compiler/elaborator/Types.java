@@ -10,10 +10,9 @@ import pascal.hardscript.compiler.model.ListEntity;
 import pascal.hardscript.compiler.model.component.AtomType;
 import pascal.hardscript.compiler.model.component.ComponentPort;
 import pascal.hardscript.compiler.model.component.ComponentType;
+import pascal.hardscript.compiler.model.data.BooleanValue;
 import pascal.hardscript.compiler.model.data.Data;
-import pascal.hardscript.compiler.model.value.BooleanValue;
-import pascal.hardscript.compiler.model.value.IntegerValue;
-import pascal.hardscript.compiler.model.value.Value;
+import pascal.hardscript.compiler.model.data.IntegerValue;
 
 import java.util.List;
 
@@ -103,7 +102,6 @@ public final class Types {
         return switch (entity) {
             case ComponentType componentType -> componentType;
             case Data data -> AtomType.of(Identifier.of("SOURCE").setSourceLoc(loc), List.of(data));
-            case Value value -> AtomType.of(Identifier.of("SOURCE").setSourceLoc(loc), List.of(value));
             default -> {
                 log.error("{}: Cannot cast {} to component type", loc, entity);
                 throw new CompileCancellationException();

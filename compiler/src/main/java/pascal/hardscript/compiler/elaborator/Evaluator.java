@@ -21,7 +21,6 @@ import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.MapBinding;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.compiler.model.scope.SingleBinding;
-import pascal.hardscript.compiler.model.value.*;
 
 import java.util.LinkedList;
 import java.util.List;
