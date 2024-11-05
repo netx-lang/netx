@@ -48,6 +48,7 @@ public class BuiltInComponentFactory {
         var result = parent.instantiateComponentScope(parent.getNameAllocator().allocateFor(type));
         var sourceLoc = type.identifier().getSourceLoc();
         requiresMatchedSize(sourceLoc, 1, type.parameters());
+
         var data = requiresData(sourceLoc, type.parameters().getFirst());
         result.addOutput(data);
         return result;

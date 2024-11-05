@@ -36,5 +36,10 @@ abstract class ResourcesFileTest {
         test("bind_3");
     }
 
+    @Test
+    void testRISCV() throws IOException {
+        test("riscv");
+    }
+
     public abstract void test(String fileName) throws IOException;
 }

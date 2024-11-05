@@ -69,6 +69,7 @@ public final class BinaryExpr extends ExprNode {
 
     private static final Map<Operator, String> OPERATOR_MAP = Map.ofEntries(
             Map.entry(Operator.COMBINE, "<>"),
+            Map.entry(Operator.CONCAT, "::"),
             Map.entry(Operator.MAPSTO, "->"),
             Map.entry(Operator.POW, "**"), Map.entry(Operator.MUL, "*"),
             Map.entry(Operator.DIV, "/"), Map.entry(Operator.MOD, "%"),
@@ -89,7 +90,7 @@ public final class BinaryExpr extends ExprNode {
     }
 
     public enum Operator {
-        COMBINE, MAPSTO,
+        COMBINE, MAPSTO, CONCAT,
         POW, MUL, DIV, MOD, ADD, SUB,
         ARITH_SHL, ARITH_SHR, LOGIC_SHR, LOGIC_SHL,
         EQ, NE, LT, LE, GT, GE,

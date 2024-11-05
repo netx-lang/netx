@@ -158,6 +158,7 @@ public final class HSParser {
     static ExprNode parseBinaryExpr(BinaryExprContext ctx) {
         BinaryExpr.Operator op = switch (ctx.op.getText()) {
             case "<>" -> BinaryExpr.Operator.COMBINE;
+            case "::" -> BinaryExpr.Operator.CONCAT;
             case "->" -> BinaryExpr.Operator.MAPSTO;
             case "**" -> BinaryExpr.Operator.POW;
             case "+" -> BinaryExpr.Operator.ADD;

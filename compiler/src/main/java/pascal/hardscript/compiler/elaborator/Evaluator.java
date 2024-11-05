@@ -243,6 +243,7 @@ public final class Evaluator {
         return switch (expr.getOp()) {
             case COMBINE -> evaluateCombineType(sourceLoc, evaluate(expr.getLhs()), evaluate(expr.getRhs()));
             case MAPSTO -> evaluatePort(sourceLoc, evaluate(expr.getLhs()), evaluate(expr.getRhs()));
+            case CONCAT -> evaluateListConcat(expr);
             case ADD, SUB, MUL, DIV, MOD, POW, AND, OR, XOR, XNOR,
                  EQ, NE, LT, LE, GT, GE, ARITH_SHR, ARITH_SHL, LOGIC_SHR, LOGIC_SHL ->
                     evaluateBinaryExpr(expr, BINARY_OPERATOR_MAP.get(expr.getOp()));
@@ -258,6 +259,15 @@ public final class Evaluator {
 
     private Value evaluateBinaryExpr(BinaryExpr expr, BinaryOperator<BooleanValue> op) {
         return op.apply(evaluateToBoolean(expr.getLhs()), evaluateToBoolean(expr.getRhs()));
+    }
+
+    private ListEntity evaluateListConcat(BinaryExpr expr) {
+        List<Entity> result = new LinkedList<>();
+        var lhs = evaluateToList(expr.getLhs());
+        var rhs = evaluateToList(expr.getRhs());
+        result.addAll(lhs.entities());
+        result.addAll(rhs.entities());
+        return ListEntity.of(result);
     }
 
     private Entity evaluateCombineType(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
@@ -281,10 +291,8 @@ public final class Evaluator {
     }
 
     private ComponentPort evaluatePort(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
-        if (!(lhs instanceof ListEntity lhsList && rhs instanceof ListEntity rhsList)) {
-            log.error("{}: Expected list of components but got {} and {}", sourceLoc, lhs, rhs);
-            throw new CompileCancellationException();
-        }
+        ListEntity lhsList = lhs instanceof ListEntity ? (ListEntity) lhs : ListEntity.of(List.of(lhs));
+        ListEntity rhsList = rhs instanceof ListEntity ? (ListEntity) rhs : ListEntity.of(List.of(rhs));
         return ComponentPort.of(makeAtomPortFromList(sourceLoc, lhsList), makeAtomPortFromList(sourceLoc, rhsList));
     }
 
