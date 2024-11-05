@@ -58,10 +58,10 @@ class EvaluatorUnitTest {
                 component test : [a] -> [b] {
                     inst a of wire(bit(4))
                     inst b of wire(bit(1))
-                    [gate |
-                        i in [0..2],
-                        let gate = [NOT, NOT] <> AND <> NOT
-                    ] <> AND : [a[i] | i in [0..4]] -> [b]
+                    [a[i] | i in [0..4]] -> [
+                        gate | i in [0..2],
+                               let gate = [NOT, NOT] <> AND <> NOT
+                    ] <> AND -> [b]
                 }
                 """;
         assertDoesNotThrow(() -> loadSingleComponent(code));

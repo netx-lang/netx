@@ -29,18 +29,18 @@
       "id" : "AND",
       "input" : [ "input@(4:9)[0]", "a@(3:9)" ],
         "output": [
-            "$i@(7:51)"
+            "$i@(8:55)"
         ]
     }, {
       "type" : "builtin",
       "id" : "REGISTER",
       "members" : [ {
         "type" : "wire",
-          "id": "$i@(7:51)",
+          "id": "$i@(8:55)",
         "width" : 1
       } ],
         "input": [
-            "$i@(7:51)"
+            "$i@(8:55)"
         ],
       "output" : [ "reg_out@(4:16)[0]" ],
       "attribute" : {
@@ -52,18 +52,18 @@
       "id" : "AND",
       "input" : [ "input@(4:9)[1]", "a@(3:9)" ],
         "output": [
-            "$i@(7:51)"
+            "$i@(8:55)"
         ]
     }, {
       "type" : "builtin",
       "id" : "REGISTER",
       "members" : [ {
         "type" : "wire",
-          "id": "$i@(7:51)",
+          "id": "$i@(8:55)",
         "width" : 1
       } ],
         "input": [
-            "$i@(7:51)"
+            "$i@(8:55)"
         ],
       "output" : [ "reg_out@(4:16)[1]" ],
       "attribute" : {
@@ -75,18 +75,18 @@
       "id" : "AND",
       "input" : [ "input@(4:9)[2]", "a@(3:9)" ],
         "output": [
-            "$i@(7:51)"
+            "$i@(8:55)"
         ]
     }, {
       "type" : "builtin",
       "id" : "REGISTER",
       "members" : [ {
         "type" : "wire",
-          "id": "$i@(7:51)",
+          "id": "$i@(8:55)",
         "width" : 1
       } ],
         "input": [
-            "$i@(7:51)"
+            "$i@(8:55)"
         ],
       "output" : [ "reg_out@(4:16)[2]" ],
       "attribute" : {

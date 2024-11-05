@@ -5,7 +5,14 @@ import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.ast.component.*;
-import pascal.hardscript.compiler.model.component.*;
+import pascal.hardscript.compiler.ast.expr.ExprNode;
+import pascal.hardscript.compiler.exception.CompileCancellationException;
+import pascal.hardscript.compiler.model.Entity;
+import pascal.hardscript.compiler.model.ListEntity;
+import pascal.hardscript.compiler.model.component.AtomType;
+import pascal.hardscript.compiler.model.component.CombineType;
+import pascal.hardscript.compiler.model.component.ComponentType;
+import pascal.hardscript.compiler.model.component.ParallelType;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.ComponentInfo;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
@@ -15,6 +22,7 @@ import pascal.hardscript.util.exception.ShallNotReachHereError;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static pascal.hardscript.compiler.elaborator.Types.requiresMatchedSize;
 
@@ -54,14 +62,12 @@ public final class Elaborator {
 
         public void build(ComponentNode node) {
             dispatchElementBuilder(node.getElements());
-            if (node.getType() != null) {
-                var portType = evaluator.evaluateToComponentPort(node.getType());
-                if (!(scope instanceof ComponentScope module)) {
-                    throw new ShallNotReachHereError();
-                }
-                portType.from().forEach(module::addInput);
-                portType.to().forEach(module::addOutput);
+            var portType = makeCommonPort(node.getSourceLoc(), node.getType().getFrom(), node.getType().getTo());
+            if (!(scope instanceof ComponentScope module)) {
+                throw new ShallNotReachHereError();
             }
+            portType.from().forEach(module::addInput);
+            portType.to().forEach(module::addOutput);
         }
 
         public void build(LoopNode node) {
@@ -107,7 +113,7 @@ public final class Elaborator {
 
         private void buildElementIntoScope(ComponentInstantiationNode instantiation) {
             var sourceLoc = instantiation.getSourceLoc();
-            var parameters = evaluator.evaluateToComponentPort(instantiation.getPort());
+            var parameters = makeCommonPort(sourceLoc, instantiation.getFrom(), instantiation.getTo());
             var arguments = new Instantiator(instantiation).instantiate(
                     evaluator.evaluateToComponentType(instantiation.getType()));
 
@@ -119,6 +125,26 @@ public final class Elaborator {
             for (int i = 0; i < arguments.to().size(); ++i) {
                 scope.alias(parameters.to().get(i), arguments.to().get(i));
             }
+        }
+
+        private ComponentPort makeCommonPort(SourceLoc sourceLoc, ExprNode from, ExprNode to) {
+            return ComponentPort.of(
+                    extractInstanceList(sourceLoc, evaluator.evaluate(from)),
+                    extractInstanceList(sourceLoc, evaluator.evaluate(to)));
+        }
+
+        private List<Instance> extractInstanceList(SourceLoc sourceLoc, Entity entity) {
+            if (entity instanceof ListEntity list) {
+                if (!list.entities().isEmpty()
+                        && list.entities().stream().allMatch(Predicate.not(Instance.class::isInstance))) {
+                    log.error("{}: Expected list of components but got {}", sourceLoc, list);
+                    throw new CompileCancellationException();
+                }
+                return list.entities().stream().map(Instance.class::cast).toList();
+            } else if (entity instanceof Instance instance) {
+                return List.of(instance);
+            }
+            throw new ShallNotReachHereError();
         }
 
         private class Instantiator {
@@ -179,4 +205,11 @@ public final class Elaborator {
             }
         }
     }
+
+    private record ComponentPort(List<Instance> from, List<Instance> to) {
+        public static ComponentPort of(List<Instance> from, List<Instance> to) {
+            return new ComponentPort(from, to);
+        }
+    }
+
 }

@@ -12,7 +12,10 @@ import pascal.hardscript.compiler.ast.expr.qualifier.Qualifier;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
-import pascal.hardscript.compiler.model.component.*;
+import pascal.hardscript.compiler.model.component.AtomType;
+import pascal.hardscript.compiler.model.component.CombineType;
+import pascal.hardscript.compiler.model.component.ComponentType;
+import pascal.hardscript.compiler.model.component.LazyType;
 import pascal.hardscript.compiler.model.instance.*;
 import pascal.hardscript.compiler.model.instance.selector.BitSelector;
 import pascal.hardscript.compiler.model.instance.selector.PartSelector;
@@ -31,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
-import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 import static pascal.hardscript.compiler.elaborator.Types.*;
@@ -49,10 +51,6 @@ public final class Evaluator {
 
     public ComponentType evaluateToComponentType(ExprNode expr) {
         return castToComponentType(expr.getSourceLoc(), evaluate(expr));
-    }
-
-    public ComponentPort evaluateToComponentPort(ExprNode expr) {
-        return requiresPort(expr.getSourceLoc(), evaluate(expr));
     }
 
     public ListEntity evaluateToList(ExprNode expr) {
@@ -245,7 +243,6 @@ public final class Evaluator {
         var sourceLoc = expr.getSourceLoc();
         return switch (expr.getOp()) {
             case COMBINE -> evaluateCombineType(sourceLoc, evaluate(expr.getLhs()), evaluate(expr.getRhs()));
-            case MAPSTO -> evaluatePort(sourceLoc, evaluate(expr.getLhs()), evaluate(expr.getRhs()));
             case CONCAT -> evaluateListConcat(expr);
             case ADD, SUB, MUL, DIV, MOD, POW, AND, OR, XOR, XNOR,
                  EQ, NE, LT, LE, GT, GE, ARITH_SHR, ARITH_SHL, LOGIC_SHR, LOGIC_SHL ->
@@ -275,22 +272,6 @@ public final class Evaluator {
 
     private Entity evaluateCombineType(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
         return CombineType.from(castToComponentType(sourceLoc, lhs), castToComponentType(sourceLoc, rhs));
-    }
-
-
-    private ComponentPort evaluatePort(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
-        ListEntity lhsList = lhs instanceof ListEntity ? (ListEntity) lhs : ListEntity.of(List.of(lhs));
-        ListEntity rhsList = rhs instanceof ListEntity ? (ListEntity) rhs : ListEntity.of(List.of(rhs));
-        return ComponentPort.of(makeAtomPortFromList(sourceLoc, lhsList), makeAtomPortFromList(sourceLoc, rhsList));
-    }
-
-    private List<Instance> makeAtomPortFromList(SourceLoc sourceLoc, ListEntity list) {
-        if (!list.entities().isEmpty()
-                && list.entities().stream().allMatch(Predicate.not(Instance.class::isInstance))) {
-            log.error("{}: Expected list of components but got {}", sourceLoc, list);
-            throw new CompileCancellationException();
-        }
-        return list.entities().stream().map(Instance.class::cast).toList();
     }
 
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {

@@ -3,18 +3,17 @@ package pascal.hardscript.compiler.ast.component;
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.ASTNode;
 import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.ast.expr.ExprNode;
 
 import java.util.List;
 import java.util.Objects;
 
 public final class ComponentNode extends ASTNode {
     private Identifier identifier;
-    private ExprNode type;
+    private ComponentTypeNode type;
     private final List<Identifier> arguments;
     private final List<ElementNode> elements;
 
-    private ComponentNode(Identifier identifier, ExprNode type,
+    private ComponentNode(Identifier identifier, ComponentTypeNode type,
                           List<Identifier> arguments, List<ElementNode> elements) {
         this.identifier = identifier;
         this.type = type;
@@ -22,7 +21,7 @@ public final class ComponentNode extends ASTNode {
         this.elements = elements;
     }
 
-    public static ComponentNode of(Identifier id, ExprNode type,
+    public static ComponentNode of(Identifier id, ComponentTypeNode type,
                                    List<Identifier> arguments, List<ElementNode> elements) {
         return new ComponentNode(id, type, arguments, elements);
     }
@@ -45,11 +44,11 @@ public final class ComponentNode extends ASTNode {
         this.identifier = identifier;
     }
 
-    public ExprNode getType() {
+    public ComponentTypeNode getType() {
         return type;
     }
 
-    public void setType(ExprNode type) {
+    public void setType(ComponentTypeNode type) {
         this.type = type;
     }
 
@@ -66,10 +65,10 @@ public final class ComponentNode extends ASTNode {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (ComponentNode) obj;
-        return Objects.equals(this.identifier, that.identifier) &&
-                Objects.equals(this.type, that.type) &&
-                Objects.equals(this.arguments, that.arguments) &&
-                Objects.equals(this.elements, that.elements);
+        return Objects.equals(this.identifier, that.identifier)
+                && Objects.equals(this.type, that.type)
+                && Objects.equals(this.arguments, that.arguments)
+                && Objects.equals(this.elements, that.elements);
     }
 
     @Override

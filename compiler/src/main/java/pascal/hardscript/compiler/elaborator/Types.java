@@ -8,7 +8,6 @@ import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
 import pascal.hardscript.compiler.model.component.AtomType;
-import pascal.hardscript.compiler.model.component.ComponentPort;
 import pascal.hardscript.compiler.model.component.ComponentType;
 import pascal.hardscript.compiler.model.component.ParallelType;
 import pascal.hardscript.compiler.model.instance.BooleanValue;
@@ -50,15 +49,6 @@ public final class Types {
             return factory;
         } else {
             log.error("{}: Expected component factory but got {}", loc, entity);
-            throw new CompileCancellationException();
-        }
-    }
-
-    public static ComponentPort requiresPort(SourceLoc loc, Entity entity) {
-        if (entity instanceof ComponentPort port) {
-            return port;
-        } else {
-            log.error("{}: Expected port but got {}", loc, entity);
             throw new CompileCancellationException();
         }
     }

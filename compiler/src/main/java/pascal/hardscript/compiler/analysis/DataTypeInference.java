@@ -142,10 +142,10 @@ public class DataTypeInference extends ModelAnalysis {
                 }
             }
         });
-        constraints.forEach(DataTypeInference::throwIfConstraintNotHolds);
+        constraints.forEach(this::throwIfConstraintNotHolds);
     }
 
-    private static void throwIfConstraintNotHolds(DataConstraint constraint) {
+    private void throwIfConstraintNotHolds(DataConstraint constraint) {
         if (!constraint.holds()) {
             log.error("Type constraint violation: {}", constraint.error());
             throw new TypeCheckingException();

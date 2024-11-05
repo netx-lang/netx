@@ -6,23 +6,26 @@ import pascal.hardscript.compiler.ast.expr.ExprNode;
 import java.util.Objects;
 
 public final class ComponentInstantiationNode extends ElementNode {
+    private ExprNode from;
     private ExprNode type;
-    private ExprNode port;
+    private ExprNode to;
 
-    private ComponentInstantiationNode(ExprNode type, ExprNode port) {
+    private ComponentInstantiationNode(ExprNode from, ExprNode type, ExprNode to) {
+        this.from = from;
         this.type = type;
-        this.port = port;
+        this.to = to;
     }
 
-    public static ComponentInstantiationNode of(ExprNode type, ExprNode connection) {
-        return new ComponentInstantiationNode(type, connection);
+    public static ComponentInstantiationNode of(ExprNode from, ExprNode type, ExprNode to) {
+        return new ComponentInstantiationNode(from, type, to);
     }
 
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);
+        from.walk(listener);
         type.walk(listener);
-        port.walk(listener);
+        to.walk(listener);
         listener.exit(this);
     }
 
@@ -34,12 +37,20 @@ public final class ComponentInstantiationNode extends ElementNode {
         this.type = type;
     }
 
-    public ExprNode getPort() {
-        return port;
+    public ExprNode getFrom() {
+        return from;
     }
 
-    public void setPort(ExprNode port) {
-        this.port = port;
+    public void setFrom(ExprNode from) {
+        this.from = from;
+    }
+
+    public ExprNode getTo() {
+        return to;
+    }
+
+    public void setTo(ExprNode to) {
+        this.to = to;
     }
 
     @Override
@@ -47,17 +58,18 @@ public final class ComponentInstantiationNode extends ElementNode {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (ComponentInstantiationNode) obj;
-        return Objects.equals(this.type, that.type) &&
-                Objects.equals(this.port, that.port);
+        return Objects.equals(this.from, that.from)
+                && Objects.equals(this.type, that.type)
+                && Objects.equals(this.to, that.to);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, port);
+        return Objects.hash(from, type, to);
     }
 
     @Override
     public String toString() {
-        return type.toString() + ":" + port.toString();
+        return from.toString() + " -> " + type.toString() + " -> " + to.toString();
     }
 }

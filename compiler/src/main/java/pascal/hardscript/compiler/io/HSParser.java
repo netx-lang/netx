@@ -24,21 +24,31 @@ import java.util.List;
 public final class HSParser {
 
     public static DesignNode parseDesign(DesignContext ctx) {
-        var result = DesignNode.of(ctx.component().stream().map(HSParser::parseComponent).toList());
-        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
-        return result;
+        return DesignNode.of(ctx.component().stream().map(HSParser::parseComponent).toList())
+                .setSourceLoc(SourceLoc.from(ctx.getStart()));
     }
 
     static ComponentNode parseComponent(ComponentContext ctx) {
         List<Identifier> arguments = ctx.component_arguments() != null
                 ? ctx.component_arguments().ID().stream().map(HSParser::parseIdentifier).toList()
                 : List.of();
-        ExprNode type = ctx.type != null ? parseExpr(ctx.type) : null;
-        var result = ComponentNode.of(parseIdentifier(ctx.ID()), type, arguments,
-                ctx.element().stream().map(HSParser::parseElement).toList());
-        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
-        return result;
+        return ComponentNode.of(parseIdentifier(ctx.ID()),
+                        parseComponentType(SourceLoc.from(ctx.ID().getSymbol()), ctx.component_type()),
+                        arguments, ctx.element().stream().map(HSParser::parseElement).toList())
+                .setSourceLoc(SourceLoc.from(ctx.getStart()));
     }
+
+    static ComponentTypeNode parseComponentType(SourceLoc sourceLoc, Component_typeContext ctx) {
+        if (ctx == null) {
+            ListExpr from = CommonList.ofEmpty().setSourceLoc(sourceLoc);
+            ListExpr to = CommonList.ofEmpty().setSourceLoc(sourceLoc);
+            return ComponentTypeNode.of(from, to).setSourceLoc(sourceLoc);
+        } else {
+            return ComponentTypeNode.of(parseExpr(ctx.from), parseExpr(ctx.to))
+                    .setSourceLoc(SourceLoc.from(ctx.getStart()));
+        }
+    }
+
     static ElementNode parseElement(ElementContext ctx) {
         var result = switch (ctx) {
             case BindingStatementContext sub -> parseBinding(sub.binding());
@@ -47,12 +57,12 @@ public final class HSParser {
             case LoopContext sub -> parseLoop(sub);
             default -> throw new ShallNotReachHereError();
         };
-        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
-        return result;
+        return result.setSourceLoc(SourceLoc.from(ctx.getStart()));
     }
 
     static ComponentInstantiationNode parseComponentInstantiation(ComponentInstantiationContext ctx) {
-        return ComponentInstantiationNode.of(parseExpr(ctx.type), parseExpr(ctx.connection));
+
+        return ComponentInstantiationNode.of(parseExpr(ctx.from), parseExpr(ctx.type), parseExpr(ctx.to));
     }
 
     static LoopNode parseLoop(LoopContext ctx) {
@@ -75,9 +85,8 @@ public final class HSParser {
                 arguments.add(null);
             }
         }
-        var result = ParamSymbolExpr.of(parsePrimarySymbol(ctx.primary_symbol()), arguments);
-        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
-        return result;
+        return ParamSymbolExpr.of(parsePrimarySymbol(ctx.primary_symbol()), arguments)
+                .setSourceLoc(SourceLoc.from(ctx.getStart()));
     }
 
     static ExprNode parseExpr(ExpressionContext ctx) {
@@ -93,8 +102,7 @@ public final class HSParser {
             case ParenExprContext sub -> parseExpr(sub.expression());
             default -> throw new ShallNotReachHereError();
         };
-        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
-        return result;
+        return result.setSourceLoc(SourceLoc.from(ctx.getStart()));
     }
 
     static SymbolExpr parseSymbolExpr(SymbolContext ctx) {
@@ -128,20 +136,17 @@ public final class HSParser {
             case LocalBindingContext sub -> BindingQualifier.of(parseBinding(sub.binding()));
             default -> throw new ShallNotReachHereError();
         };
-        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
-        return result;
+        return result.setSourceLoc(SourceLoc.from(ctx.getStart()));
     }
 
     static GeneratorQualifier parseGeneratorQualifier(IteratorContext ctx) {
-        var result = GeneratorQualifier.of(parsePrimarySymbol(ctx.primary_symbol()), parseExpr(ctx.expression()));
-        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
-        return result;
+        return GeneratorQualifier.of(parsePrimarySymbol(ctx.primary_symbol()), parseExpr(ctx.expression()))
+                .setSourceLoc(SourceLoc.from(ctx.getStart()));
     }
 
     static BindingNode parseBinding(BindingContext ctx) {
-        var result = BindingNode.of(parsePrimarySymbol(ctx.primary_symbol()), parseExpr(ctx.expression()));
-        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
-        return result;
+        return BindingNode.of(parsePrimarySymbol(ctx.primary_symbol()), parseExpr(ctx.expression()))
+                .setSourceLoc(SourceLoc.from(ctx.getStart()));
     }
 
     static ExprNode parseUnaryExpr(UnaryExprContext ctx) {
@@ -159,7 +164,6 @@ public final class HSParser {
         BinaryExpr.Operator op = switch (ctx.op.getText()) {
             case "<>" -> BinaryExpr.Operator.COMBINE;
             case "::" -> BinaryExpr.Operator.CONCAT;
-            case "->" -> BinaryExpr.Operator.MAPSTO;
             case "**" -> BinaryExpr.Operator.POW;
             case "+" -> BinaryExpr.Operator.ADD;
             case "-" -> BinaryExpr.Operator.SUB;
@@ -223,8 +227,7 @@ public final class HSParser {
                     parseExpr(sub.expression(0)), parseExpr(sub.expression(1)));
             default -> throw new ShallNotReachHereError();
         };
-        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
-        return result;
+        return result.setSourceLoc(SourceLoc.from(ctx.getStart()));
     }
 
     static ParamSymbolExpr parseParamSymbolExpr(ParamSymbolExprContext ctx) {
@@ -257,7 +260,6 @@ public final class HSParser {
                             .map(HSParser::parseExpr).toList());
             default -> throw new ShallNotReachHereError();
         };
-        result.setSourceLoc(SourceLoc.from(ctx.getStart()));
-        return result;
+        return result.setSourceLoc(SourceLoc.from(ctx.getStart()));
     }
 }

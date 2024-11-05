@@ -3,7 +3,11 @@ grammar HardScript;
 design : component+;
 
 component
-    : 'component' ID component_arguments? (':' type=expression)? '{' element* '}'
+    : 'component' ID component_arguments? component_type? '{' element* '}'
+    ;
+
+component_type
+    : ':' from=expression '->' to=expression
     ;
 
 component_arguments
@@ -11,10 +15,10 @@ component_arguments
     ;
 
 element
-    : type=expression ':' connection=expression           # ComponentInstantiation
-    | binding                                             # BindingStatement
-    | 'for' '(' iterator ')' '{' element* '}'             # Loop
-    | 'inst' primary_symbol (',' primary_symbol)* 'of' type=type_expression    # DataInstantiation
+    : from=expression '->' type=expression '->' to=expression               # ComponentInstantiation
+    | binding                                                               # BindingStatement
+    | 'for' '(' iterator ')' '{' element* '}'                               # Loop
+    | 'inst' primary_symbol (',' primary_symbol)* 'of' type=type_expression # DataInstantiation
     ;
 
 expression
@@ -24,7 +28,6 @@ expression
     | op=('+' | '-' | '~' | '!') expression                         # UnaryExpr
     | lhs=expression op='::' rhs=expression                         # BinaryExpr
     | lhs=expression op='<>' rhs=expression                         # BinaryExpr
-    | lhs=expression op='->' rhs=expression                         # BinaryExpr
     | lhs=expression op='**' rhs=expression                         # BinaryExpr
     | lhs=expression op=('*' | '/' | '%') rhs=expression            # BinaryExpr
     | lhs=expression op=('+' | '-') rhs=expression                  # BinaryExpr
@@ -80,9 +83,9 @@ binding
     ;
 
 symbol
-    : primary_symbol                                      # PrimarySymbolExpr
-    | primary_symbol '(' expression (',' expression)* ')' # ParamSymbolExpr
+    : primary_symbol '(' expression (',' expression)* ')' # ParamSymbolExpr
     | primary_symbol '(' ')'                              # ParamSymbolExpr
+    | primary_symbol                                      # PrimarySymbolExpr
     ;
 
 primary_symbol

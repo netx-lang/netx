@@ -90,6 +90,14 @@ public interface ASTListener {
         exitDefault(node);
     }
 
+    default void enter(ComponentTypeNode node) {
+        enterDefault(node);
+    }
+
+    default void exit(ComponentTypeNode node) {
+        exitDefault(node);
+    }
+
     default void enter(BitSelector node) {
         enterDefault(node);
     }

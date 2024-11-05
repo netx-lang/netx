@@ -8,8 +8,10 @@ public abstract class ASTNode {
         return sourceLoc;
     }
 
-    public void setSourceLoc(SourceLoc sourceLoc) {
+    @SuppressWarnings("unchecked")
+    public <T extends ASTNode> T setSourceLoc(SourceLoc sourceLoc) {
         this.sourceLoc = sourceLoc;
+        return (T) this;
     }
 
     abstract public void walk(ASTListener listener);

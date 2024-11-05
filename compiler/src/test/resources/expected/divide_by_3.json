@@ -27,25 +27,32 @@
       "type" : "builtin",
       "id" : "NOT",
       "input" : [ "a@(3:9)" ],
-      "output" : [ "$i1@(7:18)" ]
+        "output": [
+            "$i1@(8:22)"
+        ]
     }, {
       "type" : "builtin",
       "id" : "NOT",
       "input" : [ "b@(3:12)" ],
-      "output" : [ "$i2@(7:18)" ]
+        "output": [
+            "$i2@(8:22)"
+        ]
     }, {
       "type" : "builtin",
       "id" : "AND",
       "members" : [ {
         "type" : "wire",
-          "id": "$i1@(7:18)",
+          "id": "$i1@(8:22)",
           "width": 1
       }, {
         "type" : "wire",
-          "id": "$i2@(7:18)",
+          "id": "$i2@(8:22)",
           "width": 1
       } ],
-      "input" : [ "$i1@(7:18)", "$i2@(7:18)" ],
+        "input": [
+            "$i1@(8:22)",
+            "$i2@(8:22)"
+        ],
         "output": [
             "$i@(4:42)"
         ]
