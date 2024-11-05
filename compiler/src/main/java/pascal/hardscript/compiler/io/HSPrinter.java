@@ -149,7 +149,7 @@ public final class HSPrinter {
     private String dumpIdentifierOf(Entity entity) {
         return switch (entity) {
             case Value value -> dumpIdentifierOf(value);
-            case Data data -> dumpIdentifierOf(data);
+            case NonValue nonValue -> dumpIdentifierOf(nonValue);
             default -> throw new ShallNotReachHereError();
         };
     }
@@ -162,7 +162,7 @@ public final class HSPrinter {
         };
     }
 
-    private String dumpIdentifierOf(Data data) {
+    private String dumpIdentifierOf(NonValue data) {
         var sourceLoc = Objects.requireNonNullElse(
                 data.getSourceLoc(),
                 data.getUpperComponent().getSourceLoc());

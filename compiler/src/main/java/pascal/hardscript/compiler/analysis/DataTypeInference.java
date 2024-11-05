@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.analysis.constraint.*;
 import pascal.hardscript.compiler.exception.TypeInferenceException;
-import pascal.hardscript.compiler.model.data.AutoInferenceType;
 import pascal.hardscript.compiler.model.data.Data;
 import pascal.hardscript.compiler.model.data.DataAccess;
 import pascal.hardscript.compiler.model.scope.ComponentInfo;
@@ -43,7 +42,7 @@ public class DataTypeInference extends ModelAnalysis {
     public void collectTypeConstraints() {
         design.forEachScope(scope -> {
             for (var data : getBoundDataIn(scope)) {
-                if (!(data.getType() instanceof AutoInferenceType)) {
+                if (data.hasImplicitType()) {
                     workList.add(data);
                 }
             }
@@ -57,7 +56,7 @@ public class DataTypeInference extends ModelAnalysis {
 
     private void collectConstraintsInBuiltin(ComponentScope component) {
         switch (BuiltinComponent.of(component.getIdentifier().string())) {
-            case OR, NOT, AND, XOR, NOR, NAND -> addConstrainsForGate(component);
+            case OR, NOT, AND, XOR, NOR, NAND -> addAllEqualConstraints(component);
             case REGISTER -> addContainsForRegister(component);
             case TO, SPLIT, IGNORE, SOURCE -> {
                 // do nothing
@@ -65,7 +64,7 @@ public class DataTypeInference extends ModelAnalysis {
         }
     }
 
-    private void addConstrainsForGate(ComponentScope component) {
+    private void addAllEqualConstraints(ComponentScope component) {
         var dataList = Stream.concat(component.getInputs().stream(), component.getOutputs().stream()).toList();
         for (int i = 0; i < dataList.size(); i++) {
             for (int j = i + 1; j < dataList.size(); j++) {
@@ -93,12 +92,16 @@ public class DataTypeInference extends ModelAnalysis {
 
     private void addBinaryConstraint(BinaryConstraint binary) {
         Data lhs = binary.getLhs(), rhs = binary.getRhs();
+        if (lhs == rhs) {
+            return;
+        }
+
         if (lhs instanceof DataAccess && rhs instanceof DataAccess) {
             throwIfConstraintNotHolds(binary);
-        } else if (lhs instanceof DataAccess && rhs.getType() instanceof AutoInferenceType) {
+        } else if (lhs instanceof DataAccess && rhs.hasImplicitType()) {
             rhs.setType(binary.expectedRhs());
             workList.add(rhs);
-        } else if (lhs.getType() instanceof AutoInferenceType && rhs instanceof DataAccess) {
+        } else if (lhs.hasImplicitType() && rhs instanceof DataAccess) {
             lhs.setType(binary.expectedLhs());
             workList.add(lhs);
         } else {
@@ -115,10 +118,10 @@ public class DataTypeInference extends ModelAnalysis {
             if (graph.containsVertex(data)) {
                 for (var constraint : graph.edgesOf(data)) {
                     Data lhs = constraint.getLhs(), rhs = constraint.getRhs();
-                    if (lhs.getType() instanceof AutoInferenceType) {
+                    if (lhs.hasImplicitType()) {
                         lhs.setType(constraint.expectedLhs());
                         workList.add(lhs);
-                    } else if (rhs.getType() instanceof AutoInferenceType) {
+                    } else if (rhs.hasImplicitType()) {
                         rhs.setType(constraint.expectedRhs());
                         workList.add(rhs);
                     }
@@ -133,7 +136,7 @@ public class DataTypeInference extends ModelAnalysis {
                 if (!(entity instanceof Data data)) {
                     throw new ShallNotReachHereError();
                 }
-                if (data.getType() instanceof AutoInferenceType) {
+                if (data.hasImplicitType()) {
                     log.error("{}: Cannot infer type of data: {}", data.getSourceLoc(), data);
                     throw new TypeInferenceException();
                 }

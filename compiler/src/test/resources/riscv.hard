@@ -13,7 +13,7 @@ component riscv : [
     inst func7, rs2, rs1, func3, rd, op of wire(auto)
     inst imm, Ra, Rb, result, zero, less, PCAsrc, PCBsrc of wire(auto)
     inst imemAddr, dmemAddr, dmemDataIn of wire(auto)
-    inst extOP, regWr, branch, memToReg, dmemWe, dmemOp, aSrc, bSrc, ctl of wire(auto)
+    inst extOP, regWr, branch_ctl, memToReg, dmemWe, dmemOp, aSrc, bSrc, ctl of wire(auto)
 
     TO : [imemDataOut] -> [instr]
     TO : instr[31:25] -> [func7]
@@ -23,7 +23,7 @@ component riscv : [
     TO : instr[11:7]  -> [rd]
     TO : instr[6:0]   -> [op]
 
-    InstrDecoder : [op, func3, func7[5]] -> [extOP, regWr, branch, memToReg, dmemWe, dmemOp, aSrc, bSrc, ctl]
+    InstrDecoder : [op, func3, func7[5]] -> [extOP, regWr, branch_ctl, memToReg, dmemWe, dmemOp, aSrc, bSrc, ctl]
     ImmSelector  : [extOP, instr] -> [imm]
 
     [clk, rs1, rs2, rd, [imm, dmemDataOut, memToReg] <> MUX(1)] <> RegFile : [] -> [Ra, Rb]
@@ -33,7 +33,7 @@ component riscv : [
         [Rb, imm, 4, 4, bSrc] <> MUX(2), ctl
     ] <> ALU : [] -> [result, zero, less]
 
-    BranchCond : [branch, zero, less] -> [PCAsrc, PCBsrc]
+    BranchCond : [branch_ctl, zero, less] -> [PCAsrc, PCBsrc]
 
     [
         [4, imm, PCAsrc]<> MUX(1),
@@ -67,7 +67,7 @@ component InstrDecoder : [op_i, func3, func7] -> [extOP, regWr, branch_ctl, memT
     let U_flag = [U_flag_0, U_flag_1] <> OR
     let I_flag = [I_flag_0, I_flag_1, I_flag_2] <> OR(3)
 
-    let branch = component cond, pred : [0, pred, cond] <> MUX(1)
+    let branch = component cond, pred : [1'b0 <> EXT, pred, cond] <> MUX(1)
     [
         branch(U_flag, 3'b001),
         branch(I_flag, 3'b000),
@@ -141,7 +141,7 @@ component ImmSelector: [extOP, instr] -> [imm] {
 
     inst mask of wire(bit(8))
     DECODER(3) : [extOP] -> [mask]
-    let branch = component i, pred: [32'b0, pred, mask[i]] <> MUX(1)
+    let branch = component i, pred: [1'b0 <> EXT, pred, mask[i]] <> MUX(1)
     [
         branch(3'b000, immI), branch(3'b001, immU), 
         branch(3'b010, immS), branch(3'b011, immB), branch(3'b100, immJ)
@@ -181,7 +181,7 @@ component BranchCond : [branch_ctl, zero, less] -> [PCAsrc, PCBsrc] {
     inst result of wire(bit(2))
     inst mask   of wire(bit(8))
     DECODER(3) : [branch_ctl] -> [mask]
-    let branch = component i, pred: [32'b0, pred, mask[i]] <> MUX(1)
+    let branch = component i, pred: [1'b0 <> EXT, pred, mask[i]] <> MUX(1)
     [
         branch(3'b000, 2'b00),
         branch(3'b001, 2'b10),

@@ -9,6 +9,10 @@ import pascal.hardscript.compiler.model.scope.Scope;
 public sealed interface Data extends Entity permits NonValue, Value {
     Scope getParent();
 
+    default boolean hasImplicitType() {
+        return getType() instanceof AutoInferenceType;
+    }
+
     DataType getType();
 
     void setType(DataType type);
