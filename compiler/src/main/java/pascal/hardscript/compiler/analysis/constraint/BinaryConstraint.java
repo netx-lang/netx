@@ -1,25 +1,25 @@
 package pascal.hardscript.compiler.analysis.constraint;
 
-import pascal.hardscript.compiler.model.data.Data;
-import pascal.hardscript.compiler.model.data.DataType;
+import pascal.hardscript.compiler.model.instance.Instance;
+import pascal.hardscript.compiler.model.instance.type.InstanceType;
 
 public abstract sealed class BinaryConstraint implements DataConstraint permits EqualTypeConstraint {
-    protected final Data lhs, rhs;
+    protected final Instance lhs, rhs;
 
-    protected BinaryConstraint(Data lhs, Data rhs) {
+    protected BinaryConstraint(Instance lhs, Instance rhs) {
         this.lhs = lhs;
         this.rhs = rhs;
     }
 
-    public Data getLhs() {
+    public Instance getLhs() {
         return lhs;
     }
 
-    public Data getRhs() {
+    public Instance getRhs() {
         return rhs;
     }
 
-    public abstract DataType expectedLhs();
+    public abstract InstanceType expectedLhs();
 
-    public abstract DataType expectedRhs();
+    public abstract InstanceType expectedRhs();
 }

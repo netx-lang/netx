@@ -13,10 +13,13 @@ import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
 import pascal.hardscript.compiler.model.component.*;
-import pascal.hardscript.compiler.model.data.*;
-import pascal.hardscript.compiler.model.data.selector.BitSelector;
-import pascal.hardscript.compiler.model.data.selector.PartSelector;
-import pascal.hardscript.compiler.model.data.selector.Selector;
+import pascal.hardscript.compiler.model.instance.*;
+import pascal.hardscript.compiler.model.instance.selector.BitSelector;
+import pascal.hardscript.compiler.model.instance.selector.PartSelector;
+import pascal.hardscript.compiler.model.instance.selector.Selector;
+import pascal.hardscript.compiler.model.instance.type.BitType;
+import pascal.hardscript.compiler.model.instance.type.InstanceType;
+import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.MapBinding;
 import pascal.hardscript.compiler.model.scope.Scope;
@@ -63,7 +66,7 @@ public final class Evaluator {
         return castToBooleanValue(expr.getSourceLoc(), evaluate(expr));
     }
 
-    public NonValue.Factory<?> evaluateToDataFactory(ExprNode expr) {
+    public Data.Factory<?> evaluateToDataFactory(ExprNode expr) {
         mode = EvaluationMode.DATA_FACTORY;
         var result = requiresDataFactory(expr.getSourceLoc(), evaluate(expr));
         mode = EvaluationMode.COMMON;
@@ -104,7 +107,7 @@ public final class Evaluator {
         var base = evaluate(expr.getBase());
         var selector = evaluateSelector(expr.getSelector());
         return switch (base) {
-            case Data data -> DataAccess.of(data, selector);
+            case Instance inst -> DataAccess.of(inst, selector);
             case ListEntity listValue -> listValue.select(selector);
             default -> {
                 log.error("{}: Expected component or list but got {}",
@@ -280,19 +283,19 @@ public final class Evaluator {
         return ComponentPort.of(makeAtomPortFromList(sourceLoc, lhsList), makeAtomPortFromList(sourceLoc, rhsList));
     }
 
-    private List<Data> makeAtomPortFromList(SourceLoc sourceLoc, ListEntity list) {
+    private List<Instance> makeAtomPortFromList(SourceLoc sourceLoc, ListEntity list) {
         if (!list.entities().isEmpty()
-                && list.entities().stream().allMatch(Predicate.not(Data.class::isInstance))) {
+                && list.entities().stream().allMatch(Predicate.not(Instance.class::isInstance))) {
             log.error("{}: Expected list of components but got {}", sourceLoc, list);
             throw new CompileCancellationException();
         }
-        return list.entities().stream().map(Data.class::cast).toList();
+        return list.entities().stream().map(Instance.class::cast).toList();
     }
 
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         requiresMatchedSize(sourceLoc, 1, arguments);
         var dataType = arguments.getFirst() == null
-                ? AutoInferenceType.getInstance()
+                ? PolyType.getInstance()
                 : evaluateBitWidth(arguments.getFirst());
         return Wire.Factory.of(scope, dataType);
     }
@@ -306,7 +309,7 @@ public final class Evaluator {
         }
     }
 
-    private DataType evaluateBitWidth(ExprNode expr) {
+    private InstanceType evaluateBitWidth(ExprNode expr) {
         if (expr instanceof ParamSymbolExpr spec) {
             var identifier = getIdentifierFrom(spec.getHead());
             if (identifier.string().equals("bit")) {
@@ -362,7 +365,7 @@ public final class Evaluator {
         };
     }
 
-    private NonValue.Factory<?> evaluateComponentFactory(ParamSymbolExpr expr) {
+    private Data.Factory<?> evaluateComponentFactory(ParamSymbolExpr expr) {
         var identifier = getIdentifierFrom(expr.getHead());
         var sourceLoc = expr.getSourceLoc();
         return switch (identifier.string()) {

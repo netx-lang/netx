@@ -4,7 +4,7 @@ import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.elaborator.Evaluator;
 import pascal.hardscript.compiler.elaborator.NameAllocator;
 import pascal.hardscript.compiler.model.Entity;
-import pascal.hardscript.compiler.model.data.Data;
+import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.util.type.Pair;
 
 import java.util.*;
@@ -15,7 +15,7 @@ public abstract sealed class Scope permits BlockScope, DesignScope, ComponentSco
     private final MapBinding binding = new MapBinding();
     private final List<Scope> children = new ArrayList<>();
     private final NameAllocator nameAllocator = new NameAllocator();
-    private final Set<Pair<Data, Data>> aliases = new HashSet<>();
+    private final Set<Pair<Instance, Instance>> aliases = new HashSet<>();
 
     private final Evaluator evaluator = new Evaluator(this);
 
@@ -47,11 +47,11 @@ public abstract sealed class Scope permits BlockScope, DesignScope, ComponentSco
         return children;
     }
 
-    public void alias(Data a, Data b) {
+    public void alias(Instance a, Instance b) {
         aliases.add(new Pair<>(a, b));
     }
 
-    public Set<Pair<Data, Data>> getAliases() {
+    public Set<Pair<Instance, Instance>> getAliases() {
         return Collections.unmodifiableSet(aliases);
     }
 

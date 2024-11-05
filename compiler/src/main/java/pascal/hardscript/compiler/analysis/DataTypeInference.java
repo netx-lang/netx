@@ -6,8 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.analysis.constraint.*;
 import pascal.hardscript.compiler.exception.TypeCheckingException;
-import pascal.hardscript.compiler.model.data.Data;
-import pascal.hardscript.compiler.model.data.DataAccess;
+import pascal.hardscript.compiler.model.instance.DataAccess;
+import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.ComponentInfo;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
@@ -22,9 +22,9 @@ import java.util.stream.Stream;
 
 public class DataTypeInference extends ModelAnalysis {
     private static final Logger log = LoggerFactory.getLogger(DataTypeInference.class);
-    private final Graph<Data, BinaryConstraint> graph = new SimpleGraph<>(BinaryConstraint.class);
+    private final Graph<Instance, BinaryConstraint> graph = new SimpleGraph<>(BinaryConstraint.class);
     private final List<DataConstraint> constraints = new LinkedList<>();
-    private final Queue<Data> workList = new LinkedList<>();
+    private final Queue<Instance> workList = new LinkedList<>();
     private final ComponentInfo componentInfo;
 
     public DataTypeInference(DesignScope design) {
@@ -58,7 +58,7 @@ public class DataTypeInference extends ModelAnalysis {
         switch (BuiltinComponent.of(component.getIdentifier().string())) {
             case OR, NOT, AND, XOR, NOR, NAND -> addAllEqualConstraints(component);
             case REGISTER -> addContainsForRegister(component);
-            case TO, SPLIT, IGNORE, SOURCE -> {
+            case SPLIT, IGNORE, FROM -> {
                 // do nothing
             }
         }
@@ -74,9 +74,9 @@ public class DataTypeInference extends ModelAnalysis {
     }
 
     private void addContainsForRegister(ComponentScope component) {
-        Data input = component.getInputs().getFirst(), output = component.getOutputs().getFirst();
+        Instance input = component.getInputs().getFirst(), output = component.getOutputs().getFirst();
         addConstraint(EqualTypeConstraint.of(input, output));
-        addConstraint(ClockConstraint.of((Data) component.getAttributes().get("clock")));
+        addConstraint(ClockConstraint.of((Instance) component.getAttributes().get("clock")));
     }
 
     private void addConstraint(DataConstraint constraint) {
@@ -91,7 +91,7 @@ public class DataTypeInference extends ModelAnalysis {
     }
 
     private void addBinaryConstraint(BinaryConstraint binary) {
-        Data lhs = binary.getLhs(), rhs = binary.getRhs();
+        Instance lhs = binary.getLhs(), rhs = binary.getRhs();
         if (lhs == rhs) {
             return;
         }
@@ -117,7 +117,7 @@ public class DataTypeInference extends ModelAnalysis {
             var data = workList.poll();
             if (graph.containsVertex(data)) {
                 for (var constraint : graph.edgesOf(data)) {
-                    Data lhs = constraint.getLhs(), rhs = constraint.getRhs();
+                    Instance lhs = constraint.getLhs(), rhs = constraint.getRhs();
                     if (lhs.hasImplicitType()) {
                         lhs.setType(constraint.expectedLhs());
                         workList.add(lhs);
@@ -133,11 +133,11 @@ public class DataTypeInference extends ModelAnalysis {
     private void checkAllTyped() {
         design.forEachScope(scope -> {
             for (var entity : scope.getEntities()) {
-                if (!(entity instanceof Data data)) {
+                if (!(entity instanceof Instance inst)) {
                     throw new ShallNotReachHereError();
                 }
-                if (data.hasImplicitType()) {
-                    log.error("{}: Cannot infer type of data: {}", data.getSourceLoc(), data);
+                if (inst.hasImplicitType()) {
+                    log.error("{}: Cannot infer type of data: {}", inst.getSourceLoc(), inst);
                     throw new TypeCheckingException();
                 }
             }
@@ -152,7 +152,7 @@ public class DataTypeInference extends ModelAnalysis {
         }
     }
 
-    private static List<Data> getBoundDataIn(Scope scope) {
-        return scope.getEntities().stream().map(Data.class::cast).toList();
+    private static List<Instance> getBoundDataIn(Scope scope) {
+        return scope.getEntities().stream().map(Instance.class::cast).toList();
     }
 }

@@ -5,9 +5,12 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.model.Entity;
-import pascal.hardscript.compiler.model.data.*;
+import pascal.hardscript.compiler.model.instance.*;
+import pascal.hardscript.compiler.model.instance.type.BitType;
+import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.*;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
+import pascal.hardscript.util.lang.BuiltinComponent;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -38,7 +41,12 @@ public final class HSPrinter {
         return result;
     }
 
-    private static final Set<String> NO_DUMP = Set.of("SPLIT", "TO", "SOURCE", "IGNORE");
+    private static final Set<BuiltinComponent> NO_DUMP = Set.of(
+            BuiltinComponent.SPLIT,
+            BuiltinComponent.IGNORE,
+            BuiltinComponent.FROM,
+            BuiltinComponent.TO
+    );
 
     private ObjectNode dump(ComponentScope module) {
         var result = createObjectNode();
@@ -49,14 +57,14 @@ public final class HSPrinter {
         dumpComponentIO(result, "output", module.getOutputs());
         var members = makeMembersIn(result);
         for (var entity : module.getEntities()) {
-            if (entity instanceof NonValue nonValue) {
-                members.add(dump(nonValue));
+            if (entity instanceof Data data) {
+                members.add(dump(data));
             }
         }
         for (var sub : extractSubComponent(module)) {
             var instID = sub.getIdentifier();
             if (componentInfo.containsBuiltin(instID)) {
-                if (!NO_DUMP.contains(instID.string())) {
+                if (!NO_DUMP.contains(BuiltinComponent.of(instID.string()))) {
                     dumpBuiltinComponent(sub, instID, members);
                 }
             } else {
@@ -72,10 +80,10 @@ public final class HSPrinter {
         setType(builtin, "builtin");
         setIdentifier(builtin, instID);
 
-        List<NonValue> needDump = new LinkedList<>();
+        List<Data> needDump = new LinkedList<>();
         for (var entity : sub.getEntities()) {
-            if (entity instanceof NonValue nonValue) {
-                needDump.add(nonValue);
+            if (entity instanceof Data data) {
+                needDump.add(data);
             }
         }
         if (!needDump.isEmpty()) {
@@ -88,7 +96,7 @@ public final class HSPrinter {
         members.add(builtin);
     }
 
-    private void dumpComponentIO(ObjectNode builtin, String port, List<Data> sub) {
+    private void dumpComponentIO(ObjectNode builtin, String port, List<Instance> sub) {
         var outputs = makeArrayIn(builtin, port);
         sub.stream().map(this::dumpIdentifierOf).forEach(outputs::add);
     }
@@ -115,7 +123,7 @@ public final class HSPrinter {
         return result;
     }
 
-    private ObjectNode dump(NonValue data) {
+    private ObjectNode dump(Data data) {
         return switch (data) {
             case Wire wire -> dumpWire(wire);
             case Clock clock -> dumpClock(clock);
@@ -129,7 +137,7 @@ public final class HSPrinter {
         setIdentifier(result, wire);
         switch (wire.getType()) {
             case BitType type -> result.put("width", type.width());
-            case AutoInferenceType ignored -> {
+            case PolyType ignored -> {
             }
         }
         return result;
@@ -149,7 +157,7 @@ public final class HSPrinter {
     private String dumpIdentifierOf(Entity entity) {
         return switch (entity) {
             case Value value -> dumpIdentifierOf(value);
-            case NonValue nonValue -> dumpIdentifierOf(nonValue);
+            case Data data -> dumpIdentifierOf(data);
             default -> throw new ShallNotReachHereError();
         };
     }
@@ -162,7 +170,7 @@ public final class HSPrinter {
         };
     }
 
-    private String dumpIdentifierOf(NonValue data) {
+    private String dumpIdentifierOf(Data data) {
         var sourceLoc = Objects.requireNonNullElse(
                 data.getSourceLoc(),
                 data.getUpperComponent().getSourceLoc());
@@ -174,8 +182,8 @@ public final class HSPrinter {
         }
     }
 
-    private void setIdentifier(ObjectNode node, Data data) {
-        setIdentifier(node, dumpIdentifierOf(data));
+    private void setIdentifier(ObjectNode node, Instance inst) {
+        setIdentifier(node, dumpIdentifierOf(inst));
     }
 
     private void setIdentifier(ObjectNode node, Identifier identifier) {

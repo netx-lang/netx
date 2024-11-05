@@ -5,10 +5,10 @@ import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.component.AtomType;
-import pascal.hardscript.compiler.model.data.AutoInferenceType;
-import pascal.hardscript.compiler.model.data.BitType;
-import pascal.hardscript.compiler.model.data.DataType;
-import pascal.hardscript.compiler.model.data.Wire;
+import pascal.hardscript.compiler.model.instance.Wire;
+import pascal.hardscript.compiler.model.instance.type.BitType;
+import pascal.hardscript.compiler.model.instance.type.InstanceType;
+import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.lang.BuiltinComponent;
@@ -29,7 +29,7 @@ public class BuiltInComponentFactory {
         BUILTIN_FACTORY = new HashMap<>();
 
         BUILTIN_FACTORY.put(REGISTER, BuiltInComponentFactory::createREGISTERComponent);
-        BUILTIN_FACTORY.put(SOURCE, BuiltInComponentFactory::createSOURCEComponent);
+        BUILTIN_FACTORY.put(FROM, BuiltInComponentFactory::createFROMComponent);
         BUILTIN_FACTORY.put(IGNORE, BuiltInComponentFactory::createIGNOREComponent);
         BUILTIN_FACTORY.put(SPLIT, BuiltInComponentFactory::createSPLITComponent);
         BUILTIN_FACTORY.put(TO, BuiltInComponentFactory::createTOComponent);
@@ -57,7 +57,7 @@ public class BuiltInComponentFactory {
         return factory.apply(parent, type);
     }
 
-    public static ComponentScope createSOURCEComponent(Scope parent, AtomType type) {
+    public static ComponentScope createFROMComponent(Scope parent, AtomType type) {
         var result = instantiate(parent, type);
         var sourceLoc = type.identifier().getSourceLoc();
         requiresMatchedSize(sourceLoc, 1, type.parameters());
@@ -174,10 +174,10 @@ public class BuiltInComponentFactory {
     }
 
     private static Wire newWire(ComponentScope result, String name) {
-        return newWire(result, name, AutoInferenceType.getInstance());
+        return newWire(result, name, PolyType.getInstance());
     }
 
-    private static Wire newWire(ComponentScope result, String name, DataType type) {
+    private static Wire newWire(ComponentScope result, String name, InstanceType type) {
         var wire = Wire.of(Identifier.of("$" + name).setSourceLoc(result.getSourceLoc()), result, type);
         result.bind(wire.getIdentifier(), wire);
         return wire;

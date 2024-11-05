@@ -1,4 +1,7 @@
-package pascal.hardscript.compiler.model.data;
+package pascal.hardscript.compiler.model.instance;
+
+import pascal.hardscript.compiler.model.instance.type.BitType;
+import pascal.hardscript.compiler.model.instance.type.InstanceType;
 
 public record BooleanValue(boolean value) implements Value {
 
@@ -19,7 +22,7 @@ public record BooleanValue(boolean value) implements Value {
     }
 
     @Override
-    public DataType getType() {
+    public InstanceType getType() {
         return BitType.forBoolean();
     }
 }

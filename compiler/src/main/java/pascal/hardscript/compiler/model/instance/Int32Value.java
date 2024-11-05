@@ -1,5 +1,7 @@
-package pascal.hardscript.compiler.model.data;
+package pascal.hardscript.compiler.model.instance;
 
+import pascal.hardscript.compiler.model.instance.type.BitType;
+import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.util.lang.BitVector;
 
 public record Int32Value(int value) implements IntegerValue {
@@ -123,7 +125,7 @@ public record Int32Value(int value) implements IntegerValue {
     }
 
     @Override
-    public DataType getType() {
+    public InstanceType getType() {
         return BitType.forInt32();
     }
 

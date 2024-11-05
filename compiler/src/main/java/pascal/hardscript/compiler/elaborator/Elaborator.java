@@ -6,7 +6,7 @@ import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.ast.component.*;
 import pascal.hardscript.compiler.model.component.*;
-import pascal.hardscript.compiler.model.data.Data;
+import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.ComponentInfo;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
@@ -148,7 +148,7 @@ public final class Elaborator {
             }
 
             private ComponentPort instantiateParallelType(ParallelType parallelType) {
-                List<Data> input = new LinkedList<>(), output = new LinkedList<>();
+                List<Instance> input = new LinkedList<>(), output = new LinkedList<>();
                 for (var sub : parallelType.types()) {
                     var port = instantiate(sub);
                     input.addAll(port.from());

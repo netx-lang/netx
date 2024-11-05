@@ -1,20 +1,21 @@
-package pascal.hardscript.compiler.model.data;
+package pascal.hardscript.compiler.model.instance;
 
 import pascal.hardscript.compiler.ast.Identifier;
+import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.scope.Scope;
 
-public final class Wire implements NonValue {
+public final class Wire implements Data {
     private final Identifier id;
     private final Scope parent;
-    private DataType type;
+    private InstanceType type;
 
-    public Wire(Identifier id, Scope parent, DataType type) {
+    public Wire(Identifier id, Scope parent, InstanceType type) {
         this.id = id;
         this.parent = parent;
         this.type = type;
     }
 
-    public static Wire of(Identifier id, Scope parent, DataType width) {
+    public static Wire of(Identifier id, Scope parent, InstanceType width) {
         return new Wire(id, parent, width);
     }
 
@@ -29,12 +30,12 @@ public final class Wire implements NonValue {
     }
 
     @Override
-    public DataType getType() {
+    public InstanceType getType() {
         return type;
     }
 
     @Override
-    public void setType(DataType type) {
+    public void setType(InstanceType type) {
         this.type = type;
     }
 
@@ -43,16 +44,16 @@ public final class Wire implements NonValue {
         return id.toString();
     }
 
-    public static class Factory implements NonValue.Factory<Wire> {
-        private final DataType type;
+    public static class Factory implements Data.Factory<Wire> {
+        private final InstanceType type;
         private final Scope parent;
 
-        private Factory(Scope parent, DataType type) {
+        private Factory(Scope parent, InstanceType type) {
             this.type = type;
             this.parent = parent;
         }
 
-        public static Factory of(Scope parent, DataType type) {
+        public static Factory of(Scope parent, InstanceType type) {
             return new Factory(parent, type);
         }
 

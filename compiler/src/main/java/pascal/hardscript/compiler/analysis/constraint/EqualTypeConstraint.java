@@ -1,24 +1,24 @@
 package pascal.hardscript.compiler.analysis.constraint;
 
-import pascal.hardscript.compiler.model.data.Data;
-import pascal.hardscript.compiler.model.data.DataType;
+import pascal.hardscript.compiler.model.instance.Instance;
+import pascal.hardscript.compiler.model.instance.type.InstanceType;
 
 public final class EqualTypeConstraint extends BinaryConstraint {
-    private EqualTypeConstraint(Data lhs, Data rhs) {
+    private EqualTypeConstraint(Instance lhs, Instance rhs) {
         super(lhs, rhs);
     }
 
-    public static EqualTypeConstraint of(Data lhs, Data rhs) {
+    public static EqualTypeConstraint of(Instance lhs, Instance rhs) {
         return new EqualTypeConstraint(lhs, rhs);
     }
 
     @Override
-    public DataType expectedLhs() {
+    public InstanceType expectedLhs() {
         return rhs.getType();
     }
 
     @Override
-    public DataType expectedRhs() {
+    public InstanceType expectedRhs() {
         return lhs.getType();
     }
 

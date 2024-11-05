@@ -3,15 +3,15 @@ package pascal.hardscript.compiler.model.scope;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.model.Entity;
-import pascal.hardscript.compiler.model.data.Data;
+import pascal.hardscript.compiler.model.instance.Instance;
 
 import java.util.*;
 
 public final class ComponentScope extends Scope {
     private final int depth;
     private final Identifier identifier;
-    private final List<Data> inputs = new ArrayList<>();
-    private final List<Data> outputs = new ArrayList<>();
+    private final List<Instance> inputs = new ArrayList<>();
+    private final List<Instance> outputs = new ArrayList<>();
     private final Map<String, Entity> attributes = new HashMap<>();
 
     public ComponentScope(Scope parent, Identifier identifier) {
@@ -32,19 +32,19 @@ public final class ComponentScope extends Scope {
         return depth;
     }
 
-    public List<Data> getInputs() {
+    public List<Instance> getInputs() {
         return inputs;
     }
 
-    public List<Data> getOutputs() {
+    public List<Instance> getOutputs() {
         return outputs;
     }
 
-    public void addInput(Data... inputs) {
+    public void addInput(Instance... inputs) {
         Collections.addAll(this.inputs, inputs);
     }
 
-    public void addOutput(Data... outputs) {
+    public void addOutput(Instance... outputs) {
         Collections.addAll(this.outputs, outputs);
     }
 

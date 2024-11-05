@@ -11,10 +11,10 @@ import pascal.hardscript.compiler.model.component.AtomType;
 import pascal.hardscript.compiler.model.component.ComponentPort;
 import pascal.hardscript.compiler.model.component.ComponentType;
 import pascal.hardscript.compiler.model.component.ParallelType;
-import pascal.hardscript.compiler.model.data.BooleanValue;
-import pascal.hardscript.compiler.model.data.Data;
-import pascal.hardscript.compiler.model.data.IntegerValue;
-import pascal.hardscript.compiler.model.data.NonValue;
+import pascal.hardscript.compiler.model.instance.BooleanValue;
+import pascal.hardscript.compiler.model.instance.Data;
+import pascal.hardscript.compiler.model.instance.Instance;
+import pascal.hardscript.compiler.model.instance.IntegerValue;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -36,26 +36,17 @@ public final class Types {
         }
     }
 
-    public static ComponentType requiresComponentType(SourceLoc loc, Entity entity) {
-        if (entity instanceof ComponentType componentType) {
-            return componentType;
-        } else {
-            log.error("{}: Expected instance type but got {}", loc, entity);
-            throw new CompileCancellationException();
-        }
-    }
-
-    public static Data requiresData(SourceLoc loc, Entity entity) {
-        if (entity instanceof Data data) {
-            return data;
+    public static Instance requiresData(SourceLoc loc, Entity entity) {
+        if (entity instanceof Instance inst) {
+            return inst;
         } else {
             log.error("{}: Expected component but got {}", loc, entity);
             throw new CompileCancellationException();
         }
     }
 
-    public static NonValue.Factory<?> requiresDataFactory(SourceLoc loc, Entity entity) {
-        if (entity instanceof NonValue.Factory<?> factory) {
+    public static Data.Factory<?> requiresDataFactory(SourceLoc loc, Entity entity) {
+        if (entity instanceof Data.Factory<?> factory) {
             return factory;
         } else {
             log.error("{}: Expected component factory but got {}", loc, entity);
@@ -105,7 +96,7 @@ public final class Types {
         return switch (entity) {
             case ComponentType componentType -> componentType;
             case ListEntity list -> makeParallelTypeFromList(loc, list);
-            case Data data -> AtomType.of(Identifier.of("SOURCE").setSourceLoc(loc), List.of(data));
+            case Instance inst -> AtomType.of(Identifier.of("FROM").setSourceLoc(loc), List.of(inst));
             default -> {
                 log.error("{}: Cannot cast {} to component type", loc, entity);
                 throw new CompileCancellationException();

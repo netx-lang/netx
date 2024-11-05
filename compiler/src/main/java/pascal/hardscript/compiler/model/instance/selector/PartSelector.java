@@ -1,6 +1,6 @@
-package pascal.hardscript.compiler.model.data.selector;
+package pascal.hardscript.compiler.model.instance.selector;
 
-import pascal.hardscript.compiler.model.data.IntegerValue;
+import pascal.hardscript.compiler.model.instance.IntegerValue;
 
 public record PartSelector(IntegerValue start, IntegerValue end) implements Selector {
 

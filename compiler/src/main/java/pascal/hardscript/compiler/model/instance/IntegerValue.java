@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.model.data;
+package pascal.hardscript.compiler.model.instance;
 
 import pascal.hardscript.util.lang.BitVector;
 

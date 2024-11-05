@@ -1,7 +1,9 @@
-package pascal.hardscript.compiler.model.data;
+package pascal.hardscript.compiler.model.instance;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pascal.hardscript.compiler.model.instance.type.BitType;
+import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.util.lang.BitVector;
 
 public record BitVectorValue(BitVector value) implements IntegerValue {
@@ -131,7 +133,7 @@ public record BitVectorValue(BitVector value) implements IntegerValue {
     }
 
     @Override
-    public DataType getType() {
+    public InstanceType getType() {
         return BitType.of(value.size());
     }
 }

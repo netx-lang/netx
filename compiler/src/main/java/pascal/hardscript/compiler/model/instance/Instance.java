@@ -1,21 +1,23 @@
-package pascal.hardscript.compiler.model.data;
+package pascal.hardscript.compiler.model.instance;
 
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.model.Entity;
+import pascal.hardscript.compiler.model.instance.type.InstanceType;
+import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 
-public sealed interface Data extends Entity permits NonValue, Value {
+public sealed interface Instance extends Entity permits Data, Value {
     Scope getParent();
 
     default boolean hasImplicitType() {
-        return getType() instanceof AutoInferenceType;
+        return getType() instanceof PolyType;
     }
 
-    DataType getType();
+    InstanceType getType();
 
-    void setType(DataType type);
+    void setType(InstanceType type);
 
     Identifier getIdentifier();
 
@@ -40,6 +42,6 @@ public sealed interface Data extends Entity permits NonValue, Value {
     }
 
     default boolean isBuiltin() {
-        return (this instanceof NonValue) && getIdentifier().string().startsWith("$");
+        return (this instanceof Data) && getIdentifier().string().startsWith("$");
     }
 }

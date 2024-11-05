@@ -1,10 +1,10 @@
 package pascal.hardscript.compiler.analysis;
 
 import pascal.hardscript.compiler.model.Entity;
-import pascal.hardscript.compiler.model.data.Data;
-import pascal.hardscript.compiler.model.data.DataAccess;
-import pascal.hardscript.compiler.model.data.NonValue;
-import pascal.hardscript.compiler.model.data.Value;
+import pascal.hardscript.compiler.model.instance.Data;
+import pascal.hardscript.compiler.model.instance.DataAccess;
+import pascal.hardscript.compiler.model.instance.Instance;
+import pascal.hardscript.compiler.model.instance.Value;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.util.collection.UnionFind;
@@ -16,8 +16,8 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 public final class AliasAnalysis extends ModelAnalysis {
-    private final UnionFind<Data> aliases = new UnionFind<>();
-    private final Map<Data, Data> sourceRep = new HashMap<>();
+    private final UnionFind<Instance> aliases = new UnionFind<>();
+    private final Map<Instance, Instance> sourceRep = new HashMap<>();
 
     public AliasAnalysis(DesignScope design) {
         super(design);
@@ -43,12 +43,12 @@ public final class AliasAnalysis extends ModelAnalysis {
         }
     }
 
-    private boolean needUpdate(Data element, Data root) {
+    private boolean needUpdate(Instance element, Instance root) {
         if (sourceRep.containsKey(root)) {
             var top = sourceRep.get(root);
             return switch (top) {
                 case Value ignored -> false;
-                case NonValue ignored -> {
+                case Data ignored -> {
                     if (element instanceof Value) yield true;
                     if (element.getDepth() == top.getDepth()) {
                         boolean eAccFlag = element instanceof DataAccess;
@@ -91,45 +91,45 @@ public final class AliasAnalysis extends ModelAnalysis {
     }
 
     private boolean needDump(Entity entity) {
-        return entity instanceof Data data
-                && ((data.isUserDefined() && repOf(data) == data) || isBuiltinRep(data));
+        return entity instanceof Instance inst
+                && ((inst.isUserDefined() && repOf(inst) == inst) || isBuiltinRep(inst));
     }
 
 
-    boolean isBuiltinRep(Data data) {
-        return !hasSourceAlias(data) && aliases.find(data) == data;
+    boolean isBuiltinRep(Instance inst) {
+        return !hasSourceAlias(inst) && aliases.find(inst) == inst;
     }
 
-    boolean hasSourceAlias(Data data) {
-        if (aliases.contains(data)) {
-            return sourceRep.containsKey(aliases.find(data));
+    boolean hasSourceAlias(Instance inst) {
+        if (aliases.contains(inst)) {
+            return sourceRep.containsKey(aliases.find(inst));
         }
         return false;
     }
 
     @Nonnull
-    Data repOf(Data data) {
+    Instance repOf(Instance inst) {
         while (true) {
-            var next = getNextRep(data);
-            if (next == data) {
-                return data;
+            var next = getNextRep(inst);
+            if (next == inst) {
+                return inst;
             }
-            data = next;
+            inst = next;
         }
     }
 
     @Nonnull
-    private Data getNextRep(Data data) {
-        if (data instanceof DataAccess access) {
+    private Instance getNextRep(Instance inst) {
+        if (inst instanceof DataAccess access) {
             var base = access.base();
             if (hasSourceAlias(base) && repOf(base) != base) {
                 return DataAccess.of(repOf(base), access.selector());
             }
         }
-        if (aliases.contains(data)) {
-            var result = aliases.find(data);
+        if (aliases.contains(inst)) {
+            var result = aliases.find(inst);
             return Objects.requireNonNullElse(sourceRep.get(result), result);
         }
-        return data;
+        return inst;
     }
 }

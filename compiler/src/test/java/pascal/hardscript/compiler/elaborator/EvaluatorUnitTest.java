@@ -4,10 +4,10 @@ import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.io.Frontend;
-import pascal.hardscript.compiler.model.data.Data;
-import pascal.hardscript.compiler.model.data.DataAccess;
-import pascal.hardscript.compiler.model.data.Int32Value;
-import pascal.hardscript.compiler.model.data.selector.BitSelector;
+import pascal.hardscript.compiler.model.instance.DataAccess;
+import pascal.hardscript.compiler.model.instance.Instance;
+import pascal.hardscript.compiler.model.instance.Int32Value;
+import pascal.hardscript.compiler.model.instance.selector.BitSelector;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.util.lang.BuiltinComponent;
@@ -43,7 +43,7 @@ class EvaluatorUnitTest {
                     inst x of wire(bit(4))
                 }
                 """);
-        var data = (Data) component.getBinding().resolve(Identifier.of("x"));
+        var data = (Instance) component.getBinding().resolve(Identifier.of("x"));
         var expected = new ArrayList<>(IntStream.range(0, 4)
                 .mapToObj(Int32Value::of).map(BitSelector::of)
                 .map(selector -> DataAccess.of(data, selector)).toList());
