@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.instance.*;
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
@@ -42,8 +41,8 @@ public final class HSPrinter {
     }
 
     private static final Set<BuiltinComponent> NO_DUMP = Set.of(
-            BuiltinComponent.SPLIT,
             BuiltinComponent.IGNORE,
+            BuiltinComponent.SPLIT,
             BuiltinComponent.FROM,
             BuiltinComponent.TO
     );
@@ -98,14 +97,14 @@ public final class HSPrinter {
 
     private void dumpComponentIO(ObjectNode builtin, String port, List<Instance> sub) {
         var outputs = makeArrayIn(builtin, port);
-        sub.stream().map(this::dumpIdentifierOf).forEach(outputs::add);
+        sub.stream().map(this::dumpInstance).forEach(outputs::add);
     }
 
     private void dumpComponentAttribute(ObjectNode node, ComponentScope module) {
         if (!module.getAttributes().isEmpty()) {
             var attributes = createObjectNode();
             for (var entry : module.getAttributes().entrySet()) {
-                attributes.put(entry.getKey(), dumpIdentifierOf(entry.getValue()));
+                attributes.put(entry.getKey(), dumpInstance((Instance) entry.getValue()));
             }
             node.putIfAbsent("attribute", attributes);
         }
@@ -154,15 +153,14 @@ public final class HSPrinter {
         node.put("type", type);
     }
 
-    private String dumpIdentifierOf(Entity entity) {
+    private String dumpInstance(Instance entity) {
         return switch (entity) {
-            case Value value -> dumpIdentifierOf(value);
-            case Data data -> dumpIdentifierOf(data);
-            default -> throw new ShallNotReachHereError();
+            case Value value -> dumpValue(value);
+            case Data data -> dumpData(data);
         };
     }
 
-    private String dumpIdentifierOf(Value value) {
+    private String dumpValue(Value value) {
         return switch (value) {
             case BooleanValue v -> String.valueOf(v.value());
             case Int32Value v -> String.valueOf(v.value());
@@ -170,20 +168,27 @@ public final class HSPrinter {
         };
     }
 
-    private String dumpIdentifierOf(Data data) {
+    private String dumpData(Data data) {
         var sourceLoc = Objects.requireNonNullElse(
                 data.getSourceLoc(),
                 data.getUpperComponent().getSourceLoc());
-
         if (data instanceof DataAccess access) {
-            return String.format("%s@(%s)%s", data.getIdentifier().string(), sourceLoc, access.selector());
+            return dumpDataAccess(access);
         } else {
             return String.format("%s@(%s)", data.getIdentifier().string(), sourceLoc);
         }
     }
 
+    private String dumpDataAccess(DataAccess access) {
+        return switch (access.base()) {
+            case DataAccess base -> dumpDataAccess(base) + access.selector();
+            case Value value -> dumpValue(value) + access.selector();
+            case Data data -> dumpData(data) + access.selector();
+        };
+    }
+
     private void setIdentifier(ObjectNode node, Instance inst) {
-        setIdentifier(node, dumpIdentifierOf(inst));
+        setIdentifier(node, dumpInstance(inst));
     }
 
     private void setIdentifier(ObjectNode node, Identifier identifier) {

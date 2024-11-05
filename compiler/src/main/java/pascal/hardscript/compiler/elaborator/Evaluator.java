@@ -21,9 +21,10 @@ import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.DesignScope;
-import pascal.hardscript.compiler.model.scope.MapBinding;
 import pascal.hardscript.compiler.model.scope.Scope;
-import pascal.hardscript.compiler.model.scope.SingleBinding;
+import pascal.hardscript.compiler.model.scope.binding.Binding;
+import pascal.hardscript.compiler.model.scope.binding.MapBinding;
+import pascal.hardscript.compiler.model.scope.binding.SingleBinding;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +38,7 @@ import static pascal.hardscript.compiler.elaborator.Types.*;
 
 public final class Evaluator {
     private static final Logger log = LoggerFactory.getLogger(Evaluator.class);
-    private final LinkedList<pascal.hardscript.compiler.model.scope.Binding> bindings = new LinkedList<>();
+    private final LinkedList<Binding> bindings = new LinkedList<>();
     private EvaluationMode mode = EvaluationMode.COMMON;
     private final Scope scope;
 
@@ -406,7 +407,7 @@ public final class Evaluator {
         return Identifier.of(sb.toString()).setSourceLoc(interpolated.getSourceLoc());
     }
 
-    private void overrideBindings(pascal.hardscript.compiler.model.scope.Binding binding) {
+    private void overrideBindings(Binding binding) {
         bindings.addFirst(binding);
     }
 

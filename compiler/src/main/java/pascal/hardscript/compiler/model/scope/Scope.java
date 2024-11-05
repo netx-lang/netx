@@ -5,6 +5,7 @@ import pascal.hardscript.compiler.elaborator.Evaluator;
 import pascal.hardscript.compiler.elaborator.NameAllocator;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.instance.Instance;
+import pascal.hardscript.compiler.model.scope.binding.MapBinding;
 import pascal.hardscript.util.type.Pair;
 
 import java.util.*;

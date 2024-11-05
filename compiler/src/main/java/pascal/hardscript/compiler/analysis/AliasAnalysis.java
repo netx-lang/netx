@@ -44,6 +44,7 @@ public final class AliasAnalysis extends ModelAnalysis {
     }
 
     private boolean needUpdate(Instance element, Instance root) {
+        // FIXME: Better ordering
         if (sourceRep.containsKey(root)) {
             var top = sourceRep.get(root);
             return switch (top) {
@@ -56,7 +57,7 @@ public final class AliasAnalysis extends ModelAnalysis {
                         if (eAccFlag == tAccFlag) {
                             yield element.getSourceLoc().compareTo(top.getSourceLoc()) > 0;
                         }
-                        yield tAccFlag;
+                        yield eAccFlag;
                     }
                     yield element.getDepth() < top.getDepth();
                 }

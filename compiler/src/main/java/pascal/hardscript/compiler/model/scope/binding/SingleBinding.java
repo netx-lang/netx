@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.model.scope;
+package pascal.hardscript.compiler.model.scope.binding;
 
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.model.Entity;
