@@ -42,8 +42,4 @@ public sealed interface Data extends Entity permits NonValue, Value {
     default boolean isBuiltin() {
         return (this instanceof NonValue) && getIdentifier().string().startsWith("$");
     }
-
-    interface Factory<T extends Data> extends Entity {
-        T create(Identifier id);
-    }
 }

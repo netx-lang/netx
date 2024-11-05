@@ -14,6 +14,7 @@ import pascal.hardscript.compiler.model.component.ParallelType;
 import pascal.hardscript.compiler.model.data.BooleanValue;
 import pascal.hardscript.compiler.model.data.Data;
 import pascal.hardscript.compiler.model.data.IntegerValue;
+import pascal.hardscript.compiler.model.data.NonValue;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -53,8 +54,8 @@ public final class Types {
         }
     }
 
-    public static Data.Factory<?> requiresDataFactory(SourceLoc loc, Entity entity) {
-        if (entity instanceof Data.Factory<?> factory) {
+    public static NonValue.Factory<?> requiresDataFactory(SourceLoc loc, Entity entity) {
+        if (entity instanceof NonValue.Factory<?> factory) {
             return factory;
         } else {
             log.error("{}: Expected component factory but got {}", loc, entity);

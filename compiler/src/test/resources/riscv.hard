@@ -49,7 +49,7 @@ component riscv : [
 component InstrDecoder : [op_i, func3, func7] -> [extOP, regWr, branch_ctl, memToReg, memWr, memOP, aSrc, bSrc, ctl] {
     inst op_i  of wire(bit(7))
     inst func3 of wire(bit(3))
-    inst func7 of wire(bit(7))
+    inst func7 of wire(bit(1))
     inst extOP, regWr, branch_ctl, memToReg, memWr, memOP, aSrc, bSrc, ctl of wire(auto)
 
     inst op of wire(bit(5))
@@ -161,7 +161,7 @@ component ALU: [a, b, ctl] -> [result, zero, less] {
     [
         secBranch(3'b000, [a, b] <> ADD, [a, b] <> SUB),
         firBranch(3'b001, [a, b[4:0]] <> SHL),
-        secBranch(3'b010, [a, b] <> SLT, [a, b] <> ULT),
+        secBranch(3'b010, [a, b] <> SLT <> EXT, [a, b] <> ULT <> EXT),
         firBranch(3'b011, b),
         firBranch(3'b100, [a, b] <> XOR),
         secBranch(3'b101, [a, b[4:0]] <> LSHR, [a, b[4:0]] <> ASHR),

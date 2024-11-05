@@ -63,7 +63,7 @@ public final class Evaluator {
         return castToBooleanValue(expr.getSourceLoc(), evaluate(expr));
     }
 
-    public Data.Factory<?> evaluateToDataFactory(ExprNode expr) {
+    public NonValue.Factory<?> evaluateToDataFactory(ExprNode expr) {
         mode = EvaluationMode.DATA_FACTORY;
         var result = requiresDataFactory(expr.getSourceLoc(), evaluate(expr));
         mode = EvaluationMode.COMMON;
@@ -362,7 +362,7 @@ public final class Evaluator {
         };
     }
 
-    private Data.Factory<?> evaluateComponentFactory(ParamSymbolExpr expr) {
+    private NonValue.Factory<?> evaluateComponentFactory(ParamSymbolExpr expr) {
         var identifier = getIdentifierFrom(expr.getHead());
         var sourceLoc = expr.getSourceLoc();
         return switch (identifier.string()) {

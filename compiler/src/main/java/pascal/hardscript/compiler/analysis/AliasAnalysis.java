@@ -1,8 +1,5 @@
 package pascal.hardscript.compiler.analysis;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.data.Data;
 import pascal.hardscript.compiler.model.data.DataAccess;
@@ -19,7 +16,6 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 public final class AliasAnalysis extends ModelAnalysis {
-    private static final Logger log = LoggerFactory.getLogger(AliasAnalysis.class);
     private final UnionFind<Data> aliases = new UnionFind<>();
     private final Map<Data, Data> sourceRep = new HashMap<>();
 
@@ -55,10 +51,12 @@ public final class AliasAnalysis extends ModelAnalysis {
                 case NonValue ignored -> {
                     if (element instanceof Value) yield true;
                     if (element.getDepth() == top.getDepth()) {
-                        if (!(element instanceof DataAccess) && top instanceof DataAccess) {
-                            yield true;
+                        boolean eAccFlag = element instanceof DataAccess;
+                        boolean tAccFlag = top instanceof DataAccess;
+                        if (eAccFlag == tAccFlag) {
+                            yield element.getSourceLoc().compareTo(top.getSourceLoc()) > 0;
                         }
-                        yield element.getSourceLoc().compareTo(top.getSourceLoc()) > 0;
+                        yield tAccFlag;
                     }
                     yield element.getDepth() < top.getDepth();
                 }
@@ -80,19 +78,14 @@ public final class AliasAnalysis extends ModelAnalysis {
     public void inferAliasType() {
         for (var element : aliases.elements()) {
             var root = aliases.find(element);
-            if (element.hasImplicitType()) {
-                if (!root.hasImplicitType()) {
-                    element.setType(root.getType());
-                }
-            } else {
-                if (root.hasImplicitType()) {
-                    root.setType(element.getType());
-                } else {
-                    if (!element.getType().equals(root.getType())) {
-                        log.error("Type mismatch: {} and {}", element, root);
-                        throw new CompileCancellationException();
-                    }
-                }
+            if (!element.hasImplicitType() && root.hasImplicitType()) {
+                root.setType(element.getType());
+            }
+        }
+        for (var element : aliases.elements()) {
+            var root = aliases.find(element);
+            if (element.hasImplicitType() && !root.hasImplicitType()) {
+                element.setType(root.getType());
             }
         }
     }

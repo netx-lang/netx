@@ -38,7 +38,12 @@ public final class Wire implements NonValue {
         this.type = type;
     }
 
-    public static class Factory implements Data.Factory<Wire> {
+    @Override
+    public String toString() {
+        return id.toString();
+    }
+
+    public static class Factory implements NonValue.Factory<Wire> {
         private final DataType type;
         private final Scope parent;
 

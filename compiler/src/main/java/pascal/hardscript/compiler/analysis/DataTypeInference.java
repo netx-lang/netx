@@ -5,7 +5,7 @@ import org.jgrapht.graph.SimpleGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.analysis.constraint.*;
-import pascal.hardscript.compiler.exception.TypeInferenceException;
+import pascal.hardscript.compiler.exception.TypeCheckingException;
 import pascal.hardscript.compiler.model.data.Data;
 import pascal.hardscript.compiler.model.data.DataAccess;
 import pascal.hardscript.compiler.model.scope.ComponentInfo;
@@ -42,7 +42,7 @@ public class DataTypeInference extends ModelAnalysis {
     public void collectTypeConstraints() {
         design.forEachScope(scope -> {
             for (var data : getBoundDataIn(scope)) {
-                if (data.hasImplicitType()) {
+                if (!data.hasImplicitType()) {
                     workList.add(data);
                 }
             }
@@ -138,7 +138,7 @@ public class DataTypeInference extends ModelAnalysis {
                 }
                 if (data.hasImplicitType()) {
                     log.error("{}: Cannot infer type of data: {}", data.getSourceLoc(), data);
-                    throw new TypeInferenceException();
+                    throw new TypeCheckingException();
                 }
             }
         });
@@ -148,7 +148,7 @@ public class DataTypeInference extends ModelAnalysis {
     private static void throwIfConstraintNotHolds(DataConstraint constraint) {
         if (!constraint.holds()) {
             log.error("Type constraint violation: {}", constraint.error());
-            throw new TypeInferenceException();
+            throw new TypeCheckingException();
         }
     }
 

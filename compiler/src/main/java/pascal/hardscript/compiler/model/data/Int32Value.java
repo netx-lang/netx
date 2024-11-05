@@ -126,4 +126,9 @@ public record Int32Value(int value) implements IntegerValue {
     public DataType getType() {
         return BitType.forInt32();
     }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
 }
