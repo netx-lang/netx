@@ -6,7 +6,7 @@ import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 
-public sealed interface Data extends Entity permits Clock, DataAccess, Wire, Value {
+public sealed interface Data extends Entity permits NonValue, Value {
     Scope getParent();
 
     DataType getType();
@@ -36,7 +36,7 @@ public sealed interface Data extends Entity permits Clock, DataAccess, Wire, Val
     }
 
     default boolean isBuiltin() {
-        return getIdentifier().string().startsWith("$");
+        return (this instanceof NonValue) && getIdentifier().string().startsWith("$");
     }
 
     interface Factory<T extends Data> extends Entity {

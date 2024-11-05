@@ -7,7 +7,10 @@ import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.ast.component.*;
 import pascal.hardscript.compiler.model.component.*;
 import pascal.hardscript.compiler.model.data.Data;
-import pascal.hardscript.compiler.model.scope.*;
+import pascal.hardscript.compiler.model.scope.ComponentInfo;
+import pascal.hardscript.compiler.model.scope.ComponentScope;
+import pascal.hardscript.compiler.model.scope.DesignScope;
+import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 
 import java.util.LinkedList;
@@ -95,9 +98,11 @@ public final class Elaborator {
 
         private void buildElementIntoScope(DataInstantiationNode node) {
             var factory = evaluator.evaluateToDataFactory(node.getType());
+            var component = scope instanceof ComponentScope componentScope
+                    ? componentScope : scope.getUpperComponent();
             node.getSymbols().stream()
                     .map(evaluator::getIdentifierFrom)
-                    .forEach(id -> scope.bind(id, factory.create(id)));
+                    .forEach(id -> component.bind(id, factory.create(id)));
         }
 
         private void buildElementIntoScope(ComponentInstantiationNode instantiation) {

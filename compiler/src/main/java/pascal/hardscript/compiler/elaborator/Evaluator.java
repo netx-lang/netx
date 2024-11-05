@@ -270,24 +270,9 @@ public final class Evaluator {
     }
 
     private Entity evaluateCombineType(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
-        if (lhs instanceof ListEntity lhsList) {
-            lhs = makeParallelTypeFromList(sourceLoc, lhsList);
-        }
-        if (rhs instanceof ListEntity rhsList) {
-            rhs = makeParallelTypeFromList(sourceLoc, rhsList);
-        }
-        if (!(lhs instanceof ComponentType lhsType && rhs instanceof ComponentType rhsType)) {
-            log.error("Expected instance type but got {} and {}", lhs, rhs);
-            throw new CompileCancellationException();
-        }
-        return CombineType.from(lhsType, rhsType);
+        return CombineType.from(castToComponentType(sourceLoc, lhs), castToComponentType(sourceLoc, rhs));
     }
 
-    private ParallelType makeParallelTypeFromList(SourceLoc sourceLoc, ListEntity list) {
-        List<ComponentType> result = new LinkedList<>();
-        list.forEach(entity -> result.add(castToComponentType(sourceLoc, entity)));
-        return ParallelType.from(result);
-    }
 
     private ComponentPort evaluatePort(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
         ListEntity lhsList = lhs instanceof ListEntity ? (ListEntity) lhs : ListEntity.of(List.of(lhs));

@@ -49,7 +49,9 @@ public final class HSPrinter {
         dumpComponentIO(result, "output", module.getOutputs());
         var members = makeMembersIn(result);
         for (var entity : module.getEntities()) {
-            members.add(dump((Data) entity));
+            if (entity instanceof NonValue nonValue) {
+                members.add(dump(nonValue));
+            }
         }
         for (var sub : extractSubComponent(module)) {
             var instID = sub.getIdentifier();
@@ -70,9 +72,11 @@ public final class HSPrinter {
         setType(builtin, "builtin");
         setIdentifier(builtin, instID);
 
-        List<Data> needDump = new LinkedList<>();
+        List<NonValue> needDump = new LinkedList<>();
         for (var entity : sub.getEntities()) {
-            needDump.add((Data) entity);
+            if (entity instanceof NonValue nonValue) {
+                needDump.add(nonValue);
+            }
         }
         if (!needDump.isEmpty()) {
             var subarray = makeMembersIn(builtin);
@@ -111,7 +115,7 @@ public final class HSPrinter {
         return result;
     }
 
-    private ObjectNode dump(Data data) {
+    private ObjectNode dump(NonValue data) {
         return switch (data) {
             case Wire wire -> dumpWire(wire);
             case Clock clock -> dumpClock(clock);

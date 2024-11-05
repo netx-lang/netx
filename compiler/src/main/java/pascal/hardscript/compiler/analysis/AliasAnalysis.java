@@ -3,6 +3,8 @@ package pascal.hardscript.compiler.analysis;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.data.Data;
 import pascal.hardscript.compiler.model.data.DataAccess;
+import pascal.hardscript.compiler.model.data.NonValue;
+import pascal.hardscript.compiler.model.data.Value;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.util.collection.UnionFind;
@@ -43,13 +45,24 @@ public final class AliasAnalysis extends ModelAnalysis {
     private boolean needUpdate(Data element, Data root) {
         if (sourceRep.containsKey(root)) {
             var top = sourceRep.get(root);
-            if (element.getDepth() == top.getDepth()) {
-                if (!(element instanceof DataAccess) && top instanceof DataAccess) {
-                    return true;
+
+            switch (top) {
+                case Value ignored -> {
+                    return false;
                 }
-                return element.getSourceLoc().compareTo(top.getSourceLoc()) > 0;
+                case NonValue ignored -> {
+                    if (element instanceof Value) {
+                        return true;
+                    }
+                    if (element.getDepth() == top.getDepth()) {
+                        if (!(element instanceof DataAccess) && top instanceof DataAccess) {
+                            return true;
+                        }
+                        return element.getSourceLoc().compareTo(top.getSourceLoc()) > 0;
+                    }
+                    return element.getDepth() < top.getDepth();
+                }
             }
-            return element.getDepth() < top.getDepth();
         }
         return true;
     }

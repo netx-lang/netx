@@ -6,7 +6,7 @@ import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.exception.TypeInferenceException;
 import pascal.hardscript.compiler.model.scope.Scope;
 
-public record Clock(Identifier id, Scope parent) implements Data {
+public record Clock(Identifier id, Scope parent) implements NonValue {
 
     private static final BitType TYPE = new BitType(1);
     private static final Logger log = LoggerFactory.getLogger(Clock.class);

@@ -10,10 +10,12 @@ import pascal.hardscript.compiler.model.ListEntity;
 import pascal.hardscript.compiler.model.component.AtomType;
 import pascal.hardscript.compiler.model.component.ComponentPort;
 import pascal.hardscript.compiler.model.component.ComponentType;
+import pascal.hardscript.compiler.model.component.ParallelType;
 import pascal.hardscript.compiler.model.data.BooleanValue;
 import pascal.hardscript.compiler.model.data.Data;
 import pascal.hardscript.compiler.model.data.IntegerValue;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public final class Types {
@@ -101,12 +103,19 @@ public final class Types {
     public static ComponentType castToComponentType(SourceLoc loc, Entity entity) {
         return switch (entity) {
             case ComponentType componentType -> componentType;
+            case ListEntity list -> makeParallelTypeFromList(loc, list);
             case Data data -> AtomType.of(Identifier.of("SOURCE").setSourceLoc(loc), List.of(data));
             default -> {
                 log.error("{}: Cannot cast {} to component type", loc, entity);
                 throw new CompileCancellationException();
             }
         };
+    }
+
+    private static ParallelType makeParallelTypeFromList(SourceLoc sourceLoc, ListEntity list) {
+        List<ComponentType> result = new LinkedList<>();
+        list.forEach(entity -> result.add(castToComponentType(sourceLoc, entity)));
+        return ParallelType.from(result);
     }
 
     public static ListEntity requiresList(SourceLoc loc, Entity entity) {

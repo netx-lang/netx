@@ -36,11 +36,14 @@ public class BuiltInComponentFactory {
         BUILTIN_FACTORY.put(EXT, BuiltInComponentFactory::createEXTComponent);
 
         BUILTIN_FACTORY.put(NOT, BuiltInComponentFactory::createNOTComponent);
-        for (var op : Set.of(OR, AND, XOR, NOR, NAND, CONCAT)) {
+        for (var op : Set.of(OR, AND, XOR, NOR, NAND, CONCAT, ADD, SUB)) {
             BUILTIN_FACTORY.put(op, BuiltInComponentFactory::createMultiInputComponent);
         }
-        for (var op : Set.of(EQ, NE, LT, LE, GT, GE)) {
+        for (var op : Set.of(EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE)) {
             BUILTIN_FACTORY.put(op, BuiltInComponentFactory::createRelationalOpComponent);
+        }
+        for (var op : Set.of(SHL, ASHR, LSHR)) {
+            BUILTIN_FACTORY.put(op, BuiltInComponentFactory::createShiftComponent);
         }
     }
 
@@ -119,12 +122,12 @@ public class BuiltInComponentFactory {
 
     private static ComponentScope createEXTComponent(Scope parent, AtomType type) {
         var sourceLoc = type.identifier().getSourceLoc();
-        requiresMatchedSize(sourceLoc, 1, type.parameters());
         var result = instantiate(parent, type);
         if (type.parameters().isEmpty()) {
             result.addInput(newWire(result, "i"));
-            result.addInput(newWire(result, "o"));
+            result.addOutput(newWire(result, "o"));
         } else {
+            requiresMatchedSize(sourceLoc, 1, type.parameters());
             int width = requiresIntegerValue(sourceLoc, type.parameters().getFirst()).toInt();
             result.addInput(newWire(result, "i"));
             result.addOutput(newWire(result, "o", BitType.of(width)));
@@ -137,6 +140,15 @@ public class BuiltInComponentFactory {
         requiresMatchedSize(sourceLoc, 0, type.parameters());
         var result = instantiate(parent, type);
         result.addInput(newWire(result, "i1"), newWire(result, "i2"));
+        result.addOutput(newWire(result, "o", BitType.forBoolean()));
+        return result;
+    }
+
+    private static ComponentScope createShiftComponent(Scope parent, AtomType type) {
+        var sourLoc = type.identifier().getSourceLoc();
+        requiresMatchedSize(sourLoc, 0, type.parameters());
+        var result = instantiate(parent, type);
+        result.addInput(newWire(result, "i"), newWire(result, "off"));
         result.addOutput(newWire(result, "o"));
         return result;
     }

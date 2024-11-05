@@ -3,7 +3,7 @@ package pascal.hardscript.compiler.model.data;
 import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.model.scope.Scope;
 
-public final class Wire implements Data {
+public final class Wire implements NonValue {
     private final Identifier id;
     private final Scope parent;
     private DataType type;

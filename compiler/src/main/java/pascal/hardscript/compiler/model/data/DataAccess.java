@@ -7,7 +7,7 @@ import pascal.hardscript.compiler.exception.TypeInferenceException;
 import pascal.hardscript.compiler.model.data.selector.Selector;
 import pascal.hardscript.compiler.model.scope.Scope;
 
-public record DataAccess(Data base, Selector selector) implements Data {
+public record DataAccess(Data base, Selector selector) implements NonValue {
 
     private static final Logger log = LoggerFactory.getLogger(DataAccess.class);
 
