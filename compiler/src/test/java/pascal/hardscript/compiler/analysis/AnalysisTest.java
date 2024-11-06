@@ -55,4 +55,26 @@ class AnalysisTest {
                 new HSPrinter(Frontend.load(expected).compile()).dump(),
                 new HSPrinter(Frontend.load(actual).compile()).dump());
     }
+
+    @Test
+    void testDuplicatedElimination() {
+        var expected = """
+                component top: [a, b] -> [e] {
+                    inst a, b, c, e of wire(bit(4))
+                    [a, b] -> AND -> c
+                    [c, c] -> ADD -> e
+                }
+                """;
+        var actual = """
+                component top: [a, b] -> [e] {
+                    inst a, b, c, e, d of wire(bit(4))
+                    [a, b] -> AND -> c
+                    [a, b] -> AND -> d
+                    [c, d] -> ADD -> e
+                }
+                """;
+        assertEquals(
+                new HSPrinter(Frontend.load(expected).compile()).dump(),
+                new HSPrinter(Frontend.load(actual).compile()).dump());
+    }
 }

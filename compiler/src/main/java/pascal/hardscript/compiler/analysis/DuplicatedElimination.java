@@ -17,11 +17,11 @@ import java.util.stream.Collectors;
 
 import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
 
-public class DuplicatedComponentAnalysis extends ModelAnalysis {
+public class DuplicatedElimination extends ModelAnalysis {
     private final Map<Entity, Instance> duplicatedRep = new HashMap<>();
     private final ComponentInfo info;
 
-    public DuplicatedComponentAnalysis(DesignScope design) {
+    public DuplicatedElimination(DesignScope design) {
         super(design);
         info = design.getComponentInfo();
     }
