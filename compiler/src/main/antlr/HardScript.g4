@@ -15,7 +15,7 @@ component_arguments
     ;
 
 element
-    : from=expression '->' type=expression '->' to=expression               # ComponentInstantiation
+    : lhs=expression '<-' rhs=expression                                    # ComponentInstantiation
     | binding                                                               # BindingStatement
     | 'for' '(' iterator ')' '{' element* '}'                               # Loop
     | 'inst' primary_symbol (',' primary_symbol)* 'of' type=type_expression # DataInstantiation
@@ -26,8 +26,8 @@ expression
     | number                                                        # NumberExpr
     | '[' list ']'                                                  # ListExpr
     | op=('+' | '-' | '~' | '!') expression                         # UnaryExpr
-    | lhs=expression op='::' rhs=expression                         # BinaryExpr
-    | lhs=expression op='<>' rhs=expression                         # BinaryExpr
+    | expression (selector)+                                        # AccessExpr
+
     | lhs=expression op='**' rhs=expression                         # BinaryExpr
     | lhs=expression op=('*' | '/' | '%') rhs=expression            # BinaryExpr
     | lhs=expression op=('+' | '-') rhs=expression                  # BinaryExpr
@@ -39,7 +39,8 @@ expression
     | lhs=expression op='|' rhs=expression                          # BinaryExpr
     | lhs=expression op='&&' rhs=expression                         # BinaryExpr
     | lhs=expression op='||' rhs=expression                         # BinaryExpr
-    | expression (selector)+                                        # AccessExpr
+    | lhs=expression op='::' rhs=expression                         # BinaryExpr
+    | lhs=expression op='<>' rhs=expression                         # BinaryExpr
     | 'if' cond=expression
       'then' thenBranch=expression
       'else' elseBranch=expression                                       # ConditionalExpr

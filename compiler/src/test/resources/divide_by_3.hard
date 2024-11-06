@@ -4,8 +4,8 @@ component Divide_by_3 : [clk] -> [clk_3] {
     let REG_WRAPPER = component isPos, x: REGISTER(clk, isPos, x)
     let POS_REG = component x: REG_WRAPPER(true, x)
     let NEG_REG = component x: REG_WRAPPER(false, x)
-    [a, b] ->
-        [NOT, NOT] <> AND <>
-        POS_REG(a) <>
-        POS_REG(b) <> SPLIT(2) <> [NEG_REG(c), TO] <> OR -> clk_3
+
+    clk_3 <- OR <> [NEG_REG(c), TO]
+        <> SPLIT(2) <> POS_REG(b) <> POS_REG(a)
+        <> AND <> [NOT <> a, NOT <> b]
 }

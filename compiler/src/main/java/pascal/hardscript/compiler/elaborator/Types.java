@@ -21,9 +21,10 @@ import java.util.List;
 public final class Types {
     private static final Logger log = LoggerFactory.getLogger(Types.class);
 
-    public static void requiresMatchedSize(SourceLoc sourceLoc, List<?> from, List<?> to) {
-        if (from.size() != to.size()) {
-            log.error("{}: Instantiation with mismatched component size: {} vs {}", sourceLoc, from.size(), to.size());
+    public static void requiresMatchedSize(SourceLoc sourceLoc, List<?> target, List<?> source) {
+        if (target.size() != source.size()) {
+            log.error("{}: Instantiation with mismatched component size: {} vs {}",
+                    sourceLoc, target.size(), source.size());
             throw new CompileCancellationException();
         }
     }

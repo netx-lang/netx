@@ -35,8 +35,8 @@ class AnalysisTest {
                     inst x of wire(bit(4))
                     inst c of wire(bit(2))
                     inst d of wire(bit(2))
-                    [a, b] -> OR -> [x]
-                    [a[1:0], b[1:0]] -> AND <> REGISTER(clk, true, c) <> NOT -> [d]
+                    [x] <- OR <> [a, b]
+                    [d] <- NOT <> REGISTER(clk, true, c) <> AND <> [a[1:0], b[1:0]]
                 }
                 """;
         var actual = """
@@ -47,8 +47,8 @@ class AnalysisTest {
                     inst x of wire(auto)
                     inst c of wire(auto)
                     inst d of wire(auto)
-                    [a, b] -> OR -> [x]
-                    [a[1:0], b[1:0]] -> AND <> REGISTER(clk, true, c) <> NOT -> [d]
+                    [x] <- OR <> [a, b]
+                    [d] <- NOT <> REGISTER(clk, true, c) <> AND <> [a[1:0], b[1:0]]
                 }
                 """;
         assertEquals(
@@ -61,16 +61,16 @@ class AnalysisTest {
         var expected = """
                 component top: [a, b] -> [e] {
                     inst a, b, c, e of wire(bit(4))
-                    [a, b] -> AND -> c
-                    [c, c] -> ADD -> e
+                    c <- AND <> [a, b]
+                    e <- ADD <> [c, c]
                 }
                 """;
         var actual = """
                 component top: [a, b] -> [e] {
                     inst a, b, c, e, d of wire(bit(4))
-                    [a, b] -> AND -> c
-                    [a, b] -> AND -> d
-                    [c, d] -> ADD -> e
+                    c <- AND <> [a, b]
+                    d <- AND <> [a, b]
+                    e <- ADD <> [c, d]
                 }
                 """;
         assertEquals(

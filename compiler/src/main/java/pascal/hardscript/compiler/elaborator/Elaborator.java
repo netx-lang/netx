@@ -7,7 +7,6 @@ import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.ast.component.*;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
-import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
 import pascal.hardscript.compiler.model.component.AtomType;
 import pascal.hardscript.compiler.model.component.CombineType;
@@ -62,12 +61,11 @@ public final class Elaborator {
 
         public void build(ComponentNode node) {
             dispatchElementBuilder(node.getElements());
-            var portType = makeCommonPort(node.getSourceLoc(), node.getType().getFrom(), node.getType().getTo());
-            if (!(scope instanceof ComponentScope module)) {
-                throw new ShallNotReachHereError();
-            }
-            portType.from().forEach(module::addInput);
-            portType.to().forEach(module::addOutput);
+            var module = (ComponentScope) scope;
+            var sourceLoc = node.getSourceLoc();
+            extractInstanceList(sourceLoc, node.getType().getFrom()).forEach(module::addInput);
+            extractInstanceList(sourceLoc, node.getType().getTo()).forEach(module::addOutput);
+
         }
 
         public void build(LoopNode node) {
@@ -113,27 +111,19 @@ public final class Elaborator {
 
         private void buildElementIntoScope(ComponentInstantiationNode instantiation) {
             var sourceLoc = instantiation.getSourceLoc();
-            var parameters = makeCommonPort(sourceLoc, instantiation.getFrom(), instantiation.getTo());
-            var arguments = new Instantiator(instantiation).instantiate(
-                    evaluator.evaluateToComponentType(instantiation.getType()));
+            var compType = evaluator.evaluateToComponentType(instantiation.getRhs());
 
-            requiresMatchedSize(sourceLoc, arguments.from(), parameters.from());
-            requiresMatchedSize(sourceLoc, arguments.to(), parameters.to());
-            for (int i = 0; i < arguments.from().size(); ++i) {
-                scope.addAlias(parameters.from().get(i), arguments.from().get(i));
-            }
-            for (int i = 0; i < arguments.to().size(); ++i) {
-                scope.addAlias(parameters.to().get(i), arguments.to().get(i));
+            var target = extractInstanceList(sourceLoc, instantiation.getLhs());
+            var source = new Instantiator(sourceLoc).instantiate(compType);
+
+            requiresMatchedSize(sourceLoc, target, source);
+            for (int i = 0; i < target.size(); i++) {
+                scope.addAlias(source.get(i), target.get(i));
             }
         }
 
-        private ComponentPort makeCommonPort(SourceLoc sourceLoc, ExprNode from, ExprNode to) {
-            return ComponentPort.of(
-                    extractInstanceList(sourceLoc, evaluator.evaluate(from)),
-                    extractInstanceList(sourceLoc, evaluator.evaluate(to)));
-        }
-
-        private List<Instance> extractInstanceList(SourceLoc sourceLoc, Entity entity) {
+        private List<Instance> extractInstanceList(SourceLoc sourceLoc, ExprNode node) {
+            var entity = evaluator.evaluate(node);
             if (entity instanceof ListEntity list) {
                 if (!list.entities().isEmpty()
                         && list.entities().stream().allMatch(Predicate.not(Instance.class::isInstance))) {
@@ -150,11 +140,20 @@ public final class Elaborator {
         private class Instantiator {
             private final SourceLoc sourceLoc;
 
-            private Instantiator(ComponentInstantiationNode instantiation) {
-                this.sourceLoc = instantiation.getSourceLoc();
+            private Instantiator(SourceLoc sourceLoc) {
+                this.sourceLoc = sourceLoc;
             }
 
-            private ComponentPort instantiate(ComponentType type) {
+            public List<Instance> instantiate(ComponentType type) {
+                var result = doInstantiate(type);
+                if (!result.source().isEmpty()) {
+                    log.error("{}: Incomplete component instantiation {}", sourceLoc, type);
+                    throw new CompileCancellationException();
+                }
+                return result.target();
+            }
+
+            ComponentPort doInstantiate(ComponentType type) {
                 return switch (type) {
                     case AtomType atomType -> instantiateAtomType(atomType);
                     case CombineType combineType -> instantiateCombineType(combineType);
@@ -162,35 +161,35 @@ public final class Elaborator {
                 };
             }
 
-            private ComponentPort instantiateCombineType(CombineType combineType) {
-                var lhs = instantiate(combineType.lhs());
-                var rhs = instantiate(combineType.rhs());
+            public ComponentPort instantiateCombineType(CombineType combineType) {
+                var lhs = doInstantiate(combineType.lhs());
+                var rhs = doInstantiate(combineType.rhs());
 
-                requiresMatchedSize(sourceLoc, lhs.to(), rhs.from());
-                for (int i = 0; i < lhs.to().size(); ++i) {
-                    scope.addAlias(lhs.to().get(i), rhs.from().get(i));
+                requiresMatchedSize(sourceLoc, lhs.source(), rhs.target());
+                for (int i = 0; i < lhs.source().size(); ++i) {
+                    scope.addAlias(rhs.target().get(i), lhs.source().get(i));
                 }
-                return ComponentPort.of(lhs.from(), rhs.to());
+                return ComponentPort.of(lhs.target(), rhs.source());
             }
 
-            private ComponentPort instantiateParallelType(ParallelType parallelType) {
+            public ComponentPort instantiateParallelType(ParallelType parallelType) {
                 List<Instance> input = new LinkedList<>(), output = new LinkedList<>();
                 for (var sub : parallelType.types()) {
-                    var port = instantiate(sub);
-                    input.addAll(port.from());
-                    output.addAll(port.to());
+                    var port = doInstantiate(sub);
+                    input.addAll(port.target());
+                    output.addAll(port.source());
                 }
                 return ComponentPort.of(input, output);
             }
 
-            private ComponentPort instantiateAtomType(AtomType atomType) {
+            public ComponentPort instantiateAtomType(AtomType atomType) {
                 ComponentScope module = info.containsComponent(atomType.identifier())
                         ? instantiateSubComponent(atomType)
                         : BuiltInComponentFactory.createBuiltInComponent(scope, atomType);
-                return ComponentPort.of(module.getInputs(), module.getOutputs());
+                return ComponentPort.of(module.getOutputs(), module.getInputs());
             }
 
-            private ComponentScope instantiateSubComponent(AtomType atomType) {
+            public ComponentScope instantiateSubComponent(AtomType atomType) {
                 var node = info.getComponentNode(atomType.identifier());
                 var componentScope = scope.instantiateComponentScope(
                         scope.getNameAllocator().allocateFor(atomType));
@@ -204,12 +203,11 @@ public final class Elaborator {
                 return componentScope;
             }
         }
-    }
 
-    private record ComponentPort(List<Instance> from, List<Instance> to) {
-        public static ComponentPort of(List<Instance> from, List<Instance> to) {
-            return new ComponentPort(from, to);
+        private record ComponentPort(List<Instance> target, List<Instance> source) {
+            public static ComponentPort of(List<Instance> target, List<Instance> source) {
+                return new ComponentPort(target, source);
+            }
         }
     }
-
 }

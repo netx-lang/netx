@@ -24,76 +24,114 @@
     }, {
       "type" : "builtin",
       "id" : "NOT",
-      "input" : [ "a@(2:9)" ],
-      "output" : [ "$i1@(3:29)" ]
-    }, {
-      "type" : "builtin",
-      "id" : "NOT",
-      "input" : [ "b@(2:12)" ],
-      "output" : [ "$i2@(3:29)" ]
-    }, {
-      "type" : "builtin",
-      "id" : "AND",
-      "members" : [ {
-        "type" : "wire",
-          "id": "$i1@(3:29)",
-          "width": 1
-      }, {
-        "type" : "wire",
-          "id": "$i2@(3:29)",
-          "width": 1
-      } ],
-      "input" : [ "$i1@(3:29)", "$i2@(3:29)" ],
-      "output" : [ "$i@(3:36)" ]
-    }, {
-      "type" : "builtin",
-      "id" : "NOT",
-      "members" : [ {
-        "type" : "wire",
-          "id": "$i@(3:36)",
-          "width": 1
-      } ],
-      "input" : [ "$i@(3:36)" ],
-      "output" : [ "$i@(3:16)" ]
-    }, {
-      "type" : "builtin",
-      "id" : "NOT",
-      "members" : [ {
-        "type" : "wire",
-          "id": "$i@(3:16)",
-          "width": 1
-      } ],
-      "input" : [ "$i@(3:16)" ],
-      "output" : [ "$i1@(3:29)" ]
-    }, {
-      "type" : "builtin",
-      "id" : "NOT",
-      "input" : [ "c@(2:15)" ],
-      "output" : [ "$i2@(3:29)" ]
+        "members": [
+            {
+                "type": "wire",
+                "id": "$i@(3:15)",
+                "width": 1
+            }
+        ],
+        "input": [
+            "$i@(3:15)"
+        ],
+        "output": [
+            "d@(2:18)"
+        ]
     }, {
       "type" : "builtin",
       "id" : "AND",
       "members" : [ {
         "type" : "wire",
-          "id": "$i1@(3:29)",
+          "id": "$i1@(3:22)",
           "width": 1
       }, {
         "type" : "wire",
-          "id": "$i2@(3:29)",
+          "id": "$i2@(3:22)",
           "width": 1
       } ],
-      "input" : [ "$i1@(3:29)", "$i2@(3:29)" ],
-      "output" : [ "$i@(3:36)" ]
+        "input": [
+            "$i1@(3:22)",
+            "$i2@(3:22)"
+        ],
+        "output": [
+            "$i@(3:15)"
+        ]
     }, {
       "type" : "builtin",
       "id" : "NOT",
       "members" : [ {
         "type" : "wire",
-          "id": "$i@(3:36)",
+          "id": "$i@(3:30)",
           "width": 1
       } ],
-      "input" : [ "$i@(3:36)" ],
-      "output" : [ "d@(2:18)" ]
+        "input": [
+            "$i@(3:30)"
+        ],
+        "output": [
+            "$i1@(3:22)"
+        ]
+    },
+        {
+            "type": "builtin",
+            "id": "NOT",
+            "input": [
+                "c@(2:15)"
+            ],
+            "output": [
+                "$i2@(3:22)"
+            ]
+    }, {
+      "type" : "builtin",
+      "id" : "NOT",
+      "members" : [ {
+        "type" : "wire",
+          "id": "$i@(3:15)",
+          "width": 1
+      } ],
+            "input": [
+                "$i@(3:15)"
+            ],
+            "output": [
+                "$i@(3:30)"
+            ]
+    }, {
+      "type" : "builtin",
+      "id" : "AND",
+      "members" : [ {
+        "type" : "wire",
+          "id": "$i1@(3:22)",
+          "width": 1
+      }, {
+        "type" : "wire",
+          "id": "$i2@(3:22)",
+          "width": 1
+      } ],
+            "input": [
+                "$i1@(3:22)",
+                "$i2@(3:22)"
+            ],
+            "output": [
+                "$i@(3:15)"
+            ]
+    }, {
+      "type" : "builtin",
+      "id" : "NOT",
+            "input": [
+                "a@(2:9)"
+            ],
+            "output": [
+                "$i1@(3:22)"
+            ]
+        },
+        {
+            "type": "builtin",
+            "id": "NOT",
+            "input": [
+                "b@(2:12)"
+            ],
+            "output": [
+                "$i2@(3:22)"
+            ]
     } ]
   } ]
 }

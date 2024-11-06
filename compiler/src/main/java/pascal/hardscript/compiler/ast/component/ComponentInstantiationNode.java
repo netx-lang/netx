@@ -6,51 +6,40 @@ import pascal.hardscript.compiler.ast.expr.ExprNode;
 import java.util.Objects;
 
 public final class ComponentInstantiationNode extends ElementNode {
-    private ExprNode from;
-    private ExprNode type;
-    private ExprNode to;
+    private ExprNode lhs;
+    private ExprNode rhs;
 
-    private ComponentInstantiationNode(ExprNode from, ExprNode type, ExprNode to) {
-        this.from = from;
-        this.type = type;
-        this.to = to;
+    private ComponentInstantiationNode(ExprNode lhs, ExprNode rhs) {
+        this.lhs = lhs;
+        this.rhs = rhs;
     }
 
-    public static ComponentInstantiationNode of(ExprNode from, ExprNode type, ExprNode to) {
-        return new ComponentInstantiationNode(from, type, to);
+    public static ComponentInstantiationNode of(ExprNode lhs, ExprNode rhs) {
+        return new ComponentInstantiationNode(lhs, rhs);
     }
 
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);
-        from.walk(listener);
-        type.walk(listener);
-        to.walk(listener);
+        lhs.walk(listener);
+        rhs.walk(listener);
         listener.exit(this);
     }
 
-    public ExprNode getType() {
-        return type;
+    public ExprNode getLhs() {
+        return lhs;
     }
 
-    public void setType(ExprNode type) {
-        this.type = type;
+    public void setLhs(ExprNode lhs) {
+        this.lhs = lhs;
     }
 
-    public ExprNode getFrom() {
-        return from;
+    public ExprNode getRhs() {
+        return rhs;
     }
 
-    public void setFrom(ExprNode from) {
-        this.from = from;
-    }
-
-    public ExprNode getTo() {
-        return to;
-    }
-
-    public void setTo(ExprNode to) {
-        this.to = to;
+    public void setRhs(ExprNode rhs) {
+        this.rhs = rhs;
     }
 
     @Override
@@ -58,18 +47,17 @@ public final class ComponentInstantiationNode extends ElementNode {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (ComponentInstantiationNode) obj;
-        return Objects.equals(this.from, that.from)
-                && Objects.equals(this.type, that.type)
-                && Objects.equals(this.to, that.to);
+        return Objects.equals(this.lhs, that.lhs)
+                && Objects.equals(this.rhs, that.rhs);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(from, type, to);
+        return Objects.hash(lhs, rhs);
     }
 
     @Override
     public String toString() {
-        return from.toString() + " -> " + type.toString() + " -> " + to.toString();
+        return lhs.toString() + " <- " + rhs.toString();
     }
 }
