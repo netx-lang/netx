@@ -2,7 +2,6 @@ package pascal.hardscript.compiler.elaborator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.component.AtomType;
 import pascal.hardscript.compiler.model.instance.Wire;
@@ -12,6 +11,7 @@ import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.lang.BuiltinComponent;
+import pascal.hardscript.util.lang.Identifier;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -3,13 +3,13 @@ package pascal.hardscript.compiler.io;
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.antlr.HardScriptParser;
-import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.ast.component.BindingNode;
 import pascal.hardscript.compiler.ast.expr.*;
 import pascal.hardscript.compiler.ast.expr.qualifier.BindingQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.GeneratorQualifier;
 import pascal.hardscript.compiler.ast.expr.selector.BitSelector;
 import pascal.hardscript.compiler.ast.expr.selector.PartSelector;
+import pascal.hardscript.util.lang.Identifier;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class HSParserUnitTest {
 
     static HardScriptParser makeParser(String code) {
-        var frontend = Frontend.load(CharStreams.fromString(code));
+        var frontend = Compiler.load(CharStreams.fromString(code));
         return frontend.buildANTLRParser();
     }
 

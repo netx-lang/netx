@@ -1,9 +1,9 @@
 package pascal.hardscript.compiler.model.scope;
 
-import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.instance.Instance;
+import pascal.hardscript.util.lang.Identifier;
+import pascal.hardscript.util.lang.SourceLoc;
 
 import java.util.*;
 

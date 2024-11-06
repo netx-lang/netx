@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.ast;
+package pascal.hardscript.util.lang;
 
 import java.util.Objects;
 

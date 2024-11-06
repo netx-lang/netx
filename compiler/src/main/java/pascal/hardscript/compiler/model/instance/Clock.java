@@ -1,10 +1,10 @@
 package pascal.hardscript.compiler.model.instance;
 
-import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
+import pascal.hardscript.util.lang.Identifier;
 
 public record Clock(Identifier id, Scope parent) implements Data {
 

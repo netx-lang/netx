@@ -1,8 +1,8 @@
 package pascal.hardscript.compiler.elaborator;
 
-import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.model.component.AtomType;
+import pascal.hardscript.util.lang.Identifier;
+import pascal.hardscript.util.lang.SourceLoc;
 
 public final class NameAllocator {
 

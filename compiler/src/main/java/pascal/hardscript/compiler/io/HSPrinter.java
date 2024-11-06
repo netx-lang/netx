@@ -3,13 +3,13 @@ package pascal.hardscript.compiler.io;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.model.instance.*;
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.*;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BuiltinComponent;
+import pascal.hardscript.util.lang.Identifier;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -32,13 +32,7 @@ public final class HSPrinter {
     }
 
     private ObjectNode dump(DesignScope design) {
-        var result = createObjectNode();
-        setType(result, "design");
-        var members = makeMembersIn(result);
-        design.getChildren().stream()
-                .map(ComponentScope.class::cast)
-                .map(this::dump).forEach(members::add);
-        return result;
+        return dump((ComponentScope) design.getChildren().getFirst());
     }
 
     private ObjectNode dump(ComponentScope module) {
@@ -70,7 +64,7 @@ public final class HSPrinter {
 
     private void dumpBuiltinComponent(ComponentScope sub, Identifier instID, ArrayNode members) {
         var builtin = createObjectNode();
-        setType(builtin, "builtin");
+        setType(builtin, "component");
         setIdentifier(builtin, instID);
 
         List<Data> needDump = new LinkedList<>();

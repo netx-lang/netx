@@ -1,8 +1,8 @@
 package pascal.hardscript.compiler.model.scope;
 
-import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.ast.component.ComponentNode;
 import pascal.hardscript.util.lang.BuiltinComponent;
+import pascal.hardscript.util.lang.Identifier;
 
 import java.util.*;
 

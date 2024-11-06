@@ -1,7 +1,7 @@
 package pascal.hardscript.compiler.ast.expr;
 
 import pascal.hardscript.compiler.ast.ASTListener;
-import pascal.hardscript.compiler.ast.Identifier;
+import pascal.hardscript.util.lang.Identifier;
 
 import java.util.Objects;
 

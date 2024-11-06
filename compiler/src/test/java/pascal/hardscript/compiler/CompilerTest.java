@@ -2,7 +2,7 @@ package pascal.hardscript.compiler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import pascal.hardscript.compiler.io.Frontend;
+import pascal.hardscript.compiler.io.Compiler;
 import pascal.hardscript.compiler.io.HSPrinter;
 
 import java.io.IOException;
@@ -51,7 +51,7 @@ class CompilerTest {
     }
 
     public void test(String fileName) throws IOException {
-        var design = Frontend.loadPath(TEST_DIR.resolve(fileName + ".hard")).compile();
+        var design = Compiler.loadPath(TEST_DIR.resolve(fileName + ".hard")).compile();
         var json = new HSPrinter(design).dump();
 
         if (GENERATE_EXPECTED) {

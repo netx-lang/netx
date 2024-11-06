@@ -1,5 +1,7 @@
 package pascal.hardscript.compiler.ast;
 
+import pascal.hardscript.util.lang.SourceLoc;
+
 public abstract class ASTNode {
 
     protected SourceLoc sourceLoc;

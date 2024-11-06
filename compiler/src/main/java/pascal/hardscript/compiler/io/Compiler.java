@@ -15,24 +15,24 @@ import pascal.hardscript.compiler.model.scope.DesignScope;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public final class Frontend {
+public final class Compiler {
 
     private final CharStream charStream;
 
-    public Frontend(CharStream charStream) {
+    public Compiler(CharStream charStream) {
         this.charStream = charStream;
     }
 
-    public static Frontend load(String string) {
-        return new Frontend(CharStreams.fromString(string));
+    public static Compiler load(String string) {
+        return new Compiler(CharStreams.fromString(string));
     }
 
-    public static Frontend load(CharStream charStream) {
-        return new Frontend(charStream);
+    public static Compiler load(CharStream charStream) {
+        return new Compiler(charStream);
     }
 
-    public static Frontend loadPath(Path path) throws IOException {
-        return new Frontend(CharStreams.fromPath(path));
+    public static Compiler loadPath(Path path) throws IOException {
+        return new Compiler(CharStreams.fromPath(path));
     }
 
     public HardScriptParser buildANTLRParser() {

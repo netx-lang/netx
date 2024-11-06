@@ -13,25 +13,25 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class FrontendUnitTest {
+class CompilerUnitTest {
     @Test
     void loadWithValidCharStream() {
         CharStream charStream = CharStreams.fromString("valid input");
-        Frontend frontend = Frontend.load(charStream);
-        assertNotNull(frontend);
+        Compiler compiler = Compiler.load(charStream);
+        assertNotNull(compiler);
     }
 
     @Test
     void loadPathWithValidPath() throws IOException {
         Path path = Path.of("src/test/resources/adder.hard");
-        Frontend frontend = Frontend.loadPath(path);
-        assertNotNull(frontend);
+        Compiler compiler = Compiler.loadPath(path);
+        assertNotNull(compiler);
     }
 
     @Test
     void loadPathWithInvalidPath() {
         Path path = Path.of("invalid/path/to/file.hard");
-        assertThrows(IOException.class, () -> Frontend.loadPath(path));
+        assertThrows(IOException.class, () -> Compiler.loadPath(path));
     }
 
     @Test
@@ -39,8 +39,8 @@ class FrontendUnitTest {
         String content = new String(Files.readAllBytes(Path.of("src/test/resources/adder.hard")));
 
         CharStream charStream = CharStreams.fromString(content);
-        Frontend frontend = Frontend.load(charStream);
-        DesignScope designScope = frontend.compile();
+        Compiler compiler = Compiler.load(charStream);
+        DesignScope designScope = compiler.compile();
         assertNotNull(designScope);
     }
 
@@ -49,15 +49,15 @@ class FrontendUnitTest {
         String content = new String(Files.readAllBytes(Path.of("src/test/resources/divide_by_3.hard")));
 
         CharStream charStream = CharStreams.fromString(content);
-        Frontend frontend = Frontend.load(charStream);
-        DesignScope scope = frontend.compile();
+        Compiler compiler = Compiler.load(charStream);
+        DesignScope scope = compiler.compile();
         assertNotNull(scope);
     }
 
     @Test
     void parseInvalidInput() {
         CharStream charStream = CharStreams.fromString("invalid input");
-        Frontend frontend = Frontend.load(charStream);
-        assertThrows(ParseCancellationException.class, frontend::compile);
+        Compiler compiler = Compiler.load(charStream);
+        assertThrows(ParseCancellationException.class, compiler::compile);
     }
 }

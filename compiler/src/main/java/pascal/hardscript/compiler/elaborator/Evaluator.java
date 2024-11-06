@@ -2,8 +2,6 @@ package pascal.hardscript.compiler.elaborator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.ast.expr.*;
 import pascal.hardscript.compiler.ast.expr.qualifier.BindingQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.FilterQualifier;
@@ -28,6 +26,8 @@ import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.compiler.model.scope.binding.Binding;
 import pascal.hardscript.compiler.model.scope.binding.MapBinding;
 import pascal.hardscript.compiler.model.scope.binding.SingleBinding;
+import pascal.hardscript.util.lang.Identifier;
+import pascal.hardscript.util.lang.SourceLoc;
 
 import java.util.LinkedList;
 import java.util.List;

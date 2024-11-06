@@ -1,6 +1,6 @@
 package pascal.hardscript.compiler.model.scope;
 
-import pascal.hardscript.compiler.ast.Identifier;
+import pascal.hardscript.util.lang.Identifier;
 
 import java.util.Stack;
 import java.util.function.Consumer;

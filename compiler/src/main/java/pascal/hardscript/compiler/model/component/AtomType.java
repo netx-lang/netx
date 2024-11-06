@@ -1,7 +1,7 @@
 package pascal.hardscript.compiler.model.component;
 
-import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.model.Entity;
+import pascal.hardscript.util.lang.Identifier;
 
 import java.util.List;
 

@@ -2,8 +2,6 @@ package pascal.hardscript.compiler.elaborator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.ListEntity;
@@ -14,6 +12,8 @@ import pascal.hardscript.compiler.model.instance.BooleanValue;
 import pascal.hardscript.compiler.model.instance.Data;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.instance.IntegerValue;
+import pascal.hardscript.util.lang.Identifier;
+import pascal.hardscript.util.lang.SourceLoc;
 
 import java.util.LinkedList;
 import java.util.List;

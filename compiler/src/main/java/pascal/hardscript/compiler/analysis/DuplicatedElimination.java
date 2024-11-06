@@ -1,6 +1,5 @@
 package pascal.hardscript.compiler.analysis;
 
-import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.ComponentInfo;
@@ -8,6 +7,7 @@ import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.lang.BuiltinComponent;
+import pascal.hardscript.util.lang.Identifier;
 
 import java.util.HashMap;
 import java.util.LinkedList;

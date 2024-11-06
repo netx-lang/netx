@@ -1,11 +1,10 @@
 package pascal.hardscript.compiler.io;
 
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import pascal.hardscript.compiler.antlr.HardScriptParser.*;
 import pascal.hardscript.compiler.ast.DesignNode;
-import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.ast.SourceLoc;
 import pascal.hardscript.compiler.ast.component.*;
 import pascal.hardscript.compiler.ast.expr.*;
 import pascal.hardscript.compiler.ast.expr.qualifier.BindingQualifier;
@@ -17,6 +16,8 @@ import pascal.hardscript.compiler.ast.expr.selector.PartSelector;
 import pascal.hardscript.compiler.ast.expr.selector.Selector;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BitVector;
+import pascal.hardscript.util.lang.Identifier;
+import pascal.hardscript.util.lang.SourceLoc;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -25,7 +26,7 @@ public final class HSParser {
 
     public static DesignNode parseDesign(DesignContext ctx) {
         return DesignNode.of(ctx.component().stream().map(HSParser::parseComponent).toList())
-                .setSourceLoc(SourceLoc.from(ctx.getStart()));
+                .setSourceLoc(locationOf(ctx.getStart()));
     }
 
     static ComponentNode parseComponent(ComponentContext ctx) {
@@ -33,9 +34,9 @@ public final class HSParser {
                 ? ctx.component_arguments().ID().stream().map(HSParser::parseIdentifier).toList()
                 : List.of();
         return ComponentNode.of(parseIdentifier(ctx.ID()),
-                        parseComponentType(SourceLoc.from(ctx.ID().getSymbol()), ctx.component_type()),
+                        parseComponentType(locationOf(ctx.ID().getSymbol()), ctx.component_type()),
                         arguments, ctx.element().stream().map(HSParser::parseElement).toList())
-                .setSourceLoc(SourceLoc.from(ctx.getStart()));
+                .setSourceLoc(locationOf(ctx.getStart()));
     }
 
     static ComponentTypeNode parseComponentType(SourceLoc sourceLoc, Component_typeContext ctx) {
@@ -45,7 +46,7 @@ public final class HSParser {
             return ComponentTypeNode.of(from, to).setSourceLoc(sourceLoc);
         } else {
             return ComponentTypeNode.of(parseExpr(ctx.from), parseExpr(ctx.to))
-                    .setSourceLoc(SourceLoc.from(ctx.getStart()));
+                    .setSourceLoc(locationOf(ctx.getStart()));
         }
     }
 
@@ -57,7 +58,7 @@ public final class HSParser {
             case LoopContext sub -> parseLoop(sub);
             default -> throw new ShallNotReachHereError();
         };
-        return result.setSourceLoc(SourceLoc.from(ctx.getStart()));
+        return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
     static ComponentInstantiationNode parseComponentInstantiation(ComponentInstantiationContext ctx) {
@@ -86,7 +87,7 @@ public final class HSParser {
             }
         }
         return ParamSymbolExpr.of(parsePrimarySymbol(ctx.primary_symbol()), arguments)
-                .setSourceLoc(SourceLoc.from(ctx.getStart()));
+                .setSourceLoc(locationOf(ctx.getStart()));
     }
 
     static ExprNode parseExpr(ExpressionContext ctx) {
@@ -102,7 +103,7 @@ public final class HSParser {
             case ParenExprContext sub -> parseExpr(sub.expression());
             default -> throw new ShallNotReachHereError();
         };
-        return result.setSourceLoc(SourceLoc.from(ctx.getStart()));
+        return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
     static SymbolExpr parseSymbolExpr(SymbolContext ctx) {
@@ -136,17 +137,17 @@ public final class HSParser {
             case LocalBindingContext sub -> BindingQualifier.of(parseBinding(sub.binding()));
             default -> throw new ShallNotReachHereError();
         };
-        return result.setSourceLoc(SourceLoc.from(ctx.getStart()));
+        return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
     static GeneratorQualifier parseGeneratorQualifier(IteratorContext ctx) {
         return GeneratorQualifier.of(parsePrimarySymbol(ctx.primary_symbol()), parseExpr(ctx.expression()))
-                .setSourceLoc(SourceLoc.from(ctx.getStart()));
+                .setSourceLoc(locationOf(ctx.getStart()));
     }
 
     static BindingNode parseBinding(BindingContext ctx) {
         return BindingNode.of(parsePrimarySymbol(ctx.primary_symbol()), parseExpr(ctx.expression()))
-                .setSourceLoc(SourceLoc.from(ctx.getStart()));
+                .setSourceLoc(locationOf(ctx.getStart()));
     }
 
     static ExprNode parseUnaryExpr(UnaryExprContext ctx) {
@@ -227,7 +228,7 @@ public final class HSParser {
                     parseExpr(sub.expression(0)), parseExpr(sub.expression(1)));
             default -> throw new ShallNotReachHereError();
         };
-        return result.setSourceLoc(SourceLoc.from(ctx.getStart()));
+        return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
     static ParamSymbolExpr parseParamSymbolExpr(ParamSymbolExprContext ctx) {
@@ -247,7 +248,7 @@ public final class HSParser {
     }
 
     static Identifier parseIdentifier(TerminalNode ID) {
-        return Identifier.of(ID.getText()).setSourceLoc(SourceLoc.from(ID.getSymbol()));
+        return Identifier.of(ID.getText()).setSourceLoc(locationOf(ID.getSymbol()));
     }
 
     static PrimarySymbol parsePrimarySymbol(Primary_symbolContext ctx) {
@@ -260,6 +261,11 @@ public final class HSParser {
                             .map(HSParser::parseExpr).toList());
             default -> throw new ShallNotReachHereError();
         };
-        return result.setSourceLoc(SourceLoc.from(ctx.getStart()));
+        return result.setSourceLoc(locationOf(ctx.getStart()));
     }
+
+    static SourceLoc locationOf(Token token) {
+        return new SourceLoc(token.getLine(), token.getCharPositionInLine());
+    }
+
 }

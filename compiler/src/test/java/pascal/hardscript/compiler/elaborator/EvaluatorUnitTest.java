@@ -2,8 +2,7 @@ package pascal.hardscript.compiler.elaborator;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
-import pascal.hardscript.compiler.ast.Identifier;
-import pascal.hardscript.compiler.io.Frontend;
+import pascal.hardscript.compiler.io.Compiler;
 import pascal.hardscript.compiler.model.instance.DataAccess;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.instance.Int32Value;
@@ -11,6 +10,7 @@ import pascal.hardscript.compiler.model.instance.selector.BitSelector;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.util.lang.BuiltinComponent;
+import pascal.hardscript.util.lang.Identifier;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class EvaluatorUnitTest {
 
     private static DesignScope loadDesign(String code) {
-        return new Elaborator(Frontend.load(CharStreams.fromString(code)).parse()).elaborate();
+        return new Elaborator(Compiler.load(CharStreams.fromString(code)).parse()).elaborate();
     }
 
     private static ComponentScope loadSingleComponent(String code) {

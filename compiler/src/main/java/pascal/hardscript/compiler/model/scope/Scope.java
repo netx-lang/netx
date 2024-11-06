@@ -1,11 +1,11 @@
 package pascal.hardscript.compiler.model.scope;
 
-import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.elaborator.Evaluator;
 import pascal.hardscript.compiler.elaborator.NameAllocator;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.binding.MapBinding;
+import pascal.hardscript.util.lang.Identifier;
 
 import java.util.*;
 

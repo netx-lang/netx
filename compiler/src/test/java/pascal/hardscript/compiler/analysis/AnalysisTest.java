@@ -1,7 +1,7 @@
 package pascal.hardscript.compiler.analysis;
 
 import org.junit.jupiter.api.Test;
-import pascal.hardscript.compiler.io.Frontend;
+import pascal.hardscript.compiler.io.Compiler;
 import pascal.hardscript.compiler.io.HSParser;
 import pascal.hardscript.compiler.io.HSPrinter;
 import pascal.hardscript.util.TestUtils;
@@ -19,7 +19,7 @@ class AnalysisTest {
     @Test
     void testSourceLocChecker() throws IOException {
         for (var testcase : TestUtils.collectAllFilesUnder(TEST_DIR)) {
-            var frontend = Frontend.loadPath(testcase);
+            var frontend = Compiler.loadPath(testcase);
             var design = HSParser.parseDesign(frontend.buildANTLRParser().design());
             new SourceLocChecker(design).analyze();
         }
@@ -52,8 +52,8 @@ class AnalysisTest {
                 }
                 """;
         assertEquals(
-                new HSPrinter(Frontend.load(expected).compile()).dump(),
-                new HSPrinter(Frontend.load(actual).compile()).dump());
+                new HSPrinter(Compiler.load(expected).compile()).dump(),
+                new HSPrinter(Compiler.load(actual).compile()).dump());
     }
 
     @Test
@@ -74,7 +74,7 @@ class AnalysisTest {
                 }
                 """;
         assertEquals(
-                new HSPrinter(Frontend.load(expected).compile()).dump(),
-                new HSPrinter(Frontend.load(actual).compile()).dump());
+                new HSPrinter(Compiler.load(expected).compile()).dump(),
+                new HSPrinter(Compiler.load(actual).compile()).dump());
     }
 }
