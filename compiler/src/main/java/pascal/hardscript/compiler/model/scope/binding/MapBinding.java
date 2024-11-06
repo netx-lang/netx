@@ -10,6 +10,14 @@ import java.util.*;
 public final class MapBinding implements Binding {
     private final Map<Identifier, Entity> bindings = new HashMap<>();
 
+    private MapBinding() {
+
+    }
+
+    public static MapBinding ofEmpty() {
+        return new MapBinding();
+    }
+
     public static MapBinding of(Identifier identifier, Entity entity) {
         var binding = new MapBinding();
         binding.bind(identifier, entity);
@@ -26,6 +34,13 @@ public final class MapBinding implements Binding {
 
     public void bind(Identifier identifier, Entity entity) {
         bindings.put(identifier, entity);
+    }
+
+    public void add(Binding binding) {
+        switch (binding) {
+            case SingleBinding single -> bindings.put(single.key(), single.value());
+            case MapBinding map -> bindings.putAll(map.bindings);
+        }
     }
 
     public Collection<Entity> getEntities() {

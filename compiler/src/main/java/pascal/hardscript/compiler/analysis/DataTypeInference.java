@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.stream.Stream;
 
-public class DataTypeInference extends ModelAnalysis {
+public final class DataTypeInference extends ModelAnalysis {
     private static final Logger log = LoggerFactory.getLogger(DataTypeInference.class);
     private final Graph<Instance, BinaryConstraint> graph = new SimpleGraph<>(BinaryConstraint.class);
     private final List<DataConstraint> constraints = new LinkedList<>();
@@ -41,15 +41,14 @@ public class DataTypeInference extends ModelAnalysis {
 
     public void collectTypeConstraints() {
         design.forEachScope(scope -> {
+            var component = (ComponentScope) scope;
             for (var data : getBoundDataIn(scope)) {
                 if (!data.hasImplicitType()) {
                     workList.add(data);
                 }
             }
-            if (scope instanceof ComponentScope component) {
-                if (componentInfo.containsBuiltin(component.getIdentifier())) {
-                    collectConstraintsInBuiltin(component);
-                }
+            if (componentInfo.containsBuiltin(component.getIdentifier())) {
+                collectConstraintsInBuiltin(component);
             }
         });
     }

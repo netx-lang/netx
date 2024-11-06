@@ -68,6 +68,7 @@ public final class AliasAnalysis extends ModelAnalysis {
 
     public void eliminateDuplicate() {
         design.forEachScope(scope -> {
+            scope.getAliases().clear();
             scope.getEntities().removeIf(Predicate.not(this::needDump));
             if (scope instanceof ComponentScope componentScope) {
                 componentScope.getInputs().replaceAll(this::repOf);

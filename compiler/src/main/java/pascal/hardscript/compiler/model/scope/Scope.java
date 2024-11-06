@@ -9,15 +9,15 @@ import pascal.hardscript.compiler.model.scope.binding.MapBinding;
 import pascal.hardscript.util.type.Pair;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 public abstract sealed class Scope permits BlockScope, DesignScope, ComponentScope {
-    private final Scope parent;
-    private final MapBinding binding = new MapBinding();
-    private final List<Scope> children = new ArrayList<>();
-    private final NameAllocator nameAllocator = new NameAllocator();
+    private Scope parent;
+    private List<Scope> children = new ArrayList<>();
+    private MapBinding binding = MapBinding.ofEmpty();
+
     private final Set<Pair<Instance, Instance>> aliases = new HashSet<>();
 
+    private final NameAllocator nameAllocator = new NameAllocator();
     private final Evaluator evaluator = new Evaluator(this);
 
     protected Scope(Scope parent) {
@@ -26,6 +26,22 @@ public abstract sealed class Scope permits BlockScope, DesignScope, ComponentSco
 
     public Scope getParent() {
         return parent;
+    }
+
+    public void setParent(Scope parent) {
+        this.parent = parent;
+    }
+
+    public List<Scope> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<Scope> children) {
+        this.children = children;
+    }
+
+    public void setBinding(MapBinding binding) {
+        this.binding = binding;
     }
 
     public MapBinding getBinding() {
@@ -44,16 +60,12 @@ public abstract sealed class Scope permits BlockScope, DesignScope, ComponentSco
         return nameAllocator;
     }
 
-    public List<Scope> getChildren() {
-        return children;
-    }
-
     public void alias(Instance a, Instance b) {
         aliases.add(new Pair<>(a, b));
     }
 
     public Set<Pair<Instance, Instance>> getAliases() {
-        return Collections.unmodifiableSet(aliases);
+        return aliases;
     }
 
     public void bind(Identifier identifier, Entity entity) {
@@ -78,15 +90,5 @@ public abstract sealed class Scope permits BlockScope, DesignScope, ComponentSco
             case DesignScope ignored -> null;
             default -> parent.getUpperComponent();
         };
-    }
-
-    public void forEachScope(Consumer<Scope> consumer) {
-        Stack<Scope> stack = new Stack<>();
-        stack.push(this);
-        while (!stack.isEmpty()) {
-            Scope scope = stack.pop();
-            consumer.accept(scope);
-            stack.addAll(scope.getChildren());
-        }
     }
 }

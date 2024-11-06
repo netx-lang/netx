@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import pascal.hardscript.compiler.analysis.AliasAnalysis;
 import pascal.hardscript.compiler.analysis.DataTypeInference;
+import pascal.hardscript.compiler.analysis.ScopeInlineAnalysis;
 import pascal.hardscript.compiler.analysis.SourceLocChecker;
 import pascal.hardscript.compiler.antlr.HardScriptLexer;
 import pascal.hardscript.compiler.antlr.HardScriptParser;
@@ -54,6 +55,7 @@ public final class Frontend {
     public DesignScope compile() {
         var design = new Elaborator(parse()).elaborate();
         new AliasAnalysis(design).analyze();
+        new ScopeInlineAnalysis(design).analyze();
         new DataTypeInference(design).analyze();
         return design;
     }
