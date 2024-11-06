@@ -120,10 +120,10 @@ public final class Elaborator {
             requiresMatchedSize(sourceLoc, arguments.from(), parameters.from());
             requiresMatchedSize(sourceLoc, arguments.to(), parameters.to());
             for (int i = 0; i < arguments.from().size(); ++i) {
-                scope.alias(parameters.from().get(i), arguments.from().get(i));
+                scope.addAlias(parameters.from().get(i), arguments.from().get(i));
             }
             for (int i = 0; i < arguments.to().size(); ++i) {
-                scope.alias(parameters.to().get(i), arguments.to().get(i));
+                scope.addAlias(parameters.to().get(i), arguments.to().get(i));
             }
         }
 
@@ -168,7 +168,7 @@ public final class Elaborator {
 
                 requiresMatchedSize(sourceLoc, lhs.to(), rhs.from());
                 for (int i = 0; i < lhs.to().size(); ++i) {
-                    scope.alias(lhs.to().get(i), rhs.from().get(i));
+                    scope.addAlias(lhs.to().get(i), rhs.from().get(i));
                 }
                 return ComponentPort.of(lhs.from(), rhs.to());
             }

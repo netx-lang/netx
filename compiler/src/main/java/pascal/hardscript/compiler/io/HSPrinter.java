@@ -14,7 +14,8 @@ import pascal.hardscript.util.lang.BuiltinComponent;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
+
+import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
 
 public final class HSPrinter {
     private final DesignScope design;
@@ -39,13 +40,6 @@ public final class HSPrinter {
                 .map(this::dump).forEach(members::add);
         return result;
     }
-
-    private static final Set<BuiltinComponent> NO_DUMP = Set.of(
-            BuiltinComponent.IGNORE,
-            BuiltinComponent.SPLIT,
-            BuiltinComponent.FROM,
-            BuiltinComponent.TO
-    );
 
     private ObjectNode dump(ComponentScope module) {
         var result = createObjectNode();

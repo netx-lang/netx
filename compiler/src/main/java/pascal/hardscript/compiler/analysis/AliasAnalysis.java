@@ -28,11 +28,12 @@ public final class AliasAnalysis extends ModelAnalysis {
         collectAlias();
         eliminateDuplicate();
         inferAliasType();
+//        design.forEachScope(scope -> scope.getAliases().clear());
     }
 
     private void collectAlias() {
         design.forEachScope(scope -> scope.getAliases()
-                .forEach(pair -> pair.accept(aliases::union)));
+                .forEach(alias -> aliases.union(alias.from(), alias.to())));
         for (var element : aliases.elements()) {
             if (element.isUserDefined()) {
                 var root = aliases.find(element);
@@ -68,7 +69,6 @@ public final class AliasAnalysis extends ModelAnalysis {
 
     public void eliminateDuplicate() {
         design.forEachScope(scope -> {
-            scope.getAliases().clear();
             scope.getEntities().removeIf(Predicate.not(this::needDump));
             if (scope instanceof ComponentScope componentScope) {
                 componentScope.getInputs().replaceAll(this::repOf);

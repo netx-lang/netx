@@ -52,21 +52,21 @@ component InstrDecoder : [op_i, func3, func7] -> [extOP, regWr, branch_ctl, memT
     inst func3 of wire(bit(3))
     inst func7 of wire(bit(1))
     inst extOP, regWr, branch_ctl, memToReg, memWr, memOP, aSrc, bSrc, ctl of wire(auto)
-
+    inst U_flag_0, U_flag_1, I_flag_0, R_flag, J_flag, I_flag_1, B_flag, I_flag_2, S_flag, U_flag, I_flag of wire(auto)
     inst op of wire(bit(5))
     [op_i[6:2]] -> TO -> [op]
-    let U_flag_0 = [op, 5'b01101] <> EQ // lui
-    let U_flag_1 = [op, 5'b00101] <> EQ // auipc
-    let I_flag_0 = [op, 5'b00100] <> EQ // addi, slti, sltiu, xori, ori, andi, slli, srli, srai
-    let R_flag   = [op, 5'b01100] <> EQ // add, sub, sll, slt, sltu, xor, srl, sra, or, and
-    let J_flag   = [op, 5'b11011] <> EQ // jal
-    let I_flag_1 = [op, 5'b11001] <> EQ // jalr
-    let B_flag   = [op, 5'b11000] <> EQ // beq, bne, blt, bge, bltu, bgeu
-    let I_flag_2 = [op, 5'b00000] <> EQ // lb, lh, lw, lbu, lhu
-    let S_flag   = [op, 5'b01000] <> EQ // sb, sh, sw
+    [op, 5'b01101] -> EQ -> [U_flag_0] // lui
+    [op, 5'b00101] -> EQ -> [U_flag_1] // auipc
+    [op, 5'b00100] -> EQ -> [I_flag_0] // addi, slti, sltiu, xori, ori, andi, slli, srli, srai
+    [op, 5'b01100] -> EQ -> [R_flag]   // add, sub, sll, slt, sltu, xor, srl, sra, or, and
+    [op, 5'b11011] -> EQ -> [J_flag]   // jal
+    [op, 5'b11001] -> EQ -> [I_flag_1] // jalr
+    [op, 5'b11000] -> EQ -> [B_flag]   // beq, bne, blt, bge, bltu, bgeu
+    [op, 5'b00000] -> EQ -> [I_flag_2] // lb, lh, lw, lbu, lhu
+    [op, 5'b01000] -> EQ -> [S_flag]   // sb, sh, sw
 
-    let U_flag = [U_flag_0, U_flag_1] <> OR
-    let I_flag = [I_flag_0, I_flag_1, I_flag_2] <> OR(3)
+    [U_flag_0, U_flag_1] -> OR -> [U_flag]
+    [I_flag_0, I_flag_1, I_flag_2] -> OR(3) -> [I_flag]
 
     let branch = component cond, pred : [1'b0 <> EXT, pred, cond] <> MUX(1)
     [] -> [

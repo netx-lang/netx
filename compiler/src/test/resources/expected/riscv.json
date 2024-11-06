@@ -159,13 +159,180 @@
           "members": [
             {
               "type": "wire",
+              "id": "R_flag@(55:39)",
+              "width": 1
+            },
+            {
+              "type": "wire",
+              "id": "U_flag@(55:91)",
+              "width": 1
+            },
+            {
+              "type": "wire",
+              "id": "U_flag_1@(55:19)",
+              "width": 1
+            },
+            {
+              "type": "wire",
+              "id": "U_flag_0@(55:9)",
+              "width": 1
+            },
+            {
+              "type": "wire",
+              "id": "J_flag@(55:47)",
+              "width": 1
+            },
+            {
+              "type": "wire",
+              "id": "I_flag_1@(55:55)",
+              "width": 1
+            },
+            {
+              "type": "wire",
+              "id": "I_flag_0@(55:29)",
+              "width": 1
+            },
+            {
+              "type": "wire",
+              "id": "B_flag@(55:65)",
+              "width": 1
+            },
+            {
+              "type": "wire",
               "id": "de_func3@(110:9)",
               "width": 8
             },
             {
               "type": "wire",
+              "id": "I_flag@(55:99)",
+              "width": 1
+            },
+            {
+              "type": "wire",
               "id": "arith_ctl@(111:9)",
               "width": 4
+            },
+            {
+              "type": "builtin",
+              "id": "EQ",
+              "input": [
+                "instr@(12:9)[6 : 0][6 : 2]",
+                "01101"
+              ],
+              "output": [
+                "U_flag_0@(55:9)"
+              ]
+            },
+            {
+              "type": "builtin",
+              "id": "EQ",
+              "input": [
+                "instr@(12:9)[6 : 0][6 : 2]",
+                "00101"
+              ],
+              "output": [
+                "U_flag_1@(55:19)"
+              ]
+            },
+            {
+              "type": "builtin",
+              "id": "EQ",
+              "input": [
+                "instr@(12:9)[6 : 0][6 : 2]",
+                "00100"
+              ],
+              "output": [
+                "I_flag_0@(55:29)"
+              ]
+            },
+            {
+              "type": "builtin",
+              "id": "EQ",
+              "input": [
+                "instr@(12:9)[6 : 0][6 : 2]",
+                "01100"
+              ],
+              "output": [
+                "R_flag@(55:39)"
+              ]
+            },
+            {
+              "type": "builtin",
+              "id": "EQ",
+              "input": [
+                "instr@(12:9)[6 : 0][6 : 2]",
+                "11011"
+              ],
+              "output": [
+                "J_flag@(55:47)"
+              ]
+            },
+            {
+              "type": "builtin",
+              "id": "EQ",
+              "input": [
+                "instr@(12:9)[6 : 0][6 : 2]",
+                "11001"
+              ],
+              "output": [
+                "I_flag_1@(55:55)"
+              ]
+            },
+            {
+              "type": "builtin",
+              "id": "EQ",
+              "input": [
+                "instr@(12:9)[6 : 0][6 : 2]",
+                "11000"
+              ],
+              "output": [
+                "B_flag@(55:65)"
+              ]
+            },
+            {
+              "type": "builtin",
+              "id": "EQ",
+              "input": [
+                "instr@(12:9)[6 : 0][6 : 2]",
+                "00000"
+              ],
+              "output": [
+                "memToReg@(16:35)"
+              ]
+            },
+            {
+              "type": "builtin",
+              "id": "EQ",
+              "input": [
+                "instr@(12:9)[6 : 0][6 : 2]",
+                "01000"
+              ],
+              "output": [
+                "dmemWe@(16:45)"
+              ]
+            },
+            {
+              "type": "builtin",
+              "id": "OR",
+              "input": [
+                "U_flag_0@(55:9)",
+                "U_flag_1@(55:19)"
+              ],
+              "output": [
+                "U_flag@(55:91)"
+              ]
+            },
+            {
+              "type": "builtin",
+              "id": "OR",
+              "input": [
+                "I_flag_0@(55:29)",
+                "I_flag_1@(55:55)",
+                "memToReg@(16:35)"
+              ],
+              "output": [
+                "I_flag@(55:99)"
+              ]
             },
             {
               "type": "builtin",
@@ -178,57 +345,12 @@
               ]
             },
             {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "01101"
-              ],
-              "output": [
-                "$i1@(68:41)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "00101"
-              ],
-              "output": [
-                "$i2@(68:41)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "OR",
-              "members": [
-                {
-                  "type": "wire",
-                  "id": "$i1@(68:41)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i2@(68:41)",
-                  "width": 1
-                }
-              ],
-              "input": [
-                "$i1@(68:41)",
-                "$i2@(68:41)"
-              ],
-              "output": [
-                "code@(225:9)"
-              ]
-            },
-            {
               "type": "component",
               "id": "MUX",
               "input": [
                 "input_0@(229:13)",
                 "001",
-                "code@(225:9)"
+                "U_flag@(55:91)"
               ],
               "output": [
                 "output@(227:9)"
@@ -238,11 +360,6 @@
                   "type": "wire",
                   "id": "output@(227:9)",
                   "width": 3
-                },
-                {
-                  "type": "wire",
-                  "id": "code@(225:9)",
-                  "width": 1
                 },
                 {
                   "type": "wire",
@@ -258,7 +375,7 @@
                   "type": "component",
                   "id": "DECODER",
                   "input": [
-                    "code@(225:9)"
+                    "U_flag@(55:91)"
                   ],
                   "output": [
                     "mask@(226:9)"
@@ -268,7 +385,7 @@
                       "type": "builtin",
                       "id": "NOT",
                       "input": [
-                        "code@(225:9)[0]"
+                        "U_flag@(55:91)[0]"
                       ],
                       "output": [
                         "$i1@(245:13)"
@@ -295,7 +412,7 @@
                       "type": "builtin",
                       "id": "AND",
                       "input": [
-                        "code@(225:9)[0]"
+                        "U_flag@(55:91)[0]"
                       ],
                       "output": [
                         "mask@(226:9)[1]"
@@ -395,74 +512,12 @@
               ]
             },
             {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "00100"
-              ],
-              "output": [
-                "$i1@(69:51)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "11001"
-              ],
-              "output": [
-                "$i2@(69:51)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "00000"
-              ],
-              "output": [
-                "$i3@(69:51)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "OR",
-              "members": [
-                {
-                  "type": "wire",
-                  "id": "$i1@(69:51)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i2@(69:51)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i3@(69:51)",
-                  "width": 1
-                }
-              ],
-              "input": [
-                "$i1@(69:51)",
-                "$i2@(69:51)",
-                "$i3@(69:51)"
-              ],
-              "output": [
-                "code@(225:9)"
-              ]
-            },
-            {
               "type": "component",
               "id": "MUX",
               "input": [
                 "input_0@(229:13)",
                 "000",
-                "code@(225:9)"
+                "I_flag@(55:99)"
               ],
               "output": [
                 "output@(227:9)"
@@ -472,11 +527,6 @@
                   "type": "wire",
                   "id": "output@(227:9)",
                   "width": 3
-                },
-                {
-                  "type": "wire",
-                  "id": "code@(225:9)",
-                  "width": 1
                 },
                 {
                   "type": "wire",
@@ -492,7 +542,7 @@
                   "type": "component",
                   "id": "DECODER",
                   "input": [
-                    "code@(225:9)"
+                    "I_flag@(55:99)"
                   ],
                   "output": [
                     "mask@(226:9)"
@@ -502,7 +552,7 @@
                       "type": "builtin",
                       "id": "NOT",
                       "input": [
-                        "code@(225:9)[0]"
+                        "I_flag@(55:99)[0]"
                       ],
                       "output": [
                         "$i1@(245:13)"
@@ -529,7 +579,7 @@
                       "type": "builtin",
                       "id": "AND",
                       "input": [
-                        "code@(225:9)[0]"
+                        "I_flag@(55:99)[0]"
                       ],
                       "output": [
                         "mask@(226:9)[1]"
@@ -629,23 +679,12 @@
               ]
             },
             {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "11011"
-              ],
-              "output": [
-                "code@(225:9)"
-              ]
-            },
-            {
               "type": "component",
               "id": "MUX",
               "input": [
                 "input_0@(229:13)",
                 "100",
-                "code@(225:9)"
+                "J_flag@(55:47)"
               ],
               "output": [
                 "output@(227:9)"
@@ -655,11 +694,6 @@
                   "type": "wire",
                   "id": "output@(227:9)",
                   "width": 3
-                },
-                {
-                  "type": "wire",
-                  "id": "code@(225:9)",
-                  "width": 1
                 },
                 {
                   "type": "wire",
@@ -675,7 +709,7 @@
                   "type": "component",
                   "id": "DECODER",
                   "input": [
-                    "code@(225:9)"
+                    "J_flag@(55:47)"
                   ],
                   "output": [
                     "mask@(226:9)"
@@ -685,7 +719,7 @@
                       "type": "builtin",
                       "id": "NOT",
                       "input": [
-                        "code@(225:9)[0]"
+                        "J_flag@(55:47)[0]"
                       ],
                       "output": [
                         "$i1@(245:13)"
@@ -712,7 +746,7 @@
                       "type": "builtin",
                       "id": "AND",
                       "input": [
-                        "code@(225:9)[0]"
+                        "J_flag@(55:47)[0]"
                       ],
                       "output": [
                         "mask@(226:9)[1]"
@@ -812,23 +846,12 @@
               ]
             },
             {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "11000"
-              ],
-              "output": [
-                "code@(225:9)"
-              ]
-            },
-            {
               "type": "component",
               "id": "MUX",
               "input": [
                 "input_0@(229:13)",
                 "011",
-                "code@(225:9)"
+                "B_flag@(55:65)"
               ],
               "output": [
                 "output@(227:9)"
@@ -838,11 +861,6 @@
                   "type": "wire",
                   "id": "output@(227:9)",
                   "width": 3
-                },
-                {
-                  "type": "wire",
-                  "id": "code@(225:9)",
-                  "width": 1
                 },
                 {
                   "type": "wire",
@@ -858,7 +876,7 @@
                   "type": "component",
                   "id": "DECODER",
                   "input": [
-                    "code@(225:9)"
+                    "B_flag@(55:65)"
                   ],
                   "output": [
                     "mask@(226:9)"
@@ -868,7 +886,7 @@
                       "type": "builtin",
                       "id": "NOT",
                       "input": [
-                        "code@(225:9)[0]"
+                        "B_flag@(55:65)[0]"
                       ],
                       "output": [
                         "$i1@(245:13)"
@@ -895,7 +913,7 @@
                       "type": "builtin",
                       "id": "AND",
                       "input": [
-                        "code@(225:9)[0]"
+                        "B_flag@(55:65)[0]"
                       ],
                       "output": [
                         "mask@(226:9)[1]"
@@ -995,23 +1013,12 @@
               ]
             },
             {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "01000"
-              ],
-              "output": [
-                "code@(225:9)"
-              ]
-            },
-            {
               "type": "component",
               "id": "MUX",
               "input": [
                 "input_0@(229:13)",
                 "010",
-                "code@(225:9)"
+                "dmemWe@(16:45)"
               ],
               "output": [
                 "output@(227:9)"
@@ -1021,11 +1028,6 @@
                   "type": "wire",
                   "id": "output@(227:9)",
                   "width": 3
-                },
-                {
-                  "type": "wire",
-                  "id": "code@(225:9)",
-                  "width": 1
                 },
                 {
                   "type": "wire",
@@ -1041,7 +1043,7 @@
                   "type": "component",
                   "id": "DECODER",
                   "input": [
-                    "code@(225:9)"
+                    "dmemWe@(16:45)"
                   ],
                   "output": [
                     "mask@(226:9)"
@@ -1051,7 +1053,7 @@
                       "type": "builtin",
                       "id": "NOT",
                       "input": [
-                        "code@(225:9)[0]"
+                        "dmemWe@(16:45)[0]"
                       ],
                       "output": [
                         "$i1@(245:13)"
@@ -1078,7 +1080,7 @@
                       "type": "builtin",
                       "id": "AND",
                       "input": [
-                        "code@(225:9)[0]"
+                        "dmemWe@(16:45)[0]"
                       ],
                       "output": [
                         "mask@(226:9)[1]"
@@ -1183,163 +1185,12 @@
             },
             {
               "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "01101"
-              ],
-              "output": [
-                "$i1@(68:41)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "00101"
-              ],
-              "output": [
-                "$i2@(68:41)"
-              ]
-            },
-            {
-              "type": "builtin",
               "id": "OR",
-              "members": [
-                {
-                  "type": "wire",
-                  "id": "$i1@(68:41)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i2@(68:41)",
-                  "width": 1
-                }
-              ],
               "input": [
-                "$i1@(68:41)",
-                "$i2@(68:41)"
-              ],
-              "output": [
-                "$i1@(80:46)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "00100"
-              ],
-              "output": [
-                "$i1@(69:51)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "11001"
-              ],
-              "output": [
-                "$i2@(69:51)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "00000"
-              ],
-              "output": [
-                "$i3@(69:51)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "OR",
-              "members": [
-                {
-                  "type": "wire",
-                  "id": "$i1@(69:51)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i2@(69:51)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i3@(69:51)",
-                  "width": 1
-                }
-              ],
-              "input": [
-                "$i1@(69:51)",
-                "$i2@(69:51)",
-                "$i3@(69:51)"
-              ],
-              "output": [
-                "$i2@(80:46)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "01100"
-              ],
-              "output": [
-                "$i3@(80:46)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "11011"
-              ],
-              "output": [
-                "$i4@(80:46)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "OR",
-              "members": [
-                {
-                  "type": "wire",
-                  "id": "$i1@(80:46)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i2@(80:46)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i3@(80:46)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i4@(80:46)",
-                  "width": 1
-                }
-              ],
-              "input": [
-                "$i1@(80:46)",
-                "$i2@(80:46)",
-                "$i3@(80:46)",
-                "$i4@(80:46)"
+                "U_flag@(55:91)",
+                "I_flag@(55:99)",
+                "R_flag@(55:39)",
+                "J_flag@(55:47)"
               ],
               "output": [
                 "regWr@(16:16)"
@@ -1356,23 +1207,12 @@
               ]
             },
             {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "11011"
-              ],
-              "output": [
-                "code@(225:9)"
-              ]
-            },
-            {
               "type": "component",
               "id": "MUX",
               "input": [
                 "input_0@(229:13)",
                 "001",
-                "code@(225:9)"
+                "J_flag@(55:47)"
               ],
               "output": [
                 "output@(227:9)"
@@ -1382,11 +1222,6 @@
                   "type": "wire",
                   "id": "output@(227:9)",
                   "width": 3
-                },
-                {
-                  "type": "wire",
-                  "id": "code@(225:9)",
-                  "width": 1
                 },
                 {
                   "type": "wire",
@@ -1402,7 +1237,7 @@
                   "type": "component",
                   "id": "DECODER",
                   "input": [
-                    "code@(225:9)"
+                    "J_flag@(55:47)"
                   ],
                   "output": [
                     "mask@(226:9)"
@@ -1412,7 +1247,7 @@
                       "type": "builtin",
                       "id": "NOT",
                       "input": [
-                        "code@(225:9)[0]"
+                        "J_flag@(55:47)[0]"
                       ],
                       "output": [
                         "$i1@(245:13)"
@@ -1439,7 +1274,7 @@
                       "type": "builtin",
                       "id": "AND",
                       "input": [
-                        "code@(225:9)[0]"
+                        "J_flag@(55:47)[0]"
                       ],
                       "output": [
                         "mask@(226:9)[1]"
@@ -1539,23 +1374,12 @@
               ]
             },
             {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "11001"
-              ],
-              "output": [
-                "code@(225:9)"
-              ]
-            },
-            {
               "type": "component",
               "id": "MUX",
               "input": [
                 "input_0@(229:13)",
                 "010",
-                "code@(225:9)"
+                "I_flag_1@(55:55)"
               ],
               "output": [
                 "output@(227:9)"
@@ -1565,11 +1389,6 @@
                   "type": "wire",
                   "id": "output@(227:9)",
                   "width": 3
-                },
-                {
-                  "type": "wire",
-                  "id": "code@(225:9)",
-                  "width": 1
                 },
                 {
                   "type": "wire",
@@ -1585,7 +1404,7 @@
                   "type": "component",
                   "id": "DECODER",
                   "input": [
-                    "code@(225:9)"
+                    "I_flag_1@(55:55)"
                   ],
                   "output": [
                     "mask@(226:9)"
@@ -1595,7 +1414,7 @@
                       "type": "builtin",
                       "id": "NOT",
                       "input": [
-                        "code@(225:9)[0]"
+                        "I_flag_1@(55:55)[0]"
                       ],
                       "output": [
                         "$i1@(245:13)"
@@ -1622,7 +1441,7 @@
                       "type": "builtin",
                       "id": "AND",
                       "input": [
-                        "code@(225:9)[0]"
+                        "I_flag_1@(55:55)[0]"
                       ],
                       "output": [
                         "mask@(226:9)[1]"
@@ -2835,23 +2654,12 @@
               ]
             },
             {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "11000"
-              ],
-              "output": [
-                "code@(225:9)"
-              ]
-            },
-            {
               "type": "component",
               "id": "MUX",
               "input": [
                 "input_0@(229:13)",
                 "input_1@(229:13)",
-                "code@(225:9)"
+                "B_flag@(55:65)"
               ],
               "output": [
                 "output@(227:9)"
@@ -2861,11 +2669,6 @@
                   "type": "wire",
                   "id": "output@(227:9)",
                   "width": 3
-                },
-                {
-                  "type": "wire",
-                  "id": "code@(225:9)",
-                  "width": 1
                 },
                 {
                   "type": "wire",
@@ -2886,7 +2689,7 @@
                   "type": "component",
                   "id": "DECODER",
                   "input": [
-                    "code@(225:9)"
+                    "B_flag@(55:65)"
                   ],
                   "output": [
                     "mask@(226:9)"
@@ -2896,7 +2699,7 @@
                       "type": "builtin",
                       "id": "NOT",
                       "input": [
-                        "code@(225:9)[0]"
+                        "B_flag@(55:65)[0]"
                       ],
                       "output": [
                         "$i1@(245:13)"
@@ -2923,7 +2726,7 @@
                       "type": "builtin",
                       "id": "AND",
                       "input": [
-                        "code@(225:9)[0]"
+                        "B_flag@(55:65)[0]"
                       ],
                       "output": [
                         "mask@(226:9)[1]"
@@ -3026,28 +2829,6 @@
             },
             {
               "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "00000"
-              ],
-              "output": [
-                "memToReg@(16:35)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "01000"
-              ],
-              "output": [
-                "dmemWe@(16:45)"
-              ]
-            },
-            {
-              "type": "builtin",
               "id": "EXT",
               "input": [
                 "0"
@@ -3058,44 +2839,10 @@
             },
             {
               "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "00000"
-              ],
-              "output": [
-                "$i1@(100:39)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "01000"
-              ],
-              "output": [
-                "$i2@(100:39)"
-              ]
-            },
-            {
-              "type": "builtin",
               "id": "OR",
-              "members": [
-                {
-                  "type": "wire",
-                  "id": "$i1@(100:39)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i2@(100:39)",
-                  "width": 1
-                }
-              ],
               "input": [
-                "$i1@(100:39)",
-                "$i2@(100:39)"
+                "memToReg@(16:35)",
+                "dmemWe@(16:45)"
               ],
               "output": [
                 "code@(225:9)"
@@ -3260,61 +3007,11 @@
             },
             {
               "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "00101"
-              ],
-              "output": [
-                "$i1@(102:42)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "11011"
-              ],
-              "output": [
-                "$i2@(102:42)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "11001"
-              ],
-              "output": [
-                "$i3@(102:42)"
-              ]
-            },
-            {
-              "type": "builtin",
               "id": "OR",
-              "members": [
-                {
-                  "type": "wire",
-                  "id": "$i1@(102:42)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i2@(102:42)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i3@(102:42)",
-                  "width": 1
-                }
-              ],
               "input": [
-                "$i1@(102:42)",
-                "$i2@(102:42)",
-                "$i3@(102:42)"
+                "U_flag_1@(55:19)",
+                "J_flag@(55:47)",
+                "I_flag_1@(55:55)"
               ],
               "output": [
                 "aSrc@(16:61)"
@@ -3332,95 +3029,13 @@
             },
             {
               "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "01101"
-              ],
-              "output": [
-                "$i1@(105:67)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "00101"
-              ],
-              "output": [
-                "$i2@(105:67)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "00100"
-              ],
-              "output": [
-                "$i3@(105:67)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "00000"
-              ],
-              "output": [
-                "$i4@(105:67)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "01000"
-              ],
-              "output": [
-                "$i5@(105:67)"
-              ]
-            },
-            {
-              "type": "builtin",
               "id": "OR",
-              "members": [
-                {
-                  "type": "wire",
-                  "id": "$i1@(105:67)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i2@(105:67)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i3@(105:67)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i4@(105:67)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i5@(105:67)",
-                  "width": 1
-                }
-              ],
               "input": [
-                "$i1@(105:67)",
-                "$i2@(105:67)",
-                "$i3@(105:67)",
-                "$i4@(105:67)",
-                "$i5@(105:67)"
+                "U_flag_0@(55:9)",
+                "U_flag_1@(55:19)",
+                "I_flag_0@(55:29)",
+                "memToReg@(16:35)",
+                "dmemWe@(16:45)"
               ],
               "output": [
                 "code@(225:9)"
@@ -3600,44 +3215,10 @@
             },
             {
               "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "11011"
-              ],
-              "output": [
-                "$i1@(106:37)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "11001"
-              ],
-              "output": [
-                "$i2@(106:37)"
-              ]
-            },
-            {
-              "type": "builtin",
               "id": "OR",
-              "members": [
-                {
-                  "type": "wire",
-                  "id": "$i1@(106:37)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i2@(106:37)",
-                  "width": 1
-                }
-              ],
               "input": [
-                "$i1@(106:37)",
-                "$i2@(106:37)"
+                "J_flag@(55:47)",
+                "I_flag_1@(55:55)"
               ],
               "output": [
                 "code@(225:9)"
@@ -3817,44 +3398,10 @@
             },
             {
               "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "01100"
-              ],
-              "output": [
-                "$i1@(107:35)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "11000"
-              ],
-              "output": [
-                "$i2@(107:35)"
-              ]
-            },
-            {
-              "type": "builtin",
               "id": "OR",
-              "members": [
-                {
-                  "type": "wire",
-                  "id": "$i1@(107:35)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i2@(107:35)",
-                  "width": 1
-                }
-              ],
               "input": [
-                "$i1@(107:35)",
-                "$i2@(107:35)"
+                "R_flag@(55:39)",
+                "B_flag@(55:65)"
               ],
               "output": [
                 "code@(225:9)"
@@ -5732,23 +5279,12 @@
               ]
             },
             {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "01101"
-              ],
-              "output": [
-                "code@(225:9)"
-              ]
-            },
-            {
               "type": "component",
               "id": "MUX",
               "input": [
                 "input_0@(229:13)",
                 "0011",
-                "code@(225:9)"
+                "U_flag_0@(55:9)"
               ],
               "output": [
                 "output@(227:9)"
@@ -5758,11 +5294,6 @@
                   "type": "wire",
                   "id": "output@(227:9)",
                   "width": 4
-                },
-                {
-                  "type": "wire",
-                  "id": "code@(225:9)",
-                  "width": 1
                 },
                 {
                   "type": "wire",
@@ -5778,7 +5309,7 @@
                   "type": "component",
                   "id": "DECODER",
                   "input": [
-                    "code@(225:9)"
+                    "U_flag_0@(55:9)"
                   ],
                   "output": [
                     "mask@(226:9)"
@@ -5788,7 +5319,7 @@
                       "type": "builtin",
                       "id": "NOT",
                       "input": [
-                        "code@(225:9)[0]"
+                        "U_flag_0@(55:9)[0]"
                       ],
                       "output": [
                         "$i1@(245:13)"
@@ -5815,7 +5346,7 @@
                       "type": "builtin",
                       "id": "AND",
                       "input": [
-                        "code@(225:9)[0]"
+                        "U_flag_0@(55:9)[0]"
                       ],
                       "output": [
                         "mask@(226:9)[1]"
@@ -5916,44 +5447,10 @@
             },
             {
               "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "00100"
-              ],
-              "output": [
-                "$i1@(126:37)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "01100"
-              ],
-              "output": [
-                "$i2@(126:37)"
-              ]
-            },
-            {
-              "type": "builtin",
               "id": "OR",
-              "members": [
-                {
-                  "type": "wire",
-                  "id": "$i1@(126:37)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i2@(126:37)",
-                  "width": 1
-                }
-              ],
               "input": [
-                "$i1@(126:37)",
-                "$i2@(126:37)"
+                "I_flag_0@(55:29)",
+                "R_flag@(55:39)"
               ],
               "output": [
                 "code@(225:9)"
@@ -6295,23 +5792,12 @@
               ]
             },
             {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "11000"
-              ],
-              "output": [
-                "code@(225:9)"
-              ]
-            },
-            {
               "type": "component",
               "id": "MUX",
               "input": [
                 "input_0@(229:13)",
                 "input_1@(229:13)",
-                "code@(225:9)"
+                "B_flag@(55:65)"
               ],
               "output": [
                 "output@(227:9)"
@@ -6321,11 +5807,6 @@
                   "type": "wire",
                   "id": "output@(227:9)",
                   "width": 4
-                },
-                {
-                  "type": "wire",
-                  "id": "code@(225:9)",
-                  "width": 1
                 },
                 {
                   "type": "wire",
@@ -6346,7 +5827,7 @@
                   "type": "component",
                   "id": "DECODER",
                   "input": [
-                    "code@(225:9)"
+                    "B_flag@(55:65)"
                   ],
                   "output": [
                     "mask@(226:9)"
@@ -6356,7 +5837,7 @@
                       "type": "builtin",
                       "id": "NOT",
                       "input": [
-                        "code@(225:9)[0]"
+                        "B_flag@(55:65)[0]"
                       ],
                       "output": [
                         "$i1@(245:13)"
@@ -6383,7 +5864,7 @@
                       "type": "builtin",
                       "id": "AND",
                       "input": [
-                        "code@(225:9)[0]"
+                        "B_flag@(55:65)[0]"
                       ],
                       "output": [
                         "mask@(226:9)[1]"
@@ -6484,95 +5965,13 @@
             },
             {
               "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "00101"
-              ],
-              "output": [
-                "$i1@(128:65)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "11011"
-              ],
-              "output": [
-                "$i2@(128:65)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "11001"
-              ],
-              "output": [
-                "$i3@(128:65)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "00000"
-              ],
-              "output": [
-                "$i4@(128:65)"
-              ]
-            },
-            {
-              "type": "builtin",
-              "id": "EQ",
-              "input": [
-                "instr@(12:9)[6 : 0][6 : 2]",
-                "01000"
-              ],
-              "output": [
-                "$i5@(128:65)"
-              ]
-            },
-            {
-              "type": "builtin",
               "id": "OR",
-              "members": [
-                {
-                  "type": "wire",
-                  "id": "$i1@(128:65)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i2@(128:65)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i3@(128:65)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i4@(128:65)",
-                  "width": 1
-                },
-                {
-                  "type": "wire",
-                  "id": "$i5@(128:65)",
-                  "width": 1
-                }
-              ],
               "input": [
-                "$i1@(128:65)",
-                "$i2@(128:65)",
-                "$i3@(128:65)",
-                "$i4@(128:65)",
-                "$i5@(128:65)"
+                "U_flag_1@(55:19)",
+                "J_flag@(55:47)",
+                "I_flag_1@(55:55)",
+                "memToReg@(16:35)",
+                "dmemWe@(16:45)"
               ],
               "output": [
                 "code@(225:9)"
@@ -7468,26 +6867,9 @@
             },
             {
               "type": "builtin",
-              "id": "EXT",
-              "input": [
-                "instr@(12:9)[31]"
-              ],
-              "output": [
-                "$i1@(139:68)"
-              ]
-            },
-            {
-              "type": "builtin",
               "id": "CONCAT",
-              "members": [
-                {
-                  "type": "wire",
-                  "id": "$i1@(139:68)",
-                  "width": 20
-                }
-              ],
               "input": [
-                "$i1@(139:68)",
+                "$i1@(137:55)",
                 "instr@(12:9)[31 : 25]",
                 "instr@(12:9)[11 : 7]"
               ],
@@ -7669,26 +7051,9 @@
             },
             {
               "type": "builtin",
-              "id": "EXT",
-              "input": [
-                "instr@(12:9)[31]"
-              ],
-              "output": [
-                "$i1@(140:84)"
-              ]
-            },
-            {
-              "type": "builtin",
               "id": "CONCAT",
-              "members": [
-                {
-                  "type": "wire",
-                  "id": "$i1@(140:84)",
-                  "width": 20
-                }
-              ],
               "input": [
-                "$i1@(140:84)",
+                "$i1@(139:68)",
                 "instr@(12:9)[7]",
                 "instr@(12:9)[30 : 25]",
                 "instr@(12:9)[11 : 8]",

@@ -6,16 +6,14 @@ import pascal.hardscript.compiler.elaborator.NameAllocator;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.binding.MapBinding;
-import pascal.hardscript.util.type.Pair;
 
 import java.util.*;
 
 public abstract sealed class Scope permits BlockScope, DesignScope, ComponentScope {
     private Scope parent;
     private List<Scope> children = new ArrayList<>();
-    private MapBinding binding = MapBinding.ofEmpty();
-
-    private final Set<Pair<Instance, Instance>> aliases = new HashSet<>();
+    private final MapBinding binding = MapBinding.ofEmpty();
+    private final Set<Alias> aliases = new HashSet<>();
 
     private final NameAllocator nameAllocator = new NameAllocator();
     private final Evaluator evaluator = new Evaluator(this);
@@ -40,10 +38,6 @@ public abstract sealed class Scope permits BlockScope, DesignScope, ComponentSco
         this.children = children;
     }
 
-    public void setBinding(MapBinding binding) {
-        this.binding = binding;
-    }
-
     public MapBinding getBinding() {
         return binding;
     }
@@ -60,11 +54,11 @@ public abstract sealed class Scope permits BlockScope, DesignScope, ComponentSco
         return nameAllocator;
     }
 
-    public void alias(Instance a, Instance b) {
-        aliases.add(new Pair<>(a, b));
+    public void addAlias(Instance a, Instance b) {
+        aliases.add(Alias.of(a, b));
     }
 
-    public Set<Pair<Instance, Instance>> getAliases() {
+    public Set<Alias> getAliases() {
         return aliases;
     }
 
@@ -90,5 +84,11 @@ public abstract sealed class Scope permits BlockScope, DesignScope, ComponentSco
             case DesignScope ignored -> null;
             default -> parent.getUpperComponent();
         };
+    }
+
+    public record Alias(Instance from, Instance to) {
+        public static Alias of(Instance from, Instance to) {
+            return new Alias(from, to);
+        }
     }
 }

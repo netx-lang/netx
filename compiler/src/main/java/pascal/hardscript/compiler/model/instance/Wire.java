@@ -4,6 +4,8 @@ import pascal.hardscript.compiler.ast.Identifier;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.scope.Scope;
 
+import java.util.Objects;
+
 public final class Wire implements Data {
     private final Identifier id;
     private final Scope parent;
@@ -37,6 +39,14 @@ public final class Wire implements Data {
     @Override
     public void setType(InstanceType type) {
         this.type = type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Wire wire = (Wire) o;
+        return Objects.equals(id, wire.id) && Objects.equals(parent, wire.parent) && Objects.equals(type, wire.type);
     }
 
     @Override
