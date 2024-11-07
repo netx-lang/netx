@@ -31,6 +31,10 @@ dependencies {
     testRuntimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
     testRuntimeOnly("org.apache.logging.log4j:log4j-api:2.20.0")
     testRuntimeOnly("org.apache.logging.log4j:log4j-core:2.20.0")
+
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.17.2")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.2")
 }
 
 tasks.test {

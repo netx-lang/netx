@@ -29,22 +29,33 @@ public final class FrontendUtils {
         return Identifier.of(name).setSourceLoc(SourceLoc.of(line, column));
     }
 
-    public static Iterator<JsonNode> membersIterOf(JsonNode node) {
-        var members = membersNodeOf(node);
+    public static Iterator<JsonNode> iteratorOf(JsonNode node, String field) {
+        var members = arrayNodeOf(node, field);
         return members.elements();
     }
 
-    public static void forEachMember(JsonNode node, Consumer<JsonNode> consumer) {
-        membersIterOf(node).forEachRemaining(consumer);
+    public static Stream<JsonNode> streamOf(JsonNode node, String field) {
+        var array = arrayNodeOf(node, field);
+        return StreamSupport.stream(array.spliterator(), false);
+    }
+
+    public static void forEachInField(JsonNode node, String field, Consumer<JsonNode> consumer) {
+        iteratorOf(node, field).forEachRemaining(consumer);
+    }
+
+    public static Iterator<JsonNode> membersIterOf(JsonNode node) {
+        return iteratorOf(node, "member");
     }
 
     public static Stream<JsonNode> membersOf(JsonNode node) {
-        var members = membersNodeOf(node);
-        return StreamSupport.stream(members.spliterator(), false);
-
+        return streamOf(node, "member");
     }
 
-    private static ArrayNode membersNodeOf(JsonNode node) {
-        return (ArrayNode) node.get("members");
+    public static void forEachMember(JsonNode node, Consumer<JsonNode> consumer) {
+        forEachInField(node, "member", consumer);
+    }
+
+    private static ArrayNode arrayNodeOf(JsonNode node, String field) {
+        return (ArrayNode) node.get(field);
     }
 }

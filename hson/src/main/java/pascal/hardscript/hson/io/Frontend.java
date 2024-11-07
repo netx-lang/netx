@@ -30,6 +30,7 @@ public class Frontend {
     }
 
     public void parse() {
-        new InstanceParser(circuit).parse(json);
+        new DataParser(circuit).parse(json);
+        new RelationParser(circuit).parse(json);
     }
 }
