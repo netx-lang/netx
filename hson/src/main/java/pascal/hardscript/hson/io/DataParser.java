@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import pascal.hardscript.hson.model.Circuit;
 import pascal.hardscript.hson.model.ClockNode;
 import pascal.hardscript.hson.model.WireNode;
-import pascal.hardscript.hson.model.StreamNode;
 
 import static pascal.hardscript.hson.io.FrontendUtils.*;
 
@@ -27,7 +26,7 @@ public final class DataParser {
         }
     }
 
-    private StreamNode parseClock(JsonNode node) {
+    private ClockNode parseClock(JsonNode node) {
         return ClockNode.of(identifierOf(node));
     }
 
