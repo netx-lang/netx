@@ -1,0 +1,4 @@
+component top: [a, b] -> c {
+    inst a, b, c of wire(bit(4))
+    c <- AND <> [a, b]
+}

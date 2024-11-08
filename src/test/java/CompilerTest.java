@@ -1,5 +1,3 @@
-package pascal.hardscript.compiler;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.io.Compiler;

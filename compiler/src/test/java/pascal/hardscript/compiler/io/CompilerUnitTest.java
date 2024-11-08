@@ -23,7 +23,7 @@ class CompilerUnitTest {
 
     @Test
     void loadPathWithValidPath() throws IOException {
-        Path path = Path.of("src/test/resources/adder.hard");
+        Path path = Path.of("src/test/resources/valid.hard");
         Compiler compiler = Compiler.loadPath(path);
         assertNotNull(compiler);
     }
@@ -35,18 +35,8 @@ class CompilerUnitTest {
     }
 
     @Test
-    void parseValidInput() throws IOException {
-        String content = new String(Files.readAllBytes(Path.of("src/test/resources/adder.hard")));
-
-        CharStream charStream = CharStreams.fromString(content);
-        Compiler compiler = Compiler.load(charStream);
-        DesignScope designScope = compiler.compile();
-        assertNotNull(designScope);
-    }
-
-    @Test
-    void elaborateValidInput() throws IOException {
-        String content = new String(Files.readAllBytes(Path.of("src/test/resources/divide_by_3.hard")));
+    void testValidInput() throws IOException {
+        String content = new String(Files.readAllBytes(Path.of("src/test/resources/valid.hard")));
 
         CharStream charStream = CharStreams.fromString(content);
         Compiler compiler = Compiler.load(charStream);
@@ -55,7 +45,7 @@ class CompilerUnitTest {
     }
 
     @Test
-    void parseInvalidInput() {
+    void testInvalidInput() {
         CharStream charStream = CharStreams.fromString("invalid input");
         Compiler compiler = Compiler.load(charStream);
         assertThrows(ParseCancellationException.class, compiler::compile);

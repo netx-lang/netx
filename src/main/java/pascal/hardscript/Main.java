@@ -1,4 +1,4 @@
-package pascal.hardscript.simulator;
+package pascal.hardscript;
 
 public class Main {
     public static void main(String[] args) {
