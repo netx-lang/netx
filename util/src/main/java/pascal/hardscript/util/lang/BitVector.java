@@ -1,5 +1,7 @@
 package pascal.hardscript.util.lang;
 
+import pascal.hardscript.util.exception.TodoException;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -88,8 +90,18 @@ public final class BitVector {
         return new BigInteger(data);
     }
 
+    public BigInteger toUnsignedBigInteger() {
+        normalize();
+        return new BigInteger(1, data);
+    }
+
     public int toInt() {
         return toBigInteger().intValue();
+    }
+
+    public BitVector concat(BitVector other) {
+        // TODO:
+        throw new TodoException();
     }
 
     public BitVector negative() {
@@ -156,6 +168,10 @@ public final class BitVector {
         return result;
     }
 
+    public BitVector nand(BitVector other) {
+        return this.and(other).not();
+    }
+
     public BitVector or(BitVector other) {
         requiresSameSize(this, other);
         BitVector result = new BitVector(size);
@@ -163,6 +179,10 @@ public final class BitVector {
             result.data[i] = (byte) (data[i] | other.data[i]);
         }
         return result;
+    }
+
+    public BitVector nor(BitVector other) {
+        return this.or(other).not();
     }
 
     public BitVector xor(BitVector other) {
@@ -250,20 +270,36 @@ public final class BitVector {
         return !eq(other);
     }
 
-    public boolean gt(BitVector other) {
+    public boolean sgt(BitVector other) {
         return toBigInteger().compareTo(other.toBigInteger()) > 0;
     }
 
-    public boolean ge(BitVector other) {
+    public boolean sge(BitVector other) {
         return toBigInteger().compareTo(other.toBigInteger()) >= 0;
     }
 
-    public boolean lt(BitVector other) {
+    public boolean slt(BitVector other) {
         return toBigInteger().compareTo(other.toBigInteger()) < 0;
     }
 
-    public boolean le(BitVector other) {
+    public boolean sle(BitVector other) {
         return toBigInteger().compareTo(other.toBigInteger()) <= 0;
+    }
+
+    public boolean ugt(BitVector other) {
+        return toUnsignedBigInteger().compareTo(other.toBigInteger()) > 0;
+    }
+
+    public boolean uge(BitVector other) {
+        return toUnsignedBigInteger().compareTo(other.toBigInteger()) >= 0;
+    }
+
+    public boolean ult(BitVector other) {
+        return toUnsignedBigInteger().compareTo(other.toBigInteger()) < 0;
+    }
+
+    public boolean ule(BitVector other) {
+        return toUnsignedBigInteger().compareTo(other.toBigInteger()) <= 0;
     }
 
     @Override

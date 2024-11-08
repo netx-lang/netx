@@ -2,7 +2,7 @@ package pascal.hardscript.hson.model;
 
 import pascal.hardscript.util.lang.Identifier;
 
-public class ComputationNode extends Node {
+public final class ComputationNode extends Node {
     private ComputationNode(Identifier id) {
         super(id);
     }

@@ -5,6 +5,8 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
+import pascal.hardscript.util.exception.ShallNotReachHereError;
+import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
 
@@ -66,6 +68,26 @@ public class Circuit {
         while (iterator.hasNext()) {
             iterator.next().setOrder(order++);
         }
+    }
+
+    public Node getPredecessor(Node node) {
+        var list = getPredecessors(node);
+        if (list.size() != 1) {
+            throw new TodoException("Replace this Exception");
+        }
+        return list.getFirst();
+    }
+
+    public Node getSuccessor(Node node) {
+        var list = getSuccessors(node);
+        if (list.size() != 1) {
+            throw new TodoException("Replace this Exception");
+        }
+        return list.getFirst();
+    }
+
+    public List<Node> getPredecessors(Node node) {
+        return Graphs.predecessorListOf(graph, node);
     }
 
     public List<Node> getSuccessors(Node node) {

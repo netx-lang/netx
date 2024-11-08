@@ -1,10 +1,9 @@
 package pascal.hardscript.hson.simulator;
 
-import pascal.hardscript.hson.model.Circuit;
-import pascal.hardscript.hson.model.ClockNode;
-import pascal.hardscript.hson.model.Node;
-import pascal.hardscript.util.exception.TodoException;
+import pascal.hardscript.hson.model.*;
+import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BitVector;
+import pascal.hardscript.util.lang.BuiltinComponent;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -26,11 +25,14 @@ public final class Simulator {
 
     private void initialize() {
         circuit.topologySort();
-        for (var entry : circuit.getRegisters().entrySet()) {
-            var clock = entry.getKey();
-            clock.setValue(supplier.nextBoolean());
-            clocks.add(clock);
-            for (var reg : entry.getValue()) {
+        for (var node : circuit.getInputs()) {
+            if (node instanceof ClockNode clock) {
+                clock.setValue(supplier.nextBoolean());
+                clocks.add(clock);
+            }
+        }
+        for (var register : circuit.getRegisters().values()) {
+            for (var reg : register) {
                 reg.setValue(supplier.next(reg.getWidth()));
             }
         }
@@ -39,29 +41,71 @@ public final class Simulator {
     public void run() {
         boolean hasProgress = true;
         while (hasProgress) {
-            while (hasProgress) {
-                hasProgress = step();
+            while (!schedule.isEmpty()) {
+                step();
             }
-            clockStep();
+            hasProgress = clockStep();
         }
     }
 
-    public void clockStep() {
-        // FIXME: deprecated
-        clocks.getFirst().tick();
-    }
-
-    public boolean step() {
-        if (schedule.isEmpty()) {
-            return false;
-        }
-
+    public boolean clockStep() {
         boolean hasProgress = false;
-        var node = schedule.poll();
-        for (var successor : circuit.getSuccessors(node)) {
-            throw new TodoException(); // TODO:
+        var clock = pickClock();
+        clock.tick();
+        for (var reg : circuit.getRegisters().get(clock)) {
+            var input = (DataNode) circuit.getPredecessor(reg);
+            var output = (DataNode) circuit.getSuccessor(reg);
+            if (!input.getValue().equals(reg.getValue())) {
+                schedule.add(output);
+                hasProgress = true;
+            }
         }
         return hasProgress;
+    }
+
+    private ClockNode pickClock() {
+        // FIXME: deprecated
+        if (clocks.size() == 1) {
+            return clocks.getFirst();
+        }
+        return clocks.get(RANDOM.nextInt(clocks.size()));
+    }
+
+    public void step() {
+        var node = schedule.poll();
+        switch (Objects.requireNonNull(node)) {
+            case DataNode data -> dataNodeStep(data);
+            case ComputationNode computation -> computationStep(computation);
+        }
+    }
+
+    private void computationStep(ComputationNode node) {
+        var id = node.getIdentifier();
+        if (BuiltinComponent.isBuiltin(id)) {
+            var inputs = circuit.getPredecessors(node).stream()
+                    .map(DataNode.class::cast)
+                    .map(DataNode::getValue).toList();
+            var update = Evaluator.evaluate(BuiltinComponent.of(id), inputs).iterator();
+            for (var output : circuit.getSuccessors(node)) {
+                // FIXME: check order
+                ((DataNode) output).setValue(update.next());
+                schedule.add(output);
+            }
+        } else {
+            // TODO: check constraints, etc.
+        }
+    }
+
+    private void dataNodeStep(DataNode node) {
+        for (var successor : circuit.getSuccessors(node)) {
+            switch (successor) {
+                case ComputationNode computation -> schedule.add(computation);
+                case RegisterNode ignore -> {
+                    // do nothing since registers are only updated on clock ticks
+                }
+                default -> throw new ShallNotReachHereError();
+            }
+        }
     }
 
     private static class ScheduleQueue extends PriorityQueue<Node> {

@@ -104,22 +104,22 @@ public record BitVectorValue(BitVector value) implements IntegerValue {
 
     @Override
     public BooleanValue gt(IntegerValue other) {
-        return BooleanValue.of(value.gt(other.toBitVector()));
+        return BooleanValue.of(value.sgt(other.toBitVector()));
     }
 
     @Override
     public BooleanValue ge(IntegerValue other) {
-        return BooleanValue.of(value.ge(other.toBitVector()));
+        return BooleanValue.of(value.sge(other.toBitVector()));
     }
 
     @Override
     public BooleanValue lt(IntegerValue other) {
-        return BooleanValue.of(value.lt(other.toBitVector()));
+        return BooleanValue.of(value.slt(other.toBitVector()));
     }
 
     @Override
     public BooleanValue le(IntegerValue other) {
-        return BooleanValue.of(value.le(other.toBitVector()));
+        return BooleanValue.of(value.sle(other.toBitVector()));
     }
 
     @Override
