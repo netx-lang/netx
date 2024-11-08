@@ -29,8 +29,9 @@ public class Frontend {
         return new Frontend(mapper.readTree(path.toFile()));
     }
 
-    public void parse() {
-        new DataParser(circuit).parse(json);
-        new RelationParser(circuit).parse(json);
+    public Circuit parse() {
+        new DataParser(circuit).run(json);
+        new RelationParser(circuit).run(json);
+        return circuit;
     }
 }

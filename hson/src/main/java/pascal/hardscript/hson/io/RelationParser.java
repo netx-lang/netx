@@ -15,7 +15,12 @@ public final class RelationParser {
         this.circuit = circuit;
     }
 
-    public void parse(JsonNode node) {
+    public void run(JsonNode root) {
+        resolveNodes(root, "input");
+        resolveNodes(root, "output");
+    }
+
+    private void parse(JsonNode node) {
         var id = identifierOf(node);
         RelationNode relation;
         if (id.string().equals("REGISTER")) {
@@ -32,16 +37,18 @@ public final class RelationParser {
     private RelationNode parseRegister(JsonNode node, Identifier id) {
         RelationNode relation;
         var attribute = node.get("attribute");
+        var clock = (ClockNode) reolveNode(attribute.get("clock"));
         boolean isPosTrigger = Boolean.parseBoolean(attribute.get("isPosTrigger").textValue());
-        var clock = (ClockNode) circuit.resolve(parseIdentifier(attribute.get("clock").textValue()));
         relation = RegisterNode.of(id, clock, isPosTrigger);
         return relation;
     }
 
     private List<Node> resolveNodes(JsonNode node, String field) {
-        return streamOf(node, field)
-                .map(FrontendUtils::identifierOf)
-                .map(circuit::resolve).toList();
+        return streamOf(node, field).map(this::reolveNode).toList();
+    }
+
+    private Node reolveNode(JsonNode node) {
+        return circuit.resolve(parseIdentifier(node.textValue()));
     }
 
     private void parseSubComponents(JsonNode member) {

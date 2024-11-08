@@ -14,13 +14,15 @@ import java.util.Map;
 
 public class Circuit {
     private final DataManager manager = new DataManager();
+    private final List<Node> inputs = new LinkedList<>();
+    private final List<Node> outputs = new LinkedList<>();
     private final Map<ClockNode, List<RegisterNode>> registers = new HashMap<>();
     private final Graph<Node, DefaultEdge> graph = new SimpleDirectedGraph<>(DefaultEdge.class);
 
     public void addVertex(Node node) {
         switch (node) {
             case ClockNode clock -> registers.put(clock, new LinkedList<>());
-            case RegisterNode register -> registers.get(register.clock()).add(register);
+            case RegisterNode register -> registers.get(register.getClock()).add(register);
             default -> {
                 // do nothing
             }
