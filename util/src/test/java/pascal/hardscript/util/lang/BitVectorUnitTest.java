@@ -88,13 +88,13 @@ class BitVectorUnitTest {
     }
 
     @Test
-    void testInvert() {
+    void testNot() {
         BitVector bv1 = BitVector.parse("01101011", 8, 2);
         BitVector bv2 = BitVector.parse("10010100", 8, 2);
         BitVector bv3 = BitVector.parse("1010010111111010000010111", 25, 2);
         BitVector bv4 = BitVector.parse("0101101000000101111101000", 25, 2);
-        assertEquals(bv2, bv1.invert());
-        assertEquals(bv4, bv3.invert());
+        assertEquals(bv2, bv1.not());
+        assertEquals(bv4, bv3.not());
     }
 
     @Test

@@ -129,7 +129,7 @@ public record BitVectorValue(BitVector value) implements IntegerValue {
 
     @Override
     public IntegerValue bitwiseNot() {
-        return BitVectorValue.of(value.invert());
+        return BitVectorValue.of(value.not());
     }
 
     @Override

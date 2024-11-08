@@ -2,19 +2,16 @@ package pascal.hardscript.hson.model;
 
 import pascal.hardscript.util.lang.Identifier;
 
-public final class ClockNode extends DataNode implements StreamNode {
-    private final Identifier id;
-
+public final class ClockNode extends DataNode {
     public ClockNode(Identifier id) {
-        this.id = id;
+        super(id, 1);
     }
 
     public static ClockNode of(Identifier id) {
         return new ClockNode(id);
     }
 
-    @Override
-    public Identifier getIdentifier() {
-        return id;
+    public void tick() {
+        setValue(getValue().not());
     }
 }

@@ -45,6 +45,10 @@ public final class BitVector {
         return new BitVector(Integer.SIZE, BigInteger.valueOf(value).toByteArray());
     }
 
+    public static BitVector fromBoolean(boolean value) {
+        return new BitVector(1, value ? new byte[]{1} : new byte[]{0});
+    }
+
     public static BitVector fromBigInteger(int size, BigInteger value) {
         return new BitVector(size, value.toByteArray());
     }
@@ -89,7 +93,7 @@ public final class BitVector {
     }
 
     public BitVector negative() {
-        BitVector result = invert();
+        BitVector result = not();
         for (int i = 0; i < data.length; i++) {
             result.data[i]++;
             if (result.data[i] != 0) {
@@ -99,7 +103,7 @@ public final class BitVector {
         return result;
     }
 
-    public BitVector invert() {
+    public BitVector not() {
         BitVector result = new BitVector(size);
         for (int i = 0; i < data.length; i++) {
             result.data[i] = (byte) ~data[i];
@@ -172,7 +176,7 @@ public final class BitVector {
 
     public BitVector xnor(BitVector other) {
         requiresSameSize(this, other);
-        return xor(other).invert();
+        return xor(other).not();
     }
 
     public BitVector ashr(int offset) {

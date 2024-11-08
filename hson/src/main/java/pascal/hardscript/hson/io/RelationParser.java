@@ -22,24 +22,26 @@ public final class RelationParser {
 
     private void parse(JsonNode node) {
         var id = identifierOf(node);
-        RelationNode relation;
+        var inputs = resolveNodes(node, "input");
+        var outputs = resolveNodes(node, "output");
+
+        Node relation;
         if (id.string().equals("REGISTER")) {
-            relation = parseRegister(node, id);
+            int width = ((DataNode) outputs.getFirst()).getWidth();
+            relation = parseRegister(node, id, width);
         } else {
             relation = ComputationNode.of(id);
         }
-        circuit.addHyperEdge(relation,
-                resolveNodes(node, "input"),
-                resolveNodes(node, "output"));
+        circuit.addHyperEdge(relation, inputs, outputs);
         forEachMember(node, this::parseSubComponents);
     }
 
-    private RelationNode parseRegister(JsonNode node, Identifier id) {
-        RelationNode relation;
+    private Node parseRegister(JsonNode node, Identifier id, int width) {
+        Node relation;
         var attribute = node.get("attribute");
         var clock = (ClockNode) reolveNode(attribute.get("clock"));
         boolean isPosTrigger = Boolean.parseBoolean(attribute.get("isPosTrigger").textValue());
-        relation = RegisterNode.of(id, clock, isPosTrigger);
+        relation = RegisterNode.of(id, width, clock, isPosTrigger);
         return relation;
     }
 

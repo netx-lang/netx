@@ -1,8 +1,10 @@
 package pascal.hardscript.hson.model;
 
 import org.jgrapht.Graph;
+import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
+import org.jgrapht.traverse.TopologicalOrderIterator;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
 
@@ -31,7 +33,7 @@ public class Circuit {
         manager.addNode(node);
     }
 
-    public void addHyperEdge(RelationNode node, List<Node> from, List<Node> to) {
+    public void addHyperEdge(Node node, List<Node> from, List<Node> to) {
         addVertex(node);
         from.forEach(f -> addEdge(f, node));
         to.forEach(t -> addEdge(node, t));
@@ -44,6 +46,30 @@ public class Circuit {
     @Nonnull
     public Node resolve(Identifier identifier) {
         return manager.resolve(identifier);
+    }
+
+    public List<Node> getInputs() {
+        return inputs;
+    }
+
+    public List<Node> getOutputs() {
+        return outputs;
+    }
+
+    public Map<ClockNode, List<RegisterNode>> getRegisters() {
+        return registers;
+    }
+
+    public void topologySort() {
+        int order = 0;
+        var iterator = new TopologicalOrderIterator<>(graph);
+        while (iterator.hasNext()) {
+            iterator.next().setOrder(order++);
+        }
+    }
+
+    public List<Node> getSuccessors(Node node) {
+        return Graphs.successorListOf(graph, node);
     }
 
     private static class DataManager {
