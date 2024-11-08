@@ -21,7 +21,11 @@ public final class FrontendUtils {
     }
 
     public static Identifier identifierOf(JsonNode node) {
-        var matcher = ID_PATTERN.matcher(node.get("id").textValue());
+        return parseIdentifier(node.get("id").textValue());
+    }
+
+    public static Identifier parseIdentifier(String string) {
+        var matcher = ID_PATTERN.matcher(string);
 
         var name = matcher.group(1);
         var line = Integer.parseInt(matcher.group(2));

@@ -8,19 +8,29 @@ import pascal.hardscript.util.lang.SourceLoc;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class Circuit {
     private final DataManager manager = new DataManager();
+    private final Map<ClockNode, List<RegisterNode>> registers = new HashMap<>();
     private final Graph<Node, DefaultEdge> graph = new SimpleDirectedGraph<>(DefaultEdge.class);
 
-    public Node addVertex(Node node) {
+    public void addVertex(Node node) {
+        switch (node) {
+            case ClockNode clock -> registers.put(clock, new LinkedList<>());
+            case RegisterNode register -> registers.get(register.clock()).add(register);
+            default -> {
+                // do nothing
+            }
+        }
         graph.addVertex(node);
-        return manager.addNode(node);
+        manager.addNode(node);
     }
 
-    public void addHyperEdge(Identifier id, List<Node> from, List<Node> to) {
-        var node = addVertex(new ComputationNode(id));
+    public void addHyperEdge(RelationNode node, List<Node> from, List<Node> to) {
+        addVertex(node);
         from.forEach(f -> addEdge(f, node));
         to.forEach(t -> addEdge(node, t));
     }
@@ -38,10 +48,9 @@ public class Circuit {
         private static class IdentifierMap extends HashMap<Identifier, Node> {}
         private final HashMap<SourceLoc, IdentifierMap> nodes = new HashMap<>();
 
-        public Node addNode(Node node) {
+        public void addNode(Node node) {
             var id = node.getIdentifier();
             nodes.computeIfAbsent(id.getSourceLoc(), _ -> new IdentifierMap()).put(id, node);
-            return node;
         }
 
         public Node resolve(Identifier identifier) {
