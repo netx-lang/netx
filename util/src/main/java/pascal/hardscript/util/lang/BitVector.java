@@ -1,7 +1,5 @@
 package pascal.hardscript.util.lang;
 
-import pascal.hardscript.util.exception.TodoException;
-
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -100,8 +98,21 @@ public final class BitVector {
     }
 
     public BitVector concat(BitVector other) {
-        // TODO:
-        throw new TodoException();
+        var result = new BitVector(size + other.size);
+        int lhsLength = data.length, rhsLength = other.data.length;
+        if ((other.size & 7) == 0) {
+            System.arraycopy(other.data, 0, result.data, 0, rhsLength);
+            System.arraycopy(data, 0, result.data, rhsLength, lhsLength);
+        } else {
+            normalize();
+            int offset = other.size & 7;
+            var shift = this.shl(offset);
+            System.arraycopy(other.data, 0, result.data, 0, rhsLength - 1);
+            System.arraycopy(shift.data, 1, result.data, rhsLength, lhsLength - 1);
+            result.data[rhsLength - 1] = (byte) (shift.data[0] | other.data[rhsLength - 1]);
+            result.data[result.data.length - 1] = (byte) (data[lhsLength - 1] << offset);
+        }
+        return result;
     }
 
     public BitVector negative() {
@@ -225,10 +236,11 @@ public final class BitVector {
             System.arraycopy(data, byteOffset, result.data, 0, data.length - byteOffset);
         } else {
             result.data[data.length - byteOffset - 1] = (byte) (data[data.length - 1] >> bitOffset);
+            var mask = ((1 << (8 - bitOffset + 1)) - 1);
             for (int i = 0; i < data.length - byteOffset - 1; i++) {
-                result.data[i] = (byte) (
-                        (data[i + byteOffset] >>> bitOffset) |
-                                (data[i + byteOffset + 1] << (8 - bitOffset)));
+                var low = (data[i + byteOffset] >>> bitOffset) & mask;
+                var high = (data[i + byteOffset + 1] << (8 - bitOffset));
+                result.data[i] = (byte) (low | high);
             }
         }
     }
@@ -243,10 +255,11 @@ public final class BitVector {
             System.arraycopy(data, 0, result.data, byteOffset, data.length);
         } else {
             result.data[byteOffset] = (byte) (data[0] << bitOffset);
+            var mask = ((1 << (bitOffset + 1)) - 1);
             for (int i = byteOffset + 1; i < data.length; i++) {
-                result.data[i] = (byte) (
-                        (data[i - byteOffset] << bitOffset) |
-                                (data[i - byteOffset - 1] >>> (8 - bitOffset)));
+                var low = data[i - byteOffset] << bitOffset;
+                var high = (data[i - byteOffset - 1] >>> (8 - bitOffset)) & mask;
+                result.data[i] = (byte) (low | high);
             }
         }
         return result;

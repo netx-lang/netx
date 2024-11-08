@@ -69,6 +69,18 @@ class BitVectorUnitTest {
     }
 
     @Test
+    void testConcat() {
+        BitVector bv1 = BitVector.parse("01101011", 8, 2);
+        BitVector bv2 = BitVector.parse("00010101", 8, 2);
+        BitVector bv3 = BitVector.parse("0110101100010101", 16, 2);
+        BitVector bv4 = BitVector.parse("1010010111111010000010111", 25, 2);
+        BitVector bv5 = BitVector.parse("0010101111000101110101100", 25, 2);
+        BitVector bv6 = BitVector.parse("10100101111110100000101110010101111000101110101100", 50, 2);
+        assertEquals(bv3, bv1.concat(bv2));
+        assertEquals(bv6, bv4.concat(bv5));
+    }
+
+    @Test
     void testEquals() {
         BitVector bv1 = BitVector.parse("01101011", 8, 2);
         BitVector bv2 = BitVector.parse("01101011", 8, 2);
