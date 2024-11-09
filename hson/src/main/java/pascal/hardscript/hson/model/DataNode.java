@@ -3,7 +3,7 @@ package pascal.hardscript.hson.model;
 import pascal.hardscript.util.lang.BitVector;
 import pascal.hardscript.util.lang.Identifier;
 
-public abstract sealed class DataNode extends Node permits ClockNode, ConstantNode, WireNode {
+public abstract sealed class DataNode extends Node permits ClockNode, ConstantNode, WireNode, DataSelectNode {
     protected BitVector value;
     protected final int width;
 

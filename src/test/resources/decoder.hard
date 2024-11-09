@@ -1,4 +1,4 @@
-component top : [] -> [] {
+component top : [input] -> [output] {
     inst input of wire(bit(3))
     inst output of wire(bit(8))
     output <- decoder(3) <> input

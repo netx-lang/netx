@@ -38,6 +38,11 @@ public final class Simulator {
                 clocks.add(clock);
             }
         }
+        for (var node : circuit.getAllNodes()) {
+            if (node instanceof DataNode data && !(data instanceof DataSelectNode)) {
+                data.setValue(supplier.next(data.getWidth()));
+            }
+        }
         for (var register : circuit.getRegisters().values()) {
             for (var reg : register) {
                 var state = reg.getCurr();
@@ -139,9 +144,17 @@ public final class Simulator {
                     .map(DataNode::getValue).toList();
             var update = Evaluator.evaluate(BuiltinComponent.of(id), inputs).iterator();
             for (var output : circuit.getSuccessors(node)) {
-                // FIXME: check order
-                ((DataNode) output).setValue(update.next());
-                schedule.add(output);
+                var data = (DataNode) output;
+                data.setValue(update.next());
+                if (data instanceof DataSelectNode selectNode) {
+                    var base = selectNode.getBase();
+                    var value = selectNode.inverseApply();
+                    if (!value.equals(base.getValue())) {
+                        base.setValue(value);
+                        schedule.add(base);
+                    }
+                }
+                schedule.add(data);
             }
         } else if (DO_VERIFICATION) {
             // TODO: check constraints, etc.
@@ -156,6 +169,13 @@ public final class Simulator {
                     var id = computation.getIdentifier();
                     if (DO_VERIFICATION || BuiltinComponent.isBuiltin(id)) {
                         schedule.add(computation);
+                    }
+                }
+                case DataSelectNode select -> {
+                    var value = select.apply();
+                    if (!value.equals(select.getValue())) {
+                        select.setValue(value);
+                        schedule.add(select);
                     }
                 }
                 default -> throw new ShallNotReachHereError();

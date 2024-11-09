@@ -49,8 +49,12 @@ public final class DataParser {
         return node.get("width").intValue();
     }
 
-    private static Pair<Identifier, Integer> parseIdentifier(JsonNode node) {
-        var parser = buildParser(node.get("id").textValue());
+    static Pair<Identifier, Integer> parseIdentifier(JsonNode node) {
+        return parseIdentifier(node.get("id").textValue());
+    }
+
+    static Pair<Identifier, Integer> parseIdentifier(String string) {
+        var parser = buildParser(string);
         var context = parser.identifier();
 
         var id = Identifier.of(context.name.getText()).setSourceLoc(

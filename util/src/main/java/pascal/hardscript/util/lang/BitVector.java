@@ -45,6 +45,10 @@ public final class BitVector {
         return new BitVector(Integer.SIZE, BigInteger.valueOf(value).toByteArray());
     }
 
+    public static BitVector fromInt(int value, int size) {
+        return new BitVector(size, BigInteger.valueOf(value).toByteArray());
+    }
+
     public static BitVector fromBoolean(boolean value) {
         return new BitVector(1, value ? new byte[]{1} : new byte[]{0});
     }
@@ -63,6 +67,38 @@ public final class BitVector {
 
     public boolean get(int index) {
         return (data[index >> 3] & (1 << (index & 7))) != 0;
+    }
+
+    public BitVector select(int msb, int lsb) {
+        if (msb < lsb) {
+            throw new IllegalArgumentException("Invalid range");
+        }
+        int size = msb - lsb + 1;
+        BitVector result = new BitVector(size);
+        for (int i = 0; i < size; i++) {
+            if (get(lsb + i)) {
+                result.set(i);
+            }
+        }
+        return result;
+    }
+
+    public BitVector set(int msb, int lsb, BitVector vector) {
+        if (msb < lsb) {
+            throw new IllegalArgumentException("Invalid range");
+        }
+        int size = msb - lsb + 1;
+        if (size != vector.size) {
+            throw new IllegalArgumentException("Invalid vector size");
+        }
+        for (int i = 0; i < size; i++) {
+            if (vector.get(i)) {
+                set(lsb + i);
+            } else {
+                clear(lsb + i);
+            }
+        }
+        return this;
     }
 
     public int size() {

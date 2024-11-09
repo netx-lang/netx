@@ -5,12 +5,8 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
-import pascal.hardscript.util.exception.TodoException;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Circuit {
     private final List<DataNode> inputs = new LinkedList<>();
@@ -32,7 +28,7 @@ public class Circuit {
         to.forEach(t -> addEdge(node, t));
     }
 
-    private void addEdge(Node from, Node to) {
+    public void addEdge(Node from, Node to) {
         graph.addEdge(from, to);
     }
 
@@ -56,28 +52,16 @@ public class Circuit {
         return registers;
     }
 
+    public Set<Node> getAllNodes() {
+        return graph.vertexSet();
+    }
+
     public void topologySort() {
         int order = 0;
         var iterator = new TopologicalOrderIterator<>(graph);
         while (iterator.hasNext()) {
             iterator.next().setOrder(order++);
         }
-    }
-
-    public Node getPredecessor(Node node) {
-        var list = getPredecessors(node);
-        if (list.size() != 1) {
-            throw new TodoException("Replace this Exception");
-        }
-        return list.getFirst();
-    }
-
-    public Node getSuccessor(Node node) {
-        var list = getSuccessors(node);
-        if (list.size() != 1) {
-            throw new TodoException("Replace this Exception");
-        }
-        return list.getFirst();
     }
 
     public List<Node> getPredecessors(Node node) {

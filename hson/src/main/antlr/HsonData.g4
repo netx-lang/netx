@@ -1,21 +1,27 @@
 grammar HsonData;
 
-data: identifier | constant;
+data
+    : identifier | constant | select;
+
+select
+    : identifier selector+
+    ;
 
 identifier
-    : name=ID '@' '(' line=UNSIGNED_INTEGER ':' column=UNSIGNED_INTEGER ')' '@' index=UNSIGNED_INTEGER selector*
+    : name=ID '@' '(' line=UNSIGNED_INTEGER ':' column=UNSIGNED_INTEGER ')' '@' index=UNSIGNED_INTEGER
     ;
 
 selector
-    : '[' UNSIGNED_INTEGER ']'                      # BitSelector
-    | '[' UNSIGNED_INTEGER ':' UNSIGNED_INTEGER ']' # PartSelector
+    : '[' index=UNSIGNED_INTEGER ']'                      # BitSelector
+    | '[' from=UNSIGNED_INTEGER ':' to=UNSIGNED_INTEGER ']' # PartSelector
     ;
 
 constant
-    : size=UNSIGNED_INTEGER  literal=HEX
+    : HEX
+    | UNSIGNED_INTEGER
     ;
 
-HEX : '\'h' [0-9a-fA-F] [0-9a-fA-F_]* ;
+HEX : UNSIGNED_INTEGER '\'h' [0-9a-fA-F] [0-9a-fA-F_]* ;
 ID : [$a-zA-Z_][a-zA-Z_0-9]*;
 UNSIGNED_INTEGER : [0-9] [0-9_]*;
 WHITE_SPACE: [ \t\r\n]+ -> skip;
