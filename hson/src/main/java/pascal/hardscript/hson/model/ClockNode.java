@@ -11,7 +11,9 @@ public final class ClockNode extends DataNode {
         return new ClockNode(id);
     }
 
-    public void tick() {
-        setValue(getValue().not());
+    public boolean tick() {
+        var next = getValue().not();
+        setValue(next);
+        return next.toBoolean();
     }
 }

@@ -20,8 +20,8 @@ public final class RelationParser {
     }
 
     public void run(JsonNode root) {
-        resolveNodes(root, "input").forEach(node -> circuit.addInput((DataNode) node));
-        resolveNodes(root, "output").forEach(node -> circuit.addOutput((DataNode) node));
+        resolveNodes(root, "input").forEach(circuit::addInput);
+        resolveNodes(root, "output").forEach(circuit::addOutput);
         parse(root);
     }
 
@@ -36,27 +36,19 @@ public final class RelationParser {
         var inputs = resolveNodes(node, "input");
         var outputs = resolveNodes(node, "output");
         switch (typeOf(node)) {
-            case Node.Type.COMPONENT -> {
-                var id = Identifier.of(node.get("id").textValue());
-                relation = ComputationNode.of(id);
-                forEachMember(node, this::parse);
-            }
-            case Node.Type.REGISTER -> {
-                int width = outputs.getFirst().getWidth();
-                relation = parseRegister(node, width);
-            }
+            case Node.Type.COMPONENT -> relation = ComputationNode.of(Identifier.of(node.get("id").textValue()));
+            case Node.Type.REGISTER  -> relation = parseRegister(node, outputs.getFirst(), inputs.getFirst());
             default -> throw new ShallNotReachHereError();
         }
+        forEachMember(node, this::parse);
         circuit.addHyperEdge(relation, inputs, outputs);
     }
 
-    private Node parseRegister(JsonNode node, int width) {
-        Node relation;
+    private RegisterNode parseRegister(JsonNode node, DataNode state, DataNode next) {
         var attribute = node.get("attribute");
         var clock = (ClockNode) resolveNode(attribute.get("clock"));
         boolean isPosTrigger = Boolean.parseBoolean(attribute.get("isPosTrigger").textValue());
-        relation = RegisterNode.of(width, clock, isPosTrigger);
-        return relation;
+        return RegisterNode.of(state, next, clock, isPosTrigger);
     }
 
     private List<DataNode> resolveNodes(JsonNode node, String field) {

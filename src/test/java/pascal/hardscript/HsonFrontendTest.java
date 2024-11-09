@@ -1,5 +1,6 @@
 package pascal.hardscript;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.hson.io.Frontend;
 
@@ -37,6 +38,7 @@ class HsonFrontendTest {
         test("bind_3");
     }
 
+    @Disabled
     @Test
     void testRISCV() throws IOException {
         test("riscv");

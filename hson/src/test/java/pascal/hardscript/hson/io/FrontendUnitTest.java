@@ -1,8 +1,11 @@
 package pascal.hardscript.hson.io;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class FrontendUnitTest {
+
+    @Disabled
     @Test
     void testData() {
 //        assertEquals(

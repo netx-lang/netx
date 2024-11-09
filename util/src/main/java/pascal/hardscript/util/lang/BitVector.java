@@ -97,6 +97,10 @@ public final class BitVector {
         return toBigInteger().intValue();
     }
 
+    public boolean toBoolean() {
+        return get(0);
+    }
+
     public BitVector concat(BitVector other) {
         var result = new BitVector(size + other.size);
         int lhsLength = data.length, rhsLength = other.data.length;

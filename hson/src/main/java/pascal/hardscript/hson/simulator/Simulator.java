@@ -2,11 +2,13 @@ package pascal.hardscript.hson.simulator;
 
 import pascal.hardscript.hson.model.*;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
+import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.lang.BitVector;
 import pascal.hardscript.util.lang.BuiltinComponent;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.Consumer;
 
 public final class Simulator {
     public final static Boolean RANDOM_START = false;
@@ -18,6 +20,7 @@ public final class Simulator {
     private final ValueSupplier supplier = new ValueSupplier();
     private final Map<String, DataNode> ioNodes = new HashMap<>();
 
+    private Consumer<Simulator> onEachTick = null;
     private final ScheduleQueue schedule = new ScheduleQueue();
 
     public Simulator(Circuit circuit) {
@@ -37,7 +40,8 @@ public final class Simulator {
         }
         for (var register : circuit.getRegisters().values()) {
             for (var reg : register) {
-                reg.setValue(supplier.next(reg.getWidth()));
+                var state = reg.getState();
+                state.setValue(supplier.next(state.getWidth()));
             }
         }
     }
@@ -59,6 +63,10 @@ public final class Simulator {
         return getOutputValue(Objects.requireNonNull(ioNodes.get(name)));
     }
 
+    public void setOnEachTick(Consumer<Simulator> onEachTick) {
+        this.onEachTick = onEachTick;
+    }
+
     public void run() {
         boolean hasProgress = true;
         while (hasProgress) {
@@ -69,20 +77,34 @@ public final class Simulator {
         }
     }
 
+    public void runUntil(int steps) {
+        for (int i = 0; i < steps; i++) {
+            while (!schedule.isEmpty()) {
+                step();
+            }
+            clockStep();
+        }
+    }
+
     public boolean clockStep() {
+        if (onEachTick != null) {
+            onEachTick.accept(this);
+        }
+
         boolean hasProgress = false;
         var clock = pickClock();
         if (clock == null) {
             return false;
         }
 
-        clock.tick();
+        var isPosEdge = clock.tick();
         for (var reg : circuit.getRegisters().get(clock)) {
-            var input = (DataNode) circuit.getPredecessor(reg);
-            var output = (DataNode) circuit.getSuccessor(reg);
-            if (!input.getValue().equals(reg.getValue())) {
-                schedule.add(output);
-                hasProgress = true;
+            if (reg.isPosTrigger() == isPosEdge) {
+                DataNode state = reg.getState(), next = reg.getNext();
+                if (!next.getValue().equals(state.getValue())) {
+                    schedule.add(state);
+                    hasProgress = true;
+                }
             }
         }
         return hasProgress;
@@ -104,6 +126,9 @@ public final class Simulator {
         switch (Objects.requireNonNull(node)) {
             case DataNode data -> dataNodeStep(data);
             case ComputationNode computation -> computationStep(computation);
+            case RegisterNode ignored -> {
+                // do nothing
+            }
         }
     }
 
@@ -121,6 +146,7 @@ public final class Simulator {
             }
         } else if (DO_VERIFICATION) {
             // TODO: check constraints, etc.
+            throw new TodoException();
         }
     }
 
