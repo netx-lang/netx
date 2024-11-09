@@ -1,8 +1,7 @@
 package pascal.hardscript;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import pascal.hardscript.hson.io.Frontend;
+import pascal.hardscript.hson.io.HFrontend;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -38,14 +37,13 @@ class HsonFrontendTest {
         test("bind_3");
     }
 
-    @Disabled
     @Test
     void testRISCV() throws IOException {
         test("riscv");
     }
 
     public void test(String fileName) throws IOException {
-        var circuit = Frontend.loadPath(TEST_DIR.resolve(fileName + ".json")).parse();
+        var circuit = HFrontend.loadPath(TEST_DIR.resolve(fileName + ".json")).parse();
         System.out.println(circuit);
     }
 }

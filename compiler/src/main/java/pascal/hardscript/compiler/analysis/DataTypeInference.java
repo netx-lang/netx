@@ -8,7 +8,6 @@ import pascal.hardscript.compiler.analysis.constraint.*;
 import pascal.hardscript.compiler.exception.TypeCheckingException;
 import pascal.hardscript.compiler.model.instance.DataAccess;
 import pascal.hardscript.compiler.model.instance.Instance;
-import pascal.hardscript.compiler.model.scope.ComponentInfo;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
@@ -25,11 +24,9 @@ public final class DataTypeInference extends ModelAnalysis {
     private final Graph<Instance, BinaryConstraint> graph = new SimpleGraph<>(BinaryConstraint.class);
     private final List<DataConstraint> constraints = new LinkedList<>();
     private final Queue<Instance> workList = new LinkedList<>();
-    private final ComponentInfo componentInfo;
 
     public DataTypeInference(DesignScope design) {
         super(design);
-        this.componentInfo = design.getComponentInfo();
     }
 
     @Override
@@ -47,7 +44,7 @@ public final class DataTypeInference extends ModelAnalysis {
                     workList.add(data);
                 }
             }
-            if (componentInfo.containsBuiltin(component.getIdentifier())) {
+            if (BuiltinComponent.isBuiltin(component.getIdentifier())) {
                 collectConstraintsInBuiltin(component);
             }
         });

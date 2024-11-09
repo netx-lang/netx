@@ -3,7 +3,7 @@ package pascal.hardscript.hson.io;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-class FrontendUnitTest {
+class HFrontendUnitTest {
 
     @Disabled
     @Test

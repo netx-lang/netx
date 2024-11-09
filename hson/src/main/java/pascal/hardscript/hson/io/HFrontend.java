@@ -8,31 +8,31 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 
-public class Frontend {
+public class HFrontend {
     private static final ObjectMapper mapper = new ObjectMapper();
     private final Circuit circuit = new Circuit();
     private final DataManager manager;
     private final JsonNode json;
 
-    private Frontend(JsonNode node) {
+    private HFrontend(JsonNode node) {
         this.json = node;
         this.manager = new DataManager(json.get("dataCount").intValue());
     }
 
-    public static Frontend load(JsonNode node) {
-        return new Frontend(node);
+    public static HFrontend load(JsonNode node) {
+        return new HFrontend(node);
     }
 
-    public static Frontend load(InputStream inputStream) throws IOException {
-        return new Frontend(mapper.readTree(inputStream));
+    public static HFrontend load(InputStream inputStream) throws IOException {
+        return new HFrontend(mapper.readTree(inputStream));
     }
 
-    public static Frontend load(String string) throws IOException {
-        return new Frontend(mapper.readTree(string));
+    public static HFrontend load(String string) throws IOException {
+        return new HFrontend(mapper.readTree(string));
     }
 
-    public static Frontend loadPath(Path path) throws IOException {
-        return new Frontend(mapper.readTree(path.toFile()));
+    public static HFrontend loadPath(Path path) throws IOException {
+        return new HFrontend(mapper.readTree(path.toFile()));
     }
 
     public Circuit getCircuit() {

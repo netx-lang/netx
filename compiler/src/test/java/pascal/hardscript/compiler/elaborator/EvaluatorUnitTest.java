@@ -2,7 +2,7 @@ package pascal.hardscript.compiler.elaborator;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
-import pascal.hardscript.compiler.io.Compiler;
+import pascal.hardscript.compiler.io.HSCompiler;
 import pascal.hardscript.compiler.model.instance.DataAccess;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.instance.Int32Value;
@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class EvaluatorUnitTest {
 
     private static DesignScope loadDesign(String code) {
-        return new Elaborator(Compiler.load(CharStreams.fromString(code)).parse()).elaborate();
+        return new Elaborator(HSCompiler.load(CharStreams.fromString(code)).parse()).elaborate();
     }
 
     private static ComponentScope loadSingleComponent(String code) {
@@ -60,7 +60,7 @@ class EvaluatorUnitTest {
                     inst b of wire(bit(1))
                     [b] <- AND <> [gate |
                         i in [0..2],
-                        let gate = NOT <> AND <> [NOT, NOT] 
+                        let gate = NOT <> AND <> [NOT, NOT]
                     ] <> [a[i] | i in [0..4]]
                 }
                 """;

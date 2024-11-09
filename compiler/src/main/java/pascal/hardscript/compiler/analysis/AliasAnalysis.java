@@ -28,7 +28,7 @@ public final class AliasAnalysis extends ModelAnalysis {
         collectAlias();
         eliminateDuplicate();
         inferAliasType();
-//        design.forEachScope(scope -> scope.getAliases().clear());
+        design.forEachScope(scope -> scope.getAliases().clear());
     }
 
     private void collectAlias() {

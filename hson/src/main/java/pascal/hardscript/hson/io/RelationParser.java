@@ -14,7 +14,7 @@ public final class RelationParser {
     private final Circuit circuit;
     private final DataManager manager;
 
-    public RelationParser(Frontend frontend) {
+    public RelationParser(HFrontend frontend) {
         this.circuit = frontend.getCircuit();
         this.manager = frontend.getManager();
     }

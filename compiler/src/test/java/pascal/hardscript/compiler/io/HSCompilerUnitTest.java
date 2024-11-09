@@ -13,25 +13,25 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class CompilerUnitTest {
+class HSCompilerUnitTest {
     @Test
     void loadWithValidCharStream() {
         CharStream charStream = CharStreams.fromString("valid input");
-        Compiler compiler = Compiler.load(charStream);
+        HSCompiler compiler = HSCompiler.load(charStream);
         assertNotNull(compiler);
     }
 
     @Test
     void loadPathWithValidPath() throws IOException {
         Path path = Path.of("src/test/resources/valid.hard");
-        Compiler compiler = Compiler.loadPath(path);
+        HSCompiler compiler = HSCompiler.loadPath(path);
         assertNotNull(compiler);
     }
 
     @Test
     void loadPathWithInvalidPath() {
         Path path = Path.of("invalid/path/to/file.hard");
-        assertThrows(IOException.class, () -> Compiler.loadPath(path));
+        assertThrows(IOException.class, () -> HSCompiler.loadPath(path));
     }
 
     @Test
@@ -39,7 +39,7 @@ class CompilerUnitTest {
         String content = new String(Files.readAllBytes(Path.of("src/test/resources/valid.hard")));
 
         CharStream charStream = CharStreams.fromString(content);
-        Compiler compiler = Compiler.load(charStream);
+        HSCompiler compiler = HSCompiler.load(charStream);
         DesignScope scope = compiler.compile();
         assertNotNull(scope);
     }
@@ -47,7 +47,7 @@ class CompilerUnitTest {
     @Test
     void testInvalidInput() {
         CharStream charStream = CharStreams.fromString("invalid input");
-        Compiler compiler = Compiler.load(charStream);
+        HSCompiler compiler = HSCompiler.load(charStream);
         assertThrows(ParseCancellationException.class, compiler::compile);
     }
 }

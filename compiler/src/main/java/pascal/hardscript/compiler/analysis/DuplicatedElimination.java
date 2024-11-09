@@ -2,14 +2,13 @@ package pascal.hardscript.compiler.analysis;
 
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.instance.Instance;
-import pascal.hardscript.compiler.model.scope.ComponentInfo;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
+import pascal.hardscript.util.collection.UnionFind;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -18,12 +17,10 @@ import java.util.stream.Collectors;
 import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
 
 public class DuplicatedElimination extends ModelAnalysis {
-    private final Map<Entity, Instance> duplicatedRep = new HashMap<>();
-    private final ComponentInfo info;
+    private final UnionFind<Instance> duplicatedRep = new UnionFind<>();
 
     public DuplicatedElimination(DesignScope design) {
         super(design);
-        info = design.getComponentInfo();
     }
 
     @Override
@@ -62,7 +59,7 @@ public class DuplicatedElimination extends ModelAnalysis {
         List<ComponentScope> toRemove = new LinkedList<>();
         for (var entry : idGroups.entrySet()) {
             var identifier = entry.getKey();
-            if (info.containsBuiltin(identifier)
+            if (BuiltinComponent.isBuiltin(identifier)
                     && NO_DUMP.contains(BuiltinComponent.of(identifier.name()))) {
                 continue;
             }
@@ -78,7 +75,7 @@ public class DuplicatedElimination extends ModelAnalysis {
                         for (var rep : a.getOutputs()) {
                             var dup = iterator.next();
                             if (dup != rep) {
-                                duplicatedRep.put(dup, rep);
+                                duplicatedRep.union(dup, rep);
                             }
                         }
                     }
@@ -105,16 +102,25 @@ public class DuplicatedElimination extends ModelAnalysis {
     }
 
     private void replaceDuplicatedInstances(Scope scope) {
-        scope.getEntities().removeIf(duplicatedRep::containsKey);
+        scope.getEntities().removeIf(this::needRemove);
         if (scope instanceof ComponentScope componentScope) {
             componentScope.getInputs().replaceAll(this::repOf);
             componentScope.getOutputs().replaceAll(this::repOf);
         }
     }
 
+    private boolean needRemove(Entity entity) {
+        if (entity instanceof Instance instance) {
+            if (duplicatedRep.contains(instance)) {
+                return duplicatedRep.find(instance) != instance;
+            }
+        }
+        return false;
+    }
+
     private Instance repOf(Instance instance) {
-        if (duplicatedRep.containsKey(instance)) {
-            return duplicatedRep.get(instance);
+        if (duplicatedRep.contains(instance)) {
+            return duplicatedRep.find(instance);
         }
         return instance;
     }

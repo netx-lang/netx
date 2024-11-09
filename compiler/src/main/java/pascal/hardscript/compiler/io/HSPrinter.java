@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import pascal.hardscript.compiler.model.instance.*;
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
-import pascal.hardscript.compiler.model.scope.*;
+import pascal.hardscript.compiler.model.scope.BlockScope;
+import pascal.hardscript.compiler.model.scope.ComponentScope;
+import pascal.hardscript.compiler.model.scope.DesignScope;
+import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
@@ -20,13 +23,11 @@ import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
 
 public final class HSPrinter {
     private final DesignScope design;
-    private final ComponentInfo componentInfo;
     private final Map<Data, Integer> indexMap = new HashMap<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public HSPrinter(DesignScope design) {
         this.design = design;
-        this.componentInfo = design.getComponentInfo();
     }
 
     public ObjectNode dump() {
@@ -55,7 +56,7 @@ public final class HSPrinter {
         }
         for (var sub : extractSubComponent(component)) {
             var instID = sub.getIdentifier();
-            if (componentInfo.containsBuiltin(instID)) {
+            if (BuiltinComponent.isBuiltin(instID)) {
                 if (!NO_DUMP.contains(BuiltinComponent.of(instID.name()))) {
                     dumpBuiltinComponent(sub, instID, members);
                 }

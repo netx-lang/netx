@@ -8,7 +8,6 @@ import java.util.*;
 
 public final class ComponentInfo {
     private final Set<Identifier> components = new HashSet<>();
-    private final Set<Identifier> builtin = new HashSet<>();
     private final Map<Identifier, ComponentNode> componentNodes = new HashMap<>();
 
     public ComponentInfo(List<ComponentNode> components) {
@@ -16,21 +15,15 @@ public final class ComponentInfo {
             this.components.add(node.getIdentifier());
             this.componentNodes.put(node.getIdentifier(), node);
         }
-        for (var component : BuiltinComponent.values()) {
-            this.builtin.add(Identifier.of(component.name()));
-        }
     }
 
     public boolean contains(Identifier identifier) {
-        return containsComponent(identifier) || containsBuiltin(identifier);
+        if (containsComponent(identifier)) return true;
+        return BuiltinComponent.isBuiltin(identifier);
     }
 
     public boolean containsComponent(Identifier identifier) {
         return components.contains(identifier);
-    }
-
-    public boolean containsBuiltin(Identifier identifier) {
-        return builtin.contains(identifier);
     }
 
     public ComponentNode getComponentNode(Identifier identifier) {

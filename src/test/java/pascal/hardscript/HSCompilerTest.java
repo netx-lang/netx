@@ -2,7 +2,7 @@ package pascal.hardscript;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import pascal.hardscript.compiler.io.Compiler;
+import pascal.hardscript.compiler.io.HSCompiler;
 import pascal.hardscript.compiler.io.HSPrinter;
 
 import java.io.IOException;
@@ -11,7 +11,7 @@ import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class CompilerTest {
+class HSCompilerTest {
     private static final boolean GENERATE_EXPECTED = false;
     private static final Path TEST_DIR = Path.of("src/test/resources/");
     private static final Path EXPECTED_DIR = Path.of("src/test/resources/expected/");
@@ -51,7 +51,7 @@ class CompilerTest {
     }
 
     public void test(String fileName) throws IOException {
-        var design = Compiler.loadPath(TEST_DIR.resolve(fileName + ".hard")).compile();
+        var design = HSCompiler.loadPath(TEST_DIR.resolve(fileName + ".hard")).compile();
         var json = new HSPrinter(design).dump();
 
         if (GENERATE_EXPECTED) {

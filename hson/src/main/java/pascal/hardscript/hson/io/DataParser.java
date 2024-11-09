@@ -14,7 +14,7 @@ public final class DataParser {
     private final Circuit circuit;
     private final DataManager manager;
 
-    public DataParser(Frontend frontend) {
+    public DataParser(HFrontend frontend) {
         this.circuit = frontend.getCircuit();
         this.manager = frontend.getManager();
     }

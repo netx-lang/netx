@@ -30,7 +30,6 @@ public enum BuiltinComponent {
         return of(id.name());
     }
 
-
     public static boolean isBuiltin(String name) {
         return VALUES.contains(name.toUpperCase());
     }

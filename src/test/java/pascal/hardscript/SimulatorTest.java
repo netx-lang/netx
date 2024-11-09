@@ -1,9 +1,9 @@
 package pascal.hardscript;
 
 import org.junit.jupiter.api.Test;
-import pascal.hardscript.compiler.io.Compiler;
+import pascal.hardscript.compiler.io.HSCompiler;
 import pascal.hardscript.compiler.io.HSPrinter;
-import pascal.hardscript.hson.io.Frontend;
+import pascal.hardscript.hson.io.HFrontend;
 import pascal.hardscript.hson.simulator.Simulator;
 import pascal.hardscript.util.lang.BitVector;
 
@@ -20,13 +20,17 @@ public class SimulatorTest {
     @Test
     void testAdder() throws IOException {
         var simulator = buildSimulator("adder.hard");
-
         var high = BitVector.fromBoolean(true);
+        var low = BitVector.fromBoolean(false);
         simulator.setInputValue("a", high);
         simulator.setInputValue("b", high);
         simulator.setInputValue("cin", high);
         simulator.run();
         assertEquals(high, simulator.getOutputValue("out"));
+        assertEquals(high, simulator.getOutputValue("cout"));
+        simulator.setInputValue("a", low);
+        simulator.run();
+        assertEquals(low, simulator.getOutputValue("out"));
         assertEquals(high, simulator.getOutputValue("cout"));
     }
 
@@ -40,8 +44,8 @@ public class SimulatorTest {
     }
 
     private static Simulator buildSimulator(String other) throws IOException {
-        var design = Compiler.loadPath(TEST_DIR.resolve(other)).compile();
-        var circuit = Frontend.load(new HSPrinter(design).dump()).parse();
+        var design = HSCompiler.loadPath(TEST_DIR.resolve(other)).compile();
+        var circuit = HFrontend.load(new HSPrinter(design).dump()).parse();
         return new Simulator(circuit);
     }
 }
