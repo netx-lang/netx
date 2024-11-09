@@ -32,23 +32,28 @@ public final class RelationParser {
             }
         }
 
-        Node relation;
         var inputs = resolveNodes(node, "input");
         var outputs = resolveNodes(node, "output");
         switch (typeOf(node)) {
-            case Node.Type.COMPONENT -> relation = ComputationNode.of(Identifier.of(node.get("id").textValue()));
-            case Node.Type.REGISTER  -> relation = parseRegister(node, outputs.getFirst(), inputs.getFirst());
+            case Node.Type.COMPONENT -> {
+                Node relation = ComputationNode.of(Identifier.of(node.get("id").textValue()));
+                circuit.addHyperEdge(relation, inputs, outputs);
+            }
+            case Node.Type.REGISTER  -> {
+                var register = parseRegister(node, outputs.getFirst(), inputs.getFirst());
+                circuit.addRegister(register);
+            }
             default -> throw new ShallNotReachHereError();
         }
         forEachMember(node, this::parse);
-        circuit.addHyperEdge(relation, inputs, outputs);
+
     }
 
-    private RegisterNode parseRegister(JsonNode node, DataNode state, DataNode next) {
+    private Register parseRegister(JsonNode node, DataNode state, DataNode next) {
         var attribute = node.get("attribute");
         var clock = (ClockNode) resolveNode(attribute.get("clock"));
         boolean isPosTrigger = Boolean.parseBoolean(attribute.get("isPosTrigger").textValue());
-        return RegisterNode.of(state, next, clock, isPosTrigger);
+        return Register.of(state, next, clock, isPosTrigger);
     }
 
     private List<DataNode> resolveNodes(JsonNode node, String field) {

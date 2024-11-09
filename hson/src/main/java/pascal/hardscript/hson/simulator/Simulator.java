@@ -40,7 +40,8 @@ public final class Simulator {
         }
         for (var register : circuit.getRegisters().values()) {
             for (var reg : register) {
-                var state = reg.getState();
+                var state = reg.getCurr();
+                schedule.add(state);
                 state.setValue(supplier.next(state.getWidth()));
             }
         }
@@ -100,9 +101,10 @@ public final class Simulator {
         var isPosEdge = clock.tick();
         for (var reg : circuit.getRegisters().get(clock)) {
             if (reg.isPosTrigger() == isPosEdge) {
-                DataNode state = reg.getState(), next = reg.getNext();
-                if (!next.getValue().equals(state.getValue())) {
-                    schedule.add(state);
+                DataNode curr = reg.getCurr(), next = reg.getNext();
+                if (!next.getValue().equals(curr.getValue())) {
+                    curr.setValue(next.getValue());
+                    schedule.add(curr);
                     hasProgress = true;
                 }
             }
@@ -126,9 +128,6 @@ public final class Simulator {
         switch (Objects.requireNonNull(node)) {
             case DataNode data -> dataNodeStep(data);
             case ComputationNode computation -> computationStep(computation);
-            case RegisterNode ignored -> {
-                // do nothing
-            }
         }
     }
 
@@ -153,9 +152,6 @@ public final class Simulator {
     private void dataNodeStep(DataNode node) {
         for (var successor : circuit.getSuccessors(node)) {
             switch (successor) {
-                case RegisterNode ignore -> {
-                    // do nothing since registers are only updated on clock ticks
-                }
                 case ComputationNode computation -> {
                     var id = computation.getIdentifier();
                     if (DO_VERIFICATION || BuiltinComponent.isBuiltin(id)) {

@@ -2,7 +2,7 @@ package pascal.hardscript.hson.model;
 
 import pascal.hardscript.util.lang.Identifier;
 
-public abstract sealed class Node implements Comparable<Node> permits ComputationNode, DataNode, RegisterNode {
+public abstract sealed class Node implements Comparable<Node> permits ComputationNode, DataNode {
     private final Identifier id;
     private int order;
 

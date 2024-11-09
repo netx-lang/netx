@@ -1,6 +1,5 @@
 package pascal.hardscript;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.io.Compiler;
 import pascal.hardscript.compiler.io.HSPrinter;
@@ -31,15 +30,13 @@ public class SimulatorTest {
         assertEquals(high, simulator.getOutputValue("cout"));
     }
 
-    @Disabled
     @Test
     void testDivideBy3() throws IOException {
         var simulator = buildSimulator("divide_by_3.hard");
-        List<Boolean> clock = new LinkedList<>();
-        simulator.setOnEachTick(env ->
-                clock.add(env.getOutputValue("clk_3").toBoolean()));
+        List<Integer> clock = new LinkedList<>();
+        simulator.setOnEachTick(env -> clock.add(env.getOutputValue("clk_3").toInt()));
         simulator.runUntil(20);
-        System.out.println(clock);
+        assertEquals(List.of(0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0), clock);
     }
 
     private static Simulator buildSimulator(String other) throws IOException {

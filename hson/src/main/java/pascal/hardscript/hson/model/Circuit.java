@@ -15,18 +15,15 @@ import java.util.Map;
 public class Circuit {
     private final List<DataNode> inputs = new LinkedList<>();
     private final List<DataNode> outputs = new LinkedList<>();
-    private final Map<ClockNode, List<RegisterNode>> registers = new HashMap<>();
+    private final Map<ClockNode, List<Register>> registers = new HashMap<>();
     private final Graph<Node, DefaultEdge> graph = new SimpleDirectedGraph<>(DefaultEdge.class);
 
     public void addVertex(Node node) {
-        switch (node) {
-            case ClockNode clock -> registers.put(clock, new LinkedList<>());
-            case RegisterNode register -> registers.get(register.getClock()).add(register);
-            default -> {
-                // do nothing
-            }
-        }
         graph.addVertex(node);
+    }
+
+    public void addRegister(Register register) {
+        registers.computeIfAbsent(register.getClock(), _ -> new LinkedList<>()).add(register);
     }
 
     public void addHyperEdge(Node node, List<DataNode> from, List<DataNode> to) {
@@ -55,7 +52,7 @@ public class Circuit {
         outputs.add(node);
     }
 
-    public Map<ClockNode, List<RegisterNode>> getRegisters() {
+    public Map<ClockNode, List<Register>> getRegisters() {
         return registers;
     }
 
