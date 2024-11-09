@@ -13,8 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CompilerTest {
     private static final boolean GENERATE_EXPECTED = false;
-    protected static final Path TEST_DIR = Path.of("src/test/resources/");
-    protected static final Path EXPECTED_DIR = Path.of("src/test/resources/expected/");
+    private static final Path TEST_DIR = Path.of("src/test/resources/");
+    private static final Path EXPECTED_DIR = Path.of("src/test/resources/expected/");
 
     private static final ObjectMapper mapper = new ObjectMapper();
 

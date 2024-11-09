@@ -5,21 +5,16 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
-import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.exception.TodoException;
-import pascal.hardscript.util.lang.Identifier;
-import pascal.hardscript.util.lang.SourceLoc;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 public class Circuit {
-    private final DataManager manager = new DataManager();
-    private final List<Node> inputs = new LinkedList<>();
-    private final List<Node> outputs = new LinkedList<>();
+    private final List<DataNode> inputs = new LinkedList<>();
+    private final List<DataNode> outputs = new LinkedList<>();
     private final Map<ClockNode, List<RegisterNode>> registers = new HashMap<>();
     private final Graph<Node, DefaultEdge> graph = new SimpleDirectedGraph<>(DefaultEdge.class);
 
@@ -32,10 +27,9 @@ public class Circuit {
             }
         }
         graph.addVertex(node);
-        manager.addNode(node);
     }
 
-    public void addHyperEdge(Node node, List<Node> from, List<Node> to) {
+    public void addHyperEdge(Node node, List<DataNode> from, List<DataNode> to) {
         addVertex(node);
         from.forEach(f -> addEdge(f, node));
         to.forEach(t -> addEdge(node, t));
@@ -45,17 +39,20 @@ public class Circuit {
         graph.addEdge(from, to);
     }
 
-    @Nonnull
-    public Node resolve(Identifier identifier) {
-        return manager.resolve(identifier);
-    }
-
-    public List<Node> getInputs() {
+    public List<DataNode> getInputs() {
         return inputs;
     }
 
-    public List<Node> getOutputs() {
+    public List<DataNode> getOutputs() {
         return outputs;
+    }
+
+    public void addInput(DataNode node) {
+        inputs.add(node);
+    }
+
+    public void addOutput(DataNode node) {
+        outputs.add(node);
     }
 
     public Map<ClockNode, List<RegisterNode>> getRegisters() {
@@ -92,19 +89,5 @@ public class Circuit {
 
     public List<Node> getSuccessors(Node node) {
         return Graphs.successorListOf(graph, node);
-    }
-
-    private static class DataManager {
-        private static class IdentifierMap extends HashMap<Identifier, Node> {}
-        private final HashMap<SourceLoc, IdentifierMap> nodes = new HashMap<>();
-
-        public void addNode(Node node) {
-            var id = node.getIdentifier();
-            nodes.computeIfAbsent(id.getSourceLoc(), _ -> new IdentifierMap()).put(id, node);
-        }
-
-        public Node resolve(Identifier identifier) {
-            return nodes.get(identifier.getSourceLoc()).get(identifier);
-        }
     }
 }

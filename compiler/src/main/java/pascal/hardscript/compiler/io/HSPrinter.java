@@ -11,15 +11,17 @@ import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 
 import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
 
 public final class HSPrinter {
     private final DesignScope design;
     private final ComponentInfo componentInfo;
+    private final Map<Data, Integer> indexMap = new HashMap<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public HSPrinter(DesignScope design) {
@@ -28,45 +30,52 @@ public final class HSPrinter {
     }
 
     public ObjectNode dump() {
-        return dump(design);
+        var result = createObjectNode();
+        result.putIfAbsent("design", dump(design));
+        result.put("dataCount", indexMap.size());
+        return result;
     }
 
     private ObjectNode dump(DesignScope design) {
         return dump((ComponentScope) design.getChildren().getFirst());
     }
 
-    private ObjectNode dump(ComponentScope module) {
+    private ObjectNode dump(ComponentScope component) {
         var result = createObjectNode();
         setType(result, "component");
-        setIdentifier(result, module.getIdentifier());
+        setIdentifier(result, component.getIdentifier());
 
-        dumpComponentIO(result, "input", module.getInputs());
-        dumpComponentIO(result, "output", module.getOutputs());
+        dumpComponentIO(result, "input", component.getInputs());
+        dumpComponentIO(result, "output", component.getOutputs());
         var members = makeMembersIn(result);
-        for (var entity : module.getEntities()) {
+        for (var entity : component.getEntities()) {
             if (entity instanceof Data data) {
                 members.add(dump(data));
             }
         }
-        for (var sub : extractSubComponent(module)) {
+        for (var sub : extractSubComponent(component)) {
             var instID = sub.getIdentifier();
             if (componentInfo.containsBuiltin(instID)) {
-                if (!NO_DUMP.contains(BuiltinComponent.of(instID.string()))) {
+                if (!NO_DUMP.contains(BuiltinComponent.of(instID.name()))) {
                     dumpBuiltinComponent(sub, instID, members);
                 }
             } else {
                 members.add(dump(sub));
             }
         }
-        dumpComponentAttribute(result, module);
+        dumpComponentAttribute(result, component);
         return result;
     }
 
     private void dumpBuiltinComponent(ComponentScope sub, Identifier instID, ArrayNode members) {
         var builtin = createObjectNode();
-        setType(builtin, "component");
-        setIdentifier(builtin, instID);
-
+        if (instID.name().equals("REGISTER")) {
+            setType(builtin, "register");
+            dumpComponentAttribute(builtin, sub);
+        } else {
+            setType(builtin, "component");
+            setIdentifier(builtin, instID);
+        }
         List<Data> needDump = new LinkedList<>();
         for (var entity : sub.getEntities()) {
             if (entity instanceof Data data) {
@@ -79,7 +88,7 @@ public final class HSPrinter {
         }
         dumpComponentIO(builtin, "input", sub.getInputs());
         dumpComponentIO(builtin, "output", sub.getOutputs());
-        dumpComponentAttribute(builtin, sub);
+
         members.add(builtin);
     }
 
@@ -88,10 +97,10 @@ public final class HSPrinter {
         sub.stream().map(this::dumpInstance).forEach(outputs::add);
     }
 
-    private void dumpComponentAttribute(ObjectNode node, ComponentScope module) {
-        if (!module.getAttributes().isEmpty()) {
+    private void dumpComponentAttribute(ObjectNode node, ComponentScope component) {
+        if (!component.getAttributes().isEmpty()) {
             var attributes = createObjectNode();
-            for (var entry : module.getAttributes().entrySet()) {
+            for (var entry : component.getAttributes().entrySet()) {
                 attributes.put(entry.getKey(), dumpInstance((Instance) entry.getValue()));
             }
             node.putIfAbsent("attribute", attributes);
@@ -157,13 +166,11 @@ public final class HSPrinter {
     }
 
     private String dumpData(Data data) {
-        var sourceLoc = Objects.requireNonNullElse(
-                data.getSourceLoc(),
-                data.getUpperComponent().getSourceLoc());
         if (data instanceof DataAccess access) {
             return dumpDataAccess(access);
         } else {
-            return String.format("%s@(%s)", data.getIdentifier().string(), sourceLoc);
+            int index = indexMap.computeIfAbsent(data, _ -> indexMap.size());
+            return data.getIdentifier().toString() + "@" + index;
         }
     }
 
@@ -180,7 +187,7 @@ public final class HSPrinter {
     }
 
     private void setIdentifier(ObjectNode node, Identifier identifier) {
-        setIdentifier(node, identifier.string());
+        setIdentifier(node, identifier.name());
     }
 
     private void setIdentifier(ObjectNode node, String value) {

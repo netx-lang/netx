@@ -10,16 +10,20 @@ import java.util.*;
 
 public final class Simulator {
     public final static Boolean RANDOM_START = false;
+    public final static Boolean DO_VERIFICATION = false;
     private final static Random RANDOM = new Random();
 
     private final Circuit circuit;
     private final List<ClockNode> clocks = new LinkedList<>();
     private final ValueSupplier supplier = new ValueSupplier();
+    private final Map<String, DataNode> ioNodes = new HashMap<>();
 
     private final ScheduleQueue schedule = new ScheduleQueue();
 
     public Simulator(Circuit circuit) {
         this.circuit = circuit;
+        circuit.getInputs().forEach(node -> ioNodes.put(node.getIdentifier().name(), node));
+        circuit.getOutputs().forEach(node -> ioNodes.put(node.getIdentifier().name(), node));
         initialize();
     }
 
@@ -38,6 +42,23 @@ public final class Simulator {
         }
     }
 
+    public void setInputValue(String name, BitVector value) {
+        setInputValue(Objects.requireNonNull(ioNodes.get(name)), value);
+    }
+
+    public void setInputValue(DataNode input, BitVector value) {
+        input.setValue(value);
+        schedule.add(input);
+    }
+
+    public BitVector getOutputValue(DataNode output) {
+        return output.getValue();
+    }
+
+    public BitVector getOutputValue(String name) {
+        return getOutputValue(Objects.requireNonNull(ioNodes.get(name)));
+    }
+
     public void run() {
         boolean hasProgress = true;
         while (hasProgress) {
@@ -51,6 +72,10 @@ public final class Simulator {
     public boolean clockStep() {
         boolean hasProgress = false;
         var clock = pickClock();
+        if (clock == null) {
+            return false;
+        }
+
         clock.tick();
         for (var reg : circuit.getRegisters().get(clock)) {
             var input = (DataNode) circuit.getPredecessor(reg);
@@ -65,6 +90,9 @@ public final class Simulator {
 
     private ClockNode pickClock() {
         // FIXME: deprecated
+        if (clocks.isEmpty()) {
+            return null;
+        }
         if (clocks.size() == 1) {
             return clocks.getFirst();
         }
@@ -91,7 +119,7 @@ public final class Simulator {
                 ((DataNode) output).setValue(update.next());
                 schedule.add(output);
             }
-        } else {
+        } else if (DO_VERIFICATION) {
             // TODO: check constraints, etc.
         }
     }
@@ -99,9 +127,14 @@ public final class Simulator {
     private void dataNodeStep(DataNode node) {
         for (var successor : circuit.getSuccessors(node)) {
             switch (successor) {
-                case ComputationNode computation -> schedule.add(computation);
                 case RegisterNode ignore -> {
                     // do nothing since registers are only updated on clock ticks
+                }
+                case ComputationNode computation -> {
+                    var id = computation.getIdentifier();
+                    if (DO_VERIFICATION || BuiltinComponent.isBuiltin(id)) {
+                        schedule.add(computation);
+                    }
                 }
                 default -> throw new ShallNotReachHereError();
             }

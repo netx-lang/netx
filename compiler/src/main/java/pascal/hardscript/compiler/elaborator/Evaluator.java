@@ -294,7 +294,7 @@ public final class Evaluator {
     private InstanceType evaluateBitWidth(ExprNode expr) {
         if (expr instanceof ParamSymbolExpr spec) {
             var identifier = getIdentifierFrom(spec.getHead());
-            if (identifier.string().equals("bit")) {
+            if (identifier.name().equals("bit")) {
                 if (spec.getArguments().size() == 1) {
                     return BitType.of(evaluateToIntegerValue(spec.getArguments().getFirst()).toInt());
                 }
@@ -350,7 +350,7 @@ public final class Evaluator {
     private Data.Factory<?> evaluateComponentFactory(ParamSymbolExpr expr) {
         var identifier = getIdentifierFrom(expr.getHead());
         var sourceLoc = expr.getSourceLoc();
-        return switch (identifier.string()) {
+        return switch (identifier.name()) {
             case "wire" -> evaluateWireFactory(sourceLoc, expr.getArguments());
             case "clock" -> evaluateClockFactory(sourceLoc, expr.getArguments());
             default -> {

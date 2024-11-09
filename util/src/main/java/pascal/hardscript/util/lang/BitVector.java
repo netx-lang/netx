@@ -328,14 +328,17 @@ public final class BitVector {
         data[data.length - 1] &= mask;
     }
 
+    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+
+    @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (byte datum : data) {
-            for (int i = 0; i < 8; i++) {
-                sb.append((datum & (1 << i)) != 0 ? '1' : '0');
-            }
+        char[] hexChars = new char[data.length * 2];
+        for (int j = 0; j < data.length; j++) {
+            int v = data[j] & 0xFF;
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
         }
-        return sb.reverse().substring(data.length * 8 - size);
+        return size + "'h" + new String(hexChars);
     }
 
     private static void requiresSameSize(BitVector a, BitVector b) {

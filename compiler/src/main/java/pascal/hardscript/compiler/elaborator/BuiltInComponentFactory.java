@@ -49,7 +49,7 @@ public class BuiltInComponentFactory {
 
     public static ComponentScope createBuiltInComponent(Scope parent, AtomType type) {
         var identifier = type.identifier();
-        var factory = BUILTIN_FACTORY.get(BuiltinComponent.of(identifier.string()));
+        var factory = BUILTIN_FACTORY.get(BuiltinComponent.of(identifier.name()));
         if (factory == null) {
             log.error("{}: Unknown built-in Component: {}", identifier.getSourceLoc(), identifier);
             throw new CompileCancellationException();

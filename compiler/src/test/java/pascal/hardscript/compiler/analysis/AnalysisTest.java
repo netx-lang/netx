@@ -69,8 +69,8 @@ class AnalysisTest {
                 component top: [a, b] -> [e] {
                     inst a, b, c, e, d of wire(bit(4))
                     c <- AND <> [a, b]
-                    d <- AND <> [a, b]
                     e <- ADD <> [c, d]
+                    d <- AND <> [a, b]
                 }
                 """;
         assertEquals(

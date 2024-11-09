@@ -8,7 +8,7 @@ import java.nio.file.Path;
 
 
 class HsonFrontendTest {
-    protected static final Path TEST_DIR = Path.of("src/test/resources/expected/");
+    private static final Path TEST_DIR = Path.of("src/test/resources/expected/");
 
     @Test
     void testAdder() throws IOException {

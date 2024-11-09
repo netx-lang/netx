@@ -27,7 +27,7 @@ public enum BuiltinComponent {
 
 
     public static BuiltinComponent of(Identifier id) {
-        return of(id.string());
+        return of(id.name());
     }
 
 
@@ -36,6 +36,6 @@ public enum BuiltinComponent {
     }
 
     public static boolean isBuiltin(Identifier id) {
-        return isBuiltin(id.string());
+        return isBuiltin(id.name());
     }
 }

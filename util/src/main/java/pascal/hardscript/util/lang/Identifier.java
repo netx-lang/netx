@@ -3,23 +3,19 @@ package pascal.hardscript.util.lang;
 import java.util.Objects;
 
 public final class Identifier {
-    private final String string;
+    private final String name;
     private SourceLoc sourceLoc;
 
-    private Identifier(String string) {
-        this.string = string;
+    private Identifier(String name) {
+        this.name = name;
     }
 
     public static Identifier of(String id) {
         return new Identifier(id);
     }
 
-    public String string() {
-        return string;
-    }
-
-    public String getString() {
-        return string;
+    public String name() {
+        return name;
     }
 
     public SourceLoc getSourceLoc() {
@@ -36,16 +32,16 @@ public final class Identifier {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (Identifier) obj;
-        return Objects.equals(this.string, that.string);
+        return Objects.equals(this.name, that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(string);
+        return Objects.hash(name);
     }
 
     @Override
     public String toString() {
-        return string;
+        return String.format("%s@(%s)", name, sourceLoc);
     }
 }

@@ -42,6 +42,6 @@ public sealed interface Instance extends Entity permits Data, Value {
     }
 
     default boolean isBuiltin() {
-        return (this instanceof Data) && getIdentifier().string().startsWith("$");
+        return (this instanceof Data) && getIdentifier().name().startsWith("$");
     }
 }

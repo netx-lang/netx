@@ -63,7 +63,7 @@ public class DuplicatedElimination extends ModelAnalysis {
         for (var entry : idGroups.entrySet()) {
             var identifier = entry.getKey();
             if (info.containsBuiltin(identifier)
-                    && NO_DUMP.contains(BuiltinComponent.of(identifier.string()))) {
+                    && NO_DUMP.contains(BuiltinComponent.of(identifier.name()))) {
                 continue;
             }
 

@@ -40,7 +40,7 @@ public final class Elaborator {
 
     public DesignScope elaborate() {
         var topNode = node.getComponents().stream()
-                .filter(n -> TOP_COMPONENT.equals(n.getIdentifier().string()))
+                .filter(n -> TOP_COMPONENT.equals(n.getIdentifier().name()))
                 .findFirst().orElseGet(() -> {
                     log.warn("No component named '{}' found, using the first component as top", TOP_COMPONENT);
                     return node.getComponents().getFirst();

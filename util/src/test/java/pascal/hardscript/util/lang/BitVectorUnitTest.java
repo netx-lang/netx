@@ -18,27 +18,27 @@ class BitVectorUnitTest {
         BitVector bv8 = BitVector.parse("af41", 16, 16);
         BitVector bv9 = BitVector.parse("41", 16, 16);
         BitVector bv10 = BitVector.parse("41", 4, 16);
-        assertEquals("1101011", bv1.toString());
-        assertEquals("01101011", bv2.toString());
-        assertEquals("110101001101101011", bv3.toString());
-        assertEquals("11011011", bv4.toString());
-        assertEquals("011011011", bv5.toString());
-        assertEquals("01011111", bv6.toString());
-        assertEquals("00000000000001011111", bv7.toString());
-        assertEquals("1010111101000001", bv8.toString());
-        assertEquals("0000000001000001", bv9.toString());
-        assertEquals("0001", bv10.toString());
+        assertEquals("7'h6B", bv1.toString());
+        assertEquals("8'h6B", bv2.toString());
+        assertEquals("18'h6B5303", bv3.toString());
+        assertEquals("8'hDB", bv4.toString());
+        assertEquals("9'hDB00", bv5.toString());
+        assertEquals("8'h5F", bv6.toString());
+        assertEquals("20'h5F0000", bv7.toString());
+        assertEquals("16'h41AF", bv8.toString());
+        assertEquals("16'h4100", bv9.toString());
+        assertEquals("4'h01", bv10.toString());
     }
 
     @Test
     void set() {
         BitVector bv = BitVector.parse("01101011", 8, 2);
         bv.set(0);
-        assertEquals("01101011", bv.toString());
+        assertEquals(BitVector.parse("01101011", 8, 2), bv);
         bv.set(2);
-        assertEquals("01101111", bv.toString());
+        assertEquals(BitVector.parse("01101111", 8, 2), bv);
         bv.set(7);
-        assertEquals("11101111", bv.toString());
+        assertEquals(BitVector.parse("11101111", 8, 2), bv);
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> bv.set(8));
     }
 
@@ -46,11 +46,11 @@ class BitVectorUnitTest {
     void clear() {
         BitVector bv = BitVector.parse("01101011", 8, 2);
         bv.clear(0);
-        assertEquals("01101010", bv.toString());
+        assertEquals(BitVector.parse("01101010", 8, 2), bv);
         bv.clear(1);
-        assertEquals("01101000", bv.toString());
+        assertEquals(BitVector.parse("01101000", 8, 2), bv);
         bv.clear();
-        assertEquals("00000000", bv.toString());
+        assertEquals(BitVector.parse("00000000", 8, 2), bv);
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> bv.clear(8));
     }
 

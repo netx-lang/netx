@@ -19,7 +19,7 @@ public abstract sealed class Node implements Comparable<Node> permits Computatio
     }
 
     public enum Type {
-        COMPONENT, CLOCK, WIRE
+        COMPONENT, REGISTER, CLOCK, WIRE
     }
 
     @Override

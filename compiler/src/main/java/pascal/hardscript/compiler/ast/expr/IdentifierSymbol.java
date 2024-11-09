@@ -45,6 +45,6 @@ public final class IdentifierSymbol extends PrimarySymbol {
 
     @Override
     public String toString() {
-        return identifier.string();
+        return identifier.name();
     }
 }
