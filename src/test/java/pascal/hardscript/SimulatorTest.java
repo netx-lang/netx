@@ -47,6 +47,18 @@ public class SimulatorTest {
     }
 
     @Test
+    void testEncoder() throws IOException {
+        var simulator = buildSimulator("encoder.hard");
+        for (int i = 0; i < 8; i++) {
+            var input = BitVector.fromInt(1 << i, 8);
+            var expected = BitVector.fromInt(i, 3);
+            simulator.setInputValue("input", input);
+            simulator.run();
+            assertEquals(expected, simulator.getOutputValue("output"));
+        }
+    }
+
+    @Test
     void testDivideBy3() throws IOException {
         var simulator = buildSimulator("divide_by_3.hard");
         List<Integer> clock = new LinkedList<>();
