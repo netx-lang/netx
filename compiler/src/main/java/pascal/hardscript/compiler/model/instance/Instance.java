@@ -3,7 +3,6 @@ package pascal.hardscript.compiler.model.instance;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
-import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
@@ -26,15 +25,7 @@ public sealed interface Instance extends Entity permits Data, Value {
     }
 
     default int getDepth() {
-        return getUpperComponent().getDepth();
-    }
-
-    default ComponentScope getUpperComponent() {
-        if (getParent() instanceof ComponentScope module) {
-            return module;
-        } else {
-            return getParent().getUpperComponent();
-        }
+        return getParent().getLeastUpperComponent().getDepth();
     }
 
     default boolean isUserDefined() {

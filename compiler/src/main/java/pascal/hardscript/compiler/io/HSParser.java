@@ -4,6 +4,8 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import pascal.hardscript.compiler.antlr.HardScriptParser.*;
+import pascal.hardscript.compiler.ast.ASTListener;
+import pascal.hardscript.compiler.ast.ASTNode;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.component.*;
 import pascal.hardscript.compiler.ast.expr.*;
@@ -19,7 +21,7 @@ import pascal.hardscript.util.lang.BitVector;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class HSParser {
@@ -30,23 +32,36 @@ public final class HSParser {
     }
 
     static ComponentNode parseComponent(ComponentContext ctx) {
-        List<Identifier> arguments = ctx.component_arguments() != null
-                ? ctx.component_arguments().ID().stream().map(HSParser::parseIdentifier).toList()
-                : List.of();
-        return ComponentNode.of(parseIdentifier(ctx.ID()),
-                        parseComponentType(locationOf(ctx.ID().getSymbol()), ctx.component_type()),
-                        arguments, ctx.element().stream().map(HSParser::parseElement).toList())
+        var attributes = parseComponentAttributes(ctx);
+        var elements = parseElements(ctx.element());
+        var type = parseComponentType(ctx);
+        return ComponentNode.of(parseIdentifier(ctx.ID()), type, attributes, elements)
                 .setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static ComponentTypeNode parseComponentType(SourceLoc sourceLoc, Component_typeContext ctx) {
-        if (ctx == null) {
-            ListExpr from = CommonList.ofEmpty().setSourceLoc(sourceLoc);
-            ListExpr to = CommonList.ofEmpty().setSourceLoc(sourceLoc);
-            return ComponentTypeNode.of(from, to).setSourceLoc(sourceLoc);
+    static List<Identifier> parseComponentAttributes(ComponentContext ctx) {
+        if (ctx.attributes() == null) {
+            return List.of();
+        }
+        return ctx.attributes().ID().stream()
+                .map(HSParser::parseIdentifier).toList();
+    }
+
+    static ComponentTypeNode parseComponentType(ComponentContext ctx) {
+        var typeCtx = ctx.component_type();
+        if (typeCtx == null) {
+            var sourceLoc = locationOf(ctx.ID().getSymbol());
+            var result = ComponentTypeNode.of(CommonList.ofEmpty(), CommonList.ofEmpty());
+            result.walk(new ASTListener() {
+                @Override
+                public void enterDefault(ASTNode node) {
+                    node.setSourceLoc(sourceLoc);
+                }
+            });
+            return result;
         } else {
-            return ComponentTypeNode.of(parseExpr(ctx.from), parseExpr(ctx.to))
-                    .setSourceLoc(locationOf(ctx.getStart()));
+            return ComponentTypeNode.of(parseExpr(typeCtx.from), parseExpr(typeCtx.to))
+                    .setSourceLoc(locationOf(typeCtx.getStart()));
         }
     }
 
@@ -62,61 +77,54 @@ public final class HSParser {
     }
 
     static ComponentInstantiationNode parseComponentInstantiation(ComponentInstantiationContext ctx) {
-
         return ComponentInstantiationNode.of(parseExpr(ctx.lhs), parseExpr(ctx.rhs));
     }
 
     static LoopNode parseLoop(LoopContext ctx) {
-        return LoopNode.of(
-                parseGeneratorQualifier(ctx.iterator()),
-                ctx.element().stream().map(HSParser::parseElement).toList());
+        return LoopNode.of(parseGeneratorQualifier(ctx.iterator()), parseElements(ctx.element()));
     }
 
     static DataInstantiationNode parseDataInstantiationNode(DataInstantiationContext ctx) {
-        return DataInstantiationNode.of(
-                ctx.primary_symbol().stream().map(HSParser::parsePrimarySymbol).toList(), parseTypeExpr(ctx.type));
+        return DataInstantiationNode.of(parsePrimarySymbolList(ctx.primary_symbol()), parseTypeExpr(ctx.type));
     }
 
     static ExprNode parseTypeExpr(Type_expressionContext ctx) {
-        var arguments = new LinkedList<ExprNode>();
-        for (var arg : ctx.type_argument()) {
-            if (arg.expression() != null) {
-                arguments.add(parseExpr(arg.expression()));
-            } else {
-                arguments.add(null);
-            }
-        }
-        return ParamSymbolExpr.of(parsePrimarySymbol(ctx.primary_symbol()), arguments)
-                .setSourceLoc(locationOf(ctx.getStart()));
+        return switch (ctx) {
+            case ExplicitTypeContext type -> ParamSymbolExpr.of(
+                    parsePrimarySymbol(type.primary_symbol()),
+                    parseExprList(type.expression())).setSourceLoc(locationOf(ctx.getStart()));
+            case AutoTypeContext type -> AutoTypeExpr.of().setSourceLoc(locationOf(type.getStart()));
+            default -> throw new ShallNotReachHereError();
+        };
     }
 
     static ExprNode parseExpr(ExpressionContext ctx) {
         var result = switch (ctx) {
-            case SymbolExprContext sub -> parseSymbolExpr(sub.symbol());
-            case NumberExprContext sub -> parseNumberExpr(sub.number());
-            case ListExprContext sub -> parseListExpr(sub.list());
+            case ListExprContext sub -> parseListExpr(sub);
             case UnaryExprContext sub -> parseUnaryExpr(sub);
-            case BinaryExprContext sub -> parseBinaryExpr(sub);
+            case SymbolExprContext sub -> parseSymbolExpr(sub);
+            case NumberExprContext sub -> parseNumberExpr(sub);
             case AccessExprContext sub -> parseAccessExpr(sub);
-            case ConditionalExprContext sub -> parseConditionalExpr(sub);
+            case BinaryExprContext sub -> parseBinaryExpr(sub);
             case LambdaExprContext sub -> parseLambdaExpr(sub);
+            case ConditionalExprContext sub -> parseConditionalExpr(sub);
             case ParenExprContext sub -> parseExpr(sub.expression());
             default -> throw new ShallNotReachHereError();
         };
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static SymbolExpr parseSymbolExpr(SymbolContext ctx) {
-        return switch (ctx) {
+    static SymbolExpr parseSymbolExpr(SymbolExprContext ctx) {
+        return switch (ctx.symbol()) {
             case PrimarySymbolExprContext sub -> parsePrimarySymbol(sub.primary_symbol());
             case ParamSymbolExprContext sub -> parseParamSymbolExpr(sub);
             default -> throw new ShallNotReachHereError();
         };
     }
 
-    static ListExpr parseListExpr(ListContext ctx) {
-        return switch (ctx) {
-            case CommonListContext sub -> CommonList.of(sub.expression().stream().map(HSParser::parseExpr).toList());
+    static ListExpr parseListExpr(ListExprContext ctx) {
+        return switch (ctx.list()) {
+            case CommonListContext sub -> CommonList.of(parseExprList(sub.expression()));
             case RangeListContext sub -> RangeList.of(parseExpr(sub.from), parseExpr(sub.to));
             case ListComprehensionContext sub -> parseListComprehension(sub);
             case EmptyListContext ignored -> CommonList.ofEmpty();
@@ -151,49 +159,17 @@ public final class HSParser {
     }
 
     static ExprNode parseUnaryExpr(UnaryExprContext ctx) {
-        UnaryExpr.Operator op = switch (ctx.op.getText()) {
-            case "+" -> UnaryExpr.Operator.ADD;
-            case "-" -> UnaryExpr.Operator.SUB;
-            case "!" -> UnaryExpr.Operator.NOT;
-            case "~" -> UnaryExpr.Operator.BITWISE_NOT;
-            default -> throw new ShallNotReachHereError();
-        };
+        UnaryExpr.Operator op = UnaryExpr.Operator.fromString(ctx.op.getText());
         return UnaryExpr.of(op, parseExpr(ctx.expression()));
     }
 
     static ExprNode parseBinaryExpr(BinaryExprContext ctx) {
-        BinaryExpr.Operator op = switch (ctx.op.getText()) {
-            case "<>" -> BinaryExpr.Operator.COMBINE;
-            case "::" -> BinaryExpr.Operator.CONCAT;
-            case "**" -> BinaryExpr.Operator.POW;
-            case "+" -> BinaryExpr.Operator.ADD;
-            case "-" -> BinaryExpr.Operator.SUB;
-            case "*" -> BinaryExpr.Operator.MUL;
-            case "/" -> BinaryExpr.Operator.DIV;
-            case "%" -> BinaryExpr.Operator.MOD;
-            case "==" -> BinaryExpr.Operator.EQ;
-            case "!=" -> BinaryExpr.Operator.NE;
-            case "<" -> BinaryExpr.Operator.LT;
-            case ">" -> BinaryExpr.Operator.GT;
-            case "<=" -> BinaryExpr.Operator.LE;
-            case ">=" -> BinaryExpr.Operator.GE;
-            case "&&" -> BinaryExpr.Operator.LOGIC_AND;
-            case "||" -> BinaryExpr.Operator.LOGIC_OR;
-            case "&" -> BinaryExpr.Operator.AND;
-            case "|" -> BinaryExpr.Operator.OR;
-            case "^" -> BinaryExpr.Operator.XOR;
-            case "^~", "~^" -> BinaryExpr.Operator.XNOR;
-            case "<<" -> BinaryExpr.Operator.LOGIC_SHL;
-            case ">>" -> BinaryExpr.Operator.LOGIC_SHR;
-            case "<<<" -> BinaryExpr.Operator.ARITH_SHL;
-            case ">>>" -> BinaryExpr.Operator.ARITH_SHR;
-            default -> throw new ShallNotReachHereError();
-        };
+        var op = BinaryExpr.Operator.fromString(ctx.op.getText());
         return BinaryExpr.of(op, parseExpr(ctx.lhs), parseExpr(ctx.rhs));
     }
 
-    static NumberExpr parseNumberExpr(NumberContext ctx) {
-        return switch (ctx) {
+    static NumberExpr parseNumberExpr(NumberExprContext ctx) {
+        return switch (ctx.number()) {
             case IntNumberContext sub -> IntNumber.of(Integer.parseInt(sub.INTEGER().getText()));
             case BoolNumberContext sub -> BoolNumber.of(Boolean.parseBoolean(sub.BOOLEAN().getText()));
             case BitVectorNumberContext sub -> parseBitVectorNumber(sub);
@@ -224,8 +200,7 @@ public final class HSParser {
     static Selector parseSelector(SelectorContext ctx) {
         var result = switch (ctx) {
             case BitSelectorContext sub -> BitSelector.of(parseExpr(sub.expression()));
-            case PartSelectorContext sub -> PartSelector.of(
-                    parseExpr(sub.expression(0)), parseExpr(sub.expression(1)));
+            case PartSelectorContext sub -> PartSelector.of(parseExpr(sub.from), parseExpr(sub.to));
             default -> throw new ShallNotReachHereError();
         };
         return result.setSourceLoc(locationOf(ctx.getStart()));
@@ -234,7 +209,7 @@ public final class HSParser {
     static ParamSymbolExpr parseParamSymbolExpr(ParamSymbolExprContext ctx) {
         return ParamSymbolExpr.of(
                 parsePrimarySymbol(ctx.primary_symbol()),
-                ctx.expression().stream().map(HSParser::parseExpr).toList());
+                parseExprList(ctx.expression()));
     }
 
     static ExprNode parseConditionalExpr(ConditionalExprContext ctx) {
@@ -242,9 +217,7 @@ public final class HSParser {
     }
 
     static ExprNode parseLambdaExpr(LambdaExprContext ctx) {
-        return LambdaExpr.of(
-                ctx.primary_symbol().stream().map(HSParser::parsePrimarySymbol).toList(),
-                parseExpr(ctx.expression()));
+        return LambdaExpr.of(parsePrimarySymbolList(ctx.primary_symbol()), parseExpr(ctx.expression()));
     }
 
     static Identifier parseIdentifier(TerminalNode ID) {
@@ -264,8 +237,31 @@ public final class HSParser {
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
+    static List<ElementNode> parseElements(List<ElementContext> list) {
+        List<ElementNode> result = new ArrayList<>();
+        for (var element : list) {
+            result.add(parseElement(element));
+        }
+        return result;
+    }
+
+    static List<ExprNode> parseExprList(List<ExpressionContext> list) {
+        List<ExprNode> result = new ArrayList<>();
+        for (var expr : list) {
+            result.add(parseExpr(expr));
+        }
+        return result;
+    }
+
+    static List<PrimarySymbol> parsePrimarySymbolList(List<Primary_symbolContext> list) {
+        List<PrimarySymbol> result = new ArrayList<>();
+        for (var symbol : list) {
+            result.add(parsePrimarySymbol(symbol));
+        }
+        return result;
+    }
+
     static SourceLoc locationOf(Token token) {
         return new SourceLoc(token.getLine(), token.getCharPositionInLine());
     }
-
 }

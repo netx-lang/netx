@@ -102,8 +102,7 @@ public final class Elaborator {
 
         private void buildElementIntoScope(DataInstantiationNode node) {
             var factory = evaluator.evaluateToDataFactory(node.getType());
-            var component = scope instanceof ComponentScope componentScope
-                    ? componentScope : scope.getUpperComponent();
+            var component = factory.getParent();
             node.getSymbols().stream()
                     .map(evaluator::getIdentifierFrom)
                     .forEach(id -> component.bind(id, factory.create(id)));
@@ -194,8 +193,8 @@ public final class Elaborator {
                 var componentScope = scope.instantiateComponentScope(
                         scope.getNameAllocator().allocateFor(atomType));
 
-                requiresMatchedSize(sourceLoc, node.getArguments(), atomType.parameters());
-                var iterator = node.getArguments().iterator();
+                requiresMatchedSize(sourceLoc, node.getAttributes(), atomType.parameters());
+                var iterator = node.getAttributes().iterator();
                 for (var entity : atomType.parameters()) {
                     componentScope.bind(iterator.next(), entity);
                 }

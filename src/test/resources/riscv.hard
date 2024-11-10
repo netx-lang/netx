@@ -9,11 +9,11 @@ component riscv : [
     inst imemDataOut of wire(bit(32))
     inst dmemDataOut of wire(bit(32))
 
-    inst instr, PC, nextPC of wire(auto)
-    inst func7, rs2, rs1, func3, rd, op of wire(auto)
-    inst imm, Ra, Rb, result, zero, less, PCAsrc, PCBsrc of wire(auto)
-    inst imemAddr, dmemAddr, dmemDataIn of wire(auto)
-    inst extOP, regWr, branch_ctl, memToReg, dmemWe, dmemOp, aSrc, bSrc, ctl of wire(auto)
+    inst instr, PC, nextPC of auto
+    inst func7, rs2, rs1, func3, rd, op of auto
+    inst imm, Ra, Rb, result, zero, less, PCAsrc, PCBsrc of auto
+    inst imemAddr, dmemAddr, dmemDataIn of auto
+    inst extOP, regWr, branch_ctl, memToReg, dmemWe, dmemOp, aSrc, bSrc, ctl of auto
 
     instr <- [imemDataOut]
     func7 <- instr[31:25]
@@ -51,8 +51,8 @@ component InstrDecoder : [op_i, func3, func7] -> [extOP, regWr, branch_ctl, memT
     inst op_i  of wire(bit(7))
     inst func3 of wire(bit(3))
     inst func7 of wire(bit(1))
-    inst extOP, regWr, branch_ctl, memToReg, memWr, memOP, aSrc, bSrc, ctl of wire(auto)
-    inst U_flag_0, U_flag_1, I_flag_0, R_flag, J_flag, I_flag_1, B_flag, I_flag_2, S_flag, U_flag, I_flag of wire(auto)
+    inst extOP, regWr, branch_ctl, memToReg, memWr, memOP, aSrc, bSrc, ctl of auto
+    inst U_flag_0, U_flag_1, I_flag_0, R_flag, J_flag, I_flag_1, B_flag, I_flag_2, S_flag, U_flag, I_flag of auto
     inst op of wire(bit(5))
     op <- op_i[6:2]
     U_flag_0 <- EQ <> [op, 5'b01101] // lui
@@ -224,9 +224,9 @@ component MUX(width) : [input_${i} | i in [0..W]] :: [code] -> [output] {
     let W = 2**width
     inst code of wire(bit(width))
     inst mask of wire(bit(W))
-    inst output of wire(auto)
+    inst output of auto
     for (i in [0..W]) {
-        inst input_${i} of wire(auto)
+        inst input_${i} of auto
     }
     mask <- DECODER(width) <> code
     

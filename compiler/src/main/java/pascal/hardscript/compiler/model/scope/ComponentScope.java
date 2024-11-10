@@ -17,7 +17,11 @@ public final class ComponentScope extends Scope {
     public ComponentScope(Scope parent, Identifier identifier) {
         super(parent);
         this.identifier = identifier;
-        this.depth = (getUpperComponent() != null) ? getUpperComponent().getDepth() + 1 : 0;
+        if (parent instanceof DesignScope) {
+            this.depth = 0;
+        } else {
+            this.depth = parent.getLeastUpperComponent().depth + 1;
+        }
     }
 
     public SourceLoc getSourceLoc() {

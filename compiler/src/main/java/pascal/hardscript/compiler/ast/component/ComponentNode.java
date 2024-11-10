@@ -10,14 +10,14 @@ import java.util.Objects;
 public final class ComponentNode extends ASTNode {
     private Identifier identifier;
     private ComponentTypeNode type;
-    private final List<Identifier> arguments;
+    private final List<Identifier> attributes;
     private final List<ElementNode> elements;
 
     private ComponentNode(Identifier identifier, ComponentTypeNode type,
-                          List<Identifier> arguments, List<ElementNode> elements) {
+                          List<Identifier> attributes, List<ElementNode> elements) {
         this.identifier = identifier;
         this.type = type;
-        this.arguments = arguments;
+        this.attributes = attributes;
         this.elements = elements;
     }
 
@@ -56,8 +56,8 @@ public final class ComponentNode extends ASTNode {
         return elements;
     }
 
-    public List<Identifier> getArguments() {
-        return arguments;
+    public List<Identifier> getAttributes() {
+        return attributes;
     }
 
     @Override
@@ -67,7 +67,7 @@ public final class ComponentNode extends ASTNode {
         var that = (ComponentNode) obj;
         return Objects.equals(this.identifier, that.identifier)
                 && Objects.equals(this.type, that.type)
-                && Objects.equals(this.arguments, that.arguments)
+                && Objects.equals(this.attributes, that.attributes)
                 && Objects.equals(this.elements, that.elements);
     }
 

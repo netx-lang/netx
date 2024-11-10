@@ -3,14 +3,14 @@ grammar HardScript;
 design : component+;
 
 component
-    : 'component' ID component_arguments? component_type? '{' element* '}'
+    : 'component' ID attributes? component_type? '{' element* '}'
     ;
 
 component_type
     : ':' from=expression '->' to=expression
     ;
 
-component_arguments
+attributes
     : '(' ID (',' ID)* ')'
     ;
 
@@ -49,17 +49,13 @@ expression
     ;
 
 type_expression
-    : primary_symbol '(' (type_argument (',' type_argument)*)? ')'
-    ;
-
-type_argument
-    : 'auto'
-    | expression
+    : primary_symbol '(' (expression (',' expression)*)? ')' # ExplicitType
+    | 'auto'                                                 # AutoType
     ;
 
 selector
-    : '[' expression ']'                # BitSelector
-    | '[' expression ':' expression ']' # PartSelector
+    : '[' expression ']'                        # BitSelector
+    | '[' from=expression ':' to=expression ']' # PartSelector
     ;
 
 list

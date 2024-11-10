@@ -2,7 +2,6 @@ package pascal.hardscript.compiler.analysis;
 
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.io.HSCompiler;
-import pascal.hardscript.compiler.io.HSParser;
 import pascal.hardscript.compiler.io.HSPrinter;
 import pascal.hardscript.util.TestUtils;
 
@@ -20,8 +19,7 @@ class AnalysisTest {
     void testSourceLocChecker() throws IOException {
         for (var testcase : TestUtils.collectAllFilesUnder(TEST_DIR)) {
             var frontend = HSCompiler.loadPath(testcase);
-            var design = HSParser.parseDesign(frontend.buildANTLRParser().design());
-            new SourceLocChecker(design).analyze();
+            new SourceLocChecker(frontend.parse()).analyze();
         }
     }
 
@@ -43,10 +41,10 @@ class AnalysisTest {
                 component top {
                     inst clk of clock()
                     inst a of wire(bit(4))
-                    inst b of wire(auto)
-                    inst x of wire(auto)
-                    inst c of wire(auto)
-                    inst d of wire(auto)
+                    inst b of auto
+                    inst x of auto
+                    inst c of auto
+                    inst d of auto
                     [x] <- OR <> [a, b]
                     [d] <- NOT <> REGISTER(clk, true, c) <> AND <> [a[1:0], b[1:0]]
                 }

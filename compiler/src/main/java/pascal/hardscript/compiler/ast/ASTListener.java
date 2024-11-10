@@ -225,4 +225,12 @@ public interface ASTListener {
     default void exit(LambdaExpr node) {
         exitDefault(node);
     }
+
+    default void enter(AutoTypeExpr node) {
+        enterDefault(node);
+    }
+
+    default void exit(AutoTypeExpr node) {
+        exitDefault(node);
+    }
 }

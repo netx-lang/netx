@@ -1,8 +1,8 @@
 package pascal.hardscript.compiler.ast.expr;
 
 import pascal.hardscript.compiler.ast.ASTListener;
+import pascal.hardscript.util.collection.BiMap;
 
-import java.util.Map;
 import java.util.Objects;
 
 public final class BinaryExpr extends ExprNode {
@@ -67,25 +67,9 @@ public final class BinaryExpr extends ExprNode {
         return Objects.hash(op, lhs, rhs);
     }
 
-    private static final Map<Operator, String> OPERATOR_MAP = Map.ofEntries(
-            Map.entry(Operator.COMBINE, "<>"),
-            Map.entry(Operator.CONCAT, "::"),
-            Map.entry(Operator.POW, "**"), Map.entry(Operator.MUL, "*"),
-            Map.entry(Operator.DIV, "/"), Map.entry(Operator.MOD, "%"),
-            Map.entry(Operator.ADD, "+"), Map.entry(Operator.SUB, "-"),
-            Map.entry(Operator.ARITH_SHL, "<<<"), Map.entry(Operator.ARITH_SHR, ">>>"),
-            Map.entry(Operator.LOGIC_SHR, ">>"), Map.entry(Operator.LOGIC_SHL, "<<"),
-            Map.entry(Operator.EQ, "=="), Map.entry(Operator.NE, "!="),
-            Map.entry(Operator.LT, "<"), Map.entry(Operator.LE, "<="),
-            Map.entry(Operator.GT, ">"), Map.entry(Operator.GE, ">="),
-            Map.entry(Operator.AND, "&"), Map.entry(Operator.OR, "|"),
-            Map.entry(Operator.XOR, "^"), Map.entry(Operator.XNOR, "^^"),
-            Map.entry(Operator.LOGIC_AND, "&&"), Map.entry(Operator.LOGIC_OR, "||")
-    );
-
     @Override
     public String toString() {
-        return "(" + lhs + " " + OPERATOR_MAP.get(op) + " " + rhs + ")";
+        return "(" + lhs + " " + Operator.OP_MAP.getKey(op) + " " + rhs + ")";
     }
 
     public enum Operator {
@@ -93,6 +77,40 @@ public final class BinaryExpr extends ExprNode {
         POW, MUL, DIV, MOD, ADD, SUB,
         ARITH_SHL, ARITH_SHR, LOGIC_SHR, LOGIC_SHL,
         EQ, NE, LT, LE, GT, GE,
-        AND, OR, XOR, XNOR, LOGIC_AND, LOGIC_OR,
+        AND, OR, XOR, XNOR, LOGIC_AND, LOGIC_OR;
+
+        public static final BiMap<String, Operator> OP_MAP = new BiMap<>();
+
+        static {
+            OP_MAP.put("<>", COMBINE);
+            OP_MAP.put("::", CONCAT);
+            OP_MAP.put("**", POW);
+            OP_MAP.put("+", ADD);
+            OP_MAP.put("-", SUB);
+            OP_MAP.put("*", MUL);
+            OP_MAP.put("/", DIV);
+            OP_MAP.put("%", MOD);
+            OP_MAP.put("==", EQ);
+            OP_MAP.put("!=", NE);
+            OP_MAP.put("<", LT);
+            OP_MAP.put(">", GT);
+            OP_MAP.put("<=", LE);
+            OP_MAP.put(">=", GE);
+            OP_MAP.put("&&", LOGIC_AND);
+            OP_MAP.put("||", LOGIC_OR);
+            OP_MAP.put("&", AND);
+            OP_MAP.put("|", OR);
+            OP_MAP.put("^", XOR);
+            OP_MAP.put("^~", XNOR);
+            OP_MAP.put("~^", XNOR);
+            OP_MAP.put("<<", LOGIC_SHL);
+            OP_MAP.put(">>", LOGIC_SHR);
+            OP_MAP.put("<<<", ARITH_SHL);
+            OP_MAP.put(">>>", ARITH_SHR);
+        }
+
+        public static Operator fromString(String s) {
+            return Objects.requireNonNull(OP_MAP.getValue(s));
+        }
     }
 }

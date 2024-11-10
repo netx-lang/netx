@@ -62,7 +62,7 @@ public final class DataInstantiationNode extends ElementNode {
             sb.append(", ").append(symbols.get(i));
         }
         sb.append(" of ");
-        sb.append(type);
+        sb.append(Objects.requireNonNullElse(type, "auto"));
         return sb.toString();
     }
 }

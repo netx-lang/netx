@@ -78,11 +78,14 @@ public abstract sealed class Scope permits BlockScope, DesignScope, ComponentSco
         return child;
     }
 
-    public ComponentScope getUpperComponent() {
+    public ComponentScope getLeastUpperComponent() {
+        if (this instanceof ComponentScope component) {
+            return component;
+        }
         return switch (parent) {
             case ComponentScope module -> module;
             case DesignScope ignored -> null;
-            default -> parent.getUpperComponent();
+            default -> parent.getLeastUpperComponent();
         };
     }
 

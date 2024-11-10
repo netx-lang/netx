@@ -26,6 +26,7 @@ import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.compiler.model.scope.binding.Binding;
 import pascal.hardscript.compiler.model.scope.binding.MapBinding;
 import pascal.hardscript.compiler.model.scope.binding.SingleBinding;
+import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
 
@@ -67,7 +68,10 @@ public final class Evaluator {
 
     public Data.Factory<?> evaluateToDataFactory(ExprNode expr) {
         mode = EvaluationMode.DATA_FACTORY;
-        var result = requiresDataFactory(expr.getSourceLoc(), evaluate(expr));
+        var factory = expr instanceof AutoTypeExpr
+                ? Wire.Factory.of(scope.getLeastUpperComponent(), PolyType.getInstance())
+                : evaluate(expr);
+        var result = requiresDataFactory(expr.getSourceLoc(), factory);
         mode = EvaluationMode.COMMON;
         return result;
     }
@@ -82,6 +86,7 @@ public final class Evaluator {
             case SymbolExpr sub -> evaluateSymbolExpr(sub);
             case UnaryExpr sub -> evaluateUnaryExpr(sub);
             case LambdaExpr sub -> evaluateLambdaExpr(sub);
+            case AutoTypeExpr ignored -> throw new ShallNotReachHereError();
         };
     }
 
@@ -276,15 +281,12 @@ public final class Evaluator {
 
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         requiresMatchedSize(sourceLoc, 1, arguments);
-        var dataType = arguments.getFirst() == null
-                ? PolyType.getInstance()
-                : evaluateBitWidth(arguments.getFirst());
-        return Wire.Factory.of(scope, dataType);
+        return Wire.Factory.of(scope.getLeastUpperComponent(), evaluateBitWidth(arguments.getFirst()));
     }
 
     private Clock.Factory evaluateClockFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         if (arguments.isEmpty()) {
-            return Clock.Factory.of(scope);
+            return Clock.Factory.of(scope.getLeastUpperComponent());
         } else {
             log.error("{}: Unexpected specification for component type clock: {}", sourceLoc, arguments);
             throw new CompileCancellationException();

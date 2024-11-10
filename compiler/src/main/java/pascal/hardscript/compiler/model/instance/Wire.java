@@ -1,6 +1,7 @@
 package pascal.hardscript.compiler.model.instance;
 
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
+import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.lang.Identifier;
 
@@ -56,20 +57,25 @@ public final class Wire implements Data {
 
     public static class Factory implements Data.Factory<Wire> {
         private final InstanceType type;
-        private final Scope parent;
+        private final ComponentScope parent;
 
-        private Factory(Scope parent, InstanceType type) {
+        private Factory(ComponentScope parent, InstanceType type) {
             this.type = type;
             this.parent = parent;
         }
 
-        public static Factory of(Scope parent, InstanceType type) {
+        public static Factory of(ComponentScope parent, InstanceType type) {
             return new Factory(parent, type);
         }
 
         @Override
         public Wire create(Identifier id) {
             return new Wire(id, parent, type);
+        }
+
+        @Override
+        public ComponentScope getParent() {
+            return parent;
         }
     }
 }

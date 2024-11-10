@@ -1,9 +1,11 @@
 package pascal.hardscript.compiler.ast.expr;
 
 import pascal.hardscript.compiler.ast.ASTListener;
+import pascal.hardscript.util.collection.BiMap;
 
-import java.util.Map;
 import java.util.Objects;
+
+import static pascal.hardscript.compiler.ast.expr.UnaryExpr.Operator.OP_MAP;
 
 public final class UnaryExpr extends ExprNode {
     private Operator op;
@@ -55,17 +57,25 @@ public final class UnaryExpr extends ExprNode {
         return Objects.hash(op, operand);
     }
 
-    private static final Map<Operator, String> OPERATOR_MAP = Map.ofEntries(
-            Map.entry(Operator.ADD, "+"), Map.entry(Operator.SUB, "-"),
-            Map.entry(Operator.NOT, "!"), Map.entry(Operator.BITWISE_NOT, "~")
-    );
-
     @Override
     public String toString() {
-        return OPERATOR_MAP.get(op) + operand;
+        return OP_MAP.getKey(op) + operand;
     }
 
     public enum Operator {
-        ADD, SUB, NOT, BITWISE_NOT
+        ADD, SUB, NOT, BITWISE_NOT;
+
+        public static final BiMap<String, Operator> OP_MAP = new BiMap<>();
+
+        static {
+            OP_MAP.put("+", ADD);
+            OP_MAP.put("-", SUB);
+            OP_MAP.put("!", NOT);
+            OP_MAP.put("~", BITWISE_NOT);
+        }
+
+        public static Operator fromString(String s) {
+            return OP_MAP.getValue(s);
+        }
     }
 }

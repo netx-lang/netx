@@ -23,11 +23,7 @@ public final class ParamSymbolExpr extends SymbolExpr {
     public void walk(ASTListener listener) {
         listener.enter(this);
         head.walk(listener);
-        arguments.forEach(argument -> {
-            if (argument != null) {
-                argument.walk(listener);
-            }
-        });
+        arguments.forEach(argument -> argument.walk(listener));
         listener.exit(this);
     }
 
@@ -62,9 +58,9 @@ public final class ParamSymbolExpr extends SymbolExpr {
         var sb = new StringBuilder();
         sb.append(head).append("(");
         if (!arguments.isEmpty()) {
-            sb.append(Objects.requireNonNullElse(arguments.getFirst(), "auto"));
+            sb.append(arguments.getFirst());
             for (int i = 1; i < arguments.size(); i++) {
-                sb.append(", ").append(Objects.requireNonNullElse(arguments.get(i), "auto"));
+                sb.append(", ").append(arguments.get(i));
             }
         }
         sb.append(")");

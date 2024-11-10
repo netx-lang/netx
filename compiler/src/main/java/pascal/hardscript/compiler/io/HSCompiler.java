@@ -35,17 +35,6 @@ public final class HSCompiler {
         return new HSCompiler(CharStreams.fromPath(path));
     }
 
-    public HardScriptParser buildANTLRParser() {
-        var lexer = new HardScriptLexer(charStream);
-        lexer.removeErrorListeners();
-        lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
-        var tokenStream = new CommonTokenStream(lexer);
-        var parser = new HardScriptParser(tokenStream);
-        parser.removeErrorListeners();
-        parser.addErrorListener(ThrowingErrorListener.INSTANCE);
-        return parser;
-    }
-
     public DesignNode parse() {
         var design = HSParser.parseDesign(buildANTLRParser().design());
         new SourceLocChecker(design).analyze();
@@ -58,6 +47,17 @@ public final class HSCompiler {
         new DuplicatedElimination(design).analyze();
         new DataTypeInference(design).analyze();
         return design;
+    }
+
+    HardScriptParser buildANTLRParser() {
+        var lexer = new HardScriptLexer(charStream);
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
+        var tokenStream = new CommonTokenStream(lexer);
+        var parser = new HardScriptParser(tokenStream);
+        parser.removeErrorListeners();
+        parser.addErrorListener(ThrowingErrorListener.INSTANCE);
+        return parser;
     }
 
     private static class ThrowingErrorListener extends BaseErrorListener {
