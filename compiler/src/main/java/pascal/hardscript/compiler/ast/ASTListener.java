@@ -218,11 +218,11 @@ public interface ASTListener {
         exitDefault(node);
     }
 
-    default void enter(LambdaExpr node) {
+    default void enter(LazyExpr node) {
         enterDefault(node);
     }
 
-    default void exit(LambdaExpr node) {
+    default void exit(LazyExpr node) {
         exitDefault(node);
     }
 

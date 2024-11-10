@@ -6,11 +6,8 @@ import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.component.*;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
-import pascal.hardscript.compiler.model.ListEntity;
-import pascal.hardscript.compiler.model.component.AtomType;
-import pascal.hardscript.compiler.model.component.CombineType;
-import pascal.hardscript.compiler.model.component.ComponentType;
-import pascal.hardscript.compiler.model.component.ParallelType;
+import pascal.hardscript.compiler.model.EntityList;
+import pascal.hardscript.compiler.model.component.*;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.ComponentInfo;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
@@ -19,38 +16,42 @@ import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.SourceLoc;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Predicate;
 
 import static pascal.hardscript.compiler.elaborator.Types.requiresMatchedSize;
 
 public final class Elaborator {
     private static final Logger log = LoggerFactory.getLogger(Elaborator.class);
+    private static final String TOP_COMPONENT = "top";
+
     private final DesignNode node;
     private final DesignScope design;
-    private final ComponentInfo info;
-    private final String TOP_COMPONENT = "top";
 
     public Elaborator(DesignNode node) {
         this.node = node;
-        this.info = ComponentInfo.of(node.getComponents());
-        this.design = DesignScope.newDesign(info);
+        this.design = DesignScope.newDesign(ComponentInfo.of(node.getComponents()));
     }
 
     public DesignScope elaborate() {
-        var topNode = node.getComponents().stream()
-                .filter(n -> TOP_COMPONENT.equals(n.getIdentifier().name()))
-                .findFirst().orElseGet(() -> {
-                    log.warn("No component named '{}' found, using the first component as top", TOP_COMPONENT);
-                    return node.getComponents().getFirst();
-                });
+        var topNode = findTopNode();
         var scope = design.instantiateComponentScope(topNode.getIdentifier());
         new ScopeElaborator(scope).build(topNode);
         return design;
     }
 
-    private final class ScopeElaborator {
+    private ComponentNode findTopNode() {
+        for (var component : node.getComponents()) {
+            if (TOP_COMPONENT.equals(component.getIdentifier().name())) {
+                return component;
+            }
+        }
+        log.warn("No component named '{}' found, using the first component as top", TOP_COMPONENT);
+        return node.getComponents().getFirst();
+    }
+
+    private static final class ScopeElaborator {
         private final Scope scope;
         private final Evaluator evaluator;
 
@@ -61,11 +62,10 @@ public final class Elaborator {
 
         public void build(ComponentNode node) {
             dispatchElementBuilder(node.getElements());
-            var module = (ComponentScope) scope;
+            var component = (ComponentScope) scope;
             var sourceLoc = node.getSourceLoc();
-            extractInstanceList(sourceLoc, node.getType().getFrom()).forEach(module::addInput);
-            extractInstanceList(sourceLoc, node.getType().getTo()).forEach(module::addOutput);
-
+            extractInstanceList(sourceLoc, node.getType().getInput()).forEach(component::addInput);
+            extractInstanceList(sourceLoc, node.getType().getOutput()).forEach(component::addOutput);
         }
 
         public void build(LoopNode node) {
@@ -75,32 +75,31 @@ public final class Elaborator {
         private void dispatchElementBuilder(List<ElementNode> list) {
             for (var element : list) {
                 switch (element) {
-                    case LoopNode loop -> buildElementIntoScope(loop);
-                    case BindingNode binding -> buildElementIntoScope(binding);
-                    case DataInstantiationNode component -> buildElementIntoScope(component);
-                    case ComponentInstantiationNode instantiation -> buildElementIntoScope(instantiation);
+                    case LoopNode loop -> buildElement(loop);
+                    case BindingNode binding -> buildElement(binding);
+                    case DataInstantiationNode component -> buildElement(component);
+                    case ComponentInstantiationNode instantiation -> buildElement(instantiation);
                 }
             }
         }
 
-        private void buildElementIntoScope(LoopNode loop) {
+        private void buildElement(LoopNode loop) {
             var generator = loop.getGenerator();
             var id = evaluator.getIdentifierFrom(generator.getHead());
-            var list = evaluator.evaluateToList(generator.getFrom());
-            for (var entity : list.entities()) {
+            for (var entity : evaluator.evaluateToList(generator.getFrom()).entities()) {
                 var subScope = scope.instantiateBlockScope();
                 subScope.bind(id, entity);
                 new ScopeElaborator(subScope).build(loop);
             }
         }
 
-        private void buildElementIntoScope(BindingNode binding) {
+        private void buildElement(BindingNode binding) {
             var head = evaluator.getIdentifierFrom(binding.getHead());
             var expr = evaluator.evaluate(binding.getExpr());
             scope.bind(head, expr);
         }
 
-        private void buildElementIntoScope(DataInstantiationNode node) {
+        private void buildElement(DataInstantiationNode node) {
             var factory = evaluator.evaluateToDataFactory(node.getType());
             var component = factory.getParent();
             node.getSymbols().stream()
@@ -108,7 +107,7 @@ public final class Elaborator {
                     .forEach(id -> component.bind(id, factory.create(id)));
         }
 
-        private void buildElementIntoScope(ComponentInstantiationNode instantiation) {
+        private void buildElement(ComponentInstantiationNode instantiation) {
             var sourceLoc = instantiation.getSourceLoc();
             var compType = evaluator.evaluateToComponentType(instantiation.getRhs());
 
@@ -123,13 +122,17 @@ public final class Elaborator {
 
         private List<Instance> extractInstanceList(SourceLoc sourceLoc, ExprNode node) {
             var entity = evaluator.evaluate(node);
-            if (entity instanceof ListEntity list) {
-                if (!list.entities().isEmpty()
-                        && list.entities().stream().allMatch(Predicate.not(Instance.class::isInstance))) {
-                    log.error("{}: Expected list of components but got {}", sourceLoc, list);
-                    throw new CompileCancellationException();
+            if (entity instanceof EntityList list) {
+                List<Instance> result = new ArrayList<>();
+                for (var member : list.entities()) {
+                    if (member instanceof Instance inst) {
+                        result.add(inst);
+                    } else {
+                        log.error("{}: Expected list of components but got {}", sourceLoc, list);
+                        throw new CompileCancellationException();
+                    }
                 }
-                return list.entities().stream().map(Instance.class::cast).toList();
+                return result;
             } else if (entity instanceof Instance instance) {
                 return List.of(instance);
             }
@@ -154,15 +157,16 @@ public final class Elaborator {
 
             ComponentPort doInstantiate(ComponentType type) {
                 return switch (type) {
-                    case AtomType atomType -> instantiateAtomType(atomType);
-                    case CombineType combineType -> instantiateCombineType(combineType);
+                    case ComponentAtom atom -> instantiateAtomType(atom);
+                    case BuiltinAtom atom -> instantiateBuiltinType(atom);
+                    case SequentialType sequentialType -> instantiateSequentialType(sequentialType);
                     case ParallelType parallelType -> instantiateParallelType(parallelType);
                 };
             }
 
-            public ComponentPort instantiateCombineType(CombineType combineType) {
-                var lhs = doInstantiate(combineType.lhs());
-                var rhs = doInstantiate(combineType.rhs());
+            public ComponentPort instantiateSequentialType(SequentialType sequentialType) {
+                var lhs = doInstantiate(sequentialType.lhs());
+                var rhs = doInstantiate(sequentialType.rhs());
 
                 requiresMatchedSize(sourceLoc, lhs.source(), rhs.target());
                 for (int i = 0; i < lhs.source().size(); ++i) {
@@ -181,25 +185,23 @@ public final class Elaborator {
                 return ComponentPort.of(input, output);
             }
 
-            public ComponentPort instantiateAtomType(AtomType atomType) {
-                ComponentScope module = info.containsComponent(atomType.identifier())
-                        ? instantiateSubComponent(atomType)
-                        : BuiltInComponentFactory.createBuiltInComponent(scope, atomType);
-                return ComponentPort.of(module.getOutputs(), module.getInputs());
+            public ComponentPort instantiateBuiltinType(BuiltinAtom atom) {
+                var component = BuiltInComponentFactory.createBuiltInComponent(scope, atom);
+                return ComponentPort.of(component.getOutputs(), component.getInputs());
             }
 
-            public ComponentScope instantiateSubComponent(AtomType atomType) {
-                var node = info.getComponentNode(atomType.identifier());
-                var componentScope = scope.instantiateComponentScope(
-                        scope.getNameAllocator().allocateFor(atomType));
+            public ComponentPort instantiateAtomType(ComponentAtom atom) {
+                var node = atom.getDefinition();
+                var component = scope.instantiateComponentScope(
+                        scope.getNameAllocator().allocateFor(atom));
 
-                requiresMatchedSize(sourceLoc, node.getAttributes(), atomType.parameters());
+                requiresMatchedSize(sourceLoc, node.getAttributes(), atom.getParameters());
                 var iterator = node.getAttributes().iterator();
-                for (var entity : atomType.parameters()) {
-                    componentScope.bind(iterator.next(), entity);
+                for (var entity : atom.getParameters()) {
+                    component.bind(iterator.next(), entity);
                 }
-                new ScopeElaborator(componentScope).build(node);
-                return componentScope;
+                new ScopeElaborator(component).build(node);
+                return ComponentPort.of(component.getOutputs(), component.getInputs());
             }
         }
 

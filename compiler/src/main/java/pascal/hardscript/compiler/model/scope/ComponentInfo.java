@@ -1,7 +1,6 @@
 package pascal.hardscript.compiler.model.scope;
 
 import pascal.hardscript.compiler.ast.component.ComponentNode;
-import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 
 import java.util.HashMap;
@@ -15,15 +14,6 @@ public final class ComponentInfo {
         for (var node : components) {
             this.componentNodes.put(node.getIdentifier(), node);
         }
-    }
-
-    public boolean contains(Identifier identifier) {
-        if (containsComponent(identifier)) return true;
-        return BuiltinComponent.isBuiltin(identifier);
-    }
-
-    public boolean containsComponent(Identifier identifier) {
-        return componentNodes.containsKey(identifier);
     }
 
     public ComponentNode getComponentNode(Identifier identifier) {

@@ -1,24 +1,32 @@
 package pascal.hardscript.compiler.model.scope;
 
+import pascal.hardscript.compiler.ast.component.ComponentNode;
 import pascal.hardscript.util.lang.Identifier;
 
+import javax.annotation.Nonnull;
+import java.util.Objects;
 import java.util.Stack;
 import java.util.function.Consumer;
 
 public final class DesignScope extends Scope {
-    private final ComponentInfo componentInfo;
+    private final ComponentInfo info;
 
-    DesignScope(Scope parent, ComponentInfo componentInfo) {
+    DesignScope(Scope parent, ComponentInfo info) {
         super(parent);
-        this.componentInfo = componentInfo;
+        this.info = info;
     }
 
-    public boolean containsInfo(Identifier identifier) {
-        return componentInfo.contains(identifier);
+    public static DesignScope newDesign(ComponentInfo info) {
+        return new DesignScope(null, info);
     }
 
-    public static DesignScope newDesign(ComponentInfo componentInfo) {
-        return new DesignScope(null, componentInfo);
+    public boolean hasDefinition(Identifier identifier) {
+        return info.getComponentNode(identifier) != null;
+    }
+
+    @Nonnull
+    public ComponentNode getDefinition(Identifier identifier) {
+        return Objects.requireNonNull(info.getComponentNode(identifier));
     }
 
     public ComponentScope getTop() {

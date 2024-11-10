@@ -4,15 +4,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
-import pascal.hardscript.compiler.model.ListEntity;
-import pascal.hardscript.compiler.model.component.AtomType;
+import pascal.hardscript.compiler.model.EntityList;
+import pascal.hardscript.compiler.model.component.BuiltinAtom;
 import pascal.hardscript.compiler.model.component.ComponentType;
 import pascal.hardscript.compiler.model.component.ParallelType;
 import pascal.hardscript.compiler.model.instance.BooleanValue;
 import pascal.hardscript.compiler.model.instance.Data;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.instance.IntegerValue;
-import pascal.hardscript.util.lang.Identifier;
+import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.SourceLoc;
 
 import java.util.LinkedList;
@@ -86,8 +86,8 @@ public final class Types {
     public static ComponentType castToComponentType(SourceLoc loc, Entity entity) {
         return switch (entity) {
             case ComponentType componentType -> componentType;
-            case ListEntity list -> makeParallelTypeFromList(loc, list);
-            case Instance inst -> AtomType.of(Identifier.of("FROM").setSourceLoc(loc), List.of(inst));
+            case EntityList list -> makeParallelTypeFromList(loc, list);
+            case Instance inst -> BuiltinAtom.of(BuiltinComponent.FROM, loc, List.of(inst));
             default -> {
                 log.error("{}: Cannot cast {} to component type", loc, entity);
                 throw new CompileCancellationException();
@@ -95,14 +95,14 @@ public final class Types {
         };
     }
 
-    private static ParallelType makeParallelTypeFromList(SourceLoc sourceLoc, ListEntity list) {
+    private static ParallelType makeParallelTypeFromList(SourceLoc sourceLoc, EntityList list) {
         List<ComponentType> result = new LinkedList<>();
         list.forEach(entity -> result.add(castToComponentType(sourceLoc, entity)));
         return ParallelType.from(result);
     }
 
-    public static ListEntity requiresList(SourceLoc loc, Entity entity) {
-        if (entity instanceof ListEntity list) {
+    public static EntityList requiresList(SourceLoc loc, Entity entity) {
+        if (entity instanceof EntityList list) {
             return list;
         } else {
             log.error("{}: Expected list but got {}", loc, entity);

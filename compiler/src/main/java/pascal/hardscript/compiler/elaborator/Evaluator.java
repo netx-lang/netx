@@ -9,11 +9,8 @@ import pascal.hardscript.compiler.ast.expr.qualifier.GeneratorQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.Qualifier;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
-import pascal.hardscript.compiler.model.ListEntity;
-import pascal.hardscript.compiler.model.component.AtomType;
-import pascal.hardscript.compiler.model.component.CombineType;
-import pascal.hardscript.compiler.model.component.ComponentType;
-import pascal.hardscript.compiler.model.component.LazyType;
+import pascal.hardscript.compiler.model.EntityList;
+import pascal.hardscript.compiler.model.component.*;
 import pascal.hardscript.compiler.model.instance.*;
 import pascal.hardscript.compiler.model.instance.selector.BitSelector;
 import pascal.hardscript.compiler.model.instance.selector.PartSelector;
@@ -27,9 +24,11 @@ import pascal.hardscript.compiler.model.scope.binding.Binding;
 import pascal.hardscript.compiler.model.scope.binding.MapBinding;
 import pascal.hardscript.compiler.model.scope.binding.SingleBinding;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
+import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
 
+import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +40,11 @@ import static pascal.hardscript.compiler.elaborator.Types.*;
 
 public final class Evaluator {
     private static final Logger log = LoggerFactory.getLogger(Evaluator.class);
+
     private final LinkedList<Binding> bindings = new LinkedList<>();
-    private EvaluationMode mode = EvaluationMode.COMMON;
     private final Scope scope;
+
+    private EvaluationMode mode = EvaluationMode.COMMON;
 
     public Evaluator(Scope scope) {
         this.scope = scope;
@@ -54,7 +55,7 @@ public final class Evaluator {
         return castToComponentType(expr.getSourceLoc(), evaluate(expr));
     }
 
-    public ListEntity evaluateToList(ExprNode expr) {
+    public EntityList evaluateToList(ExprNode expr) {
         return requiresList(expr.getSourceLoc(), evaluate(expr));
     }
 
@@ -67,44 +68,34 @@ public final class Evaluator {
     }
 
     public Data.Factory<?> evaluateToDataFactory(ExprNode expr) {
-        mode = EvaluationMode.DATA_FACTORY;
-        var factory = expr instanceof AutoTypeExpr
-                ? Wire.Factory.of(scope.getLeastUpperComponent(), PolyType.getInstance())
-                : evaluate(expr);
-        var result = requiresDataFactory(expr.getSourceLoc(), factory);
-        mode = EvaluationMode.COMMON;
-        return result;
+        Data.Factory<?> factory;
+        if (expr instanceof AutoTypeExpr) {
+            factory = Wire.Factory.of(scope.getLeastUpperComponent(), PolyType.getInstance());
+        } else {
+            mode = EvaluationMode.DATA_FACTORY;
+            factory = requiresDataFactory(expr.getSourceLoc(), evaluate(expr));
+            mode = EvaluationMode.COMMON;
+        }
+        return factory;
     }
 
     public Entity evaluate(ExprNode expr) {
         return switch (expr) {
+            case ListExpr sub -> evaluateListExpr(sub);
+            case LazyExpr sub -> evaluateLazyExpr(sub);
+            case UnaryExpr sub -> evaluateUnaryExpr(sub);
             case AccessExpr sub -> evaluateAccessExpr(sub);
             case BinaryExpr sub -> evaluateBinaryExpr(sub);
-            case ConditionalExpr sub -> evaluateConditionalExpr(sub);
-            case ListExpr sub -> evaluateListExpr(sub);
             case NumberExpr sub -> evaluateNumberExpr(sub);
             case SymbolExpr sub -> evaluateSymbolExpr(sub);
-            case UnaryExpr sub -> evaluateUnaryExpr(sub);
-            case LambdaExpr sub -> evaluateLambdaExpr(sub);
+            case ConditionalExpr sub -> evaluateConditionalExpr(sub);
             case AutoTypeExpr ignored -> throw new ShallNotReachHereError();
         };
     }
 
-    private Entity evaluateLambdaExpr(LambdaExpr expr) {
+    private Entity evaluateLazyExpr(LazyExpr expr) {
         var arguments = expr.getArguments().stream().map(this::getIdentifierFrom).toList();
         return LazyType.of(scope, arguments, expr.getBody());
-    }
-
-    public ComponentType evaluateLazyExpr(LazyType lazy, AtomType caller) {
-        var evaluator = lazy.capture().getEvaluator();
-        requiresMatchedSize(caller.identifier().getSourceLoc(), lazy.identifiers(), caller.parameters());
-        int size = lazy.identifiers().size();
-        var bindings = MapBinding.of(IntStream.range(0, size).mapToObj(
-                i -> Map.entry(lazy.identifiers().get(i), caller.parameters().get(i))).toList());
-        evaluator.overrideBindings(bindings);
-        var result = evaluator.evaluateToComponentType(lazy.expr());
-        evaluator.restoreBindings();
-        return result;
     }
 
     private Entity evaluateAccessExpr(AccessExpr expr) {
@@ -112,7 +103,7 @@ public final class Evaluator {
         var selector = evaluateSelector(expr.getSelector());
         return switch (base) {
             case Instance inst -> DataAccess.of(inst, selector);
-            case ListEntity listValue -> listValue.select(selector);
+            case EntityList listValue -> listValue.select(selector);
             default -> {
                 log.error("{}: Expected component or list but got {}",
                         expr.getBase().getSourceLoc(), base);
@@ -139,25 +130,25 @@ public final class Evaluator {
         };
     }
 
-    private ListEntity evaluateCommonList(CommonList list) {
+    private EntityList evaluateCommonList(CommonList list) {
         var elements = list.getElements().stream().map(this::evaluate).toList();
         if (elements.isEmpty()) {
-            return ListEntity.ofEmpty();
+            return EntityList.ofEmpty();
         }
-        return ListEntity.of(elements);
+        return EntityList.of(elements);
     }
 
-    private ListEntity evaluateRangeList(RangeList list) {
+    private EntityList evaluateRangeList(RangeList list) {
         var from = evaluateToIntegerValue(list.getFrom()).toInt();
         var to = evaluateToIntegerValue(list.getTo()).toInt();
-        return ListEntity.of(
+        return EntityList.of(
                 IntStream.range(Integer.min(from, to), Integer.max(from, to))
                         .mapToObj(Int32Value::of)
                         .map(Entity.class::cast).toList());
     }
 
-    private ListEntity evaluateListComprehension(ListComprehension list) {
-        return ListEntity.of(doListComprehension(list.getHead(), new LinkedList<>(list.getQualifiers())));
+    private EntityList evaluateListComprehension(ListComprehension list) {
+        return EntityList.of(doListComprehension(list.getHead(), new LinkedList<>(list.getQualifiers())));
     }
 
     private List<Entity> doListComprehension(ExprNode head, LinkedList<Qualifier> qualifiers) {
@@ -247,7 +238,7 @@ public final class Evaluator {
     private Entity evaluateBinaryExpr(BinaryExpr expr) {
         var sourceLoc = expr.getSourceLoc();
         return switch (expr.getOp()) {
-            case COMBINE -> evaluateCombineType(sourceLoc, evaluate(expr.getLhs()), evaluate(expr.getRhs()));
+            case COMBINE -> evaluateSequentialType(sourceLoc, evaluate(expr.getLhs()), evaluate(expr.getRhs()));
             case CONCAT -> evaluateListConcat(expr);
             case ADD, SUB, MUL, DIV, MOD, POW, AND, OR, XOR, XNOR,
                  EQ, NE, LT, LE, GT, GE, ARITH_SHR, ARITH_SHL, LOGIC_SHR, LOGIC_SHL ->
@@ -266,17 +257,17 @@ public final class Evaluator {
         return op.apply(evaluateToBoolean(expr.getLhs()), evaluateToBoolean(expr.getRhs()));
     }
 
-    private ListEntity evaluateListConcat(BinaryExpr expr) {
+    private EntityList evaluateListConcat(BinaryExpr expr) {
         List<Entity> result = new LinkedList<>();
         var lhs = evaluateToList(expr.getLhs());
         var rhs = evaluateToList(expr.getRhs());
         result.addAll(lhs.entities());
         result.addAll(rhs.entities());
-        return ListEntity.of(result);
+        return EntityList.of(result);
     }
 
-    private Entity evaluateCombineType(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
-        return CombineType.from(castToComponentType(sourceLoc, lhs), castToComponentType(sourceLoc, rhs));
+    private Entity evaluateSequentialType(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
+        return SequentialType.of(castToComponentType(sourceLoc, lhs), castToComponentType(sourceLoc, rhs));
     }
 
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
@@ -316,22 +307,27 @@ public final class Evaluator {
     private Entity evaluatePrimarySymbolExpr(PrimarySymbol expr) {
         var id = getIdentifierFrom(expr);
         Entity entity = resolveIdentifier(id);
-        if (entity != null) {
-            if (entity instanceof LazyType lambdaType) {
-                return evaluateLazyExpr(lambdaType, AtomType.of(id));
-            }
-            return entity;
+        if (entity instanceof LazyType lazyType) {
+            return evaluateLazyExpr(expr.getSourceLoc(), lazyType, List.of());
         }
-        if (scope instanceof DesignScope design) {
-            if (design.containsInfo(id)) {
-                return AtomType.of(id);
-            }
-            log.error("{}: Unresolved Symbol {}", expr.getSourceLoc(), id);
-            throw new CompileCancellationException();
-        }
-        return scope.getParent().getEvaluator().evaluate(expr);
+        return entity;
     }
 
+    public ComponentType evaluateLazyExpr(SourceLoc sourceLoc, LazyType lazy, List<Entity> parameters) {
+        var evaluator = lazy.capture().getEvaluator();
+        requiresMatchedSize(sourceLoc, lazy.identifiers(), parameters);
+        int size = lazy.identifiers().size();
+        var bindings = MapBinding.ofEmpty();
+        for (int i = 0; i < size; i++) {
+            bindings.bind(lazy.identifiers().get(i), parameters.get(i));
+        }
+        evaluator.overrideBindings(bindings);
+        var result = evaluator.evaluateToComponentType(lazy.expr());
+        evaluator.restoreBindings();
+        return result;
+    }
+
+    @Nonnull
     private Entity resolveIdentifier(Identifier id) {
         for (var binding : bindings) {
             var entity = binding.lookup(id);
@@ -339,17 +335,43 @@ public final class Evaluator {
                 return entity;
             }
         }
-        return null;
+        if (scope instanceof DesignScope design) {
+            if (design.hasDefinition(id)) {
+                return ComponentAtom.of(design.getDefinition(id));
+            } else if (BuiltinComponent.isBuiltin(id)) {
+                return BuiltinAtom.of(BuiltinComponent.of(id), id.getSourceLoc(), List.of());
+            } else {
+                log.error("{}: Unresolved identifier {}", id.getSourceLoc(), id);
+                throw new CompileCancellationException();
+            }
+        }
+        return scope.getParent().getEvaluator().resolveIdentifier(id);
     }
 
     private Entity evaluateParamSymbolExpr(ParamSymbolExpr expr) {
         return switch (mode) {
-            case DATA_FACTORY -> evaluateComponentFactory(expr);
-            case COMMON -> evaluateInstanceType(expr);
+            case COMMON -> evaluateComponentType(expr);
+            case DATA_FACTORY -> evaluateDataFactory(expr);
         };
     }
 
-    private Data.Factory<?> evaluateComponentFactory(ParamSymbolExpr expr) {
+    private Entity evaluateComponentType(ParamSymbolExpr expr) {
+        var identifier = getIdentifierFrom(expr.getHead());
+        var parameters = expr.getArguments().stream().map(this::evaluate).toList();
+        Entity entity = resolveIdentifier(identifier);
+        if (entity instanceof LazyType lazyType) {
+            return evaluateLazyExpr(expr.getSourceLoc(), lazyType, parameters);
+        } else if (entity instanceof AtomType atom) {
+            atom.setParameters(parameters);
+            return atom;
+        } else {
+            log.error("{}: Expected component type but got {}", expr.getSourceLoc(), entity);
+            throw new CompileCancellationException();
+        }
+    }
+
+
+    private Data.Factory<?> evaluateDataFactory(ParamSymbolExpr expr) {
         var identifier = getIdentifierFrom(expr.getHead());
         var sourceLoc = expr.getSourceLoc();
         return switch (identifier.name()) {
@@ -360,16 +382,6 @@ public final class Evaluator {
                 throw new CompileCancellationException();
             }
         };
-    }
-
-    private ComponentType evaluateInstanceType(ParamSymbolExpr expr) {
-        var identifier = getIdentifierFrom(expr.getHead());
-        var parameters = expr.getArguments().stream().map(this::evaluate).toList();
-        var atom = AtomType.of(identifier, parameters);
-        if (resolveIdentifier(identifier) instanceof LazyType lambdaType) {
-            return evaluateLazyExpr(lambdaType, atom);
-        }
-        return atom;
     }
 
     public Identifier getIdentifierFrom(PrimarySymbol symbol) {

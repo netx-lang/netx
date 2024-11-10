@@ -7,32 +7,32 @@ import pascal.hardscript.compiler.ast.expr.ExprNode;
 import java.util.Objects;
 
 public class ComponentTypeNode extends ASTNode {
-    private ExprNode from;
-    private ExprNode to;
+    private ExprNode input;
+    private ExprNode output;
 
-    private ComponentTypeNode(ExprNode from, ExprNode to) {
-        this.from = from;
-        this.to = to;
+    private ComponentTypeNode(ExprNode input, ExprNode output) {
+        this.input = input;
+        this.output = output;
     }
 
     public static ComponentTypeNode of(ExprNode from, ExprNode to) {
         return new ComponentTypeNode(from, to);
     }
 
-    public ExprNode getFrom() {
-        return from;
+    public ExprNode getInput() {
+        return input;
     }
 
-    public void setFrom(ExprNode from) {
-        this.from = from;
+    public void setInput(ExprNode input) {
+        this.input = input;
     }
 
-    public ExprNode getTo() {
-        return to;
+    public ExprNode getOutput() {
+        return output;
     }
 
-    public void setTo(ExprNode to) {
-        this.to = to;
+    public void setOutput(ExprNode output) {
+        this.output = output;
     }
 
     @Override
@@ -40,24 +40,24 @@ public class ComponentTypeNode extends ASTNode {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ComponentTypeNode that = (ComponentTypeNode) o;
-        return Objects.equals(from, that.from) && Objects.equals(to, that.to);
+        return Objects.equals(input, that.input) && Objects.equals(output, that.output);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(from, to);
+        return Objects.hash(input, output);
     }
 
     @Override
     public String toString() {
-        return from.toString() + " -> " + to.toString();
+        return input.toString() + " -> " + output.toString();
     }
 
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);
-        from.walk(listener);
-        to.walk(listener);
+        input.walk(listener);
+        output.walk(listener);
         listener.exit(this);
     }
 }

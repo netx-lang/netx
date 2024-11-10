@@ -1,17 +1,17 @@
 package pascal.hardscript.compiler.model.component;
 
 import pascal.hardscript.compiler.model.Entity;
-import pascal.hardscript.util.lang.Identifier;
 
 import java.util.List;
 
-public record AtomType(Identifier identifier, List<Entity> parameters) implements ComponentType {
+public sealed abstract class AtomType implements ComponentType permits BuiltinAtom, ComponentAtom {
+    private List<Entity> parameters;
 
-    public static AtomType of(Identifier identifier) {
-        return new AtomType(identifier, List.of());
+    public List<Entity> getParameters() {
+        return parameters;
     }
 
-    public static AtomType of(Identifier identifier, List<Entity> parameters) {
-        return new AtomType(identifier, parameters);
+    public void setParameters(List<Entity> parameters) {
+        this.parameters = parameters;
     }
 }

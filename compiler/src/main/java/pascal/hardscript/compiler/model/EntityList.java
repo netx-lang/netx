@@ -7,7 +7,7 @@ import pascal.hardscript.compiler.model.instance.selector.Selector;
 import java.util.List;
 import java.util.function.Consumer;
 
-public record ListEntity(List<Entity> entities) implements Entity {
+public record EntityList(List<Entity> entities) implements Entity {
 
     public Entity select(Selector selector) {
         return switch (selector) {
@@ -15,7 +15,7 @@ public record ListEntity(List<Entity> entities) implements Entity {
             case PartSelector partSelector -> {
                 int start = partSelector.start().toInt();
                 int end = partSelector.end().toInt();
-                yield ListEntity.of(entities.subList(
+                yield EntityList.of(entities.subList(
                         Integer.min(start, end), Integer.max(start, end) + 1));
             }
         };
@@ -25,11 +25,11 @@ public record ListEntity(List<Entity> entities) implements Entity {
         entities.forEach(consumer);
     }
 
-    public static ListEntity of(List<Entity> values) {
-        return new ListEntity(values);
+    public static EntityList of(List<Entity> values) {
+        return new EntityList(values);
     }
 
-    public static ListEntity ofEmpty() {
-        return new ListEntity(List.of());
+    public static EntityList ofEmpty() {
+        return new EntityList(List.of());
     }
 }

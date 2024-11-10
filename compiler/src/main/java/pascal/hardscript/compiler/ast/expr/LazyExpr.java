@@ -6,17 +6,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-public final class LambdaExpr extends ExprNode {
+public final class LazyExpr extends ExprNode {
     private final List<PrimarySymbol> arguments;
     private ExprNode body;
 
-    private LambdaExpr(List<PrimarySymbol> arguments, ExprNode body) {
+    private LazyExpr(List<PrimarySymbol> arguments, ExprNode body) {
         this.arguments = new LinkedList<>(arguments);
         this.body = body;
     }
 
-    public static LambdaExpr of(List<PrimarySymbol> arguments, ExprNode expr) {
-        return new LambdaExpr(arguments, expr);
+    public static LazyExpr of(List<PrimarySymbol> arguments, ExprNode expr) {
+        return new LazyExpr(arguments, expr);
     }
 
     public List<PrimarySymbol> getArguments() {
@@ -45,7 +45,7 @@ public final class LambdaExpr extends ExprNode {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        LambdaExpr that = (LambdaExpr) o;
+        LazyExpr that = (LazyExpr) o;
         return Objects.equals(arguments, that.arguments) && Objects.equals(body, that.body);
     }
 

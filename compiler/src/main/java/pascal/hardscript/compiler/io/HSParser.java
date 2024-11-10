@@ -102,11 +102,11 @@ public final class HSParser {
         var result = switch (ctx) {
             case ListExprContext sub -> parseListExpr(sub);
             case UnaryExprContext sub -> parseUnaryExpr(sub);
+            case LazyExprContext sub -> parseLazyExpr(sub);
             case SymbolExprContext sub -> parseSymbolExpr(sub);
             case NumberExprContext sub -> parseNumberExpr(sub);
             case AccessExprContext sub -> parseAccessExpr(sub);
             case BinaryExprContext sub -> parseBinaryExpr(sub);
-            case LambdaExprContext sub -> parseLambdaExpr(sub);
             case ConditionalExprContext sub -> parseConditionalExpr(sub);
             case ParenExprContext sub -> parseExpr(sub.expression());
             default -> throw new ShallNotReachHereError();
@@ -216,8 +216,8 @@ public final class HSParser {
         return ConditionalExpr.of(parseExpr(ctx.cond), parseExpr(ctx.thenBranch), parseExpr(ctx.elseBranch));
     }
 
-    static ExprNode parseLambdaExpr(LambdaExprContext ctx) {
-        return LambdaExpr.of(parsePrimarySymbolList(ctx.primary_symbol()), parseExpr(ctx.expression()));
+    static ExprNode parseLazyExpr(LazyExprContext ctx) {
+        return LazyExpr.of(parsePrimarySymbolList(ctx.primary_symbol()), parseExpr(ctx.expression()));
     }
 
     static Identifier parseIdentifier(TerminalNode ID) {
