@@ -16,27 +16,27 @@ import java.util.stream.Collectors;
 
 import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
 
-public class DuplicatedElimination extends ModelAnalysis {
-    private final UnionFind<Instance> duplicatedRep = new UnionFind<>();
+public class DuplicatedComponentElimination extends ModelAnalysis {
+    private final UnionFind<Instance> set = new UnionFind<>();
 
-    public DuplicatedElimination(DesignScope design) {
+    public DuplicatedComponentElimination(DesignScope design) {
         super(design);
     }
 
     @Override
     public void analyze() {
-        design.forEachScope(this::inline);
+        inlineScope(design.getTop());
         design.forEachScope(this::collectDuplicatedComponents);
         design.forEachScope(this::replaceDuplicatedInstances);
     }
 
-    private void inline(Scope scope) {
+    private void inlineScope(Scope scope) {
         List<Scope> inlinedChildren = new LinkedList<>();
         var binding = scope.getBinding();
         var aliases = scope.getAliases();
 
         for (var child : scope.getChildren()) {
-            inline(child);
+            inlineScope(child);
             if (child instanceof ComponentScope) {
                 inlinedChildren.add(child);
             } else {
@@ -66,18 +66,14 @@ public class DuplicatedElimination extends ModelAnalysis {
 
             var idGroup = entry.getValue();
             for (int i = 0; i < idGroup.size(); i++) {
-                ComponentScope a = idGroup.get(i);
                 for (int j = i + 1; j < idGroup.size(); j++) {
-                    ComponentScope b = idGroup.get(j);
-                    var iterator = b.getOutputs().iterator();
+                    ComponentScope a = idGroup.get(i), b = idGroup.get(j);
                     if (isDuplicated(a, b)) {
-                        toRemove.add(b);
+                        var iterator = b.getOutputs().iterator();
                         for (var rep : a.getOutputs()) {
-                            var dup = iterator.next();
-                            if (dup != rep) {
-                                duplicatedRep.union(dup, rep);
-                            }
+                            set.union(iterator.next(), rep);
                         }
+                        toRemove.add(b);
                     }
                 }
             }
@@ -111,16 +107,16 @@ public class DuplicatedElimination extends ModelAnalysis {
 
     private boolean needRemove(Entity entity) {
         if (entity instanceof Instance instance) {
-            if (duplicatedRep.contains(instance)) {
-                return duplicatedRep.find(instance) != instance;
+            if (set.contains(instance)) {
+                return set.find(instance) != instance;
             }
         }
         return false;
     }
 
     private Instance repOf(Instance instance) {
-        if (duplicatedRep.contains(instance)) {
-            return duplicatedRep.find(instance);
+        if (set.contains(instance)) {
+            return set.find(instance);
         }
         return instance;
     }

@@ -13,10 +13,6 @@ public final class DesignScope extends Scope {
         this.componentInfo = componentInfo;
     }
 
-    public ComponentInfo getComponentInfo() {
-        return componentInfo;
-    }
-
     public boolean containsInfo(Identifier identifier) {
         return componentInfo.contains(identifier);
     }
@@ -25,10 +21,14 @@ public final class DesignScope extends Scope {
         return new DesignScope(null, componentInfo);
     }
 
+    public ComponentScope getTop() {
+        assert getChildren().size() == 1;
+        return (ComponentScope) getChildren().getFirst();
+    }
+
     public void forEachScope(Consumer<Scope> consumer) {
         Stack<Scope> stack = new Stack<>();
-        assert getChildren().size() == 1;
-        stack.push(getChildren().getFirst());
+        stack.push(getTop());
         while (!stack.isEmpty()) {
             Scope scope = stack.pop();
             consumer.accept(scope);
