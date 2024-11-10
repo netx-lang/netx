@@ -1,4 +1,4 @@
-package pascal.hardscript.hson.model;
+package pascal.hardscript.hson.simulator.model;
 
 import pascal.hardscript.util.lang.BitVector;
 import pascal.hardscript.util.lang.Identifier;

@@ -1,18 +1,15 @@
-package pascal.hardscript.hson.io;
+package pascal.hardscript.hson.simulator.frontend;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import pascal.hardscript.hson.antlr.HsonDataParser;
-import pascal.hardscript.hson.model.*;
-import pascal.hardscript.hson.model.selector.BitSelector;
-import pascal.hardscript.hson.model.selector.PartSelector;
-import pascal.hardscript.hson.model.selector.Selector;
+import pascal.hardscript.hson.simulator.model.*;
+import pascal.hardscript.hson.util.HsonType;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
-import pascal.hardscript.util.lang.BitVector;
 import pascal.hardscript.util.lang.Identifier;
 
 import java.util.List;
 
-import static pascal.hardscript.hson.io.FrontendUtils.*;
+import static pascal.hardscript.hson.util.FrontendUtils.*;
 
 public final class RelationParser {
     private final Circuit circuit;
@@ -31,7 +28,7 @@ public final class RelationParser {
 
     private void parse(JsonNode node) {
         switch (typeOf(node)) {
-            case Node.Type.CLOCK, WIRE -> {
+            case HsonType.CLOCK, WIRE -> {
                 return;
             }
         }
@@ -39,11 +36,11 @@ public final class RelationParser {
         var inputs = resolveNodes(node, "input");
         var outputs = resolveNodes(node, "output");
         switch (typeOf(node)) {
-            case Node.Type.COMPONENT -> {
+            case HsonType.COMPONENT -> {
                 Node relation = ComputationNode.of(Identifier.of(node.get("id").textValue()));
                 circuit.addHyperEdge(relation, inputs, outputs);
             }
-            case Node.Type.REGISTER  -> {
+            case HsonType.REGISTER  -> {
                 var register = parseRegister(node, outputs.getFirst(), inputs.getFirst());
                 circuit.addRegister(register);
             }
@@ -99,27 +96,5 @@ public final class RelationParser {
             base = result;
         }
         return result;
-    }
-
-    static Selector parseSelector(HsonDataParser.SelectorContext ctx) {
-        return switch (ctx) {
-            case HsonDataParser.BitSelectorContext sub -> BitSelector.of(
-                    Integer.parseUnsignedInt(sub.index.getText()));
-            case HsonDataParser.PartSelectorContext sub -> PartSelector.of(
-                    Integer.parseUnsignedInt(sub.from.getText()),
-                    Integer.parseUnsignedInt(sub.to.getText()));
-            default -> throw new ShallNotReachHereError();
-        };
-    }
-
-    static BitVector parseConstantValue(HsonDataParser.ConstantContext ctx) {
-        BitVector value;
-        if (ctx.HEX() != null) {
-            var literal = ctx.getText().toLowerCase().split("'h");
-            value = BitVector.parse(literal[1], Integer.parseUnsignedInt(literal[0]), 16);
-        } else {
-            value = BitVector.fromInt(Integer.parseInt(ctx.getText()));
-        }
-        return value;
     }
 }

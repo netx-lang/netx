@@ -1,10 +1,10 @@
-package pascal.hardscript.hson.io;
+package pascal.hardscript.hson.simulator.frontend;
 
-import pascal.hardscript.hson.model.DataNode;
+import pascal.hardscript.hson.simulator.model.DataNode;
 
 import javax.annotation.Nonnull;
 
-public class DataManager {
+public final class DataManager {
     private final DataNode[] nodes;
 
     public DataManager(int dataCount) {

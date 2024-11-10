@@ -12,8 +12,8 @@ import java.util.function.BinaryOperator;
 
 public class Evaluator {
     private static final Map<BuiltinComponent, BiFunction<BitVector, BitVector, Boolean>> RELATIONAL_OP;
-    private static final Map<BuiltinComponent, BinaryOperator<BitVector>> BINARY_OP;
     private static final Map<BuiltinComponent, BiFunction<BitVector, Integer, BitVector>> SHIFT_OP;
+    private static final Map<BuiltinComponent, BinaryOperator<BitVector>> BINARY_OP;
 
     static {
         RELATIONAL_OP = new HashMap<>();

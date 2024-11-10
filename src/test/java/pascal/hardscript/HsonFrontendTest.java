@@ -1,7 +1,7 @@
 package pascal.hardscript;
 
 import org.junit.jupiter.api.Test;
-import pascal.hardscript.hson.io.HFrontend;
+import pascal.hardscript.hson.simulator.frontend.HFrontend;
 
 import java.io.IOException;
 import java.nio.file.Path;

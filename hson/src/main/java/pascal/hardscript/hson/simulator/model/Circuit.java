@@ -1,4 +1,4 @@
-package pascal.hardscript.hson.model;
+package pascal.hardscript.hson.simulator.model;
 
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;

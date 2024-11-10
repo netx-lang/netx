@@ -1,4 +1,4 @@
-package pascal.hardscript.hson.model;
+package pascal.hardscript.hson.simulator.model;
 
 import pascal.hardscript.util.lang.Identifier;
 
@@ -16,10 +16,6 @@ public abstract sealed class Node implements Comparable<Node> permits Computatio
 
     public void setOrder(int order) {
         this.order = order;
-    }
-
-    public enum Type {
-        COMPONENT, REGISTER, CLOCK, WIRE
     }
 
     @Override

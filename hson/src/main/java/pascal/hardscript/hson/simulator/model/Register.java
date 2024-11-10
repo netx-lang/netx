@@ -1,4 +1,4 @@
-package pascal.hardscript.hson.model;
+package pascal.hardscript.hson.simulator.model;
 
 public final class Register {
     private final DataNode curr, next;

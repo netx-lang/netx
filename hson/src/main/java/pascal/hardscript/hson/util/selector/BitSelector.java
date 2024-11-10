@@ -1,4 +1,4 @@
-package pascal.hardscript.hson.model.selector;
+package pascal.hardscript.hson.util.selector;
 
 import pascal.hardscript.util.lang.BitVector;
 

@@ -1,6 +1,6 @@
-package pascal.hardscript.hson.model;
+package pascal.hardscript.hson.simulator.model;
 
-import pascal.hardscript.hson.model.selector.Selector;
+import pascal.hardscript.hson.util.selector.Selector;
 import pascal.hardscript.util.lang.BitVector;
 
 public final class DataSelectNode extends DataNode {

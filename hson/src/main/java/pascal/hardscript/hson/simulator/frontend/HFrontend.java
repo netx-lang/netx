@@ -1,21 +1,19 @@
-package pascal.hardscript.hson.io;
+package pascal.hardscript.hson.simulator.frontend;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import pascal.hardscript.hson.model.Circuit;
+import pascal.hardscript.hson.AbstractHFrontend;
+import pascal.hardscript.hson.simulator.model.Circuit;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 
-public class HFrontend {
-    private static final ObjectMapper mapper = new ObjectMapper();
+public final class HFrontend extends AbstractHFrontend<Circuit> {
     private final Circuit circuit = new Circuit();
     private final DataManager manager;
-    private final JsonNode json;
 
     private HFrontend(JsonNode node) {
-        this.json = node;
+        super(node);
         this.manager = new DataManager(json.get("dataCount").intValue());
     }
 

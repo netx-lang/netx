@@ -3,8 +3,8 @@ package pascal.hardscript;
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.io.HSCompiler;
 import pascal.hardscript.compiler.io.HSPrinter;
-import pascal.hardscript.hson.io.HFrontend;
 import pascal.hardscript.hson.simulator.Simulator;
+import pascal.hardscript.hson.simulator.frontend.HFrontend;
 import pascal.hardscript.util.lang.BitVector;
 
 import java.io.IOException;
