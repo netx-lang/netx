@@ -1,22 +1,27 @@
 package pascal.hardscript.hson.verilog.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public final class VModule {
     private final String origin;
-    private final List<Wire> wires = new ArrayList<>();
-    private final List<VModule> children = new ArrayList<>();
-    private final Map<Wire, List<Register>> registers = new HashMap<>();
 
-    public VModule(String origin) {
+    private final VModule parent;
+    private final List<VModule> children = new ArrayList<>();
+
+    private List<Data> inputs;
+    private List<Data> outputs;
+    private final List<Wire> wires = new ArrayList<>();
+    private final List<Assign> assign = new ArrayList<>();
+    private final List<Register> registers = new ArrayList<>();
+
+    public VModule(String origin, VModule parent) {
         this.origin = origin;
+        this.parent = parent;
     }
 
-    public static VModule of(String id) {
-        return new VModule(id);
+    public static VModule of(String id, VModule parent) {
+        return new VModule(id, parent);
     }
 
     public void addWire(Wire wire) {
@@ -27,12 +32,20 @@ public final class VModule {
         return wires;
     }
 
-    public void addRegister(Wire clock, Register register) {
-        registers.computeIfAbsent(clock, _ -> new ArrayList<>()).add(register);
+    public List<Data> getInputs() {
+        return inputs;
     }
 
-    public Map<Wire, List<Register>> getRegisters() {
-        return registers;
+    public void setInputs(List<Data> inputs) {
+        this.inputs = inputs;
+    }
+
+    public List<Data> getOutputs() {
+        return outputs;
+    }
+
+    public void setOutputs(List<Data> outputs) {
+        this.outputs = outputs;
     }
 
     public void addSubModule(VModule module) {
@@ -43,4 +56,19 @@ public final class VModule {
         return children;
     }
 
+    public void addAssign(Assign assignItem) {
+        assign.add(assignItem);
+    }
+
+    public List<Assign> getAssign() {
+        return assign;
+    }
+
+    public List<Register> getRegisters() {
+        return registers;
+    }
+
+    public void addRegister(Register register) {
+        registers.add(register);
+    }
 }

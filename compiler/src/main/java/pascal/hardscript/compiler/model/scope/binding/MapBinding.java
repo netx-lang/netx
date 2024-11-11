@@ -47,6 +47,10 @@ public final class MapBinding implements Binding {
         return bindings.values();
     }
 
+    public Set<Map.Entry<Identifier, Entity>> getEntries() {
+        return bindings.entrySet();
+    }
+
     @Override
     @Nullable
     public Entity lookup(Identifier identifier) {

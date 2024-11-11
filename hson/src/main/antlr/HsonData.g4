@@ -4,7 +4,7 @@ data
     : identifier | constant | select;
 
 select
-    : identifier selector+
+    : identifier selector
     ;
 
 identifier
@@ -12,7 +12,7 @@ identifier
     ;
 
 selector
-    : '[' index=UNSIGNED_INTEGER ']'                      # BitSelector
+    : '[' index=UNSIGNED_INTEGER ']'                        # BitSelector
     | '[' from=UNSIGNED_INTEGER ':' to=UNSIGNED_INTEGER ']' # PartSelector
     ;
 

@@ -32,7 +32,7 @@ public class BuiltInComponentFactory {
         BUILTIN_FACTORY.put(EXT, BuiltInComponentFactory::createEXTComponent);
 
         BUILTIN_FACTORY.put(NOT, BuiltInComponentFactory::createNOTComponent);
-        for (var op : Set.of(OR, AND, XOR, NOR, NAND, CONCAT, ADD, SUB)) {
+        for (var op : Set.of(OR, AND, XOR, NOR, NAND, XNOR, CONCAT, ADD, SUB)) {
             BUILTIN_FACTORY.put(op, BuiltInComponentFactory::createMultiInputComponent);
         }
         for (var op : Set.of(EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE)) {

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import pascal.hardscript.hson.antlr.HsonDataParser;
 import pascal.hardscript.hson.simulator.model.*;
 import pascal.hardscript.hson.util.HsonType;
-import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.Identifier;
 
 import java.util.List;
@@ -44,10 +43,8 @@ public final class RelationParser {
                 var register = parseRegister(node, outputs.getFirst(), inputs.getFirst());
                 circuit.addRegister(register);
             }
-            default -> throw new ShallNotReachHereError();
         }
         forEachMember(node, this::parse);
-
     }
 
     private Register parseRegister(JsonNode node, DataNode state, DataNode next) {
@@ -65,36 +62,32 @@ public final class RelationParser {
         var parser = buildParser(node.textValue());
         var context = parser.data();
         if (context.identifier() != null) {
-            return parseDataNode(context);
+            return resolveDataNode(context.identifier());
         } else if (context.constant() != null) {
-            return parseConstant(context);
+            return resolveConstant(context.constant());
         } else {
-            return parseWireSelect(context.select());
+            return resolveWireSelect(context.select());
         }
     }
 
-    private DataNode parseDataNode(HsonDataParser.DataContext context) {
-        var index = Integer.parseUnsignedInt(context.identifier().index.getText());
+    private DataNode resolveDataNode(HsonDataParser.IdentifierContext context) {
+        var index = Integer.parseUnsignedInt(context.index.getText());
         return manager.resolve(index);
     }
 
-    private ConstantNode parseConstant(HsonDataParser.DataContext context) {
-        HsonDataParser.ConstantContext ctx = context.constant();
-        var result = ConstantNode.of(parseConstantValue(ctx));
+    private ConstantNode resolveConstant(HsonDataParser.ConstantContext context) {
+        var result = ConstantNode.of(parseConstantValue(context));
         circuit.addVertex(result);
         return result;
     }
 
-    private DataNode parseWireSelect(HsonDataParser.SelectContext ctx) {
-        var index = Integer.parseUnsignedInt(ctx.identifier().index.getText());
-        DataNode base = manager.resolve(index), result = base;
-        for (var selectCtx : ctx.selector()) {
-            var selector = parseSelector(selectCtx);
-            result = DataSelectNode.of(base, selector);
-            circuit.addVertex(result);
-            circuit.addEdge(base, result);
-            base = result;
-        }
+    private DataNode resolveWireSelect(HsonDataParser.SelectContext context) {
+        var index = Integer.parseUnsignedInt(context.identifier().index.getText());
+        DataNode base = manager.resolve(index), result;
+        var selector = parseSelector(context.selector());
+        result = DataSelectNode.of(base, selector);
+        circuit.addVertex(result);
+        circuit.addEdge(base, result);
         return result;
     }
 }
