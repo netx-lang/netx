@@ -75,4 +75,31 @@ class AnalysisTest {
                 new HSPrinter(HSCompiler.load(expected).compile()).dump(),
                 new HSPrinter(HSCompiler.load(actual).compile()).dump());
     }
+
+    @Test
+    void testSelector() {
+        var expected = """
+                component top: [a] -> [b, c, d, e] {
+                    inst a of wire(bit(8))
+                    inst b, c, d, e of auto
+                    b <- a[5:3]
+                    c <- a[1]
+                    d <- a[3]
+                    e <- 7'b1001011
+                }
+                """;
+        var actual = """
+                component top: [a] -> [b, c, d, e] {
+                    inst a of wire(bit(8))
+                    inst b, c, d, e of auto
+                    b <- a[5:2][3:1]
+                    c <- a[1][0]
+                    d <- a[4:3][0]
+                    e <- 8'b10010110[7:1]
+                }
+                """;
+        assertEquals(
+                new HSPrinter(HSCompiler.load(expected).compile()).dump(),
+                new HSPrinter(HSCompiler.load(actual).compile()).dump());
+    }
 }

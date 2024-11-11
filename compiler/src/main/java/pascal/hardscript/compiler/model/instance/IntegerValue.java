@@ -1,12 +1,8 @@
 package pascal.hardscript.compiler.model.instance;
 
-import pascal.hardscript.util.lang.BitVector;
-
 public sealed interface IntegerValue extends Value permits BitVectorValue, Int32Value {
 
     int toInt();
-
-    BitVector toBitVector();
 
     IntegerValue add(IntegerValue other);
 

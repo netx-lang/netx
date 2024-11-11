@@ -3,6 +3,7 @@ package pascal.hardscript.compiler.model.instance;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
+import pascal.hardscript.util.lang.BitVector;
 import pascal.hardscript.util.lang.Identifier;
 
 public sealed interface Value extends Instance permits BooleanValue, IntegerValue {
@@ -20,4 +21,6 @@ public sealed interface Value extends Instance permits BooleanValue, IntegerValu
     default Identifier getIdentifier() {
         throw new ShallNotReachHereError();
     }
+
+    BitVector toBitVector();
 }

@@ -191,10 +191,11 @@ public final class HSParser {
     }
 
     static ExprNode parseAccessExpr(AccessExprContext ctx) {
-        var base = parseExpr(ctx.expression());
-        return ctx.selector().stream()
-                .map(HSParser::parseSelector)
-                .reduce(base, AccessExpr::of, (e, _) -> e);
+        var result = parseExpr(ctx.expression());
+        for (var selector : ctx.selector()) {
+            result = AccessExpr.of(result, parseSelector(selector)).setSourceLoc(result.getSourceLoc());
+        }
+        return result;
     }
 
     static Selector parseSelector(SelectorContext ctx) {

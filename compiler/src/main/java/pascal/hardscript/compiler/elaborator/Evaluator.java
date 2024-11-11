@@ -102,7 +102,14 @@ public final class Evaluator {
         var base = evaluate(expr.getBase());
         var selector = evaluateSelector(expr.getSelector());
         return switch (base) {
-            case Instance inst -> DataAccess.of(inst, selector);
+            case Instance inst -> {
+                try {
+                    yield DataAccess.of(inst, selector);
+                } catch (CompileCancellationException e) {
+                    log.error("{}: invalid selectors {}", expr.getSourceLoc(), expr);
+                    throw e;
+                }
+            }
             case EntityList listValue -> listValue.select(selector);
             default -> {
                 log.error("{}: Expected component or list but got {}",

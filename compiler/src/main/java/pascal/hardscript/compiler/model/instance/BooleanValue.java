@@ -2,6 +2,7 @@ package pascal.hardscript.compiler.model.instance;
 
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
+import pascal.hardscript.util.lang.BitVector;
 
 public record BooleanValue(boolean value) implements Value {
 
@@ -24,5 +25,10 @@ public record BooleanValue(boolean value) implements Value {
     @Override
     public InstanceType getType() {
         return BitType.forBoolean();
+    }
+
+    @Override
+    public BitVector toBitVector() {
+        return BitVector.fromBoolean(value);
     }
 }
