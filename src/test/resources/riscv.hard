@@ -124,7 +124,7 @@ component InstrDecoder : [op_i, func3, func7] -> [extOP, regWr, branch_ctl, memT
     ctl <- AND(4) <> [
         branch(U_flag_0, 4'b0011),
         branch(OR <> [I_flag_0, R_flag], arith_ctl),
-        branch(B_flag, MUX(1) <> [4'b0010, 4'b1010, AND <> [func3[3], func3[2]]]),
+        branch(B_flag, MUX(1) <> [4'b0010, 4'b1010, AND <> [func3[2], func3[1]]]),
         branch(OR(5) <> [U_flag_1, J_flag, I_flag_1, I_flag_2, S_flag], 4'b0000)
     ]
 }
