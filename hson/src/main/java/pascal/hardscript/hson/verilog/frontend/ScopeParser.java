@@ -38,7 +38,8 @@ public final class ScopeParser {
     private void parseComponent(JsonNode node, VModule parent) {
         String name = node.get("id").textValue();
         if (!BuiltinComponent.isBuiltin(name)) {
-            var module = VModule.of(name, parent);
+            var module = VModule.of(name);
+            parent.addSubModule(module);
             manager.addModule(node, module);
             forEachMember(node, n -> parse(n, module));
         } else {

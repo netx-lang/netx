@@ -1,7 +1,6 @@
 package pascal.hardscript.hson.verilog.model;
 
 import pascal.hardscript.hson.util.selector.Selector;
-import pascal.hardscript.util.exception.TodoException;
 
 public record DataSelect(Data base, Selector selector) implements Data {
 
@@ -9,8 +8,4 @@ public record DataSelect(Data base, Selector selector) implements Data {
         return new DataSelect(base, selector);
     }
 
-    @Override
-    public String dump() {
-        throw new TodoException();
-    }
 }

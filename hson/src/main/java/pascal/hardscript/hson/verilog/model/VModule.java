@@ -5,23 +5,23 @@ import java.util.List;
 
 public final class VModule {
     private final String origin;
-
-    private final VModule parent;
     private final List<VModule> children = new ArrayList<>();
 
-    private List<Data> inputs;
-    private List<Data> outputs;
+    private List<Data> inputs, outputs;
     private final List<Wire> wires = new ArrayList<>();
     private final List<Assign> assign = new ArrayList<>();
     private final List<Register> registers = new ArrayList<>();
 
-    public VModule(String origin, VModule parent) {
+    public VModule(String origin) {
         this.origin = origin;
-        this.parent = parent;
     }
 
-    public static VModule of(String id, VModule parent) {
-        return new VModule(id, parent);
+    public static VModule of(String id) {
+        return new VModule(id);
+    }
+
+    public String getOrigin() {
+        return origin;
     }
 
     public void addWire(Wire wire) {

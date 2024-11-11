@@ -8,8 +8,4 @@ public record Constant(BitVector value) implements Data {
         return new Constant(value);
     }
 
-    @Override
-    public String dump() {
-        return value.toString();
-    }
 }
