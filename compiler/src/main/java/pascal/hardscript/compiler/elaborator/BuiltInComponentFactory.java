@@ -51,7 +51,7 @@ public class BuiltInComponentFactory {
     public static ComponentScope createFROMComponent(Scope parent, BuiltinAtom type) {
         var result = instantiate(parent, type);
         requiresMatchedSize(type.getSourceLoc(), 1, type.getParameters());
-        var data = requiresData(type.getSourceLoc(), type.getParameters().getFirst());
+        var data = requiresInstance(type.getSourceLoc(), type.getParameters().getFirst());
         result.addOutput(data);
         return result;
     }
@@ -82,12 +82,12 @@ public class BuiltInComponentFactory {
         requiresMatchedSize(type.getSourceLoc(), 3, type.getParameters());
         var result = instantiate(parent, type);
 
-        var clock = requiresData(type.getSourceLoc(), type.getParameters().get(0));
+        var clock = requiresInstance(type.getSourceLoc(), type.getParameters().get(0));
         var isPosTrigger = requiresBooleanValue(type.getSourceLoc(), type.getParameters().get(1));
         result.addAttribute(Identifier.of("clock"), clock);
         result.addAttribute(Identifier.of("isPosTrigger"), isPosTrigger);
 
-        var data = requiresData(type.getSourceLoc(), type.getParameters().get(2));
+        var data = requiresInstance(type.getSourceLoc(), type.getParameters().get(2));
         var input = newWire(result, "i", data.getType());
         result.addInput(input);
         result.addOutput(data);

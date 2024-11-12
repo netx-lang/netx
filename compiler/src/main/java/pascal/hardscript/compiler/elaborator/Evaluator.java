@@ -274,7 +274,9 @@ public final class Evaluator {
     }
 
     private Entity evaluateSequentialType(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
-        return SequentialType.of(castToComponentType(sourceLoc, lhs), castToComponentType(sourceLoc, rhs));
+        return SequentialType.of(
+                castToComponentType(sourceLoc, lhs),
+                castToComponentType(sourceLoc, rhs));
     }
 
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {

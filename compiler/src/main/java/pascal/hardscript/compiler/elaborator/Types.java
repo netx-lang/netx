@@ -36,9 +36,9 @@ public final class Types {
         }
     }
 
-    public static Instance requiresData(SourceLoc loc, Entity entity) {
-        if (entity instanceof Instance inst) {
-            return inst;
+    public static Instance requiresInstance(SourceLoc loc, Entity entity) {
+        if (entity instanceof Instance instance) {
+            return instance;
         } else {
             log.error("{}: Expected component but got {}", loc, entity);
             throw new CompileCancellationException();
@@ -83,11 +83,20 @@ public final class Types {
         };
     }
 
+    public static EntityList requiresList(SourceLoc loc, Entity entity) {
+        if (entity instanceof EntityList list) {
+            return list;
+        } else {
+            log.error("{}: Expected list but got {}", loc, entity);
+            throw new CompileCancellationException();
+        }
+    }
+
     public static ComponentType castToComponentType(SourceLoc loc, Entity entity) {
         return switch (entity) {
-            case ComponentType componentType -> componentType;
             case EntityList list -> makeParallelTypeFromList(loc, list);
             case Instance inst -> BuiltinAtom.of(BuiltinComponent.FROM, loc, List.of(inst));
+            case ComponentType componentType -> componentType;
             default -> {
                 log.error("{}: Cannot cast {} to component type", loc, entity);
                 throw new CompileCancellationException();
@@ -100,14 +109,4 @@ public final class Types {
         list.forEach(entity -> result.add(castToComponentType(sourceLoc, entity)));
         return ParallelType.from(result);
     }
-
-    public static EntityList requiresList(SourceLoc loc, Entity entity) {
-        if (entity instanceof EntityList list) {
-            return list;
-        } else {
-            log.error("{}: Expected list but got {}", loc, entity);
-            throw new CompileCancellationException();
-        }
-    }
-
 }

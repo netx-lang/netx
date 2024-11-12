@@ -8,6 +8,7 @@ import pascal.hardscript.compiler.ast.expr.ExprNode;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.EntityList;
 import pascal.hardscript.compiler.model.component.*;
+import pascal.hardscript.compiler.model.instance.Data;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.ComponentInfo;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
@@ -120,21 +121,21 @@ public final class Elaborator {
             }
         }
 
-        private List<Instance> extractInstanceList(SourceLoc sourceLoc, ExprNode node) {
+        private List<Data> extractInstanceList(SourceLoc sourceLoc, ExprNode node) {
             var entity = evaluator.evaluate(node);
             if (entity instanceof EntityList list) {
-                List<Instance> result = new ArrayList<>();
+                List<Data> result = new ArrayList<>();
                 for (var member : list.entities()) {
-                    if (member instanceof Instance inst) {
-                        result.add(inst);
+                    if (member instanceof Data data) {
+                        result.add(data);
                     } else {
                         log.error("{}: Expected list of components but got {}", sourceLoc, list);
                         throw new CompileCancellationException();
                     }
                 }
                 return result;
-            } else if (entity instanceof Instance instance) {
-                return List.of(instance);
+            } else if (entity instanceof Data data) {
+                return List.of(data);
             }
             throw new ShallNotReachHereError();
         }
@@ -157,8 +158,8 @@ public final class Elaborator {
 
             ComponentPort doInstantiate(ComponentType type) {
                 return switch (type) {
-                    case ComponentAtom atom -> instantiateAtomType(atom);
-                    case BuiltinAtom atom -> instantiateBuiltinType(atom);
+                    case ComponentAtom atom -> instantiateComponentAtom(atom);
+                    case BuiltinAtom atom -> instantiateBuiltinAtom(atom);
                     case SequentialType sequentialType -> instantiateSequentialType(sequentialType);
                     case ParallelType parallelType -> instantiateParallelType(parallelType);
                 };
@@ -185,15 +186,15 @@ public final class Elaborator {
                 return ComponentPort.of(input, output);
             }
 
-            public ComponentPort instantiateBuiltinType(BuiltinAtom atom) {
+            public ComponentPort instantiateBuiltinAtom(BuiltinAtom atom) {
                 var component = BuiltInComponentFactory.createBuiltInComponent(scope, atom);
                 return ComponentPort.of(component.getOutputs(), component.getInputs());
             }
 
-            public ComponentPort instantiateAtomType(ComponentAtom atom) {
+            public ComponentPort instantiateComponentAtom(ComponentAtom atom) {
                 var node = atom.getDefinition();
-                var component = scope.instantiateComponentScope(
-                        scope.getNameAllocator().allocateFor(atom));
+                var scopeName = scope.getNameAllocator().allocateFor(atom);
+                var component = scope.instantiateComponentScope(scopeName);
 
                 requiresMatchedSize(sourceLoc, node.getAttributes(), atom.getParameters());
                 var iterator = node.getAttributes().iterator();

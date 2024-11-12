@@ -39,13 +39,6 @@ class HSCompilerTest {
     }
 
     @Test
-    void testBind() throws IOException {
-        test("bind_1");
-        test("bind_2");
-        test("bind_3");
-    }
-
-    @Test
     void testRISCV() throws IOException {
         test("riscv");
     }

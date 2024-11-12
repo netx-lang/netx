@@ -14,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class HSCompilerUnitTest {
+    private static final Path TEST_DIR = Path.of("src/test/resources");
+
     @Test
     void loadWithValidCharStream() {
         CharStream charStream = CharStreams.fromString("valid input");
@@ -23,8 +25,7 @@ class HSCompilerUnitTest {
 
     @Test
     void loadPathWithValidPath() throws IOException {
-        Path path = Path.of("src/test/resources/valid.hard");
-        HSCompiler compiler = HSCompiler.loadPath(path);
+        HSCompiler compiler = HSCompiler.loadPath(TEST_DIR.resolve("bind_1.hard"));
         assertNotNull(compiler);
     }
 
@@ -36,7 +37,13 @@ class HSCompilerUnitTest {
 
     @Test
     void testValidInput() throws IOException {
-        String content = new String(Files.readAllBytes(Path.of("src/test/resources/valid.hard")));
+        test("bind_1.hard");
+        test("bind_2.hard");
+        test("bind_3.hard");
+    }
+
+    private static void test(String fileName) throws IOException {
+        String content = new String(Files.readAllBytes(TEST_DIR.resolve(fileName)));
 
         CharStream charStream = CharStreams.fromString(content);
         HSCompiler compiler = HSCompiler.load(charStream);

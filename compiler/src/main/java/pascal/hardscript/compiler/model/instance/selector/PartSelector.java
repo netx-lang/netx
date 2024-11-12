@@ -12,7 +12,7 @@ public record PartSelector(IntegerValue start, IntegerValue end) implements Sele
 
     @Override
     public String toString() {
-        return String.format("[%d : %d]", start.toInt(), end.toInt());
+        return String.format("[%d:%d]", start.toInt(), end.toInt());
     }
 
     @Override
