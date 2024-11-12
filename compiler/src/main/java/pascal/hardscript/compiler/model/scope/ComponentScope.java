@@ -4,14 +4,17 @@ import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public final class ComponentScope extends Scope {
     private final int depth;
+
     private final Identifier identifier;
     private final List<Instance> inputs = new ArrayList<>();
     private final List<Instance> outputs = new ArrayList<>();
-    private final Map<Identifier, Instance> attributes = new HashMap<>();
+    private Attributes attributes;
 
     public ComponentScope(Scope parent, Identifier identifier) {
         super(parent);
@@ -51,11 +54,14 @@ public final class ComponentScope extends Scope {
         Collections.addAll(this.outputs, outputs);
     }
 
-    public void addAttribute(Identifier name, Instance entity) {
-        attributes.put(name, entity);
+    public Attributes getAttributes() {
+        return attributes;
     }
 
-    public Map<Identifier, Instance> getAttributes() {
-        return attributes;
+    public void setAttributes(Attributes attributes) {
+        this.attributes = attributes;
+        for (var entry : attributes.entrySet()) {
+            bind(entry.getKey(), entry.getValue());
+        }
     }
 }

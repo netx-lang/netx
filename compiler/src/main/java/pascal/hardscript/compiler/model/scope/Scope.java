@@ -1,7 +1,6 @@
 package pascal.hardscript.compiler.model.scope;
 
 import pascal.hardscript.compiler.elaborator.Evaluator;
-import pascal.hardscript.compiler.elaborator.NameAllocator;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.binding.MapBinding;
@@ -15,7 +14,6 @@ public abstract sealed class Scope permits BlockScope, DesignScope, ComponentSco
     private final MapBinding binding = MapBinding.ofEmpty();
     private final Set<Alias> aliases = new HashSet<>();
 
-    private final NameAllocator nameAllocator = new NameAllocator();
     private final Evaluator evaluator = new Evaluator(this);
 
     protected Scope(Scope parent) {
@@ -48,10 +46,6 @@ public abstract sealed class Scope permits BlockScope, DesignScope, ComponentSco
 
     public Evaluator getEvaluator() {
         return evaluator;
-    }
-
-    public NameAllocator getNameAllocator() {
-        return nameAllocator;
     }
 
     public void addAlias(Instance a, Instance b) {

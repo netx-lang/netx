@@ -5,6 +5,7 @@ import pascal.hardscript.compiler.model.instance.Wire;
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
+import pascal.hardscript.compiler.model.scope.Attributes;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.lang.BuiltinComponent;
@@ -82,10 +83,12 @@ public class BuiltInComponentFactory {
         requiresMatchedSize(type.getSourceLoc(), 3, type.getParameters());
         var result = instantiate(parent, type);
 
+        var attributes = new Attributes();
         var clock = requiresInstance(type.getSourceLoc(), type.getParameters().get(0));
         var isPosTrigger = requiresBooleanValue(type.getSourceLoc(), type.getParameters().get(1));
-        result.addAttribute(Identifier.of("clock"), clock);
-        result.addAttribute(Identifier.of("isPosTrigger"), isPosTrigger);
+        attributes.addAttribute(Identifier.of("clock"), clock);
+        attributes.addAttribute(Identifier.of("isPosTrigger"), isPosTrigger);
+        result.setAttributes(attributes);
 
         var data = requiresInstance(type.getSourceLoc(), type.getParameters().get(2));
         var input = newWire(result, "i", data.getType());
@@ -153,7 +156,9 @@ public class BuiltInComponentFactory {
     }
 
     private static ComponentScope instantiate(Scope parent, BuiltinAtom type) {
-        return parent.instantiateComponentScope(parent.getNameAllocator().allocateFor(type));
+        return parent.instantiateComponentScope(
+                Identifier.of(type.getBuiltin().name()).setSourceLoc(type.getSourceLoc())
+        );
     }
 
     private static Wire newWire(ComponentScope result, String name) {

@@ -10,10 +10,7 @@ import pascal.hardscript.compiler.model.EntityList;
 import pascal.hardscript.compiler.model.component.*;
 import pascal.hardscript.compiler.model.instance.Data;
 import pascal.hardscript.compiler.model.instance.Instance;
-import pascal.hardscript.compiler.model.scope.ComponentInfo;
-import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.DesignScope;
-import pascal.hardscript.compiler.model.scope.Scope;
+import pascal.hardscript.compiler.model.scope.*;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.SourceLoc;
 
@@ -21,11 +18,11 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import static pascal.hardscript.compiler.Configuration.TOP_COMPONENT;
 import static pascal.hardscript.compiler.elaborator.Types.requiresMatchedSize;
 
 public final class Elaborator {
     private static final Logger log = LoggerFactory.getLogger(Elaborator.class);
-    private static final String TOP_COMPONENT = "top";
 
     private final DesignNode node;
     private final DesignScope design;
@@ -193,9 +190,14 @@ public final class Elaborator {
 
             public ComponentPort instantiateComponentAtom(ComponentAtom atom) {
                 var node = atom.getDefinition();
-                var scopeName = scope.getNameAllocator().allocateFor(atom);
-                var component = scope.instantiateComponentScope(scopeName);
+                var component = scope.instantiateComponentScope(node.getIdentifier());
+                component.setAttributes(extractAttributes(atom, node));
+                new ScopeElaborator(component).build(node);
+                return ComponentPort.of(component.getOutputs(), component.getInputs());
+            }
 
+            private Attributes extractAttributes(ComponentAtom atom, ComponentNode node) {
+                Attributes attributes = new Attributes();
                 requiresMatchedSize(sourceLoc, node.getAttributes(), atom.getParameters());
                 var iterator = node.getAttributes().iterator();
                 for (var entity : atom.getParameters()) {
@@ -204,11 +206,9 @@ public final class Elaborator {
                         throw new CompileCancellationException();
                     }
                     var identifier = iterator.next();
-                    component.bind(identifier, instance);
-                    component.addAttribute(identifier, instance);
+                    attributes.addAttribute(identifier, instance);
                 }
-                new ScopeElaborator(component).build(node);
-                return ComponentPort.of(component.getOutputs(), component.getInputs());
+                return attributes;
             }
         }
 
