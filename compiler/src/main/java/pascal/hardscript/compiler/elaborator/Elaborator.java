@@ -25,17 +25,19 @@ public final class Elaborator {
     private static final Logger log = LoggerFactory.getLogger(Elaborator.class);
 
     private final DesignNode node;
-    private final DesignScope design;
+    private final Design design;
 
     public Elaborator(DesignNode node) {
         this.node = node;
-        this.design = DesignScope.newDesign(ComponentInfo.of(node.getComponents()));
+        this.design = Design.newDesign();
+        Evaluator.setInfo(ComponentInfo.of(node.getComponents()));
     }
 
-    public DesignScope elaborate() {
+    public Design elaborate() {
         var topNode = findTopNode();
-        var scope = design.instantiateComponentScope(topNode.getIdentifier());
-        new ScopeElaborator(scope).build(topNode);
+        var topScope = new ComponentScope(null, topNode.getIdentifier());
+        new ScopeElaborator(topScope).build(topNode);
+        design.setTop(topScope);
         return design;
     }
 
@@ -191,7 +193,11 @@ public final class Elaborator {
             public ComponentPort instantiateComponentAtom(ComponentAtom atom) {
                 var node = atom.getDefinition();
                 var component = scope.instantiateComponentScope(node.getIdentifier());
-                component.setAttributes(extractAttributes(atom, node));
+                var attributes = extractAttributes(atom, node);
+                component.setAttributes(attributes);
+                for (var entry : attributes.entrySet()) {
+                    component.bind(entry.getKey(), entry.getValue());
+                }
                 new ScopeElaborator(component).build(node);
                 return ComponentPort.of(component.getOutputs(), component.getInputs());
             }

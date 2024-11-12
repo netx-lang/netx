@@ -8,7 +8,7 @@ import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.BlockScope;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.DesignScope;
+import pascal.hardscript.compiler.model.scope.Design;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BuiltinComponent;
@@ -23,11 +23,11 @@ import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
 import static pascal.hardscript.util.lang.BuiltinComponent.REGISTER;
 
 public final class HSPrinter {
-    private final DesignScope design;
+    private final Design design;
     private final Map<Data, Integer> indexMap = new HashMap<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public HSPrinter(DesignScope design) {
+    public HSPrinter(Design design) {
         this.design = design;
     }
 
@@ -38,8 +38,8 @@ public final class HSPrinter {
         return result;
     }
 
-    private ObjectNode dump(DesignScope design) {
-        return dump((ComponentScope) design.getChildren().getFirst());
+    private ObjectNode dump(Design design) {
+        return dump(design.getTop());
     }
 
     private ObjectNode dump(ComponentScope component) {
@@ -114,7 +114,6 @@ public final class HSPrinter {
             switch (subScope) {
                 case ComponentScope sub -> result.add(sub);
                 case BlockScope sub -> result.addAll(extractSubComponent(sub));
-                case DesignScope ignored -> throw new ShallNotReachHereError();
             }
         }
         return result;

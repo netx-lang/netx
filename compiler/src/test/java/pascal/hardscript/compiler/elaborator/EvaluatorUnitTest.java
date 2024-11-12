@@ -8,7 +8,7 @@ import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.instance.Int32Value;
 import pascal.hardscript.compiler.model.instance.selector.BitSelector;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.DesignScope;
+import pascal.hardscript.compiler.model.scope.Design;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 
@@ -20,12 +20,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EvaluatorUnitTest {
 
-    private static DesignScope loadDesign(String code) {
+    private static Design loadDesign(String code) {
         return new Elaborator(HSCompiler.load(CharStreams.fromString(code)).parse()).elaborate();
     }
 
     private static ComponentScope loadSingleComponent(String code) {
-        return (ComponentScope) loadDesign(code).getChildren().getFirst();
+        return loadDesign(code).getTop();
     }
 
     @Test

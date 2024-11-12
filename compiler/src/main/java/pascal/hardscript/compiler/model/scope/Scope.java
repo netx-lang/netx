@@ -8,11 +8,11 @@ import pascal.hardscript.util.lang.Identifier;
 
 import java.util.*;
 
-public abstract sealed class Scope permits BlockScope, DesignScope, ComponentScope {
+public abstract sealed class Scope permits BlockScope, ComponentScope {
     private Scope parent;
     private List<Scope> children = new ArrayList<>();
-    private final MapBinding binding = MapBinding.ofEmpty();
     private final Set<Alias> aliases = new HashSet<>();
+    private final MapBinding binding = MapBinding.ofEmpty();
 
     private final Evaluator evaluator = new Evaluator(this);
 
@@ -77,8 +77,8 @@ public abstract sealed class Scope permits BlockScope, DesignScope, ComponentSco
             return component;
         }
         return switch (parent) {
+            case null -> null;
             case ComponentScope module -> module;
-            case DesignScope ignored -> null;
             default -> parent.getLeastUpperComponent();
         };
     }

@@ -18,7 +18,8 @@ import pascal.hardscript.compiler.model.instance.selector.Selector;
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
-import pascal.hardscript.compiler.model.scope.DesignScope;
+import pascal.hardscript.compiler.model.scope.ComponentInfo;
+import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.compiler.model.scope.binding.Binding;
 import pascal.hardscript.compiler.model.scope.binding.MapBinding;
@@ -40,6 +41,7 @@ import static pascal.hardscript.compiler.elaborator.Types.*;
 
 public final class Evaluator {
     private static final Logger log = LoggerFactory.getLogger(Evaluator.class);
+    private static ComponentInfo info;
 
     private final LinkedList<Binding> bindings = new LinkedList<>();
     private final Scope scope;
@@ -49,6 +51,10 @@ public final class Evaluator {
     public Evaluator(Scope scope) {
         this.scope = scope;
         bindings.add(scope.getBinding());
+    }
+
+    public static void setInfo(ComponentInfo info) {
+        Evaluator.info = info;
     }
 
     public ComponentType evaluateToComponentType(ExprNode expr) {
@@ -95,7 +101,7 @@ public final class Evaluator {
 
     private Entity evaluateLazyExpr(LazyExpr expr) {
         var arguments = expr.getArguments().stream().map(this::getIdentifierFrom).toList();
-        return LazyType.of(scope, arguments, expr.getBody());
+        return LazyType.of(arguments, expr.getBody());
     }
 
     private Entity evaluateAccessExpr(AccessExpr expr) {
@@ -323,16 +329,15 @@ public final class Evaluator {
     }
 
     public ComponentType evaluateLazyExpr(SourceLoc sourceLoc, LazyType lazy, List<Entity> parameters) {
-        var evaluator = lazy.capture().getEvaluator();
         requiresMatchedSize(sourceLoc, lazy.identifiers(), parameters);
         int size = lazy.identifiers().size();
         var bindings = MapBinding.ofEmpty();
         for (int i = 0; i < size; i++) {
             bindings.bind(lazy.identifiers().get(i), parameters.get(i));
         }
-        evaluator.overrideBindings(bindings);
-        var result = evaluator.evaluateToComponentType(lazy.expr());
-        evaluator.restoreBindings();
+        overrideBindings(bindings);
+        var result = evaluateToComponentType(lazy.expr());
+        restoreBindings();
         return result;
     }
 
@@ -344,10 +349,12 @@ public final class Evaluator {
                 return entity;
             }
         }
-        if (scope instanceof DesignScope design) {
-            if (design.hasDefinition(id)) {
-                return ComponentAtom.of(design.getDefinition(id));
-            } else if (BuiltinComponent.isBuiltin(id)) {
+
+        if (scope instanceof ComponentScope) {
+            if (info.hasDefinition(id)) {
+                return ComponentAtom.of(info.getDefinition(id));
+            } else
+            if (BuiltinComponent.isBuiltin(id)) {
                 return BuiltinAtom.of(BuiltinComponent.of(id), id.getSourceLoc(), List.of());
             } else {
                 log.error("{}: Unresolved identifier {}", id.getSourceLoc(), id);

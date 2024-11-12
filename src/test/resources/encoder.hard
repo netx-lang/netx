@@ -9,7 +9,7 @@ component encoder(width) : [code] -> [output] {
     inst output of wire(bit(width))
 
     for (i in [0..width]) {
-        output[i] <- OR(width + 1) <> [input[j] |
+        output[i] <- OR(width + 1) <> [code[j] |
             j in [0..2**width],
             when j & (1 << i)
         ]
