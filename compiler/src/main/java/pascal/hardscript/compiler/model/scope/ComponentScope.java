@@ -1,6 +1,5 @@
 package pascal.hardscript.compiler.model.scope;
 
-import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
@@ -12,7 +11,7 @@ public final class ComponentScope extends Scope {
     private final Identifier identifier;
     private final List<Instance> inputs = new ArrayList<>();
     private final List<Instance> outputs = new ArrayList<>();
-    private final Map<String, Entity> attributes = new HashMap<>();
+    private final Map<Identifier, Instance> attributes = new HashMap<>();
 
     public ComponentScope(Scope parent, Identifier identifier) {
         super(parent);
@@ -52,11 +51,11 @@ public final class ComponentScope extends Scope {
         Collections.addAll(this.outputs, outputs);
     }
 
-    public void addAttribute(String name, Entity entity) {
+    public void addAttribute(Identifier name, Instance entity) {
         attributes.put(name, entity);
     }
 
-    public Map<String, Entity> getAttributes() {
+    public Map<Identifier, Instance> getAttributes() {
         return attributes;
     }
 }

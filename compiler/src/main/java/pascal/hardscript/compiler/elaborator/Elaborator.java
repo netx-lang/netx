@@ -198,7 +198,13 @@ public final class Elaborator {
                 requiresMatchedSize(sourceLoc, node.getAttributes(), atom.getParameters());
                 var iterator = node.getAttributes().iterator();
                 for (var entity : atom.getParameters()) {
-                    component.bind(iterator.next(), entity);
+                    if (!(entity instanceof Instance instance)) {
+                        log.error("{}: Invalid component attribute {}", sourceLoc, entity);
+                        throw new CompileCancellationException();
+                    }
+                    var identifier = iterator.next();
+                    component.bind(identifier, instance);
+                    component.addAttribute(identifier, instance);
                 }
                 new ScopeElaborator(component).build(node);
                 return ComponentPort.of(component.getOutputs(), component.getInputs());

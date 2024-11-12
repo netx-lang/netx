@@ -84,8 +84,8 @@ public class BuiltInComponentFactory {
 
         var clock = requiresData(type.getSourceLoc(), type.getParameters().get(0));
         var isPosTrigger = requiresBooleanValue(type.getSourceLoc(), type.getParameters().get(1));
-        result.addAttribute("clock", clock);
-        result.addAttribute("isPosTrigger", isPosTrigger);
+        result.addAttribute(Identifier.of("clock"), clock);
+        result.addAttribute(Identifier.of("isPosTrigger"), isPosTrigger);
 
         var data = requiresData(type.getSourceLoc(), type.getParameters().get(2));
         var input = newWire(result, "i", data.getType());

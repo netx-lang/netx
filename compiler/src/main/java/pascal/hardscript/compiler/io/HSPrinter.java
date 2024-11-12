@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
+import static pascal.hardscript.util.lang.BuiltinComponent.REGISTER;
 
 public final class HSPrinter {
     private final DesignScope design;
@@ -64,13 +65,12 @@ public final class HSPrinter {
                 members.add(dump(sub));
             }
         }
-        dumpComponentAttribute(result, component);
         return result;
     }
 
     private void dumpBuiltinComponent(ComponentScope sub, Identifier instID, ArrayNode members) {
         var builtin = createObjectNode();
-        if (instID.name().equals("REGISTER")) {
+        if (BuiltinComponent.of(instID) == REGISTER) {
             setType(builtin, "register");
             dumpComponentAttribute(builtin, sub);
         } else {
@@ -102,7 +102,7 @@ public final class HSPrinter {
         if (!component.getAttributes().isEmpty()) {
             var attributes = createObjectNode();
             for (var entry : component.getAttributes().entrySet()) {
-                attributes.put(entry.getKey(), dumpInstance((Instance) entry.getValue()));
+                attributes.put(entry.getKey().name(), dumpInstance(entry.getValue()));
             }
             node.putIfAbsent("attribute", attributes);
         }
