@@ -45,7 +45,7 @@ expression
       'then' thenBranch=expression
       'else' elseBranch=expression                                       # ConditionalExpr
     | '(' expression ')'                                                 # ParenExpr
-    | 'component' (primary_symbol (',' primary_symbol)*)? ':' expression # LazyExpr
+    | 'component' (primary_symbol (',' primary_symbol)*)? ':' expression # MacroExpr
     ;
 
 type_expression

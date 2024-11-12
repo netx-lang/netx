@@ -88,7 +88,7 @@ public final class Evaluator {
     public Entity evaluate(ExprNode expr) {
         return switch (expr) {
             case ListExpr sub -> evaluateListExpr(sub);
-            case LazyExpr sub -> evaluateLazyExpr(sub);
+            case MacroExpr sub -> evaluateMacroExpr(sub);
             case UnaryExpr sub -> evaluateUnaryExpr(sub);
             case AccessExpr sub -> evaluateAccessExpr(sub);
             case BinaryExpr sub -> evaluateBinaryExpr(sub);
@@ -99,9 +99,9 @@ public final class Evaluator {
         };
     }
 
-    private Entity evaluateLazyExpr(LazyExpr expr) {
+    private Entity evaluateMacroExpr(MacroExpr expr) {
         var arguments = expr.getArguments().stream().map(this::getIdentifierFrom).toList();
-        return LazyType.of(arguments, expr.getBody());
+        return MacroType.of(arguments, expr.getBody());
     }
 
     private Entity evaluateAccessExpr(AccessExpr expr) {
@@ -322,21 +322,21 @@ public final class Evaluator {
     private Entity evaluatePrimarySymbolExpr(PrimarySymbol expr) {
         var id = getIdentifierFrom(expr);
         Entity entity = resolveIdentifier(id);
-        if (entity instanceof LazyType lazyType) {
-            return evaluateLazyExpr(expr.getSourceLoc(), lazyType, List.of());
+        if (entity instanceof MacroType macroType) {
+            return evaluateMacroExpr(expr.getSourceLoc(), macroType, List.of());
         }
         return entity;
     }
 
-    public ComponentType evaluateLazyExpr(SourceLoc sourceLoc, LazyType lazy, List<Entity> parameters) {
-        requiresMatchedSize(sourceLoc, lazy.identifiers(), parameters);
-        int size = lazy.identifiers().size();
+    public ComponentType evaluateMacroExpr(SourceLoc sourceLoc, MacroType marco, List<Entity> parameters) {
+        requiresMatchedSize(sourceLoc, marco.identifiers(), parameters);
+        int size = marco.identifiers().size();
         var bindings = MapBinding.ofEmpty();
         for (int i = 0; i < size; i++) {
-            bindings.bind(lazy.identifiers().get(i), parameters.get(i));
+            bindings.bind(marco.identifiers().get(i), parameters.get(i));
         }
         overrideBindings(bindings);
-        var result = evaluateToComponentType(lazy.expr());
+        var result = evaluateToComponentType(marco.expr());
         restoreBindings();
         return result;
     }
@@ -375,8 +375,8 @@ public final class Evaluator {
         var identifier = getIdentifierFrom(expr.getHead());
         var parameters = expr.getArguments().stream().map(this::evaluate).toList();
         Entity entity = resolveIdentifier(identifier);
-        if (entity instanceof LazyType lazyType) {
-            return evaluateLazyExpr(expr.getSourceLoc(), lazyType, parameters);
+        if (entity instanceof MacroType macroType) {
+            return evaluateMacroExpr(expr.getSourceLoc(), macroType, parameters);
         } else if (entity instanceof AtomType atom) {
             atom.setParameters(parameters);
             return atom;

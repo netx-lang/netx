@@ -102,7 +102,7 @@ public final class HSParser {
         var result = switch (ctx) {
             case ListExprContext sub -> parseListExpr(sub);
             case UnaryExprContext sub -> parseUnaryExpr(sub);
-            case LazyExprContext sub -> parseLazyExpr(sub);
+            case MacroExprContext sub -> parseMacroExpr(sub);
             case SymbolExprContext sub -> parseSymbolExpr(sub);
             case NumberExprContext sub -> parseNumberExpr(sub);
             case AccessExprContext sub -> parseAccessExpr(sub);
@@ -217,8 +217,8 @@ public final class HSParser {
         return ConditionalExpr.of(parseExpr(ctx.cond), parseExpr(ctx.thenBranch), parseExpr(ctx.elseBranch));
     }
 
-    static ExprNode parseLazyExpr(LazyExprContext ctx) {
-        return LazyExpr.of(parsePrimarySymbolList(ctx.primary_symbol()), parseExpr(ctx.expression()));
+    static ExprNode parseMacroExpr(MacroExprContext ctx) {
+        return MacroExpr.of(parsePrimarySymbolList(ctx.primary_symbol()), parseExpr(ctx.expression()));
     }
 
     static Identifier parseIdentifier(TerminalNode ID) {
