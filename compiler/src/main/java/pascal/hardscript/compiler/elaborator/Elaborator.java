@@ -39,9 +39,14 @@ public final class Elaborator {
         var topNode = findTopNode();
         var topScope = design.instantiateTop(topNode.getIdentifier());
         new ScopeElaborator(topScope).build(topNode);
-        topScope.setSignature(Signature.of(
-                ComponentAtom.of(topNode), topScope.getInputs(), topScope.getOutputs()));
+        setDesignSignature(topScope, topNode);
         return design;
+    }
+
+    private static void setDesignSignature(ComponentScope topScope, ComponentNode topNode) {
+        var atom = ComponentAtom.of(topNode);
+        atom.setIdentifier(topNode.getIdentifier());
+        topScope.setSignature(Signature.of(atom, topScope.getInputs(), topScope.getOutputs()));
     }
 
     private ComponentNode findTopNode() {
@@ -196,7 +201,7 @@ public final class Elaborator {
 
             public ComponentPort instantiateComponentAtom(ComponentAtom atom) {
                 var node = atom.getDefinition();
-                var component = scope.instantiateComponentScope(node.getIdentifier());
+                var component = scope.instantiateComponentScope(atom.getIdentifier());
 
                 var attributes = extractAttributes(atom, node);
                 for (var entry : attributes.entrySet()) {

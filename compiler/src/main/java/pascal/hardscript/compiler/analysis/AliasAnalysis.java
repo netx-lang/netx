@@ -29,15 +29,14 @@ public final class AliasAnalysis extends ModelAnalysis {
             }
         });
         global.resolveRepresentatives();
-        global.propagateAliasType();
         design.forEachScope(scope -> {
             if (isUserDefinedComponent(scope)) {
                 var component = (ComponentScope) scope;
-                component.getEntities().removeIf(Predicate.not(global::needDump));
                 component.getInputs().replaceAll(global::repOf);
                 component.getOutputs().replaceAll(global::repOf);
             }
         });
+        global.propagateAliasType();
     }
 
     private static boolean isUserDefinedComponent(Scope scope) {

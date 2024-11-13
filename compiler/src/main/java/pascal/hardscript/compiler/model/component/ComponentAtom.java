@@ -2,24 +2,34 @@ package pascal.hardscript.compiler.model.component;
 
 import pascal.hardscript.compiler.ast.component.ComponentNode;
 import pascal.hardscript.compiler.model.Entity;
+import pascal.hardscript.util.lang.Identifier;
 
 import java.util.List;
-import java.util.Objects;
 
 public final class ComponentAtom extends AtomType {
     private final ComponentNode definition;
+    private Identifier identifier;
 
-    public ComponentAtom(ComponentNode definition, List<Entity> parameters) {
+    public ComponentAtom(ComponentNode definition, Identifier identifier, List<Entity> parameters) {
         this.definition = definition;
+        this.identifier = identifier;
         this.parameters = parameters;
     }
 
     public static ComponentAtom of(ComponentNode definition) {
-        return new ComponentAtom(definition, List.of());
+        return new ComponentAtom(definition, null, List.of());
     }
 
-    public static ComponentAtom of(ComponentNode definition, List<Entity> parameters) {
-        return new ComponentAtom(definition, parameters);
+    public static ComponentAtom of(ComponentNode definition, Identifier identifier, List<Entity> parameters) {
+        return new ComponentAtom(definition, identifier, parameters);
+    }
+
+    public void setIdentifier(Identifier identifier) {
+        this.identifier = identifier;
+    }
+
+    public Identifier getIdentifier() {
+        return identifier;
     }
 
     public ComponentNode getDefinition() {
@@ -27,20 +37,7 @@ public final class ComponentAtom extends AtomType {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ComponentAtom that = (ComponentAtom) o;
-        return Objects.equals(definition, that.definition);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(definition);
-    }
-
-    @Override
     public AtomType copyOf() {
-        return ComponentAtom.of(definition, parameters);
+        return ComponentAtom.of(definition, identifier, parameters);
     }
 }

@@ -41,7 +41,7 @@ public final class BuiltinAtom extends AtomType {
     }
 
     @Override
-    public AtomType copyOf() {
+    public BuiltinAtom copyOf() {
         return BuiltinAtom.of(builtin, sourceLoc, getParameters());
     }
 }

@@ -40,8 +40,7 @@ public final class Identifier {
         return Objects.hash(name);
     }
 
-    @Override
-    public String toString() {
+    public String toStringWithLoc() {
         return String.format("%s@(%s)", name, sourceLoc);
     }
 }

@@ -1,6 +1,7 @@
 package pascal.hardscript.compiler.model.instance;
 
 import pascal.hardscript.compiler.model.Entity;
+import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
 
@@ -10,8 +11,10 @@ import java.util.function.Supplier;
 public sealed abstract class Data implements Instance permits Clock, Wire {
     private final int index;
     protected final Identifier id;
+    protected final ComponentScope parent;
 
-    protected Data(Identifier id, int index) {
+    protected Data(Identifier id, ComponentScope parent, int index) {
+        this.parent = parent;
         this.index = index;
         this.id = id;
     }
@@ -26,6 +29,10 @@ public sealed abstract class Data implements Instance permits Clock, Wire {
 
     public Integer getIndex() {
         return index;
+    }
+
+    public ComponentScope getParent() {
+        return parent;
     }
 
     @Override
@@ -47,9 +54,11 @@ public sealed abstract class Data implements Instance permits Clock, Wire {
     }
 
     public abstract static class Factory<T extends Data> implements Entity {
+        protected final ComponentScope parent;
         protected final Supplier<Integer> indexer;
 
-        protected Factory(Supplier<Integer> indexer) {
+        protected Factory(ComponentScope parent, Supplier<Integer> indexer) {
+            this.parent = parent;
             this.indexer = indexer;
         }
 

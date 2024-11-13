@@ -76,7 +76,9 @@ public final class Evaluator {
     public Data.Factory<?> evaluateToDataFactory(ExprNode expr) {
         Data.Factory<?> factory;
         if (expr instanceof AutoTypeExpr) {
-            factory = Wire.Factory.of(global.getDataIndexer(), PolyType.getInstance());
+            factory = Wire.Factory.of(
+                    scope.getLeastUpperComponent(),
+                    PolyType.getInstance(), global.getDataIndexer());
         } else {
             mode = EvaluationMode.DATA_FACTORY;
             factory = requiresDataFactory(expr.getSourceLoc(), evaluate(expr));
@@ -287,12 +289,13 @@ public final class Evaluator {
 
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         requiresMatchedSize(sourceLoc, 1, arguments);
-        return Wire.Factory.of(global.getDataIndexer(), evaluateBitWidth(arguments.getFirst()));
+        return Wire.Factory.of(
+                scope.getLeastUpperComponent(), evaluateBitWidth(arguments.getFirst()), global.getDataIndexer());
     }
 
     private Clock.Factory evaluateClockFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         if (arguments.isEmpty()) {
-            return Clock.Factory.of(global.getDataIndexer());
+            return Clock.Factory.of(scope.getLeastUpperComponent(), global.getDataIndexer());
         } else {
             log.error("{}: Unexpected specification for component type clock: {}", sourceLoc, arguments);
             throw new CompileCancellationException();
@@ -349,7 +352,11 @@ public final class Evaluator {
             var result = global.getEvaluator().lookup(id);
             if (result != null) {
                 if (result instanceof BuiltinAtom atom) {
-                    atom.setSourceLoc(id.getSourceLoc());
+                    result = atom.copyOf();
+                    ((BuiltinAtom) result).setSourceLoc(id.getSourceLoc());
+                } else if (result instanceof ComponentAtom atom) {
+                    result = atom.copyOf();
+                    ((ComponentAtom) result).setIdentifier(id);
                 }
                 return result;
             }

@@ -16,11 +16,12 @@ public record Signature(ComponentAtom caller, List<Instance> inputs, List<Instan
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Signature signature = (Signature) o;
-        return Objects.equals(caller, signature.caller);
+        return Objects.equals(caller.getDefinition(), signature.caller.getDefinition());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(caller);
+        return Objects.hash(caller.getDefinition());
     }
 }
+

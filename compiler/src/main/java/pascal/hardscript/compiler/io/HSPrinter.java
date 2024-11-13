@@ -48,14 +48,16 @@ public final class HSPrinter {
     private ObjectNode defineComponent(Signature signature, ComponentScope component) {
         var definition = createObjectNode();
         setType(definition, "definition");
-        setIdentifier(definition, component.getIdentifier());
 
-        dumpComponentIO(definition, "input", signature.inputs());
-        dumpComponentIO(definition, "output", signature.outputs());
+        var definitionIdentifier = signature.caller().getDefinition().getIdentifier();
+        setIdentifier(definition, definitionIdentifier.toStringWithLoc());
+
+        dumpSignatureIO(definition, "input", signature.inputs());
+        dumpSignatureIO(definition, "output", signature.outputs());
         var members = makeMembersIn(definition);
         for (var entity : component.getEntities()) {
             if (entity instanceof Data data) {
-                members.add(dump(data));
+                members.add(dumpDataDefinition(data));
             }
         }
         for (var sub : extractSubComponent(component)) {
@@ -65,13 +67,18 @@ public final class HSPrinter {
                     dumpBuiltinComponent(sub, instID, members);
                 }
             } else {
-                members.add(dump(sub));
+                members.add(instantiateComponent(sub));
             }
         }
         return definition;
     }
 
-    private ObjectNode dump(ComponentScope component) {
+    private void dumpSignatureIO(ObjectNode node, String port, List<Instance> sub) {
+        var array = makeArrayIn(node, port);
+        sub.stream().map(this::dumpInstance).forEach(array::add);
+    }
+
+    private ObjectNode instantiateComponent(ComponentScope component) {
         var signature = component.getSignature();
         var result = createObjectNode();
         if (!signatures.contains(signature)) {
@@ -79,13 +86,7 @@ public final class HSPrinter {
             definitions.add(defineComponent(signature, component));
         }
         result.put("type", "component");
-        result.put("id", component.getIdentifier().name());
-        var members = makeMembersIn(result);
-        for (var entity : component.getEntities()) {
-            if (entity instanceof Data data) {
-                members.add(dump(data));
-            }
-        }
+        setIdentifier(result, component.getIdentifier().toStringWithLoc());
         dumpComponentIO(result, "input", component.getInputs());
         dumpComponentIO(result, "output", component.getOutputs());
         return result;
@@ -98,7 +99,7 @@ public final class HSPrinter {
             dumpComponentAttribute(builtin, sub);
         } else {
             setType(builtin, "component");
-            setIdentifier(builtin, instID);
+            setIdentifier(builtin, instID.toStringWithLoc());
         }
         List<Data> needDump = new LinkedList<>();
         for (var entity : sub.getEntities()) {
@@ -108,24 +109,23 @@ public final class HSPrinter {
         }
         if (!needDump.isEmpty()) {
             var subarray = makeMembersIn(builtin);
-            needDump.forEach(c -> subarray.add(dump(c)));
+            needDump.forEach(c -> subarray.add(dumpDataDefinition(c)));
         }
         dumpComponentIO(builtin, "input", sub.getInputs());
         dumpComponentIO(builtin, "output", sub.getOutputs());
-
         members.add(builtin);
     }
 
-    private void dumpComponentIO(ObjectNode builtin, String port, List<Instance> sub) {
-        var outputs = makeArrayIn(builtin, port);
-        sub.stream().map(this::dumpInstance).forEach(outputs::add);
+    private void dumpComponentIO(ObjectNode node, String port, List<Instance> sub) {
+        var array = makeArrayIn(node, port);
+        sub.stream().map(this::dumpInstanceRef).forEach(array::add);
     }
 
     private void dumpComponentAttribute(ObjectNode node, ComponentScope component) {
         if (!component.getAttributes().isEmpty()) {
             var attributes = createObjectNode();
             for (var entry : component.getAttributes().entrySet()) {
-                attributes.put(entry.getKey().name(), dumpInstance(entry.getValue()));
+                attributes.put(entry.getKey().name(), dumpInstanceRef(entry.getValue()));
             }
             node.putIfAbsent("attribute", attributes);
         }
@@ -143,29 +143,28 @@ public final class HSPrinter {
         return result;
     }
 
-    private ObjectNode dump(Data data) {
+    private ObjectNode dumpDataDefinition(Data data) {
         return switch (data) {
-            case Wire wire -> dumpWire(wire);
-            case Clock clock -> dumpClock(clock);
+            case Wire wire -> dumpWireRef(wire);
+            case Clock clock -> dumpClockRef(clock);
         };
     }
 
-    private ObjectNode dumpWire(Wire wire) {
+    private ObjectNode dumpWireRef(Wire wire) {
         var result = createObjectNode();
         setType(result, "wire");
-        setIdentifier(result, wire);
+        setIdentifier(result, wire.getIdentifier().name());
         switch (wire.getType()) {
             case BitType type -> result.put("width", type.width());
-            case PolyType ignored -> {
-            }
+            case PolyType ignored -> throw new ShallNotReachHereError();
         }
         return result;
     }
 
-    private ObjectNode dumpClock(Clock clock) {
+    private ObjectNode dumpClockRef(Clock clock) {
         var result = createObjectNode();
         setType(result, "clock");
-        setIdentifier(result, clock);
+        setIdentifier(result, clock.getIdentifier().name());
         return result;
     }
 
@@ -181,6 +180,14 @@ public final class HSPrinter {
         };
     }
 
+    private String dumpInstanceRef(Instance entity) {
+        return switch (entity) {
+            case Data data -> dumpDataRef(data);
+            case Value value -> dumpValue(value);
+            case DataAccess access -> dumpDataAccessRef(access);
+        };
+    }
+
     private String dumpValue(Value value) {
         return switch (value) {
             case BooleanValue v -> String.valueOf(v.value());
@@ -191,19 +198,20 @@ public final class HSPrinter {
 
     private String dumpData(Data data) {
         dataCount = Math.max(dataCount, data.getIndex());
-        return data.getIdentifier().toString() + "@" + data.getIndex();
+        return data.getIdentifier().name();
+    }
+
+    private String dumpDataRef(Data data) {
+        dataCount = Math.max(dataCount, data.getIndex());
+        return String.format("%s#(%s)", data.getIdentifier().name(), data.getParent().getIdentifier().getSourceLoc());
     }
 
     private String dumpDataAccess(DataAccess access) {
         return dumpData(access.base()) + access.selector();
     }
 
-    private void setIdentifier(ObjectNode node, Instance inst) {
-        setIdentifier(node, dumpInstance(inst));
-    }
-
-    private void setIdentifier(ObjectNode node, Identifier identifier) {
-        setIdentifier(node, identifier.name());
+    private String dumpDataAccessRef(DataAccess access) {
+        return dumpDataRef(access.base()) + access.selector();
     }
 
     private void setIdentifier(ObjectNode node, String value) {
