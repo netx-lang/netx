@@ -97,24 +97,30 @@ public final class Simulator {
             onEachTick.accept(this);
         }
 
-        boolean hasProgress = false;
         var clock = pickClock();
         if (clock == null) {
             return false;
         }
 
         var isPosEdge = clock.tick();
+        List<Register> toUpdate = new LinkedList<>();
         for (var reg : circuit.getRegisters().get(clock)) {
             if (reg.isPosTrigger() == isPosEdge) {
                 DataNode curr = reg.getCurr(), next = reg.getNext();
                 if (!next.getValue().equals(curr.getValue())) {
-                    curr.setValue(next.getValue());
-                    schedule.add(curr);
-                    hasProgress = true;
+                    toUpdate.add(reg);
+
                 }
             }
         }
-        return hasProgress;
+        var incomingValue = toUpdate.stream()
+                .map(Register::getNext)
+                .map(DataNode::getValue).toList().iterator();
+        for (var reg : toUpdate) {
+            reg.getCurr().setValue(incomingValue.next());
+            schedule.add(reg.getCurr());
+        }
+        return !toUpdate.isEmpty();
     }
 
     private ClockNode pickClock() {
