@@ -62,7 +62,7 @@ public final class ComponentScope extends Scope {
         this.attributes = attributes;
     }
 
-    public boolean isBuilltin() {
+    public boolean isBuiltin() {
         return BuiltinComponent.isBuiltin(identifier);
     }
 }

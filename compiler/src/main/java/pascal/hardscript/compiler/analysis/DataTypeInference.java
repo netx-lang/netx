@@ -7,8 +7,8 @@ import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.analysis.constraint.*;
 import pascal.hardscript.compiler.exception.TypeCheckingException;
 import pascal.hardscript.compiler.model.instance.Data;
-import pascal.hardscript.compiler.model.instance.DataAccess;
 import pascal.hardscript.compiler.model.instance.Instance;
+import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
@@ -46,6 +46,9 @@ public final class DataTypeInference extends ModelAnalysis {
                     workList.add(data);
                 }
             }
+            for (var alias : scope.getAliases()) {
+                addBinaryConstraint(EqualTypeConstraint.of(alias.lhs(), alias.rhs()));
+            }
             if (BuiltinComponent.isBuiltin(component.getIdentifier())) {
                 collectConstraintsInBuiltin(component);
             }
@@ -54,7 +57,7 @@ public final class DataTypeInference extends ModelAnalysis {
 
     private void collectConstraintsInBuiltin(ComponentScope component) {
         switch (BuiltinComponent.of(component.getIdentifier().name())) {
-            case OR, NOT, AND, XOR, NOR, NAND -> addAllEqualConstraints(component);
+            case OR, NOT, AND, XOR, NOR, NAND, XNOR -> addAllEqualConstraints(component);
             case REGISTER -> addContainsForRegister(component);
             case SPLIT, IGNORE, FROM -> {
                 // do nothing
@@ -94,14 +97,14 @@ public final class DataTypeInference extends ModelAnalysis {
             return;
         }
 
-        if (lhs instanceof DataAccess && rhs instanceof DataAccess) {
+        boolean lhsHasType = !(lhs.hasImplicitType());
+        boolean rhsHasType = !(rhs.hasImplicitType());
+        if (lhsHasType && rhsHasType) {
             throwIfConstraintNotHolds(binary);
-        } else if (lhs instanceof DataAccess && rhs.hasImplicitType()) {
-            rhs.setType(binary.expectedRhs());
-            workList.add(rhs);
-        } else if (lhs.hasImplicitType() && rhs instanceof DataAccess) {
-            lhs.setType(binary.expectedLhs());
-            workList.add(lhs);
+        } else if (lhsHasType && rhs.hasImplicitType()) {
+            setTypeFor(rhs, binary.expectedRhs());
+        } else if (lhs.hasImplicitType() && rhsHasType) {
+            setTypeFor(lhs, binary.expectedLhs());
         } else {
             constraints.add(binary);
             graph.addVertex(lhs);
@@ -117,15 +120,18 @@ public final class DataTypeInference extends ModelAnalysis {
                 for (var constraint : graph.edgesOf(data)) {
                     Instance lhs = constraint.getLhs(), rhs = constraint.getRhs();
                     if (lhs.hasImplicitType()) {
-                        lhs.setType(constraint.expectedLhs());
-                        workList.add(lhs);
+                        setTypeFor(lhs, constraint.expectedLhs());
                     } else if (rhs.hasImplicitType()) {
-                        rhs.setType(constraint.expectedRhs());
-                        workList.add(rhs);
+                        setTypeFor(rhs, constraint.expectedRhs());
                     }
                 }
             }
         }
+    }
+
+    private void setTypeFor(Instance instance, InstanceType type) {
+        instance.setType(type);
+        workList.add(instance);
     }
 
     private void checkAllTyped() {

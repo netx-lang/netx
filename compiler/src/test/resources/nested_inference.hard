@@ -1,0 +1,17 @@
+component top {
+    inst a of wire(bit(3))
+    inst b of auto
+    b <- sub <> a
+}
+component sub: [a] -> [b] {
+    inst a, b of auto
+    b <- tricky <> [a, EXT <> 1'b0]
+}
+component tricky : [a, b] -> [c] {
+    inst c of auto
+    inst a, b of auto
+    c <- AND <> [
+        AND <> [a, EXT <> 1'b1],
+        AND <> [b, EXT <> 1'b1]
+    ]
+}

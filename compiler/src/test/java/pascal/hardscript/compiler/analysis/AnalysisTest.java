@@ -8,6 +8,7 @@ import pascal.hardscript.util.TestUtils;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
@@ -52,6 +53,12 @@ class AnalysisTest {
         assertEquals(
                 new HSPrinter(HSCompiler.load(expected).compile()).dump(),
                 new HSPrinter(HSCompiler.load(actual).compile()).dump());
+    }
+
+    @Test
+    void testNestedDataTypeInference() {
+        var file = TEST_DIR.resolve("nested_inference.hard");
+        assertDoesNotThrow(() -> new HSPrinter(HSCompiler.loadPath(file).compile()).dump());
     }
 
     @Test
