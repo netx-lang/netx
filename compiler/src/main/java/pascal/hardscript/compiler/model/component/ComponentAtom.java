@@ -4,6 +4,7 @@ import pascal.hardscript.compiler.ast.component.ComponentNode;
 import pascal.hardscript.compiler.model.Entity;
 
 import java.util.List;
+import java.util.Objects;
 
 public final class ComponentAtom extends AtomType {
     private final ComponentNode definition;
@@ -23,6 +24,19 @@ public final class ComponentAtom extends AtomType {
 
     public ComponentNode getDefinition() {
         return definition;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ComponentAtom that = (ComponentAtom) o;
+        return Objects.equals(definition, that.definition);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(definition);
     }
 
     @Override

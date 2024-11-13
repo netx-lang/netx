@@ -3,6 +3,7 @@ package pascal.hardscript.compiler.model.scope;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.model.component.BuiltinAtom;
 import pascal.hardscript.compiler.model.component.ComponentAtom;
+import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 
@@ -33,8 +34,12 @@ public final class DesignScope extends Scope {
         return scope;
     }
 
-    public void setTop(ComponentScope top) {
-        this.top = top;
+    public ComponentScope instantiateTop(Identifier identifier) {
+        if (this.top != null) {
+            throw new ShallNotReachHereError();
+        }
+        this.top = instantiateComponentScope(identifier);
+        return top;
     }
 
     public ComponentScope getTop() {

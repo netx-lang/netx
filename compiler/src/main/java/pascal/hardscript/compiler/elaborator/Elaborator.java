@@ -38,9 +38,8 @@ public final class Elaborator {
 
     public DesignScope elaborate() {
         var topNode = findTopNode();
-        var topScope = new ComponentScope(design, topNode.getIdentifier());
+        var topScope = design.instantiateTop(topNode.getIdentifier());
         new ScopeElaborator(topScope).build(topNode);
-        design.setTop(topScope);
         return design;
     }
 
@@ -160,10 +159,10 @@ public final class Elaborator {
 
             ComponentPort doInstantiate(ComponentType type) {
                 return switch (type) {
-                    case ComponentAtom atom -> instantiateComponentAtom(atom);
                     case BuiltinAtom atom -> instantiateBuiltinAtom(atom);
-                    case SequentialType sequentialType -> instantiateSequentialType(sequentialType);
+                    case ComponentAtom atom -> instantiateComponentAtom(atom);
                     case ParallelType parallelType -> instantiateParallelType(parallelType);
+                    case SequentialType sequentialType -> instantiateSequentialType(sequentialType);
                 };
             }
 
@@ -190,6 +189,7 @@ public final class Elaborator {
 
             public ComponentPort instantiateBuiltinAtom(BuiltinAtom atom) {
                 var component = BuiltInComponentFactory.createBuiltInComponent(scope, atom);
+                component.setSignature(atom);
                 return ComponentPort.of(component.getOutputs(), component.getInputs());
             }
 
@@ -197,10 +197,11 @@ public final class Elaborator {
                 var node = atom.getDefinition();
                 var component = scope.instantiateComponentScope(node.getIdentifier());
                 var attributes = extractAttributes(atom, node);
-                component.setAttributes(attributes);
                 for (var entry : attributes.entrySet()) {
                     component.bind(entry.getKey(), entry.getValue());
                 }
+                component.setSignature(atom);
+                component.setAttributes(attributes);
                 new ScopeElaborator(component).build(node);
                 return ComponentPort.of(component.getOutputs(), component.getInputs());
             }

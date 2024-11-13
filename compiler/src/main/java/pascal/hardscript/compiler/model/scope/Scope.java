@@ -32,6 +32,10 @@ public abstract sealed class Scope permits BlockScope, ComponentScope, DesignSco
         return children;
     }
 
+    public void addChild(Scope child) {
+        children.add(child);
+    }
+
     public void setChildren(List<Scope> children) {
         this.children = children;
     }
@@ -62,7 +66,7 @@ public abstract sealed class Scope permits BlockScope, ComponentScope, DesignSco
 
     public ComponentScope instantiateComponentScope(Identifier identifier) {
         var child = new ComponentScope(this, identifier);
-        children.add(child);
+        addChild(child);
         return child;
     }
 

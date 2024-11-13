@@ -1,5 +1,6 @@
 package pascal.hardscript.compiler.model.scope;
 
+import pascal.hardscript.compiler.model.component.AtomType;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
@@ -11,10 +12,11 @@ import java.util.List;
 public final class ComponentScope extends Scope {
     private final int depth;
 
+    private AtomType signature;
+    private Attributes attributes;
     private final Identifier identifier;
     private final List<Instance> inputs = new ArrayList<>();
     private final List<Instance> outputs = new ArrayList<>();
-    private Attributes attributes;
 
     public ComponentScope(Scope parent, Identifier identifier) {
         super(parent);
@@ -48,6 +50,14 @@ public final class ComponentScope extends Scope {
 
     public void addOutput(Instance... outputs) {
         Collections.addAll(this.outputs, outputs);
+    }
+
+    public AtomType getSignature() {
+        return signature;
+    }
+
+    public void setSignature(AtomType signature) {
+        this.signature = signature;
     }
 
     public Attributes getAttributes() {
