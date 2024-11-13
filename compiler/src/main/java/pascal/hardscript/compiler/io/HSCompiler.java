@@ -2,9 +2,9 @@ package pascal.hardscript.compiler.io;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import pascal.hardscript.compiler.analysis.AliasAnalysis;
 import pascal.hardscript.compiler.analysis.DataTypeInference;
 import pascal.hardscript.compiler.analysis.DuplicatedComponentElimination;
-import pascal.hardscript.compiler.analysis.DuplicatedDataElimination;
 import pascal.hardscript.compiler.analysis.SourceLocChecker;
 import pascal.hardscript.compiler.antlr.HardScriptLexer;
 import pascal.hardscript.compiler.antlr.HardScriptParser;
@@ -42,7 +42,7 @@ public final class HSCompiler {
 
     public DesignScope compile() {
         var design = new Elaborator(parse()).elaborate();
-        new DuplicatedDataElimination(design).analyze();
+        new AliasAnalysis(design).analyze();
         new DuplicatedComponentElimination(design).analyze();
         new DataTypeInference(design).analyze();
         return design;

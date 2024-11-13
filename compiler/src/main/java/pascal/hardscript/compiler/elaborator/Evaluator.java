@@ -329,8 +329,7 @@ public final class Evaluator {
     }
 
     public ComponentType evaluateMacroExpr(SourceLoc sourceLoc, Macro marco, List<Entity> parameters) {
-        requiresMatchedSize(sourceLoc, marco.identifiers(), parameters);
-        int size = marco.identifiers().size();
+        int size = requiresMatchedSize(sourceLoc, marco.identifiers(), parameters);
         var bindings = MapBinding.ofEmpty();
         for (int i = 0; i < size; i++) {
             bindings.bind(marco.identifiers().get(i), parameters.get(i));

@@ -1,7 +1,8 @@
 package pascal.hardscript.compiler.model.scope;
 
-import pascal.hardscript.compiler.model.component.AtomType;
+import pascal.hardscript.compiler.model.component.Signature;
 import pascal.hardscript.compiler.model.instance.Instance;
+import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
 
@@ -10,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 public final class ComponentScope extends Scope {
-    private AtomType signature;
+    private Signature signature;
     private Attributes attributes;
     private final Identifier identifier;
     private final List<Instance> inputs = new ArrayList<>();
@@ -45,11 +46,11 @@ public final class ComponentScope extends Scope {
         Collections.addAll(this.outputs, outputs);
     }
 
-    public AtomType getSignature() {
+    public Signature getSignature() {
         return signature;
     }
 
-    public void setSignature(AtomType signature) {
+    public void setSignature(Signature signature) {
         this.signature = signature;
     }
 
@@ -59,5 +60,9 @@ public final class ComponentScope extends Scope {
 
     public void setAttributes(Attributes attributes) {
         this.attributes = attributes;
+    }
+
+    public boolean isBuilltin() {
+        return BuiltinComponent.isBuiltin(identifier);
     }
 }

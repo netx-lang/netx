@@ -115,9 +115,9 @@ public final class Elaborator {
             var target = extractInstanceList(sourceLoc, instantiation.getLhs());
             var source = new Instantiator(sourceLoc).instantiate(compType);
 
-            requiresMatchedSize(sourceLoc, target, source);
-            for (int i = 0; i < target.size(); i++) {
-                scope.addAlias(source.get(i), target.get(i));
+            int size = requiresMatchedSize(sourceLoc, target, source);
+            for (int i = 0; i < size; i++) {
+                scope.addAlias(target.get(i), source.get(i));
             }
         }
 
@@ -170,9 +170,9 @@ public final class Elaborator {
                 var rhs = doInstantiate(sequentialType.rhs());
                 var lhs = doInstantiate(sequentialType.lhs());
 
-                requiresMatchedSize(sourceLoc, lhs.source(), rhs.target());
-                for (int i = 0; i < lhs.source().size(); ++i) {
-                    scope.addAlias(rhs.target().get(i), lhs.source().get(i));
+                int size = requiresMatchedSize(sourceLoc, lhs.source(), rhs.target());
+                for (int i = 0; i < size; ++i) {
+                    scope.addAlias(lhs.source().get(i), rhs.target().get(i));
                 }
                 return ComponentPort.of(lhs.target(), rhs.source());
             }
@@ -189,34 +189,41 @@ public final class Elaborator {
 
             public ComponentPort instantiateBuiltinAtom(BuiltinAtom atom) {
                 var component = design.getBuiltinFactory().createBuiltInComponent(scope, atom);
-                component.setSignature(atom);
                 return ComponentPort.of(component.getOutputs(), component.getInputs());
             }
 
             public ComponentPort instantiateComponentAtom(ComponentAtom atom) {
                 var node = atom.getDefinition();
                 var component = scope.instantiateComponentScope(node.getIdentifier());
+
                 var attributes = extractAttributes(atom, node);
                 for (var entry : attributes.entrySet()) {
                     component.bind(entry.getKey(), entry.getValue());
                 }
-                component.setSignature(atom);
                 component.setAttributes(attributes);
+                setSignatureFor(atom, component);
                 new ScopeElaborator(component).build(node);
                 return ComponentPort.of(component.getOutputs(), component.getInputs());
             }
 
+            private void setSignatureFor(ComponentAtom atom, ComponentScope scope) {
+                var signature = Signature.of(atom);
+                signature.setInputName(scope.getInputs());
+                signature.setOutputName(scope.getOutputs());
+                scope.setSignature(signature);
+            }
+
             private Attributes extractAttributes(ComponentAtom atom, ComponentNode node) {
                 Attributes attributes = new Attributes();
-                requiresMatchedSize(sourceLoc, node.getAttributes(), atom.getParameters());
-                var iterator = node.getAttributes().iterator();
-                for (var entity : atom.getParameters()) {
+                int size = requiresMatchedSize(sourceLoc, node.getAttributes(), atom.getParameters());
+                for (int i = 0; i < size; i++) {
+                    var id = node.getAttributes().get(i);
+                    var entity = atom.getParameters().get(i);
                     if (!(entity instanceof Instance instance)) {
                         log.error("{}: Invalid component attribute {}", sourceLoc, entity);
                         throw new CompileCancellationException();
                     }
-                    var identifier = iterator.next();
-                    attributes.addAttribute(identifier, instance);
+                    attributes.addAttribute(id, instance);
                 }
                 return attributes;
             }

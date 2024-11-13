@@ -3,6 +3,7 @@ package pascal.hardscript.compiler.io;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import pascal.hardscript.compiler.model.component.Signature;
 import pascal.hardscript.compiler.model.instance.*;
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
@@ -14,8 +15,10 @@ import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
 import static pascal.hardscript.util.lang.BuiltinComponent.REGISTER;
@@ -23,6 +26,7 @@ import static pascal.hardscript.util.lang.BuiltinComponent.REGISTER;
 public final class HSPrinter {
     private int dataCount = 0;
     private final DesignScope design;
+    private final Set<Signature> signatures = new HashSet<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public HSPrinter(DesignScope design) {
@@ -41,6 +45,13 @@ public final class HSPrinter {
     }
 
     private ObjectNode dump(ComponentScope component) {
+        var signature = component.getSignature();
+        if (signatures.contains(signature)) {
+
+        } else {
+            signatures.add(signature);
+        }
+
         var result = createObjectNode();
         setType(result, "component");
         setIdentifier(result, component.getIdentifier());

@@ -52,8 +52,8 @@ public abstract sealed class Scope permits BlockScope, ComponentScope, DesignSco
         return evaluator;
     }
 
-    public void addAlias(Instance a, Instance b) {
-        aliases.add(Alias.of(a, b));
+    public void addAlias(Instance lhs, Instance rhs) {
+        aliases.add(Alias.of(lhs, rhs));
     }
 
     public Set<Alias> getAliases() {
@@ -87,9 +87,9 @@ public abstract sealed class Scope permits BlockScope, ComponentScope, DesignSco
         };
     }
 
-    public record Alias(Instance from, Instance to) {
-        public static Alias of(Instance from, Instance to) {
-            return new Alias(from, to);
+    public record Alias(Instance lhs, Instance rhs) {
+        public static Alias of(Instance lhs, Instance rhs) {
+            return new Alias(lhs, rhs);
         }
     }
 }
