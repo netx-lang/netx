@@ -102,7 +102,7 @@ public final class Elaborator {
 
         private void buildElement(DataInstantiationNode node) {
             var factory = evaluator.evaluateToDataFactory(node.getType());
-            var component = factory.getParent();
+            var component = scope.getLeastUpperComponent();
             node.getSymbols().stream()
                     .map(evaluator::getIdentifierFrom)
                     .forEach(id -> component.bind(id, factory.create(id)));

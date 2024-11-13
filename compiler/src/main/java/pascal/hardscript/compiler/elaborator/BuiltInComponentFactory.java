@@ -152,7 +152,7 @@ public class BuiltInComponentFactory {
 
     private Wire newWire(ComponentScope result, String name, InstanceType type) {
         var id = Identifier.of("$" + name).setSourceLoc(result.getSourceLoc());
-        var wire = Wire.Factory.of(global.getDataIndexer(), result, type).create(id);
+        var wire = Wire.Factory.of(global.getDataIndexer(), type).create(id);
         result.bind(wire.getIdentifier(), wire);
         return wire;
     }

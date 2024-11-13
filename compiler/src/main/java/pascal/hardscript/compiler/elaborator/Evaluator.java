@@ -76,7 +76,7 @@ public final class Evaluator {
     public Data.Factory<?> evaluateToDataFactory(ExprNode expr) {
         Data.Factory<?> factory;
         if (expr instanceof AutoTypeExpr) {
-            factory = Wire.Factory.of(global.getDataIndexer(), scope.getLeastUpperComponent(), PolyType.getInstance());
+            factory = Wire.Factory.of(global.getDataIndexer(), PolyType.getInstance());
         } else {
             mode = EvaluationMode.DATA_FACTORY;
             factory = requiresDataFactory(expr.getSourceLoc(), evaluate(expr));
@@ -101,7 +101,7 @@ public final class Evaluator {
 
     private Entity evaluateMacroExpr(MacroExpr expr) {
         var arguments = expr.getArguments().stream().map(this::getIdentifierFrom).toList();
-        return MacroType.of(arguments, expr.getBody());
+        return Macro.of(arguments, expr.getBody());
     }
 
     private Entity evaluateAccessExpr(AccessExpr expr) {
@@ -287,14 +287,12 @@ public final class Evaluator {
 
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         requiresMatchedSize(sourceLoc, 1, arguments);
-        return Wire.Factory.of(global.getDataIndexer(),
-                scope.getLeastUpperComponent(), evaluateBitWidth(arguments.getFirst()));
+        return Wire.Factory.of(global.getDataIndexer(), evaluateBitWidth(arguments.getFirst()));
     }
 
     private Clock.Factory evaluateClockFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         if (arguments.isEmpty()) {
-            return Clock.Factory.of(global.getDataIndexer(),
-                    scope.getLeastUpperComponent());
+            return Clock.Factory.of(global.getDataIndexer());
         } else {
             log.error("{}: Unexpected specification for component type clock: {}", sourceLoc, arguments);
             throw new CompileCancellationException();
@@ -324,13 +322,13 @@ public final class Evaluator {
     private Entity evaluatePrimarySymbolExpr(PrimarySymbol expr) {
         var id = getIdentifierFrom(expr);
         Entity entity = resolveIdentifier(id);
-        if (entity instanceof MacroType macroType) {
-            return evaluateMacroExpr(expr.getSourceLoc(), macroType, List.of());
+        if (entity instanceof Macro macro) {
+            return evaluateMacroExpr(expr.getSourceLoc(), macro, List.of());
         }
         return entity;
     }
 
-    public ComponentType evaluateMacroExpr(SourceLoc sourceLoc, MacroType marco, List<Entity> parameters) {
+    public ComponentType evaluateMacroExpr(SourceLoc sourceLoc, Macro marco, List<Entity> parameters) {
         requiresMatchedSize(sourceLoc, marco.identifiers(), parameters);
         int size = marco.identifiers().size();
         var bindings = MapBinding.ofEmpty();
@@ -384,8 +382,8 @@ public final class Evaluator {
         var identifier = getIdentifierFrom(expr.getHead());
         var parameters = expr.getArguments().stream().map(this::evaluate).toList();
         Entity prototype = resolveIdentifier(identifier);
-        if (prototype instanceof MacroType macroType) {
-            return evaluateMacroExpr(expr.getSourceLoc(), macroType, parameters);
+        if (prototype instanceof Macro macro) {
+            return evaluateMacroExpr(expr.getSourceLoc(), macro, parameters);
         } else if (prototype instanceof AtomType atom) {
             return atom.parameterize(parameters);
         } else {

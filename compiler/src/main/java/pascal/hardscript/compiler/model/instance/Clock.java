@@ -2,7 +2,6 @@ package pascal.hardscript.compiler.model.instance;
 
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
-import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.Identifier;
 
@@ -25,12 +24,12 @@ public final class Clock extends Data {
 
     public static class Factory extends Data.Factory<Clock> {
 
-        protected Factory(Supplier<Integer> indexer, ComponentScope parent) {
-            super(indexer, parent);
+        protected Factory(Supplier<Integer> indexer) {
+            super(indexer);
         }
 
-        public static Factory of(Supplier<Integer> indexer, ComponentScope parent) {
-            return new Factory(indexer, parent);
+        public static Factory of(Supplier<Integer> indexer) {
+            return new Factory(indexer);
         }
 
         @Override

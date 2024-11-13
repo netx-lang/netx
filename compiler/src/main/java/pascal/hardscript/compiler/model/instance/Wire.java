@@ -1,7 +1,6 @@
 package pascal.hardscript.compiler.model.instance;
 
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
-import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.util.lang.Identifier;
 
 import java.util.function.Supplier;
@@ -36,13 +35,13 @@ public final class Wire extends Data {
     public static class Factory extends Data.Factory<Wire> {
         private final InstanceType type;
 
-        private Factory(Supplier<Integer> indexer, ComponentScope parent, InstanceType type) {
-            super(indexer, parent);
+        private Factory(Supplier<Integer> indexer, InstanceType type) {
+            super(indexer);
             this.type = type;
         }
 
-        public static Factory of(Supplier<Integer> indexer, ComponentScope parent, InstanceType type) {
-            return new Factory(indexer, parent, type);
+        public static Factory of(Supplier<Integer> indexer, InstanceType type) {
+            return new Factory(indexer, type);
         }
 
         @Override
