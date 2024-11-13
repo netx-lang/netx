@@ -1,6 +1,7 @@
 package pascal.hardscript.compiler.model.scope;
 
 import pascal.hardscript.compiler.ast.DesignNode;
+import pascal.hardscript.compiler.elaborator.BuiltInComponentFactory;
 import pascal.hardscript.compiler.model.component.BuiltinAtom;
 import pascal.hardscript.compiler.model.component.ComponentAtom;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
@@ -8,13 +9,18 @@ import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public final class DesignScope extends Scope {
     private ComponentScope top;
+    private final Supplier<Integer> dataIndexer;
+    private final BuiltInComponentFactory factory = new BuiltInComponentFactory(this);
 
     DesignScope() {
         super(null);
+        this.dataIndexer = new AtomicInteger(0)::incrementAndGet;;
     }
 
     public static DesignScope newDesign(DesignNode node) {
@@ -44,6 +50,14 @@ public final class DesignScope extends Scope {
 
     public ComponentScope getTop() {
         return top;
+    }
+
+    public Supplier<Integer> getDataIndexer() {
+        return dataIndexer;
+    }
+
+    public BuiltInComponentFactory getBuiltinFactory() {
+        return factory;
     }
 
     public void forEachScope(Consumer<Scope> consumer) {

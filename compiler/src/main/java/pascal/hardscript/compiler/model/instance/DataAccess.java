@@ -8,28 +8,34 @@ import pascal.hardscript.compiler.model.instance.selector.PartSelector;
 import pascal.hardscript.compiler.model.instance.selector.Selector;
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
-import pascal.hardscript.compiler.model.scope.Scope;
-import pascal.hardscript.util.lang.Identifier;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
-public record DataAccess(Instance base, Selector selector) implements Data {
-
+public final class DataAccess extends Data {
     private static final Logger log = LoggerFactory.getLogger(DataAccess.class);
+    private final Instance base;
+    private final Selector selector;
+
+    public DataAccess(Data base, Selector selector) {
+        super(base.getIdentifier(), base.getParent(), base.getIndex());
+        this.base = base;
+        this.selector = selector;
+    }
 
     public static Instance of(Instance base, Selector selector) {
         if (base instanceof Value value) {
             return selectConstant(value, selector);
         } else if (!(base instanceof DataAccess)) {
-            return new DataAccess(base, selector);
+            return new DataAccess((Data) base, selector);
         }
 
         List<Selector> selectors = new LinkedList<>();
         selectors.add(selector);
         while (base instanceof DataAccess access) {
-            base = access.base();
-            selectors.addFirst(access.selector());
+            base = access.getBase();
+            selectors.addFirst(access.getSelector());
         }
         var finalSelector = selectors.getFirst();
         for (int i = 1; i < selectors.size(); i++) {
@@ -38,8 +44,29 @@ public record DataAccess(Instance base, Selector selector) implements Data {
         if (base instanceof Value value) {
             return selectConstant(value, finalSelector);
         } else {
-            return new DataAccess(base, finalSelector);
+            return new DataAccess((Data) base, finalSelector);
         }
+    }
+
+    public Instance getBase() {
+        return base;
+    }
+
+    public Selector getSelector() {
+        return selector;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DataAccess that = (DataAccess) o;
+        return Objects.equals(base, that.base) && Objects.equals(selector, that.selector);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(base, selector);
     }
 
     private static BitVectorValue selectConstant(Value value, Selector selector) {
@@ -53,17 +80,6 @@ public record DataAccess(Instance base, Selector selector) implements Data {
             }
         }
         return BitVectorValue.of(value.toBitVector().select(msb, lsb));
-    }
-
-    @Override
-    public Identifier getIdentifier() {
-        return base.getIdentifier();
-    }
-
-    @Override
-    public Scope getParent() {
-        // FIXME: check
-        return base.getParent();
     }
 
     @Override

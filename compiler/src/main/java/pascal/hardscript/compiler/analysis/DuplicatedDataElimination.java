@@ -1,6 +1,7 @@
 package pascal.hardscript.compiler.analysis;
 
 import pascal.hardscript.compiler.model.Entity;
+import pascal.hardscript.compiler.model.instance.Data;
 import pascal.hardscript.compiler.model.instance.DataAccess;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.instance.Value;
@@ -55,18 +56,7 @@ public final class DuplicatedDataElimination extends ModelAnalysis {
         } else if (now instanceof Value) {
             return true;
         } else {
-            // Prefer the higher one
-            if (now.getDepth() == old.getDepth()) {
-                // Prefer DataAccess over other Data
-                boolean isNowAcc = now instanceof DataAccess;
-                boolean isOldAcc = old instanceof DataAccess;
-                if (isNowAcc == isOldAcc) {
-                    // Prefer the one appear earlier
-                    return now.getSourceLoc().compareTo(old.getSourceLoc()) < 0;
-                }
-                return isNowAcc;
-            }
-            return now.getDepth() < old.getDepth();
+            return ((Data) now).getIndex() < ((Data) old).getIndex();
         }
     }
 
@@ -137,9 +127,9 @@ public final class DuplicatedDataElimination extends ModelAnalysis {
     private Instance getNextRep(Instance inst) {
         // If the inst is a DataAccess, find the alias of its base
         if (inst instanceof DataAccess access) {
-            var base = access.base();
+            var base = access.getBase();
             if (hasSourceAlias(base) && repOf(base) != base) {
-                return DataAccess.of(repOf(base), access.selector());
+                return DataAccess.of(repOf(base), access.getSelector());
             }
         }
         // Otherwise find the alias of the inst itself

@@ -7,16 +7,11 @@ import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.Identifier;
 
-public record Clock(Identifier id, Scope parent) implements Data {
+import java.util.function.Supplier;
 
-    @Override
-    public Identifier getIdentifier() {
-        return id;
-    }
-
-    @Override
-    public Scope getParent() {
-        return parent;
+public final class Clock extends Data {
+    public Clock(Identifier id, Scope parent, int index) {
+        super(id, parent, index);
     }
 
     @Override
@@ -29,25 +24,19 @@ public record Clock(Identifier id, Scope parent) implements Data {
         throw new ShallNotReachHereError();
     }
 
-    public static class Factory implements Data.Factory<Clock> {
-        private final ComponentScope parent;
+    public static class Factory extends Data.Factory<Clock> {
 
-        public Factory(ComponentScope parent) {
-            this.parent = parent;
+        protected Factory(Supplier<Integer> indexer, ComponentScope parent) {
+            super(indexer, parent);
         }
 
-        public static Factory of(ComponentScope parent) {
-            return new Factory(parent);
+        public static Factory of(Supplier<Integer> indexer, ComponentScope parent) {
+            return new Factory(indexer, parent);
         }
 
         @Override
         public Clock create(Identifier id) {
-            return new Clock(id, parent);
-        }
-
-        @Override
-        public ComponentScope getParent() {
-            return parent;
+            return new Clock(id, parent, indexer.get());
         }
     }
 }

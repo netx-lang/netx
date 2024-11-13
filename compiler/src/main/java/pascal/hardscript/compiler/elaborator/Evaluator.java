@@ -76,7 +76,7 @@ public final class Evaluator {
     public Data.Factory<?> evaluateToDataFactory(ExprNode expr) {
         Data.Factory<?> factory;
         if (expr instanceof AutoTypeExpr) {
-            factory = Wire.Factory.of(scope.getLeastUpperComponent(), PolyType.getInstance());
+            factory = Wire.Factory.of(global.getDataIndexer(), scope.getLeastUpperComponent(), PolyType.getInstance());
         } else {
             mode = EvaluationMode.DATA_FACTORY;
             factory = requiresDataFactory(expr.getSourceLoc(), evaluate(expr));
@@ -287,12 +287,14 @@ public final class Evaluator {
 
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         requiresMatchedSize(sourceLoc, 1, arguments);
-        return Wire.Factory.of(scope.getLeastUpperComponent(), evaluateBitWidth(arguments.getFirst()));
+        return Wire.Factory.of(global.getDataIndexer(),
+                scope.getLeastUpperComponent(), evaluateBitWidth(arguments.getFirst()));
     }
 
     private Clock.Factory evaluateClockFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         if (arguments.isEmpty()) {
-            return Clock.Factory.of(scope.getLeastUpperComponent());
+            return Clock.Factory.of(global.getDataIndexer(),
+                    scope.getLeastUpperComponent());
         } else {
             log.error("{}: Unexpected specification for component type clock: {}", sourceLoc, arguments);
             throw new CompileCancellationException();

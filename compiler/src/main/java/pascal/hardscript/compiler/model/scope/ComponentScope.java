@@ -10,8 +10,6 @@ import java.util.Collections;
 import java.util.List;
 
 public final class ComponentScope extends Scope {
-    private final int depth;
-
     private AtomType signature;
     private Attributes attributes;
     private final Identifier identifier;
@@ -21,7 +19,6 @@ public final class ComponentScope extends Scope {
     public ComponentScope(Scope parent, Identifier identifier) {
         super(parent);
         this.identifier = identifier;
-        this.depth = parent instanceof DesignScope ? 0 : parent.getLeastUpperComponent().depth + 1;
     }
 
     public SourceLoc getSourceLoc() {
@@ -30,10 +27,6 @@ public final class ComponentScope extends Scope {
 
     public Identifier getIdentifier() {
         return identifier;
-    }
-
-    public int getDepth() {
-        return depth;
     }
 
     public List<Instance> getInputs() {

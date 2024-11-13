@@ -14,17 +14,15 @@ import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
 import static pascal.hardscript.util.lang.BuiltinComponent.REGISTER;
 
 public final class HSPrinter {
+    private int dataCount = 0;
     private final DesignScope design;
-    private final Map<Data, Integer> indexMap = new HashMap<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public HSPrinter(DesignScope design) {
@@ -34,7 +32,7 @@ public final class HSPrinter {
     public ObjectNode dump() {
         var result = createObjectNode();
         result.putIfAbsent("design", dump(design));
-        result.put("dataCount", indexMap.size());
+        result.put("dataCount", dataCount + 1);
         return result;
     }
 
@@ -170,16 +168,16 @@ public final class HSPrinter {
         if (data instanceof DataAccess access) {
             return dumpDataAccess(access);
         } else {
-            int index = indexMap.computeIfAbsent(data, _ -> indexMap.size());
-            return data.getIdentifier().toString() + "@" + index;
+            dataCount = Math.max(dataCount, data.getIndex());
+            return data.getIdentifier().toString() + "@" + data.getIndex();
         }
     }
 
     private String dumpDataAccess(DataAccess access) {
-        return switch (access.base()) {
-            case DataAccess base -> dumpDataAccess(base) + access.selector();
-            case Value value -> dumpValue(value) + access.selector();
-            case Data data -> dumpData(data) + access.selector();
+        return switch (access.getBase()) {
+            case DataAccess base -> dumpDataAccess(base) + access.getSelector();
+            case Value value -> dumpValue(value) + access.getSelector();
+            case Data data -> dumpData(data) + access.getSelector();
         };
     }
 

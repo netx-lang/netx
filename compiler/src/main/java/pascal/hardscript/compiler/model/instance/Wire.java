@@ -6,30 +6,20 @@ import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.lang.Identifier;
 
 import java.util.Objects;
+import java.util.function.Supplier;
 
-public final class Wire implements Data {
-    private final Identifier id;
+public final class Wire extends Data {
     private final Scope parent;
     private InstanceType type;
 
-    public Wire(Identifier id, Scope parent, InstanceType type) {
-        this.id = id;
+    public Wire(Identifier id, Scope parent, InstanceType type, int index) {
+        super(id, parent, index);
         this.parent = parent;
         this.type = type;
     }
 
-    public static Wire of(Identifier id, Scope parent, InstanceType width) {
-        return new Wire(id, parent, width);
-    }
-
-    @Override
-    public Identifier getIdentifier() {
-        return id;
-    }
-
-    @Override
-    public Scope getParent() {
-        return parent;
+    public static Wire of(Identifier id, Scope parent, InstanceType width, int index) {
+        return new Wire(id, parent, width, index);
     }
 
     @Override
@@ -55,27 +45,21 @@ public final class Wire implements Data {
         return id.toString();
     }
 
-    public static class Factory implements Data.Factory<Wire> {
+    public static class Factory extends Data.Factory<Wire> {
         private final InstanceType type;
-        private final ComponentScope parent;
 
-        private Factory(ComponentScope parent, InstanceType type) {
+        private Factory(Supplier<Integer> indexer, ComponentScope parent, InstanceType type) {
+            super(indexer, parent);
             this.type = type;
-            this.parent = parent;
         }
 
-        public static Factory of(ComponentScope parent, InstanceType type) {
-            return new Factory(parent, type);
+        public static Factory of(Supplier<Integer> indexer, ComponentScope parent, InstanceType type) {
+            return new Factory(indexer, parent, type);
         }
 
         @Override
         public Wire create(Identifier id) {
-            return new Wire(id, parent, type);
-        }
-
-        @Override
-        public ComponentScope getParent() {
-            return parent;
+            return new Wire(id, parent, type, indexer.get());
         }
     }
 }

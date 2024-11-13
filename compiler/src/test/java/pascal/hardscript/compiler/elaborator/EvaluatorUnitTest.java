@@ -9,14 +9,14 @@ import pascal.hardscript.compiler.model.instance.Int32Value;
 import pascal.hardscript.compiler.model.instance.selector.BitSelector;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
-import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class EvaluatorUnitTest {
 
@@ -26,14 +26,6 @@ class EvaluatorUnitTest {
 
     private static ComponentScope loadSingleComponent(String code) {
         return loadDesign(code).getTop();
-    }
-
-    @Test
-    void testBuiltinFactoryIntegrity() {
-        assertEquals(BuiltInComponentFactory.BUILTIN_FACTORY.size(), BuiltinComponent.values().length);
-        for (var component : BuiltinComponent.values()) {
-            assertTrue(BuiltInComponentFactory.BUILTIN_FACTORY.containsKey(component));
-        }
     }
 
     @Test

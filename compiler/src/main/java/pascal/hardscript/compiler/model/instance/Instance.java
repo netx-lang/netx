@@ -10,22 +10,18 @@ import pascal.hardscript.util.lang.SourceLoc;
 public sealed interface Instance extends Entity permits Data, Value {
     Scope getParent();
 
-    default boolean hasImplicitType() {
-        return getType() instanceof PolyType;
-    }
+    Identifier getIdentifier();
 
     InstanceType getType();
 
     void setType(InstanceType type);
 
-    Identifier getIdentifier();
+    default boolean hasImplicitType() {
+        return getType() instanceof PolyType;
+    }
 
     default SourceLoc getSourceLoc() {
         return getIdentifier().getSourceLoc();
-    }
-
-    default int getDepth() {
-        return getParent().getLeastUpperComponent().getDepth();
     }
 
     default boolean isUserDefined() {

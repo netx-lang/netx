@@ -53,7 +53,7 @@ public final class Elaborator {
         return node.getComponents().getFirst();
     }
 
-    private static final class ScopeElaborator {
+    private final class ScopeElaborator {
         private final Scope scope;
         private final Evaluator evaluator;
 
@@ -167,8 +167,9 @@ public final class Elaborator {
             }
 
             public ComponentPort instantiateSequentialType(SequentialType sequentialType) {
-                var lhs = doInstantiate(sequentialType.lhs());
+                // right-hand-side goes first
                 var rhs = doInstantiate(sequentialType.rhs());
+                var lhs = doInstantiate(sequentialType.lhs());
 
                 requiresMatchedSize(sourceLoc, lhs.source(), rhs.target());
                 for (int i = 0; i < lhs.source().size(); ++i) {
@@ -188,7 +189,7 @@ public final class Elaborator {
             }
 
             public ComponentPort instantiateBuiltinAtom(BuiltinAtom atom) {
-                var component = BuiltInComponentFactory.createBuiltInComponent(scope, atom);
+                var component = design.getBuiltinFactory().createBuiltInComponent(scope, atom);
                 component.setSignature(atom);
                 return ComponentPort.of(component.getOutputs(), component.getInputs());
             }
