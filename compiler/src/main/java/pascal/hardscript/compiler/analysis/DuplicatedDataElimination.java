@@ -5,7 +5,7 @@ import pascal.hardscript.compiler.model.instance.DataAccess;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.instance.Value;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.Design;
+import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.util.collection.UnionFind;
 
 import javax.annotation.Nonnull;
@@ -18,7 +18,7 @@ public final class DuplicatedDataElimination extends ModelAnalysis {
     private final UnionFind<Instance> set = new UnionFind<>();
     private final Map<Instance, Instance> sourceRep = new HashMap<>();
 
-    public DuplicatedDataElimination(Design design) {
+    public DuplicatedDataElimination(DesignScope design) {
         super(design);
     }
 

@@ -10,7 +10,7 @@ import pascal.hardscript.compiler.antlr.HardScriptLexer;
 import pascal.hardscript.compiler.antlr.HardScriptParser;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.elaborator.Elaborator;
-import pascal.hardscript.compiler.model.scope.Design;
+import pascal.hardscript.compiler.model.scope.DesignScope;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -40,7 +40,7 @@ public final class HSCompiler {
         return design;
     }
 
-    public Design compile() {
+    public DesignScope compile() {
         var design = new Elaborator(parse()).elaborate();
         new DuplicatedDataElimination(design).analyze();
         new DuplicatedComponentElimination(design).analyze();

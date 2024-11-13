@@ -1,6 +1,6 @@
 grammar HardScript;
 
-design : component+;
+design : (component | binding)+;
 
 component
     : 'component' ID attributes? component_type? '{' element* '}'
@@ -27,7 +27,6 @@ expression
     | '[' list ']'                                                  # ListExpr
     | op=('+' | '-' | '~' | '!') expression                         # UnaryExpr
     | expression (selector)+                                        # AccessExpr
-
     | lhs=expression op='**' rhs=expression                         # BinaryExpr
     | lhs=expression op=('*' | '/' | '%') rhs=expression            # BinaryExpr
     | lhs=expression op=('+' | '-') rhs=expression                  # BinaryExpr

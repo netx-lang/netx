@@ -10,7 +10,10 @@ import pascal.hardscript.compiler.model.EntityList;
 import pascal.hardscript.compiler.model.component.*;
 import pascal.hardscript.compiler.model.instance.Data;
 import pascal.hardscript.compiler.model.instance.Instance;
-import pascal.hardscript.compiler.model.scope.*;
+import pascal.hardscript.compiler.model.scope.Attributes;
+import pascal.hardscript.compiler.model.scope.ComponentScope;
+import pascal.hardscript.compiler.model.scope.DesignScope;
+import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.SourceLoc;
 
@@ -25,17 +28,17 @@ public final class Elaborator {
     private static final Logger log = LoggerFactory.getLogger(Elaborator.class);
 
     private final DesignNode node;
-    private final Design design;
+    private final DesignScope design;
 
     public Elaborator(DesignNode node) {
         this.node = node;
-        this.design = Design.newDesign();
-        Evaluator.setInfo(ComponentInfo.of(node.getComponents()));
+        this.design = DesignScope.newDesign(node);
+        Evaluator.setGlobal(design);
     }
 
-    public Design elaborate() {
+    public DesignScope elaborate() {
         var topNode = findTopNode();
-        var topScope = new ComponentScope(null, topNode.getIdentifier());
+        var topScope = new ComponentScope(design, topNode.getIdentifier());
         new ScopeElaborator(topScope).build(topNode);
         design.setTop(topScope);
         return design;

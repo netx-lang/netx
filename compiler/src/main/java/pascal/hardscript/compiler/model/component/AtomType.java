@@ -5,13 +5,17 @@ import pascal.hardscript.compiler.model.Entity;
 import java.util.List;
 
 public sealed abstract class AtomType implements ComponentType permits BuiltinAtom, ComponentAtom {
-    private List<Entity> parameters;
+    protected List<Entity> parameters;
 
     public List<Entity> getParameters() {
         return parameters;
     }
 
-    public void setParameters(List<Entity> parameters) {
-        this.parameters = parameters;
+    abstract public AtomType copyOf();
+
+    public AtomType parameterize(List<Entity> parameters) {
+        var result = this.copyOf();
+        result.parameters = parameters;
+        return result;
     }
 }

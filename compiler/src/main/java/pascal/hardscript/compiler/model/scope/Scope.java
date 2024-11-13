@@ -8,7 +8,7 @@ import pascal.hardscript.util.lang.Identifier;
 
 import java.util.*;
 
-public abstract sealed class Scope permits BlockScope, ComponentScope {
+public abstract sealed class Scope permits BlockScope, ComponentScope, DesignScope {
     private Scope parent;
     private List<Scope> children = new ArrayList<>();
     private final Set<Alias> aliases = new HashSet<>();

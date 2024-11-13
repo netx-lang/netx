@@ -3,7 +3,7 @@ package pascal.hardscript.compiler.analysis;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.Design;
+import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.collection.UnionFind;
 import pascal.hardscript.util.lang.BuiltinComponent;
@@ -19,7 +19,7 @@ import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
 public class DuplicatedComponentElimination extends ModelAnalysis {
     private final UnionFind<Instance> set = new UnionFind<>();
 
-    public DuplicatedComponentElimination(Design design) {
+    public DuplicatedComponentElimination(DesignScope design) {
         super(design);
     }
 

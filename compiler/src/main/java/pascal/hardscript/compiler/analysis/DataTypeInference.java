@@ -9,7 +9,7 @@ import pascal.hardscript.compiler.exception.TypeCheckingException;
 import pascal.hardscript.compiler.model.instance.DataAccess;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.Design;
+import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BuiltinComponent;
@@ -26,7 +26,7 @@ public final class DataTypeInference extends ModelAnalysis {
     private final List<DataConstraint> constraints = new LinkedList<>();
     private final Queue<Instance> workList = new LinkedList<>();
 
-    public DataTypeInference(Design design) {
+    public DataTypeInference(DesignScope design) {
         super(design);
     }
 

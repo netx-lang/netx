@@ -4,7 +4,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.jupiter.api.Test;
-import pascal.hardscript.compiler.model.scope.Design;
+import pascal.hardscript.compiler.model.scope.DesignScope;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -47,7 +47,7 @@ class HSCompilerUnitTest {
 
         CharStream charStream = CharStreams.fromString(content);
         HSCompiler compiler = HSCompiler.load(charStream);
-        Design scope = compiler.compile();
+        DesignScope scope = compiler.compile();
         assertNotNull(scope);
     }
 

@@ -18,18 +18,18 @@ import pascal.hardscript.compiler.model.instance.selector.Selector;
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
-import pascal.hardscript.compiler.model.scope.ComponentInfo;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
+import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.compiler.model.scope.binding.Binding;
 import pascal.hardscript.compiler.model.scope.binding.MapBinding;
 import pascal.hardscript.compiler.model.scope.binding.SingleBinding;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
-import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +41,7 @@ import static pascal.hardscript.compiler.elaborator.Types.*;
 
 public final class Evaluator {
     private static final Logger log = LoggerFactory.getLogger(Evaluator.class);
-    private static ComponentInfo info;
+    private static DesignScope global;
 
     private final LinkedList<Binding> bindings = new LinkedList<>();
     private final Scope scope;
@@ -53,8 +53,8 @@ public final class Evaluator {
         bindings.add(scope.getBinding());
     }
 
-    public static void setInfo(ComponentInfo info) {
-        Evaluator.info = info;
+    public static void setGlobal(DesignScope design) {
+        Evaluator.global = design;
     }
 
     public ComponentType evaluateToComponentType(ExprNode expr) {
@@ -343,25 +343,32 @@ public final class Evaluator {
 
     @Nonnull
     private Entity resolveIdentifier(Identifier id) {
+        Entity entity = lookup(id);
+        if (entity != null) return entity;
+
+        if (scope instanceof ComponentScope) {
+            var result = global.getEvaluator().lookup(id);
+            if (result != null) {
+                if (result instanceof BuiltinAtom atom) {
+                    atom.setSourceLoc(id.getSourceLoc());
+                }
+                return result;
+            }
+            log.error("{}: Unresolved identifier {}", id.getSourceLoc(), id);
+            throw new CompileCancellationException();
+        }
+        return scope.getParent().getEvaluator().resolveIdentifier(id);
+    }
+
+    @Nullable
+    private Entity lookup(Identifier id) {
         for (var binding : bindings) {
             var entity = binding.lookup(id);
             if (entity != null) {
                 return entity;
             }
         }
-
-        if (scope instanceof ComponentScope) {
-            if (info.hasDefinition(id)) {
-                return ComponentAtom.of(info.getDefinition(id));
-            } else
-            if (BuiltinComponent.isBuiltin(id)) {
-                return BuiltinAtom.of(BuiltinComponent.of(id), id.getSourceLoc(), List.of());
-            } else {
-                log.error("{}: Unresolved identifier {}", id.getSourceLoc(), id);
-                throw new CompileCancellationException();
-            }
-        }
-        return scope.getParent().getEvaluator().resolveIdentifier(id);
+        return null;
     }
 
     private Entity evaluateParamSymbolExpr(ParamSymbolExpr expr) {
@@ -374,14 +381,13 @@ public final class Evaluator {
     private Entity evaluateComponentType(ParamSymbolExpr expr) {
         var identifier = getIdentifierFrom(expr.getHead());
         var parameters = expr.getArguments().stream().map(this::evaluate).toList();
-        Entity entity = resolveIdentifier(identifier);
-        if (entity instanceof MacroType macroType) {
+        Entity prototype = resolveIdentifier(identifier);
+        if (prototype instanceof MacroType macroType) {
             return evaluateMacroExpr(expr.getSourceLoc(), macroType, parameters);
-        } else if (entity instanceof AtomType atom) {
-            atom.setParameters(parameters);
-            return atom;
+        } else if (prototype instanceof AtomType atom) {
+            return atom.parameterize(parameters);
         } else {
-            log.error("{}: Expected component type but got {}", expr.getSourceLoc(), entity);
+            log.error("{}: Expected component type but got {}", expr.getSourceLoc(), prototype);
             throw new CompileCancellationException();
         }
     }

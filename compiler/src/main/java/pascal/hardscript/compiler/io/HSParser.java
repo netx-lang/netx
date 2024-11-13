@@ -27,8 +27,9 @@ import java.util.List;
 public final class HSParser {
 
     public static DesignNode parseDesign(DesignContext ctx) {
-        return DesignNode.of(ctx.component().stream().map(HSParser::parseComponent).toList())
-                .setSourceLoc(locationOf(ctx.getStart()));
+        var bindings = ctx.binding().stream().map(HSParser::parseBinding).toList();
+        var components = ctx.component().stream().map(HSParser::parseComponent).toList();
+        return DesignNode.of(bindings, components).setSourceLoc(locationOf(ctx.getStart()));
     }
 
     static ComponentNode parseComponent(ComponentContext ctx) {
