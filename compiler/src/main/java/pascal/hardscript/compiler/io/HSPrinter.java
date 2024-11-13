@@ -15,50 +15,44 @@ import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
 import static pascal.hardscript.util.lang.BuiltinComponent.REGISTER;
 
 public final class HSPrinter {
     private int dataCount = 0;
-    private final DesignScope design;
+    private final DesignScope designScope;
     private final Set<Signature> signatures = new HashSet<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public HSPrinter(DesignScope design) {
-        this.design = design;
+    private final ObjectNode design;
+    private final List<ObjectNode> definitions = new ArrayList<>();
+
+    public HSPrinter(DesignScope scope) {
+        this.designScope = scope;
+        this.design = createObjectNode();
     }
 
     public ObjectNode dump() {
-        var result = createObjectNode();
-        result.putIfAbsent("design", dump(design));
-        result.put("dataCount", dataCount + 1);
-        return result;
+        var top = designScope.getTop();
+        signatures.add(top.getSignature());
+        definitions.add(defineComponent(top.getSignature(), top));
+        design.put("top", top.getIdentifier().name());
+        design.put("dataCount", dataCount + 1);
+        Collections.reverse(definitions);
+        makeArrayIn(design, "definitions").addAll(definitions);
+        return design;
     }
 
-    private ObjectNode dump(DesignScope design) {
-        return dump(design.getTop());
-    }
+    private ObjectNode defineComponent(Signature signature, ComponentScope component) {
+        var definition = createObjectNode();
+        setType(definition, "definition");
+        setIdentifier(definition, component.getIdentifier());
 
-    private ObjectNode dump(ComponentScope component) {
-        var signature = component.getSignature();
-        if (signatures.contains(signature)) {
-
-        } else {
-            signatures.add(signature);
-        }
-
-        var result = createObjectNode();
-        setType(result, "component");
-        setIdentifier(result, component.getIdentifier());
-
-        dumpComponentIO(result, "input", component.getInputs());
-        dumpComponentIO(result, "output", component.getOutputs());
-        var members = makeMembersIn(result);
+        dumpComponentIO(definition, "input", signature.inputs());
+        dumpComponentIO(definition, "output", signature.outputs());
+        var members = makeMembersIn(definition);
         for (var entity : component.getEntities()) {
             if (entity instanceof Data data) {
                 members.add(dump(data));
@@ -74,6 +68,26 @@ public final class HSPrinter {
                 members.add(dump(sub));
             }
         }
+        return definition;
+    }
+
+    private ObjectNode dump(ComponentScope component) {
+        var signature = component.getSignature();
+        var result = createObjectNode();
+        if (!signatures.contains(signature)) {
+            signatures.add(signature);
+            definitions.add(defineComponent(signature, component));
+        }
+        result.put("type", "component");
+        result.put("id", component.getIdentifier().name());
+        var members = makeMembersIn(result);
+        for (var entity : component.getEntities()) {
+            if (entity instanceof Data data) {
+                members.add(dump(data));
+            }
+        }
+        dumpComponentIO(result, "input", component.getInputs());
+        dumpComponentIO(result, "output", component.getOutputs());
         return result;
     }
 

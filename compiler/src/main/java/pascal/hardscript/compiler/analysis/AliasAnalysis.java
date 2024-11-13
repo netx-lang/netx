@@ -15,6 +15,8 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public final class AliasAnalysis extends ModelAnalysis {
+    private final AliasStructure global = new AliasStructure();
+
     public AliasAnalysis(DesignScope design) {
         super(design);
     }
@@ -22,9 +24,19 @@ public final class AliasAnalysis extends ModelAnalysis {
     @Override
     public void analyze() {
         design.forEachScope(scope -> {
-           if (isUserDefinedComponent(scope)) {
-               new ComponentAnalysis(scope).analyze();
-           }
+            if (isUserDefinedComponent(scope)) {
+                new ComponentAnalysis(scope).analyze();
+            }
+        });
+        global.resolveRepresentatives();
+        global.propagateAliasType();
+        design.forEachScope(scope -> {
+            if (isUserDefinedComponent(scope)) {
+                var component = (ComponentScope) scope;
+                component.getEntities().removeIf(Predicate.not(global::needDump));
+                component.getInputs().replaceAll(global::repOf);
+                component.getOutputs().replaceAll(global::repOf);
+            }
         });
     }
 
@@ -32,38 +44,50 @@ public final class AliasAnalysis extends ModelAnalysis {
         return scope instanceof ComponentScope component && !component.isBuilltin();
     }
 
-    private static class ComponentAnalysis {
+    private class ComponentAnalysis {
         private final Scope scope;
-        private final List<Scope> affected = new LinkedList<>();
-        private final UnionFind<Instance> set = new UnionFind<>();
-        private final Map<Instance, Instance> sourceRep = new HashMap<>();
+        private final AliasStructure local = new AliasStructure();
+        private final List<Scope> analysisScopes = new LinkedList<>();
 
         private ComponentAnalysis(Scope scope) {
             this.scope = scope;
         }
 
         public void analyze() {
-            collectAffected(scope);
-            collectAlias();
+            exploreAnalysisScopes(scope);
+            local.resolveRepresentatives();
             eliminateDuplicatedData();
-            propagateAliasType();
         }
 
-        private void collectAlias() {
-            affected.forEach(scope -> {
-                for (var alias : scope.getAliases()) {
-                    set.union(alias.lhs(), alias.rhs());
-                }
-            });
-            resolveRepresentatives();
-        }
-
-        private void collectAffected(Scope scope) {
-            affected.add(scope);
+        private void exploreAnalysisScopes(Scope scope) {
+            analysisScopes.add(scope);
+            local.addAlias(scope.getAliases());
+            global.addAlias(scope.getAliases());
             for (var child : scope.getChildren()) {
                 if (!isUserDefinedComponent(child)) {
-                    collectAffected(child);
+                    exploreAnalysisScopes(child);
                 }
+            }
+        }
+
+        public void eliminateDuplicatedData() {
+            analysisScopes.forEach(scope -> {
+                scope.getEntities().removeIf(Predicate.not(local::needDump));
+                if (scope instanceof ComponentScope componentScope) {
+                    componentScope.getInputs().replaceAll(local::repOf);
+                    componentScope.getOutputs().replaceAll(local::repOf);
+                }
+            });
+        }
+    }
+
+    private static class AliasStructure {
+        private final UnionFind<Instance> set = new UnionFind<>();
+        private final Map<Instance, Instance> sourceRep = new HashMap<>();
+
+        private void addAlias(Collection<Scope.Alias> aliases) {
+            for (var alias : aliases) {
+                set.union(alias.lhs(), alias.rhs());
             }
         }
 
@@ -93,15 +117,6 @@ public final class AliasAnalysis extends ModelAnalysis {
             }
         }
 
-        public void eliminateDuplicatedData() {
-            affected.forEach(scope -> {
-                scope.getEntities().removeIf(Predicate.not(this::needDump));
-                if (scope instanceof ComponentScope componentScope) {
-                    componentScope.getInputs().replaceAll(this::repOf);
-                    componentScope.getOutputs().replaceAll(this::repOf);
-                }
-            });
-        }
 
         public void propagateAliasType() {
             // First pass: propagate type from alias to root
