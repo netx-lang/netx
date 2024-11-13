@@ -110,7 +110,7 @@ public final class Evaluator {
         return switch (base) {
             case Instance inst -> {
                 try {
-                    yield DataAccess.of(inst, selector);
+                    yield Instance.accessOf(inst, selector);
                 } catch (CompileCancellationException e) {
                     log.error("{}: invalid selectors {}", expr.getSourceLoc(), expr);
                     throw e;

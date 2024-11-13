@@ -3,7 +3,6 @@ package pascal.hardscript.compiler.elaborator;
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.io.HSCompiler;
-import pascal.hardscript.compiler.model.instance.DataAccess;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.instance.Int32Value;
 import pascal.hardscript.compiler.model.instance.selector.BitSelector;
@@ -38,7 +37,7 @@ class EvaluatorUnitTest {
         var data = (Instance) component.getBinding().resolve(Identifier.of("x"));
         var expected = new ArrayList<>(IntStream.range(0, 4)
                 .mapToObj(Int32Value::of).map(BitSelector::of)
-                .map(selector -> DataAccess.of(data, selector)).toList());
+                .map(selector -> Instance.accessOf(data, selector)).toList());
         assertEquals(expected, component.getInputs());
         Collections.reverse(expected);
         assertEquals(expected, component.getOutputs());

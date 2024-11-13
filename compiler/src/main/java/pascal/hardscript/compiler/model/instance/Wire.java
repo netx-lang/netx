@@ -2,24 +2,20 @@ package pascal.hardscript.compiler.model.instance;
 
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.lang.Identifier;
 
-import java.util.Objects;
 import java.util.function.Supplier;
 
 public final class Wire extends Data {
-    private final Scope parent;
     private InstanceType type;
 
-    public Wire(Identifier id, Scope parent, InstanceType type, int index) {
-        super(id, parent, index);
-        this.parent = parent;
+    public Wire(Identifier id, InstanceType type, int index) {
+        super(id, index);
         this.type = type;
     }
 
-    public static Wire of(Identifier id, Scope parent, InstanceType width, int index) {
-        return new Wire(id, parent, width, index);
+    public static Wire of(Identifier id, InstanceType width, int index) {
+        return new Wire(id, width, index);
     }
 
     @Override
@@ -30,14 +26,6 @@ public final class Wire extends Data {
     @Override
     public void setType(InstanceType type) {
         this.type = type;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Wire wire = (Wire) o;
-        return Objects.equals(id, wire.id) && Objects.equals(parent, wire.parent) && Objects.equals(type, wire.type);
     }
 
     @Override
@@ -59,7 +47,7 @@ public final class Wire extends Data {
 
         @Override
         public Wire create(Identifier id) {
-            return new Wire(id, parent, type, indexer.get());
+            return new Wire(id, type, indexer.get());
         }
     }
 }

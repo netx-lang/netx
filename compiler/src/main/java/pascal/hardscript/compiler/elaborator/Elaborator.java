@@ -8,7 +8,6 @@ import pascal.hardscript.compiler.ast.expr.ExprNode;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.EntityList;
 import pascal.hardscript.compiler.model.component.*;
-import pascal.hardscript.compiler.model.instance.Data;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.Attributes;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
@@ -122,21 +121,21 @@ public final class Elaborator {
             }
         }
 
-        private List<Data> extractInstanceList(SourceLoc sourceLoc, ExprNode node) {
+        private List<Instance> extractInstanceList(SourceLoc sourceLoc, ExprNode node) {
             var entity = evaluator.evaluate(node);
             if (entity instanceof EntityList list) {
-                List<Data> result = new ArrayList<>();
+                List<Instance> result = new ArrayList<>();
                 for (var member : list.entities()) {
-                    if (member instanceof Data data) {
-                        result.add(data);
+                    if (member instanceof Instance instance) {
+                        result.add(instance);
                     } else {
                         log.error("{}: Expected list of components but got {}", sourceLoc, list);
                         throw new CompileCancellationException();
                     }
                 }
                 return result;
-            } else if (entity instanceof Data data) {
-                return List.of(data);
+            } else if (entity instanceof Instance instance) {
+                return List.of(instance);
             }
             throw new ShallNotReachHereError();
         }

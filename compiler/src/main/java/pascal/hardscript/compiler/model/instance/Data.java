@@ -2,34 +2,49 @@ package pascal.hardscript.compiler.model.instance;
 
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.lang.Identifier;
+import pascal.hardscript.util.lang.SourceLoc;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
-public sealed abstract class Data implements Instance permits Clock, DataAccess, Wire {
+public sealed abstract class Data implements Instance permits Clock, Wire {
     private final int index;
     protected final Identifier id;
-    protected final Scope parent;
 
-    protected Data(Identifier id, Scope parent, int index) {
-        this.parent = parent;
+    protected Data(Identifier id, int index) {
         this.index = index;
         this.id = id;
     }
 
-    @Override
-    public Scope getParent() {
-        return parent;
-    }
-
-    @Override
     public Identifier getIdentifier() {
         return id;
     }
 
+    public SourceLoc getSourceLoc() {
+        return getIdentifier().getSourceLoc();
+    }
+
     public Integer getIndex() {
         return index;
+    }
+
+    @Override
+    public boolean isBuiltin() {
+        return getIdentifier().name().startsWith("$");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Data data = (Data) o;
+        return index == data.index;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(index);
     }
 
     public abstract static class Factory<T extends Data> implements Entity {

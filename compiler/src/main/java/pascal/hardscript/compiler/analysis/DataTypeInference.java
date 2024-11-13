@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.analysis.constraint.*;
 import pascal.hardscript.compiler.exception.TypeCheckingException;
+import pascal.hardscript.compiler.model.instance.Data;
 import pascal.hardscript.compiler.model.instance.DataAccess;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
@@ -134,7 +135,7 @@ public final class DataTypeInference extends ModelAnalysis {
                     throw new ShallNotReachHereError();
                 }
                 if (inst.hasImplicitType()) {
-                    log.error("{}: Cannot infer type of data: {}", inst.getSourceLoc(), inst);
+                    log.error("{}: Cannot infer type of data: {}", ((Data) inst).getSourceLoc(), inst);
                     throw new TypeCheckingException();
                 }
             }

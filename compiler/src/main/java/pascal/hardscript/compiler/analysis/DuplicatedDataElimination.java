@@ -56,7 +56,9 @@ public final class DuplicatedDataElimination extends ModelAnalysis {
         } else if (now instanceof Value) {
             return true;
         } else {
-            return ((Data) now).getIndex() < ((Data) old).getIndex();
+            var nowData = now instanceof DataAccess access ? access.base() : (Data) now;
+            var oldData = old instanceof DataAccess access ? access.base() : (Data) old;
+            return nowData.getIndex() < oldData.getIndex();
         }
     }
 
@@ -127,9 +129,9 @@ public final class DuplicatedDataElimination extends ModelAnalysis {
     private Instance getNextRep(Instance inst) {
         // If the inst is a DataAccess, find the alias of its base
         if (inst instanceof DataAccess access) {
-            var base = access.getBase();
+            var base = access.base();
             if (hasSourceAlias(base) && repOf(base) != base) {
-                return DataAccess.of(repOf(base), access.getSelector());
+                return Instance.accessOf(repOf(base), access.selector());
             }
         }
         // Otherwise find the alias of the inst itself

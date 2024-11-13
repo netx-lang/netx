@@ -122,7 +122,6 @@ public final class HSPrinter {
         return switch (data) {
             case Wire wire -> dumpWire(wire);
             case Clock clock -> dumpClock(clock);
-            default -> throw new ShallNotReachHereError();
         };
     }
 
@@ -151,8 +150,9 @@ public final class HSPrinter {
 
     private String dumpInstance(Instance entity) {
         return switch (entity) {
-            case Value value -> dumpValue(value);
             case Data data -> dumpData(data);
+            case Value value -> dumpValue(value);
+            case DataAccess access -> dumpDataAccess(access);
         };
     }
 
@@ -165,20 +165,12 @@ public final class HSPrinter {
     }
 
     private String dumpData(Data data) {
-        if (data instanceof DataAccess access) {
-            return dumpDataAccess(access);
-        } else {
-            dataCount = Math.max(dataCount, data.getIndex());
-            return data.getIdentifier().toString() + "@" + data.getIndex();
-        }
+        dataCount = Math.max(dataCount, data.getIndex());
+        return data.getIdentifier().toString() + "@" + data.getIndex();
     }
 
     private String dumpDataAccess(DataAccess access) {
-        return switch (access.getBase()) {
-            case DataAccess base -> dumpDataAccess(base) + access.getSelector();
-            case Value value -> dumpValue(value) + access.getSelector();
-            case Data data -> dumpData(data) + access.getSelector();
-        };
+        return dumpData(access.base()) + access.selector();
     }
 
     private void setIdentifier(ObjectNode node, Instance inst) {
