@@ -11,11 +11,7 @@ public sealed abstract class AtomType implements ComponentType permits BuiltinAt
         return parameters;
     }
 
-    abstract public AtomType copyOf();
-
-    public AtomType parameterize(List<Entity> parameters) {
-        var result = this.copyOf();
-        result.parameters = parameters;
-        return result;
+    public void setParameters(List<Entity> parameters) {
+        this.parameters = parameters;
     }
 }

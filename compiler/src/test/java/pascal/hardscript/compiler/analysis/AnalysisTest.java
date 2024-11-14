@@ -2,7 +2,7 @@ package pascal.hardscript.compiler.analysis;
 
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.io.HSCompiler;
-import pascal.hardscript.compiler.io.HSPrinter;
+import pascal.hardscript.compiler.io.HSDumper;
 import pascal.hardscript.util.TestUtils;
 
 import java.io.IOException;
@@ -51,14 +51,14 @@ class AnalysisTest {
                 }
                 """;
         assertEquals(
-                new HSPrinter(HSCompiler.load(expected).compile()).dump(),
-                new HSPrinter(HSCompiler.load(actual).compile()).dump());
+                new HSDumper(HSCompiler.load(expected).compile()).dump(),
+                new HSDumper(HSCompiler.load(actual).compile()).dump());
     }
 
     @Test
     void testNestedDataTypeInference() {
         var file = TEST_DIR.resolve("nested_inference.hard");
-        assertDoesNotThrow(() -> new HSPrinter(HSCompiler.loadPath(file).compile()).dump());
+        assertDoesNotThrow(() -> new HSDumper(HSCompiler.loadPath(file).compile()).dump());
     }
 
     @Test
@@ -79,8 +79,8 @@ class AnalysisTest {
                 }
                 """;
         assertEquals(
-                new HSPrinter(HSCompiler.load(expected).compile()).dump(),
-                new HSPrinter(HSCompiler.load(actual).compile()).dump());
+                new HSDumper(HSCompiler.load(expected).compile()).dump(),
+                new HSDumper(HSCompiler.load(actual).compile()).dump());
     }
 
     @Test
@@ -106,7 +106,7 @@ class AnalysisTest {
                 }
                 """;
         assertEquals(
-                new HSPrinter(HSCompiler.load(expected).compile()).dump(),
-                new HSPrinter(HSCompiler.load(actual).compile()).dump());
+                new HSDumper(HSCompiler.load(expected).compile()).dump(),
+                new HSDumper(HSCompiler.load(actual).compile()).dump());
     }
 }

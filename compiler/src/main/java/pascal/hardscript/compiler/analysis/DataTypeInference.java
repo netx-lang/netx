@@ -11,7 +11,6 @@ import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
-import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
@@ -40,23 +39,18 @@ public final class DataTypeInference extends ModelAnalysis {
 
     public void collectTypeConstraints() {
         design.forEachScope(scope -> {
-            var component = (ComponentScope) scope;
-            for (var data : getBoundDataIn(scope)) {
-                if (!data.hasImplicitType()) {
-                    workList.add(data);
-                }
-            }
             for (var alias : scope.getAliases()) {
                 addBinaryConstraint(EqualTypeConstraint.of(alias.lhs(), alias.rhs()));
             }
-            if (BuiltinComponent.isBuiltin(component.getIdentifier())) {
+            var component = (ComponentScope) scope;
+            if (component.isBuiltin()) {
                 collectConstraintsInBuiltin(component);
             }
         });
     }
 
     private void collectConstraintsInBuiltin(ComponentScope component) {
-        switch (BuiltinComponent.of(component.getIdentifier().name())) {
+        switch (BuiltinComponent.of(component.getIdentifier())) {
             case OR, NOT, AND, XOR, NOR, NAND, XNOR -> addAllEqualConstraints(component);
             case REGISTER -> addContainsForRegister(component);
             case SPLIT, IGNORE, FROM -> {
@@ -154,9 +148,5 @@ public final class DataTypeInference extends ModelAnalysis {
             log.error("Type constraint violation: {}", constraint.error());
             throw new TypeCheckingException();
         }
-    }
-
-    private static List<Instance> getBoundDataIn(Scope scope) {
-        return scope.getEntities().stream().map(Instance.class::cast).toList();
     }
 }

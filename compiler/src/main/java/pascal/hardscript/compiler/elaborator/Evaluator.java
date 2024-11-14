@@ -25,6 +25,7 @@ import pascal.hardscript.compiler.model.scope.binding.Binding;
 import pascal.hardscript.compiler.model.scope.binding.MapBinding;
 import pascal.hardscript.compiler.model.scope.binding.SingleBinding;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
+import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
 
@@ -33,6 +34,7 @@ import javax.annotation.Nullable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.stream.IntStream;
@@ -346,24 +348,24 @@ public final class Evaluator {
     @Nonnull
     private Entity resolveIdentifier(Identifier id) {
         Entity entity = lookup(id);
-        if (entity != null) return entity;
-
-        if (scope instanceof ComponentScope) {
-            var result = global.getEvaluator().lookup(id);
-            if (result != null) {
-                if (result instanceof BuiltinAtom atom) {
-                    result = atom.copyOf();
-                    ((BuiltinAtom) result).setSourceLoc(id.getSourceLoc());
-                } else if (result instanceof ComponentAtom atom) {
-                    result = atom.copyOf();
-                    ((ComponentAtom) result).setIdentifier(id);
+        if (entity == null) {
+            if (scope instanceof ComponentScope) {
+                entity = global.getEvaluator().lookup(id);
+                if (entity == null) {
+                    if (global.hasDefinition(id)) {
+                        entity = ComponentAtom.of(global.getDefinition(id), id);
+                    } else if (BuiltinComponent.isBuiltin(id)) {
+                        entity = BuiltinAtom.of(BuiltinComponent.of(id), id.getSourceLoc());
+                    }
                 }
-                return result;
+            } else {
+                entity = scope.getParent().getEvaluator().resolveIdentifier(id);
             }
+        }
+        return Objects.requireNonNullElseGet(entity, () -> {
             log.error("{}: Unresolved identifier {}", id.getSourceLoc(), id);
             throw new CompileCancellationException();
-        }
-        return scope.getParent().getEvaluator().resolveIdentifier(id);
+        });
     }
 
     @Nullable
@@ -391,7 +393,8 @@ public final class Evaluator {
         if (prototype instanceof Macro macro) {
             return evaluateMacroExpr(expr.getSourceLoc(), macro, parameters);
         } else if (prototype instanceof AtomType atom) {
-            return atom.parameterize(parameters);
+            atom.setParameters(parameters);
+            return atom;
         } else {
             log.error("{}: Expected component type but got {}", expr.getSourceLoc(), prototype);
             throw new CompileCancellationException();

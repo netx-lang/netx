@@ -44,8 +44,7 @@ public final class Elaborator {
     }
 
     private static void setDesignSignature(ComponentScope topScope, ComponentNode topNode) {
-        var atom = ComponentAtom.of(topNode);
-        atom.setIdentifier(topNode.getIdentifier());
+        var atom = ComponentAtom.of(topNode, topNode.getIdentifier());
         topScope.setSignature(Signature.of(atom, topScope.getInputs(), topScope.getOutputs()));
     }
 
@@ -208,8 +207,8 @@ public final class Elaborator {
                     component.bind(entry.getKey(), entry.getValue());
                 }
                 component.setAttributes(attributes);
-                setSignatureFor(atom, component);
                 new ScopeElaborator(component).build(node);
+                setSignatureFor(atom, component);
                 return ComponentPort.of(component.getOutputs(), component.getInputs());
             }
 

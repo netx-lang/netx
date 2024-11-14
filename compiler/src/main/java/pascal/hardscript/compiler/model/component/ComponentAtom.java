@@ -16,8 +16,8 @@ public final class ComponentAtom extends AtomType {
         this.parameters = parameters;
     }
 
-    public static ComponentAtom of(ComponentNode definition) {
-        return new ComponentAtom(definition, null, List.of());
+    public static ComponentAtom of(ComponentNode definition, Identifier id) {
+        return new ComponentAtom(definition, id, List.of());
     }
 
     public static ComponentAtom of(ComponentNode definition, Identifier identifier, List<Entity> parameters) {
@@ -34,10 +34,5 @@ public final class ComponentAtom extends AtomType {
 
     public ComponentNode getDefinition() {
         return definition;
-    }
-
-    @Override
-    public AtomType copyOf() {
-        return ComponentAtom.of(definition, identifier, parameters);
     }
 }

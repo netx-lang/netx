@@ -2,7 +2,7 @@ package pascal.hardscript;
 
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.io.HSCompiler;
-import pascal.hardscript.compiler.io.HSPrinter;
+import pascal.hardscript.compiler.io.HSDumper;
 import pascal.hardscript.hson.simulator.Simulator;
 import pascal.hardscript.hson.simulator.frontend.HFrontend;
 import pascal.hardscript.util.lang.BitVector;
@@ -69,7 +69,7 @@ public class SimulatorTest {
 
     private static Simulator buildSimulator(String other) throws IOException {
         var design = HSCompiler.loadPath(TEST_DIR.resolve(other)).compile();
-        var circuit = HFrontend.load(new HSPrinter(design).dump()).parse();
+        var circuit = HFrontend.load(new HSDumper(design).dump()).parse();
         return new Simulator(circuit);
     }
 }
