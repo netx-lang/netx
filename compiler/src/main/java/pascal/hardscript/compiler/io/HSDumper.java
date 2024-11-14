@@ -13,7 +13,10 @@ import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
@@ -22,10 +25,10 @@ import static pascal.hardscript.util.lang.BuiltinComponent.REGISTER;
 
 public final class HSDumper {
     private final DesignScope designScope;
-    private final Set<Signature> signatures = new HashSet<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final ObjectNode design;
+    private final SignatureManager manager = new SignatureManager();
     private final List<ObjectNode> definitions = new LinkedList<>();
 
     public HSDumper(DesignScope scope) {
@@ -35,20 +38,22 @@ public final class HSDumper {
 
     public ObjectNode dump() {
         var top = designScope.getTop();
-        signatures.add(top.getSignature());
-        definitions.addFirst(new ComponentDumper(top.getSignature(), top).dump());
+        definitions.addFirst(new ComponentDumper(manager.addSignature(top.getSignature()), top.getSignature(), top).dump());
         design.put("top", top.getIdentifier().name());
         makeArrayIn(design, "definitions").addAll(definitions);
         return design;
     }
 
     private class ComponentDumper {
+
+        private final int index;
         private final Signature signature;
         private final ComponentScope component;
         private final Supplier<Integer> indexer = new AtomicInteger(0)::getAndIncrement;
         private final Map<ComponentScope, Integer> indexMap = new HashMap<>();
 
-        private ComponentDumper(Signature signature, ComponentScope component) {
+        private ComponentDumper(int index, Signature signature, ComponentScope component) {
+            this.index = index;
             this.signature = signature;
             this.component = component;
         }
@@ -71,9 +76,7 @@ public final class HSDumper {
 
             var definition = createObjectNode();
             setType(definition, "definition");
-
-            var definitionIdentifier = signature.caller().getDefinition().getIdentifier();
-            setIdentifier(definition, definitionIdentifier.toStringWithLoc());
+            setDefID(definition, signature.caller().getDefinition().getIdentifier(), index);
 
             dumpDefIO(definition, "input", signature.inputs());
             dumpDefIO(definition, "output", signature.outputs());
@@ -105,12 +108,11 @@ public final class HSDumper {
         private ObjectNode instantiate(ComponentScope component) {
             var signature = component.getSignature();
             var result = createObjectNode();
-            if (!signatures.contains(signature)) {
-                signatures.add(signature);
-                definitions.add(new ComponentDumper(signature, component).dump());
+            if (!manager.contains(signature)) {
+                definitions.add(new ComponentDumper(manager.addSignature(signature), signature, component).dump());
             }
-            result.put("type", "component");
-            setIdentifier(result, component.getIdentifier().toStringWithLoc() + "#" + allocateIndex(component));
+            setType(result, "component");
+            setInstID(result, component.getIdentifier(), manager.getCount(signature), allocateIndex(component));
             dumpInstIO(result, "input", component.getInputs());
             dumpInstIO(result, "output", component.getOutputs());
             return result;
@@ -123,7 +125,7 @@ public final class HSDumper {
                 dumpComponentAttribute(builtin, sub);
             } else {
                 setType(builtin, "component");
-                setIdentifier(builtin, instID.toStringWithLoc() + "#" + allocateIndex(sub));
+                setBuiltinID(builtin, instID, allocateIndex(sub));
             }
             List<Data> needDump = new LinkedList<>();
             for (var entity : sub.getEntities()) {
@@ -150,7 +152,7 @@ public final class HSDumper {
         private ObjectNode defineWire(Wire wire) {
             var result = createObjectNode();
             setType(result, "wire");
-            setIdentifier(result, wire.getIdentifier().toStringWithLoc());
+            setDataID(result, wire.getIdentifier());
             switch (wire.getType()) {
                 case BitType type -> result.put("width", type.width());
                 case PolyType ignored -> throw new ShallNotReachHereError();
@@ -161,7 +163,7 @@ public final class HSDumper {
         private ObjectNode defineClock(Clock clock) {
             var result = createObjectNode();
             setType(result, "clock");
-            setIdentifier(result, clock.getIdentifier().toStringWithLoc());
+            setDataID(result, clock.getIdentifier());
             return result;
         }
 
@@ -220,8 +222,21 @@ public final class HSDumper {
         node.put("type", type);
     }
 
-    private static void setIdentifier(ObjectNode node, String value) {
-        node.put("id", value);
+    private static void setDefID(ObjectNode node, Identifier id, int defIndex) {
+        node.put("id", String.format("%s(%d)@(%s)", id.name(), defIndex, id.getSourceLoc()));
+    }
+
+
+    private static void setInstID(ObjectNode node, Identifier id, int defIndex, int instIndex) {
+        node.put("id", String.format("%s(%d)#%d@(%s)", id.name(), defIndex, instIndex, id.getSourceLoc()));
+    }
+
+    private static void setBuiltinID(ObjectNode node, Identifier id, int instIndex) {
+        node.put("id", String.format("%s#%d@(%s)", id.name(), instIndex, id.getSourceLoc()));
+    }
+
+    private static void setDataID(ObjectNode node, Identifier id) {
+        node.put("id", id.toStringWithLoc());
     }
 
     private static ArrayNode makeArrayIn(ObjectNode node, String key) {
@@ -234,5 +249,26 @@ public final class HSDumper {
 
     private ObjectNode createObjectNode() {
         return objectMapper.createObjectNode();
+    }
+
+    private static class SignatureManager {
+        private final Map<Signature, Integer> signatures = new HashMap<>();
+        private final Map<Identifier, Integer> idCount = new HashMap<>();
+
+        public int getCount(Signature signature) {
+            return signatures.get(signature);
+        }
+
+        public boolean contains(Signature signature) {
+            return signatures.containsKey(signature);
+        }
+
+        public int addSignature(Signature signature) {
+            var id = signature.caller().getIdentifier();
+            int count = idCount.getOrDefault(id, 0) + 1;
+            idCount.put(id, count);
+            signatures.put(signature, count);
+            return count;
+        }
     }
 }
