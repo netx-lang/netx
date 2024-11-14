@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.io.HSCompiler;
 import pascal.hardscript.compiler.io.HSDumper;
+import pascal.hardscript.compiler.io.HSPrinter;
+import pascal.hardscript.util.print.NotepadWriter;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -48,8 +50,7 @@ class HSCompilerTest {
         var json = new HSDumper(design).dump();
 
         if (GENERATE_EXPECTED) {
-            mapper.writerWithDefaultPrettyPrinter()
-                    .writeValue(EXPECTED_DIR.resolve(fileName + ".json").toFile(), json);
+            new HSPrinter(json, NotepadWriter.pathOut(EXPECTED_DIR.resolve(fileName + ".json"))).print();
         } else {
             var expected = mapper.reader()
                     .readTree(Files.newBufferedReader(EXPECTED_DIR.resolve(fileName + ".json")));

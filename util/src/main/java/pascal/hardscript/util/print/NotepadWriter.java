@@ -15,7 +15,7 @@ import java.util.function.Consumer;
  */
 public class NotepadWriter implements AutoCloseable {
 
-    private static final String DEFAULT_INDENT = " ".repeat(4);
+    private static final String DEFAULT_INDENT = " ".repeat(2);
 
     private final Writer writer;
 

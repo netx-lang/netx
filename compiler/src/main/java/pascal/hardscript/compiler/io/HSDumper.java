@@ -39,13 +39,12 @@ public final class HSDumper {
     public ObjectNode dump() {
         var top = designScope.getTop();
         definitions.addFirst(new ComponentDumper(manager.addSignature(top.getSignature()), top.getSignature(), top).dump());
-        design.put("top", top.getIdentifier().name());
+        design.put("top", top.getIdentifier().toStringWithLoc());
         makeArrayIn(design, "definitions").addAll(definitions);
         return design;
     }
 
     private class ComponentDumper {
-
         private final int index;
         private final Signature signature;
         private final ComponentScope component;
@@ -152,11 +151,11 @@ public final class HSDumper {
         private ObjectNode defineWire(Wire wire) {
             var result = createObjectNode();
             setType(result, "wire");
-            setDataID(result, wire.getIdentifier());
             switch (wire.getType()) {
                 case BitType type -> result.put("width", type.width());
                 case PolyType ignored -> throw new ShallNotReachHereError();
             }
+            setDataID(result, wire.getIdentifier());
             return result;
         }
 
@@ -223,20 +222,26 @@ public final class HSDumper {
     }
 
     private static void setDefID(ObjectNode node, Identifier id, int defIndex) {
-        node.put("id", String.format("%s(%d)@(%s)", id.name(), defIndex, id.getSourceLoc()));
+        node.put("id", id.name());
+        node.put("defIndex", defIndex);
+        node.put("loc", id.getSourceLoc().toString());
     }
 
 
     private static void setInstID(ObjectNode node, Identifier id, int defIndex, int instIndex) {
-        node.put("id", String.format("%s(%d)#%d@(%s)", id.name(), defIndex, instIndex, id.getSourceLoc()));
+        node.put("id", String.format("%s@%d", id.name(), instIndex));
+        node.put("defIndex", defIndex);
+        node.put("loc", id.getSourceLoc().toString());
     }
 
     private static void setBuiltinID(ObjectNode node, Identifier id, int instIndex) {
-        node.put("id", String.format("%s#%d@(%s)", id.name(), instIndex, id.getSourceLoc()));
+        node.put("id", String.format("%s@%d", id.name(), instIndex));
+        node.put("loc", id.getSourceLoc().toString());
     }
 
     private static void setDataID(ObjectNode node, Identifier id) {
-        node.put("id", id.toStringWithLoc());
+        node.put("id", id.name());
+        node.put("loc", id.getSourceLoc().toString());
     }
 
     private static ArrayNode makeArrayIn(ObjectNode node, String key) {
@@ -253,7 +258,7 @@ public final class HSDumper {
 
     private static class SignatureManager {
         private final Map<Signature, Integer> signatures = new HashMap<>();
-        private final Map<Identifier, Integer> idCount = new HashMap<>();
+        private final Map<String, Integer> idCount = new HashMap<>();
 
         public int getCount(Signature signature) {
             return signatures.get(signature);
@@ -265,8 +270,8 @@ public final class HSDumper {
 
         public int addSignature(Signature signature) {
             var id = signature.caller().getIdentifier();
-            int count = idCount.getOrDefault(id, 0) + 1;
-            idCount.put(id, count);
+            int count = idCount.getOrDefault(id.name(), 0) + 1;
+            idCount.put(id.name(), count);
             signatures.put(signature, count);
             return count;
         }

@@ -1,5 +1,5 @@
 package pascal.hardscript.hson.util;
 
 public enum HsonType {
-    COMPONENT, REGISTER, CLOCK, WIRE
+    DEFINITION, COMPONENT, REGISTER, CLOCK, WIRE
 }
