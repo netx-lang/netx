@@ -2,6 +2,7 @@ package pascal.hardscript.hson.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
 
@@ -25,6 +26,11 @@ public final class FrontendUtils {
     public static ComponentRef instRefOf(JsonNode node) {
         var literal = node.get("id").textValue().split("@");
         return ComponentRef.of(literal[0],  defIndexOf(node), Integer.parseUnsignedInt(literal[1]));
+    }
+
+    public static BuiltinRef builtinRefOf(JsonNode node) {
+        var literal = node.get("id").textValue().split("@");
+        return BuiltinRef.of(BuiltinComponent.of(literal[0]), Integer.parseUnsignedInt(literal[1]));
     }
 
     public static SourceLoc sourceLocOf(JsonNode node) {
@@ -68,6 +74,12 @@ public final class FrontendUtils {
     public record ModuleIndex(String name, int index) {
         public static ModuleIndex of(String name, int index) {
             return new ModuleIndex(name, index);
+        }
+    }
+
+    public record BuiltinRef(BuiltinComponent builtin, int index) {
+        public static BuiltinRef of(BuiltinComponent builtin, int index) {
+            return new BuiltinRef(builtin, index);
         }
     }
 

@@ -44,6 +44,12 @@ public class HFrontend extends AbstractHFrontend<List<VModule>> {
             var id = identifierOf(node);
             definitions.put(ModuleIndex.of(id.name(), defIndexOf(node)), VModule.of(id));
         }
+        for (var node : defNodes) {
+            var id = identifierOf(node);
+            var module = definitions.get(ModuleIndex.of(id.name(), defIndexOf(node)));
+            new ScopeParser(this, node, module).parse();
+            result.add(module);
+        }
         return result;
     }
 

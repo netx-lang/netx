@@ -1,6 +1,5 @@
-package pascal.hardscript.hson.verilog.model;
+package pascal.hardscript.hson.verilog.model.ref;
 
-import pascal.hardscript.hson.verilog.model.ref.DataRef;
 import pascal.hardscript.util.lang.BitVector;
 
 public record Constant(BitVector value) implements DataRef {

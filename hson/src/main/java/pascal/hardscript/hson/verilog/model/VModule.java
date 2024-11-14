@@ -1,7 +1,5 @@
 package pascal.hardscript.hson.verilog.model;
 
-import pascal.hardscript.hson.verilog.model.data.Data;
-import pascal.hardscript.hson.verilog.model.data.Wire;
 import pascal.hardscript.util.lang.Identifier;
 
 import java.util.ArrayList;
@@ -11,9 +9,11 @@ import java.util.Map;
 
 public final class VModule {
     private final Identifier origin;
+
+    private final Map<Integer, Assign> assignments = new HashMap<>();
     private final Map<Integer, Instantiation> instantiations = new HashMap<>();
 
-    private List<Data> inputs, outputs;
+    private List<String> inputs, outputs;
     private final List<Wire> wires = new ArrayList<>();
     private final List<Register> registers = new ArrayList<>();
 
@@ -33,6 +33,14 @@ public final class VModule {
         instantiations.put(instantiation.getInstIndex(), instantiation);
     }
 
+    public void add(int index, Assign assign) {
+        assignments.put(index, assign);
+    }
+
+    public void add(Register register) {
+        registers.add(register);
+    }
+
     public Instantiation getInstantiation(int instIndex) {
         return instantiations.get(instIndex);
     }
@@ -45,27 +53,23 @@ public final class VModule {
         return wires;
     }
 
-    public List<Data> getInputs() {
+    public List<String> getInputs() {
         return inputs;
     }
 
-    public void setInputs(List<Data> inputs) {
+    public void setInputs(List<String> inputs) {
         this.inputs = inputs;
     }
 
-    public List<Data> getOutputs() {
+    public List<String> getOutputs() {
         return outputs;
     }
 
-    public void setOutputs(List<Data> outputs) {
+    public void setOutputs(List<String> outputs) {
         this.outputs = outputs;
     }
 
     public List<Register> getRegisters() {
         return registers;
-    }
-
-    public void addRegister(Register register) {
-        registers.add(register);
     }
 }

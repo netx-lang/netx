@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
-import static pascal.hardscript.util.lang.BuiltinComponent.REGISTER;
 
 public final class HSDumper {
     private final DesignScope designScope;
@@ -120,13 +119,9 @@ public final class HSDumper {
 
         private ObjectNode instantiateBuiltin(ComponentScope sub, Identifier instID) {
             var builtin = createObjectNode();
-            if (BuiltinComponent.of(instID) == REGISTER) {
-                setType(builtin, "register");
-                dumpComponentAttribute(builtin, sub);
-            } else {
-                setType(builtin, "builtin");
-                setBuiltinID(builtin, instID, allocateIndex(sub));
-            }
+            setType(builtin, "builtin");
+            setBuiltinID(builtin, instID, allocateIndex(sub));
+            dumpComponentAttribute(builtin, sub);
             List<Data> needDump = new LinkedList<>();
             for (var entity : sub.getEntities()) {
                 if (entity instanceof Data data) {
