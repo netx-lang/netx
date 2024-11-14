@@ -27,20 +27,21 @@ public final class HSDumper {
     private final DesignScope designScope;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final ObjectNode design;
+    private final ArrayNode design;
     private final SignatureManager manager = new SignatureManager();
     private final List<ObjectNode> definitions = new LinkedList<>();
 
     public HSDumper(DesignScope scope) {
         this.designScope = scope;
-        this.design = createObjectNode();
+        this.design = objectMapper.createArrayNode();
     }
 
-    public ObjectNode dump() {
+    public ArrayNode dump() {
         var top = designScope.getTop();
-        definitions.addFirst(new ComponentDumper(manager.addSignature(top.getSignature()), top.getSignature(), top).dump());
-        design.put("top", top.getIdentifier().toStringWithLoc());
-        makeArrayIn(design, "definitions").addAll(definitions);
+        var signIndex = manager.addSignature(top.getSignature());
+        definitions.addFirst(
+                new ComponentDumper(signIndex, top.getSignature(), top).dump());
+        definitions.forEach(design::add);
         return design;
     }
 
@@ -74,7 +75,7 @@ public final class HSDumper {
             allocateIndex(component);
 
             var definition = createObjectNode();
-            setType(definition, "definition");
+            setType(definition, "component");
             setDefID(definition, signature.caller().getDefinition().getIdentifier(), index);
 
             dumpDefIO(definition, "input", signature.inputs());
@@ -108,9 +109,9 @@ public final class HSDumper {
             var signature = component.getSignature();
             var result = createObjectNode();
             if (!manager.contains(signature)) {
-                definitions.add(new ComponentDumper(manager.addSignature(signature), signature, component).dump());
+                definitions.addFirst(new ComponentDumper(manager.addSignature(signature), signature, component).dump());
             }
-            setType(result, "component");
+            setType(result, "instantiate");
             setInstID(result, component.getIdentifier(), manager.getCount(signature), allocateIndex(component));
             dumpInstIO(result, "input", component.getInputs());
             dumpInstIO(result, "output", component.getOutputs());
@@ -123,7 +124,7 @@ public final class HSDumper {
                 setType(builtin, "register");
                 dumpComponentAttribute(builtin, sub);
             } else {
-                setType(builtin, "component");
+                setType(builtin, "builtin");
                 setBuiltinID(builtin, instID, allocateIndex(sub));
             }
             List<Data> needDump = new LinkedList<>();
@@ -202,7 +203,7 @@ public final class HSDumper {
         }
 
         private String dumpDataRef(Data data) {
-            return String.format("%s#%d", data.getIdentifier().name(), indexOf(data));
+            return String.format("%s@%d", data.getIdentifier().name(), indexOf(data));
         }
 
         private String dumpValue(Value value) {

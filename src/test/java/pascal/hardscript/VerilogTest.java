@@ -15,6 +15,6 @@ public class VerilogTest {
     void testAdder() throws IOException {
         var module = HFrontend.loadPath(TEST_DIR.resolve( "adder.json")).parse();
         var notepad = NotepadWriter.stdOut();
-        new VerilogDumper(notepad, module).dump();
+        new VerilogDumper(notepad, module.getFirst()).dump();
     }
 }

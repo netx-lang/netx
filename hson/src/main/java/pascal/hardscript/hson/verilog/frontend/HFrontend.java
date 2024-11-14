@@ -7,14 +7,18 @@ import pascal.hardscript.hson.verilog.model.VModule;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-public class HFrontend extends AbstractHFrontend<VModule> {
-    private final VModule module = VModule.of("$top");
-    private final VManager manager;
+import static pascal.hardscript.hson.util.FrontendUtils.*;
+
+public class HFrontend extends AbstractHFrontend<List<VModule>> {
+    private final Map<ModuleIndex, VModule> definitions = new HashMap<>();
 
     private HFrontend(JsonNode json) {
         super(json);
-        manager = new VManager(Integer.parseUnsignedInt(json.get("dataCount").asText()));
     }
 
     public static HFrontend load(JsonNode node) {
@@ -33,19 +37,18 @@ public class HFrontend extends AbstractHFrontend<VModule> {
         return new HFrontend(mapper.readTree(path.toFile()));
     }
 
-    public VModule getModule() {
-        return module;
-    }
-
-    public VManager getManager() {
-        return manager;
-    }
-
     @Override
-    public VModule parse() {
-        var design = json.get("design");
-        new ScopeParser(this).run(design);
-        new RelationParser(this).run(design);
-        return module;
+    public List<VModule> parse() {
+        List<VModule> result = new LinkedList<>();
+        for (var node : defNodes) {
+            var id = identifierOf(node);
+            definitions.put(ModuleIndex.of(id.name(), defIndexOf(node)), VModule.of(id));
+        }
+        return result;
     }
+
+    public VModule resolveModuleDef(ModuleIndex index) {
+        return definitions.get(index);
+    }
+
 }

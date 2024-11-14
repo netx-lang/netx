@@ -2,18 +2,8 @@ package pascal.hardscript.hson.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import pascal.hardscript.hson.antlr.HsonDataLexer;
-import pascal.hardscript.hson.antlr.HsonDataParser;
-import pascal.hardscript.hson.util.selector.BitSelector;
-import pascal.hardscript.hson.util.selector.PartSelector;
-import pascal.hardscript.hson.util.selector.Selector;
-import pascal.hardscript.util.exception.ShallNotReachHereError;
-import pascal.hardscript.util.lang.BitVector;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
-import pascal.hardscript.util.type.Pair;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -28,54 +18,26 @@ public final class FrontendUtils {
         return HsonType.valueOf(type.toUpperCase());
     }
 
-    public static HsonDataParser buildParser(String string) {
-        var lexer = new HsonDataLexer(CharStreams.fromString(string));
-        var stream = new CommonTokenStream(lexer);
-        return new HsonDataParser(stream);
+    public static Identifier identifierOf(JsonNode node) {
+        return Identifier.of(node.get("id").textValue()).setSourceLoc(sourceLocOf(node));
+    }
+
+    public static ComponentRef instRefOf(JsonNode node) {
+        var literal = node.get("id").textValue().split("@");
+        return ComponentRef.of(literal[0],  defIndexOf(node), Integer.parseUnsignedInt(literal[1]));
+    }
+
+    public static SourceLoc sourceLocOf(JsonNode node) {
+        var literal = node.get("loc").textValue().split(":");
+        return SourceLoc.of(Integer.parseUnsignedInt(literal[0]), Integer.parseUnsignedInt(literal[1]));
+    }
+
+    public static int defIndexOf(JsonNode node) {
+        return node.get("defIndex").intValue();
     }
 
     public static int widthOf(JsonNode node) {
         return node.get("width").intValue();
-    }
-
-    public static Pair<Identifier, Integer> parseIdentifier(JsonNode node) {
-        return parseIdentifier(node.get("id").textValue());
-    }
-
-    public static Pair<Identifier, Integer> parseIdentifier(String string) {
-        var parser = buildParser(string);
-        var context = parser.identifier();
-
-        var id = Identifier.of(context.name.getText()).setSourceLoc(
-                SourceLoc.of(
-                        Integer.parseUnsignedInt(context.line.getText()),
-                        Integer.parseUnsignedInt(context.column.getText())
-                )
-        );
-        var index = Integer.parseUnsignedInt(context.index.getText());
-        return Pair.of(id, index);
-    }
-
-    public static Selector parseSelector(HsonDataParser.SelectorContext ctx) {
-        return switch (ctx) {
-            case HsonDataParser.BitSelectorContext sub -> BitSelector.of(
-                    Integer.parseUnsignedInt(sub.index.getText()));
-            case HsonDataParser.PartSelectorContext sub -> PartSelector.of(
-                    Integer.parseUnsignedInt(sub.from.getText()),
-                    Integer.parseUnsignedInt(sub.to.getText()));
-            default -> throw new ShallNotReachHereError();
-        };
-    }
-
-    public static BitVector parseConstantValue(HsonDataParser.ConstantContext ctx) {
-        BitVector value;
-        if (ctx.HEX() != null) {
-            var literal = ctx.getText().toLowerCase().split("'h");
-            value = BitVector.parse(literal[1], Integer.parseUnsignedInt(literal[0]), 16);
-        } else {
-            value = BitVector.fromInt(Integer.parseInt(ctx.getText()));
-        }
-        return value;
     }
 
     public static Iterator<JsonNode> iteratorOf(JsonNode node, String field) {
@@ -101,5 +63,17 @@ public final class FrontendUtils {
 
     private static ArrayNode arrayNodeOf(JsonNode node, String field) {
         return (ArrayNode) node.get(field);
+    }
+
+    public record ModuleIndex(String name, int index) {
+        public static ModuleIndex of(String name, int index) {
+            return new ModuleIndex(name, index);
+        }
+    }
+
+    public record ComponentRef(ModuleIndex moduleIndex, int instIndex) {
+        public static ComponentRef of(String name, int defIndex, int instIndex) {
+            return new ComponentRef(ModuleIndex.of(name, defIndex), instIndex);
+        }
     }
 }

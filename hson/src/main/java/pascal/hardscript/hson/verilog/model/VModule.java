@@ -1,31 +1,44 @@
 package pascal.hardscript.hson.verilog.model;
 
+import pascal.hardscript.hson.verilog.model.data.Data;
+import pascal.hardscript.hson.verilog.model.data.Wire;
+import pascal.hardscript.util.lang.Identifier;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class VModule {
-    private final String origin;
-    private final List<VModule> children = new ArrayList<>();
+    private final Identifier origin;
+    private final Map<Integer, Instantiation> instantiations = new HashMap<>();
 
     private List<Data> inputs, outputs;
     private final List<Wire> wires = new ArrayList<>();
-    private final List<Assign> assign = new ArrayList<>();
     private final List<Register> registers = new ArrayList<>();
 
-    public VModule(String origin) {
+    public VModule(Identifier origin) {
         this.origin = origin;
     }
 
-    public static VModule of(String id) {
+    public static VModule of(Identifier id) {
         return new VModule(id);
     }
 
-    public String getOrigin() {
-        return origin;
+    public void add(Wire wire) {
+        wires.add(wire);
     }
 
-    public void addWire(Wire wire) {
-        wires.add(wire);
+    public void add(Instantiation instantiation) {
+        instantiations.put(instantiation.getInstIndex(), instantiation);
+    }
+
+    public Instantiation getInstantiation(int instIndex) {
+        return instantiations.get(instIndex);
+    }
+
+    public Identifier getOrigin() {
+        return origin;
     }
 
     public List<Wire> getWires() {
@@ -46,22 +59,6 @@ public final class VModule {
 
     public void setOutputs(List<Data> outputs) {
         this.outputs = outputs;
-    }
-
-    public void addSubModule(VModule module) {
-        children.add(module);
-    }
-
-    public List<VModule> getChildren() {
-        return children;
-    }
-
-    public void addAssign(Assign assignItem) {
-        assign.add(assignItem);
-    }
-
-    public List<Assign> getAssign() {
-        return assign;
     }
 
     public List<Register> getRegisters() {

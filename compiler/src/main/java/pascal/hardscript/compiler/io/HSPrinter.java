@@ -20,18 +20,14 @@ public final class HSPrinter {
     }
 
     public void print() {
-        startObject();
-        printKey("top"); printStr(json.get("top").textValue()); writer.println(", ");
-        printKey("definitions");
         startArray();
-        var iterator = json.get("definitions").elements();
+        var iterator = json.elements();
         printObject(iterator.next());
         while (iterator.hasNext()) {
             writer.println(",");
             printObject(iterator.next());
         }
         writer.newLine(); endArray();
-        writer.newLine(); endObject();
         writer.flush();
         writer.close();
     }
@@ -50,7 +46,8 @@ public final class HSPrinter {
         switch (HsonType.typeOf(node)) {
             case WIRE, CLOCK -> printData(node);
             case REGISTER -> printObject(node);
-            case COMPONENT -> printObject(node, 3);
+            case BUILTIN -> printObject(node, 3);
+            case INSTANTIATE -> printObject(node, 4);
         }
     }
 
@@ -122,8 +119,8 @@ public final class HSPrinter {
         }
     }
 
-    private enum HsonType {
-        DEFINITION, COMPONENT, REGISTER, WIRE, CLOCK;
+    public enum HsonType {
+        COMPONENT, REGISTER, BUILTIN, INSTANTIATE, CLOCK, WIRE;
 
         public static HsonType typeOf(JsonNode node) {
             return valueOf(node.get("type").textValue().toUpperCase());

@@ -1,7 +1,6 @@
 package pascal.hardscript.hson.verilog;
 
 import pascal.hardscript.hson.verilog.model.VModule;
-import pascal.hardscript.hson.verilog.model.Wire;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.print.NotepadWriter;
 
@@ -21,36 +20,36 @@ public class VerilogDumper {
     }
 
     public void dump() {
-        dumpModule(design.getChildren().getFirst());
+//        dumpModule(design.getChildren().getFirst());
     }
 
-    private void dumpModule(VModule module) {
-        notepad.println("module " + instNameOf(module.getOrigin()) + "();");
-        notepad.incIndent();
-        for (var wire : module.getWires()) {
-            notepad.println("wire " + typeOf(wire) + idOf(wire.id()) + ";");
-        }
-        notepad.decIndent();
-        notepad.println("endmodule");
-    }
-
-    private static String typeOf(Wire wire) {
-        if (wire.width() == 1) {
-            return "";
-        } else {
-            return String.format("[%d:0]", wire.width() - 1);
-        }
-    }
-
-    private String idOf(Identifier id) {
-        var count = idCount.getOrDefault(id, 1);
-        idCount.put(id, count + 1);
-        return String.format("%s_%d_%d_%d", id.name(), id.getSourceLoc().line(), id.getSourceLoc().column(), count);
-    }
-
-    private String instNameOf(String name) {
-        var count = instCount.getOrDefault(name, 1);
-        instCount.put(name, count + 1);
-        return name + "_" + count;
-    }
+//    private void dumpModule(VModule module) {
+//        notepad.println("module " + instNameOf(module.getOrigin()) + "();");
+//        notepad.incIndent();
+//        for (var wire : module.getWires()) {
+//            notepad.println("wire " + typeOf(wire) + idOf(wire.id()) + ";");
+//        }
+//        notepad.decIndent();
+//        notepad.println("endmodule");
+//    }
+//
+//    private static String typeOf(Wire wire) {
+//        if (wire.width() == 1) {
+//            return "";
+//        } else {
+//            return String.format("[%d:0]", wire.width() - 1);
+//        }
+//    }
+//
+//    private String idOf(Identifier id) {
+//        var count = idCount.getOrDefault(id, 1);
+//        idCount.put(id, count + 1);
+//        return String.format("%s_%d_%d_%d", id.name(), id.getSourceLoc().line(), id.getSourceLoc().column(), count);
+//    }
+//
+//    private String instNameOf(String name) {
+//        var count = instCount.getOrDefault(name, 1);
+//        instCount.put(name, count + 1);
+//        return name + "_" + count;
+//    }
 }

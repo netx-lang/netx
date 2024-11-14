@@ -1,7 +1,9 @@
 package pascal.hardscript.hson.verilog.model;
 
-public record Register(Data in, Data out, Data clock, boolean isPosTrigger) {
-    public static Register of(Data in, Data out, Data clock, boolean isPosTrigger) {
+import pascal.hardscript.hson.verilog.model.ref.DataRef;
+
+public record Register(DataRef in, DataRef out, DataRef clock, boolean isPosTrigger) {
+    public static Register of(DataRef in, DataRef out, DataRef clock, boolean isPosTrigger) {
         return new Register(in, out, clock, isPosTrigger);
     }
 }
