@@ -13,8 +13,7 @@ public class VerilogTest {
 
     @Test
     void testAdder() throws IOException {
-        var module = HFrontend.loadPath(TEST_DIR.resolve( "adder.json")).parse();
-        var notepad = NotepadWriter.stdOut();
-        new VerilogDumper(notepad, module.getFirst()).dump();
+        var design = HFrontend.loadPath(TEST_DIR.resolve( "adder.json")).parse();
+        new VerilogDumper(NotepadWriter.stdOut(), design).dump();
     }
 }

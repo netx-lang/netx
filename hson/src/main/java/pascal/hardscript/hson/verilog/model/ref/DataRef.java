@@ -1,4 +1,4 @@
 package pascal.hardscript.hson.verilog.model.ref;
 
-public interface DataRef {
+public sealed interface DataRef permits Constant, DataRefSelect, WireRef {
 }

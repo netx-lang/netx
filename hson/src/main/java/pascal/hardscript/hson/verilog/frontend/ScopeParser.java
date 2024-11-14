@@ -68,8 +68,8 @@ public final class ScopeParser {
 
     private void parseInstantiation(JsonNode node) {
         var ref = instRefOf(node);
-        var module = frontend.resolveModuleDef(ref.moduleIndex());
-        var inst = Instantiation.of(module, ref.instIndex());
+        var def = frontend.resolveModuleDef(ref.moduleIndex());
+        var inst = Instantiation.of(def, ref.instIndex());
         module.add(inst);
         inst.setInputs(refParser.resolveDataRefList(node, "input"));
         inst.setOutputs(refParser.resolveDataRefList(node, "output"));

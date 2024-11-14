@@ -2,13 +2,11 @@ package pascal.hardscript.hson.verilog.model;
 
 import pascal.hardscript.util.lang.Identifier;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class VModule {
-    private final Identifier origin;
+    private final Identifier id;
+    private final int defIndex;
 
     private final Map<Integer, Assign> assignments = new HashMap<>();
     private final Map<Integer, Instantiation> instantiations = new HashMap<>();
@@ -17,12 +15,13 @@ public final class VModule {
     private final List<Wire> wires = new ArrayList<>();
     private final List<Register> registers = new ArrayList<>();
 
-    public VModule(Identifier origin) {
-        this.origin = origin;
+    public VModule(Identifier id, int defIndex) {
+        this.id = id;
+        this.defIndex = defIndex;
     }
 
-    public static VModule of(Identifier id) {
-        return new VModule(id);
+    public static VModule of(Identifier id, int defIndex) {
+        return new VModule(id, defIndex);
     }
 
     public void add(Wire wire) {
@@ -45,8 +44,16 @@ public final class VModule {
         return instantiations.get(instIndex);
     }
 
-    public Identifier getOrigin() {
-        return origin;
+    public Collection<Instantiation> getInstantiations() {
+        return instantiations.values();
+    }
+
+    public Identifier getId() {
+        return id;
+    }
+
+    public int getDefIndex() {
+        return defIndex;
     }
 
     public List<Wire> getWires() {

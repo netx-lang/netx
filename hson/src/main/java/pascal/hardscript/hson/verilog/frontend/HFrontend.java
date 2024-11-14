@@ -42,7 +42,8 @@ public class HFrontend extends AbstractHFrontend<List<VModule>> {
         List<VModule> result = new LinkedList<>();
         for (var node : defNodes) {
             var id = identifierOf(node);
-            definitions.put(ModuleIndex.of(id.name(), defIndexOf(node)), VModule.of(id));
+            var defIndex = defIndexOf(node);
+            definitions.put(ModuleIndex.of(id.name(), defIndex), VModule.of(id, defIndex));
         }
         for (var node : defNodes) {
             var id = identifierOf(node);
