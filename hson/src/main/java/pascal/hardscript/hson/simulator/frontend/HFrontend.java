@@ -10,9 +10,11 @@ import java.nio.file.Path;
 
 public final class HFrontend extends AbstractHFrontend<Circuit> {
     private final Circuit circuit = new Circuit();
+    private final DataManager manager;
 
     private HFrontend(JsonNode node) {
         super(node);
+        this.manager = new DataManager(json.get("totalData").intValue());
     }
 
     public static HFrontend load(JsonNode node) {
@@ -31,11 +33,18 @@ public final class HFrontend extends AbstractHFrontend<Circuit> {
         return new HFrontend(mapper.readTree(path.toFile()));
     }
 
+    public DataManager getManager() {
+        return manager;
+    }
+
     public Circuit getCircuit() {
         return circuit;
     }
 
     public Circuit parse() {
+        var design = json.get("design");
+        new DataParser(this).run(design);
+        new RelationParser(this).run(design);
         return circuit;
     }
 }

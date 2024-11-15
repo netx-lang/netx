@@ -16,9 +16,11 @@ import static pascal.hardscript.hson.util.FrontendUtils.*;
 
 public class HFrontend extends AbstractHFrontend<List<VModule>> {
     private final Map<ModuleIndex, VModule> definitions = new HashMap<>();
+    private final List<JsonNode> defNodes = new LinkedList<>();
 
     private HFrontend(JsonNode json) {
         super(json);
+        json.elements().forEachRemaining(defNodes::add);
     }
 
     public static HFrontend load(JsonNode node) {
