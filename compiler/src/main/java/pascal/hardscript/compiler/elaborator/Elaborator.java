@@ -102,7 +102,7 @@ public final class Elaborator {
 
         private void buildElement(BindingNode binding) {
             var head = evaluator.getIdentifierFrom(binding.getHead());
-            var expr = evaluator.evaluate(binding.getExpr());
+            var expr = evaluator.evaluateToMacro(binding.getExpr());
             scope.bind(head, expr);
         }
 
@@ -118,12 +118,25 @@ public final class Elaborator {
             var sourceLoc = instantiation.getSourceLoc();
             var compType = evaluator.evaluateToComponentType(instantiation.getRhs());
 
+            var component = scope.getLeastUpperComponent();
             var target = extractInstanceList(sourceLoc, instantiation.getLhs());
             var source = new Instantiator(sourceLoc).instantiate(compType);
 
+            checkAttributeWrite(component, target, sourceLoc);
             int size = requiresMatchedSize(sourceLoc, target, source);
             for (int i = 0; i < size; i++) {
                 scope.addAlias(target.get(i), source.get(i));
+            }
+        }
+
+        private void checkAttributeWrite(ComponentScope component, List<Instance> target, SourceLoc sourceLoc) {
+            if (component.getAttributes() != null) {
+                for (var inst : target) {
+                    if (component.getAttributes().contains(inst)) {
+                        log.error("{}: Component Attributes {} is read-only ", sourceLoc, inst);
+                        throw new CompileCancellationException();
+                    }
+                }
             }
         }
 
@@ -223,11 +236,7 @@ public final class Elaborator {
                 for (int i = 0; i < size; i++) {
                     var id = node.getAttributes().get(i);
                     var entity = atom.getParameters().get(i);
-                    if (!(entity instanceof Instance instance)) {
-                        log.error("{}: Invalid component attribute {}", sourceLoc, entity);
-                        throw new CompileCancellationException();
-                    }
-                    attributes.addAttribute(id, instance);
+                    attributes.addAttribute(id, entity);
                 }
                 return attributes;
             }

@@ -75,6 +75,27 @@ public final class Evaluator {
         return castToBooleanValue(expr.getSourceLoc(), evaluate(expr));
     }
 
+    public Macro evaluateToMacro(ExprNode expr) {
+        if (expr instanceof MacroExpr) {
+            return evaluateMacroExpr((MacroExpr) expr);
+        } else {
+            return Macro.of(expr);
+        }
+    }
+
+    public Entity evaluate(ExprNode expr) {
+        return switch (expr) {
+            case ListExpr sub -> evaluateListExpr(sub);
+            case UnaryExpr sub -> evaluateUnaryExpr(sub);
+            case AccessExpr sub -> evaluateAccessExpr(sub);
+            case BinaryExpr sub -> evaluateBinaryExpr(sub);
+            case NumberExpr sub -> evaluateNumberExpr(sub);
+            case SymbolExpr sub -> evaluateSymbolExpr(sub);
+            case ConditionalExpr sub -> evaluateConditionalExpr(sub);
+            default -> throw new ShallNotReachHereError(); // AutoTypeExpr, MacroExpr
+        };
+    }
+
     public Data.Factory<?> evaluateToDataFactory(ExprNode expr) {
         Data.Factory<?> factory;
         if (expr instanceof AutoTypeExpr) {
@@ -89,21 +110,7 @@ public final class Evaluator {
         return factory;
     }
 
-    public Entity evaluate(ExprNode expr) {
-        return switch (expr) {
-            case ListExpr sub -> evaluateListExpr(sub);
-            case MacroExpr sub -> evaluateMacroExpr(sub);
-            case UnaryExpr sub -> evaluateUnaryExpr(sub);
-            case AccessExpr sub -> evaluateAccessExpr(sub);
-            case BinaryExpr sub -> evaluateBinaryExpr(sub);
-            case NumberExpr sub -> evaluateNumberExpr(sub);
-            case SymbolExpr sub -> evaluateSymbolExpr(sub);
-            case ConditionalExpr sub -> evaluateConditionalExpr(sub);
-            case AutoTypeExpr ignored -> throw new ShallNotReachHereError();
-        };
-    }
-
-    private Entity evaluateMacroExpr(MacroExpr expr) {
+    private Macro evaluateMacroExpr(MacroExpr expr) {
         var arguments = expr.getArguments().stream().map(this::getIdentifierFrom).toList();
         return Macro.of(arguments, expr.getBody());
     }
@@ -196,7 +203,7 @@ public final class Evaluator {
                     var binding = qualifier.getBinding();
                     overrideBindings(SingleBinding.of(
                             getIdentifierFrom(binding.getHead()),
-                            evaluate(binding.getExpr())));
+                            evaluateToMacro(binding.getExpr())));
                     result = doListComprehension(head, new LinkedList<>(qualifiers));
                     restoreBindings();
                 }
@@ -333,14 +340,14 @@ public final class Evaluator {
         return entity;
     }
 
-    public ComponentType evaluateMacroExpr(SourceLoc sourceLoc, Macro marco, List<Entity> parameters) {
+    public Entity evaluateMacroExpr(SourceLoc sourceLoc, Macro marco, List<Entity> parameters) {
         int size = requiresMatchedSize(sourceLoc, marco.identifiers(), parameters);
         var bindings = MapBinding.ofEmpty();
         for (int i = 0; i < size; i++) {
             bindings.bind(marco.identifiers().get(i), parameters.get(i));
         }
         overrideBindings(bindings);
-        var result = evaluateToComponentType(marco.expr());
+        var result = evaluate(marco.expr());
         restoreBindings();
         return result;
     }

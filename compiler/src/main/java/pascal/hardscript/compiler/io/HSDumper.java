@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 
 import static pascal.hardscript.compiler.Configuration.FULLY_EXPAND;
 import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
+import static pascal.hardscript.util.lang.BuiltinComponent.REGISTER;
 
 public final class HSDumper {
     private final DesignScope designScope;
@@ -122,7 +123,9 @@ public final class HSDumper {
             var builtin = createObjectNode();
             setType(builtin, "builtin");
             setBuiltinID(builtin, instID, allocateIndex(sub));
-            dumpComponentAttribute(builtin, sub);
+            if (BuiltinComponent.of(instID) == REGISTER) {
+                dumpRegAttribute(builtin, sub);
+            }
             List<Data> needDump = new LinkedList<>();
             for (var entity : sub.getEntities()) {
                 if (entity instanceof Data data) {
@@ -163,14 +166,12 @@ public final class HSDumper {
             return result;
         }
 
-        private void dumpComponentAttribute(ObjectNode node, ComponentScope component) {
-            if (component.getAttributes() != null && !component.getAttributes().isEmpty()) {
-                var attributes = createObjectNode();
-                for (var entry : component.getAttributes().entrySet()) {
-                    attributes.put(entry.getKey().name(), dumpInstanceRef(entry.getValue()));
-                }
-                node.putIfAbsent("attribute", attributes);
+        private void dumpRegAttribute(ObjectNode node, ComponentScope component) {
+            var attributes = createObjectNode();
+            for (var entry : component.getAttributes().entrySet()) {
+                attributes.put(entry.getKey().name(), dumpInstanceRef((Instance) entry.getValue()));
             }
+            node.putIfAbsent("attribute", attributes);
         }
 
         private void dumpDefIO(ObjectNode node, String port, List<Instance> sub) {

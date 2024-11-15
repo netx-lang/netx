@@ -1,5 +1,6 @@
 package pascal.hardscript.compiler.model.scope;
 
+import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.util.lang.Identifier;
 
@@ -8,17 +9,21 @@ import java.util.Map;
 import java.util.Set;
 
 public final class Attributes {
-    private final Map<Identifier, Instance> attributes = new HashMap<>();
+    private final Map<Identifier, Entity> attributes = new HashMap<>();
 
-    public void addAttribute(Identifier name, Instance entity) {
+    public void addAttribute(Identifier name, Entity entity) {
         attributes.put(name, entity);
     }
 
-    public Instance get(Identifier id) {
+    public Entity get(Identifier id) {
         return attributes.get(id);
     }
 
-    public Set<Map.Entry<Identifier, Instance>> entrySet() {
+    public boolean contains(Instance instance) {
+        return attributes.containsValue(instance);
+    }
+
+    public Set<Map.Entry<Identifier, Entity>> entrySet() {
         return attributes.entrySet();
     }
 

@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.jupiter.api.Test;
+import pascal.hardscript.compiler.Configuration;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 
 import java.io.IOException;
@@ -35,20 +36,28 @@ class HSCompilerUnitTest {
         assertThrows(IOException.class, () -> HSCompiler.loadPath(path));
     }
 
-    @Test
-    void testValidInput() throws IOException {
-        test("bind_1.hard");
-        test("bind_2.hard");
-        test("bind_3.hard");
-    }
-
     private static void test(String fileName) throws IOException {
+        Configuration.FULLY_EXPAND = true;
         String content = new String(Files.readAllBytes(TEST_DIR.resolve(fileName)));
 
         CharStream charStream = CharStreams.fromString(content);
         HSCompiler compiler = HSCompiler.load(charStream);
         DesignScope scope = compiler.compile();
         assertNotNull(scope);
+    }
+
+    @Test
+    void testBind() throws IOException {
+        test("bind_1.hard");
+        test("bind_2.hard");
+        test("bind_3.hard");
+    }
+
+    @Test
+    void testAttr() throws IOException {
+        test("attr_1.hard");
+        test("attr_2.hard");
+        test("attr_3.hard");
     }
 
     @Test

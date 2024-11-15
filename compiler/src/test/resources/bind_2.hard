@@ -1,10 +1,10 @@
 component test {
     inst clk of clock()
     inst a, out of wire(bit(1))
-    inst input, reg_out of wire(bit(3))
+    inst input of wire(bit(3))
 
-    out <- AND(3) <> [gate(reg_out[i]) |
+    out <- AND(3) <> [gate |
         i in [0..3],
-        let gate = component x : REGISTER(clk, true, x) <> AND <> [input[i], a]
+        let gate = component : REGISTER(clk, true) <> AND <> [input[i], a]
     ]
 }

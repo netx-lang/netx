@@ -1,0 +1,10 @@
+component top {
+    inst a of wire(bit(32))
+    let AA = component : AND <> SPLIT(2)
+    a <- sub(AA) <> 1
+}
+
+component sub(op): [a] -> [b] {
+    inst a, b of auto
+    b <- OR <> [op <> a, op <> a]
+}

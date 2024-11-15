@@ -33,9 +33,8 @@ class AnalysisTest {
                     inst b of wire(bit(4))
                     inst x of wire(bit(4))
                     inst c of wire(bit(2))
-                    inst d of wire(bit(2))
                     [x] <- OR <> [a, b]
-                    [d] <- NOT <> REGISTER(clk, true, c) <> AND <> [a[1:0], b[1:0]]
+                    [c] <- NOT <> REGISTER(clk, true) <> AND <> [a[1:0], b[1:0]]
                 }
                 """;
         var actual = """
@@ -45,9 +44,8 @@ class AnalysisTest {
                     inst b of auto
                     inst x of auto
                     inst c of auto
-                    inst d of auto
                     [x] <- OR <> [a, b]
-                    [d] <- NOT <> REGISTER(clk, true, c) <> AND <> [a[1:0], b[1:0]]
+                    [c] <- NOT <> REGISTER(clk, true) <> AND <> [a[1:0], b[1:0]]
                 }
                 """;
         assertEquals(

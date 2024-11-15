@@ -1,12 +1,12 @@
-let REG_WRAPPER = component isPos, x: REGISTER(clk, isPos, x)
-let POS_REG = component x: REG_WRAPPER(true, x)
-let NEG_REG = component x: REG_WRAPPER(false, x)
+let REG_WRAPPER = component isPos: REGISTER(clk, isPos)
+let POS_REG = REG_WRAPPER(true)
+let NEG_REG = REG_WRAPPER(false)
 
 component Divide_by_3 : [clk] -> [clk_3] {
     inst clk, clk_3 of clock()
     inst a, b, c    of wire(bit(1))
-
-    clk_3 <- OR <> [NEG_REG(c), TO]
-        <> SPLIT(2) <> POS_REG(b) <> POS_REG(a)
-        <> AND <> [NOT <> a, NOT <> b]
+    a <- POS_REG <> AND <> [NOT <> a, NOT <> b]
+    b <- POS_REG <> a
+    c <- NEG_REG <> b
+    clk_3 <- OR <> [b, c]
 }

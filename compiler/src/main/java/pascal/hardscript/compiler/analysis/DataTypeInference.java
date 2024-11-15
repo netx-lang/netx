@@ -71,7 +71,7 @@ public final class DataTypeInference extends ModelAnalysis {
     private void addContainsForRegister(ComponentScope component) {
         Instance input = component.getInputs().getFirst(), output = component.getOutputs().getFirst();
         addConstraint(EqualTypeConstraint.of(input, output));
-        addConstraint(ClockConstraint.of(component.getAttributes().get(Identifier.of("clock"))));
+        addConstraint(ClockConstraint.of((Instance) component.getAttributes().get(Identifier.of("clock"))));
     }
 
     private void addConstraint(DataConstraint constraint) {

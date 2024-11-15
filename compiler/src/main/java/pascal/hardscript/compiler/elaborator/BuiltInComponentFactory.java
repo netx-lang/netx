@@ -65,7 +65,7 @@ public class BuiltInComponentFactory {
     }
 
     private ComponentScope createREGISTERComponent(Scope parent, BuiltinAtom type) {
-        requiresMatchedSize(type.getSourceLoc(), 3, type.getParameters());
+        requiresMatchedSize(type.getSourceLoc(), 2, type.getParameters());
         var result = instantiate(parent, type);
 
         var attributes = new Attributes();
@@ -75,10 +75,8 @@ public class BuiltInComponentFactory {
         attributes.addAttribute(Identifier.of("isPosTrigger"), isPosTrigger);
         result.setAttributes(attributes);
 
-        var data = requiresInstance(type.getSourceLoc(), type.getParameters().get(2));
-        var input = newWire(result, "i", data.getType());
-        result.addInput(input);
-        result.addOutput(data);
+        result.addInput(newWire(result, "i"));
+        result.addOutput(newWire(result, "o"));
         return result;
     }
 

@@ -1,0 +1,9 @@
+component top {
+    inst a of wire(bit(32))
+    a <- sub(1) <> 1
+}
+
+component sub(op): [a] -> [b] {
+    inst a, b of auto
+    b <- OR <> [a, op]
+}
