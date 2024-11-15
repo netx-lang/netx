@@ -52,6 +52,10 @@ public final class VModule {
         return assignments.values();
     }
 
+    public List<Register> getRegisters() {
+        return registers;
+    }
+
     public Identifier getId() {
         return id;
     }
@@ -78,9 +82,5 @@ public final class VModule {
 
     public void setOutputs(List<String> outputs) {
         this.outputs = outputs;
-    }
-
-    public List<Register> getRegisters() {
-        return registers;
     }
 }
