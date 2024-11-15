@@ -43,3 +43,6 @@ bin/
 
 ### ANTLR ###
 compiler/src/main/antlr/.antlr/
+
+### GENERATED EXPECTED ###
+/src/test/resources/expected/

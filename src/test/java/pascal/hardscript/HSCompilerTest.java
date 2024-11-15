@@ -2,6 +2,7 @@ package pascal.hardscript;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import pascal.hardscript.compiler.Configuration;
 import pascal.hardscript.compiler.io.HSCompiler;
 import pascal.hardscript.compiler.io.HSDumper;
 import pascal.hardscript.compiler.io.HSPrinter;
@@ -46,11 +47,13 @@ class HSCompilerTest {
     }
 
     public void test(String fileName) throws IOException {
+        Configuration.FULLY_EXPAND = false;
         var design = HSCompiler.loadPath(TEST_DIR.resolve(fileName + ".hard")).compile();
         var json = new HSDumper(design).dump();
 
         if (GENERATE_EXPECTED) {
-            new HSPrinter(json, NotepadWriter.pathOut(EXPECTED_DIR.resolve(fileName + ".json"))).print();
+            var notepad = NotepadWriter.pathOut(EXPECTED_DIR.resolve(fileName + ".json"));
+            new HSPrinter(json, notepad).print();
         } else {
             var expected = mapper.reader()
                     .readTree(Files.newBufferedReader(EXPECTED_DIR.resolve(fileName + ".json")));

@@ -2,8 +2,8 @@ package pascal.hardscript.compiler;
 
 public final class Configuration {
 
-    public static final boolean FULLY_EXPAND = true;
+    public static boolean FULLY_EXPAND = false;
 
-    public static final String TOP_COMPONENT = "top";
+    public static String TOP_COMPONENT = "top";
 
 }

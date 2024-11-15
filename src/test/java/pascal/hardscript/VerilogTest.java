@@ -1,6 +1,7 @@
 package pascal.hardscript;
 
 import org.junit.jupiter.api.Test;
+import pascal.hardscript.compiler.Configuration;
 import pascal.hardscript.hson.verilog.VerilogDumper;
 import pascal.hardscript.hson.verilog.frontend.HFrontend;
 import pascal.hardscript.util.print.NotepadWriter;
@@ -13,6 +14,7 @@ public class VerilogTest {
 
     @Test
     void testAdder() throws IOException {
+        Configuration.FULLY_EXPAND = false;
         var design = HFrontend.loadPath(TEST_DIR.resolve( "adder.json")).parse();
         new VerilogDumper(NotepadWriter.stdOut(), design).dump();
     }
