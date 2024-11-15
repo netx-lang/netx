@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
+import static pascal.hardscript.compiler.Configuration.FULLY_EXPAND;
 import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
 
 public final class HSDumper {
@@ -38,8 +39,7 @@ public final class HSDumper {
     public ArrayNode dump() {
         var top = designScope.getTop();
         var signIndex = manager.addSignature(top.getSignature());
-        definitions.addFirst(
-                new ComponentDumper(signIndex, top.getSignature(), top).dump());
+        definitions.addFirst(new ComponentDumper(signIndex, top.getSignature(), top).dump());
         definitions.forEach(design::add);
         return design;
     }
@@ -95,7 +95,6 @@ public final class HSDumper {
                 if (BuiltinComponent.isBuiltin(instID)) {
                     if (!NO_DUMP.contains(BuiltinComponent.of(instID))) {
                         members.add(instantiateBuiltin(sub, instID));
-
                     }
                 } else {
                     members.add(instantiate(sub));
@@ -112,8 +111,10 @@ public final class HSDumper {
             }
             setType(result, "instantiate");
             setInstID(result, component.getIdentifier(), manager.getCount(signature), allocateIndex(component));
-            dumpInstIO(result, "input", component.getInputs());
-            dumpInstIO(result, "output", component.getOutputs());
+            if (!FULLY_EXPAND) {
+                dumpInstIO(result, "input", component.getInputs());
+                dumpInstIO(result, "output", component.getOutputs());
+            }
             return result;
         }
 

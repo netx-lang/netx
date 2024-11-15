@@ -10,6 +10,8 @@ import pascal.hardscript.util.print.NotepadWriter;
 
 import java.util.Map;
 
+import static pascal.hardscript.compiler.Configuration.FULLY_EXPAND;
+
 public final class HSPrinter {
     private final JsonNode json;
     private final NotepadWriter writer;
@@ -47,7 +49,17 @@ public final class HSPrinter {
             case WIRE, CLOCK -> printData(node);
             case REGISTER -> printObject(node);
             case BUILTIN -> printObject(node, 3);
-            case INSTANTIATE -> printObject(node, 4);
+            case INSTANTIATE -> printInstantiation(node);
+        }
+    }
+
+    private void printInstantiation(JsonNode node) {
+        if (FULLY_EXPAND) {
+            writer.print("{");
+            printAllFields(node, 4);
+            writer.print("}");
+        } else {
+            printObject(node, 4);
         }
     }
 

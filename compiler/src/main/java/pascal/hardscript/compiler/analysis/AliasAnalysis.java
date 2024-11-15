@@ -14,6 +14,8 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Predicate;
 
+import static pascal.hardscript.compiler.Configuration.FULLY_EXPAND;
+
 public final class AliasAnalysis extends ModelAnalysis {
     private final AliasStructure global = new AliasStructure();
 
@@ -23,9 +25,29 @@ public final class AliasAnalysis extends ModelAnalysis {
 
     @Override
     public void analyze() {
+        if (FULLY_EXPAND) {
+            globalAnalyze();
+        } else {
+            scopeWiseAnalyze();
+        }
+    }
+
+    private void globalAnalyze() {
+        design.forEachScope(scope -> global.addAlias(scope.getAliases()));
+        global.resolveRepresentatives();
+        design.forEachScope(scope -> {
+            scope.getEntities().removeIf(Predicate.not(global::needDump));
+            if (scope instanceof ComponentScope componentScope) {
+                componentScope.getInputs().replaceAll(global::repOf);
+                componentScope.getOutputs().replaceAll(global::repOf);
+            }
+        });
+    }
+
+    private void scopeWiseAnalyze() {
         design.forEachScope(scope -> {
             if (isUserDefinedComponent(scope)) {
-                new ComponentAnalysis(scope).analyze();
+                new ComponentScopeWiseAnalysis(scope).analyze();
             }
         });
         global.resolveRepresentatives();
@@ -42,12 +64,12 @@ public final class AliasAnalysis extends ModelAnalysis {
         return scope instanceof ComponentScope component && !component.isBuiltin();
     }
 
-    private class ComponentAnalysis {
+    private class ComponentScopeWiseAnalysis {
         private final Scope scope;
         private final AliasStructure local = new AliasStructure();
         private final List<Scope> analysisScopes = new LinkedList<>();
 
-        private ComponentAnalysis(Scope scope) {
+        private ComponentScopeWiseAnalysis(Scope scope) {
             this.scope = scope;
         }
 
@@ -70,23 +92,12 @@ public final class AliasAnalysis extends ModelAnalysis {
 
         public void eliminateDuplicatedData() {
             analysisScopes.forEach(scope -> {
-                scope.getEntities().removeIf(Predicate.not(this::needDump));
+                scope.getEntities().removeIf(Predicate.not(local::needDump));
                 if (scope instanceof ComponentScope componentScope) {
                     componentScope.getInputs().replaceAll(local::repOf);
                     componentScope.getOutputs().replaceAll(local::repOf);
                 }
             });
-        }
-
-        public boolean needDump(Entity entity) {
-            if (entity instanceof Instance inst) {
-                if (inst.isUserDefined()) {
-                    return local.repOf(inst) == inst;
-                } else {
-                    return !local.hasSourceAlias(inst) && local.rootOf(inst) == inst;
-                }
-            }
-            return false;
         }
     }
 
@@ -113,6 +124,17 @@ public final class AliasAnalysis extends ModelAnalysis {
             }
         }
 
+        public boolean needDump(Entity entity) {
+            if (entity instanceof Instance inst) {
+                if (inst.isUserDefined()) {
+                    return repOf(inst) == inst;
+                } else {
+                    return !hasSourceAlias(inst) && set.find(inst) == inst;
+                }
+            }
+            return false;
+        }
+
         boolean needUpdate(Instance now, Instance old) {
             // Prefer Value over Data
             if (old instanceof Value) {
@@ -131,10 +153,6 @@ public final class AliasAnalysis extends ModelAnalysis {
                 return sourceRep.containsKey(set.find(inst));
             }
             return false;
-        }
-
-        Instance rootOf(Instance inst) {
-            return set.find(inst);
         }
 
         @Nonnull

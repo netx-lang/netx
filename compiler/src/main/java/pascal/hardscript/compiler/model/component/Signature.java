@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static pascal.hardscript.compiler.Configuration.FULLY_EXPAND;
+
 public final class Signature {
     private final ComponentAtom caller;
     private final List<Instance> inputs, outputs;
@@ -29,14 +31,24 @@ public final class Signature {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Signature signature = (Signature) o;
-        return Objects.equals(caller.getDefinition(), signature.caller.getDefinition())
-                && Objects.equals(inTypes, signature.inTypes)
-                && Objects.equals(outTypes, signature.outTypes);
+        boolean calleeEq = Objects.equals(caller.getDefinition(), signature.caller.getDefinition());
+        if (calleeEq) {
+            if (FULLY_EXPAND) {
+                return Objects.equals(inputs, signature.inputs) && Objects.equals(outputs, signature.outputs);
+            } else {
+                return Objects.equals(inTypes, signature.inTypes) && Objects.equals(outTypes, signature.outTypes);
+            }
+        }
+        return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(caller.getDefinition(), inTypes, outTypes);
+        if (FULLY_EXPAND) {
+            return Objects.hash(caller.getDefinition(), inputs, outputs);
+        } else {
+            return Objects.hash(caller.getDefinition(), inTypes, outTypes);
+        }
     }
 
     public ComponentAtom caller() {
