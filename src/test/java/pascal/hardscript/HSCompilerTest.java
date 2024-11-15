@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class HSCompilerTest {
     private static final boolean GENERATE_EXPECTED = false;
     private static final Path TEST_DIR = Path.of("src/test/resources/");
-    private static final Path EXPECTED_DIR = Path.of("src/test/resources/expected/");
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -46,18 +45,25 @@ class HSCompilerTest {
         test("riscv");
     }
 
-    public void test(String fileName) throws IOException {
-        Configuration.FULLY_EXPAND = false;
+    private static void testHelper(String fileName) throws IOException {
         var design = HSCompiler.loadPath(TEST_DIR.resolve(fileName + ".hard")).compile();
         var json = new HSDumper(design).dump();
 
+        Path expectedDir = TEST_DIR.resolve(Configuration.FULLY_EXPAND ? "expanded" : "compact");
         if (GENERATE_EXPECTED) {
-            var notepad = NotepadWriter.pathOut(EXPECTED_DIR.resolve(fileName + ".json"));
+            var notepad = NotepadWriter.pathOut(expectedDir.resolve(fileName + ".json"));
             new HSPrinter(json, notepad).print();
         } else {
             var expected = mapper.reader()
-                    .readTree(Files.newBufferedReader(EXPECTED_DIR.resolve(fileName + ".json")));
+                    .readTree(Files.newBufferedReader(expectedDir.resolve(fileName + ".json")));
             assertEquals(expected, json);
         }
+    }
+
+    public void test(String fileName) throws IOException {
+        Configuration.FULLY_EXPAND = true;
+        testHelper(fileName);
+        Configuration.FULLY_EXPAND = false;
+        testHelper(fileName);
     }
 }

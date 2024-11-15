@@ -15,6 +15,7 @@ import static pascal.hardscript.compiler.Configuration.FULLY_EXPAND;
 public final class HSPrinter {
     private final JsonNode json;
     private final NotepadWriter writer;
+    private static final int INST_INLINE = FULLY_EXPAND ? 3 : 4;
 
     public HSPrinter(JsonNode json, NotepadWriter writer) {
         this.json = json;
@@ -22,14 +23,18 @@ public final class HSPrinter {
     }
 
     public void print() {
-        startArray();
-        var iterator = json.elements();
-        printObject(iterator.next());
-        while (iterator.hasNext()) {
-            writer.println(",");
-            printObject(iterator.next());
+        if (FULLY_EXPAND) {
+            printObject(json);
+        } else {
+            startArray();
+            var iterator = json.elements();
+            printObject(iterator.next(), INST_INLINE);
+            while (iterator.hasNext()) {
+                writer.println(",");
+                printObject(iterator.next(), INST_INLINE);
+            }
+            writer.newLine(); endArray();
         }
-        writer.newLine(); endArray();
         writer.flush();
         writer.close();
     }
@@ -49,17 +54,7 @@ public final class HSPrinter {
             case WIRE, CLOCK -> printData(node);
             case REGISTER -> printObject(node);
             case BUILTIN -> printObject(node, 3);
-            case INSTANTIATE -> printInstantiation(node);
-        }
-    }
-
-    private void printInstantiation(JsonNode node) {
-        if (FULLY_EXPAND) {
-            writer.print("{");
-            printAllFields(node, 4);
-            writer.print("}");
-        } else {
-            printObject(node, 4);
+            case INSTANTIATE, COMPONENT -> printObject(node, INST_INLINE);
         }
     }
 

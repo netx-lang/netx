@@ -35,7 +35,6 @@ public final class HFrontend extends AbstractHFrontend<Circuit> {
         return circuit;
     }
 
-
     public Circuit parse() {
         return circuit;
     }

@@ -4,7 +4,6 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.jupiter.api.Test;
-import pascal.hardscript.compiler.Configuration;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 
 import java.io.IOException;
@@ -37,7 +36,6 @@ class HSCompilerUnitTest {
     }
 
     private static void test(String fileName) throws IOException {
-        Configuration.FULLY_EXPAND = true;
         String content = new String(Files.readAllBytes(TEST_DIR.resolve(fileName)));
 
         CharStream charStream = CharStreams.fromString(content);

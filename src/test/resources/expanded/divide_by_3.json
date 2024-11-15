@@ -1,0 +1,73 @@
+{
+  "totalData": 9,
+  "design": {
+    "type": "component",
+    "id": "Divide_by_3",
+    "loc": "5:10",
+    "input": ["clk@0"],
+    "output": ["clk_3@1"],
+    "members": [
+      {"type": "clock", "id": "clk@0", "loc": "6:9"},
+      {"type": "clock", "id": "clk_3@1", "loc": "6:14"},
+      {"type": "wire", "width": 1, "id": "a@2", "loc": "7:9"},
+      {"type": "wire", "width": 1, "id": "b@3", "loc": "7:12"},
+      {"type": "wire", "width": 1, "id": "c@4", "loc": "7:15"},
+      {
+        "type": "builtin", "id": "NOT", "loc": "8:28",
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@5", "loc": "8:28"}
+        ],
+        "input": ["a@2"],
+        "output": ["$o@5"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "8:38",
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@6", "loc": "8:38"}
+        ],
+        "input": ["b@3"],
+        "output": ["$o@6"]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "8:20",
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@7", "loc": "8:20"}
+        ],
+        "input": ["$o@5", "$o@6"],
+        "output": ["$o@7"]
+      },
+      {
+        "type": "builtin", "id": "REGISTER", "loc": "1:35",
+        "attribute": {
+          "isPosTrigger": "true",
+          "clock": "clk@0"
+        },
+        "input": ["$o@7"],
+        "output": ["a@2"]
+      },
+      {
+        "type": "builtin", "id": "REGISTER", "loc": "1:35",
+        "attribute": {
+          "isPosTrigger": "true",
+          "clock": "clk@0"
+        },
+        "input": ["a@2"],
+        "output": ["b@3"]
+      },
+      {
+        "type": "builtin", "id": "REGISTER", "loc": "1:35",
+        "attribute": {
+          "isPosTrigger": "false",
+          "clock": "clk@0"
+        },
+        "input": ["b@3"],
+        "output": ["c@4"]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "11:13",
+        "input": ["b@3", "c@4"],
+        "output": ["clk_3@1"]
+      }
+    ]
+  }
+}

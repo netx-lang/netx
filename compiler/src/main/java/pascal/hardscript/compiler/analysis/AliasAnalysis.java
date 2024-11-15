@@ -32,16 +32,8 @@ public final class AliasAnalysis extends ModelAnalysis {
         }
     }
 
-    private void globalAnalyze() {
-        design.forEachScope(scope -> global.addAlias(scope.getAliases()));
-        global.resolveRepresentatives();
-        design.forEachScope(scope -> {
-            scope.getEntities().removeIf(Predicate.not(global::needDump));
-            if (scope instanceof ComponentScope componentScope) {
-                componentScope.getInputs().replaceAll(global::repOf);
-                componentScope.getOutputs().replaceAll(global::repOf);
-            }
-        });
+    private static boolean isUserDefinedComponent(Scope scope) {
+        return !((ComponentScope) scope).isBuiltin();
     }
 
     private void scopeWiseAnalyze() {
@@ -60,8 +52,16 @@ public final class AliasAnalysis extends ModelAnalysis {
         });
     }
 
-    private static boolean isUserDefinedComponent(Scope scope) {
-        return scope instanceof ComponentScope component && !component.isBuiltin();
+    private void globalAnalyze() {
+        design.forEachScope(scope -> global.addAlias(scope.getAliases()));
+        global.resolveRepresentatives();
+        design.forEachScope(scope -> {
+            scope.getEntities().removeIf(Predicate.not(global::needDump));
+            if (scope instanceof ComponentScope component) {
+                component.getInputs().replaceAll(global::repOf);
+                component.getOutputs().replaceAll(global::repOf);
+            }
+        });
     }
 
     private class ComponentScopeWiseAnalysis {

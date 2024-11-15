@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
 
-public class DuplicatedComponentElimination extends ModelAnalysis {
+public final class DuplicatedComponentElimination extends ModelAnalysis {
     private final UnionFind<Instance> set = new UnionFind<>();
 
     public DuplicatedComponentElimination(DesignScope design) {
@@ -25,30 +25,8 @@ public class DuplicatedComponentElimination extends ModelAnalysis {
 
     @Override
     public void analyze() {
-        inlineScope(design.getTop());
         design.forEachScope(this::collectDuplicatedComponents);
         design.forEachScope(this::replaceDuplicatedInstances);
-    }
-
-    private void inlineScope(Scope scope) {
-        List<Scope> inlinedChildren = new LinkedList<>();
-        var binding = scope.getBinding();
-        var aliases = scope.getAliases();
-
-        for (var child : scope.getChildren()) {
-            inlineScope(child);
-            if (child instanceof ComponentScope) {
-                inlinedChildren.add(child);
-            } else {
-                binding.add(child.getBinding());
-                aliases.addAll(child.getAliases());
-                inlinedChildren.addAll(child.getChildren());
-                for (var grandChild : child.getChildren()) {
-                    grandChild.setParent(scope);
-                }
-            }
-        }
-        scope.setChildren(inlinedChildren);
     }
 
     private void collectDuplicatedComponents(Scope scope) {

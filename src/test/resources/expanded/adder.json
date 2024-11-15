@@ -1,0 +1,59 @@
+{
+  "totalData": 9,
+  "design": {
+    "type": "component",
+    "id": "full_adder",
+    "loc": "1:10",
+    "input": ["a@0", "b@1", "cin@2"],
+    "output": ["out@3", "cout@4"],
+    "members": [
+      {"type": "wire", "width": 1, "id": "a@0", "loc": "2:9"},
+      {"type": "wire", "width": 1, "id": "b@1", "loc": "2:12"},
+      {"type": "wire", "width": 1, "id": "cout@4", "loc": "2:25"},
+      {"type": "wire", "width": 1, "id": "cin@2", "loc": "2:15"},
+      {"type": "wire", "width": 1, "id": "out@3", "loc": "2:20"},
+      {
+        "type": "component", "id": "half_adder", "loc": "3:52",
+        "input": ["a@0", "b@1"],
+        "output": ["carry@5", "out@6"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "carry@5", "loc": "7:20"},
+          {"type": "wire", "width": 1, "id": "out@6", "loc": "7:15"},
+          {
+            "type": "builtin", "id": "XOR", "loc": "8:13",
+            "input": ["a@0", "b@1"],
+            "output": ["out@6"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "9:13",
+            "input": ["a@0", "b@1"],
+            "output": ["carry@5"]
+          }
+        ]
+      },
+      {
+        "type": "component", "id": "half_adder", "loc": "3:36",
+        "input": ["out@6", "cin@2"],
+        "output": ["carry@7", "out@3"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "carry@7", "loc": "7:20"},
+          {
+            "type": "builtin", "id": "XOR", "loc": "8:13",
+            "input": ["out@6", "cin@2"],
+            "output": ["out@3"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "9:13",
+            "input": ["out@6", "cin@2"],
+            "output": ["carry@7"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "3:20",
+        "input": ["carry@5", "carry@7"],
+        "output": ["cout@4"]
+      }
+    ]
+  }
+}
