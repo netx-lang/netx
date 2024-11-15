@@ -1,5 +1,6 @@
 package pascal.hardscript.hson.verilog;
 
+import pascal.hardscript.hson.verilog.model.Assign;
 import pascal.hardscript.hson.verilog.model.Instantiation;
 import pascal.hardscript.hson.verilog.model.VModule;
 import pascal.hardscript.hson.verilog.model.Wire;
@@ -7,6 +8,7 @@ import pascal.hardscript.hson.verilog.model.ref.Constant;
 import pascal.hardscript.hson.verilog.model.ref.DataRef;
 import pascal.hardscript.hson.verilog.model.ref.DataRefSelect;
 import pascal.hardscript.hson.verilog.model.ref.WireRef;
+import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.print.NotepadWriter;
 
@@ -44,6 +46,9 @@ public class VerilogDumper {
         for (var inst : module.getInstantiations()) {
             dumpInstantiation(inst);
         }
+        for (var assign : module.getAssigns()) {
+            dumpAssign(assign);
+        }
         notepad.decIndent();
         notepad.println("endmodule");
         notepad.newLine();
@@ -57,29 +62,39 @@ public class VerilogDumper {
         ports.addAll(inst.getOutputs());
         var iter = ports.iterator();
         if (iter.hasNext()) {
-            dumpDataRef(iter.next());
+            notepad.print(dumpDataRef(iter.next()));
         }
         while (iter.hasNext()) {
             notepad.print(", ");
-            dumpDataRef(iter.next());
+            notepad.print(dumpDataRef(iter.next()));
         }
         notepad.println(");");
     }
 
-    private void dumpDataRef(DataRef ref) {
-        switch (ref) {
-            case Constant constant -> notepad.print(constant.value().toString());
-            case DataRefSelect access -> {
-                dumpDataRef(access.base());
-                notepad.print(access.selector().toString());
-            }
+    private void dumpAssign(Assign assign) {
+        var rhs = String.join(
+                " " + BuiltinComponent.VERILOG_OP.get(assign.builtin()) + " ",
+                assign.inputs().stream().map(this::dumpDataRef).toList());
+        notepad.print("assign ");
+        notepad.print(dumpDataRef(assign.outputs().getFirst()));
+        notepad.print(" = ");
+        notepad.print(rhs);
+        notepad.println(";");
+    }
+
+    private String dumpDataRef(DataRef ref) {
+        return switch (ref) {
+            case Constant constant -> constant.value().toString();
+            case DataRefSelect access -> dumpDataRef(access.base()) + access.selector().toString();
             case WireRef wireRef -> {
+                String result = "";
                 if (wireRef.instance() != null) {
-                    notepad.print("$i_" + wireRef.instance().getInstIndex() + ".");
+                    result += "$i_" + wireRef.instance().getInstIndex() + ".";
                 }
-                notepad.print(wireRef.name());
+                result += wireRef.name();
+                yield result;
             }
-        }
+        };
     }
 
     private static String typeOf(Wire wire) {

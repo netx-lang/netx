@@ -48,6 +48,10 @@ public final class VModule {
         return instantiations.values();
     }
 
+    public Collection<Assign> getAssigns() {
+        return assignments.values();
+    }
+
     public Identifier getId() {
         return id;
     }

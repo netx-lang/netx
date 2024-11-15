@@ -42,7 +42,7 @@ public class Evaluator {
         SHIFT_OP.put(BuiltinComponent.SHL, BitVector::shl);
         SHIFT_OP.put(BuiltinComponent.ASHR, BitVector::ashr);
         SHIFT_OP.put(BuiltinComponent.LSHR, BitVector::lshr);
-    };
+    }
 
     public static List<BitVector> evaluate(BuiltinComponent builtin, List<BitVector> inputs) {
         return switch (builtin) {
