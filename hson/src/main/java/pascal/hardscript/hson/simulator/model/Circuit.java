@@ -71,4 +71,14 @@ public class Circuit {
     public List<Node> getSuccessors(Node node) {
         return Graphs.successorListOf(graph, node);
     }
+
+    @Deprecated
+    public void printAll() {
+        for (var node : graph.vertexSet()) {
+            if (node instanceof WireNode) {
+                System.out.print(node.getIdentifier().name() + " = " + ((WireNode) node).getValue() + "\t");
+            }
+        }
+        System.out.println();
+    }
 }

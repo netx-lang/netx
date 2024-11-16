@@ -23,16 +23,16 @@ public class SimulatorTest {
         var simulator = buildSimulator("adder.hard");
         var high = BitVector.fromBoolean(true);
         var low = BitVector.fromBoolean(false);
-        simulator.setInputValue("a", high);
-        simulator.setInputValue("b", high);
-        simulator.setInputValue("cin", high);
+        simulator.setInput("a", high);
+        simulator.setInput("b", high);
+        simulator.setInput("cin", high);
         simulator.run();
-        assertEquals(high, simulator.getOutputValue("out"));
-        assertEquals(high, simulator.getOutputValue("cout"));
-        simulator.setInputValue("a", low);
+        assertEquals(high, simulator.getOutput("out"));
+        assertEquals(high, simulator.getOutput("cout"));
+        simulator.setInput("a", low);
         simulator.run();
-        assertEquals(low, simulator.getOutputValue("out"));
-        assertEquals(high, simulator.getOutputValue("cout"));
+        assertEquals(low, simulator.getOutput("out"));
+        assertEquals(high, simulator.getOutput("cout"));
     }
 
     @Test
@@ -41,9 +41,9 @@ public class SimulatorTest {
         for (int i = 0; i < 8; i++) {
             var input = BitVector.fromInt(i, 3);
             var expected = BitVector.fromInt(1 << i, 8);
-            simulator.setInputValue("input", input);
+            simulator.setInput("input", input);
             simulator.run();
-            assertEquals(expected, simulator.getOutputValue("output"));
+            assertEquals(expected, simulator.getOutput("output"));
         }
     }
 
@@ -53,9 +53,9 @@ public class SimulatorTest {
         for (int i = 0; i < 8; i++) {
             var input = BitVector.fromInt(1 << i, 8);
             var expected = BitVector.fromInt(i, 3);
-            simulator.setInputValue("input", input);
+            simulator.setInput("input", input);
             simulator.run();
-            assertEquals(expected, simulator.getOutputValue("output"));
+            assertEquals(expected, simulator.getOutput("output"));
         }
     }
 
@@ -63,9 +63,24 @@ public class SimulatorTest {
     void testDivideBy3() throws IOException {
         var simulator = buildSimulator("divide_by_3.hard");
         List<Integer> clock = new LinkedList<>();
-        simulator.setOnEachTick(env -> clock.add(env.getOutputValue("clk_3").toInt()));
+        simulator.setOnEachTick(env -> clock.add(env.getOutput("clk_3").toInt()));
         simulator.runUntil(20);
         assertEquals(List.of(0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0), clock);
+    }
+
+    @Test
+    void testCounter() throws IOException {
+        var simulator = buildSimulator("counter.hard");
+        var high = BitVector.fromBoolean(true);
+        var low = BitVector.fromBoolean(false);
+
+        List<Integer> count = new LinkedList<>();
+        simulator.setOnEachTick(env -> count.add(env.getOutput("count").toInt()));
+        simulator.setInput("rst", low);
+        simulator.runUntil(6);
+        simulator.setInput("rst", high);
+        simulator.runUntil(8);
+        assertEquals(List.of(0, 0, 1, 1, 2, 2, 3, 3, 0, 0), count);
     }
 
     private static Simulator buildSimulator(String other) throws IOException {

@@ -11,17 +11,16 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public final class Simulator {
-    public final static Boolean RANDOM_START = false;
     public final static Boolean DO_VERIFICATION = false;
-    private final static Random RANDOM = new Random();
 
     private final Circuit circuit;
     private final List<ClockNode> clocks = new LinkedList<>();
-    private final ValueSupplier supplier = new ValueSupplier();
     private final Map<String, DataNode> ioNodes = new HashMap<>();
 
-    private Consumer<Simulator> onEachTick = null;
     private final ScheduleQueue schedule = new ScheduleQueue();
+    private final ValueSupplier supplier = new ValueSupplier();
+
+    private Consumer<Simulator> onEachTick = null;
 
     public Simulator(Circuit circuit) {
         this.circuit = circuit;
@@ -34,39 +33,39 @@ public final class Simulator {
         circuit.topologySort();
         for (var node : circuit.getInputs()) {
             if (node instanceof ClockNode clock) {
-                clock.setValue(supplier.nextBoolean());
+                clock.setValue(supplier.nextBit());
                 clocks.add(clock);
             }
         }
         for (var node : circuit.getAllNodes()) {
-            if (node instanceof DataNode data && !(data instanceof DataSelectNode)) {
-                data.setValue(supplier.next(data.getWidth()));
+            if (node instanceof WireNode wire) {
+                wire.setValue(supplier.nextBitVector(wire.getWidth()));
             }
         }
         for (var register : circuit.getRegisters().values()) {
             for (var reg : register) {
                 var state = reg.getCurr();
                 schedule.add(state);
-                state.setValue(supplier.next(state.getWidth()));
+                state.setValue(supplier.nextBitVector(state.getWidth()));
             }
         }
     }
 
-    public void setInputValue(String name, BitVector value) {
-        setInputValue(Objects.requireNonNull(ioNodes.get(name)), value);
+    public void setInput(String name, BitVector value) {
+        setInput(Objects.requireNonNull(ioNodes.get(name)), value);
     }
 
-    public void setInputValue(DataNode input, BitVector value) {
+    public void setInput(DataNode input, BitVector value) {
         input.setValue(value);
         schedule.add(input);
     }
 
-    public BitVector getOutputValue(DataNode output) {
+    public BitVector getOutput(DataNode output) {
         return output.getValue();
     }
 
-    public BitVector getOutputValue(String name) {
-        return getOutputValue(Objects.requireNonNull(ioNodes.get(name)));
+    public BitVector getOutput(String name) {
+        return getOutput(Objects.requireNonNull(ioNodes.get(name)));
     }
 
     public void setOnEachTick(Consumer<Simulator> onEachTick) {
@@ -95,6 +94,7 @@ public final class Simulator {
     public boolean clockStep() {
         if (onEachTick != null) {
             onEachTick.accept(this);
+            circuit.printAll();
         }
 
         var clock = pickClock();
@@ -123,15 +123,15 @@ public final class Simulator {
         return !toUpdate.isEmpty();
     }
 
+    @Deprecated
     private ClockNode pickClock() {
-        // FIXME: deprecated
         if (clocks.isEmpty()) {
             return null;
         }
         if (clocks.size() == 1) {
             return clocks.getFirst();
         }
-        return clocks.get(RANDOM.nextInt(clocks.size()));
+        return clocks.get(supplier.nextInt() % clocks.size());
     }
 
     public void step() {
@@ -151,12 +151,23 @@ public final class Simulator {
             var update = Evaluator.evaluate(BuiltinComponent.of(id), inputs).iterator();
             for (var output : circuit.getSuccessors(node)) {
                 var data = (DataNode) output;
-                data.setValue(update.next());
+                var value = update.next();
+
+                // FIXME:
+//                if (data.getWidth() != value.size()) {
+//                    if (data.getWidth() > value.size()) {
+//                        value = value.ext(data.getWidth());
+//                    } else {
+//                        value = value.truncate(data.getWidth());
+//                    }
+//                }
+
+                data.setValue(value);
                 if (data instanceof DataSelectNode selectNode) {
                     var base = selectNode.getBase();
-                    var value = selectNode.inverseApply();
-                    if (!value.equals(base.getValue())) {
-                        base.setValue(value);
+                    var baseValue = selectNode.inverseApply();
+                    if (!baseValue.equals(base.getValue())) {
+                        base.setValue(baseValue);
                         schedule.add(base);
                     }
                 }
@@ -200,17 +211,19 @@ public final class Simulator {
     }
 
     private static class ValueSupplier {
-        public BitVector nextInt() {
-            int value = RANDOM_START ? RANDOM.nextInt() : 0;
-            return BitVector.fromInt(value);
+        public final static Boolean RANDOM_START = false;
+        private final static Random RANDOM = new Random();
+
+        public int nextInt() {
+            return RANDOM.nextInt();
         }
 
-        public BitVector nextBoolean() {
+        public BitVector nextBit() {
             boolean value = RANDOM_START && RANDOM.nextBoolean();
             return BitVector.fromBoolean(value);
         }
 
-        public BitVector next(int size) {
+        public BitVector nextBitVector(int size) {
             var value = RANDOM_START ? new BigInteger(size, RANDOM) : BigInteger.ZERO;
             return BitVector.fromBigInteger(size, value);
         }

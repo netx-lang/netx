@@ -1,0 +1,80 @@
+{
+  "totalData": 11,
+  "design": {
+    "type": "component",
+    "id": "counter",
+    "loc": "1:10",
+    "input": ["clk@0", "rst@1"],
+    "output": ["count@2"],
+    "members": [
+      {"type": "clock", "id": "clk@0", "loc": "4:9"},
+      {"type": "wire", "width": 1, "id": "rst@1", "loc": "3:9"},
+      {"type": "wire", "width": 32, "id": "count@2", "loc": "2:9"},
+      {
+        "type": "builtin", "id": "ADD", "loc": "5:49",
+        "input": ["count@2", "1"],
+        "output": ["i0@3"]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "5:36",
+        "input": ["rst@1", "i0@3", "0"],
+        "output": ["output@4"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "output@4", "loc": "9:22"},
+          {"type": "wire", "width": 32, "id": "i0@3", "loc": "9:14"},
+          {
+            "type": "builtin", "id": "NOT", "loc": "11:28",
+            "members": [
+              {"type": "wire", "width": 1, "id": "$o@5", "loc": "11:28"}
+            ],
+            "input": ["rst@1"],
+            "output": ["$o@5"]
+          },
+          {
+            "type": "builtin", "id": "CAST", "loc": "11:20",
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@6", "loc": "11:20"}
+            ],
+            "input": ["$o@5"],
+            "output": ["$o@6"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "11:8",
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@7", "loc": "11:8"}
+            ],
+            "input": ["i0@3", "$o@6"],
+            "output": ["$o@7"]
+          },
+          {
+            "type": "builtin", "id": "CAST", "loc": "12:20",
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@8", "loc": "12:20"}
+            ],
+            "input": ["rst@1"],
+            "output": ["$o@8"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "12:8",
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@9", "loc": "12:8"}
+            ],
+            "input": ["0", "$o@8"],
+            "output": ["$o@9"]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "10:14",
+            "input": ["$o@7", "$o@9"],
+            "output": ["output@4"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "REGISTER", "loc": "5:13",
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
+        "input": ["output@4"],
+        "output": ["count@2"]
+      }
+    ]
+  }
+}

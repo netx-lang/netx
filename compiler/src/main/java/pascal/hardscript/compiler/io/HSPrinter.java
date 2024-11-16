@@ -95,13 +95,20 @@ public final class HSPrinter {
     }
 
     private void printField(Map.Entry<String, JsonNode> sub) {
-        printKey(sub.getKey());
-        switch (sub.getValue()) {
-            case TextNode text -> printStr(text.textValue());
-            case NumericNode num -> printInteger(num.intValue());
-            case ObjectNode obj -> printObject(obj);
-            case ArrayNode array -> printArrayField(array);
-            default -> throw new ShallNotReachHereError();
+        var key = sub.getKey();
+        printKey(key);
+        if (key.equals("attribute")) {
+            writer.print("{");
+            printAllFields(sub.getValue(), Integer.MAX_VALUE);
+            writer.print("}");
+        } else {
+            switch (sub.getValue()) {
+                case TextNode text -> printStr(text.textValue());
+                case NumericNode num -> printInteger(num.intValue());
+                case ObjectNode obj -> printObject(obj);
+                case ArrayNode array -> printArrayField(array);
+                default -> throw new ShallNotReachHereError();
+            }
         }
     }
 

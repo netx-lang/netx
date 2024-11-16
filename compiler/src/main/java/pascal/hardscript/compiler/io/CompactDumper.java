@@ -13,15 +13,11 @@ import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
-import static pascal.hardscript.util.lang.BuiltinComponent.REGISTER;
 
 final class CompactDumper {
     private final DesignScope designScope;
@@ -184,8 +180,8 @@ final class CompactDumper {
             var builtin = createObjectNode();
             setType(builtin, "builtin");
             setBuiltinID(builtin, instID, allocateIndex(sub));
-            if (BuiltinComponent.of(instID) == REGISTER) {
-                dumpRegAttribute(builtin, sub);
+            if (Objects.requireNonNull(BuiltinComponent.of(instID)) == BuiltinComponent.REGISTER) {
+                dumpAttribute(builtin, sub);
             }
             List<Data> needDump = new LinkedList<>();
             for (var entity : sub.getEntities()) {
@@ -227,7 +223,7 @@ final class CompactDumper {
             return result;
         }
 
-        private void dumpRegAttribute(ObjectNode node, ComponentScope component) {
+        private void dumpAttribute(ObjectNode node, ComponentScope component) {
             var attributes = createObjectNode();
             for (var entry : component.getAttributes().entrySet()) {
                 attributes.put(entry.getKey().name(), dumpInstanceRef((Instance) entry.getValue()));

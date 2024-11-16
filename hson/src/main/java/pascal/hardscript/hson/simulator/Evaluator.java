@@ -46,13 +46,13 @@ public class Evaluator {
 
     public static List<BitVector> evaluate(BuiltinComponent builtin, List<BitVector> inputs) {
         return switch (builtin) {
+            case CAST -> inputs;
             case NOT -> evaluateNotGate(inputs);
             case CONCAT -> evaluateMultiIn(BitVector::concat, inputs);
             case ADD, SUB -> evaluateBinary(BINARY_OP.get(builtin), inputs);
             case SHL, ASHR, LSHR -> evaluateShift(SHIFT_OP.get(builtin), inputs);
             case OR, AND, XOR, NAND, NOR, XNOR -> evaluateMultiIn(BINARY_OP.get(builtin), inputs);
             case EQ, NE, SLT, SGT, SLE, ULT, SGE, UGT, ULE, UGE -> evaluateRelation(RELATIONAL_OP.get(builtin), inputs);
-            case EXT -> throw new TodoException(); // TODO:
             case REGISTER, IGNORE, SPLIT, TO -> throw new TodoException("Replace this exception");
         };
     }

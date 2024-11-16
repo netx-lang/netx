@@ -101,10 +101,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@13", "loc": "43:12",
-        "attribute": {
-          "isPosTrigger": "false",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "false", "clock": "clk@0"},
         "input": ["output@12"],
         "output": ["PC@0"]
       }
@@ -130,7 +127,7 @@
         "output": ["mask@0"]
       },
       {
-        "type": "builtin", "id": "EXT@2", "loc": "185:47",
+        "type": "builtin", "id": "CAST@2", "loc": "185:47",
         "input": ["1'h00"],
         "output": ["input_0@0"]
       },
@@ -213,7 +210,7 @@
         "output": ["output@15"]
       },
       {
-        "type": "builtin", "id": "AND@16", "loc": "186:14",
+        "type": "builtin", "id": "OR@16", "loc": "186:14",
         "input": ["output@3", "output@4", "output@5", "output@7", "output@10", "output@12", "output@15"],
         "output": ["result@0"]
       }
@@ -239,7 +236,7 @@
         "output": ["mask@0"]
       },
       {
-        "type": "builtin", "id": "EXT@2", "loc": "160:50",
+        "type": "builtin", "id": "CAST@2", "loc": "160:50",
         "input": ["1'h00"],
         "output": ["input_0@0"]
       },
@@ -277,17 +274,17 @@
         "output": ["output@8"]
       },
       {
-        "type": "builtin", "id": "EXT@9", "loc": "160:50",
+        "type": "builtin", "id": "CAST@9", "loc": "160:50",
         "input": ["1'h00"],
         "output": ["input_0@0"]
       },
       {
-        "type": "builtin", "id": "SLT@10", "loc": "165:33",
+        "type": "builtin", "id": "SLT@10", "loc": "165:34",
         "input": ["a@0", "b@0"],
         "output": ["input_0@0"]
       },
       {
-        "type": "builtin", "id": "ULT@11", "loc": "165:48",
+        "type": "builtin", "id": "ULT@11", "loc": "165:49",
         "input": ["a@0", "b@0"],
         "output": ["input_1@0"]
       },
@@ -304,7 +301,7 @@
         "output": ["output@13"]
       },
       {
-        "type": "builtin", "id": "EXT@14", "loc": "165:8",
+        "type": "builtin", "id": "CAST@14", "loc": "165:8",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "165:8"}
         ],
@@ -373,7 +370,7 @@
         "output": ["output@25"]
       },
       {
-        "type": "builtin", "id": "AND@26", "loc": "162:14",
+        "type": "builtin", "id": "OR@26", "loc": "162:14",
         "input": ["output@6", "output@8", "$o@14", "output@15", "output@17", "output@21", "output@23", "output@25"],
         "output": ["result@0"]
       },
@@ -412,7 +409,7 @@
         "output": ["mask@0"]
       },
       {
-        "type": "builtin", "id": "EXT@2", "loc": "233:28",
+        "type": "builtin", "id": "CAST@2", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -428,7 +425,7 @@
         "output": ["$o@3"]
       },
       {
-        "type": "builtin", "id": "EXT@4", "loc": "233:28",
+        "type": "builtin", "id": "CAST@4", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -444,7 +441,7 @@
         "output": ["$o@5"]
       },
       {
-        "type": "builtin", "id": "EXT@6", "loc": "233:28",
+        "type": "builtin", "id": "CAST@6", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -460,7 +457,7 @@
         "output": ["$o@7"]
       },
       {
-        "type": "builtin", "id": "EXT@8", "loc": "233:28",
+        "type": "builtin", "id": "CAST@8", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -476,7 +473,7 @@
         "output": ["$o@9"]
       },
       {
-        "type": "builtin", "id": "AND@10", "loc": "232:14",
+        "type": "builtin", "id": "OR@10", "loc": "232:14",
         "input": ["$o@3", "$o@5", "$o@7", "$o@9"],
         "output": ["output@0"]
       }
@@ -588,10 +585,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@3", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@2"],
         "output": ["regFile_0@0"]
       },
@@ -603,10 +597,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@5", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@4"],
         "output": ["regFile_1@0"]
       },
@@ -618,10 +609,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@7", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@6"],
         "output": ["regFile_2@0"]
       },
@@ -633,10 +621,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@9", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@8"],
         "output": ["regFile_3@0"]
       },
@@ -648,10 +633,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@11", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@10"],
         "output": ["regFile_4@0"]
       },
@@ -663,10 +645,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@13", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@12"],
         "output": ["regFile_5@0"]
       },
@@ -678,10 +657,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@15", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@14"],
         "output": ["regFile_6@0"]
       },
@@ -693,10 +669,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@17", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@16"],
         "output": ["regFile_7@0"]
       },
@@ -708,10 +681,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@19", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@18"],
         "output": ["regFile_8@0"]
       },
@@ -723,10 +693,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@21", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@20"],
         "output": ["regFile_9@0"]
       },
@@ -738,10 +705,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@23", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@22"],
         "output": ["regFile_10@0"]
       },
@@ -753,10 +717,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@25", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@24"],
         "output": ["regFile_11@0"]
       },
@@ -768,10 +729,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@27", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@26"],
         "output": ["regFile_12@0"]
       },
@@ -783,10 +741,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@29", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@28"],
         "output": ["regFile_13@0"]
       },
@@ -798,10 +753,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@31", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@30"],
         "output": ["regFile_14@0"]
       },
@@ -813,10 +765,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@33", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@32"],
         "output": ["regFile_15@0"]
       },
@@ -828,10 +777,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@35", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@34"],
         "output": ["regFile_16@0"]
       },
@@ -843,10 +789,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@37", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@36"],
         "output": ["regFile_17@0"]
       },
@@ -858,10 +801,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@39", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@38"],
         "output": ["regFile_18@0"]
       },
@@ -873,10 +813,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@41", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@40"],
         "output": ["regFile_19@0"]
       },
@@ -888,10 +825,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@43", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@42"],
         "output": ["regFile_20@0"]
       },
@@ -903,10 +837,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@45", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@44"],
         "output": ["regFile_21@0"]
       },
@@ -918,10 +849,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@47", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@46"],
         "output": ["regFile_22@0"]
       },
@@ -933,10 +861,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@49", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@48"],
         "output": ["regFile_23@0"]
       },
@@ -948,10 +873,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@51", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@50"],
         "output": ["regFile_24@0"]
       },
@@ -963,10 +885,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@53", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@52"],
         "output": ["regFile_25@0"]
       },
@@ -978,10 +897,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@55", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@54"],
         "output": ["regFile_26@0"]
       },
@@ -993,10 +909,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@57", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@56"],
         "output": ["regFile_27@0"]
       },
@@ -1008,10 +921,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@59", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@58"],
         "output": ["regFile_28@0"]
       },
@@ -1023,10 +933,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@61", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@60"],
         "output": ["regFile_29@0"]
       },
@@ -1038,10 +945,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@63", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@62"],
         "output": ["regFile_30@0"]
       },
@@ -1053,10 +957,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER@65", "loc": "212:24",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@64"],
         "output": ["regFile_31@0"]
       },
@@ -1122,7 +1023,7 @@
         "output": ["mask@0"]
       },
       {
-        "type": "builtin", "id": "EXT@2", "loc": "233:28",
+        "type": "builtin", "id": "CAST@2", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1138,7 +1039,7 @@
         "output": ["$o@3"]
       },
       {
-        "type": "builtin", "id": "EXT@4", "loc": "233:28",
+        "type": "builtin", "id": "CAST@4", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1154,7 +1055,7 @@
         "output": ["$o@5"]
       },
       {
-        "type": "builtin", "id": "EXT@6", "loc": "233:28",
+        "type": "builtin", "id": "CAST@6", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1170,7 +1071,7 @@
         "output": ["$o@7"]
       },
       {
-        "type": "builtin", "id": "EXT@8", "loc": "233:28",
+        "type": "builtin", "id": "CAST@8", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1186,7 +1087,7 @@
         "output": ["$o@9"]
       },
       {
-        "type": "builtin", "id": "EXT@10", "loc": "233:28",
+        "type": "builtin", "id": "CAST@10", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1202,7 +1103,7 @@
         "output": ["$o@11"]
       },
       {
-        "type": "builtin", "id": "EXT@12", "loc": "233:28",
+        "type": "builtin", "id": "CAST@12", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1218,7 +1119,7 @@
         "output": ["$o@13"]
       },
       {
-        "type": "builtin", "id": "EXT@14", "loc": "233:28",
+        "type": "builtin", "id": "CAST@14", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1234,7 +1135,7 @@
         "output": ["$o@15"]
       },
       {
-        "type": "builtin", "id": "EXT@16", "loc": "233:28",
+        "type": "builtin", "id": "CAST@16", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1250,7 +1151,7 @@
         "output": ["$o@17"]
       },
       {
-        "type": "builtin", "id": "EXT@18", "loc": "233:28",
+        "type": "builtin", "id": "CAST@18", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1266,7 +1167,7 @@
         "output": ["$o@19"]
       },
       {
-        "type": "builtin", "id": "EXT@20", "loc": "233:28",
+        "type": "builtin", "id": "CAST@20", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1282,7 +1183,7 @@
         "output": ["$o@21"]
       },
       {
-        "type": "builtin", "id": "EXT@22", "loc": "233:28",
+        "type": "builtin", "id": "CAST@22", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1298,7 +1199,7 @@
         "output": ["$o@23"]
       },
       {
-        "type": "builtin", "id": "EXT@24", "loc": "233:28",
+        "type": "builtin", "id": "CAST@24", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1314,7 +1215,7 @@
         "output": ["$o@25"]
       },
       {
-        "type": "builtin", "id": "EXT@26", "loc": "233:28",
+        "type": "builtin", "id": "CAST@26", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1330,7 +1231,7 @@
         "output": ["$o@27"]
       },
       {
-        "type": "builtin", "id": "EXT@28", "loc": "233:28",
+        "type": "builtin", "id": "CAST@28", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1346,7 +1247,7 @@
         "output": ["$o@29"]
       },
       {
-        "type": "builtin", "id": "EXT@30", "loc": "233:28",
+        "type": "builtin", "id": "CAST@30", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1362,7 +1263,7 @@
         "output": ["$o@31"]
       },
       {
-        "type": "builtin", "id": "EXT@32", "loc": "233:28",
+        "type": "builtin", "id": "CAST@32", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1378,7 +1279,7 @@
         "output": ["$o@33"]
       },
       {
-        "type": "builtin", "id": "EXT@34", "loc": "233:28",
+        "type": "builtin", "id": "CAST@34", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1394,7 +1295,7 @@
         "output": ["$o@35"]
       },
       {
-        "type": "builtin", "id": "EXT@36", "loc": "233:28",
+        "type": "builtin", "id": "CAST@36", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1410,7 +1311,7 @@
         "output": ["$o@37"]
       },
       {
-        "type": "builtin", "id": "EXT@38", "loc": "233:28",
+        "type": "builtin", "id": "CAST@38", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1426,7 +1327,7 @@
         "output": ["$o@39"]
       },
       {
-        "type": "builtin", "id": "EXT@40", "loc": "233:28",
+        "type": "builtin", "id": "CAST@40", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1442,7 +1343,7 @@
         "output": ["$o@41"]
       },
       {
-        "type": "builtin", "id": "EXT@42", "loc": "233:28",
+        "type": "builtin", "id": "CAST@42", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1458,7 +1359,7 @@
         "output": ["$o@43"]
       },
       {
-        "type": "builtin", "id": "EXT@44", "loc": "233:28",
+        "type": "builtin", "id": "CAST@44", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1474,7 +1375,7 @@
         "output": ["$o@45"]
       },
       {
-        "type": "builtin", "id": "EXT@46", "loc": "233:28",
+        "type": "builtin", "id": "CAST@46", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1490,7 +1391,7 @@
         "output": ["$o@47"]
       },
       {
-        "type": "builtin", "id": "EXT@48", "loc": "233:28",
+        "type": "builtin", "id": "CAST@48", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1506,7 +1407,7 @@
         "output": ["$o@49"]
       },
       {
-        "type": "builtin", "id": "EXT@50", "loc": "233:28",
+        "type": "builtin", "id": "CAST@50", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1522,7 +1423,7 @@
         "output": ["$o@51"]
       },
       {
-        "type": "builtin", "id": "EXT@52", "loc": "233:28",
+        "type": "builtin", "id": "CAST@52", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1538,7 +1439,7 @@
         "output": ["$o@53"]
       },
       {
-        "type": "builtin", "id": "EXT@54", "loc": "233:28",
+        "type": "builtin", "id": "CAST@54", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1554,7 +1455,7 @@
         "output": ["$o@55"]
       },
       {
-        "type": "builtin", "id": "EXT@56", "loc": "233:28",
+        "type": "builtin", "id": "CAST@56", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1570,7 +1471,7 @@
         "output": ["$o@57"]
       },
       {
-        "type": "builtin", "id": "EXT@58", "loc": "233:28",
+        "type": "builtin", "id": "CAST@58", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1586,7 +1487,7 @@
         "output": ["$o@59"]
       },
       {
-        "type": "builtin", "id": "EXT@60", "loc": "233:28",
+        "type": "builtin", "id": "CAST@60", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1602,7 +1503,7 @@
         "output": ["$o@61"]
       },
       {
-        "type": "builtin", "id": "EXT@62", "loc": "233:28",
+        "type": "builtin", "id": "CAST@62", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1618,7 +1519,7 @@
         "output": ["$o@63"]
       },
       {
-        "type": "builtin", "id": "EXT@64", "loc": "233:28",
+        "type": "builtin", "id": "CAST@64", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 32, "id": "$o", "loc": "233:28"}
         ],
@@ -1634,7 +1535,7 @@
         "output": ["$o@65"]
       },
       {
-        "type": "builtin", "id": "AND@66", "loc": "232:14",
+        "type": "builtin", "id": "OR@66", "loc": "232:14",
         "input": ["$o@3", "$o@5", "$o@7", "$o@9", "$o@11", "$o@13", "$o@15", "$o@17", "$o@19", "$o@21", "$o@23", "$o@25", "$o@27", "$o@29", "$o@31", "$o@33", "$o@35", "$o@37", "$o@39", "$o@41", "$o@43", "$o@45", "$o@47", "$o@49", "$o@51", "$o@53", "$o@55", "$o@57", "$o@59", "$o@61", "$o@63", "$o@65"],
         "output": ["output@0"]
       }
@@ -1867,12 +1768,12 @@
         "output": ["mask@0"]
       },
       {
-        "type": "builtin", "id": "EXT@2", "loc": "145:47",
+        "type": "builtin", "id": "CAST@2", "loc": "145:47",
         "input": ["1'h00"],
         "output": ["input_0@0"]
       },
       {
-        "type": "builtin", "id": "EXT@3", "loc": "137:26",
+        "type": "builtin", "id": "CAST@3", "loc": "137:26",
         "members": [
           {"type": "wire", "width": 20, "id": "$o", "loc": "137:26"}
         ],
@@ -1924,7 +1825,7 @@
         "output": ["output@11"]
       },
       {
-        "type": "builtin", "id": "EXT@12", "loc": "141:29",
+        "type": "builtin", "id": "CAST@12", "loc": "141:29",
         "members": [
           {"type": "wire", "width": 12, "id": "$o", "loc": "141:29"}
         ],
@@ -1943,7 +1844,7 @@
         "output": ["output@14"]
       },
       {
-        "type": "builtin", "id": "AND@15", "loc": "146:11",
+        "type": "builtin", "id": "OR@15", "loc": "146:11",
         "input": ["output@5", "output@7", "output@9", "output@11", "output@14"],
         "output": ["imm@0"]
       }
@@ -2034,7 +1935,7 @@
         "output": ["I_flag@0"]
       },
       {
-        "type": "builtin", "id": "EXT@12", "loc": "71:52",
+        "type": "builtin", "id": "CAST@12", "loc": "71:52",
         "input": ["1'h00"],
         "output": ["input_0@0"]
       },
@@ -2069,7 +1970,7 @@
         "output": ["output@17"]
       },
       {
-        "type": "builtin", "id": "AND@18", "loc": "72:15",
+        "type": "builtin", "id": "OR@18", "loc": "72:15",
         "input": ["output@13", "output@14", "output@15", "output@16", "output@17"],
         "output": ["extOP@0"]
       },
@@ -2157,7 +2058,7 @@
         "output": ["output@33"]
       },
       {
-        "type": "builtin", "id": "AND@34", "loc": "85:23",
+        "type": "builtin", "id": "OR@34", "loc": "85:23",
         "input": ["output@23", "output@25", "output@27", "output@29", "output@31", "output@33"],
         "output": ["input_1@0"]
       },
@@ -2168,7 +2069,7 @@
         "output": ["output@35"]
       },
       {
-        "type": "builtin", "id": "AND@36", "loc": "82:18",
+        "type": "builtin", "id": "OR@36", "loc": "82:18",
         "input": ["output@20", "output@21", "output@35"],
         "output": ["branch_ctl@0"]
       },
@@ -2189,7 +2090,7 @@
         "output": ["aSrc@0"]
       },
       {
-        "type": "builtin", "id": "EXT@40", "loc": "71:52",
+        "type": "builtin", "id": "CAST@40", "loc": "71:52",
         "input": ["1'h00"],
         "output": ["input_0@0"]
       },
@@ -2227,7 +2128,7 @@
         "output": ["output@46"]
       },
       {
-        "type": "builtin", "id": "AND@47", "loc": "104:12",
+        "type": "builtin", "id": "OR@47", "loc": "104:12",
         "input": ["output@42", "output@44", "output@46"],
         "output": ["bSrc@0"]
       },
@@ -2238,7 +2139,7 @@
         "output": ["de_func3@0"]
       },
       {
-        "type": "builtin", "id": "EXT@49", "loc": "71:52",
+        "type": "builtin", "id": "CAST@49", "loc": "71:52",
         "input": ["1'h00"],
         "output": ["input_0@0"]
       },
@@ -2301,7 +2202,7 @@
         "output": ["output@59"]
       },
       {
-        "type": "builtin", "id": "AND@60", "loc": "113:17",
+        "type": "builtin", "id": "OR@60", "loc": "113:17",
         "input": ["output@51", "output@52", "output@53", "output@54", "output@55", "output@57", "output@58", "output@59"],
         "output": ["arith_ctl@0"]
       },
@@ -2351,7 +2252,7 @@
         "output": ["output@68"]
       },
       {
-        "type": "builtin", "id": "AND@69", "loc": "124:11",
+        "type": "builtin", "id": "OR@69", "loc": "124:11",
         "input": ["output@61", "output@63", "output@66", "output@68"],
         "output": ["ctl@0"]
       }
@@ -2449,7 +2350,7 @@
         "output": ["mask@0"]
       },
       {
-        "type": "builtin", "id": "EXT@2", "loc": "233:28",
+        "type": "builtin", "id": "CAST@2", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 3, "id": "$o", "loc": "233:28"}
         ],
@@ -2465,7 +2366,7 @@
         "output": ["$o@3"]
       },
       {
-        "type": "builtin", "id": "EXT@4", "loc": "233:28",
+        "type": "builtin", "id": "CAST@4", "loc": "233:28",
         "members": [
           {"type": "wire", "width": 3, "id": "$o", "loc": "233:28"}
         ],
@@ -2481,7 +2382,7 @@
         "output": ["$o@5"]
       },
       {
-        "type": "builtin", "id": "AND@6", "loc": "232:14",
+        "type": "builtin", "id": "OR@6", "loc": "232:14",
         "input": ["$o@3", "$o@5"],
         "output": ["output@0"]
       }

@@ -41,6 +41,11 @@ class HSCompilerTest {
     }
 
     @Test
+    void testCounter() throws IOException {
+        test("counter");
+    }
+
+    @Test
     void testRISCV() throws IOException {
         test("riscv");
     }

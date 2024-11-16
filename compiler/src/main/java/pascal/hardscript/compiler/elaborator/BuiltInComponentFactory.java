@@ -26,7 +26,7 @@ public class BuiltInComponentFactory {
             case IGNORE -> createIGNOREComponent(parent, type);
             case SPLIT -> createSPLITComponent(parent, type);
             case TO -> createTOComponent(parent, type);
-            case EXT -> createEXTComponent(parent, type);
+            case CAST -> createCASTComponent(parent, type);
             case NOT -> createNOTComponent(parent, type);
             case OR, AND, XOR, NOR, NAND, XNOR, CONCAT, ADD, SUB -> createMultiInputComponent(parent, type);
             case EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE -> createRelationalOpComponent(parent, type);
@@ -80,7 +80,7 @@ public class BuiltInComponentFactory {
         return Component;
     }
 
-    private ComponentScope createEXTComponent(Scope parent, BuiltinAtom type) {
+    private ComponentScope createCASTComponent(Scope parent, BuiltinAtom type) {
         var result = instantiate(parent, type);
         if (type.getParameters().isEmpty()) {
             result.addInput(newWire(result, "i"));

@@ -26,7 +26,8 @@ public final class RelationParser {
             Map.entry(Pattern.compile("(.*)@(\\d+)"), this::resolvePlainData),
             Map.entry(Pattern.compile("(.*)@(\\d+)\\[(\\d+)]"), this::resolveBitSelectData),
             Map.entry(Pattern.compile("(.*)@(\\d+)\\[(\\d+):(\\d+)]"), this::resolvePartSelectData),
-            Map.entry(Pattern.compile("(\\d+)'h([0-9a-fA-F]+)"), this::resolveConstant)
+            Map.entry(Pattern.compile("(\\d+)'h([0-9a-fA-F]+)"), this::resolveBitVectorConstant),
+            Map.entry(Pattern.compile("(\\d+)"), this::resolveIntConstant)
     );
 
     public RelationParser(HFrontend frontend) {
@@ -116,8 +117,17 @@ public final class RelationParser {
         return result;
     }
 
-    DataNode resolveConstant(Matcher matcher) {
+    DataNode resolveBitVectorConstant(Matcher matcher) {
         int size = Integer.parseUnsignedInt(matcher.group(1));
-        return ConstantNode.of(BitVector.parse(matcher.group(2), size, 16));
+        var result = ConstantNode.of(BitVector.parse(matcher.group(2), size, 16));
+        circuit.addVertex(result);
+        return result;
+    }
+
+    DataNode resolveIntConstant(Matcher matcher) {
+        int rep = Integer.parseUnsignedInt(matcher.group(1));
+        var result = ConstantNode.of(BitVector.fromInt(rep));
+        circuit.addVertex(result);
+        return result;
     }
 }

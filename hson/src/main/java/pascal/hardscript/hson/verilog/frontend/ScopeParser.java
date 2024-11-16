@@ -105,7 +105,8 @@ public final class ScopeParser {
                 Map.entry(Pattern.compile("(.*)@(\\d+)"), this::resolvePlainDataRef),
                 Map.entry(Pattern.compile("(.*)@(\\d+)\\[(\\d+)]"), this::resolveBitSelectDataRef),
                 Map.entry(Pattern.compile("(.*)@(\\d+)\\[(\\d+):(\\d+)]"), this::resolvePartSelectDataRef),
-                Map.entry(Pattern.compile("(\\d+)'h([0-9a-fA-F]+)"), this::resolveConstant)
+                Map.entry(Pattern.compile("(\\d+)'h([0-9a-fA-F]+)"), this::resolveBitVectorConstant),
+                Map.entry(Pattern.compile("(\\d+)"), this::resolveIntConstant)
         );
 
         public List<DataRef> resolveDataRefList(JsonNode node, String field) {
@@ -151,9 +152,14 @@ public final class ScopeParser {
             return DataRefSelect.of(base, selector);
         }
 
-        private DataRef resolveConstant(Matcher matcher) {
+        private DataRef resolveBitVectorConstant(Matcher matcher) {
             int size = Integer.parseUnsignedInt(matcher.group(1));
             return Constant.of(BitVector.parse(matcher.group(2), size, 16));
+        }
+
+        private DataRef resolveIntConstant(Matcher matcher) {
+            int value = Integer.parseUnsignedInt(matcher.group(1));
+            return Constant.of(BitVector.fromInt(value));
         }
     }
 }
