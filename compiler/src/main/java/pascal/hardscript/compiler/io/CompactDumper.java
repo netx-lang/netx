@@ -271,6 +271,7 @@ final class CompactDumper {
                 case BitVectorValue v -> v.value().toString();
             };
         }
+
         private String dumpDataAccessRef(DataAccess access) {
             return dumpDataRef(access.base()) + access.selector();
         }

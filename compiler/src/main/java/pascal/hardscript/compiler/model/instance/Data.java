@@ -9,9 +9,9 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 public sealed abstract class Data implements Instance permits Clock, Wire {
-    private final int index;
     protected final Identifier id;
     protected final ComponentScope parent;
+    private final int index;
 
     protected Data(Identifier id, ComponentScope parent, int index) {
         this.parent = parent;

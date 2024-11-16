@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Objects;
 
 public final class ListComprehension extends ListExpr {
-    private ExprNode head;
     private final List<Qualifier> qualifiers;
+    private ExprNode head;
 
     private ListComprehension(ExprNode head, List<Qualifier> qualifiers) {
         this.head = head;

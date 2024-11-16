@@ -9,12 +9,11 @@ import pascal.hardscript.util.lang.Identifier;
 import java.util.*;
 
 public abstract sealed class Scope permits BlockScope, ComponentScope, DesignScope {
-    private Scope parent;
-    private List<Scope> children = new ArrayList<>();
     private final Set<Alias> aliases = new HashSet<>();
     private final MapBinding binding = MapBinding.ofEmpty();
-
     private final Evaluator evaluator = new Evaluator(this);
+    private List<Scope> children = new ArrayList<>();
+    private Scope parent;
 
     protected Scope(Scope parent) {
         this.parent = parent;
@@ -32,12 +31,12 @@ public abstract sealed class Scope permits BlockScope, ComponentScope, DesignSco
         return children;
     }
 
-    public void addChild(Scope child) {
-        children.add(child);
-    }
-
     public void setChildren(List<Scope> children) {
         this.children = children;
+    }
+
+    public void addChild(Scope child) {
+        children.add(child);
     }
 
     public MapBinding getBinding() {

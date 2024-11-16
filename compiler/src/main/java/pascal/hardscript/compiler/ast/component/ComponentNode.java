@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Objects;
 
 public final class ComponentNode extends ASTNode {
-    private Identifier identifier;
-    private ComponentTypeNode type;
     private final List<Identifier> attributes;
     private final List<ElementNode> elements;
+    private Identifier identifier;
+    private ComponentTypeNode type;
 
     private ComponentNode(Identifier identifier, ComponentTypeNode type,
                           List<Identifier> attributes, List<ElementNode> elements) {

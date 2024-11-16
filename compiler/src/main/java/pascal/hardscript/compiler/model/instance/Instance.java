@@ -12,20 +12,6 @@ import java.util.List;
 
 public sealed interface Instance extends Entity permits Data, DataAccess, Value {
 
-    InstanceType getType();
-
-    void setType(InstanceType type);
-
-    default boolean hasImplicitType() {
-        return getType() instanceof PolyType;
-    }
-
-    default boolean isUserDefined() {
-        return !isBuiltin();
-    }
-
-    boolean isBuiltin();
-
     static Instance accessOf(Instance base, Selector selector) {
         if (base instanceof Value value) {
             return selectConstant(value, selector);
@@ -35,9 +21,9 @@ public sealed interface Instance extends Entity permits Data, DataAccess, Value 
 
         List<Selector> selectors = new LinkedList<>();
         selectors.add(selector);
-        while (base instanceof DataAccess access) {
-            base = access.base();
-            selectors.addFirst(access.selector());
+        while (base instanceof DataAccess(Data nextBase, Selector nextSelector)) {
+            base = nextBase;
+            selectors.addFirst(nextSelector);
         }
         var finalSelector = selectors.getFirst();
         for (int i = 1; i < selectors.size(); i++) {
@@ -58,4 +44,18 @@ public sealed interface Instance extends Entity permits Data, DataAccess, Value 
         }
         return BitVectorValue.of(value.toBitVector().select(msb, lsb));
     }
+
+    InstanceType getType();
+
+    void setType(InstanceType type);
+
+    default boolean hasImplicitType() {
+        return getType() instanceof PolyType;
+    }
+
+    default boolean isUserDefined() {
+        return !isBuiltin();
+    }
+
+    boolean isBuiltin();
 }

@@ -11,11 +11,11 @@ import java.util.Collections;
 import java.util.List;
 
 public final class ComponentScope extends Scope {
-    private Signature signature;
-    private Attributes attributes;
     private final Identifier identifier;
     private final List<Instance> inputs = new ArrayList<>();
     private final List<Instance> outputs = new ArrayList<>();
+    private Signature signature;
+    private Attributes attributes;
 
     public ComponentScope(Scope parent, Identifier identifier) {
         super(parent);

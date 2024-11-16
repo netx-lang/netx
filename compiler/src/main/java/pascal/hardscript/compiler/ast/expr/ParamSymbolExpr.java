@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Objects;
 
 public final class ParamSymbolExpr extends SymbolExpr {
-    private PrimarySymbol head;
     private final List<ExprNode> arguments;
+    private PrimarySymbol head;
 
     private ParamSymbolExpr(PrimarySymbol head, List<ExprNode> arguments) {
         this.head = head;

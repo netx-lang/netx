@@ -9,6 +9,14 @@ import java.util.function.Consumer;
 
 public record EntityList(List<Entity> entities) implements Entity {
 
+    public static EntityList of(List<Entity> values) {
+        return new EntityList(values);
+    }
+
+    public static EntityList ofEmpty() {
+        return new EntityList(List.of());
+    }
+
     public Entity select(Selector selector) {
         return switch (selector) {
             case BitSelector bitSelector -> entities.get(bitSelector.index().toInt());
@@ -23,13 +31,5 @@ public record EntityList(List<Entity> entities) implements Entity {
 
     public void forEach(Consumer<Entity> consumer) {
         entities.forEach(consumer);
-    }
-
-    public static EntityList of(List<Entity> values) {
-        return new EntityList(values);
-    }
-
-    public static EntityList ofEmpty() {
-        return new EntityList(List.of());
     }
 }

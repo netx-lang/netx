@@ -13,9 +13,9 @@ import java.util.Map;
 import static pascal.hardscript.compiler.Configuration.FULLY_EXPAND;
 
 public final class HSPrinter {
+    private static final int INST_INLINE = FULLY_EXPAND ? 3 : 4;
     private final JsonNode json;
     private final NotepadWriter writer;
-    private static final int INST_INLINE = FULLY_EXPAND ? 3 : 4;
 
     public HSPrinter(JsonNode json, NotepadWriter writer) {
         this.json = json;
@@ -33,7 +33,8 @@ public final class HSPrinter {
                 writer.println(",");
                 printObject(iterator.next(), INST_INLINE);
             }
-            writer.newLine(); endArray();
+            writer.newLine();
+            endArray();
         }
         writer.flush();
         writer.close();
@@ -45,7 +46,8 @@ public final class HSPrinter {
 
     private void printObject(JsonNode node, int inline) {
         startObject();
-        printAllFields(node, inline); writer.newLine();
+        printAllFields(node, inline);
+        writer.newLine();
         endObject();
     }
 
@@ -126,14 +128,6 @@ public final class HSPrinter {
         }
     }
 
-    public enum HsonType {
-        COMPONENT, REGISTER, BUILTIN, INSTANTIATE, CLOCK, WIRE;
-
-        public static HsonType typeOf(JsonNode node) {
-            return valueOf(node.get("type").textValue().toUpperCase());
-        }
-    }
-
     private void startObject() {
         writer.println("{");
         writer.incIndent();
@@ -167,6 +161,14 @@ public final class HSPrinter {
     private void printKey(String str) {
         printStr(str);
         writer.print(": ");
+    }
+
+    public enum HsonType {
+        COMPONENT, REGISTER, BUILTIN, INSTANTIATE, CLOCK, WIRE;
+
+        public static HsonType typeOf(JsonNode node) {
+            return valueOf(node.get("type").textValue().toUpperCase());
+        }
     }
 }
 

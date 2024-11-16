@@ -24,12 +24,12 @@ public final class ComponentAtom extends AtomType {
         return new ComponentAtom(definition, identifier, parameters);
     }
 
-    public void setIdentifier(Identifier identifier) {
-        this.identifier = identifier;
-    }
-
     public Identifier getIdentifier() {
         return identifier;
+    }
+
+    public void setIdentifier(Identifier identifier) {
+        this.identifier = identifier;
     }
 
     public ComponentNode getDefinition() {

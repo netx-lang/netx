@@ -15,10 +15,10 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public final class DesignScope extends Scope {
-    private ComponentScope top;
     private final Supplier<Integer> dataIndexer;
     private final Map<Identifier, ComponentNode> definitions = new HashMap<>();
     private final BuiltInComponentFactory factory = new BuiltInComponentFactory(this);
+    private ComponentScope top;
 
     DesignScope() {
         super(null);

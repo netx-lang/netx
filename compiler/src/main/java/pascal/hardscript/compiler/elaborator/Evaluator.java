@@ -37,12 +37,36 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import static pascal.hardscript.compiler.elaborator.Types.*;
 
 public final class Evaluator {
     private static final Logger log = LoggerFactory.getLogger(Evaluator.class);
+    private static final Map<BinaryExpr.Operator, BiFunction<IntegerValue, IntegerValue, Value>>
+            BINARY_OPERATOR_MAP = Map.ofEntries(
+                    Map.entry(BinaryExpr.Operator.ADD, IntegerValue::add),
+                    Map.entry(BinaryExpr.Operator.SUB, IntegerValue::sub),
+                    Map.entry(BinaryExpr.Operator.MUL, IntegerValue::mul),
+                    Map.entry(BinaryExpr.Operator.DIV, IntegerValue::div),
+                    Map.entry(BinaryExpr.Operator.MOD, IntegerValue::mod),
+                    Map.entry(BinaryExpr.Operator.POW, IntegerValue::pow),
+                    Map.entry(BinaryExpr.Operator.AND, IntegerValue::and),
+                    Map.entry(BinaryExpr.Operator.OR, IntegerValue::or),
+                    Map.entry(BinaryExpr.Operator.XOR, IntegerValue::xor),
+                    Map.entry(BinaryExpr.Operator.XNOR, IntegerValue::xnor),
+                    Map.entry(BinaryExpr.Operator.ARITH_SHR, IntegerValue::ashr),
+                    Map.entry(BinaryExpr.Operator.LOGIC_SHR, IntegerValue::lshr),
+                    Map.entry(BinaryExpr.Operator.ARITH_SHL, IntegerValue::shl),
+                    Map.entry(BinaryExpr.Operator.LOGIC_SHL, IntegerValue::shl),
+                    Map.entry(BinaryExpr.Operator.EQ, IntegerValue::eq),
+                    Map.entry(BinaryExpr.Operator.NE, IntegerValue::ne),
+                    Map.entry(BinaryExpr.Operator.LT, IntegerValue::lt),
+                    Map.entry(BinaryExpr.Operator.LE, IntegerValue::le),
+                    Map.entry(BinaryExpr.Operator.GT, IntegerValue::gt),
+                    Map.entry(BinaryExpr.Operator.GE, IntegerValue::ge)
+    );
     private static DesignScope global;
 
     private final LinkedList<Binding> bindings = new LinkedList<>();
@@ -54,10 +78,7 @@ public final class Evaluator {
         this.scope = scope;
         bindings.add(scope.getBinding());
     }
-
-    public static void setGlobal(DesignScope design) {
-        Evaluator.global = design;
-    }
+    private static Supplier<Integer> dataIndexer;
 
     public ComponentType evaluateToComponentType(ExprNode expr) {
         return castToComponentType(expr.getSourceLoc(), evaluate(expr));
@@ -96,18 +117,9 @@ public final class Evaluator {
         };
     }
 
-    public Data.Factory<?> evaluateToDataFactory(ExprNode expr) {
-        Data.Factory<?> factory;
-        if (expr instanceof AutoTypeExpr) {
-            factory = Wire.Factory.of(
-                    scope.getLeastUpperComponent(),
-                    PolyType.getInstance(), global.getDataIndexer());
-        } else {
-            mode = EvaluationMode.DATA_FACTORY;
-            factory = requiresDataFactory(expr.getSourceLoc(), evaluate(expr));
-            mode = EvaluationMode.COMMON;
-        }
-        return factory;
+    public static void setGlobal(DesignScope design) {
+        Evaluator.global = design;
+        Evaluator.dataIndexer = design.getDataIndexer();
     }
 
     private Macro evaluateMacroExpr(MacroExpr expr) {
@@ -236,28 +248,19 @@ public final class Evaluator {
         };
     }
 
-    private static final Map<BinaryExpr.Operator, BiFunction<IntegerValue, IntegerValue, Value>> BINARY_OPERATOR_MAP = Map.ofEntries(
-            Map.entry(BinaryExpr.Operator.ADD, IntegerValue::add),
-            Map.entry(BinaryExpr.Operator.SUB, IntegerValue::sub),
-            Map.entry(BinaryExpr.Operator.MUL, IntegerValue::mul),
-            Map.entry(BinaryExpr.Operator.DIV, IntegerValue::div),
-            Map.entry(BinaryExpr.Operator.MOD, IntegerValue::mod),
-            Map.entry(BinaryExpr.Operator.POW, IntegerValue::pow),
-            Map.entry(BinaryExpr.Operator.AND, IntegerValue::and),
-            Map.entry(BinaryExpr.Operator.OR, IntegerValue::or),
-            Map.entry(BinaryExpr.Operator.XOR, IntegerValue::xor),
-            Map.entry(BinaryExpr.Operator.XNOR, IntegerValue::xnor),
-            Map.entry(BinaryExpr.Operator.ARITH_SHR, IntegerValue::ashr),
-            Map.entry(BinaryExpr.Operator.LOGIC_SHR, IntegerValue::lshr),
-            Map.entry(BinaryExpr.Operator.ARITH_SHL, IntegerValue::shl),
-            Map.entry(BinaryExpr.Operator.LOGIC_SHL, IntegerValue::shl),
-            Map.entry(BinaryExpr.Operator.EQ, IntegerValue::eq),
-            Map.entry(BinaryExpr.Operator.NE, IntegerValue::ne),
-            Map.entry(BinaryExpr.Operator.LT, IntegerValue::lt),
-            Map.entry(BinaryExpr.Operator.LE, IntegerValue::le),
-            Map.entry(BinaryExpr.Operator.GT, IntegerValue::gt),
-            Map.entry(BinaryExpr.Operator.GE, IntegerValue::ge)
-    );
+    public Data.Factory<?> evaluateToDataFactory(ExprNode expr) {
+        Data.Factory<?> factory;
+        if (expr instanceof AutoTypeExpr) {
+            factory = Wire.Factory.of(
+                    scope.getLeastUpperComponent(),
+                    PolyType.getInstance(), dataIndexer);
+        } else {
+            mode = EvaluationMode.DATA_FACTORY;
+            factory = requiresDataFactory(expr.getSourceLoc(), evaluate(expr));
+            mode = EvaluationMode.COMMON;
+        }
+        return factory;
+    }
 
     private Entity evaluateBinaryExpr(BinaryExpr expr) {
         var sourceLoc = expr.getSourceLoc();
@@ -299,12 +302,12 @@ public final class Evaluator {
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         requiresMatchedSize(sourceLoc, 1, arguments);
         return Wire.Factory.of(
-                scope.getLeastUpperComponent(), evaluateBitWidth(arguments.getFirst()), global.getDataIndexer());
+                scope.getLeastUpperComponent(), evaluateBitWidth(arguments.getFirst()), dataIndexer);
     }
 
     private Clock.Factory evaluateClockFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         if (arguments.isEmpty()) {
-            return Clock.Factory.of(scope.getLeastUpperComponent(), global.getDataIndexer());
+            return Clock.Factory.of(scope.getLeastUpperComponent(), dataIndexer);
         } else {
             log.error("{}: Unexpected specification for component type clock: {}", sourceLoc, arguments);
             throw new CompileCancellationException();

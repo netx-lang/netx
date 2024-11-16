@@ -181,7 +181,7 @@ public final class HSParser {
     static BitVectorNumber parseBitVectorNumber(BitVectorNumberContext ctx) {
         var literal = ctx.getText().toLowerCase().split("'");
         int size = Integer.parseInt(literal[0]);
-        int radix = switch (literal[1].charAt(0)){
+        int radix = switch (literal[1].charAt(0)) {
             case 'b' -> 2;
             case 'o' -> 8;
             case 'd' -> 10;
