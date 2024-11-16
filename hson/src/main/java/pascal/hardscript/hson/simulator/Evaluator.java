@@ -31,6 +31,9 @@ public class Evaluator {
         BINARY_OP = new HashMap<>();
         BINARY_OP.put(BuiltinComponent.ADD, BitVector::add);
         BINARY_OP.put(BuiltinComponent.SUB, BitVector::sub);
+        BINARY_OP.put(BuiltinComponent.MUL, BitVector::mul);
+        BINARY_OP.put(BuiltinComponent.DIV, BitVector::div);
+        BINARY_OP.put(BuiltinComponent.MOD, BitVector::mod);
         BINARY_OP.put(BuiltinComponent.OR, BitVector::or);
         BINARY_OP.put(BuiltinComponent.AND, BitVector::and);
         BINARY_OP.put(BuiltinComponent.XOR, BitVector::xor);
@@ -49,7 +52,7 @@ public class Evaluator {
             case CAST -> inputs;
             case NOT -> evaluateNotGate(inputs);
             case CONCAT -> evaluateMultiIn(BitVector::concat, inputs);
-            case ADD, SUB -> evaluateBinary(BINARY_OP.get(builtin), inputs);
+            case ADD, SUB, MUL, DIV, MOD -> evaluateBinary(BINARY_OP.get(builtin), inputs);
             case SHL, ASHR, LSHR -> evaluateShift(SHIFT_OP.get(builtin), inputs);
             case OR, AND, XOR, NAND, NOR, XNOR -> evaluateMultiIn(BINARY_OP.get(builtin), inputs);
             case EQ, NE, SLT, SGT, SLE, ULT, SGE, UGT, ULE, UGE -> evaluateRelation(RELATIONAL_OP.get(builtin), inputs);

@@ -10,7 +10,7 @@ public enum BuiltinComponent {
     CAST, CONCAT,
     OR, NOT, AND, XOR, NOR, NAND, XNOR,
     EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE,
-    ADD, SUB, SHL, ASHR, LSHR;
+    ADD, SUB, SHL, MUL, DIV, MOD, ASHR, LSHR;
 
     public static final Set<BuiltinComponent> NO_DUMP = Set.of(IGNORE, SPLIT, TO);
     public static final Map<BuiltinComponent, String> VERILOG_OP;
@@ -31,7 +31,8 @@ public enum BuiltinComponent {
         VERILOG_OP.put(SLE, "<=");  VERILOG_OP.put(ULE, "<=");
         VERILOG_OP.put(SGT, ">");   VERILOG_OP.put(UGT, ">");
         VERILOG_OP.put(SGE, ">=");  VERILOG_OP.put(UGE, ">=");
-        VERILOG_OP.put(ADD, "+");   VERILOG_OP.put(SUB, "-");
+        VERILOG_OP.put(ADD, "+");   VERILOG_OP.put(SUB, "-");   VERILOG_OP.put(MUL, "*");
+        VERILOG_OP.put(DIV, "/");   VERILOG_OP.put(MOD, "%");
         VERILOG_OP.put(SHL, "<<");  VERILOG_OP.put(LSHR, ">>"); VERILOG_OP.put(ASHR, ">>>");
     }
 

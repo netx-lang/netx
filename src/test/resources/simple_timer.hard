@@ -1,0 +1,73 @@
+component top: [clk_50] -> [hex_${i} | i in [0..8]] {
+	inst clk_50 of clock()
+	for (i in [0..8]) {
+		inst hex_${i}   of wire(bit(7))
+	}
+
+	let REG = component clk: REGISTER(clk, true)
+
+	inst ms_clk, s_clk, m_clk, h_clk of clock()
+	inst ms, s, m, h of wire(bit(32))
+
+	ms_clk <- clock_divider(250000) <> clk_50
+	s_clk  <- clock_divider(100)    <> ms_clk
+	m_clk  <- clock_divider(60)     <> s_clk
+	h_clk  <- clock_divider(60)     <> h_clk
+
+	ms <- REG(ms_clk) <> MUX <> [EQ <> [ms, 100], ADD <> [ms, 1], 0]
+	s  <- REG(s_clk)  <> MUX <> [EQ <> [ms, 60], ADD <> [s, 1], 0]
+	m  <- REG(m_clk)  <> MUX <> [EQ <> [ms, 60], ADD <> [m, 1], 0]
+	h  <- REG(h_clk)  <> MUX <> [EQ <> [ms, 23], ADD <> [h, 1], 0]
+
+	hex_0 <- hex <> CAST <> MOD <> [ms, 10]
+	hex_1 <- hex <> CAST <> DIV <> [ms, 10]
+	hex_2 <- hex <> CAST <> MOD <> [s, 10]
+	hex_3 <- hex <> CAST <> DIV <> [s, 10]
+	hex_4 <- hex <> CAST <> MOD <> [m, 10]
+	hex_5 <- hex <> CAST <> DIV <> [m, 10]
+	hex_6 <- hex <> CAST <> MOD <> [h, 10]
+	hex_7 <- hex <> CAST <> DIV <> [h, 10]
+}
+
+component clock_divider(max): [clk_50] -> [clk] {
+	inst clk_50, clk of clock()
+	inst count       of wire(bit(32))
+
+	let REG = REGISTER(clk_50, true)
+	let ctl = EQ <> [count, max]
+	count <- REG <> MUX <> [ctl, ADD <> [count, 1], 0]
+	clk   <- REG <> MUX <> [ctl, clk, NOT <> clk]
+}
+
+component hex: [num] -> [code] {
+	inst num  of wire(bit(4))
+	inst code of wire(bit(7))
+	let mask = component x: MUX <> [EQ <> [x, num], 1'b0, 1'b1]
+	let branch = component x, y: AND <> [CAST <> mask(x), y]
+	code <- OR(16) <> [
+		branch(4'h0, 7'b1000000),
+		branch(4'h1, 7'b1111001),
+		branch(4'h2, 7'b0100100),
+		branch(4'h3, 7'b0110000),
+		branch(4'h4, 7'b0011001),
+		branch(4'h5, 7'b0010010),
+		branch(4'h6, 7'b0000010),
+		branch(4'h7, 7'b1111000),
+		branch(4'h8, 7'b0000000),
+		branch(4'h9, 7'b0010000),
+		branch(4'hA, 7'b0001000),
+		branch(4'hb, 7'b0000011),
+		branch(4'hC, 7'b1000110),
+		branch(4'hd, 7'b0100001),
+		branch(4'hE, 7'b0000110),
+		branch(4'hF, 7'b0001110)
+	]
+}
+
+component MUX : [ctl, i0, i1] -> [out] {
+    inst ctl, i0, i1, out of auto
+    out <- OR <> [
+        AND <> [i0, CAST <> NOT <> ctl],
+        AND <> [i1, CAST <> ctl]
+    ]
+}
