@@ -76,11 +76,13 @@ public class SimulatorTest {
 
         List<Integer> count = new LinkedList<>();
         simulator.setOnEachTick(env -> count.add(env.getOutput("count").toInt()));
+        simulator.setInput("rst", high);
+        simulator.runUntil(1);
         simulator.setInput("rst", low);
         simulator.runUntil(6);
         simulator.setInput("rst", high);
-        simulator.runUntil(8);
-        assertEquals(List.of(0, 0, 1, 1, 2, 2, 3, 3, 0, 0), count);
+        simulator.runUntil(3);
+        assertEquals(List.of(0, 0, 0, 1, 1, 2, 2, 3, 3, 0), count);
     }
 
     private static Simulator buildSimulator(String other) throws IOException {

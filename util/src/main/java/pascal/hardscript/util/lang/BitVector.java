@@ -14,43 +14,29 @@ public final class BitVector {
         this.data = new byte[(size + 7) / 8];
     }
 
-    private BitVector(int size, byte[] data) {
+    public BitVector(int size, byte[] array) {
         this.size = size;
         this.data = new byte[(size + 7) / 8];
-        int start = Math.max(0, data.length - this.data.length);
-        System.arraycopy(data, start, this.data, 0, Math.min(data.length, this.data.length));
+        int length = Math.min(data.length, array.length);
+        System.arraycopy(array, array.length - length, data, data.length - length, length);
+        normalize();
     }
 
     public static BitVector parse(String rep, int size, int radix) {
-        if (radix == 10) {
-            BigInteger value = new BigInteger(rep);
-            return new BitVector(size, value.toByteArray());
-        } else {
-            BitVector result = new BitVector(size);
-            int valid = Integer.bitCount(radix - 1);
-            for (int i = 0; i < rep.length(); i++) {
-                int digit = Character.digit(rep.charAt(rep.length() - i - 1), radix);
-                for (int j = 0; j < valid; j++) {
-                    int index = i * valid + j;
-                    if ((digit & (1 << j)) != 0 && index < size) {
-                        result.set(index);
-                    }
-                }
-            }
-            return result;
-        }
+        var bigInteger = new BigInteger(rep, radix);
+        return fromBigInteger(size, bigInteger);
     }
 
     public static BitVector fromInt(int value) {
-        return new BitVector(Integer.SIZE, BigInteger.valueOf(value).toByteArray());
+        return fromInt(value, Integer.SIZE);
     }
 
     public static BitVector fromInt(int value, int size) {
-        return new BitVector(size, BigInteger.valueOf(value).toByteArray());
+        return fromBigInteger(size, BigInteger.valueOf(value));
     }
 
     public static BitVector fromBoolean(boolean value) {
-        return new BitVector(1, value ? new byte[]{1} : new byte[]{0});
+        return fromInt(value ? 1 : 0, 1);
     }
 
     public static BitVector fromBigInteger(int size, BigInteger value) {
@@ -67,6 +53,27 @@ public final class BitVector {
 
     public boolean get(int index) {
         return (data[index >> 3] & (1 << (index & 7))) != 0;
+    }
+
+    public boolean msb() {
+        return get(size - 1);
+    }
+
+    public boolean lsb() {
+        return get(0);
+    }
+
+    public BitVector ext(int width) {
+        if (msb()) {
+            var high = BigInteger.ONE.shiftLeft(width - size + 1).subtract(BigInteger.ONE);
+            return fromBigInteger(width - size, high).concat(this);
+        } else {
+            return new BitVector(width, data);
+        }
+    }
+
+    public BitVector truncate(int width) {
+        return new BitVector(width, data);
     }
 
     public BitVector select(int msb, int lsb) {
@@ -137,222 +144,134 @@ public final class BitVector {
         return get(0);
     }
 
-    public BitVector concat(BitVector other) {
-        var result = new BitVector(size + other.size);
-        int lhsLength = data.length, rhsLength = other.data.length;
-        if ((other.size & 7) == 0) {
-            System.arraycopy(other.data, 0, result.data, 0, rhsLength);
-            System.arraycopy(data, 0, result.data, rhsLength, lhsLength);
-        } else {
-            normalize();
-            int offset = other.size & 7;
-            var shift = this.shl(offset);
-            System.arraycopy(other.data, 0, result.data, 0, rhsLength - 1);
-            System.arraycopy(shift.data, 1, result.data, rhsLength, lhsLength - 1);
-            result.data[rhsLength - 1] = (byte) (shift.data[0] | other.data[rhsLength - 1]);
-            result.data[result.data.length - 1] = (byte) (data[lhsLength - 1] << offset);
-        }
-        return result;
+    public BitVector concat(BitVector that) {
+        var rep = this.toBigInteger().shiftLeft(that.size).or(that.toBigInteger());
+        return fromBigInteger(this.size + that.size, rep);
+
     }
 
-    public BitVector negative() {
-        BitVector result = not();
-        for (int i = 0; i < data.length; i++) {
-            result.data[i]++;
-            if (result.data[i] != 0) {
-                break;
-            }
-        }
-        return result;
+    public BitVector neg() {
+        return fromBigInteger(size, toBigInteger().negate());
     }
 
     public BitVector not() {
-        BitVector result = new BitVector(size);
-        for (int i = 0; i < data.length; i++) {
-            result.data[i] = (byte) ~data[i];
-        }
-        return result;
+        return fromBigInteger(size, toBigInteger().not());
     }
 
-    public BitVector add(BitVector other) {
-        requiresSameSize(this, other);
-        BitVector result = new BitVector(size);
-        int carry = 0;
-        for (int i = 0; i < data.length; i++) {
-            int sum = (data[i] & 0xff) + (other.data[i] & 0xff) + carry;
-            result.data[i] = (byte) sum;
-            carry = sum >> 8;
-        }
-        return result;
+    public BitVector add(BitVector that) {
+        requiresSameSize(this, that);
+        return fromBigInteger(size, toBigInteger().add(that.toBigInteger()));
     }
 
-    public BitVector sub(BitVector other) {
-        requiresSameSize(this, other);
-        return add(other.negative());
+    public BitVector sub(BitVector that) {
+        requiresSameSize(this, that);
+        return fromBigInteger(size, toBigInteger().subtract(that.toBigInteger()));
     }
 
-    public BitVector mul(BitVector other) {
-        requiresSameSize(this, other);
-        return fromBigInteger(size, toBigInteger().multiply(other.toBigInteger()));
+    public BitVector mul(BitVector that) {
+        requiresSameSize(this, that);
+        return fromBigInteger(size, toBigInteger().multiply(that.toBigInteger()));
     }
 
-    public BitVector div(BitVector other) {
-        requiresSameSize(this, other);
-        return fromBigInteger(size, toBigInteger().divide(other.toBigInteger()));
+    public BitVector div(BitVector that) {
+        requiresSameSize(this, that);
+        return fromBigInteger(size, toBigInteger().divide(that.toBigInteger()));
     }
 
-    public BitVector mod(BitVector other) {
-        requiresSameSize(this, other);
-        return fromBigInteger(size, toBigInteger().mod(other.toBigInteger()));
+    public BitVector mod(BitVector that) {
+        requiresSameSize(this, that);
+        return fromBigInteger(size, toBigInteger().mod(that.toBigInteger()));
     }
 
-    public BitVector pow(BitVector other) {
-        return fromBigInteger(size, toBigInteger().pow(other.toInt()));
+    public BitVector pow(BitVector that) {
+        return fromBigInteger(size, toBigInteger().pow(that.toInt()));
     }
 
-    public BitVector and(BitVector other) {
-        requiresSameSize(this, other);
-        BitVector result = new BitVector(size);
-        for (int i = 0; i < data.length; i++) {
-            result.data[i] = (byte) (data[i] & other.data[i]);
-        }
-        return result;
+    public BitVector and(BitVector that) {
+        requiresSameSize(this, that);
+        return fromBigInteger(size, toBigInteger().and(that.toBigInteger()));
     }
 
-    public BitVector nand(BitVector other) {
-        return this.and(other).not();
+    public BitVector nand(BitVector that) {
+        return this.and(that).not();
     }
 
-    public BitVector or(BitVector other) {
-        requiresSameSize(this, other);
-        BitVector result = new BitVector(size);
-        for (int i = 0; i < data.length; i++) {
-            result.data[i] = (byte) (data[i] | other.data[i]);
-        }
-        return result;
+    public BitVector or(BitVector that) {
+        requiresSameSize(this, that);
+        return fromBigInteger(size, toBigInteger().or(that.toBigInteger()));
     }
 
-    public BitVector nor(BitVector other) {
-        return this.or(other).not();
+    public BitVector nor(BitVector that) {
+        return this.or(that).not();
     }
 
-    public BitVector xor(BitVector other) {
-        requiresSameSize(this, other);
-        BitVector result = new BitVector(size);
-        for (int i = 0; i < data.length; i++) {
-            result.data[i] = (byte) (data[i] ^ other.data[i]);
-        }
-        return result;
+    public BitVector xor(BitVector that) {
+        requiresSameSize(this, that);
+        return fromBigInteger(size, toBigInteger().xor(that.toBigInteger()));
     }
 
-    public BitVector xnor(BitVector other) {
-        requiresSameSize(this, other);
-        return xor(other).not();
+    public BitVector xnor(BitVector that) {
+        requiresSameSize(this, that);
+        return xor(that).not();
     }
 
     public BitVector ashr(int offset) {
-        var result = new BitVector(size);
-        if (get(size - 1)) {
-            int maskOffset = 8 - ((data.length << 3) - size);
-            data[data.length - 1] |= (byte) (0xff << maskOffset);
-            result.setAllBytes((byte) 0xff);
+        if (!msb()) {
+            return lshr(offset);
+        } else {
+            var rep = toBigInteger();
+            var high = BigInteger.ONE.shiftLeft(size + 1).subtract(BigInteger.ONE);
+            var low = BigInteger.ONE.shiftLeft(size - offset).subtract(BigInteger.ONE);
+            return fromBigInteger(size, rep.shiftRight(offset).or(high.xor(low)));
         }
-        doShiftRight(result, offset);
-        return result;
     }
 
     public BitVector lshr(int offset) {
-        var result = new BitVector(size);
-        doShiftRight(result, offset);
-        return result;
-    }
-
-    private void doShiftRight(BitVector result, int offset) {
-        int byteOffset = offset >> 3, bitOffset = offset & 7;
-        if (byteOffset >= data.length) {
-            return;
-        }
-        if (bitOffset == 0) {
-            System.arraycopy(data, byteOffset, result.data, 0, data.length - byteOffset);
-        } else {
-            result.data[data.length - byteOffset - 1] = (byte) (data[data.length - 1] >> bitOffset);
-            var mask = ((1 << (8 - bitOffset + 1)) - 1);
-            for (int i = 0; i < data.length - byteOffset - 1; i++) {
-                var low = (data[i + byteOffset] >>> bitOffset) & mask;
-                var high = (data[i + byteOffset + 1] << (8 - bitOffset));
-                result.data[i] = (byte) (low | high);
-            }
-        }
+        return fromBigInteger(size, toBigInteger().shiftRight(offset));
     }
 
     public BitVector shl(int offset) {
-        BitVector result = new BitVector(size);
-        int byteOffset = offset >> 3, bitOffset = offset & 7;
-        if (byteOffset >= data.length) {
-            return result;
-        }
-        if (bitOffset == 0) {
-            System.arraycopy(data, 0, result.data, byteOffset, data.length);
-        } else {
-            result.data[byteOffset] = (byte) (data[0] << bitOffset);
-            var mask = ((1 << (bitOffset + 1)) - 1);
-            for (int i = byteOffset + 1; i < data.length; i++) {
-                var low = data[i - byteOffset] << bitOffset;
-                var high = (data[i - byteOffset - 1] >>> (8 - bitOffset)) & mask;
-                result.data[i] = (byte) (low | high);
-            }
-        }
-        return result;
+        return fromBigInteger(size, toBigInteger().shiftLeft(offset));
     }
 
-    public boolean eq(BitVector other) {
-        if (size != other.size) {
-            return false;
-        }
-        this.normalize();
-        other.normalize();
-        for (int i = 0; i < data.length; i++) {
-            if (data[i] != other.data[i]) {
-                return false;
-            }
-        }
-        return true;
+    public boolean eq(BitVector that) {
+        return toBigInteger().equals(that.toBigInteger());
     }
 
-    public boolean ne(BitVector other) {
-        return !eq(other);
+    public boolean ne(BitVector that) {
+        return !eq(that);
     }
 
-    public boolean sgt(BitVector other) {
-        return toBigInteger().compareTo(other.toBigInteger()) > 0;
+    public boolean sgt(BitVector that) {
+        return toBigInteger().compareTo(that.toBigInteger()) > 0;
     }
 
-    public boolean sge(BitVector other) {
-        return toBigInteger().compareTo(other.toBigInteger()) >= 0;
+    public boolean sge(BitVector that) {
+        return toBigInteger().compareTo(that.toBigInteger()) >= 0;
     }
 
-    public boolean slt(BitVector other) {
-        return toBigInteger().compareTo(other.toBigInteger()) < 0;
+    public boolean slt(BitVector that) {
+        return toBigInteger().compareTo(that.toBigInteger()) < 0;
     }
 
-    public boolean sle(BitVector other) {
-        return toBigInteger().compareTo(other.toBigInteger()) <= 0;
+    public boolean sle(BitVector that) {
+        return toBigInteger().compareTo(that.toBigInteger()) <= 0;
     }
 
-    public boolean ugt(BitVector other) {
-        return toUnsignedBigInteger().compareTo(other.toBigInteger()) > 0;
+    public boolean ugt(BitVector that) {
+        return toUnsignedBigInteger().compareTo(that.toUnsignedBigInteger()) > 0;
     }
 
-    public boolean uge(BitVector other) {
-        return toUnsignedBigInteger().compareTo(other.toBigInteger()) >= 0;
+    public boolean uge(BitVector that) {
+        return toUnsignedBigInteger().compareTo(that.toUnsignedBigInteger()) >= 0;
     }
 
-    public boolean ult(BitVector other) {
-        return toUnsignedBigInteger().compareTo(other.toBigInteger()) < 0;
+    public boolean ult(BitVector that) {
+        return toUnsignedBigInteger().compareTo(that.toUnsignedBigInteger()) < 0;
     }
 
-    public boolean ule(BitVector other) {
-        return toUnsignedBigInteger().compareTo(other.toBigInteger()) <= 0;
+    public boolean ule(BitVector that) {
+        return toUnsignedBigInteger().compareTo(that.toUnsignedBigInteger()) <= 0;
     }
 
     @Override
@@ -365,7 +284,7 @@ public final class BitVector {
     private void normalize() {
         int offset = 8 - ((data.length << 3) - size);
         var mask = (byte) ((1 << offset) - 1);
-        data[data.length - 1] &= mask;
+        data[0] &= mask;
     }
 
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();

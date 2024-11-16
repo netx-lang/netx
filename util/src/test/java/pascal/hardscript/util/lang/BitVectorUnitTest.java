@@ -2,9 +2,45 @@ package pascal.hardscript.util.lang;
 
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class BitVectorUnitTest {
+
+    @Test
+    void testBigInteger() {
+        BigInteger value = BigInteger.valueOf(12389);
+        assertEquals(value, BitVector.fromBigInteger(16, value).toBigInteger());
+        assertEquals(value, BitVector.fromBigInteger(50, value).toBigInteger());
+        assertEquals(value.and(BigInteger.valueOf(15)), BitVector.fromBigInteger(4, value).toBigInteger());
+    }
+
+    @Test
+    void testExt() {
+        BitVector bv1 = BitVector.parse("1", 1, 2);
+        BitVector bv2 = BitVector.parse("0", 1, 2);
+        BitVector bv3 = BitVector.parse("1101010", 7, 2);
+        BitVector bv4 = BitVector.parse("0010010", 7, 2);
+        BitVector bv5 = BitVector.parse("11111111", 8, 2);
+        BitVector bv6 = BitVector.parse("00000000", 8, 2);
+        BitVector bv7 = BitVector.parse("111111111111101010", 18, 2);
+        BitVector bv8 = BitVector.parse("000000000000010010", 18, 2);
+        assertEquals(bv5, bv1.ext(8));
+        assertEquals(bv6, bv2.ext(8));
+        assertEquals(bv7, bv3.ext(18));
+        assertEquals(bv8, bv4.ext(18));
+    }
+
+    @Test
+    void testTruncate() {
+        BitVector bv1 = BitVector.parse("01101011", 8, 2);
+        BitVector bv2 = BitVector.parse("011", 3, 2);
+        BitVector bv3 = BitVector.parse("1010010111111010000010111", 25, 2);
+        BitVector bv4 = BitVector.parse("10000010111", 11, 2);
+        assertEquals(bv2, bv1.truncate(3));
+        assertEquals(bv4, bv3.truncate(11));
+    }
 
     @Test
     void parse() {
@@ -20,13 +56,13 @@ class BitVectorUnitTest {
         BitVector bv10 = BitVector.parse("41", 4, 16);
         assertEquals("7'h6B", bv1.toString());
         assertEquals("8'h6B", bv2.toString());
-        assertEquals("18'h6B5303", bv3.toString());
+        assertEquals("18'h03536B", bv3.toString());
         assertEquals("8'hDB", bv4.toString());
-        assertEquals("9'hDB00", bv5.toString());
+        assertEquals("9'h00DB", bv5.toString());
         assertEquals("8'h5F", bv6.toString());
-        assertEquals("20'h5F0000", bv7.toString());
-        assertEquals("16'h41AF", bv8.toString());
-        assertEquals("16'h4100", bv9.toString());
+        assertEquals("20'h00005F", bv7.toString());
+        assertEquals("16'hAF41", bv8.toString());
+        assertEquals("16'h0041", bv9.toString());
         assertEquals("4'h01", bv10.toString());
     }
 
@@ -90,13 +126,13 @@ class BitVectorUnitTest {
     }
 
     @Test
-    void testNegative() {
+    void testNeg() {
         BitVector bv1 = BitVector.parse("01101011", 8, 2);
         BitVector bv2 = BitVector.parse("10010101", 8, 2);
         BitVector bv3 = BitVector.parse("1010010111111010000010000", 25, 2);
         BitVector bv4 = BitVector.parse("0101101000000101111110000", 25, 2);
-        assertEquals(bv2, bv1.negative());
-        assertEquals(bv4, bv3.negative());
+        assertEquals(bv2, bv1.neg());
+        assertEquals(bv4, bv3.neg());
     }
 
     @Test

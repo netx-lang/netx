@@ -94,7 +94,6 @@ public final class Simulator {
     public boolean clockStep() {
         if (onEachTick != null) {
             onEachTick.accept(this);
-            circuit.printAll();
         }
 
         var clock = pickClock();
@@ -153,14 +152,13 @@ public final class Simulator {
                 var data = (DataNode) output;
                 var value = update.next();
 
-                // FIXME:
-//                if (data.getWidth() != value.size()) {
-//                    if (data.getWidth() > value.size()) {
-//                        value = value.ext(data.getWidth());
-//                    } else {
-//                        value = value.truncate(data.getWidth());
-//                    }
-//                }
+                if (data.getWidth() != value.size()) {
+                    if (data.getWidth() > value.size()) {
+                        value = value.ext(data.getWidth());
+                    } else {
+                        value = value.truncate(data.getWidth());
+                    }
+                }
 
                 data.setValue(value);
                 if (data instanceof DataSelectNode selectNode) {

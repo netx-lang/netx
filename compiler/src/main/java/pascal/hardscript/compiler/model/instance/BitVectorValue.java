@@ -124,7 +124,7 @@ public record BitVectorValue(BitVector value) implements IntegerValue {
 
     @Override
     public BitVectorValue neg() {
-        return BitVectorValue.of(value.negative());
+        return BitVectorValue.of(value.neg());
     }
 
     @Override
