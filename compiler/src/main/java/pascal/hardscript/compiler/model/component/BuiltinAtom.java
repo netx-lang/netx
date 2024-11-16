@@ -10,7 +10,7 @@ public final class BuiltinAtom extends AtomType {
     private final BuiltinComponent builtin;
     private final SourceLoc sourceLoc;
 
-    public BuiltinAtom(BuiltinComponent builtin, SourceLoc sourceLoc, List<Entity> parameters) {
+    private BuiltinAtom(BuiltinComponent builtin, SourceLoc sourceLoc, List<Entity> parameters) {
         this.builtin = builtin;
         this.sourceLoc = sourceLoc;
         this.parameters = parameters;

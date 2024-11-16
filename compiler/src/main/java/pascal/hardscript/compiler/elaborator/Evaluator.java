@@ -31,10 +31,7 @@ import pascal.hardscript.util.lang.SourceLoc;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
@@ -81,7 +78,7 @@ public final class Evaluator {
     private static Supplier<Integer> dataIndexer;
 
     public ComponentType evaluateToComponentType(ExprNode expr) {
-        return castToComponentType(expr.getSourceLoc(), evaluate(expr));
+        return castToComponentType(evaluate(expr), expr.getSourceLoc());
     }
 
     public EntityList evaluateToList(ExprNode expr) {
@@ -139,7 +136,7 @@ public final class Evaluator {
                     throw e;
                 }
             }
-            case EntityList listValue -> listValue.select(selector);
+            case EntityList list -> list.select(selector);
             default -> {
                 log.error("{}: Expected component or list but got {}",
                         expr.getBase().getSourceLoc(), base);
@@ -295,8 +292,8 @@ public final class Evaluator {
 
     private Entity evaluateSequentialType(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
         return SequentialType.of(
-                castToComponentType(sourceLoc, lhs),
-                castToComponentType(sourceLoc, rhs));
+                castToComponentType(lhs, sourceLoc),
+                castToComponentType(rhs, sourceLoc));
     }
 
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
@@ -398,7 +395,7 @@ public final class Evaluator {
 
     private Entity evaluateComponentType(ParamSymbolExpr expr) {
         var identifier = getIdentifierFrom(expr.getHead());
-        var parameters = expr.getArguments().stream().map(this::evaluate).toList();
+        var parameters = evaluateParameters(expr);
         Entity prototype = resolveIdentifier(identifier);
         if (prototype instanceof Macro macro) {
             return evaluateMacroExpr(expr.getSourceLoc(), macro, parameters);
@@ -409,6 +406,21 @@ public final class Evaluator {
             log.error("{}: Expected component type but got {}", expr.getSourceLoc(), prototype);
             throw new CompileCancellationException();
         }
+    }
+
+    private List<Entity> evaluateParameters(ParamSymbolExpr expr) {
+        List<Entity> result = new ArrayList<>();
+        for (var arg : expr.getArguments()) {
+            var entity = evaluate(arg);
+            var param = switch (entity) {
+                case ComponentType type -> type;
+                case Data ignored -> castToComponentType(entity, arg.getSourceLoc());
+                case DataAccess ignored -> castToComponentType(entity, arg.getSourceLoc());
+                default -> requiresValue(arg.getSourceLoc(), entity);
+            };
+            result.add(param);
+        }
+        return result;
     }
 
 

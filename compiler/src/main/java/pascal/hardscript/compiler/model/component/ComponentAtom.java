@@ -20,10 +20,6 @@ public final class ComponentAtom extends AtomType {
         return new ComponentAtom(definition, id, List.of());
     }
 
-    public static ComponentAtom of(ComponentNode definition, Identifier identifier, List<Entity> parameters) {
-        return new ComponentAtom(definition, identifier, parameters);
-    }
-
     public Identifier getIdentifier() {
         return identifier;
     }

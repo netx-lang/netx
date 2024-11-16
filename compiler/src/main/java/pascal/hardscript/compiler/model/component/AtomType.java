@@ -4,7 +4,7 @@ import pascal.hardscript.compiler.model.Entity;
 
 import java.util.List;
 
-public sealed abstract class AtomType implements ComponentType permits BuiltinAtom, ComponentAtom {
+public sealed abstract class AtomType implements ComponentType permits BuiltinAtom, ComponentAtom, InstanceAtom {
     protected List<Entity> parameters;
 
     public List<Entity> getParameters() {

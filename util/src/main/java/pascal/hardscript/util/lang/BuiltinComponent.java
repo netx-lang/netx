@@ -6,13 +6,13 @@ import java.util.Map;
 import java.util.Set;
 
 public enum BuiltinComponent {
-    REGISTER, FROM, IGNORE, SPLIT, TO,
+    REGISTER, IGNORE, SPLIT, TO,
     EXT, CONCAT,
     OR, NOT, AND, XOR, NOR, NAND, XNOR,
     EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE,
     ADD, SUB, SHL, ASHR, LSHR;
 
-    public static final Set<BuiltinComponent> NO_DUMP = Set.of(IGNORE, SPLIT, FROM, TO);
+    public static final Set<BuiltinComponent> NO_DUMP = Set.of(IGNORE, SPLIT, TO);
     public static final Map<BuiltinComponent, String> VERILOG_OP;
     public static final Set<String> VALUES;
 

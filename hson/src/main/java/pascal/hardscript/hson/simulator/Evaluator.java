@@ -53,7 +53,7 @@ public class Evaluator {
             case OR, AND, XOR, NAND, NOR, XNOR -> evaluateMultiIn(BINARY_OP.get(builtin), inputs);
             case EQ, NE, SLT, SGT, SLE, ULT, SGE, UGT, ULE, UGE -> evaluateRelation(RELATIONAL_OP.get(builtin), inputs);
             case EXT -> throw new TodoException(); // TODO:
-            case REGISTER, FROM, IGNORE, SPLIT, TO -> throw new TodoException("Replace this exception");
+            case REGISTER, IGNORE, SPLIT, TO -> throw new TodoException("Replace this exception");
         };
     }
 

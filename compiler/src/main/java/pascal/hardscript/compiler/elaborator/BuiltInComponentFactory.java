@@ -23,7 +23,6 @@ public class BuiltInComponentFactory {
     public ComponentScope createBuiltInComponent(Scope parent, BuiltinAtom type) {
         return switch (type.getBuiltin()) {
             case REGISTER -> createREGISTERComponent(parent, type);
-            case FROM -> createFROMComponent(parent, type);
             case IGNORE -> createIGNOREComponent(parent, type);
             case SPLIT -> createSPLITComponent(parent, type);
             case TO -> createTOComponent(parent, type);
@@ -33,14 +32,6 @@ public class BuiltInComponentFactory {
             case EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE -> createRelationalOpComponent(parent, type);
             case SHL, ASHR, LSHR -> createShiftComponent(parent, type);
         };
-    }
-
-    public ComponentScope createFROMComponent(Scope parent, BuiltinAtom type) {
-        var result = instantiate(parent, type);
-        requiresMatchedSize(type.getSourceLoc(), 1, type.getParameters());
-        var data = requiresInstance(type.getSourceLoc(), type.getParameters().getFirst());
-        result.addOutput(data);
-        return result;
     }
 
     public ComponentScope createIGNOREComponent(Scope parent, BuiltinAtom type) {
@@ -67,14 +58,10 @@ public class BuiltInComponentFactory {
     private ComponentScope createREGISTERComponent(Scope parent, BuiltinAtom type) {
         requiresMatchedSize(type.getSourceLoc(), 2, type.getParameters());
         var result = instantiate(parent, type);
-
         var attributes = new Attributes();
-        var clock = requiresInstance(type.getSourceLoc(), type.getParameters().get(0));
         var isPosTrigger = requiresBooleanValue(type.getSourceLoc(), type.getParameters().get(1));
-        attributes.addAttribute(Identifier.of("clock"), clock);
         attributes.addAttribute(Identifier.of("isPosTrigger"), isPosTrigger);
         result.setAttributes(attributes);
-
         result.addInput(newWire(result, "i"));
         result.addOutput(newWire(result, "o"));
         return result;

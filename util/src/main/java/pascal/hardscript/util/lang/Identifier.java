@@ -43,4 +43,9 @@ public final class Identifier {
     public String toStringWithLoc() {
         return String.format("%s@(%s)", name, sourceLoc);
     }
+
+    @Override
+    public String toString() {
+        return toStringWithLoc();
+    }
 }

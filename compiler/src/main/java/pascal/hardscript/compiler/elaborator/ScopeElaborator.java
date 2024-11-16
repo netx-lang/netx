@@ -12,6 +12,8 @@ import pascal.hardscript.compiler.model.scope.Attributes;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
+import pascal.hardscript.util.lang.BuiltinComponent;
+import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
 
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static pascal.hardscript.compiler.Configuration.FULLY_EXPAND;
+import static pascal.hardscript.compiler.elaborator.Types.requiresComponentType;
 import static pascal.hardscript.compiler.elaborator.Types.requiresMatchedSize;
 
 final class ScopeElaborator {
@@ -147,6 +150,7 @@ final class ScopeElaborator {
         Instantiator.ComponentPort doInstantiate(ComponentType type) {
             return switch (type) {
                 case BuiltinAtom atom -> instantiateBuiltinAtom(atom);
+                case InstanceAtom atom -> instantiateInstanceAtom(atom);
                 case ComponentAtom atom -> instantiateComponentAtom(atom);
                 case ParallelType parallelType -> instantiateParallelType(parallelType);
                 case SequentialType sequentialType -> instantiateSequentialType(sequentialType);
@@ -175,8 +179,17 @@ final class ScopeElaborator {
             return Instantiator.ComponentPort.of(input, output);
         }
 
+        private ComponentPort instantiateInstanceAtom(InstanceAtom atom) {
+            return ComponentPort.of(List.of(atom.getInstance()), List.of());
+        }
+
         public Instantiator.ComponentPort instantiateBuiltinAtom(BuiltinAtom atom) {
             var component = factory.createBuiltInComponent(scope, atom);
+            if (atom.getBuiltin() == BuiltinComponent.REGISTER) {
+                var clock = instantiate(requiresComponentType(sourceLoc, atom.getParameters().getFirst()));
+                requiresMatchedSize(sourceLoc, 1, clock);
+                component.getAttributes().addAttribute(Identifier.of("clock"), clock.getFirst());
+            }
             return Instantiator.ComponentPort.of(component.getOutputs(), component.getInputs());
         }
 

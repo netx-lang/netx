@@ -5,14 +5,10 @@ import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.EntityList;
-import pascal.hardscript.compiler.model.component.BuiltinAtom;
 import pascal.hardscript.compiler.model.component.ComponentType;
+import pascal.hardscript.compiler.model.component.InstanceAtom;
 import pascal.hardscript.compiler.model.component.ParallelType;
-import pascal.hardscript.compiler.model.instance.BooleanValue;
-import pascal.hardscript.compiler.model.instance.Data;
-import pascal.hardscript.compiler.model.instance.Instance;
-import pascal.hardscript.compiler.model.instance.IntegerValue;
-import pascal.hardscript.util.lang.BuiltinComponent;
+import pascal.hardscript.compiler.model.instance.*;
 import pascal.hardscript.util.lang.SourceLoc;
 
 import java.util.LinkedList;
@@ -37,11 +33,11 @@ public final class Types {
         }
     }
 
-    public static Instance requiresInstance(SourceLoc loc, Entity entity) {
-        if (entity instanceof Instance instance) {
-            return instance;
+    public static Value requiresValue(SourceLoc loc, Entity entity) {
+        if (entity instanceof Value value) {
+            return value;
         } else {
-            log.error("{}: Expected component but got {}", loc, entity);
+            log.error("{}: Expected value but got {}", loc, entity);
             throw new CompileCancellationException();
         }
     }
@@ -93,11 +89,20 @@ public final class Types {
         }
     }
 
-    public static ComponentType castToComponentType(SourceLoc loc, Entity entity) {
+    public static ComponentType requiresComponentType(SourceLoc loc, Entity entity) {
+        if (entity instanceof ComponentType componentType) {
+            return componentType;
+        } else {
+            log.error("{}: Expected component type but got {}", loc, entity);
+            throw new CompileCancellationException();
+        }
+    }
+
+    public static ComponentType castToComponentType(Entity entity, SourceLoc loc) {
         return switch (entity) {
-            case EntityList list -> makeParallelTypeFromList(loc, list);
-            case Instance inst -> BuiltinAtom.of(BuiltinComponent.FROM, loc, List.of(inst));
+            case EntityList list -> makeParallelTypeFromList(list, loc);
             case ComponentType componentType -> componentType;
+            case Instance inst -> InstanceAtom.of(inst, loc);
             default -> {
                 log.error("{}: Cannot cast {} to component type", loc, entity);
                 throw new CompileCancellationException();
@@ -105,9 +110,9 @@ public final class Types {
         };
     }
 
-    private static ParallelType makeParallelTypeFromList(SourceLoc sourceLoc, EntityList list) {
+    private static ParallelType makeParallelTypeFromList(EntityList list, SourceLoc sourceLoc) {
         List<ComponentType> result = new LinkedList<>();
-        list.forEach(entity -> result.add(castToComponentType(sourceLoc, entity)));
+        list.forEach(entity -> result.add(castToComponentType(entity, sourceLoc)));
         return ParallelType.from(result);
     }
 }

@@ -53,7 +53,7 @@ public final class DataTypeInference extends ModelAnalysis {
         switch (BuiltinComponent.of(component.getIdentifier())) {
             case OR, NOT, AND, XOR, NOR, NAND, XNOR -> addAllEqualConstraints(component);
             case REGISTER -> addContainsForRegister(component);
-            case SPLIT, IGNORE, FROM -> {
+            case SPLIT, IGNORE -> {
                 // do nothing
             }
         }
