@@ -129,7 +129,7 @@
       {
         "type": "builtin", "id": "CAST@2", "loc": "185:47",
         "input": ["1'h00"],
-        "output": ["input_0@0"]
+        "output": ["input_0@3"]
       },
       {
         "type": "instantiate", "id": "MUX@3", "defIndex": 1,
@@ -152,7 +152,7 @@
       {
         "type": "builtin", "id": "CONCAT@6", "loc": "190:23",
         "input": ["zero@0", "1'h00"],
-        "output": ["input_1@0"]
+        "output": ["input_1@7"]
       },
       {
         "type": "instantiate", "id": "MUX@7", "defIndex": 1,
@@ -171,7 +171,7 @@
       {
         "type": "builtin", "id": "CONCAT@9", "loc": "191:23",
         "input": ["$o@8", "1'h00"],
-        "output": ["input_1@0"]
+        "output": ["input_1@10"]
       },
       {
         "type": "instantiate", "id": "MUX@10", "defIndex": 1,
@@ -182,7 +182,7 @@
       {
         "type": "builtin", "id": "CONCAT@11", "loc": "192:23",
         "input": ["less@0", "1'h00"],
-        "output": ["input_1@0"]
+        "output": ["input_1@12"]
       },
       {
         "type": "instantiate", "id": "MUX@12", "defIndex": 1,
@@ -201,7 +201,7 @@
       {
         "type": "builtin", "id": "CONCAT@14", "loc": "193:23",
         "input": ["$o@13", "1'h00"],
-        "output": ["input_1@0"]
+        "output": ["input_1@15"]
       },
       {
         "type": "instantiate", "id": "MUX@15", "defIndex": 1,
@@ -238,17 +238,17 @@
       {
         "type": "builtin", "id": "CAST@2", "loc": "160:50",
         "input": ["1'h00"],
-        "output": ["input_0@0"]
+        "output": ["input_0@6"]
       },
       {
         "type": "builtin", "id": "ADD@3", "loc": "163:26",
         "input": ["a@0", "b@0"],
-        "output": ["input_0@0"]
+        "output": ["input_0@5"]
       },
       {
         "type": "builtin", "id": "SUB@4", "loc": "163:41",
         "input": ["a@0", "b@0"],
-        "output": ["input_1@0"]
+        "output": ["input_1@5"]
       },
       {
         "type": "instantiate", "id": "MUX@5", "defIndex": 1,
@@ -265,7 +265,7 @@
       {
         "type": "builtin", "id": "SHL@7", "loc": "164:26",
         "input": ["a@0", "b@0[4:0]"],
-        "output": ["input_1@0"]
+        "output": ["input_1@8"]
       },
       {
         "type": "instantiate", "id": "MUX@8", "defIndex": 1,
@@ -276,17 +276,17 @@
       {
         "type": "builtin", "id": "CAST@9", "loc": "160:50",
         "input": ["1'h00"],
-        "output": ["input_0@0"]
+        "output": ["input_0@13"]
       },
       {
         "type": "builtin", "id": "SLT@10", "loc": "165:34",
         "input": ["a@0", "b@0"],
-        "output": ["input_0@0"]
+        "output": ["input_0@12"]
       },
       {
         "type": "builtin", "id": "ULT@11", "loc": "165:49",
         "input": ["a@0", "b@0"],
-        "output": ["input_1@0"]
+        "output": ["input_1@12"]
       },
       {
         "type": "instantiate", "id": "MUX@12", "defIndex": 1,
@@ -317,7 +317,7 @@
       {
         "type": "builtin", "id": "XOR@16", "loc": "167:26",
         "input": ["a@0", "b@0"],
-        "output": ["input_1@0"]
+        "output": ["input_1@17"]
       },
       {
         "type": "instantiate", "id": "MUX@17", "defIndex": 1,
@@ -328,12 +328,12 @@
       {
         "type": "builtin", "id": "LSHR@18", "loc": "168:26",
         "input": ["a@0", "b@0[4:0]"],
-        "output": ["input_0@0"]
+        "output": ["input_0@20"]
       },
       {
         "type": "builtin", "id": "ASHR@19", "loc": "168:47",
         "input": ["a@0", "b@0[4:0]"],
-        "output": ["input_1@0"]
+        "output": ["input_1@20"]
       },
       {
         "type": "instantiate", "id": "MUX@20", "defIndex": 1,
@@ -350,7 +350,7 @@
       {
         "type": "builtin", "id": "OR@22", "loc": "169:26",
         "input": ["a@0", "b@0"],
-        "output": ["input_1@0"]
+        "output": ["input_1@23"]
       },
       {
         "type": "instantiate", "id": "MUX@23", "defIndex": 1,
@@ -361,7 +361,7 @@
       {
         "type": "builtin", "id": "AND@24", "loc": "170:26",
         "input": ["a@0", "b@0"],
-        "output": ["input_1@0"]
+        "output": ["input_1@25"]
       },
       {
         "type": "instantiate", "id": "MUX@25", "defIndex": 1,
@@ -1770,7 +1770,7 @@
       {
         "type": "builtin", "id": "CAST@2", "loc": "145:47",
         "input": ["1'h00"],
-        "output": ["input_0@0"]
+        "output": ["input_0@5"]
       },
       {
         "type": "builtin", "id": "CAST@3", "loc": "137:26",
@@ -1783,7 +1783,7 @@
       {
         "type": "builtin", "id": "CONCAT@4", "loc": "137:15",
         "input": ["$o@3", "instr@0[31:20]"],
-        "output": ["input_1@0"]
+        "output": ["input_1@5"]
       },
       {
         "type": "instantiate", "id": "MUX@5", "defIndex": 1,
@@ -1794,7 +1794,7 @@
       {
         "type": "builtin", "id": "CONCAT@6", "loc": "138:15",
         "input": ["instr@0[31:12]", "12'h0000"],
-        "output": ["input_1@0"]
+        "output": ["input_1@7"]
       },
       {
         "type": "instantiate", "id": "MUX@7", "defIndex": 1,
@@ -1805,7 +1805,7 @@
       {
         "type": "builtin", "id": "CONCAT@8", "loc": "139:15",
         "input": ["$o@3", "instr@0[31:25]", "instr@0[11:7]"],
-        "output": ["input_1@0"]
+        "output": ["input_1@9"]
       },
       {
         "type": "instantiate", "id": "MUX@9", "defIndex": 1,
@@ -1816,7 +1816,7 @@
       {
         "type": "builtin", "id": "CONCAT@10", "loc": "140:15",
         "input": ["$o@3", "instr@0[7]", "instr@0[30:25]", "instr@0[11:8]", "1'h00"],
-        "output": ["input_1@0"]
+        "output": ["input_1@11"]
       },
       {
         "type": "instantiate", "id": "MUX@11", "defIndex": 1,
@@ -1835,7 +1835,7 @@
       {
         "type": "builtin", "id": "CONCAT@13", "loc": "141:15",
         "input": ["$o@12", "instr@0[19:12]", "instr@0[20]", "instr@0[30:21]", "1'h00"],
-        "output": ["input_1@0"]
+        "output": ["input_1@14"]
       },
       {
         "type": "instantiate", "id": "MUX@14", "defIndex": 1,
@@ -1937,7 +1937,7 @@
       {
         "type": "builtin", "id": "CAST@12", "loc": "71:52",
         "input": ["1'h00"],
-        "output": ["input_0@0"]
+        "output": ["input_0@13"]
       },
       {
         "type": "instantiate", "id": "MUX@13", "defIndex": 1,
@@ -1994,7 +1994,7 @@
       {
         "type": "builtin", "id": "EQ@22", "loc": "86:23",
         "input": ["func3@0", "3'h00"],
-        "output": ["code@0"]
+        "output": ["code@23"]
       },
       {
         "type": "instantiate", "id": "MUX@23", "defIndex": 1,
@@ -2005,7 +2005,7 @@
       {
         "type": "builtin", "id": "EQ@24", "loc": "87:23",
         "input": ["func3@0", "3'h01"],
-        "output": ["code@0"]
+        "output": ["code@25"]
       },
       {
         "type": "instantiate", "id": "MUX@25", "defIndex": 1,
@@ -2016,7 +2016,7 @@
       {
         "type": "builtin", "id": "EQ@26", "loc": "88:23",
         "input": ["func3@0", "3'h04"],
-        "output": ["code@0"]
+        "output": ["code@27"]
       },
       {
         "type": "instantiate", "id": "MUX@27", "defIndex": 1,
@@ -2027,7 +2027,7 @@
       {
         "type": "builtin", "id": "EQ@28", "loc": "89:23",
         "input": ["func3@0", "3'h05"],
-        "output": ["code@0"]
+        "output": ["code@29"]
       },
       {
         "type": "instantiate", "id": "MUX@29", "defIndex": 1,
@@ -2038,7 +2038,7 @@
       {
         "type": "builtin", "id": "EQ@30", "loc": "90:23",
         "input": ["func3@0", "3'h06"],
-        "output": ["code@0"]
+        "output": ["code@31"]
       },
       {
         "type": "instantiate", "id": "MUX@31", "defIndex": 1,
@@ -2049,7 +2049,7 @@
       {
         "type": "builtin", "id": "EQ@32", "loc": "91:23",
         "input": ["func3@0", "3'h07"],
-        "output": ["code@0"]
+        "output": ["code@33"]
       },
       {
         "type": "instantiate", "id": "MUX@33", "defIndex": 1,
@@ -2060,7 +2060,7 @@
       {
         "type": "builtin", "id": "OR@34", "loc": "85:23",
         "input": ["output@23", "output@25", "output@27", "output@29", "output@31", "output@33"],
-        "output": ["input_1@0"]
+        "output": ["input_1@35"]
       },
       {
         "type": "instantiate", "id": "MUX@35", "defIndex": 1,
@@ -2076,7 +2076,7 @@
       {
         "type": "builtin", "id": "OR@37", "loc": "100:20",
         "input": ["memToReg@0", "memWr@0"],
-        "output": ["code@0"]
+        "output": ["code@38"]
       },
       {
         "type": "instantiate", "id": "MUX@38", "defIndex": 1,
@@ -2092,12 +2092,12 @@
       {
         "type": "builtin", "id": "CAST@40", "loc": "71:52",
         "input": ["1'h00"],
-        "output": ["input_0@0"]
+        "output": ["input_0@42"]
       },
       {
         "type": "builtin", "id": "OR@41", "loc": "105:15",
         "input": ["U_flag_0@0", "U_flag_1@0", "I_flag_0@0", "memToReg@0", "memWr@0"],
-        "output": ["code@0"]
+        "output": ["code@42"]
       },
       {
         "type": "instantiate", "id": "MUX@42", "defIndex": 1,
@@ -2108,7 +2108,7 @@
       {
         "type": "builtin", "id": "OR@43", "loc": "106:15",
         "input": ["J_flag@0", "I_flag_1@0"],
-        "output": ["code@0"]
+        "output": ["code@44"]
       },
       {
         "type": "instantiate", "id": "MUX@44", "defIndex": 1,
@@ -2119,7 +2119,7 @@
       {
         "type": "builtin", "id": "OR@45", "loc": "107:15",
         "input": ["R_flag@0", "B_flag@0"],
-        "output": ["code@0"]
+        "output": ["code@46"]
       },
       {
         "type": "instantiate", "id": "MUX@46", "defIndex": 1,
@@ -2141,12 +2141,12 @@
       {
         "type": "builtin", "id": "CAST@49", "loc": "71:52",
         "input": ["1'h00"],
-        "output": ["input_0@0"]
+        "output": ["input_0@51"]
       },
       {
         "type": "builtin", "id": "CONCAT@50", "loc": "114:33",
         "input": ["func7@0", "3'h00"],
-        "output": ["input_1@0"]
+        "output": ["input_1@51"]
       },
       {
         "type": "instantiate", "id": "MUX@51", "defIndex": 1,
@@ -2181,7 +2181,7 @@
       {
         "type": "builtin", "id": "CONCAT@56", "loc": "119:33",
         "input": ["func7@0", "3'h05"],
-        "output": ["input_1@0"]
+        "output": ["input_1@57"]
       },
       {
         "type": "instantiate", "id": "MUX@57", "defIndex": 1,
@@ -2215,7 +2215,7 @@
       {
         "type": "builtin", "id": "OR@62", "loc": "126:15",
         "input": ["I_flag_0@0", "R_flag@0"],
-        "output": ["code@0"]
+        "output": ["code@63"]
       },
       {
         "type": "instantiate", "id": "MUX@63", "defIndex": 1,
@@ -2226,7 +2226,7 @@
       {
         "type": "builtin", "id": "AND@64", "loc": "127:52",
         "input": ["func3@0[2]", "func3@0[1]"],
-        "output": ["code@0"]
+        "output": ["code@65"]
       },
       {
         "type": "instantiate", "id": "MUX@65", "defIndex": 1,
@@ -2243,7 +2243,7 @@
       {
         "type": "builtin", "id": "OR@67", "loc": "128:15",
         "input": ["U_flag_1@0", "J_flag@0", "I_flag_1@0", "memToReg@0", "memWr@0"],
-        "output": ["code@0"]
+        "output": ["code@68"]
       },
       {
         "type": "instantiate", "id": "MUX@68", "defIndex": 1,

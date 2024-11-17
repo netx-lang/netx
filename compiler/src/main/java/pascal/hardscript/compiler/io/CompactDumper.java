@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
+import static pascal.hardscript.util.lang.BuiltinComponent.isBuiltin;
 
 final class CompactDumper {
     private final DesignScope designScope;
@@ -39,17 +40,6 @@ final class CompactDumper {
     private static void setDefID(ObjectNode node, Identifier id, int defIndex) {
         node.put("id", id.name());
         node.put("defIndex", defIndex);
-        node.put("loc", id.getSourceLoc().toString());
-    }
-
-    private static void setInstID(ObjectNode node, Identifier id, int defIndex, int instIndex) {
-        node.put("id", String.format("%s@%d", id.name(), instIndex));
-        node.put("defIndex", defIndex);
-        node.put("loc", id.getSourceLoc().toString());
-    }
-
-    private static void setBuiltinID(ObjectNode node, Identifier id, int instIndex) {
-        node.put("id", String.format("%s@%d", id.name(), instIndex));
         node.put("loc", id.getSourceLoc().toString());
     }
 
@@ -116,12 +106,6 @@ final class CompactDumper {
             this.component = component;
         }
 
-        private int allocateIndex(ComponentScope component) {
-            var index = indexer.get();
-            indexMap.put(component, index);
-            return index;
-        }
-
         private int indexOf(Data data) {
             var parent = data.getParent().getLeastUpperComponent();
             if (indexMap.containsKey(parent)) {
@@ -131,7 +115,7 @@ final class CompactDumper {
         }
 
         public ObjectNode dump() {
-            allocateIndex(component);
+            indexAllInstances();
 
             var definition = createObjectNode();
             setType(definition, "component");
@@ -163,6 +147,24 @@ final class CompactDumper {
             return definition;
         }
 
+        private void indexAllInstances() {
+            allocateIndex(component);
+            for (var child : component.getChildren()) {
+                if (child instanceof ComponentScope childComponent) {
+                    var id = childComponent.getIdentifier();
+                    if (isBuiltin(id) && NO_DUMP.contains(BuiltinComponent.of(id))) {
+                        continue;
+                    }
+                    allocateIndex(childComponent);
+                }
+            }
+        }
+
+        private void allocateIndex(ComponentScope component) {
+            var index = indexer.get();
+            indexMap.put(component, index);
+        }
+
         private ObjectNode instantiate(ComponentScope component) {
             var signature = component.getSignature();
             ObjectNode result = createObjectNode();
@@ -170,7 +172,7 @@ final class CompactDumper {
                 definitions.addFirst(dumperOf(component).dump());
             }
             setType(result, "instantiate");
-            setInstID(result, component.getIdentifier(), manager.getCount(signature), allocateIndex(component));
+            setInstID(result, component);
             dumpInstIO(result, "input", component.getInputs());
             dumpInstIO(result, "output", component.getOutputs());
             return result;
@@ -179,7 +181,7 @@ final class CompactDumper {
         private ObjectNode instantiateBuiltin(ComponentScope sub, Identifier instID) {
             var builtin = createObjectNode();
             setType(builtin, "builtin");
-            setBuiltinID(builtin, instID, allocateIndex(sub));
+            setBuiltinID(builtin, sub);
             if (Objects.requireNonNull(BuiltinComponent.of(instID)) == BuiltinComponent.REGISTER) {
                 dumpAttribute(builtin, sub);
             }
@@ -270,6 +272,20 @@ final class CompactDumper {
 
         private String dumpDataAccessRef(DataAccess access) {
             return dumpDataRef(access.base()) + access.selector();
+        }
+
+        private void setInstID(ObjectNode node, ComponentScope component) {
+            var id = component.getIdentifier();
+            node.put("id", String.format("%s@%d", id.name(), indexMap.get(component)));
+            node.put("defIndex", manager.getCount(component.getSignature()));
+            node.put("loc", id.getSourceLoc().toString());
+        }
+
+        private void setBuiltinID(ObjectNode node, ComponentScope component) {
+            Identifier id = component.getIdentifier();
+            int instIndex = indexMap.get(component);
+            node.put("id", String.format("%s@%d", id.name(), instIndex));
+            node.put("loc", id.getSourceLoc().toString());
         }
     }
 }

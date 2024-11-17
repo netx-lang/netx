@@ -38,28 +38,19 @@
       },
       {
         "type": "builtin", "id": "REGISTER", "loc": "1:35",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["$o@7"],
         "output": ["a@2"]
       },
       {
         "type": "builtin", "id": "REGISTER", "loc": "1:35",
-        "attribute": {
-          "isPosTrigger": "true",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["a@2"],
         "output": ["b@3"]
       },
       {
         "type": "builtin", "id": "REGISTER", "loc": "1:35",
-        "attribute": {
-          "isPosTrigger": "false",
-          "clock": "clk@0"
-        },
+        "attribute": {"isPosTrigger": "false", "clock": "clk@0"},
         "input": ["b@3"],
         "output": ["c@4"]
       },

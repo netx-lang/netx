@@ -11,7 +11,7 @@
       {
         "type": "builtin", "id": "ADD@1", "loc": "5:49",
         "input": ["count@0", "1"],
-        "output": ["i0@0"]
+        "output": ["i0@2"]
       },
       {
         "type": "instantiate", "id": "MUX@2", "defIndex": 1,
