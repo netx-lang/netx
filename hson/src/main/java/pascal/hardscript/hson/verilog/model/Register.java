@@ -11,15 +11,12 @@ public final class Register {
     private DataRef clock;
     private Wire trueReg;
 
-    public Register(DataRef in, DataRef out, DataRef clock, boolean isPosTrigger) {
-        this.in = in;
-        this.out = out;
-        this.clock = clock;
+    public Register(boolean isPosTrigger) {
         this.isPosTrigger = isPosTrigger;
     }
 
-    public static Register of(DataRef in, DataRef out, DataRef clock, boolean isPosTrigger) {
-        return new Register(in, out, clock, isPosTrigger);
+    public static Register of(boolean isPosTrigger) {
+        return new Register(isPosTrigger);
     }
 
     public DataRef in() {
@@ -44,6 +41,18 @@ public final class Register {
 
     public void setTrueReg(Wire trueReg) {
         this.trueReg = trueReg;
+    }
+
+    public void setClock(DataRef clock) {
+        this.clock = clock;
+    }
+
+    public void setOut(DataRef out) {
+        this.out = out;
+    }
+
+    public void setIn(DataRef in) {
+        this.in = in;
     }
 
     public void resetRef(Function<DataRef, DataRef> mapper) {

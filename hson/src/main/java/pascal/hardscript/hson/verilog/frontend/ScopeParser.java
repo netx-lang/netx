@@ -1,6 +1,7 @@
 package pascal.hardscript.hson.verilog.frontend;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import pascal.hardscript.hson.util.HsonType;
 import pascal.hardscript.hson.util.selector.BitSelector;
 import pascal.hardscript.hson.util.selector.PartSelector;
 import pascal.hardscript.hson.util.selector.Selector;
@@ -16,6 +17,7 @@ import pascal.hardscript.util.lang.Identifier;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -59,6 +61,11 @@ public final class ScopeParser {
 
     private void parseComponentMembers() {
         forEachMember(json, node -> {
+            if (Objects.requireNonNull(typeOf(node)) == HsonType.INSTANTIATE) {
+                prepareInstantiation(node);
+            }
+        });
+        forEachMember(json, node -> {
             switch (typeOf(node)) {
                 case INSTANTIATE -> parseInstantiation(node);
                 case BUILTIN -> parseBuiltin(node);
@@ -66,11 +73,16 @@ public final class ScopeParser {
         });
     }
 
-    private void parseInstantiation(JsonNode node) {
+    private void prepareInstantiation(JsonNode node) {
         var ref = instRefOf(node);
         var def = frontend.resolveModuleDef(ref.moduleIndex());
         var inst = Instantiation.of(def, ref.instIndex());
         module.add(inst);
+    }
+
+    private void parseInstantiation(JsonNode node) {
+        var ref = instRefOf(node);
+        var inst = module.getInstantiation(ref.instIndex());
         inst.setInputs(refParser.resolveDataRefList(node, "input"));
         inst.setOutputs(refParser.resolveDataRefList(node, "output"));
     }
@@ -86,17 +98,16 @@ public final class ScopeParser {
         }
         if (ref.builtin() == BuiltinComponent.REGISTER) {
             var attrNode = node.get("attribute");
-            var register = Register.of(
-                    refParser.resolveDataRefList(node, "input").getFirst(),
-                    refParser.resolveDataRefList(node, "output").getFirst(),
-                    refParser.resolveDataRef(attrNode.get("clock").textValue()),
-                    Boolean.parseBoolean(attrNode.get("isPosTrigger").textValue()));
+            var register = Register.of(Boolean.parseBoolean(attrNode.get("isPosTrigger").textValue()));
             module.add(register);
+            register.setIn(refParser.resolveDataRefList(node, "input").getFirst());
+            register.setOut(refParser.resolveDataRefList(node, "output").getFirst());
+            register.setClock(refParser.resolveDataRef(attrNode.get("clock").textValue()));
         } else {
-            var assign = Assign.of(ref.builtin(),
-                    refParser.resolveDataRefList(node, "input"),
-                    refParser.resolveDataRefList(node, "output"));
+            var assign = Assign.of(ref.builtin());
             module.add(ref.index(), assign);
+            assign.setInputs(refParser.resolveDataRefList(node, "input"));
+            assign.setOutputs(refParser.resolveDataRefList(node, "output"));
         }
     }
 

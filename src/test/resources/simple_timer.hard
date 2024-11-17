@@ -19,14 +19,14 @@ component top: [clk_50] -> [hex_${i} | i in [0..8]] {
 	m  <- REG(m_clk)  <> MUX <> [EQ <> [ms, 60], ADD <> [m, 1], 0]
 	h  <- REG(h_clk)  <> MUX <> [EQ <> [ms, 23], ADD <> [h, 1], 0]
 
-	hex_0 <- hex <> CAST <> MOD <> [ms, 10]
-	hex_1 <- hex <> CAST <> DIV <> [ms, 10]
-	hex_2 <- hex <> CAST <> MOD <> [s, 10]
-	hex_3 <- hex <> CAST <> DIV <> [s, 10]
-	hex_4 <- hex <> CAST <> MOD <> [m, 10]
-	hex_5 <- hex <> CAST <> DIV <> [m, 10]
-	hex_6 <- hex <> CAST <> MOD <> [h, 10]
-	hex_7 <- hex <> CAST <> DIV <> [h, 10]
+	hex_0 <- hex_trigger <> CAST <> MOD <> [ms, 10]
+	hex_1 <- hex_trigger <> CAST <> DIV <> [ms, 10]
+	hex_2 <- hex_trigger <> CAST <> MOD <> [s, 10]
+	hex_3 <- hex_trigger <> CAST <> DIV <> [s, 10]
+	hex_4 <- hex_trigger <> CAST <> MOD <> [m, 10]
+	hex_5 <- hex_trigger <> CAST <> DIV <> [m, 10]
+	hex_6 <- hex_trigger <> CAST <> MOD <> [h, 10]
+	hex_7 <- hex_trigger <> CAST <> DIV <> [h, 10]
 }
 
 component clock_divider(max): [clk_50] -> [clk] {
@@ -39,7 +39,7 @@ component clock_divider(max): [clk_50] -> [clk] {
 	clk   <- REG <> MUX <> [ctl, clk, NOT <> clk]
 }
 
-component hex: [num] -> [code] {
+component hex_trigger: [num] -> [code] {
 	inst num  of wire(bit(4))
 	inst code of wire(bit(7))
 	let mask = component x: MUX <> [EQ <> [x, num], 1'b0, 1'b1]
