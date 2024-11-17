@@ -2,6 +2,7 @@ package pascal.hardscript.hson.verilog.model;
 
 import pascal.hardscript.hson.verilog.model.ref.DataRef;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class Instantiation {
@@ -33,7 +34,7 @@ public final class Instantiation {
     }
 
     public void setInputs(List<DataRef> inputs) {
-        this.inputs = inputs;
+        this.inputs = new ArrayList<>(inputs);
     }
 
     public List<DataRef> getOutputs() {
@@ -41,6 +42,6 @@ public final class Instantiation {
     }
 
     public void setOutputs(List<DataRef> outputs) {
-        this.outputs = outputs;
+        this.outputs = new ArrayList<>(outputs);
     }
 }

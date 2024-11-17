@@ -3,12 +3,14 @@ package pascal.hardscript.hson.verilog;
 import pascal.hardscript.hson.verilog.model.*;
 import pascal.hardscript.hson.verilog.model.ref.Constant;
 import pascal.hardscript.hson.verilog.model.ref.DataRef;
-import pascal.hardscript.hson.verilog.model.ref.DataRefSelect;
 import pascal.hardscript.hson.verilog.model.ref.WireRef;
+import pascal.hardscript.hson.verilog.model.ref.WireRefSelect;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.print.NotepadWriter;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,11 +18,11 @@ import java.util.stream.Collectors;
 public class VerilogDumper {
     private final NotepadWriter notepad;
     private final List<VModule> design;
-    private boolean isTop = true;
 
     public VerilogDumper(NotepadWriter notepad, List<VModule> design) {
         this.notepad = notepad;
         this.design = design;
+        new VerilogAnalysis(design).analyze();
     }
 
     private static String typeOf(Wire wire) {
@@ -41,13 +43,13 @@ public class VerilogDumper {
         notepad.println("// @(" + module.getId().getSourceLoc() + ")");
         notepad.println("module " + instNameOf(module) + "(");
         notepad.incIndent();
-        var iter = module.getInputs().iterator();
+
+        List<String> ports = new LinkedList<>();
+        ports.addAll(module.getInputs());
+        ports.addAll(module.getOutputs());
+        var iter = ports.iterator();
         if (iter.hasNext()) {
             notepad.print(iter.next());
-            iter.forEachRemaining(str -> notepad.print(", " + str));
-        }
-        if (isTop) {
-            iter = module.getOutputs().iterator();
             iter.forEachRemaining(str -> notepad.print(", " + str));
         }
         notepad.newLine();
@@ -57,14 +59,20 @@ public class VerilogDumper {
         for (var str : module.getInputs()) {
             notepad.println("input " + str + ";");
         }
-        if (isTop) {
-            for (var str : module.getOutputs()) {
-                notepad.println("output " + str + ";");
-            }
-            isTop = false;
+        for (var str : module.getOutputs()) {
+            notepad.println("output " + str + ";");
         }
-        for (var wire : module.getWires()) {
+        for (var wire : module.getAllWires()) {
             notepad.print("wire " + typeOf(wire) + idOf(wire.id()) + ";");
+            if (wire.id().getSourceLoc() != null) {
+                notepad.println(" // @(" + wire.id().getSourceLoc() + ")");
+            } else {
+                notepad.newLine();
+            }
+        }
+        for (var reg : module.getAllRegisters()) {
+            var wire = reg.getTrueReg();
+            notepad.print("reg " + typeOf(wire) + idOf(wire.id()) + ";");
             if (wire.id().getSourceLoc() != null) {
                 notepad.println(" // @(" + wire.id().getSourceLoc() + ")");
             } else {
@@ -73,7 +81,7 @@ public class VerilogDumper {
         }
         module.getInstantiations().forEach(this::dumpInstantiation);
         module.getAssigns().forEach(this::dumpAssign);
-        dumpRegisters(module.getRegisters());
+        dumpRegisters(module.getAllRegisters());
         notepad.decIndent();
         notepad.println("endmodule");
         notepad.newLine();
@@ -105,18 +113,21 @@ public class VerilogDumper {
     private void dumpInstantiation(Instantiation inst) {
         notepad.print(instNameOf(inst.getModule()));
         notepad.print(" inst_" + inst.getInstIndex() + "(");
-        var iter = inst.getInputs().iterator();
+        List<DataRef> port = new LinkedList<>();
+        port.addAll(inst.getInputs());
+        port.addAll(inst.getOutputs());
+        var iter = port.iterator();
         if (iter.hasNext()) {
             notepad.print(dumpDataRef(iter.next()));
-        }
-        while (iter.hasNext()) {
-            notepad.print(", ");
-            notepad.print(dumpDataRef(iter.next()));
+            iter.forEachRemaining(str -> notepad.print(", " + dumpDataRef(str)));
         }
         notepad.println(");");
     }
 
     private void dumpRegProcedure(List<Register> regs, DataRef clock, boolean isPosTrigger) {
+        for (var reg : regs) {
+            notepad.println("assign " + dumpDataRef(reg.out()) + " = " + idOf(reg.getTrueReg().id()) + ";");
+        }
         notepad.print("always @(");
         if (isPosTrigger) {
             notepad.print("posedge ");
@@ -127,7 +138,7 @@ public class VerilogDumper {
         notepad.println(") begin");
         notepad.incIndent();
         for (var reg : regs) {
-            notepad.print(dumpDataRef(reg.out()));
+            notepad.print(idOf(reg.getTrueReg().id()));
             notepad.print(" <= ");
             notepad.print(dumpDataRef(reg.in()));
             notepad.println(";");
@@ -136,7 +147,7 @@ public class VerilogDumper {
         notepad.println("end");
     }
 
-    private void dumpRegisters(List<Register> registers) {
+    private void dumpRegisters(Collection<Register> registers) {
         Map<DataRef, Map<Boolean, List<Register>>> groups =
                 registers.stream().collect(
                         Collectors.groupingBy(Register::clock,
@@ -156,7 +167,7 @@ public class VerilogDumper {
     private String dumpDataRef(DataRef ref) {
         var str =  switch (ref) {
             case Constant constant -> constant.value().toString();
-            case DataRefSelect access -> dumpDataRef(access.base()) + access.selector().toString();
+            case WireRefSelect access -> dumpDataRef(access.base()) + access.selector().toString();
             case WireRef wireRef -> {
                 String result = "";
                 if (wireRef.instance() != null) {

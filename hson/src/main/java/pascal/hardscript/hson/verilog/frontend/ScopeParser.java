@@ -7,8 +7,8 @@ import pascal.hardscript.hson.util.selector.Selector;
 import pascal.hardscript.hson.verilog.model.*;
 import pascal.hardscript.hson.verilog.model.ref.Constant;
 import pascal.hardscript.hson.verilog.model.ref.DataRef;
-import pascal.hardscript.hson.verilog.model.ref.DataRefSelect;
 import pascal.hardscript.hson.verilog.model.ref.WireRef;
+import pascal.hardscript.hson.verilog.model.ref.WireRefSelect;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BitVector;
 import pascal.hardscript.util.lang.BuiltinComponent;
@@ -141,7 +141,7 @@ public final class ScopeParser {
         private DataRef resolveBitSelectDataRef(Matcher matcher) {
             DataRef base = resolvePlainDataRef(matcher);
             Selector selector = BitSelector.of(Integer.parseUnsignedInt(matcher.group(3)));
-            return DataRefSelect.of(base, selector);
+            return WireRefSelect.of((WireRef) base, selector);
         }
 
         private DataRef resolvePartSelectDataRef(Matcher matcher) {
@@ -149,7 +149,7 @@ public final class ScopeParser {
             Selector selector = PartSelector.of(
                     Integer.parseUnsignedInt(matcher.group(3)),
                     Integer.parseUnsignedInt(matcher.group(4)));
-            return DataRefSelect.of(base, selector);
+            return WireRefSelect.of((WireRef) base, selector);
         }
 
         private DataRef resolveBitVectorConstant(Matcher matcher) {

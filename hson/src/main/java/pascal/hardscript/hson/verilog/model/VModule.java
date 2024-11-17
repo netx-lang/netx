@@ -12,8 +12,8 @@ public final class VModule {
     private final Map<Integer, Instantiation> instantiations = new HashMap<>();
 
     private List<String> inputs, outputs;
-    private final List<Wire> wires = new ArrayList<>();
-    private final List<Register> registers = new ArrayList<>();
+    private final Map<String, Wire> wires = new HashMap<>();
+    private final List<Register> registers = new LinkedList<>();
 
     public VModule(Identifier id, int defIndex) {
         this.id = id;
@@ -25,7 +25,7 @@ public final class VModule {
     }
 
     public void add(Wire wire) {
-        wires.add(wire);
+        wires.put(wire.id().name(), wire);
     }
 
     public void add(Instantiation instantiation) {
@@ -52,7 +52,7 @@ public final class VModule {
         return assignments.values();
     }
 
-    public List<Register> getRegisters() {
+    public Collection<Register> getAllRegisters() {
         return registers;
     }
 
@@ -64,8 +64,12 @@ public final class VModule {
         return defIndex;
     }
 
-    public List<Wire> getWires() {
-        return wires;
+    public Wire getWire(String name) {
+        return wires.get(name);
+    }
+
+    public Collection<Wire> getAllWires() {
+        return wires.values();
     }
 
     public List<String> getInputs() {
