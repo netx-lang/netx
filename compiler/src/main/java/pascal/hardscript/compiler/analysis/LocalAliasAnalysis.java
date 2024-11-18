@@ -22,30 +22,30 @@ public final class LocalAliasAnalysis extends ModelAnalysis {
     public void analyze() {
         design.forEachScope(scope -> {
             if (isUserDefinedComponent(scope)) {
-                new ComponentScopeWiseAnalysis(scope).analyze();
+                new ComponentAnalysis(scope).analyze();
             }
         });
     }
 
-    private static class ComponentScopeWiseAnalysis {
+    private static class ComponentAnalysis {
         private final Scope scope;
-        private final AliasStructure local = new AliasStructure();
+        private final AliasManager manager = new AliasManager();
         private final List<Scope> inlineScope = new LinkedList<>();
         private final List<Scope> instantiateScope = new LinkedList<>();
 
-        private ComponentScopeWiseAnalysis(Scope scope) {
+        private ComponentAnalysis(Scope scope) {
             this.scope = scope;
         }
 
         public void analyze() {
             exploreAnalysisScopes(scope);
-            local.resolveRepresentatives();
+            manager.resolveRepresentatives();
             eliminateDuplicatedData();
         }
 
         private void exploreAnalysisScopes(Scope scope) {
             inlineScope.add(scope);
-            local.addAlias(scope.getAliases());
+            manager.addAlias(scope.getAliases());
             for (var child : scope.getChildren()) {
                 if (!isUserDefinedComponent(child)) {
                     exploreAnalysisScopes(child);
@@ -57,17 +57,17 @@ public final class LocalAliasAnalysis extends ModelAnalysis {
 
         public void eliminateDuplicatedData() {
             inlineScope.forEach(scope -> {
-                scope.getEntities().removeIf(Predicate.not(local::needDump));
+                scope.getEntities().removeIf(Predicate.not(manager::needDump));
                 if (scope instanceof ComponentScope componentScope) {
-                    componentScope.getInputs().replaceAll(local::repOf);
-                    componentScope.getOutputs().replaceAll(local::repOf);
+                    componentScope.getInputs().replaceAll(manager::repOf);
+                    componentScope.getOutputs().replaceAll(manager::repOf);
                 }
             });
 
             instantiateScope.forEach(scope -> {
                 if (scope instanceof ComponentScope componentScope) {
-                    componentScope.getInputs().replaceAll(local::repOf);
-                    componentScope.getOutputs().replaceAll(local::repOf);
+                    componentScope.getInputs().replaceAll(manager::repOf);
+                    componentScope.getOutputs().replaceAll(manager::repOf);
                 }
             });
         }

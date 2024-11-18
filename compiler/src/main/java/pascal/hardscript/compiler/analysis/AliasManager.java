@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class AliasStructure {
+public class AliasManager {
     private final UnionFind<Instance> set = new UnionFind<>();
     private final Map<Instance, Instance> sourceRep = new HashMap<>();
 

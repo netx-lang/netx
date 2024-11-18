@@ -6,7 +6,7 @@ import pascal.hardscript.compiler.model.scope.DesignScope;
 import java.util.function.Predicate;
 
 public class GlobalAliasAnalysis extends ModelAnalysis {
-    private final AliasStructure global = new AliasStructure();
+    private final AliasManager manager = new AliasManager();
 
     public GlobalAliasAnalysis(DesignScope design) {
         super(design);
@@ -14,13 +14,13 @@ public class GlobalAliasAnalysis extends ModelAnalysis {
 
     @Override
     public void analyze() {
-        design.forEachScope(scope -> global.addAlias(scope.getAliases()));
-        global.resolveRepresentatives();
+        design.forEachScope(scope -> manager.addAlias(scope.getAliases()));
+        manager.resolveRepresentatives();
         design.forEachScope(scope -> {
-            scope.getEntities().removeIf(Predicate.not(global::needDump));
+            scope.getEntities().removeIf(Predicate.not(manager::needDump));
             if (scope instanceof ComponentScope component) {
-                component.getInputs().replaceAll(global::repOf);
-                component.getOutputs().replaceAll(global::repOf);
+                component.getInputs().replaceAll(manager::repOf);
+                component.getOutputs().replaceAll(manager::repOf);
             }
         });
     }

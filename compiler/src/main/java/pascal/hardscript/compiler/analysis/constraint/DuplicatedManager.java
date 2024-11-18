@@ -1,9 +1,8 @@
-package pascal.hardscript.compiler.analysis;
+package pascal.hardscript.compiler.analysis.constraint;
 
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.collection.UnionFind;
 import pascal.hardscript.util.lang.BuiltinComponent;
@@ -16,20 +15,10 @@ import java.util.stream.Collectors;
 
 import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
 
-public final class DuplicatedComponentElimination extends ModelAnalysis {
+public class DuplicatedManager {
     private final UnionFind<Instance> set = new UnionFind<>();
 
-    public DuplicatedComponentElimination(DesignScope design) {
-        super(design);
-    }
-
-    @Override
-    public void analyze() {
-        design.forEachScope(this::collectDuplicatedComponents);
-        design.forEachScope(this::replaceDuplicatedInstances);
-    }
-
-    private void collectDuplicatedComponents(Scope scope) {
+    public void collectDuplicatedComponents(Scope scope) {
         Map<Identifier, List<ComponentScope>> idGroups = scope.getChildren().stream()
                 .map(ComponentScope.class::cast)
                 .collect(Collectors.groupingBy(ComponentScope::getIdentifier));
@@ -75,15 +64,7 @@ public final class DuplicatedComponentElimination extends ModelAnalysis {
         return false;
     }
 
-    private void replaceDuplicatedInstances(Scope scope) {
-        scope.getEntities().removeIf(this::needRemove);
-        if (scope instanceof ComponentScope componentScope) {
-            componentScope.getInputs().replaceAll(this::repOf);
-            componentScope.getOutputs().replaceAll(this::repOf);
-        }
-    }
-
-    private boolean needRemove(Entity entity) {
+    public boolean needRemove(Entity entity) {
         if (entity instanceof Instance instance) {
             if (set.contains(instance)) {
                 return set.find(instance) != instance;
@@ -92,11 +73,10 @@ public final class DuplicatedComponentElimination extends ModelAnalysis {
         return false;
     }
 
-    private Instance repOf(Instance instance) {
+    public Instance repOf(Instance instance) {
         if (set.contains(instance)) {
             return set.find(instance);
         }
         return instance;
     }
-
 }

@@ -10,14 +10,12 @@ import java.util.Objects;
 public final class Signature {
     private final ComponentAtom caller;
     private final List<Instance> inputs, outputs;
-    private final List<InstanceType> inTypes, outTypes;
+    private List<InstanceType> inTypeCache, outTypeCache;
 
     public Signature(ComponentAtom caller, List<Instance> inputs, List<Instance> outputs) {
         this.caller = caller;
         this.inputs = inputs;
         this.outputs = outputs;
-        inTypes = inputs.stream().map(Instance::getType).toList();
-        outTypes = outputs.stream().map(Instance::getType).toList();
     }
 
     public static Signature of(ComponentAtom caller, List<Instance> inputName, List<Instance> outputName) {
@@ -31,12 +29,13 @@ public final class Signature {
         Signature signature = (Signature) o;
         return Objects.equals(caller.getDefinition(), signature.caller.getDefinition())
                 && Objects.equals(caller.getParameters(), signature.caller.getParameters())
-                && Objects.equals(inTypes, signature.inTypes) && Objects.equals(outTypes, signature.outTypes);
+                && Objects.equals(getInType(), signature.getInType())
+                && Objects.equals(getOutType(), signature.getOutType());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(caller.getDefinition(), caller.getParameters(), inTypes, outTypes);
+        return Objects.hash(caller.getDefinition(), caller.getParameters(), getInType(), getOutType());
     }
 
     public ComponentAtom caller() {
@@ -49,6 +48,20 @@ public final class Signature {
 
     public List<Instance> outputs() {
         return outputs;
+    }
+
+    private List<InstanceType> getInType() {
+        if (inTypeCache == null) {
+            inTypeCache = inputs.stream().map(Instance::getType).toList();
+        }
+        return inTypeCache;
+    }
+
+    private List<InstanceType> getOutType() {
+        if (outTypeCache == null) {
+            outTypeCache = outputs.stream().map(Instance::getType).toList();
+        }
+        return outTypeCache;
     }
 }
 

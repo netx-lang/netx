@@ -48,7 +48,11 @@ public final class HSCompiler {
             new LocalAliasAnalysis(design).analyze();
         }
         new DataTypeInference(design).analyze();
-        new DuplicatedComponentElimination(design).analyze();
+        if (FULLY_EXPAND) {
+            new GlobalDuplicatedElimination(design).analyze();
+        } else {
+            new LocalDuplicatedElimination(design).analyze();
+        }
         return design;
     }
 
