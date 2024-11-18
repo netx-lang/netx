@@ -602,11 +602,11 @@
       },
       {
         "type": "builtin", "id": "EQ", "loc": "17:30",
-        "input": ["ms@10", "100"],
+        "input": ["ms@10", "99"],
         "output": ["ctl@85"]
       },
       {
-        "type": "builtin", "id": "ADD", "loc": "17:47",
+        "type": "builtin", "id": "ADD", "loc": "17:46",
         "input": ["ms@10", "1"],
         "output": ["i0@86"]
       },
@@ -673,7 +673,7 @@
       },
       {
         "type": "builtin", "id": "EQ", "loc": "18:30",
-        "input": ["s@15", "60"],
+        "input": ["s@15", "59"],
         "output": ["ctl@93"]
       },
       {
@@ -744,7 +744,7 @@
       },
       {
         "type": "builtin", "id": "EQ", "loc": "19:30",
-        "input": ["m@14", "60"],
+        "input": ["m@14", "59"],
         "output": ["ctl@101"]
       },
       {

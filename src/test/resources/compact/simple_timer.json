@@ -48,11 +48,11 @@
       },
       {
         "type": "builtin", "id": "EQ@5", "loc": "17:30",
-        "input": ["ms@0", "100"],
+        "input": ["ms@0", "99"],
         "output": ["ctl@7"]
       },
       {
-        "type": "builtin", "id": "ADD@6", "loc": "17:47",
+        "type": "builtin", "id": "ADD@6", "loc": "17:46",
         "input": ["ms@0", "1"],
         "output": ["i0@7"]
       },
@@ -70,7 +70,7 @@
       },
       {
         "type": "builtin", "id": "EQ@9", "loc": "18:30",
-        "input": ["s@0", "60"],
+        "input": ["s@0", "59"],
         "output": ["ctl@11"]
       },
       {
@@ -92,7 +92,7 @@
       },
       {
         "type": "builtin", "id": "EQ@13", "loc": "19:30",
-        "input": ["m@0", "60"],
+        "input": ["m@0", "59"],
         "output": ["ctl@15"]
       },
       {
