@@ -12,6 +12,8 @@ import pascal.hardscript.compiler.model.scope.DesignScope;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import static pascal.hardscript.compiler.Configuration.FULLY_EXPAND;
+
 public final class HSCompiler {
     private final CharStream charStream;
 
@@ -40,7 +42,11 @@ public final class HSCompiler {
     public DesignScope compile() {
         var design = new Elaborator(parse()).elaborate();
         new ScopeInliner(design).analyze();
-        new AliasAnalysis(design).analyze();
+        if (FULLY_EXPAND) {
+            new GlobalAliasAnalysis(design).analyze();
+        } else {
+            new LocalAliasAnalysis(design).analyze();
+        }
         new DataTypeInference(design).analyze();
         new DuplicatedComponentElimination(design).analyze();
         return design;
