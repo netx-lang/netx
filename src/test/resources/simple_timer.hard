@@ -15,9 +15,9 @@ component top: [clk_50] -> [hex_${i} | i in [0..8]] {
 	h_clk  <- clock_divider(60)     <> h_clk
 
 	ms <- REG(ms_clk) <> MUX <> [EQ <> [ms, 100], ADD <> [ms, 1], 0]
-	s  <- REG(s_clk)  <> MUX <> [EQ <> [ms, 60], ADD <> [s, 1], 0]
-	m  <- REG(m_clk)  <> MUX <> [EQ <> [ms, 60], ADD <> [m, 1], 0]
-	h  <- REG(h_clk)  <> MUX <> [EQ <> [ms, 23], ADD <> [h, 1], 0]
+	s  <- REG(s_clk)  <> MUX <> [EQ <> [s, 60], ADD <> [s, 1], 0]
+	m  <- REG(m_clk)  <> MUX <> [EQ <> [m, 60], ADD <> [m, 1], 0]
+	h  <- REG(h_clk)  <> MUX <> [EQ <> [h, 23], ADD <> [h, 1], 0]
 
 	hex_0 <- hex_trigger <> CAST <> MOD <> [ms, 10]
 	hex_1 <- hex_trigger <> CAST <> DIV <> [ms, 10]

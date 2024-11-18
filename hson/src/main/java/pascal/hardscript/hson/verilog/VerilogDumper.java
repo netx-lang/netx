@@ -102,6 +102,11 @@ public class VerilogDumper {
                 notepad.print(String.join(", ", rhsList));
                 notepad.print("}");
             }
+            case CAST -> {
+                notepad.print("$signed(");
+                notepad.print(rhsList.getFirst());
+                notepad.print(")");
+            }
             default -> {
                 var delimiter = " " + BuiltinComponent.VERILOG_OP.get(assign.builtin()) + " ";
                 notepad.print(String.join(delimiter, rhsList));
