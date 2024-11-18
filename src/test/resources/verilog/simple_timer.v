@@ -13,119 +13,94 @@ module top_1(
   output hex_7;
   wire ms_clk; // @(9:6)
   wire clk_50; // @(2:6)
-  wire [31:0] o_27;
+  wire [31:0] o_6;
+  wire [31:0] o_29;
   wire s_clk; // @(9:14)
-  wire [31:0] o_24;
+  wire [31:0] o_9;
+  wire [31:0] o_26;
+  wire [31:0] o_25;
+  wire [31:0] o_22;
   wire [31:0] o_21;
-  wire [31:0] o_42;
   wire [3:0] p_0;
-  wire [31:0] p_16;
-  wire [3:0] p_17;
-  wire [3:0] p_2;
-  wire [3:0] p_18;
+  wire p_2;
   wire [3:0] p_1;
-  wire [3:0] p_19;
   wire [6:0] hex_1; // @(4:7)
   wire [31:0] p_4;
-  wire [31:0] p_12;
   wire [6:0] hex_0; // @(4:7)
-  wire p_3;
-  wire [31:0] p_13;
+  wire [31:0] p_3;
   wire [31:0] ms; // @(10:6)
   wire [6:0] hex_3; // @(4:7)
   wire [3:0] p_6;
-  wire p_14;
   wire [6:0] hex_2; // @(4:7)
-  wire [31:0] p_5;
-  wire [31:0] p_15;
-  wire [31:0] h; // @(10:16)
-  wire [31:0] p_8;
-  wire p_7;
-  wire [31:0] p_9;
+  wire [3:0] p_5;
+  wire [3:0] p_8;
+  wire [3:0] p_7;
+  wire [3:0] p_9;
   wire h_clk; // @(9:28)
-  wire [31:0] m; // @(10:13)
-  wire [31:0] s; // @(10:10)
-  wire [31:0] o_39;
+  wire [31:0] o_18;
+  wire [31:0] o_17;
   wire [6:0] hex_5; // @(4:7)
-  wire [31:0] o_36;
+  wire [31:0] o_14;
   wire [6:0] hex_4; // @(4:7)
+  wire [31:0] o_13;
   wire [6:0] hex_7; // @(4:7)
+  wire [31:0] o_34;
   wire [3:0] p_10;
   wire [6:0] hex_6; // @(4:7)
   wire [31:0] o_33;
-  wire p_11;
   wire m_clk; // @(9:21)
+  wire [31:0] o_10;
   wire [31:0] o_30;
-  reg [31:0] p_20;
-  reg [31:0] p_21;
-  reg [31:0] p_22;
-  reg [31:0] p_23;
-  hex_trigger_1 inst_32(p_0, hex_3);
+  reg [31:0] p_11;
+  hex_trigger_1 inst_16(p_0, hex_2);
+  hex_trigger_1 inst_32(p_1, hex_6);
   clock_divider_1 inst_1(clk_50, ms_clk);
-  clock_divider_2 inst_2(ms_clk, s_clk);
-  clock_divider_3 inst_3(s_clk, m_clk);
-  hex_trigger_1 inst_35(p_1, hex_4);
-  clock_divider_3 inst_4(h_clk, h_clk);
-  hex_trigger_1 inst_38(p_2, hex_5);
-  MUX_1 inst_7(p_3, p_4, 32'h00000000, p_5);
-  hex_trigger_1 inst_41(p_6, hex_6);
-  MUX_1 inst_11(p_7, p_8, 32'h00000000, p_9);
-  hex_trigger_1 inst_44(p_10, hex_7);
-  MUX_1 inst_15(p_11, p_12, 32'h00000000, p_13);
-  MUX_1 inst_19(p_14, p_15, 32'h00000000, p_16);
-  hex_trigger_1 inst_23(p_17, hex_0);
-  hex_trigger_1 inst_26(p_18, hex_1);
-  hex_trigger_1 inst_29(p_19, hex_2);
-  assign o_33 = m % 32'h0000000A;
-  assign p_1 = $signed(o_33);
-  assign o_36 = m / 32'h0000000A;
-  assign p_3 = ms == 32'h00000063;
-  assign p_2 = $signed(o_36);
-  assign p_4 = ms + 32'h00000001;
-  assign o_39 = h % 32'h0000000A;
-  assign p_6 = $signed(o_39);
-  assign p_7 = s == 32'h0000003B;
-  assign p_8 = s + 32'h00000001;
-  assign o_42 = h / 32'h0000000A;
-  assign p_10 = $signed(o_42);
-  assign p_11 = m == 32'h0000003B;
-  assign p_12 = m + 32'h00000001;
-  assign p_14 = h == 32'h00000017;
-  assign p_15 = h + 32'h00000001;
-  assign o_21 = ms % 32'h0000000A;
-  assign p_17 = $signed(o_21);
-  assign o_24 = ms / 32'h0000000A;
-  assign p_18 = $signed(o_24);
-  assign o_27 = s % 32'h0000000A;
-  assign p_19 = $signed(o_27);
-  assign o_30 = s / 32'h0000000A;
-  assign p_0 = $signed(o_30);
-  assign s = p_21;
-  always @(posedge s_clk) begin
-    p_21 <= p_9;
-  end
-  assign ms = p_20;
+  MUX_1 inst_4(p_2, p_3, 32'h00000000, p_4);
+  hex_trigger_1 inst_20(p_5, hex_3);
+  hex_trigger_1 inst_36(p_6, hex_7);
+  hex_trigger_1 inst_8(p_7, hex_0);
+  hex_trigger_1 inst_24(p_8, hex_4);
+  hex_trigger_1 inst_12(p_9, hex_1);
+  hex_trigger_1 inst_28(p_10, hex_5);
+  assign p_2 = ms == 32'h0083D5FF;
+  assign p_3 = ms + 32'h00000001;
+  assign o_6 = ms % 32'h0000000A;
+  assign p_7 = $signed(o_6);
+  assign o_9 = ms % 32'h00000064;
+  assign o_10 = o_9 / 32'h0000000A;
+  assign p_9 = $signed(o_10);
+  assign o_13 = ms % 32'h000003E8;
+  assign o_14 = o_13 / 32'h00000064;
+  assign p_0 = $signed(o_14);
+  assign o_17 = ms % 32'h00001770;
+  assign o_18 = o_17 / 32'h000003E8;
+  assign p_5 = $signed(o_18);
+  assign o_21 = ms % 32'h0000EA60;
+  assign o_22 = o_21 / 32'h00001770;
+  assign p_8 = $signed(o_22);
+  assign o_25 = ms % 32'h00057E40;
+  assign o_26 = o_25 / 32'h0000EA60;
+  assign p_10 = $signed(o_26);
+  assign o_29 = ms % 32'h0036EE80;
+  assign o_30 = o_29 / 32'h00057E40;
+  assign p_1 = $signed(o_30);
+  assign o_33 = ms % 32'h05265C00;
+  assign o_34 = o_33 / 32'h0036EE80;
+  assign p_6 = $signed(o_34);
+  assign ms = p_11;
   always @(posedge ms_clk) begin
-    p_20 <= p_5;
-  end
-  assign m = p_22;
-  always @(posedge m_clk) begin
-    p_22 <= p_13;
-  end
-  assign h = p_23;
-  always @(posedge h_clk) begin
-    p_23 <= p_16;
+    p_11 <= p_4;
   end
 endmodule
 
-// @(42:10)
+// @(35:10)
 module hex_trigger_1(
   num, code
 );
   input num;
   output code;
   wire [6:0] o_60;
-  wire [3:0] num; // @(43:6)
+  wire [3:0] num; // @(36:6)
   wire [6:0] o_28;
   wire [6:0] o_27;
   wire [6:0] o_24;
@@ -159,7 +134,7 @@ module hex_trigger_1(
   wire p_27;
   wire p_28;
   wire p_29;
-  wire [6:0] code; // @(44:6)
+  wire [6:0] code; // @(37:6)
   wire p_23;
   wire p_24;
   wire p_25;
@@ -257,65 +232,7 @@ module hex_trigger_1(
   assign code = o_4 | o_8 | o_12 | o_16 | o_20 | o_24 | o_28 | o_32 | o_36 | o_40 | o_44 | o_48 | o_52 | o_56 | o_60 | o_64;
 endmodule
 
-// @(32:10)
-module clock_divider_3(
-  clk_50, clk
-);
-  input clk_50;
-  output clk;
-  wire p_0;
-  wire [31:0] p_2;
-  wire clk; // @(33:14)
-  wire [31:0] p_1;
-  wire p_4;
-  wire p_3;
-  wire [31:0] count; // @(34:6)
-  wire clk_50; // @(33:6)
-  reg [31:0] p_5;
-  reg p_6;
-  MUX_1 inst_3(p_0, p_1, 32'h00000000, p_2);
-  MUX_2 inst_6(p_0, clk, p_3, p_4);
-  assign p_0 = count == 32'h0000003C;
-  assign p_1 = count + 32'h00000001;
-  assign p_3 = ~clk;
-  assign count = p_5;
-  assign clk = p_6;
-  always @(posedge clk_50) begin
-    p_5 <= p_2;
-    p_6 <= p_4;
-  end
-endmodule
-
-// @(32:10)
-module clock_divider_2(
-  clk_50, clk
-);
-  input clk_50;
-  output clk;
-  wire p_0;
-  wire [31:0] p_2;
-  wire clk; // @(33:14)
-  wire [31:0] p_1;
-  wire p_4;
-  wire p_3;
-  wire [31:0] count; // @(34:6)
-  wire clk_50; // @(33:6)
-  reg [31:0] p_5;
-  reg p_6;
-  MUX_1 inst_3(p_0, p_1, 32'h00000000, p_2);
-  MUX_2 inst_6(p_0, clk, p_3, p_4);
-  assign p_0 = count == 32'h00000064;
-  assign p_1 = count + 32'h00000001;
-  assign p_3 = ~clk;
-  assign count = p_5;
-  assign clk = p_6;
-  always @(posedge clk_50) begin
-    p_5 <= p_2;
-    p_6 <= p_4;
-  end
-endmodule
-
-// @(32:10)
+// @(25:10)
 module clock_divider_1(
   clk_50, clk
 );
@@ -323,17 +240,17 @@ module clock_divider_1(
   output clk;
   wire p_0;
   wire [31:0] p_2;
-  wire clk; // @(33:14)
+  wire clk; // @(26:14)
   wire [31:0] p_1;
   wire p_4;
   wire p_3;
-  wire [31:0] count; // @(34:6)
-  wire clk_50; // @(33:6)
+  wire [31:0] count; // @(27:6)
+  wire clk_50; // @(26:6)
   reg [31:0] p_5;
   reg p_6;
   MUX_1 inst_3(p_0, p_1, 32'h00000000, p_2);
   MUX_2 inst_6(p_0, clk, p_3, p_4);
-  assign p_0 = count == 32'h0003D090;
+  assign p_0 = count == 32'h0003D08F;
   assign p_1 = count + 32'h00000001;
   assign p_3 = ~clk;
   assign count = p_5;
@@ -344,7 +261,7 @@ module clock_divider_1(
   end
 endmodule
 
-// @(67:10)
+// @(60:10)
 module MUX_2(
   ctl, i0, i1, out
 );
@@ -354,12 +271,12 @@ module MUX_2(
   output out;
   wire o_4;
   wire o_5;
-  wire i0; // @(68:14)
-  wire i1; // @(68:18)
-  wire ctl; // @(68:9)
+  wire i0; // @(61:14)
+  wire i1; // @(61:18)
+  wire ctl; // @(61:9)
   wire o_2;
   wire o_3;
-  wire out; // @(68:22)
+  wire out; // @(61:22)
   wire o_1;
   assign o_1 = ~ctl;
   assign o_2 = $signed(o_1);
@@ -369,7 +286,7 @@ module MUX_2(
   assign out = o_3 | o_5;
 endmodule
 
-// @(67:10)
+// @(60:10)
 module MUX_1(
   ctl, i0, i1, out
 );
@@ -379,12 +296,12 @@ module MUX_1(
   output out;
   wire [31:0] o_4;
   wire [31:0] o_5;
-  wire [31:0] i0; // @(68:14)
-  wire [31:0] i1; // @(68:18)
-  wire ctl; // @(68:9)
+  wire [31:0] i0; // @(61:14)
+  wire [31:0] i1; // @(61:18)
+  wire ctl; // @(61:9)
   wire [31:0] o_2;
   wire [31:0] o_3;
-  wire [31:0] out; // @(68:22)
+  wire [31:0] out; // @(61:22)
   wire o_1;
   assign o_1 = ~ctl;
   assign o_2 = $signed(o_1);

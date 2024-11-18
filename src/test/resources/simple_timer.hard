@@ -7,26 +7,19 @@ component top: [clk_50] -> [hex_${i} | i in [0..8]] {
 	let REG = component clk: REGISTER(clk, true)
 
 	inst ms_clk, s_clk, m_clk, h_clk of clock()
-	inst ms, s, m, h of wire(bit(32))
+	inst ms of wire(bit(32))
 
-	ms_clk <- clock_divider(250000) <> clk_50
-	s_clk  <- clock_divider(100)    <> ms_clk
-	m_clk  <- clock_divider(60)     <> s_clk
-	h_clk  <- clock_divider(60)     <> h_clk
-
-	ms <- REG(ms_clk) <> MUX <> [EQ <> [ms, 99], ADD <> [ms, 1], 0]
-	s  <- REG(s_clk)  <> MUX <> [EQ <> [s, 59], ADD <> [s, 1], 0]
-	m  <- REG(m_clk)  <> MUX <> [EQ <> [m, 59], ADD <> [m, 1], 0]
-	h  <- REG(h_clk)  <> MUX <> [EQ <> [h, 23], ADD <> [h, 1], 0]
+	ms_clk <- clock_divider(500000) <> clk_50
+	ms <- REG(ms_clk) <> MUX <> [EQ <> [ms, 24 * 3600 * 100 - 1], ADD <> [ms, 1], 0]
 
 	hex_0 <- hex_trigger <> CAST <> MOD <> [ms, 10]
-	hex_1 <- hex_trigger <> CAST <> DIV <> [ms, 10]
-	hex_2 <- hex_trigger <> CAST <> MOD <> [s, 10]
-	hex_3 <- hex_trigger <> CAST <> DIV <> [s, 10]
-	hex_4 <- hex_trigger <> CAST <> MOD <> [m, 10]
-	hex_5 <- hex_trigger <> CAST <> DIV <> [m, 10]
-	hex_6 <- hex_trigger <> CAST <> MOD <> [h, 10]
-	hex_7 <- hex_trigger <> CAST <> DIV <> [h, 10]
+	hex_1 <- hex_trigger <> CAST <> DIV <> [MOD <> [ms, 100], 10]
+	hex_2 <- hex_trigger <> CAST <> DIV <> [MOD <> [ms, 1000], 100]
+	hex_3 <- hex_trigger <> CAST <> DIV <> [MOD <> [ms, 6000], 1000]
+	hex_4 <- hex_trigger <> CAST <> DIV <> [MOD <> [ms, 60000], 6000]
+	hex_5 <- hex_trigger <> CAST <> DIV <> [MOD <> [ms, 360000], 60000]
+	hex_6 <- hex_trigger <> CAST <> DIV <> [MOD <> [ms, 3600000], 360000]
+	hex_7 <- hex_trigger <> CAST <> DIV <> [MOD <> [ms, 86400000], 3600000]
 }
 
 component clock_divider(max): [clk_50] -> [clk] {
@@ -34,7 +27,7 @@ component clock_divider(max): [clk_50] -> [clk] {
 	inst count       of wire(bit(32))
 
 	let REG = REGISTER(clk_50, true)
-	let ctl = EQ <> [count, max]
+	let ctl = EQ <> [count, max / 2 - 1]
 	count <- REG <> MUX <> [ctl, ADD <> [count, 1], 0]
 	clk   <- REG <> MUX <> [ctl, clk, NOT <> clk]
 }
