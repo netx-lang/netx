@@ -1,69 +1,26 @@
 package pascal.hardscript.compiler.analysis;
 
 import pascal.hardscript.compiler.analysis.constraint.DuplicatedManager;
-import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 
-import java.util.LinkedList;
-import java.util.List;
-
-public final class LocalDuplicatedElimination extends ModelAnalysis {
+public final class LocalDuplicatedElimination extends LocalModelAnalysis {
 
     public LocalDuplicatedElimination(DesignScope design) {
-        super(design);
+        super(design, scope -> new ComponentDuplicatedAnalysis(scope).analyze(scope));
     }
 
-    private static boolean isUserDefinedComponent(Scope scope) {
-        return !((ComponentScope) scope).isBuiltin();
-    }
-
-    @Override
-    public void analyze() {
-        design.forEachScope(scope -> {
-            if (isUserDefinedComponent(scope)) {
-                new ComponentAnalysis().analyze(scope);
-            }
-        });
-    }
-
-    private static class ComponentAnalysis {
+    private static class ComponentDuplicatedAnalysis extends ComponentAnalysis {
         private final DuplicatedManager manager = new DuplicatedManager();
-        private final List<Scope> inlineScope = new LinkedList<>();
-        private final List<Scope> instantiateScope = new LinkedList<>();
+
+        protected ComponentDuplicatedAnalysis(Scope scope) {
+            super(scope);
+        }
 
         public void analyze(Scope scope) {
             exploreAnalysisScopes(scope);
-            eliminateDuplicatedData();
-        }
-
-        private void exploreAnalysisScopes(Scope scope) {
-            inlineScope.add(scope);
-            manager.collectDuplicatedComponents(scope);
-            for (var child : scope.getChildren()) {
-                if (!isUserDefinedComponent(child)) {
-                    exploreAnalysisScopes(child);
-                } else {
-                    instantiateScope.add(child);
-                }
-            }
-        }
-
-        public void eliminateDuplicatedData() {
-            inlineScope.forEach(scope -> {
-                scope.getEntities().removeIf(manager::needRemove);
-                if (scope instanceof ComponentScope componentScope) {
-                    componentScope.getInputs().replaceAll(manager::repOf);
-                    componentScope.getOutputs().replaceAll(manager::repOf);
-                }
-            });
-
-            instantiateScope.forEach(scope -> {
-                if (scope instanceof ComponentScope componentScope) {
-                    componentScope.getInputs().replaceAll(manager::repOf);
-                    componentScope.getOutputs().replaceAll(manager::repOf);
-                }
-            });
+            inlineScope.forEach(manager::collectDuplicatedComponents);
+            eliminateDuplicatedData(manager::needRemove, manager::repOf);
         }
     }
 }
