@@ -96,9 +96,9 @@ public final class DataTypeInference extends ModelAnalysis {
         boolean rhsHasType = !(rhs.hasImplicitType());
         if (lhsHasType && rhsHasType) {
             throwIfConstraintNotHolds(binary);
-        } else if (lhsHasType && rhs.hasImplicitType()) {
+        } else if (lhsHasType) {
             setTypeFor(rhs, binary.expectedRhs());
-        } else if (lhs.hasImplicitType() && rhsHasType) {
+        } else if (rhsHasType) {
             setTypeFor(lhs, binary.expectedLhs());
         } else {
             constraints.add(binary);

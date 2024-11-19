@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class HSParserUnitTest {
 
     static HardScriptParser makeParser(String code) {
-        var frontend = HSCompiler.load(CharStreams.fromString(code));
+        var frontend = Builder.forExpanded().load(CharStreams.fromString(code));
         return frontend.buildANTLRParser();
     }
 

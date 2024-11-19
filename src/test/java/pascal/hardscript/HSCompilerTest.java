@@ -2,10 +2,7 @@ package pascal.hardscript;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import pascal.hardscript.compiler.Configuration;
-import pascal.hardscript.compiler.io.HSCompiler;
-import pascal.hardscript.compiler.io.HSDumper;
-import pascal.hardscript.compiler.io.HSPrinter;
+import pascal.hardscript.compiler.io.Builder;
 import pascal.hardscript.util.print.NotepadWriter;
 
 import java.io.IOException;
@@ -55,25 +52,21 @@ class HSCompilerTest {
         test("simple_timer");
     }
 
-    private static void testHelper(String fileName) throws IOException {
-        var design = HSCompiler.loadPath(TEST_DIR.resolve(fileName + ".hard")).compile();
-        var json = new HSDumper(design).dump();
-
-        Path expectedDir = TEST_DIR.resolve(Configuration.FULLY_EXPAND ? "expanded" : "compact");
+    private static void testHelper(Builder builder, Path testcase, Path expected) throws IOException {
+        var json = builder.loadPath(testcase).compile();
         if (GENERATE_EXPECTED) {
-            var notepad = NotepadWriter.pathOut(expectedDir.resolve(fileName + ".json"));
-            new HSPrinter(json, notepad).print();
+            var notepad = NotepadWriter.pathOut(expected);
+            builder.printer(notepad).print(json);
         } else {
-            var expected = mapper.reader()
-                    .readTree(Files.newBufferedReader(expectedDir.resolve(fileName + ".json")));
-            assertEquals(expected, json);
+            assertEquals(mapper.reader().readTree(Files.newBufferedReader(expected)), json);
         }
     }
 
     public void test(String fileName) throws IOException {
-        Configuration.FULLY_EXPAND = true;
-        testHelper(fileName);
-        Configuration.FULLY_EXPAND = false;
-        testHelper(fileName);
+        Path testcase = TEST_DIR.resolve(fileName + ".hard");
+        Path expected = TEST_DIR.resolve("expanded").resolve(fileName + ".json");
+        testHelper(Builder.forExpanded(), testcase, expected);
+        expected = TEST_DIR.resolve("compact").resolve(fileName + ".json");
+        testHelper(Builder.forCompact(), testcase, expected);
     }
 }

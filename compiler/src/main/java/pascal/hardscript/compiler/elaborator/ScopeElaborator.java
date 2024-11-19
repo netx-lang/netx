@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.component.*;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
+import pascal.hardscript.compiler.io.Configuration;
 import pascal.hardscript.compiler.model.EntityList;
 import pascal.hardscript.compiler.model.component.*;
 import pascal.hardscript.compiler.model.instance.Instance;
@@ -20,17 +21,18 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import static pascal.hardscript.compiler.Configuration.FULLY_EXPAND;
 import static pascal.hardscript.compiler.elaborator.Types.requiresComponentType;
 import static pascal.hardscript.compiler.elaborator.Types.requiresMatchedSize;
 
 final class ScopeElaborator {
     private static final Logger log = LoggerFactory.getLogger(ScopeElaborator.class);
     private static BuiltInComponentFactory factory;
+    private final Configuration config;
     private final Evaluator evaluator;
     private final Scope scope;
 
-    ScopeElaborator(Scope scope) {
+    ScopeElaborator(Configuration config, Scope scope) {
+        this.config = config;
         this.scope = scope;
         this.evaluator = scope.getEvaluator();
     }
@@ -68,7 +70,7 @@ final class ScopeElaborator {
         for (var entity : evaluator.evaluateToList(generator.getFrom()).entities()) {
             var subScope = scope.instantiateBlockScope();
             subScope.bind(id, entity);
-            new ScopeElaborator(subScope).build(loop);
+            new ScopeElaborator(config, subScope).build(loop);
         }
     }
 
@@ -202,8 +204,8 @@ final class ScopeElaborator {
                 component.bind(entry.getKey(), entry.getValue());
             }
             component.setAttributes(attributes);
-            new ScopeElaborator(component).build(node);
-            if (!FULLY_EXPAND) {
+            new ScopeElaborator(config, component).build(node);
+            if (!config.fullyExpand()) {
                 setSignatureFor(atom, component);
             }
             return Instantiator.ComponentPort.of(component.getOutputs(), component.getInputs());

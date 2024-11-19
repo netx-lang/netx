@@ -4,23 +4,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.component.ComponentNode;
+import pascal.hardscript.compiler.io.Configuration;
 import pascal.hardscript.compiler.model.component.ComponentAtom;
 import pascal.hardscript.compiler.model.component.Signature;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
-
-import static pascal.hardscript.compiler.Configuration.FULLY_EXPAND;
-import static pascal.hardscript.compiler.Configuration.TOP_COMPONENT;
 
 public final class Elaborator {
     private static final Logger log = LoggerFactory.getLogger(Elaborator.class);
 
     private final DesignNode node;
     private final DesignScope design;
+    private final Configuration config;
 
-    public Elaborator(DesignNode node) {
+    public Elaborator(DesignNode node, Configuration config) {
         this.node = node;
         this.design = DesignScope.newDesign(node);
+        this.config = config;
         Evaluator.setGlobal(design);
         ScopeElaborator.setFactory(design.getBuiltinFactory());
     }
@@ -28,8 +28,8 @@ public final class Elaborator {
     public DesignScope elaborate() {
         var topNode = findTopNode();
         var topScope = design.instantiateTop(topNode.getIdentifier());
-        new ScopeElaborator(topScope).build(topNode);
-        if (!FULLY_EXPAND) {
+        new ScopeElaborator(config, topScope).build(topNode);
+        if (!config.fullyExpand()) {
             setDesignSignature(topScope, topNode);
         }
         return design;
@@ -42,11 +42,11 @@ public final class Elaborator {
 
     private ComponentNode findTopNode() {
         for (var component : node.getComponents()) {
-            if (TOP_COMPONENT.equals(component.getIdentifier().name())) {
+            if (config.topName().equals(component.getIdentifier().name())) {
                 return component;
             }
         }
-        log.warn("No component named '{}' found, using the first component as top", TOP_COMPONENT);
+        log.warn("No component named '{}' found, using the first component as top", config.topName());
         return node.getComponents().getFirst();
     }
 

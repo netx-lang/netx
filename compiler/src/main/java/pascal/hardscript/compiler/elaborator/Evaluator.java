@@ -34,7 +34,6 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
-import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import static pascal.hardscript.compiler.elaborator.Types.*;
@@ -66,6 +65,10 @@ public final class Evaluator {
     );
     private static DesignScope global;
 
+    public static void setGlobal(DesignScope design) {
+        Evaluator.global = design;
+    }
+
     private final LinkedList<Binding> bindings = new LinkedList<>();
     private final Scope scope;
 
@@ -75,7 +78,6 @@ public final class Evaluator {
         this.scope = scope;
         bindings.add(scope.getBinding());
     }
-    private static Supplier<Integer> dataIndexer;
 
     public ComponentType evaluateToComponentType(ExprNode expr) {
         return castToComponentType(evaluate(expr), expr.getSourceLoc());
@@ -112,11 +114,6 @@ public final class Evaluator {
             case ConditionalExpr sub -> evaluateConditionalExpr(sub);
             default -> throw new ShallNotReachHereError(); // AutoTypeExpr, MacroExpr
         };
-    }
-
-    public static void setGlobal(DesignScope design) {
-        Evaluator.global = design;
-        Evaluator.dataIndexer = design.getDataIndexer();
     }
 
     private Macro evaluateMacroExpr(MacroExpr expr) {
@@ -250,7 +247,7 @@ public final class Evaluator {
         if (expr instanceof AutoTypeExpr) {
             factory = Wire.Factory.of(
                     scope.getLeastUpperComponent(),
-                    PolyType.getInstance(), dataIndexer);
+                    PolyType.getInstance(), global.getDataIndexer());
         } else {
             mode = EvaluationMode.DATA_FACTORY;
             factory = requiresDataFactory(expr.getSourceLoc(), evaluate(expr));
@@ -299,12 +296,12 @@ public final class Evaluator {
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         requiresMatchedSize(sourceLoc, 1, arguments);
         return Wire.Factory.of(
-                scope.getLeastUpperComponent(), evaluateBitWidth(arguments.getFirst()), dataIndexer);
+                scope.getLeastUpperComponent(), evaluateBitWidth(arguments.getFirst()), global.getDataIndexer());
     }
 
     private Clock.Factory evaluateClockFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         if (arguments.isEmpty()) {
-            return Clock.Factory.of(scope.getLeastUpperComponent(), dataIndexer);
+            return Clock.Factory.of(scope.getLeastUpperComponent(), global.getDataIndexer());
         } else {
             log.error("{}: Unexpected specification for component type clock: {}", sourceLoc, arguments);
             throw new CompileCancellationException();

@@ -1,8 +1,7 @@
 package pascal.hardscript.compiler.analysis;
 
 import org.junit.jupiter.api.Test;
-import pascal.hardscript.compiler.io.HSCompiler;
-import pascal.hardscript.compiler.io.HSDumper;
+import pascal.hardscript.compiler.io.Builder;
 import pascal.hardscript.util.TestUtils;
 
 import java.io.IOException;
@@ -19,7 +18,7 @@ class AnalysisTest {
     @Test
     void testSourceLocChecker() throws IOException {
         for (var testcase : TestUtils.collectAllFilesUnder(TEST_DIR)) {
-            var frontend = HSCompiler.loadPath(testcase);
+            var frontend = Builder.forExpanded().loadPath(testcase);
             new SourceLocChecker(frontend.parse()).analyze();
         }
     }
@@ -49,14 +48,14 @@ class AnalysisTest {
                 }
                 """;
         assertEquals(
-                new HSDumper(HSCompiler.load(expected).compile()).dump(),
-                new HSDumper(HSCompiler.load(actual).compile()).dump());
+                Builder.forExpanded().load(expected).compile(),
+                Builder.forExpanded().load(actual).compile());
     }
 
     @Test
     void testNestedDataTypeInference() {
         var file = TEST_DIR.resolve("nested_inference.hard");
-        assertDoesNotThrow(() -> new HSDumper(HSCompiler.loadPath(file).compile()).dump());
+        assertDoesNotThrow(() -> Builder.forExpanded().loadPath(file).compile());
     }
 
     @Test
@@ -77,8 +76,8 @@ class AnalysisTest {
                 }
                 """;
         assertEquals(
-                new HSDumper(HSCompiler.load(expected).compile()).dump(),
-                new HSDumper(HSCompiler.load(actual).compile()).dump());
+                Builder.forExpanded().load(expected).compile(),
+                Builder.forExpanded().load(actual).compile());
     }
 
     @Test
@@ -104,7 +103,7 @@ class AnalysisTest {
                 }
                 """;
         assertEquals(
-                new HSDumper(HSCompiler.load(expected).compile()).dump(),
-                new HSDumper(HSCompiler.load(actual).compile()).dump());
+                Builder.forExpanded().load(expected).compile(),
+                Builder.forExpanded().load(actual).compile());
     }
 }

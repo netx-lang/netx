@@ -17,12 +17,13 @@ import java.util.function.Supplier;
 public final class DesignScope extends Scope {
     private final Supplier<Integer> dataIndexer;
     private final Map<Identifier, ComponentNode> definitions = new HashMap<>();
-    private final BuiltInComponentFactory factory = new BuiltInComponentFactory(this);
+    private final BuiltInComponentFactory factory;
     private ComponentScope top;
 
     DesignScope() {
         super(null);
         this.dataIndexer = new AtomicInteger(0)::incrementAndGet;
+        this.factory = new BuiltInComponentFactory(dataIndexer);
     }
 
     public static DesignScope newDesign(DesignNode node) {

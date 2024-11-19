@@ -7,17 +7,18 @@ import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.Attributes;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.lang.Identifier;
+
+import java.util.function.Supplier;
 
 import static pascal.hardscript.compiler.elaborator.Types.*;
 
 public class BuiltInComponentFactory {
-    private final DesignScope global;
+    private final Supplier<Integer> dataIndexer;
 
-    public BuiltInComponentFactory(DesignScope global) {
-        this.global = global;
+    public BuiltInComponentFactory(Supplier<Integer> dataIndexer) {
+        this.dataIndexer = dataIndexer;
     }
 
     public ComponentScope createBuiltInComponent(Scope parent, BuiltinAtom type) {
@@ -136,7 +137,7 @@ public class BuiltInComponentFactory {
 
     private Wire newWire(ComponentScope result, String name, InstanceType type) {
         var id = Identifier.of("$" + name).setSourceLoc(result.getSourceLoc());
-        var wire = Wire.Factory.of(result, type, global.getDataIndexer()).create(id);
+        var wire = Wire.Factory.of(result, type, dataIndexer).create(id);
         result.bind(wire.getIdentifier(), wire);
         return wire;
     }

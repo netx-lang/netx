@@ -2,7 +2,7 @@ package pascal.hardscript.compiler.elaborator;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
-import pascal.hardscript.compiler.io.HSCompiler;
+import pascal.hardscript.compiler.io.Builder;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.instance.Int32Value;
 import pascal.hardscript.compiler.model.instance.selector.BitSelector;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class EvaluatorUnitTest {
 
     private static DesignScope loadDesign(String code) {
-        return new Elaborator(HSCompiler.load(CharStreams.fromString(code)).parse()).elaborate();
+        return Builder.forExpanded().load(CharStreams.fromString(code)).elaborate();
     }
 
     private static ComponentScope loadSingleComponent(String code) {

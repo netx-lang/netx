@@ -1,5 +1,6 @@
 package pascal.hardscript.compiler.io;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import pascal.hardscript.compiler.analysis.*;
@@ -9,28 +10,13 @@ import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.elaborator.Elaborator;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 
-import java.io.IOException;
-import java.nio.file.Path;
-
-import static pascal.hardscript.compiler.Configuration.FULLY_EXPAND;
-
 public final class HSCompiler {
+    private final Configuration config;
     private final CharStream charStream;
 
-    public HSCompiler(CharStream charStream) {
+    public HSCompiler(Configuration config, CharStream charStream) {
+        this.config = config;
         this.charStream = charStream;
-    }
-
-    public static HSCompiler load(String string) {
-        return new HSCompiler(CharStreams.fromString(string));
-    }
-
-    public static HSCompiler load(CharStream charStream) {
-        return new HSCompiler(charStream);
-    }
-
-    public static HSCompiler loadPath(Path path) throws IOException {
-        return new HSCompiler(CharStreams.fromPath(path));
     }
 
     public DesignNode parse() {
@@ -39,21 +25,25 @@ public final class HSCompiler {
         return design;
     }
 
-    public DesignScope compile() {
-        var design = new Elaborator(parse()).elaborate();
+    public DesignScope elaborate() {
+        DesignNode node = parse();
+        return new Elaborator(node, config).elaborate();
+    }
+
+    public JsonNode compile() {
+        DesignScope design = elaborate();
         new ScopeInliner(design).analyze();
-        if (FULLY_EXPAND) {
+        if (config.fullyExpand()) {
             new GlobalAliasAnalysis(design).analyze();
+            new DataTypeInference(design).analyze();
+            new GlobalDuplicatedElimination(design).analyze();
+            return new ExpandedDumper(design).dump();
         } else {
             new LocalAliasAnalysis(design).analyze();
-        }
-        new DataTypeInference(design).analyze();
-        if (FULLY_EXPAND) {
-            new GlobalDuplicatedElimination(design).analyze();
-        } else {
+            new DataTypeInference(design).analyze();
             new LocalDuplicatedElimination(design).analyze();
+            return new CompactDumper(design).dump();
         }
-        return design;
     }
 
     HardScriptParser buildANTLRParser() {
