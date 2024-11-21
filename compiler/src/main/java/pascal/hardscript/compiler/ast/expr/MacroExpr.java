@@ -57,7 +57,7 @@ public final class MacroExpr extends ExprNode {
     @Override
     public String toString() {
         var sb = new StringBuilder();
-        sb.append("component");
+        sb.append("lambda");
         if (!arguments.isEmpty()) {
             sb.append(" ").append(arguments.getFirst());
             for (int i = 1; i < arguments.size(); i++) {

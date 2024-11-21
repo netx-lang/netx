@@ -4,7 +4,7 @@ component top: [clk_50] -> [hex_${i} | i in [0..8]] {
 		inst hex_${i}   of wire(bit(7))
 	}
 
-	let REG = component clk: REGISTER(clk, true)
+	let REG(clk) = REGISTER(clk, true)
 
 	inst ms_clk, s_clk, m_clk, h_clk of clock()
 	inst ms of wire(bit(32))
@@ -35,8 +35,8 @@ component clock_divider(max): [clk_50] -> [clk] {
 component hex_trigger: [num] -> [code] {
 	inst num  of wire(bit(4))
 	inst code of wire(bit(7))
-	let mask = component x: MUX <> [EQ <> [x, num], 1'b0, 1'b1]
-	let branch = component x, y: AND <> [CAST <> mask(x), y]
+	let mask(x) = MUX <> [EQ <> [x, num], 1'b0, 1'b1]
+	let branch(x, y) = AND <> [CAST <> mask(x), y]
 	code <- OR(16) <> [
 		branch(4'h0, 7'b1000000),
 		branch(4'h1, 7'b1111001),

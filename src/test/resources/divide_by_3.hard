@@ -1,4 +1,4 @@
-let REG_WRAPPER = component isPos: REGISTER(clk, isPos)
+let REG_WRAPPER(isPos) = REGISTER(clk, isPos)
 let POS_REG = REG_WRAPPER(true)
 let NEG_REG = REG_WRAPPER(false)
 

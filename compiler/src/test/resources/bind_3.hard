@@ -1,11 +1,11 @@
 component top {
     inst data of wire(bit(4))
-    let macro = component a, b, c, d: many_ports <> [a, b, c, d]
+    let macro(a, b, c, d) = many_ports <> [a, b, c, d]
 
-    let A = component a, b, c: macro(a, b, c, data[3])
-    let B = component a, b: A(a, b, data[2])
-    let C = component a: B(a, data[1])
-    let D = component: C(data[0])
+    let A(a, b, c) = macro(a, b, c, data[3])
+    let B(a, b) = A(a, b, data[2])
+    let C(a) = B(a, data[1])
+    let D = C(data[0])
     [] <- [IGNORE | i in [0..4]] <> D
 }
 

@@ -1,7 +1,6 @@
 [
   {
-    "type": "component", "id": "Divide_by_3", "defIndex": 1,
-    "loc": "5:10",
+    "type": "component", "id": "Divide_by_3", "defIndex": 1, "loc": "5:10",
     "input": ["clk"],
     "output": ["clk_3"],
     "members": [
@@ -35,19 +34,19 @@
         "output": ["$o@3"]
       },
       {
-        "type": "builtin", "id": "REGISTER@4", "loc": "1:35",
+        "type": "builtin", "id": "REGISTER@4", "loc": "1:25",
         "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["$o@3"],
         "output": ["a@0"]
       },
       {
-        "type": "builtin", "id": "REGISTER@5", "loc": "1:35",
+        "type": "builtin", "id": "REGISTER@5", "loc": "1:25",
         "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["a@0"],
         "output": ["b@0"]
       },
       {
-        "type": "builtin", "id": "REGISTER@6", "loc": "1:35",
+        "type": "builtin", "id": "REGISTER@6", "loc": "1:25",
         "attribute": {"isPosTrigger": "false", "clock": "clk@0"},
         "input": ["b@0"],
         "output": ["c@0"]

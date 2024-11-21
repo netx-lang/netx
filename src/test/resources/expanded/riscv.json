@@ -102,12 +102,12 @@
             "output": ["I_flag@33"]
           },
           {
-            "type": "builtin", "id": "CAST", "loc": "71:52",
+            "type": "builtin", "id": "CAST", "loc": "71:40",
             "input": ["1'h00"],
             "output": ["input_0@35"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@35", "3'h01", "U_flag@25"],
             "output": ["output@36"],
             "members": [
@@ -179,7 +179,7 @@
             ]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@35", "3'h00", "I_flag@33"],
             "output": ["output@43"],
             "members": [
@@ -250,7 +250,7 @@
             ]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@35", "3'h04", "J_flag@28"],
             "output": ["output@50"],
             "members": [
@@ -321,7 +321,7 @@
             ]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@35", "3'h03", "B_flag@31"],
             "output": ["output@57"],
             "members": [
@@ -392,7 +392,7 @@
             ]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@35", "3'h02", "dmemWe@8"],
             "output": ["output@64"],
             "members": [
@@ -473,7 +473,7 @@
             "output": ["regWr@13"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@35", "3'h01", "J_flag@28"],
             "output": ["output@71"],
             "members": [
@@ -544,7 +544,7 @@
             ]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@35", "3'h02", "I_flag_1@29"],
             "output": ["output@78"],
             "members": [
@@ -620,7 +620,7 @@
             "output": ["code@85"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@35", "3'h04", "code@85"],
             "output": ["output@86"],
             "members": [
@@ -697,7 +697,7 @@
             "output": ["code@93"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@35", "3'h05", "code@93"],
             "output": ["output@94"],
             "members": [
@@ -774,7 +774,7 @@
             "output": ["code@101"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@35", "3'h06", "code@101"],
             "output": ["output@102"],
             "members": [
@@ -851,7 +851,7 @@
             "output": ["code@109"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@35", "3'h07", "code@109"],
             "output": ["output@110"],
             "members": [
@@ -928,7 +928,7 @@
             "output": ["code@117"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@35", "3'h06", "code@117"],
             "output": ["output@118"],
             "members": [
@@ -1005,7 +1005,7 @@
             "output": ["code@125"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@35", "3'h07", "code@125"],
             "output": ["output@126"],
             "members": [
@@ -1082,7 +1082,7 @@
             "output": ["input_1@133"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@35", "input_1@133", "B_flag@31"],
             "output": ["output@134"],
             "members": [
@@ -1164,7 +1164,7 @@
             "output": ["code@141"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@35", "imemDataOut@2[14:12]", "code@141"],
             "output": ["dmemOp@7"],
             "members": [
@@ -1240,7 +1240,7 @@
             "output": ["aSrc@11"]
           },
           {
-            "type": "builtin", "id": "CAST", "loc": "71:52",
+            "type": "builtin", "id": "CAST", "loc": "71:40",
             "input": ["1'h00"],
             "output": ["input_0@148"]
           },
@@ -1250,7 +1250,7 @@
             "output": ["code@149"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@148", "2'h01", "code@149"],
             "output": ["output@150"],
             "members": [
@@ -1328,7 +1328,7 @@
             "output": ["code@157"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@148", "2'h02", "code@157"],
             "output": ["output@158"],
             "members": [
@@ -1405,7 +1405,7 @@
             "output": ["code@165"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@148", "2'h00", "code@165"],
             "output": ["output@166"],
             "members": [
@@ -1553,7 +1553,7 @@
             ]
           },
           {
-            "type": "builtin", "id": "CAST", "loc": "71:52",
+            "type": "builtin", "id": "CAST", "loc": "71:40",
             "input": ["1'h00"],
             "output": ["input_0@176"]
           },
@@ -1563,7 +1563,7 @@
             "output": ["input_1@177"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@176", "input_1@177", "de_func3@32[0]"],
             "output": ["output@178"],
             "members": [
@@ -1636,7 +1636,7 @@
             ]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@176", "4'h01", "de_func3@32[1]"],
             "output": ["output@185"],
             "members": [
@@ -1707,7 +1707,7 @@
             ]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@176", "4'h02", "de_func3@32[2]"],
             "output": ["output@192"],
             "members": [
@@ -1778,7 +1778,7 @@
             ]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@176", "4'h0A", "de_func3@32[3]"],
             "output": ["output@199"],
             "members": [
@@ -1849,7 +1849,7 @@
             ]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@176", "4'h04", "de_func3@32[4]"],
             "output": ["output@206"],
             "members": [
@@ -1925,7 +1925,7 @@
             "output": ["input_1@213"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@176", "input_1@213", "de_func3@32[5]"],
             "output": ["output@214"],
             "members": [
@@ -1997,7 +1997,7 @@
             ]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@176", "4'h06", "de_func3@32[6]"],
             "output": ["output@221"],
             "members": [
@@ -2068,7 +2068,7 @@
             ]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@176", "4'h07", "de_func3@32[7]"],
             "output": ["output@228"],
             "members": [
@@ -2144,7 +2144,7 @@
             "output": ["arith_ctl@34"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@176", "4'h03", "U_flag_0@27"],
             "output": ["output@235"],
             "members": [
@@ -2220,7 +2220,7 @@
             "output": ["code@242"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@176", "arith_ctl@34", "code@242"],
             "output": ["output@243"],
             "members": [
@@ -2369,7 +2369,7 @@
             ]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@176", "output@251", "B_flag@31"],
             "output": ["output@258"],
             "members": [
@@ -2445,7 +2445,7 @@
             "output": ["code@265"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "71:41",
+            "type": "component", "id": "MUX", "loc": "71:29",
             "input": ["input_0@176", "4'h00", "code@265"],
             "output": ["output@266"],
             "members": [
@@ -2601,7 +2601,7 @@
             ]
           },
           {
-            "type": "builtin", "id": "CAST", "loc": "145:47",
+            "type": "builtin", "id": "CAST", "loc": "145:37",
             "input": ["1'h00"],
             "output": ["input_0@277"]
           },
@@ -2619,7 +2619,7 @@
             "output": ["input_1@279"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "145:36",
+            "type": "component", "id": "MUX", "loc": "145:26",
             "input": ["input_0@277", "input_1@279", "mask@273[0]"],
             "output": ["output@280"],
             "members": [
@@ -2697,7 +2697,7 @@
             "output": ["input_1@287"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "145:36",
+            "type": "component", "id": "MUX", "loc": "145:26",
             "input": ["input_0@277", "input_1@287", "mask@273[1]"],
             "output": ["output@288"],
             "members": [
@@ -2774,7 +2774,7 @@
             "output": ["input_1@295"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "145:36",
+            "type": "component", "id": "MUX", "loc": "145:26",
             "input": ["input_0@277", "input_1@295", "mask@273[2]"],
             "output": ["output@296"],
             "members": [
@@ -2851,7 +2851,7 @@
             "output": ["input_1@303"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "145:36",
+            "type": "component", "id": "MUX", "loc": "145:26",
             "input": ["input_0@277", "input_1@303", "mask@273[3]"],
             "output": ["output@304"],
             "members": [
@@ -2936,7 +2936,7 @@
             "output": ["input_1@312"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "145:36",
+            "type": "component", "id": "MUX", "loc": "145:26",
             "input": ["input_0@277", "input_1@312", "mask@273[4]"],
             "output": ["output@313"],
             "members": [
@@ -7530,7 +7530,7 @@
             ]
           },
           {
-            "type": "builtin", "id": "CAST", "loc": "160:50",
+            "type": "builtin", "id": "CAST", "loc": "160:40",
             "input": ["1'h00"],
             "output": ["input_0@753"]
           },
@@ -7545,7 +7545,7 @@
             "output": ["input_1@755"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "161:54",
+            "type": "component", "id": "MUX", "loc": "161:44",
             "input": ["input_0@754", "input_1@755", "ctl@22[3]"],
             "output": ["output@756"],
             "members": [
@@ -7618,7 +7618,7 @@
             ]
           },
           {
-            "type": "component", "id": "MUX", "loc": "160:39",
+            "type": "component", "id": "MUX", "loc": "160:29",
             "input": ["input_0@753", "output@756", "mask@749[0]"],
             "output": ["output@763"],
             "members": [
@@ -7695,7 +7695,7 @@
             "output": ["input_1@770"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "160:39",
+            "type": "component", "id": "MUX", "loc": "160:29",
             "input": ["input_0@753", "input_1@770", "mask@749[1]"],
             "output": ["output@771"],
             "members": [
@@ -7767,7 +7767,7 @@
             ]
           },
           {
-            "type": "builtin", "id": "CAST", "loc": "160:50",
+            "type": "builtin", "id": "CAST", "loc": "160:40",
             "input": ["1'h00"],
             "output": ["input_0@778"]
           },
@@ -7782,7 +7782,7 @@
             "output": ["input_1@780"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "161:54",
+            "type": "component", "id": "MUX", "loc": "161:44",
             "input": ["input_0@779", "input_1@780", "ctl@22[3]"],
             "output": ["output@781"],
             "members": [
@@ -7855,7 +7855,7 @@
             ]
           },
           {
-            "type": "component", "id": "MUX", "loc": "160:39",
+            "type": "component", "id": "MUX", "loc": "160:29",
             "input": ["input_0@778", "output@781", "mask@749[2]"],
             "output": ["output@788"],
             "members": [
@@ -7935,7 +7935,7 @@
             "output": ["$o@795"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "160:39",
+            "type": "component", "id": "MUX", "loc": "160:29",
             "input": ["input_0@753", "output@737", "mask@749[3]"],
             "output": ["output@796"],
             "members": [
@@ -8011,7 +8011,7 @@
             "output": ["input_1@803"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "160:39",
+            "type": "component", "id": "MUX", "loc": "160:29",
             "input": ["input_0@753", "input_1@803", "mask@749[4]"],
             "output": ["output@804"],
             "members": [
@@ -8093,7 +8093,7 @@
             "output": ["input_1@812"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "161:54",
+            "type": "component", "id": "MUX", "loc": "161:44",
             "input": ["input_0@811", "input_1@812", "ctl@22[3]"],
             "output": ["output@813"],
             "members": [
@@ -8166,7 +8166,7 @@
             ]
           },
           {
-            "type": "component", "id": "MUX", "loc": "160:39",
+            "type": "component", "id": "MUX", "loc": "160:29",
             "input": ["input_0@753", "output@813", "mask@749[5]"],
             "output": ["output@820"],
             "members": [
@@ -8242,7 +8242,7 @@
             "output": ["input_1@827"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "160:39",
+            "type": "component", "id": "MUX", "loc": "160:29",
             "input": ["input_0@753", "input_1@827", "mask@749[6]"],
             "output": ["output@828"],
             "members": [
@@ -8319,7 +8319,7 @@
             "output": ["input_1@835"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "160:39",
+            "type": "component", "id": "MUX", "loc": "160:29",
             "input": ["input_0@753", "input_1@835", "mask@749[7]"],
             "output": ["output@836"],
             "members": [
@@ -8489,12 +8489,12 @@
             ]
           },
           {
-            "type": "builtin", "id": "CAST", "loc": "185:47",
+            "type": "builtin", "id": "CAST", "loc": "185:37",
             "input": ["1'h00"],
             "output": ["input_0@849"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "185:36",
+            "type": "component", "id": "MUX", "loc": "185:26",
             "input": ["input_0@849", "2'h00", "mask@845[0]"],
             "output": ["output@850"],
             "members": [
@@ -8566,7 +8566,7 @@
             ]
           },
           {
-            "type": "component", "id": "MUX", "loc": "185:36",
+            "type": "component", "id": "MUX", "loc": "185:26",
             "input": ["input_0@849", "2'h02", "mask@845[1]"],
             "output": ["output@857"],
             "members": [
@@ -8637,7 +8637,7 @@
             ]
           },
           {
-            "type": "component", "id": "MUX", "loc": "185:36",
+            "type": "component", "id": "MUX", "loc": "185:26",
             "input": ["input_0@849", "2'h03", "mask@845[2]"],
             "output": ["output@864"],
             "members": [
@@ -8713,7 +8713,7 @@
             "output": ["input_1@871"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "185:36",
+            "type": "component", "id": "MUX", "loc": "185:26",
             "input": ["input_0@849", "input_1@871", "mask@845[4]"],
             "output": ["output@872"],
             "members": [
@@ -8798,7 +8798,7 @@
             "output": ["input_1@880"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "185:36",
+            "type": "component", "id": "MUX", "loc": "185:26",
             "input": ["input_0@849", "input_1@880", "mask@845[5]"],
             "output": ["output@881"],
             "members": [
@@ -8875,7 +8875,7 @@
             "output": ["input_1@888"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "185:36",
+            "type": "component", "id": "MUX", "loc": "185:26",
             "input": ["input_0@849", "input_1@888", "mask@845[6]"],
             "output": ["output@889"],
             "members": [
@@ -8960,7 +8960,7 @@
             "output": ["input_1@897"]
           },
           {
-            "type": "component", "id": "MUX", "loc": "185:36",
+            "type": "component", "id": "MUX", "loc": "185:26",
             "input": ["input_0@849", "input_1@897", "mask@845[7]"],
             "output": ["output@898"],
             "members": [

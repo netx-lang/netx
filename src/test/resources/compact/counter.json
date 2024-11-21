@@ -1,7 +1,6 @@
 [
   {
-    "type": "component", "id": "counter", "defIndex": 1,
-    "loc": "1:10",
+    "type": "component", "id": "counter", "defIndex": 1, "loc": "1:10",
     "input": ["clk", "rst"],
     "output": ["count"],
     "members": [
@@ -14,8 +13,7 @@
         "output": ["i0@2"]
       },
       {
-        "type": "instantiate", "id": "MUX@2", "defIndex": 1,
-        "loc": "5:36",
+        "type": "instantiate", "id": "MUX@2", "defIndex": 1, "loc": "5:36",
         "input": ["rst@0", "i0@2", "0"],
         "output": ["output@2"]
       },
@@ -28,8 +26,7 @@
     ]
   },
   {
-    "type": "component", "id": "MUX", "defIndex": 1,
-    "loc": "8:10",
+    "type": "component", "id": "MUX", "defIndex": 1, "loc": "8:10",
     "input": ["ctl", "i0", "i1"],
     "output": ["output"],
     "members": [

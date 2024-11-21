@@ -42,9 +42,8 @@ expression
     | lhs=expression op='<>' rhs=expression                         # BinaryExpr
     | 'if' cond=expression
       'then' thenBranch=expression
-      'else' elseBranch=expression                                       # ConditionalExpr
-    | '(' expression ')'                                                 # ParenExpr
-    | 'component' (primary_symbol (',' primary_symbol)*)? ':' expression # MacroExpr
+      'else' elseBranch=expression                                  # ConditionalExpr
+    | '(' expression ')'                                            # ParenExpr
     ;
 
 type_expression
@@ -75,7 +74,7 @@ iterator
     ;
 
 binding
-    : 'let' primary_symbol '=' expression
+    : 'let' symbol '=' expression
     ;
 
 symbol
