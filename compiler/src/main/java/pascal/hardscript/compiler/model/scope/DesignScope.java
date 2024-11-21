@@ -30,9 +30,7 @@ public final class DesignScope extends Scope {
         var scope = new DesignScope();
         var evaluator = scope.getEvaluator();
         for (var binding : node.getBindings()) {
-            scope.bind(
-                    evaluator.getIdentifierFrom(binding.getHead()),
-                    evaluator.evaluateToMacro(binding.getExpr()));
+            scope.bind(evaluator.evaluateBinding(binding));
         }
         for (var component : node.getComponents()) {
             scope.definitions.put(component.getIdentifier(), component);

@@ -75,9 +75,7 @@ final class ScopeElaborator {
     }
 
     private void buildElement(BindingNode binding) {
-        var head = evaluator.getIdentifierFrom(binding.getHead());
-        var expr = evaluator.evaluateToMacro(binding.getExpr());
-        scope.bind(head, expr);
+        scope.bind(evaluator.evaluateBinding(binding));
     }
 
     private void buildElement(DataInstantiationNode node) {

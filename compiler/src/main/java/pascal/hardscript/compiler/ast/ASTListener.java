@@ -218,14 +218,6 @@ public interface ASTListener {
         exitDefault(node);
     }
 
-    default void enter(MacroExpr node) {
-        enterDefault(node);
-    }
-
-    default void exit(MacroExpr node) {
-        exitDefault(node);
-    }
-
     default void enter(AutoTypeExpr node) {
         enterDefault(node);
     }

@@ -4,6 +4,7 @@ import pascal.hardscript.compiler.elaborator.Evaluator;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.binding.MapBinding;
+import pascal.hardscript.compiler.model.scope.binding.SingleBinding;
 import pascal.hardscript.util.lang.Identifier;
 
 import java.util.*;
@@ -57,6 +58,10 @@ public abstract sealed class Scope permits BlockScope, ComponentScope, DesignSco
 
     public Set<Alias> getAliases() {
         return aliases;
+    }
+
+    public void bind(SingleBinding single) {
+        binding.bind(single.key(), single.value());
     }
 
     public void bind(Identifier identifier, Entity entity) {

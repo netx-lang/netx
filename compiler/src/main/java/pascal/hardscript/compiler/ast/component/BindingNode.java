@@ -2,20 +2,20 @@ package pascal.hardscript.compiler.ast.component;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
-import pascal.hardscript.compiler.ast.expr.PrimarySymbol;
+import pascal.hardscript.compiler.ast.expr.SymbolExpr;
 
 import java.util.Objects;
 
 public final class BindingNode extends ElementNode {
-    private PrimarySymbol head;
+    private SymbolExpr head;
     private ExprNode expr;
 
-    private BindingNode(PrimarySymbol head, ExprNode expr) {
+    private BindingNode(SymbolExpr head, ExprNode expr) {
         this.head = head;
         this.expr = expr;
     }
 
-    public static BindingNode of(PrimarySymbol head, ExprNode expr) {
+    public static BindingNode of(SymbolExpr head, ExprNode expr) {
         return new BindingNode(head, expr);
     }
 
@@ -26,11 +26,11 @@ public final class BindingNode extends ElementNode {
         listener.exit(this);
     }
 
-    public PrimarySymbol getHead() {
+    public SymbolExpr getHead() {
         return head;
     }
 
-    public void setHead(PrimarySymbol head) {
+    public void setHead(SymbolExpr head) {
         this.head = head;
     }
 

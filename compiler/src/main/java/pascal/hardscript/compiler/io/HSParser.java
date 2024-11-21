@@ -3,8 +3,6 @@ package pascal.hardscript.compiler.io;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.antlr.HardScriptParser.*;
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.ASTNode;
@@ -18,19 +16,15 @@ import pascal.hardscript.compiler.ast.expr.qualifier.Qualifier;
 import pascal.hardscript.compiler.ast.expr.selector.BitSelector;
 import pascal.hardscript.compiler.ast.expr.selector.PartSelector;
 import pascal.hardscript.compiler.ast.expr.selector.Selector;
-import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BitVector;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
-import pascal.hardscript.util.type.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public final class HSParser {
-
-    private static final Logger log = LoggerFactory.getLogger(HSParser.class);
 
     public static DesignNode parseDesign(DesignContext ctx) {
         var bindings = ctx.binding().stream().map(HSParser::parseBinding).toList();
@@ -121,7 +115,11 @@ public final class HSParser {
     }
 
     static SymbolExpr parseSymbolExpr(SymbolExprContext ctx) {
-        return switch (ctx.symbol()) {
+        return parseSymbolExpr(ctx.symbol());
+    }
+
+    static SymbolExpr parseSymbolExpr(SymbolContext ctx) {
+        return switch (ctx) {
             case PrimarySymbolExprContext sub -> parsePrimarySymbol(sub.primary_symbol());
             case ParamSymbolExprContext sub -> parseParamSymbolExpr(sub);
             default -> throw new ShallNotReachHereError();
@@ -160,41 +158,8 @@ public final class HSParser {
     }
 
     static BindingNode parseBinding(BindingContext ctx) {
-        var bindPair = parseBindingPair(ctx);
-        return BindingNode.of(bindPair.first(), bindPair.second()).setSourceLoc(locationOf(ctx.getStart()));
-    }
-
-    private static Pair<PrimarySymbol, ExprNode> parseBindingPair(BindingContext ctx) {
-        PrimarySymbol head;
-        ExprNode expr;
-        switch (ctx.symbol()) {
-            case ParamSymbolExprContext subCtx -> {
-                var paramSymbol = parseParamSymbolExpr(subCtx);
-                head = paramSymbol.getHead();
-                expr = MacroExpr.of(
-                        paramSymbol.getArguments().stream()
-                                .map(HSParser::requiresPrimarySymbol)
-                                .toList(),
-                        parseExpr(ctx.expression())
-                ).setSourceLoc(paramSymbol.getSourceLoc());
-            }
-            case PrimarySymbolExprContext subCtx -> {
-                head = parsePrimarySymbol(subCtx.primary_symbol());
-                expr = parseExpr(ctx.expression());
-            }
-            default -> throw new ShallNotReachHereError();
-        }
-        return new Pair<>(head, expr);
-    }
-
-    private static PrimarySymbol requiresPrimarySymbol(ExprNode exp) {
-        if (exp instanceof PrimarySymbol primarySymbol) {
-            return primarySymbol;
-        } else {
-            log.error("{}: Expected primary symbol, but get {} as a macro parameter",
-                    exp.getSourceLoc(), exp);
-            throw new CompileCancellationException();
-        }
+        return BindingNode.of(parseSymbolExpr(ctx.symbol()), parseExpr(ctx.expression()))
+                .setSourceLoc(locationOf(ctx.getStart()));
     }
 
     static ExprNode parseUnaryExpr(UnaryExprContext ctx) {

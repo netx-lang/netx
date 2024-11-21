@@ -2,6 +2,7 @@ package pascal.hardscript.compiler.elaborator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pascal.hardscript.compiler.ast.component.BindingNode;
 import pascal.hardscript.compiler.ast.expr.*;
 import pascal.hardscript.compiler.ast.expr.qualifier.BindingQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.FilterQualifier;
@@ -95,13 +96,24 @@ public final class Evaluator {
         return castToBooleanValue(expr.getSourceLoc(), evaluate(expr));
     }
 
-    public Macro evaluateToMacro(ExprNode expr) {
-        if (expr instanceof MacroExpr) {
-            return evaluateMacroExpr((MacroExpr) expr);
-        } else {
-            return Macro.of(expr);
+    public SingleBinding evaluateBinding(BindingNode binding) {
+        Identifier id;
+        List<Identifier> freeVariables;
+        switch (binding.getHead()) {
+            case ParamSymbolExpr param -> {
+                id = getIdentifierFrom(param.getHead());
+                freeVariables = param.getArguments().stream()
+                        .map(PrimarySymbol.class::cast)
+                        .map(this::getIdentifierFrom).toList();
+            }
+            case PrimarySymbol primary -> {
+                id = getIdentifierFrom(primary);
+                freeVariables = List.of();
+            }
         }
+        return SingleBinding.of(id, Macro.of(freeVariables, binding.getExpr()));
     }
+
 
     public Entity evaluate(ExprNode expr) {
         return switch (expr) {
@@ -112,13 +124,8 @@ public final class Evaluator {
             case NumberExpr sub -> evaluateNumberExpr(sub);
             case SymbolExpr sub -> evaluateSymbolExpr(sub);
             case ConditionalExpr sub -> evaluateConditionalExpr(sub);
-            default -> throw new ShallNotReachHereError(); // AutoTypeExpr, MacroExpr
+            case AutoTypeExpr ignored -> throw new ShallNotReachHereError();
         };
-    }
-
-    private Macro evaluateMacroExpr(MacroExpr expr) {
-        var arguments = expr.getArguments().stream().map(this::getIdentifierFrom).toList();
-        return Macro.of(arguments, expr.getBody());
     }
 
     private Entity evaluateAccessExpr(AccessExpr expr) {
@@ -207,9 +214,7 @@ public final class Evaluator {
                 }
                 case BindingQualifier qualifier -> {
                     var binding = qualifier.getBinding();
-                    overrideBindings(SingleBinding.of(
-                            getIdentifierFrom(binding.getHead()),
-                            evaluateToMacro(binding.getExpr())));
+                    overrideBindings(evaluateBinding(binding));
                     result = doListComprehension(head, new LinkedList<>(qualifiers));
                     restoreBindings();
                 }
