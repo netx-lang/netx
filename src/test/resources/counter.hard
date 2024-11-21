@@ -6,7 +6,7 @@ component counter : [clk, rst] -> [count] {
 }
 
 component MUX : [ctl, i0, i1] -> [output] {
-    inst ctl, i0, i1, output of auto
+    inst ctl, i0, i1, output
     output <- OR <> [
         AND <> [i0, CAST <> NOT <> ctl],
         AND <> [i1, CAST <> ctl]

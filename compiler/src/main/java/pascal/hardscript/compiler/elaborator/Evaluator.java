@@ -25,7 +25,6 @@ import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.compiler.model.scope.binding.Binding;
 import pascal.hardscript.compiler.model.scope.binding.MapBinding;
 import pascal.hardscript.compiler.model.scope.binding.SingleBinding;
-import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
@@ -124,7 +123,6 @@ public final class Evaluator {
             case NumberExpr sub -> evaluateNumberExpr(sub);
             case SymbolExpr sub -> evaluateSymbolExpr(sub);
             case ConditionalExpr sub -> evaluateConditionalExpr(sub);
-            case AutoTypeExpr ignored -> throw new ShallNotReachHereError();
         };
     }
 
@@ -249,7 +247,7 @@ public final class Evaluator {
 
     public Data.Factory<?> evaluateToDataFactory(ExprNode expr) {
         Data.Factory<?> factory;
-        if (expr instanceof AutoTypeExpr) {
+        if (expr == null) {
             factory = Wire.Factory.of(
                     scope.getLeastUpperComponent(),
                     PolyType.getInstance(), global.getDataIndexer());

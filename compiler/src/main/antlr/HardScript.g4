@@ -18,7 +18,8 @@ element
     : lhs=expression '<-' rhs=expression                                    # ComponentInstantiation
     | binding                                                               # BindingStatement
     | 'for' '(' iterator ')' '{' element* '}'                               # Loop
-    | 'inst' primary_symbol (',' primary_symbol)* 'of' type=type_expression # DataInstantiation
+    | 'inst' primary_symbol (',' primary_symbol)* 'of' type=param_symbol    # DataInstantiation
+    | 'inst' primary_symbol (',' primary_symbol)*                           # DataInstantiation
     ;
 
 expression
@@ -44,11 +45,6 @@ expression
       'then' thenBranch=expression
       'else' elseBranch=expression                                  # ConditionalExpr
     | '(' expression ')'                                            # ParenExpr
-    ;
-
-type_expression
-    : primary_symbol '(' (expression (',' expression)*)? ')' # ExplicitType
-    | 'auto'                                                 # AutoType
     ;
 
 selector
@@ -78,14 +74,18 @@ binding
     ;
 
 symbol
-    : primary_symbol '(' expression (',' expression)* ')' # ParamSymbolExpr
-    | primary_symbol '(' ')'                              # ParamSymbolExpr
-    | primary_symbol                                      # PrimarySymbolExpr
+    : param_symbol   # ParamSymbol
+    | primary_symbol # PrimarySymbol
     ;
 
 primary_symbol
     : ID # Identifier
     | ID (interpolation | ID)+ # Interpolated
+    ;
+
+param_symbol
+    : primary_symbol '(' expression (',' expression)* ')'
+    | primary_symbol '(' ')'
     ;
 
 interpolation

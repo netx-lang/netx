@@ -58,7 +58,7 @@ component hex_trigger: [num] -> [code] {
 }
 
 component MUX : [ctl, i0, i1] -> [out] {
-    inst ctl, i0, i1, out of auto
+    inst ctl, i0, i1, out
     out <- OR <> [
         AND <> [i0, CAST <> NOT <> ctl],
         AND <> [i1, CAST <> ctl]

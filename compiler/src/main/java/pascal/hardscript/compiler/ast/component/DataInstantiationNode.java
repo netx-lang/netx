@@ -2,6 +2,7 @@ package pascal.hardscript.compiler.ast.component;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
+import pascal.hardscript.compiler.ast.expr.ParamSymbolExpr;
 import pascal.hardscript.compiler.ast.expr.PrimarySymbol;
 
 import java.util.List;
@@ -9,21 +10,24 @@ import java.util.Objects;
 
 public final class DataInstantiationNode extends ElementNode {
     private final List<PrimarySymbol> symbols;
-    private ExprNode type;
+    private ParamSymbolExpr type;
 
-    private DataInstantiationNode(List<PrimarySymbol> symbols, ExprNode type) {
+    private DataInstantiationNode(List<PrimarySymbol> symbols, ParamSymbolExpr type) {
         this.symbols = symbols;
         this.type = type;
     }
 
-    public static DataInstantiationNode of(List<PrimarySymbol> ids, ExprNode type) {
+    public static DataInstantiationNode of(List<PrimarySymbol> ids, ParamSymbolExpr type) {
         return new DataInstantiationNode(ids, type);
     }
 
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);
-        type.walk(listener);
+        symbols.forEach(symbol -> symbol.walk(listener));
+        if (type != null) {
+            type.walk(listener);
+        }
         listener.exit(this);
     }
 
@@ -35,7 +39,7 @@ public final class DataInstantiationNode extends ElementNode {
         return type;
     }
 
-    public void setType(ExprNode type) {
+    public void setType(ParamSymbolExpr type) {
         this.type = type;
     }
 

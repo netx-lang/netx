@@ -40,9 +40,9 @@ class AnalysisTest {
                 component top {
                     inst clk of clock()
                     inst a of wire(bit(4))
-                    inst b of auto
-                    inst x of auto
-                    inst c of auto
+                    inst b
+                    inst x
+                    inst c
                     [x] <- OR <> [a, b]
                     [c] <- NOT <> REGISTER(clk, true) <> AND <> [a[1:0], b[1:0]]
                 }
@@ -85,7 +85,7 @@ class AnalysisTest {
         var expected = """
                 component top: [a] -> [b, c, d, e] {
                     inst a of wire(bit(8))
-                    inst b, c, d, e of auto
+                    inst b, c, d, e
                     b <- a[5:3]
                     c <- a[1]
                     d <- a[3]
@@ -95,7 +95,7 @@ class AnalysisTest {
         var actual = """
                 component top: [a] -> [b, c, d, e] {
                     inst a of wire(bit(8))
-                    inst b, c, d, e of auto
+                    inst b, c, d, e
                     b <- a[5:2][3:1]
                     c <- a[1][0]
                     d <- a[4:3][0]

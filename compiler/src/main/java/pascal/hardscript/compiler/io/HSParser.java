@@ -86,17 +86,8 @@ public final class HSParser {
     }
 
     static DataInstantiationNode parseDataInstantiationNode(DataInstantiationContext ctx) {
-        return DataInstantiationNode.of(parsePrimarySymbolList(ctx.primary_symbol()), parseTypeExpr(ctx.type));
-    }
-
-    static ExprNode parseTypeExpr(Type_expressionContext ctx) {
-        return switch (ctx) {
-            case ExplicitTypeContext type -> ParamSymbolExpr.of(
-                    parsePrimarySymbol(type.primary_symbol()),
-                    parseExprList(type.expression())).setSourceLoc(locationOf(ctx.getStart()));
-            case AutoTypeContext type -> AutoTypeExpr.of().setSourceLoc(locationOf(type.getStart()));
-            default -> throw new ShallNotReachHereError();
-        };
+        ParamSymbolExpr type = ctx.type == null ? null : parseParamSymbolExpr(ctx.type);
+        return DataInstantiationNode.of(parsePrimarySymbolList(ctx.primary_symbol()), type);
     }
 
     static ExprNode parseExpr(ExpressionContext ctx) {
@@ -120,8 +111,8 @@ public final class HSParser {
 
     static SymbolExpr parseSymbolExpr(SymbolContext ctx) {
         return switch (ctx) {
-            case PrimarySymbolExprContext sub -> parsePrimarySymbol(sub.primary_symbol());
-            case ParamSymbolExprContext sub -> parseParamSymbolExpr(sub);
+            case PrimarySymbolContext sub -> parsePrimarySymbol(sub.primary_symbol());
+            case ParamSymbolContext sub -> parseParamSymbolExpr(sub.param_symbol());
             default -> throw new ShallNotReachHereError();
         };
     }
@@ -211,7 +202,7 @@ public final class HSParser {
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static ParamSymbolExpr parseParamSymbolExpr(ParamSymbolExprContext ctx) {
+    static ParamSymbolExpr parseParamSymbolExpr(Param_symbolContext ctx) {
         return ParamSymbolExpr.of(
                 parsePrimarySymbol(ctx.primary_symbol()),
                 parseExprList(ctx.expression())).setSourceLoc(locationOf(ctx.getStart()));
