@@ -57,6 +57,11 @@ class HSCompilerUnitTest {
     }
 
     @Test
+    void testDeclInPlace() throws IOException {
+        test("decl_in_place.hard");
+    }
+
+    @Test
     void testInvalidInput() {
         CharStream charStream = CharStreams.fromString("invalid input");
         HSCompiler compiler = Builder.forExpanded().load(charStream);

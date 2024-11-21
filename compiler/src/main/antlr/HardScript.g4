@@ -20,6 +20,7 @@ element
     | 'for' '(' iterator ')' '{' element* '}'                               # Loop
     | 'inst' primary_symbol (',' primary_symbol)* 'of' type=param_symbol    # DataInstantiation
     | 'inst' primary_symbol (',' primary_symbol)*                           # DataInstantiation
+    | 'inst' lhs=expression '<-' rhs=expression                             # MixedInstantiation
     ;
 
 expression

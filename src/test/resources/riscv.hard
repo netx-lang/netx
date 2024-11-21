@@ -8,43 +8,38 @@ component riscv : [
     inst rst of wire(bit(1))
     inst imemDataOut of wire(bit(32))
     inst dmemDataOut of wire(bit(32))
+    inst PC, nextPC  of wire(bit(32))
 
-    inst instr, PC, nextPC
-    inst func7, rs2, rs1, func3, rd, op
-    inst imm, Ra, Rb, result, zero, less, PCAsrc, PCBsrc
-    inst imemAddr, dmemAddr, dmemDataIn
-    inst extOP, regWr, branch_ctl, memToReg, dmemWe, dmemOp, aSrc, bSrc, ctl
+    inst instr <- imemDataOut
+    inst func7 <- instr[31:25]
+    inst rs2   <- instr[24:20]
+    inst rs1   <- instr[19:15]
+    inst func3 <- instr[14:12]
+    inst rd    <- instr[11:7]
+    inst op    <- instr[6:0]
 
-    instr <- [imemDataOut]
-    func7 <- instr[31:25]
-    rs2   <- instr[24:20]
-    rs1   <- instr[19:15]
-    func3 <- instr[14:12]
-    rd    <- instr[11:7]
-    op    <- instr[6:0]
+    inst [extOP, regWr, branch_ctl, memToReg, dmemWe, dmemOp, aSrc, bSrc, ctl] <- InstrDecoder <> [op, func3, func7[5]]
+    inst imm <- ImmSelector <> [extOP, instr]
 
-    [extOP, regWr, branch_ctl, memToReg, dmemWe, dmemOp, aSrc, bSrc, ctl] <- InstrDecoder <> [op, func3, func7[5]]
-    [imm] <- ImmSelector <> [extOP, instr] 
+    inst [Ra, Rb] <- RegFile <> [clk, rs1, rs2, rd, MUX(1) <> [imm, dmemDataOut, memToReg]]
 
-    [Ra, Rb] <- RegFile <> [clk, rs1, rs2, rd, MUX(1) <> [imm, dmemDataOut, memToReg]]
-
-    [result, zero, less] <- ALU <> [
+    inst [result, zero, less] <- ALU <> [
         MUX(1) <> [Ra, PC, aSrc],
         MUX(2) <> [Rb, imm, 4, 4, bSrc], ctl
     ]
 
-    [PCAsrc, PCBsrc] <- BranchCond <> [branch_ctl, zero, less]
+    inst [PCAsrc, PCBsrc] <- BranchCond <> [branch_ctl, zero, less]
 
-    [nextPC] <- ADD <> [
+    nextPC <- ADD <> [
         MUX(1) <> [4, imm, PCAsrc],
         MUX(1) <> [PC, Ra, PCBsrc]
     ]
 
-    [PC] <- REGISTER(clk, false) <> MUX(1) <> [nextPC, 32'b0, rst]
+    PC <- REGISTER(clk, false) <> MUX(1) <> [nextPC, 32'b0, rst]
 
-    imemAddr <- MUX(1) <> [nextPC, 32'b0, rst]
-    dmemAddr   <- result
-    dmemDataIn <- Rb
+    inst imemAddr <- MUX(1) <> [nextPC, 32'b0, rst]
+    inst dmemAddr   <- result
+    inst dmemDataIn <- Rb
 }
 
 component InstrDecoder : [op_i, func3, func7] -> [extOP, regWr, branch_ctl, memToReg, memWr, memOP, aSrc, bSrc, ctl] {

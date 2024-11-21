@@ -113,6 +113,12 @@ public final class Evaluator {
         return SingleBinding.of(id, Macro.of(freeVariables, binding.getExpr()));
     }
 
+    public Entity evaluateAndDeclInPlace(ExprNode expr) {
+        mode = EvaluationMode.DECLARE_IN_PLACE;
+        var entity = evaluate(expr);
+        mode = EvaluationMode.COMMON;
+        return entity;
+    }
 
     public Entity evaluate(ExprNode expr) {
         return switch (expr) {
@@ -370,9 +376,20 @@ public final class Evaluator {
             }
         }
         return Objects.requireNonNullElseGet(entity, () -> {
+            if (mode == EvaluationMode.DECLARE_IN_PLACE) {
+                return declareDataInPlace(id);
+            }
             log.error("{}: Unresolved identifier {}", id.getSourceLoc(), id);
             throw new CompileCancellationException();
         });
+    }
+
+    @Nonnull
+    private Entity declareDataInPlace(Identifier id) {
+        var factory = Wire.Factory.of(scope.getLeastUpperComponent(), PolyType.getInstance(), global.getDataIndexer());
+        var data = factory.create(id);
+        scope.bind(id, data);
+        return data;
     }
 
     @Nullable
@@ -388,7 +405,7 @@ public final class Evaluator {
 
     private Entity evaluateParamSymbolExpr(ParamSymbolExpr expr) {
         return switch (mode) {
-            case COMMON -> evaluateComponentType(expr);
+            case COMMON, DECLARE_IN_PLACE -> evaluateComponentType(expr);
             case DATA_FACTORY -> evaluateDataFactory(expr);
         };
     }
@@ -464,6 +481,6 @@ public final class Evaluator {
     }
 
     enum EvaluationMode {
-        COMMON, DATA_FACTORY
+        COMMON, DATA_FACTORY, DECLARE_IN_PLACE
     }
 }

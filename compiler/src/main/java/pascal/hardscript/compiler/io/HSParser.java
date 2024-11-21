@@ -69,6 +69,7 @@ public final class HSParser {
     static ElementNode parseElement(ElementContext ctx) {
         var result = switch (ctx) {
             case BindingStatementContext sub -> parseBinding(sub.binding());
+            case MixedInstantiationContext sub -> parseMixedInstantiation(sub);
             case DataInstantiationContext sub -> parseDataInstantiationNode(sub);
             case ComponentInstantiationContext sub -> parseComponentInstantiation(sub);
             case LoopContext sub -> parseLoop(sub);
@@ -78,7 +79,11 @@ public final class HSParser {
     }
 
     static ComponentInstantiationNode parseComponentInstantiation(ComponentInstantiationContext ctx) {
-        return ComponentInstantiationNode.of(parseExpr(ctx.lhs), parseExpr(ctx.rhs));
+        return ComponentInstantiationNode.of(parseExpr(ctx.lhs), parseExpr(ctx.rhs), false);
+    }
+
+    static ComponentInstantiationNode parseMixedInstantiation(MixedInstantiationContext ctx) {
+        return ComponentInstantiationNode.of(parseExpr(ctx.lhs), parseExpr(ctx.rhs), true);
     }
 
     static LoopNode parseLoop(LoopContext ctx) {

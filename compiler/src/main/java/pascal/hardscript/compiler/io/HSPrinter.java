@@ -28,12 +28,14 @@ public final class HSPrinter {
         } else {
             startArray();
             var iterator = json.elements();
-            printObject(iterator.next(), componentHead);
-            while (iterator.hasNext()) {
-                writer.println(",");
+            if (iterator.hasNext()) {
                 printObject(iterator.next(), componentHead);
+                while (iterator.hasNext()) {
+                    writer.println(",");
+                    printObject(iterator.next(), componentHead);
+                }
+                writer.newLine();
             }
-            writer.newLine();
             endArray();
         }
         writer.flush();
@@ -63,34 +65,38 @@ public final class HSPrinter {
     private void printData(JsonNode node) {
         writer.print("{");
         var fieldIter = node.fields();
-        fieldIter.next();
-        printKey("type");
-        printStr(node.get("type").textValue());
-        fieldIter.forEachRemaining(sub -> {
-            writer.print(", ");
-            printKey(sub.getKey());
-            switch (sub.getValue()) {
-                case TextNode text -> printStr(text.textValue());
-                case NumericNode num -> printInteger(num.intValue());
-                default -> throw new ShallNotReachHereError();
-            }
-        });
+        if (fieldIter.hasNext()) {
+            fieldIter.next();
+            printKey("type");
+            printStr(node.get("type").textValue());
+            fieldIter.forEachRemaining(sub -> {
+                writer.print(", ");
+                printKey(sub.getKey());
+                switch (sub.getValue()) {
+                    case TextNode text -> printStr(text.textValue());
+                    case NumericNode num -> printInteger(num.intValue());
+                    default -> throw new ShallNotReachHereError();
+                }
+            });
+        }
         writer.print("}");
     }
 
     private void printAllFields(JsonNode node, int inline) {
         int count = 1;
         var fieldIter = node.fields();
-        printField(fieldIter.next());
-        while (fieldIter.hasNext()) {
-            var sub = fieldIter.next();
-            if (count < inline) {
-                writer.print(", ");
-                count++;
-            } else {
-                writer.println(",");
+        if (fieldIter.hasNext()) {
+            printField(fieldIter.next());
+            while (fieldIter.hasNext()) {
+                var sub = fieldIter.next();
+                if (count < inline) {
+                    writer.print(", ");
+                    count++;
+                } else {
+                    writer.println(",");
+                }
+                printField(sub);
             }
-            printField(sub);
         }
     }
 
@@ -116,21 +122,25 @@ public final class HSPrinter {
         if (array.get(0) instanceof TextNode) {
             writer.print("[");
             var iterator = array.elements();
-            printStr(iterator.next().textValue());
-            while (iterator.hasNext()) {
-                writer.print(", ");
+            if (iterator.hasNext()) {
                 printStr(iterator.next().textValue());
+                while (iterator.hasNext()) {
+                    writer.print(", ");
+                    printStr(iterator.next().textValue());
+                }
             }
             writer.print("]");
         } else {
             startArray();
             var iterator = array.elements();
-            printMember(iterator.next());
-            while (iterator.hasNext()) {
-                writer.println(",");
+            if (iterator.hasNext()) {
                 printMember(iterator.next());
+                while (iterator.hasNext()) {
+                    writer.println(",");
+                    printMember(iterator.next());
+                }
+                writer.newLine();
             }
-            writer.newLine();
             endArray();
         }
     }

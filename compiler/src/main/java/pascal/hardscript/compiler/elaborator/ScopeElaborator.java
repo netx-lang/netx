@@ -9,10 +9,10 @@ import pascal.hardscript.compiler.io.Configuration;
 import pascal.hardscript.compiler.model.EntityList;
 import pascal.hardscript.compiler.model.component.*;
 import pascal.hardscript.compiler.model.instance.Instance;
+import pascal.hardscript.compiler.model.instance.Value;
 import pascal.hardscript.compiler.model.scope.Attributes;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.Scope;
-import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
@@ -45,8 +45,28 @@ final class ScopeElaborator {
         dispatchElementBuilder(node.getElements());
         var component = (ComponentScope) scope;
         var sourceLoc = node.getSourceLoc();
-        extractInstanceList(sourceLoc, node.getType().getInput()).forEach(component::addInput);
-        extractInstanceList(sourceLoc, node.getType().getOutput()).forEach(component::addOutput);
+        extractIOList(sourceLoc, node.getType().getInput()).forEach(component::addInput);
+        extractIOList(sourceLoc, node.getType().getOutput()).forEach(component::addOutput);
+    }
+
+    private List<Instance> extractIOList(SourceLoc sourceLoc, ExprNode node) {
+        var entity = evaluator.evaluate(node);
+        if (entity instanceof EntityList(var list)) {
+            List<Instance> result = new ArrayList<>();
+            for (var member : list) {
+                if (member instanceof Instance instance) {
+                    result.add(instance);
+                } else {
+                    log.error("{}: Expected list of instances but got {}", sourceLoc, list);
+                    throw new CompileCancellationException();
+                }
+            }
+            return result;
+        } else if (entity instanceof Instance instance) {
+            return List.of(instance);
+        }
+        log.error("{}: Expected list of instances but got {}", sourceLoc, entity);
+        throw new CompileCancellationException();
     }
 
     public void build(LoopNode node) {
@@ -91,7 +111,7 @@ final class ScopeElaborator {
         var compType = evaluator.evaluateToComponentType(instantiation.getRhs());
 
         var component = scope.getLeastUpperComponent();
-        var target = extractInstanceList(sourceLoc, instantiation.getLhs());
+        var target = extractComponentLhs(sourceLoc, instantiation.getLhs(), instantiation.needDeclareInPlace());
         var source = new Instantiator(sourceLoc).instantiate(compType);
 
         checkAttributeWrite(component, target, sourceLoc);
@@ -99,6 +119,26 @@ final class ScopeElaborator {
         for (int i = 0; i < size; i++) {
             scope.addAlias(target.get(i), source.get(i));
         }
+    }
+
+    private List<Instance> extractComponentLhs(SourceLoc sourceLoc, ExprNode node, boolean declareInPlace) {
+        var entity = declareInPlace ? evaluator.evaluateAndDeclInPlace(node) : evaluator.evaluate(node);
+        if (entity instanceof EntityList(var list)) {
+            List<Instance> result = new ArrayList<>();
+            for (var member : list) {
+                if (member instanceof Instance inst && !(member instanceof Value)) {
+                    result.add(inst);
+                } else {
+                    log.error("{}: Expected list of data but got {}", sourceLoc, list);
+                    throw new CompileCancellationException();
+                }
+            }
+            return result;
+        } else if (entity instanceof Instance instance && !(entity instanceof Value)) {
+            return List.of(instance);
+        }
+        log.error("{}: Expected list of data but got {}", sourceLoc, entity);
+        throw new CompileCancellationException();
     }
 
     private void checkAttributeWrite(ComponentScope component, List<Instance> target, SourceLoc sourceLoc) {
@@ -110,25 +150,6 @@ final class ScopeElaborator {
                 }
             }
         }
-    }
-
-    private List<Instance> extractInstanceList(SourceLoc sourceLoc, ExprNode node) {
-        var entity = evaluator.evaluate(node);
-        if (entity instanceof EntityList(var list)) {
-            List<Instance> result = new ArrayList<>();
-            for (var member : list) {
-                if (member instanceof Instance instance) {
-                    result.add(instance);
-                } else {
-                    log.error("{}: Expected list of components but got {}", sourceLoc, list);
-                    throw new CompileCancellationException();
-                }
-            }
-            return result;
-        } else if (entity instanceof Instance instance) {
-            return List.of(instance);
-        }
-        throw new ShallNotReachHereError();
     }
 
     private class Instantiator {
