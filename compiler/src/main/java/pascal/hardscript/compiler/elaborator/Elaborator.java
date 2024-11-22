@@ -21,8 +21,6 @@ public final class Elaborator {
         this.node = node;
         this.design = DesignScope.newDesign(node);
         this.config = config;
-        Evaluator.setGlobal(design);
-        ScopeElaborator.setFactory(design.getBuiltinFactory());
     }
 
     public DesignScope elaborate() {

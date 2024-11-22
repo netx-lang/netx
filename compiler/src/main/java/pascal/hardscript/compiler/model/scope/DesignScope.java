@@ -21,7 +21,7 @@ public final class DesignScope extends Scope {
     private ComponentScope top;
 
     DesignScope() {
-        super(null);
+        super(null, null);
         this.dataIndexer = new AtomicInteger(0)::incrementAndGet;
         this.factory = new BuiltInComponentFactory(dataIndexer);
     }
@@ -43,7 +43,14 @@ public final class DesignScope extends Scope {
             throw new ShallNotReachHereError();
         }
         this.top = instantiateComponentScope(identifier);
-        return top;
+        return this.top;
+    }
+
+    @Override
+    public ComponentScope instantiateComponentScope(Identifier identifier) {
+        var child = new ComponentScope(this, this, identifier);
+        addChild(child);
+        return child;
     }
 
     public ComponentScope getTop() {

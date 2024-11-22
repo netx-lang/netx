@@ -26,7 +26,7 @@ import static pascal.hardscript.compiler.elaborator.Types.requiresMatchedSize;
 
 final class ScopeElaborator {
     private static final Logger log = LoggerFactory.getLogger(ScopeElaborator.class);
-    private static BuiltInComponentFactory factory;
+    private final BuiltInComponentFactory factory;
     private final Configuration config;
     private final Evaluator evaluator;
     private final Scope scope;
@@ -34,11 +34,8 @@ final class ScopeElaborator {
     ScopeElaborator(Configuration config, Scope scope) {
         this.config = config;
         this.scope = scope;
+        this.factory = scope.getGlobal().getBuiltinFactory();
         this.evaluator = scope.getEvaluator();
-    }
-
-    public static void setFactory(BuiltInComponentFactory factory) {
-        ScopeElaborator.factory = factory;
     }
 
     public void build(ComponentNode node) {

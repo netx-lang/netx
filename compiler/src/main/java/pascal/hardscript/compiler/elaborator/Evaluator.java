@@ -63,19 +63,16 @@ public final class Evaluator {
                     Map.entry(BinaryExpr.Operator.GT, IntegerValue::gt),
                     Map.entry(BinaryExpr.Operator.GE, IntegerValue::ge)
     );
-    private static DesignScope global;
-
-    public static void setGlobal(DesignScope design) {
-        Evaluator.global = design;
-    }
 
     private final LinkedList<Binding> bindings = new LinkedList<>();
+    private final DesignScope global;
     private final Scope scope;
 
     private EvaluationMode mode = EvaluationMode.COMMON;
 
     public Evaluator(Scope scope) {
         this.scope = scope;
+        this.global = scope.getGlobal();
         bindings.add(scope.getBinding());
     }
 
@@ -305,12 +302,15 @@ public final class Evaluator {
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         requiresMatchedSize(sourceLoc, 1, arguments);
         return Wire.Factory.of(
-                scope.getLeastUpperComponent(), evaluateBitWidth(arguments.getFirst()), global.getDataIndexer());
+                scope.getLeastUpperComponent(),
+                evaluateBitWidth(arguments.getFirst()), global.getDataIndexer());
     }
 
     private Clock.Factory evaluateClockFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         if (arguments.isEmpty()) {
-            return Clock.Factory.of(scope.getLeastUpperComponent(), global.getDataIndexer());
+            return Clock.Factory.of(
+                    scope.getLeastUpperComponent(),
+                    global.getDataIndexer());
         } else {
             log.error("{}: Unexpected specification for component type clock: {}", sourceLoc, arguments);
             throw new CompileCancellationException();

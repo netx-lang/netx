@@ -17,8 +17,8 @@ public final class ComponentScope extends Scope {
     private Signature signature;
     private Attributes attributes;
 
-    public ComponentScope(Scope parent, Identifier identifier) {
-        super(parent);
+    ComponentScope(DesignScope global, Scope parent, Identifier identifier) {
+        super(global, parent);
         this.identifier = identifier;
     }
 

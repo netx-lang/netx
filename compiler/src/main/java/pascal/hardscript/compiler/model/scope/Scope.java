@@ -12,12 +12,16 @@ import java.util.*;
 public abstract sealed class Scope permits BlockScope, ComponentScope, DesignScope {
     private final Set<Alias> aliases = new HashSet<>();
     private final MapBinding binding = MapBinding.ofEmpty();
-    private final Evaluator evaluator = new Evaluator(this);
-    private List<Scope> children = new ArrayList<>();
+    private final Evaluator evaluator;
+    private final DesignScope global;
+    private List<Scope> children;
     private Scope parent;
 
-    protected Scope(Scope parent) {
+    protected Scope(DesignScope global, Scope parent) {
+        this.global = global;
         this.parent = parent;
+        this.children = new ArrayList<>();
+        this.evaluator = new Evaluator(this);
     }
 
     public Scope getParent() {
@@ -26,6 +30,10 @@ public abstract sealed class Scope permits BlockScope, ComponentScope, DesignSco
 
     public void setParent(Scope parent) {
         this.parent = parent;
+    }
+
+    public DesignScope getGlobal() {
+        return global;
     }
 
     public List<Scope> getChildren() {
@@ -69,13 +77,13 @@ public abstract sealed class Scope permits BlockScope, ComponentScope, DesignSco
     }
 
     public ComponentScope instantiateComponentScope(Identifier identifier) {
-        var child = new ComponentScope(this, identifier);
+        var child = new ComponentScope(this.global, this, identifier);
         addChild(child);
         return child;
     }
 
     public BlockScope instantiateBlockScope() {
-        var child = new BlockScope(this);
+        var child = new BlockScope(this.global, this);
         children.add(child);
         return child;
     }
