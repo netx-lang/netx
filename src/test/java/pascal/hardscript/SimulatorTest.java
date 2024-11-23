@@ -19,18 +19,15 @@ public class SimulatorTest {
     @Test
     void testAdder() throws IOException {
         var simulator = buildSimulator("adder.hard");
-        var high = BitVector.fromBoolean(true);
-        var low = BitVector.fromBoolean(false);
-        simulator.setInput("a", high);
-        simulator.setInput("b", high);
-        simulator.setInput("cin", high);
-        simulator.run();
-        assertEquals(high, simulator.getOutput("out"));
-        assertEquals(high, simulator.getOutput("cout"));
-        simulator.setInput("a", low);
-        simulator.run();
-        assertEquals(low, simulator.getOutput("out"));
-        assertEquals(high, simulator.getOutput("cout"));
+        for (int i = 0; i <= 255; i++) {
+            for (int j = 0; j <= 255; j++) {
+                var expected = BitVector.fromInt(i + j, 8);
+                simulator.setInput("a", BitVector.fromInt(i, 8));
+                simulator.setInput("b", BitVector.fromInt(j, 8));
+                simulator.run();
+                assertEquals(expected, simulator.getOutput("c"));
+            }
+        }
     }
 
     @Test

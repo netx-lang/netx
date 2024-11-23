@@ -7,7 +7,7 @@ import pascal.hardscript.compiler.model.instance.selector.Selector;
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
 
-public record DataAccess(Data base, Selector selector) implements Instance {
+public record DataAccess(Data base, Selector selector) implements MutableInstance {
     private static final Logger log = LoggerFactory.getLogger(DataAccess.class);
 
     @Override

@@ -1,3 +1,15 @@
+component top : [a, b] -> [c] {
+    inst a, b, c of wire(bit(8))
+    [c] <- adder(8) <> [a, b]
+}
+
+component adder(WIDTH) : [a, b] -> [c] {
+    inst a, b, c of wire(bit(WIDTH))
+    let ADDER(i) = [|c[i], TO] <> full_adder <> [a[i], b[i], TO]
+    let RES(i)   = if i == -1 then 1'b0 else ADDER(i) <> RES(i-1)
+    [] <- IGNORE <> RES(WIDTH - 1)
+}
+
 component full_adder: [a, b, cin] -> [out, cout] {
     inst a, b, cin, out, cout of wire(bit(1))
     [cout, out] <- [OR, TO] <> [TO, half_adder] <> [half_adder <> [a, b], cin]

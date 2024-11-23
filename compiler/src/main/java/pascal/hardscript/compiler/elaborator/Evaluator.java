@@ -245,7 +245,14 @@ public final class Evaluator {
             case SUB -> evaluateToIntegerValue(expr.getOperand()).neg();
             case NOT -> evaluateToBoolean(expr.getOperand()).not();
             case BITWISE_NOT -> evaluateToIntegerValue(expr.getOperand()).bitwiseNot();
+            case OUTPUT -> evaluateUnaryToInstanceType(InstanceAtom.Mode.SINK, expr);
+            case INOUT -> evaluateUnaryToInstanceType(InstanceAtom.Mode.BIDI, expr);
         };
+    }
+
+    private Entity evaluateUnaryToInstanceType(InstanceAtom.Mode mode, UnaryExpr expr) {
+        var operand = requiresMutableInstance(expr.getSourceLoc(), evaluate(expr.getOperand()));
+        return InstanceAtom.of(mode, operand, expr.getSourceLoc());
     }
 
     public Data.Factory<?> evaluateToDataFactory(ExprNode expr) {

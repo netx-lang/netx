@@ -42,6 +42,15 @@ public final class Types {
         }
     }
 
+    public static MutableInstance requiresMutableInstance(SourceLoc loc, Entity entity) {
+        if (entity instanceof MutableInstance instance) {
+            return instance;
+        } else {
+            log.error("{}: Expected instance but got {}", loc, entity);
+            throw new CompileCancellationException();
+        }
+    }
+
     public static Data.Factory<?> requiresDataFactory(SourceLoc loc, Entity entity) {
         if (entity instanceof Data.Factory<?> factory) {
             return factory;
@@ -102,7 +111,7 @@ public final class Types {
         return switch (entity) {
             case EntityList list -> makeParallelTypeFromList(list, loc);
             case ComponentType componentType -> componentType;
-            case Instance inst -> InstanceAtom.of(inst, loc);
+            case Instance inst -> InstanceAtom.of(InstanceAtom.Mode.SOURCE, inst, loc);
             default -> {
                 log.error("{}: Cannot cast {} to component type", loc, entity);
                 throw new CompileCancellationException();

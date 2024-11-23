@@ -27,8 +27,8 @@ expression
     : symbol                                                        # SymbolExpr
     | number                                                        # NumberExpr
     | '[' list ']'                                                  # ListExpr
-    | op=('+' | '-' | '~' | '!') expression                         # UnaryExpr
     | expression (selector)+                                        # AccessExpr
+    | op=('+' | '-' | '~' | '!' | '|' | 'bi') expression            # UnaryExpr
     | lhs=expression op='**' rhs=expression                         # BinaryExpr
     | lhs=expression op=('*' | '/' | '%') rhs=expression            # BinaryExpr
     | lhs=expression op=('+' | '-') rhs=expression                  # BinaryExpr
@@ -94,7 +94,7 @@ interpolation
     ;
 
 number
-    : INTEGER          # IntNumber
+    : UNSIGNED_INTEGER # IntNumber
     | BOOLEAN          # BoolNumber
     | BIN_NUMBER       # BitVectorNumber
     | HEX_NUMBER       # BitVectorNumber
@@ -109,7 +109,6 @@ HEX_NUMBER : UNSIGNED_INTEGER '\'' [hH] [0-9a-fA-F] [0-9a-fA-F_]*;
 OCT_NUMBER : UNSIGNED_INTEGER '\'' [oO] [0-7] [0-7_]*;
 DEC_NUMBER : UNSIGNED_INTEGER '\'' [dD] [0-9] [0-9_]*;
 
-INTEGER : [+-]? [0-9] [0-9_]*;
 UNSIGNED_INTEGER : [0-9] [0-9_]*;
 
 ID : [a-zA-Z_][a-zA-Z_0-9]*;

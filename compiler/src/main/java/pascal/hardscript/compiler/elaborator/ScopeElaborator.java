@@ -9,7 +9,7 @@ import pascal.hardscript.compiler.io.Configuration;
 import pascal.hardscript.compiler.model.EntityList;
 import pascal.hardscript.compiler.model.component.*;
 import pascal.hardscript.compiler.model.instance.Instance;
-import pascal.hardscript.compiler.model.instance.Value;
+import pascal.hardscript.compiler.model.instance.MutableInstance;
 import pascal.hardscript.compiler.model.scope.Attributes;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.Scope;
@@ -21,8 +21,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import static pascal.hardscript.compiler.elaborator.Types.requiresComponentType;
-import static pascal.hardscript.compiler.elaborator.Types.requiresMatchedSize;
+import static pascal.hardscript.compiler.elaborator.Types.*;
 
 final class ScopeElaborator {
     private static final Logger log = LoggerFactory.getLogger(ScopeElaborator.class);
@@ -118,27 +117,16 @@ final class ScopeElaborator {
         }
     }
 
-    private List<Instance> extractComponentLhs(SourceLoc sourceLoc, ExprNode node, boolean declareInPlace) {
+    private List<MutableInstance> extractComponentLhs(SourceLoc sourceLoc, ExprNode node, boolean declareInPlace) {
         var entity = declareInPlace ? evaluator.evaluateAndDeclInPlace(node) : evaluator.evaluate(node);
         if (entity instanceof EntityList(var list)) {
-            List<Instance> result = new ArrayList<>();
-            for (var member : list) {
-                if (member instanceof Instance inst && !(member instanceof Value)) {
-                    result.add(inst);
-                } else {
-                    log.error("{}: Expected list of data but got {}", sourceLoc, list);
-                    throw new CompileCancellationException();
-                }
-            }
-            return result;
-        } else if (entity instanceof Instance instance && !(entity instanceof Value)) {
-            return List.of(instance);
+            return list.stream().map(o -> requiresMutableInstance(sourceLoc, o)).toList();
+        } else {
+            return List.of(requiresMutableInstance(sourceLoc, entity));
         }
-        log.error("{}: Expected list of data but got {}", sourceLoc, entity);
-        throw new CompileCancellationException();
     }
 
-    private void checkAttributeWrite(ComponentScope component, List<Instance> target, SourceLoc sourceLoc) {
+    private void checkAttributeWrite(ComponentScope component, List<MutableInstance> target, SourceLoc sourceLoc) {
         if (component.getAttributes() != null) {
             for (var inst : target) {
                 if (component.getAttributes().contains(inst)) {
@@ -198,7 +186,12 @@ final class ScopeElaborator {
         }
 
         private ComponentPort instantiateInstanceAtom(InstanceAtom atom) {
-            return ComponentPort.of(List.of(atom.getInstance()), List.of());
+            var inst = List.of(atom.getInstance());
+            return switch (atom.getMode()) {
+                case SOURCE -> ComponentPort.of(inst, List.of());
+                case SINK -> ComponentPort.of(List.of(), inst);
+                case BIDI -> ComponentPort.of(inst, inst);
+            };
         }
 
         public Instantiator.ComponentPort instantiateBuiltinAtom(BuiltinAtom atom) {

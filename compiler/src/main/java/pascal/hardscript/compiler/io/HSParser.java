@@ -170,7 +170,7 @@ public final class HSParser {
 
     static NumberExpr parseNumberExpr(NumberExprContext ctx) {
         return switch (ctx.number()) {
-            case IntNumberContext sub -> IntNumber.of(Integer.parseInt(sub.INTEGER().getText()));
+            case IntNumberContext sub -> IntNumber.of(Integer.parseUnsignedInt(sub.UNSIGNED_INTEGER().getText()));
             case BoolNumberContext sub -> BoolNumber.of(Boolean.parseBoolean(sub.BOOLEAN().getText()));
             case BitVectorNumberContext sub -> parseBitVectorNumber(sub);
             default -> throw new ShallNotReachHereError();

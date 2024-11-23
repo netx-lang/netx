@@ -8,7 +8,7 @@ import pascal.hardscript.util.lang.SourceLoc;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public sealed abstract class Data implements Instance permits Clock, Wire {
+public sealed abstract class Data implements MutableInstance permits Clock, Wire {
     protected final Identifier id;
     protected final ComponentScope parent;
     private final int index;

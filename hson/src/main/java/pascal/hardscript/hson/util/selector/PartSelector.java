@@ -21,4 +21,9 @@ public record PartSelector(int msb, int lsb) implements Selector {
     public BitVector inverseApply(BitVector base, BitVector vector) {
         return base.set(msb, lsb, vector);
     }
+
+    @Override
+    public String toString() {
+        return "[" + msb + ":" + lsb + ']';
+    }
 }

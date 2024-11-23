@@ -10,7 +10,7 @@ import pascal.hardscript.compiler.model.instance.type.PolyType;
 import java.util.LinkedList;
 import java.util.List;
 
-public sealed interface Instance extends Entity permits Data, DataAccess, Value {
+public sealed interface Instance extends Entity permits MutableInstance, Value {
 
     static Instance accessOf(Instance base, Selector selector) {
         if (base instanceof Value value) {

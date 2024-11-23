@@ -27,4 +27,9 @@ public record BitSelector(int index) implements Selector{
         }
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "[" + index + ']';
+    }
 }
