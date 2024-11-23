@@ -5,7 +5,7 @@ component top : [a, b] -> [c] {
 
 component adder(WIDTH) : [a, b] -> [c] {
     inst a, b, c of wire(bit(WIDTH))
-    let ADDER(i) = [|c[i], TO] <> full_adder <> [a[i], b[i], TO]
+    let ADDER(i) = [#c[i], TO] <> full_adder <> [a[i], b[i], TO]
     let RES(i)   = if i == -1 then 1'b0 else ADDER(i) <> RES(i-1)
     [] <- IGNORE <> RES(WIDTH - 1)
 }
@@ -16,7 +16,6 @@ component full_adder: [a, b, cin] -> [out, cout] {
 }
 
 component half_adder: [a, b] -> [carry, out] {
-    inst a, b, out, carry of wire(bit(1))
-    out   <- XOR <> [a, b]
-    carry <- AND <> [a, b]
+    auto out   <- XOR <> [a, b]
+    auto carry <- AND <> [a, b]
 }

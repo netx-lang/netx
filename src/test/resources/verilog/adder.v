@@ -69,10 +69,10 @@ module half_adder_1(
   input b;
   output carry;
   output out;
-  wire a; // @(19:9)
-  wire b; // @(19:12)
-  wire carry; // @(19:20)
-  wire out; // @(19:15)
+  wire a; // @(19:26)
+  wire b; // @(19:29)
+  wire carry; // @(20:9)
+  wire out; // @(19:9)
   assign out = a ^ b;
   assign carry = a & b;
 endmodule

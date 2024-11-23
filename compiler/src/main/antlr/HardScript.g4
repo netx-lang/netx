@@ -19,8 +19,8 @@ element
     | binding                                                               # BindingStatement
     | 'for' '(' iterator ')' '{' element* '}'                               # Loop
     | 'inst' primary_symbol (',' primary_symbol)* 'of' type=param_symbol    # DataInstantiation
-    | 'inst' primary_symbol (',' primary_symbol)*                           # DataInstantiation
-    | 'inst' lhs=expression '<-' rhs=expression                             # MixedInstantiation
+    | 'auto' primary_symbol (',' primary_symbol)*                           # DataInstantiation
+    | 'auto' lhs=expression '<-' rhs=expression                             # MixedInstantiation
     ;
 
 expression
@@ -28,7 +28,7 @@ expression
     | number                                                        # NumberExpr
     | '[' list ']'                                                  # ListExpr
     | expression (selector)+                                        # AccessExpr
-    | op=('+' | '-' | '~' | '!' | '|' | '*') expression             # UnaryExpr
+    | op=('+' | '-' | '~' | '!' | '#' | '*') expression             # UnaryExpr
     | lhs=expression op='**' rhs=expression                         # BinaryExpr
     | lhs=expression op=('*' | '/' | '%') rhs=expression            # BinaryExpr
     | lhs=expression op=('+' | '-') rhs=expression                  # BinaryExpr

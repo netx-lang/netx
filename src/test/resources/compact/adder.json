@@ -96,17 +96,17 @@
     "input": ["a", "b"],
     "output": ["carry", "out"],
     "members": [
-      {"type": "wire", "width": 1, "id": "a", "loc": "19:9"},
-      {"type": "wire", "width": 1, "id": "b", "loc": "19:12"},
-      {"type": "wire", "width": 1, "id": "carry", "loc": "19:20"},
-      {"type": "wire", "width": 1, "id": "out", "loc": "19:15"},
+      {"type": "wire", "width": 1, "id": "a", "loc": "19:26"},
+      {"type": "wire", "width": 1, "id": "b", "loc": "19:29"},
+      {"type": "wire", "width": 1, "id": "carry", "loc": "20:9"},
+      {"type": "wire", "width": 1, "id": "out", "loc": "19:9"},
       {
-        "type": "builtin", "id": "XOR@1", "loc": "20:13",
+        "type": "builtin", "id": "XOR@1", "loc": "19:18",
         "input": ["a@0", "b@0"],
         "output": ["out@0"]
       },
       {
-        "type": "builtin", "id": "AND@2", "loc": "21:13",
+        "type": "builtin", "id": "AND@2", "loc": "20:18",
         "input": ["a@0", "b@0"],
         "output": ["carry@0"]
       }

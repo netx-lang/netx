@@ -4,6 +4,6 @@ component top {
 }
 
 component sub(op): [a] -> [b] {
-    inst a, b
+    auto a, b
     b <- OR <> [a, op]
 }

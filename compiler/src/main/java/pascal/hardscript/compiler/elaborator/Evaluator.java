@@ -76,7 +76,10 @@ public final class Evaluator {
         bindings.add(scope.getBinding());
     }
 
-    public ComponentType evaluateToComponentType(ExprNode expr) {
+    public ComponentType evaluateToComponentType(ExprNode expr, boolean needDeclareInPlace) {
+        if (needDeclareInPlace) {
+            return castToComponentType(evaluateAndDeclInPlace(expr), expr.getSourceLoc());
+        }
         return castToComponentType(evaluate(expr), expr.getSourceLoc());
     }
 

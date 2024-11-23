@@ -104,12 +104,13 @@ final class ScopeElaborator {
 
     private void buildElement(ComponentInstantiationNode instantiation) {
         var sourceLoc = instantiation.getSourceLoc();
-        var compType = evaluator.evaluateToComponentType(instantiation.getRhs());
-
         var component = scope.getLeastUpperComponent();
-        var target = extractComponentLhs(sourceLoc, instantiation.getLhs(), instantiation.needDeclareInPlace());
-        var source = new Instantiator(sourceLoc).instantiate(compType);
+        boolean inPlace = instantiation.needDeclareInPlace();
 
+        var compType = evaluator.evaluateToComponentType(instantiation.getRhs(), inPlace);
+        var target = extractComponentLhs(sourceLoc, instantiation.getLhs(), inPlace);
+        var source = new Instantiator(sourceLoc).instantiate(compType);
+        
         checkAttributeWrite(component, target, sourceLoc);
         int size = requiresMatchedSize(sourceLoc, target, source);
         for (int i = 0; i < size; i++) {
