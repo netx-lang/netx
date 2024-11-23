@@ -1,14 +1,14 @@
 package pascal.hardscript.compiler.analysis;
 
 import org.junit.jupiter.api.Test;
+import pascal.hardscript.compiler.exception.TypeCheckingException;
 import pascal.hardscript.compiler.io.Builder;
 import pascal.hardscript.util.TestUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 class AnalysisTest {
@@ -105,5 +105,23 @@ class AnalysisTest {
         assertEquals(
                 Builder.forExpanded().load(expected).compile(),
                 Builder.forExpanded().load(actual).compile());
+    }
+
+    @Test
+    void testInvalidAccess() {
+        var a = """
+                component top {
+                    inst a, b of wire(bit(4))
+                    a[1:0] <- b[5:4]
+                }
+                """;
+        var b = """
+                component top {
+                    inst a, b of wire(bit(4))
+                    a[1:0] <- AND <> [b[5:4], b[3:2]]
+                }
+                """;
+        assertThrows(TypeCheckingException.class, () -> Builder.forExpanded().load(a).compile());
+        assertThrows(TypeCheckingException.class, () -> Builder.forExpanded().load(b).compile());
     }
 }

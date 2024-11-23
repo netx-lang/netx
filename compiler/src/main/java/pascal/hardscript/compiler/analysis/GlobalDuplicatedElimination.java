@@ -14,8 +14,8 @@ public final class GlobalDuplicatedElimination extends ModelAnalysis {
 
     @Override
     public void analyze() {
-        design.forEachScope(manager::collectDuplicatedComponents);
-        design.forEachScope(this::replaceDuplicatedInstances);
+        design.forEachSubscope(manager::collectDuplicatedComponents);
+        design.forEachSubscope(this::replaceDuplicatedInstances);
     }
 
     private void replaceDuplicatedInstances(Scope scope) {

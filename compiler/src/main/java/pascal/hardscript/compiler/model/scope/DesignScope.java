@@ -73,7 +73,7 @@ public final class DesignScope extends Scope {
         return Objects.requireNonNull(definitions.get(id));
     }
 
-    public void forEachScope(Consumer<Scope> consumer) {
+    public void forEachSubscope(Consumer<Scope> consumer) {
         Stack<Scope> stack = new Stack<>();
         stack.push(getTop());
         while (!stack.isEmpty()) {

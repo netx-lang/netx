@@ -28,7 +28,7 @@ expression
     | number                                                        # NumberExpr
     | '[' list ']'                                                  # ListExpr
     | expression (selector)+                                        # AccessExpr
-    | op=('+' | '-' | '~' | '!' | '|' | 'bi') expression            # UnaryExpr
+    | op=('+' | '-' | '~' | '!' | '|' | '*') expression             # UnaryExpr
     | lhs=expression op='**' rhs=expression                         # BinaryExpr
     | lhs=expression op=('*' | '/' | '%') rhs=expression            # BinaryExpr
     | lhs=expression op=('+' | '-') rhs=expression                  # BinaryExpr

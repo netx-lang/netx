@@ -31,17 +31,22 @@ public final class HSCompiler {
         return new Elaborator(node, config).elaborate();
     }
 
+    private static void checkType(DesignScope design) {
+        new DataTypeInference(design).analyze();
+        new AccessChecker(design).analyze();
+    }
+
     public JsonNode compile() {
         DesignScope design = elaborate();
         new ScopeInliner(design).analyze();
         if (config.fullyExpand()) {
             new GlobalAliasAnalysis(design).analyze();
-            new DataTypeInference(design).analyze();
+            checkType(design);
             new GlobalDuplicatedElimination(design).analyze();
             return new ExpandedDumper(design).dump();
         } else {
             new LocalAliasAnalysis(design).analyze();
-            new DataTypeInference(design).analyze();
+            checkType(design);
             new LocalDuplicatedElimination(design).analyze();
             return new CompactDumper(design).dump();
         }

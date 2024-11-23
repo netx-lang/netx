@@ -245,7 +245,7 @@ public final class Evaluator {
             case SUB -> evaluateToIntegerValue(expr.getOperand()).neg();
             case NOT -> evaluateToBoolean(expr.getOperand()).not();
             case BITWISE_NOT -> evaluateToIntegerValue(expr.getOperand()).bitwiseNot();
-            case OUTPUT -> evaluateUnaryToInstanceType(InstanceAtom.Mode.SINK, expr);
+            case SINK -> evaluateUnaryToInstanceType(InstanceAtom.Mode.SINK, expr);
             case INOUT -> evaluateUnaryToInstanceType(InstanceAtom.Mode.BIDI, expr);
         };
     }
