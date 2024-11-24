@@ -6,13 +6,13 @@ component top {
     let B(a, b) = A(a, b, data[2])
     let C(a) = B(a, data[1])
     let D = C(data[0])
-    [] <- [IGNORE | i in [0..4]] <> D
+    [IGNORE | i in [0..4]] <> D
 }
 
 component many_ports : [input[i] | i in [0..4]] -> [output[i] | i in [0..4]] {
     inst input of wire(bit(4))
     inst output of wire(bit(4))
     for (i in [0..4]) {
-        output[(i + 1) % 4] <- input[i]
+        #output[(i + 1) % 4] <> input[i]
     }
 }

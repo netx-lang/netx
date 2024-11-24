@@ -11,12 +11,12 @@
       {"type": "wire", "width": 1, "id": "rst@1", "loc": "3:9"},
       {"type": "wire", "width": 32, "id": "count@2", "loc": "2:9"},
       {
-        "type": "builtin", "id": "ADD", "loc": "5:49",
+        "type": "builtin", "id": "ADD", "loc": "5:50",
         "input": ["count@2", "1"],
         "output": ["i0@3"]
       },
       {
-        "type": "component", "id": "MUX", "loc": "5:36",
+        "type": "component", "id": "MUX", "loc": "5:37",
         "input": ["rst@1", "i0@3", "0"],
         "output": ["output@4"],
         "members": [
@@ -63,14 +63,14 @@
             "output": ["$o@9"]
           },
           {
-            "type": "builtin", "id": "OR", "loc": "10:14",
+            "type": "builtin", "id": "OR", "loc": "10:15",
             "input": ["$o@7", "$o@9"],
             "output": ["output@4"]
           }
         ]
       },
       {
-        "type": "builtin", "id": "REGISTER", "loc": "5:13",
+        "type": "builtin", "id": "REGISTER", "loc": "5:14",
         "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@4"],
         "output": ["count@2"]

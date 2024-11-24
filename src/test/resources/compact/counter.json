@@ -8,17 +8,17 @@
       {"type": "wire", "width": 1, "id": "rst", "loc": "3:9"},
       {"type": "wire", "width": 32, "id": "count", "loc": "2:9"},
       {
-        "type": "builtin", "id": "ADD@1", "loc": "5:49",
+        "type": "builtin", "id": "ADD@1", "loc": "5:50",
         "input": ["count@0", "1"],
         "output": ["i0@2"]
       },
       {
-        "type": "instantiate", "id": "MUX@2", "defIndex": 1, "loc": "5:36",
+        "type": "instantiate", "id": "MUX@2", "defIndex": 1, "loc": "5:37",
         "input": ["rst@0", "i0@2", "0"],
         "output": ["output@2"]
       },
       {
-        "type": "builtin", "id": "REGISTER@3", "loc": "5:13",
+        "type": "builtin", "id": "REGISTER@3", "loc": "5:14",
         "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["output@2"],
         "output": ["count@0"]
@@ -75,7 +75,7 @@
         "output": ["$o@5"]
       },
       {
-        "type": "builtin", "id": "OR@6", "loc": "10:14",
+        "type": "builtin", "id": "OR@6", "loc": "10:15",
         "input": ["$o@3", "$o@5"],
         "output": ["output@0"]
       }

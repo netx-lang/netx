@@ -7,41 +7,30 @@ import java.util.Objects;
 
 public final class ComponentInstantiationNode extends ElementNode {
     private boolean declareInPlace;
-    private ExprNode lhs;
-    private ExprNode rhs;
+    private ExprNode expr;
 
-    private ComponentInstantiationNode(ExprNode lhs, ExprNode rhs, boolean declareInPlace) {
-        this.lhs = lhs;
-        this.rhs = rhs;
+    private ComponentInstantiationNode(ExprNode expr, boolean declareInPlace) {
+        this.expr = expr;
         this.declareInPlace = declareInPlace;
     }
 
-    public static ComponentInstantiationNode of(ExprNode lhs, ExprNode rhs, boolean doLhsDataInstantiation) {
-        return new ComponentInstantiationNode(lhs, rhs, doLhsDataInstantiation);
+    public static ComponentInstantiationNode of(ExprNode lhs, boolean doLhsDataInstantiation) {
+        return new ComponentInstantiationNode(lhs, doLhsDataInstantiation);
     }
 
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);
-        lhs.walk(listener);
-        rhs.walk(listener);
+        expr.walk(listener);
         listener.exit(this);
     }
 
-    public ExprNode getLhs() {
-        return lhs;
+    public ExprNode getExpr() {
+        return expr;
     }
 
-    public void setLhs(ExprNode lhs) {
-        this.lhs = lhs;
-    }
-
-    public ExprNode getRhs() {
-        return rhs;
-    }
-
-    public void setRhs(ExprNode rhs) {
-        this.rhs = rhs;
+    public void setExpr(ExprNode expr) {
+        this.expr = expr;
     }
 
     public boolean needDeclareInPlace() {
@@ -57,21 +46,20 @@ public final class ComponentInstantiationNode extends ElementNode {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (ComponentInstantiationNode) obj;
-        return Objects.equals(this.lhs, that.lhs)
-                && Objects.equals(this.rhs, that.rhs)
+        return Objects.equals(this.expr, that.expr)
                 && this.declareInPlace == that.declareInPlace;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(lhs, rhs, declareInPlace);
+        return Objects.hash(expr, declareInPlace);
     }
 
     @Override
     public String toString() {
         if (declareInPlace) {
-            return "inst " + lhs.toString() + " <- " + rhs.toString();
+            return "auto " + expr.toString();
         }
-        return lhs.toString() + " <- " + rhs.toString();
+        return expr.toString();
     }
 }

@@ -99,137 +99,152 @@ module hex_trigger_1(
 );
   input num;
   output code;
-  wire [6:0] o_60;
+  wire [6:0] code; // @(37:6)
   wire [3:0] num; // @(36:6)
+  MUX_3 inst_1(num, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h02, 7'h78, 7'h00, 7'h10, 7'h08, 7'h03, 7'h46, 7'h21, 7'h06, 7'h0E, code);
+endmodule
+
+// @(59:10)
+module MUX_3(
+  code, input_0, input_1, input_2, input_3, input_4, input_5, input_6, input_7, input_8, input_9, input_10, input_11, input_12, input_13, input_14, input_15, out
+);
+  input code;
+  input input_0;
+  input input_1;
+  input input_2;
+  input input_3;
+  input input_4;
+  input input_5;
+  input input_6;
+  input input_7;
+  input input_8;
+  input input_9;
+  input input_10;
+  input input_11;
+  input input_12;
+  input input_13;
+  input input_14;
+  input input_15;
+  output out;
+  wire [6:0] input_9; // @(65:16)
+  wire [6:0] input_5; // @(65:16)
+  wire [6:0] input_6; // @(65:16)
+  wire [6:0] input_7; // @(65:16)
+  wire [6:0] input_8; // @(65:16)
+  wire [6:0] o_29;
   wire [6:0] o_28;
   wire [6:0] o_27;
+  wire [6:0] o_26;
+  wire [6:0] o_25;
   wire [6:0] o_24;
   wire [6:0] o_23;
+  wire [6:0] o_22;
+  wire [6:0] o_21;
   wire [6:0] o_20;
-  wire [6:0] o_64;
-  wire [6:0] o_63;
-  wire p_0;
-  wire p_2;
-  wire p_1;
-  wire p_4;
-  wire p_3;
-  wire p_6;
-  wire p_5;
-  wire p_8;
-  wire p_7;
-  wire p_9;
+  wire [6:0] o_2;
   wire [6:0] o_3;
   wire [6:0] o_19;
+  wire [6:0] o_18;
+  wire [6:0] o_17;
+  wire [6:0] input_14; // @(65:16)
   wire [6:0] o_16;
+  wire [6:0] input_15; // @(65:16)
   wire [6:0] o_15;
-  wire [6:0] o_59;
-  wire p_30;
-  wire p_31;
+  wire [6:0] input_12; // @(65:16)
+  wire [6:0] o_14;
+  wire [6:0] input_13; // @(65:16)
+  wire [6:0] o_13;
+  wire [6:0] input_10; // @(65:16)
   wire [6:0] o_12;
-  wire [6:0] o_56;
+  wire [6:0] input_11; // @(65:16)
   wire [6:0] o_11;
-  wire [6:0] o_55;
-  wire [6:0] o_52;
-  wire [6:0] o_51;
-  wire p_27;
-  wire p_28;
-  wire p_29;
-  wire [6:0] code; // @(37:6)
-  wire p_23;
-  wire p_24;
-  wire p_25;
-  wire p_26;
+  wire [6:0] o_10;
+  wire [3:0] code; // @(61:9)
+  wire [6:0] out; // @(64:10)
+  wire [6:0] o_6;
   wire [6:0] o_7;
   wire [6:0] o_4;
+  wire [6:0] o_5;
   wire [6:0] o_8;
-  wire [6:0] o_48;
-  wire [6:0] o_47;
-  wire p_20;
-  wire p_21;
-  wire [6:0] o_44;
-  wire p_22;
-  wire [6:0] o_43;
-  wire [6:0] o_40;
-  wire p_16;
-  wire p_17;
-  wire p_18;
-  wire p_19;
-  wire p_12;
-  wire p_13;
-  wire p_14;
-  wire p_15;
-  wire [6:0] o_39;
-  wire [6:0] o_36;
-  wire [6:0] o_35;
-  wire p_10;
-  wire p_11;
+  wire [6:0] o_9;
+  wire [15:0] mask; // @(62:9)
+  wire [6:0] input_1; // @(65:16)
+  wire [6:0] input_2; // @(65:16)
+  wire [6:0] input_3; // @(65:16)
+  wire [6:0] input_4; // @(65:16)
+  wire [6:0] o_33;
   wire [6:0] o_32;
   wire [6:0] o_31;
-  MUX_2 inst_2(p_0, 1'h00, 1'h01, p_1);
-  MUX_2 inst_34(p_2, 1'h00, 1'h01, p_3);
-  MUX_2 inst_6(p_4, 1'h00, 1'h01, p_5);
-  MUX_2 inst_38(p_6, 1'h00, 1'h01, p_7);
-  MUX_2 inst_10(p_8, 1'h00, 1'h01, p_9);
-  MUX_2 inst_42(p_10, 1'h00, 1'h01, p_11);
-  MUX_2 inst_14(p_12, 1'h00, 1'h01, p_13);
-  MUX_2 inst_46(p_14, 1'h00, 1'h01, p_15);
-  MUX_2 inst_18(p_16, 1'h00, 1'h01, p_17);
-  MUX_2 inst_50(p_18, 1'h00, 1'h01, p_19);
-  MUX_2 inst_22(p_20, 1'h00, 1'h01, p_21);
-  MUX_2 inst_54(p_22, 1'h00, 1'h01, p_23);
-  MUX_2 inst_26(p_24, 1'h00, 1'h01, p_25);
-  MUX_2 inst_58(p_26, 1'h00, 1'h01, p_27);
-  MUX_2 inst_30(p_28, 1'h00, 1'h01, p_29);
-  MUX_2 inst_62(p_30, 1'h00, 1'h01, p_31);
-  assign p_0 = 4'h00 == num;
-  assign o_3 = $signed(p_1);
-  assign o_4 = o_3 & 7'h40;
-  assign p_4 = 4'h01 == num;
-  assign o_7 = $signed(p_5);
-  assign o_8 = o_7 & 7'h79;
-  assign p_8 = 4'h02 == num;
-  assign o_11 = $signed(p_9);
-  assign o_12 = o_11 & 7'h24;
-  assign p_12 = 4'h03 == num;
-  assign o_15 = $signed(p_13);
-  assign o_16 = o_15 & 7'h30;
-  assign p_16 = 4'h04 == num;
-  assign o_19 = $signed(p_17);
-  assign o_20 = o_19 & 7'h19;
-  assign p_20 = 4'h05 == num;
-  assign o_23 = $signed(p_21);
-  assign o_24 = o_23 & 7'h12;
-  assign p_24 = 4'h06 == num;
-  assign o_27 = $signed(p_25);
-  assign o_28 = o_27 & 7'h02;
-  assign p_28 = 4'h07 == num;
-  assign o_31 = $signed(p_29);
-  assign o_32 = o_31 & 7'h78;
-  assign p_2 = 4'h08 == num;
-  assign o_35 = $signed(p_3);
-  assign o_36 = o_35 & 7'h00;
-  assign p_6 = 4'h09 == num;
-  assign o_39 = $signed(p_7);
-  assign o_40 = o_39 & 7'h10;
-  assign p_10 = 4'h0A == num;
-  assign o_43 = $signed(p_11);
-  assign o_44 = o_43 & 7'h08;
-  assign p_14 = 4'h0B == num;
-  assign o_47 = $signed(p_15);
-  assign o_48 = o_47 & 7'h03;
-  assign p_18 = 4'h0C == num;
-  assign o_51 = $signed(p_19);
-  assign o_52 = o_51 & 7'h46;
-  assign p_22 = 4'h0D == num;
-  assign o_55 = $signed(p_23);
-  assign o_56 = o_55 & 7'h21;
-  assign p_26 = 4'h0E == num;
-  assign o_59 = $signed(p_27);
-  assign o_60 = o_59 & 7'h06;
-  assign p_30 = 4'h0F == num;
-  assign o_63 = $signed(p_31);
-  assign o_64 = o_63 & 7'h0E;
-  assign code = o_4 | o_8 | o_12 | o_16 | o_20 | o_24 | o_28 | o_32 | o_36 | o_40 | o_44 | o_48 | o_52 | o_56 | o_60 | o_64;
+  wire [6:0] o_30;
+  wire [6:0] input_0; // @(65:16)
+  DECODER_2 inst_1(code, mask);
+  assign o_2 = $signed(mask[0]);
+  assign o_3 = input_0 & o_2;
+  assign o_4 = $signed(mask[1]);
+  assign o_5 = input_1 & o_4;
+  assign o_6 = $signed(mask[2]);
+  assign o_7 = input_2 & o_6;
+  assign o_8 = $signed(mask[3]);
+  assign o_9 = input_3 & o_8;
+  assign o_10 = $signed(mask[4]);
+  assign o_11 = input_4 & o_10;
+  assign o_12 = $signed(mask[5]);
+  assign o_13 = input_5 & o_12;
+  assign o_14 = $signed(mask[6]);
+  assign o_15 = input_6 & o_14;
+  assign o_16 = $signed(mask[7]);
+  assign o_17 = input_7 & o_16;
+  assign o_18 = $signed(mask[8]);
+  assign o_19 = input_8 & o_18;
+  assign o_20 = $signed(mask[9]);
+  assign o_21 = input_9 & o_20;
+  assign o_22 = $signed(mask[10]);
+  assign o_23 = input_10 & o_22;
+  assign o_24 = $signed(mask[11]);
+  assign o_25 = input_11 & o_24;
+  assign o_26 = $signed(mask[12]);
+  assign o_27 = input_12 & o_26;
+  assign o_28 = $signed(mask[13]);
+  assign o_29 = input_13 & o_28;
+  assign o_30 = $signed(mask[14]);
+  assign o_31 = input_14 & o_30;
+  assign o_32 = $signed(mask[15]);
+  assign o_33 = input_15 & o_32;
+  assign out = o_3 | o_5 | o_7 | o_9 | o_11 | o_13 | o_15 | o_17 | o_19 | o_21 | o_23 | o_25 | o_27 | o_29 | o_31 | o_33;
+endmodule
+
+// @(69:10)
+module DECODER_2(
+  code, out
+);
+  input code;
+  output out;
+  wire o_4;
+  wire [3:0] code; // @(71:9)
+  wire o_2;
+  wire o_3;
+  wire [15:0] out; // @(72:9)
+  wire o_1;
+  assign o_1 = ~code[0];
+  assign o_2 = ~code[1];
+  assign o_3 = ~code[2];
+  assign o_4 = ~code[3];
+  assign out[0] = o_1 & o_2 & o_3 & o_4;
+  assign out[1] = code[0] & o_2 & o_3 & o_4;
+  assign out[2] = o_1 & code[1] & o_3 & o_4;
+  assign out[3] = code[0] & code[1] & o_3 & o_4;
+  assign out[4] = o_1 & o_2 & code[2] & o_4;
+  assign out[5] = code[0] & o_2 & code[2] & o_4;
+  assign out[6] = o_1 & code[1] & code[2] & o_4;
+  assign out[7] = code[0] & code[1] & code[2] & o_4;
+  assign out[8] = o_1 & o_2 & o_3 & code[3];
+  assign out[9] = code[0] & o_2 & o_3 & code[3];
+  assign out[10] = o_1 & code[1] & o_3 & code[3];
+  assign out[11] = code[0] & code[1] & o_3 & code[3];
+  assign out[12] = o_1 & o_2 & code[2] & code[3];
+  assign out[13] = code[0] & o_2 & code[2] & code[3];
+  assign out[14] = o_1 & code[1] & code[2] & code[3];
+  assign out[15] = code[0] & code[1] & code[2] & code[3];
 endmodule
 
 // @(25:10)
@@ -261,53 +276,67 @@ module clock_divider_1(
   end
 endmodule
 
-// @(60:10)
+// @(59:10)
 module MUX_2(
-  ctl, i0, i1, out
+  code, input_0, input_1, out
 );
-  input ctl;
-  input i0;
-  input i1;
+  input code;
+  input input_0;
+  input input_1;
   output out;
   wire o_4;
+  wire code; // @(61:9)
   wire o_5;
-  wire i0; // @(61:14)
-  wire i1; // @(61:18)
-  wire ctl; // @(61:9)
+  wire input_1; // @(65:16)
   wire o_2;
   wire o_3;
-  wire out; // @(61:22)
-  wire o_1;
-  assign o_1 = ~ctl;
-  assign o_2 = $signed(o_1);
-  assign o_3 = i0 & o_2;
-  assign o_4 = $signed(ctl);
-  assign o_5 = i1 & o_4;
+  wire [1:0] mask; // @(62:9)
+  wire out; // @(64:10)
+  wire input_0; // @(65:16)
+  DECODER_1 inst_1(code, mask);
+  assign o_2 = $signed(mask[0]);
+  assign o_3 = input_0 & o_2;
+  assign o_4 = $signed(mask[1]);
+  assign o_5 = input_1 & o_4;
   assign out = o_3 | o_5;
 endmodule
 
-// @(60:10)
+// @(59:10)
 module MUX_1(
-  ctl, i0, i1, out
+  code, input_0, input_1, out
 );
-  input ctl;
-  input i0;
-  input i1;
+  input code;
+  input input_0;
+  input input_1;
   output out;
   wire [31:0] o_4;
+  wire code; // @(61:9)
   wire [31:0] o_5;
-  wire [31:0] i0; // @(61:14)
-  wire [31:0] i1; // @(61:18)
-  wire ctl; // @(61:9)
+  wire [31:0] input_1; // @(65:16)
   wire [31:0] o_2;
   wire [31:0] o_3;
-  wire [31:0] out; // @(61:22)
-  wire o_1;
-  assign o_1 = ~ctl;
-  assign o_2 = $signed(o_1);
-  assign o_3 = i0 & o_2;
-  assign o_4 = $signed(ctl);
-  assign o_5 = i1 & o_4;
+  wire [1:0] mask; // @(62:9)
+  wire [31:0] out; // @(64:10)
+  wire [31:0] input_0; // @(65:16)
+  DECODER_1 inst_1(code, mask);
+  assign o_2 = $signed(mask[0]);
+  assign o_3 = input_0 & o_2;
+  assign o_4 = $signed(mask[1]);
+  assign o_5 = input_1 & o_4;
   assign out = o_3 | o_5;
+endmodule
+
+// @(69:10)
+module DECODER_1(
+  code, out
+);
+  input code;
+  output out;
+  wire code; // @(71:9)
+  wire [1:0] out; // @(72:9)
+  wire o_1;
+  assign o_1 = ~code[0];
+  assign out[0] = o_1;
+  assign out[1] = code[0];
 endmodule
 

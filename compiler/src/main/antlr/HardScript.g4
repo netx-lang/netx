@@ -15,12 +15,12 @@ attributes
     ;
 
 element
-    : lhs=expression '<-' rhs=expression                                    # ComponentInstantiation
-    | binding                                                               # BindingStatement
-    | 'for' '(' iterator ')' '{' element* '}'                               # Loop
-    | 'inst' primary_symbol (',' primary_symbol)* 'of' type=param_symbol    # DataInstantiation
-    | 'auto' primary_symbol (',' primary_symbol)*                           # DataInstantiation
-    | 'auto' lhs=expression '<-' rhs=expression                             # MixedInstantiation
+    : 'inst' primary_symbol (',' primary_symbol)* 'of' type=param_symbol    # DataInstantiation
+    | 'auto' primary_symbol (',' primary_symbol)*   # DataInstantiation
+    | 'for' '(' iterator ')' '{' element* '}'       # Loop
+    | binding                                       # BindingStatement
+    | expression                                    # ComponentInstantiation
+    | 'auto' expression                             # MixedInstantiation
     ;
 
 expression

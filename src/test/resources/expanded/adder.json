@@ -7,409 +7,409 @@
     "input": ["a@0", "b@1"],
     "output": ["c@2"],
     "members": [
-      {"type": "wire", "width": 8, "id": "a@0", "loc": "2:9"},
-      {"type": "wire", "width": 8, "id": "b@1", "loc": "2:12"},
-      {"type": "wire", "width": 8, "id": "c@2", "loc": "2:15"},
+      {"type": "wire", "width": 8, "id": "a@0", "loc": "2:28"},
+      {"type": "wire", "width": 8, "id": "b@1", "loc": "2:31"},
+      {"type": "wire", "width": 8, "id": "c@2", "loc": "2:10"},
       {
-        "type": "component", "id": "adder", "loc": "3:11",
+        "type": "component", "id": "adder", "loc": "2:15",
         "input": ["a@0", "b@1"],
         "output": ["c@2"],
         "members": [
           {
-            "type": "component", "id": "full_adder", "loc": "8:34",
+            "type": "component", "id": "full_adder", "loc": "7:34",
             "input": ["a@0[0]", "b@1[0]", "1'h00"],
             "output": ["c@2[0]", "cout@3"],
             "members": [
-              {"type": "wire", "width": 1, "id": "cout@3", "loc": "14:25"},
+              {"type": "wire", "width": 1, "id": "cout@3", "loc": "13:25"},
               {
-                "type": "component", "id": "half_adder", "loc": "15:52",
+                "type": "component", "id": "half_adder", "loc": "14:53",
                 "input": ["a@0[0]", "b@1[0]"],
                 "output": ["carry@4", "out@5"],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@4", "loc": "20:9"},
-                  {"type": "wire", "width": 1, "id": "out@5", "loc": "19:9"},
+                  {"type": "wire", "width": 1, "id": "carry@4", "loc": "19:10"},
+                  {"type": "wire", "width": 1, "id": "out@5", "loc": "18:10"},
                   {
-                    "type": "builtin", "id": "XOR", "loc": "19:18",
+                    "type": "builtin", "id": "XOR", "loc": "18:19",
                     "input": ["a@0[0]", "b@1[0]"],
                     "output": ["out@5"]
                   },
                   {
-                    "type": "builtin", "id": "AND", "loc": "20:18",
+                    "type": "builtin", "id": "AND", "loc": "19:19",
                     "input": ["a@0[0]", "b@1[0]"],
                     "output": ["carry@4"]
                   }
                 ]
               },
               {
-                "type": "component", "id": "half_adder", "loc": "15:36",
+                "type": "component", "id": "half_adder", "loc": "14:37",
                 "input": ["out@5", "1'h00"],
                 "output": ["carry@6", "c@2[0]"],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@6", "loc": "20:9"},
+                  {"type": "wire", "width": 1, "id": "carry@6", "loc": "19:10"},
                   {
-                    "type": "builtin", "id": "XOR", "loc": "19:18",
+                    "type": "builtin", "id": "XOR", "loc": "18:19",
                     "input": ["out@5", "1'h00"],
                     "output": ["c@2[0]"]
                   },
                   {
-                    "type": "builtin", "id": "AND", "loc": "20:18",
+                    "type": "builtin", "id": "AND", "loc": "19:19",
                     "input": ["out@5", "1'h00"],
                     "output": ["carry@6"]
                   }
                 ]
               },
               {
-                "type": "builtin", "id": "OR", "loc": "15:20",
+                "type": "builtin", "id": "OR", "loc": "14:21",
                 "input": ["carry@4", "carry@6"],
                 "output": ["cout@3"]
               }
             ]
           },
           {
-            "type": "component", "id": "full_adder", "loc": "8:34",
+            "type": "component", "id": "full_adder", "loc": "7:34",
             "input": ["a@0[1]", "b@1[1]", "cout@3"],
             "output": ["c@2[1]", "cout@7"],
             "members": [
-              {"type": "wire", "width": 1, "id": "cout@7", "loc": "14:25"},
+              {"type": "wire", "width": 1, "id": "cout@7", "loc": "13:25"},
               {
-                "type": "component", "id": "half_adder", "loc": "15:52",
+                "type": "component", "id": "half_adder", "loc": "14:53",
                 "input": ["a@0[1]", "b@1[1]"],
                 "output": ["carry@8", "out@9"],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@8", "loc": "20:9"},
-                  {"type": "wire", "width": 1, "id": "out@9", "loc": "19:9"},
+                  {"type": "wire", "width": 1, "id": "carry@8", "loc": "19:10"},
+                  {"type": "wire", "width": 1, "id": "out@9", "loc": "18:10"},
                   {
-                    "type": "builtin", "id": "XOR", "loc": "19:18",
+                    "type": "builtin", "id": "XOR", "loc": "18:19",
                     "input": ["a@0[1]", "b@1[1]"],
                     "output": ["out@9"]
                   },
                   {
-                    "type": "builtin", "id": "AND", "loc": "20:18",
+                    "type": "builtin", "id": "AND", "loc": "19:19",
                     "input": ["a@0[1]", "b@1[1]"],
                     "output": ["carry@8"]
                   }
                 ]
               },
               {
-                "type": "component", "id": "half_adder", "loc": "15:36",
+                "type": "component", "id": "half_adder", "loc": "14:37",
                 "input": ["out@9", "cout@3"],
                 "output": ["carry@10", "c@2[1]"],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@10", "loc": "20:9"},
+                  {"type": "wire", "width": 1, "id": "carry@10", "loc": "19:10"},
                   {
-                    "type": "builtin", "id": "XOR", "loc": "19:18",
+                    "type": "builtin", "id": "XOR", "loc": "18:19",
                     "input": ["out@9", "cout@3"],
                     "output": ["c@2[1]"]
                   },
                   {
-                    "type": "builtin", "id": "AND", "loc": "20:18",
+                    "type": "builtin", "id": "AND", "loc": "19:19",
                     "input": ["out@9", "cout@3"],
                     "output": ["carry@10"]
                   }
                 ]
               },
               {
-                "type": "builtin", "id": "OR", "loc": "15:20",
+                "type": "builtin", "id": "OR", "loc": "14:21",
                 "input": ["carry@8", "carry@10"],
                 "output": ["cout@7"]
               }
             ]
           },
           {
-            "type": "component", "id": "full_adder", "loc": "8:34",
+            "type": "component", "id": "full_adder", "loc": "7:34",
             "input": ["a@0[2]", "b@1[2]", "cout@7"],
             "output": ["c@2[2]", "cout@11"],
             "members": [
-              {"type": "wire", "width": 1, "id": "cout@11", "loc": "14:25"},
+              {"type": "wire", "width": 1, "id": "cout@11", "loc": "13:25"},
               {
-                "type": "component", "id": "half_adder", "loc": "15:52",
+                "type": "component", "id": "half_adder", "loc": "14:53",
                 "input": ["a@0[2]", "b@1[2]"],
                 "output": ["carry@12", "out@13"],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@12", "loc": "20:9"},
-                  {"type": "wire", "width": 1, "id": "out@13", "loc": "19:9"},
+                  {"type": "wire", "width": 1, "id": "carry@12", "loc": "19:10"},
+                  {"type": "wire", "width": 1, "id": "out@13", "loc": "18:10"},
                   {
-                    "type": "builtin", "id": "XOR", "loc": "19:18",
+                    "type": "builtin", "id": "XOR", "loc": "18:19",
                     "input": ["a@0[2]", "b@1[2]"],
                     "output": ["out@13"]
                   },
                   {
-                    "type": "builtin", "id": "AND", "loc": "20:18",
+                    "type": "builtin", "id": "AND", "loc": "19:19",
                     "input": ["a@0[2]", "b@1[2]"],
                     "output": ["carry@12"]
                   }
                 ]
               },
               {
-                "type": "component", "id": "half_adder", "loc": "15:36",
+                "type": "component", "id": "half_adder", "loc": "14:37",
                 "input": ["out@13", "cout@7"],
                 "output": ["carry@14", "c@2[2]"],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@14", "loc": "20:9"},
+                  {"type": "wire", "width": 1, "id": "carry@14", "loc": "19:10"},
                   {
-                    "type": "builtin", "id": "XOR", "loc": "19:18",
+                    "type": "builtin", "id": "XOR", "loc": "18:19",
                     "input": ["out@13", "cout@7"],
                     "output": ["c@2[2]"]
                   },
                   {
-                    "type": "builtin", "id": "AND", "loc": "20:18",
+                    "type": "builtin", "id": "AND", "loc": "19:19",
                     "input": ["out@13", "cout@7"],
                     "output": ["carry@14"]
                   }
                 ]
               },
               {
-                "type": "builtin", "id": "OR", "loc": "15:20",
+                "type": "builtin", "id": "OR", "loc": "14:21",
                 "input": ["carry@12", "carry@14"],
                 "output": ["cout@11"]
               }
             ]
           },
           {
-            "type": "component", "id": "full_adder", "loc": "8:34",
+            "type": "component", "id": "full_adder", "loc": "7:34",
             "input": ["a@0[3]", "b@1[3]", "cout@11"],
             "output": ["c@2[3]", "cout@15"],
             "members": [
-              {"type": "wire", "width": 1, "id": "cout@15", "loc": "14:25"},
+              {"type": "wire", "width": 1, "id": "cout@15", "loc": "13:25"},
               {
-                "type": "component", "id": "half_adder", "loc": "15:52",
+                "type": "component", "id": "half_adder", "loc": "14:53",
                 "input": ["a@0[3]", "b@1[3]"],
                 "output": ["carry@16", "out@17"],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@16", "loc": "20:9"},
-                  {"type": "wire", "width": 1, "id": "out@17", "loc": "19:9"},
+                  {"type": "wire", "width": 1, "id": "carry@16", "loc": "19:10"},
+                  {"type": "wire", "width": 1, "id": "out@17", "loc": "18:10"},
                   {
-                    "type": "builtin", "id": "XOR", "loc": "19:18",
+                    "type": "builtin", "id": "XOR", "loc": "18:19",
                     "input": ["a@0[3]", "b@1[3]"],
                     "output": ["out@17"]
                   },
                   {
-                    "type": "builtin", "id": "AND", "loc": "20:18",
+                    "type": "builtin", "id": "AND", "loc": "19:19",
                     "input": ["a@0[3]", "b@1[3]"],
                     "output": ["carry@16"]
                   }
                 ]
               },
               {
-                "type": "component", "id": "half_adder", "loc": "15:36",
+                "type": "component", "id": "half_adder", "loc": "14:37",
                 "input": ["out@17", "cout@11"],
                 "output": ["carry@18", "c@2[3]"],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@18", "loc": "20:9"},
+                  {"type": "wire", "width": 1, "id": "carry@18", "loc": "19:10"},
                   {
-                    "type": "builtin", "id": "XOR", "loc": "19:18",
+                    "type": "builtin", "id": "XOR", "loc": "18:19",
                     "input": ["out@17", "cout@11"],
                     "output": ["c@2[3]"]
                   },
                   {
-                    "type": "builtin", "id": "AND", "loc": "20:18",
+                    "type": "builtin", "id": "AND", "loc": "19:19",
                     "input": ["out@17", "cout@11"],
                     "output": ["carry@18"]
                   }
                 ]
               },
               {
-                "type": "builtin", "id": "OR", "loc": "15:20",
+                "type": "builtin", "id": "OR", "loc": "14:21",
                 "input": ["carry@16", "carry@18"],
                 "output": ["cout@15"]
               }
             ]
           },
           {
-            "type": "component", "id": "full_adder", "loc": "8:34",
+            "type": "component", "id": "full_adder", "loc": "7:34",
             "input": ["a@0[4]", "b@1[4]", "cout@15"],
             "output": ["c@2[4]", "cout@19"],
             "members": [
-              {"type": "wire", "width": 1, "id": "cout@19", "loc": "14:25"},
+              {"type": "wire", "width": 1, "id": "cout@19", "loc": "13:25"},
               {
-                "type": "component", "id": "half_adder", "loc": "15:52",
+                "type": "component", "id": "half_adder", "loc": "14:53",
                 "input": ["a@0[4]", "b@1[4]"],
                 "output": ["carry@20", "out@21"],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@20", "loc": "20:9"},
-                  {"type": "wire", "width": 1, "id": "out@21", "loc": "19:9"},
+                  {"type": "wire", "width": 1, "id": "carry@20", "loc": "19:10"},
+                  {"type": "wire", "width": 1, "id": "out@21", "loc": "18:10"},
                   {
-                    "type": "builtin", "id": "XOR", "loc": "19:18",
+                    "type": "builtin", "id": "XOR", "loc": "18:19",
                     "input": ["a@0[4]", "b@1[4]"],
                     "output": ["out@21"]
                   },
                   {
-                    "type": "builtin", "id": "AND", "loc": "20:18",
+                    "type": "builtin", "id": "AND", "loc": "19:19",
                     "input": ["a@0[4]", "b@1[4]"],
                     "output": ["carry@20"]
                   }
                 ]
               },
               {
-                "type": "component", "id": "half_adder", "loc": "15:36",
+                "type": "component", "id": "half_adder", "loc": "14:37",
                 "input": ["out@21", "cout@15"],
                 "output": ["carry@22", "c@2[4]"],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@22", "loc": "20:9"},
+                  {"type": "wire", "width": 1, "id": "carry@22", "loc": "19:10"},
                   {
-                    "type": "builtin", "id": "XOR", "loc": "19:18",
+                    "type": "builtin", "id": "XOR", "loc": "18:19",
                     "input": ["out@21", "cout@15"],
                     "output": ["c@2[4]"]
                   },
                   {
-                    "type": "builtin", "id": "AND", "loc": "20:18",
+                    "type": "builtin", "id": "AND", "loc": "19:19",
                     "input": ["out@21", "cout@15"],
                     "output": ["carry@22"]
                   }
                 ]
               },
               {
-                "type": "builtin", "id": "OR", "loc": "15:20",
+                "type": "builtin", "id": "OR", "loc": "14:21",
                 "input": ["carry@20", "carry@22"],
                 "output": ["cout@19"]
               }
             ]
           },
           {
-            "type": "component", "id": "full_adder", "loc": "8:34",
+            "type": "component", "id": "full_adder", "loc": "7:34",
             "input": ["a@0[5]", "b@1[5]", "cout@19"],
             "output": ["c@2[5]", "cout@23"],
             "members": [
-              {"type": "wire", "width": 1, "id": "cout@23", "loc": "14:25"},
+              {"type": "wire", "width": 1, "id": "cout@23", "loc": "13:25"},
               {
-                "type": "component", "id": "half_adder", "loc": "15:52",
+                "type": "component", "id": "half_adder", "loc": "14:53",
                 "input": ["a@0[5]", "b@1[5]"],
                 "output": ["carry@24", "out@25"],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@24", "loc": "20:9"},
-                  {"type": "wire", "width": 1, "id": "out@25", "loc": "19:9"},
+                  {"type": "wire", "width": 1, "id": "carry@24", "loc": "19:10"},
+                  {"type": "wire", "width": 1, "id": "out@25", "loc": "18:10"},
                   {
-                    "type": "builtin", "id": "XOR", "loc": "19:18",
+                    "type": "builtin", "id": "XOR", "loc": "18:19",
                     "input": ["a@0[5]", "b@1[5]"],
                     "output": ["out@25"]
                   },
                   {
-                    "type": "builtin", "id": "AND", "loc": "20:18",
+                    "type": "builtin", "id": "AND", "loc": "19:19",
                     "input": ["a@0[5]", "b@1[5]"],
                     "output": ["carry@24"]
                   }
                 ]
               },
               {
-                "type": "component", "id": "half_adder", "loc": "15:36",
+                "type": "component", "id": "half_adder", "loc": "14:37",
                 "input": ["out@25", "cout@19"],
                 "output": ["carry@26", "c@2[5]"],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@26", "loc": "20:9"},
+                  {"type": "wire", "width": 1, "id": "carry@26", "loc": "19:10"},
                   {
-                    "type": "builtin", "id": "XOR", "loc": "19:18",
+                    "type": "builtin", "id": "XOR", "loc": "18:19",
                     "input": ["out@25", "cout@19"],
                     "output": ["c@2[5]"]
                   },
                   {
-                    "type": "builtin", "id": "AND", "loc": "20:18",
+                    "type": "builtin", "id": "AND", "loc": "19:19",
                     "input": ["out@25", "cout@19"],
                     "output": ["carry@26"]
                   }
                 ]
               },
               {
-                "type": "builtin", "id": "OR", "loc": "15:20",
+                "type": "builtin", "id": "OR", "loc": "14:21",
                 "input": ["carry@24", "carry@26"],
                 "output": ["cout@23"]
               }
             ]
           },
           {
-            "type": "component", "id": "full_adder", "loc": "8:34",
+            "type": "component", "id": "full_adder", "loc": "7:34",
             "input": ["a@0[6]", "b@1[6]", "cout@23"],
             "output": ["c@2[6]", "cout@27"],
             "members": [
-              {"type": "wire", "width": 1, "id": "cout@27", "loc": "14:25"},
+              {"type": "wire", "width": 1, "id": "cout@27", "loc": "13:25"},
               {
-                "type": "component", "id": "half_adder", "loc": "15:52",
+                "type": "component", "id": "half_adder", "loc": "14:53",
                 "input": ["a@0[6]", "b@1[6]"],
                 "output": ["carry@28", "out@29"],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@28", "loc": "20:9"},
-                  {"type": "wire", "width": 1, "id": "out@29", "loc": "19:9"},
+                  {"type": "wire", "width": 1, "id": "carry@28", "loc": "19:10"},
+                  {"type": "wire", "width": 1, "id": "out@29", "loc": "18:10"},
                   {
-                    "type": "builtin", "id": "XOR", "loc": "19:18",
+                    "type": "builtin", "id": "XOR", "loc": "18:19",
                     "input": ["a@0[6]", "b@1[6]"],
                     "output": ["out@29"]
                   },
                   {
-                    "type": "builtin", "id": "AND", "loc": "20:18",
+                    "type": "builtin", "id": "AND", "loc": "19:19",
                     "input": ["a@0[6]", "b@1[6]"],
                     "output": ["carry@28"]
                   }
                 ]
               },
               {
-                "type": "component", "id": "half_adder", "loc": "15:36",
+                "type": "component", "id": "half_adder", "loc": "14:37",
                 "input": ["out@29", "cout@23"],
                 "output": ["carry@30", "c@2[6]"],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@30", "loc": "20:9"},
+                  {"type": "wire", "width": 1, "id": "carry@30", "loc": "19:10"},
                   {
-                    "type": "builtin", "id": "XOR", "loc": "19:18",
+                    "type": "builtin", "id": "XOR", "loc": "18:19",
                     "input": ["out@29", "cout@23"],
                     "output": ["c@2[6]"]
                   },
                   {
-                    "type": "builtin", "id": "AND", "loc": "20:18",
+                    "type": "builtin", "id": "AND", "loc": "19:19",
                     "input": ["out@29", "cout@23"],
                     "output": ["carry@30"]
                   }
                 ]
               },
               {
-                "type": "builtin", "id": "OR", "loc": "15:20",
+                "type": "builtin", "id": "OR", "loc": "14:21",
                 "input": ["carry@28", "carry@30"],
                 "output": ["cout@27"]
               }
             ]
           },
           {
-            "type": "component", "id": "full_adder", "loc": "8:34",
+            "type": "component", "id": "full_adder", "loc": "7:34",
             "input": ["a@0[7]", "b@1[7]", "cout@27"],
             "output": ["c@2[7]", "cout@31"],
             "members": [
-              {"type": "wire", "width": 1, "id": "cout@31", "loc": "14:25"},
+              {"type": "wire", "width": 1, "id": "cout@31", "loc": "13:25"},
               {
-                "type": "component", "id": "half_adder", "loc": "15:52",
+                "type": "component", "id": "half_adder", "loc": "14:53",
                 "input": ["a@0[7]", "b@1[7]"],
                 "output": ["carry@32", "out@33"],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@32", "loc": "20:9"},
-                  {"type": "wire", "width": 1, "id": "out@33", "loc": "19:9"},
+                  {"type": "wire", "width": 1, "id": "carry@32", "loc": "19:10"},
+                  {"type": "wire", "width": 1, "id": "out@33", "loc": "18:10"},
                   {
-                    "type": "builtin", "id": "XOR", "loc": "19:18",
+                    "type": "builtin", "id": "XOR", "loc": "18:19",
                     "input": ["a@0[7]", "b@1[7]"],
                     "output": ["out@33"]
                   },
                   {
-                    "type": "builtin", "id": "AND", "loc": "20:18",
+                    "type": "builtin", "id": "AND", "loc": "19:19",
                     "input": ["a@0[7]", "b@1[7]"],
                     "output": ["carry@32"]
                   }
                 ]
               },
               {
-                "type": "component", "id": "half_adder", "loc": "15:36",
+                "type": "component", "id": "half_adder", "loc": "14:37",
                 "input": ["out@33", "cout@27"],
                 "output": ["carry@34", "c@2[7]"],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@34", "loc": "20:9"},
+                  {"type": "wire", "width": 1, "id": "carry@34", "loc": "19:10"},
                   {
-                    "type": "builtin", "id": "XOR", "loc": "19:18",
+                    "type": "builtin", "id": "XOR", "loc": "18:19",
                     "input": ["out@33", "cout@27"],
                     "output": ["c@2[7]"]
                   },
                   {
-                    "type": "builtin", "id": "AND", "loc": "20:18",
+                    "type": "builtin", "id": "AND", "loc": "19:19",
                     "input": ["out@33", "cout@27"],
                     "output": ["carry@34"]
                   }
                 ]
               },
               {
-                "type": "builtin", "id": "OR", "loc": "15:20",
+                "type": "builtin", "id": "OR", "loc": "14:21",
                 "input": ["carry@32", "carry@34"],
                 "output": ["cout@31"]
               }

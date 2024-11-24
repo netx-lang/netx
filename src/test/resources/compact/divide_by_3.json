@@ -10,25 +10,25 @@
       {"type": "wire", "width": 1, "id": "b", "loc": "7:12"},
       {"type": "wire", "width": 1, "id": "c", "loc": "7:15"},
       {
-        "type": "builtin", "id": "NOT@1", "loc": "8:28",
+        "type": "builtin", "id": "NOT@1", "loc": "8:29",
         "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "8:28"}
+          {"type": "wire", "width": 1, "id": "$o", "loc": "8:29"}
         ],
         "input": ["a@0"],
         "output": ["$o@1"]
       },
       {
-        "type": "builtin", "id": "NOT@2", "loc": "8:38",
+        "type": "builtin", "id": "NOT@2", "loc": "8:39",
         "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "8:38"}
+          {"type": "wire", "width": 1, "id": "$o", "loc": "8:39"}
         ],
         "input": ["b@0"],
         "output": ["$o@2"]
       },
       {
-        "type": "builtin", "id": "AND@3", "loc": "8:20",
+        "type": "builtin", "id": "AND@3", "loc": "8:21",
         "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "8:20"}
+          {"type": "wire", "width": 1, "id": "$o", "loc": "8:21"}
         ],
         "input": ["$o@1", "$o@2"],
         "output": ["$o@3"]
@@ -52,7 +52,7 @@
         "output": ["c@0"]
       },
       {
-        "type": "builtin", "id": "OR@7", "loc": "11:13",
+        "type": "builtin", "id": "OR@7", "loc": "11:14",
         "input": ["b@0", "c@0"],
         "output": ["clk_3@0"]
       }

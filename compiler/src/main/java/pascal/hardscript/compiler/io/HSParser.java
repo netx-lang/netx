@@ -79,11 +79,11 @@ public final class HSParser {
     }
 
     static ComponentInstantiationNode parseComponentInstantiation(ComponentInstantiationContext ctx) {
-        return ComponentInstantiationNode.of(parseExpr(ctx.lhs), parseExpr(ctx.rhs), false);
+        return ComponentInstantiationNode.of(parseExpr(ctx.expression()), false);
     }
 
     static ComponentInstantiationNode parseMixedInstantiation(MixedInstantiationContext ctx) {
-        return ComponentInstantiationNode.of(parseExpr(ctx.lhs), parseExpr(ctx.rhs), true);
+        return ComponentInstantiationNode.of(parseExpr(ctx.expression()), true);
     }
 
     static LoopNode parseLoop(LoopContext ctx) {

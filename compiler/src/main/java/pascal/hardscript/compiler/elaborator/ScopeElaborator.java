@@ -9,7 +9,6 @@ import pascal.hardscript.compiler.io.Configuration;
 import pascal.hardscript.compiler.model.EntityList;
 import pascal.hardscript.compiler.model.component.*;
 import pascal.hardscript.compiler.model.instance.Instance;
-import pascal.hardscript.compiler.model.instance.MutableInstance;
 import pascal.hardscript.compiler.model.scope.Attributes;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.Scope;
@@ -21,7 +20,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import static pascal.hardscript.compiler.elaborator.Types.*;
+import static pascal.hardscript.compiler.elaborator.Types.requiresComponentType;
+import static pascal.hardscript.compiler.elaborator.Types.requiresMatchedSize;
 
 final class ScopeElaborator {
     private static final Logger log = LoggerFactory.getLogger(ScopeElaborator.class);
@@ -104,38 +104,9 @@ final class ScopeElaborator {
 
     private void buildElement(ComponentInstantiationNode instantiation) {
         var sourceLoc = instantiation.getSourceLoc();
-        var component = scope.getLeastUpperComponent();
         boolean inPlace = instantiation.needDeclareInPlace();
-
-        var compType = evaluator.evaluateToComponentType(instantiation.getRhs(), inPlace);
-        var target = extractComponentLhs(sourceLoc, instantiation.getLhs(), inPlace);
-        var source = new Instantiator(sourceLoc).instantiate(compType);
-        
-        checkAttributeWrite(component, target, sourceLoc);
-        int size = requiresMatchedSize(sourceLoc, target, source);
-        for (int i = 0; i < size; i++) {
-            scope.addAlias(target.get(i), source.get(i));
-        }
-    }
-
-    private List<MutableInstance> extractComponentLhs(SourceLoc sourceLoc, ExprNode node, boolean declareInPlace) {
-        var entity = declareInPlace ? evaluator.evaluateAndDeclInPlace(node) : evaluator.evaluate(node);
-        if (entity instanceof EntityList(var list)) {
-            return list.stream().map(o -> requiresMutableInstance(sourceLoc, o)).toList();
-        } else {
-            return List.of(requiresMutableInstance(sourceLoc, entity));
-        }
-    }
-
-    private void checkAttributeWrite(ComponentScope component, List<MutableInstance> target, SourceLoc sourceLoc) {
-        if (component.getAttributes() != null) {
-            for (var inst : target) {
-                if (component.getAttributes().contains(inst)) {
-                    log.error("{}: Component Attributes {} is read-only ", sourceLoc, inst);
-                    throw new CompileCancellationException();
-                }
-            }
-        }
+        var compType = evaluator.evaluateToComponentType(instantiation.getExpr(), inPlace);
+        new Instantiator(sourceLoc).instantiate(compType);
     }
 
     private class Instantiator {

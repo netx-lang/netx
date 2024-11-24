@@ -1,7 +1,7 @@
 component top : [input] -> [output] {
     inst input of wire(bit(8))
     inst output of wire(bit(3))
-    output <- encoder(3) <> input
+    #output <> encoder(3) <> input
 }
 
 component encoder(width) : [code] -> [output] {
@@ -9,7 +9,7 @@ component encoder(width) : [code] -> [output] {
     inst output of wire(bit(width))
 
     for (i in [0..width]) {
-        output[i] <- OR(width + 1) <> [code[j] |
+        #output[i] <> OR(width + 1) <> [code[j] |
             j in [0..2**width],
             when j & (1 << i)
         ]

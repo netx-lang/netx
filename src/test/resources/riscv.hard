@@ -10,61 +10,59 @@ component riscv : [
     inst dmemDataOut of wire(bit(32))
     inst PC, nextPC  of wire(bit(32))
 
-    auto instr <- imemDataOut
-    auto func7 <- instr[31:25]
-    auto rs2   <- instr[24:20]
-    auto rs1   <- instr[19:15]
-    auto func3 <- instr[14:12]
-    auto rd    <- instr[11:7]
-    auto op    <- instr[6:0]
+    auto #instr <> imemDataOut
+    auto #func7 <> instr[31:25]
+    auto #rs2   <> instr[24:20]
+    auto #rs1   <> instr[19:15]
+    auto #func3 <> instr[14:12]
+    auto #rd    <> instr[11:7]
+    auto #op    <> instr[6:0]
 
-    auto [extOP, regWr, branch_ctl, memToReg, dmemWe, dmemOp, aSrc, bSrc, ctl] <- InstrDecoder <> [op, func3, func7[5]]
-    auto imm <- ImmSelector <> [extOP, instr]
+    auto #[extOP, regWr, branch_ctl, memToReg, dmemWe, dmemOp, aSrc, bSrc, ctl] <> InstrDecoder <> [op, func3, func7[5]]
+    auto #imm <> ImmSelector <> [extOP, instr]
 
-    auto [Ra, Rb] <- RegFile <> [clk, rs1, rs2, rd, MUX(1) <> [imm, dmemDataOut, memToReg]]
+    auto #[Ra, Rb] <> RegFile <> [clk, rs1, rs2, rd, MUX(1) <> [imm, dmemDataOut, memToReg]]
 
-    auto [result, zero, less] <- ALU <> [
+    auto #[result, zero, less] <> ALU <> [
         MUX(1) <> [Ra, PC, aSrc],
         MUX(2) <> [Rb, imm, 4, 4, bSrc], ctl
     ]
 
-    auto [PCAsrc, PCBsrc] <- BranchCond <> [branch_ctl, zero, less]
+    auto #[PCAsrc, PCBsrc] <> BranchCond <> [branch_ctl, zero, less]
 
-    nextPC <- ADD <> [
+    #nextPC <> ADD <> [
         MUX(1) <> [4, imm, PCAsrc],
         MUX(1) <> [PC, Ra, PCBsrc]
     ]
 
-    PC <- REGISTER(clk, false) <> MUX(1) <> [nextPC, 32'b0, rst]
+    #PC <> REGISTER(clk, false) <> MUX(1) <> [nextPC, 32'b0, rst]
 
-    auto imemAddr <- MUX(1) <> [nextPC, 32'b0, rst]
-    auto dmemAddr   <- result
-    auto dmemDataIn <- Rb
+    auto #imemAddr <> MUX(1) <> [nextPC, 32'b0, rst]
+    auto #dmemAddr   <> result
+    auto #dmemDataIn <> Rb
 }
 
 component InstrDecoder : [op_i, func3, func7] -> [extOP, regWr, branch_ctl, memToReg, memWr, memOP, aSrc, bSrc, ctl] {
     inst op_i  of wire(bit(7))
     inst func3 of wire(bit(3))
     inst func7 of wire(bit(1))
-    auto extOP, regWr, branch_ctl, memToReg, memWr, memOP, aSrc, bSrc, ctl
-    auto U_flag_0, U_flag_1, I_flag_0, R_flag, J_flag, I_flag_1, B_flag, I_flag_2, S_flag, U_flag, I_flag
-    inst op of wire(bit(5))
-    op <- op_i[6:2]
-    U_flag_0 <- EQ <> [op, 5'b01101] // lui
-    U_flag_1 <- EQ <> [op, 5'b00101] // auipc
-    I_flag_0 <- EQ <> [op, 5'b00100] // addi, slti, sltiu, xori, ori, andi, slli, srli, srai
-    R_flag   <- EQ <> [op, 5'b01100] // add, sub, sll, slt, sltu, xor, srl, sra, or, and
-    J_flag   <- EQ <> [op, 5'b11011] // jal
-    I_flag_1 <- EQ <> [op, 5'b11001] // jalr
-    B_flag   <- EQ <> [op, 5'b11000] // beq, bne, blt, bge, bltu, bgeu
-    I_flag_2 <- EQ <> [op, 5'b00000] // lb, lh, lw, lbu, lhu
-    S_flag   <- EQ <> [op, 5'b01000] // sb, sh, sw
 
-    U_flag <- OR <> [U_flag_0, U_flag_1]
-    I_flag <- OR(3) <> [I_flag_0, I_flag_1, I_flag_2] 
+    auto #op <> op_i[6:2]
+    auto #U_flag_0 <> EQ <> [op, 5'b01101] // lui
+    auto #U_flag_1 <> EQ <> [op, 5'b00101] // auipc
+    auto #I_flag_0 <> EQ <> [op, 5'b00100] // addi, slti, sltiu, xori, ori, andi, slli, srli, srai
+    auto #R_flag   <> EQ <> [op, 5'b01100] // add, sub, sll, slt, sltu, xor, srl, sra, or, and
+    auto #J_flag   <> EQ <> [op, 5'b11011] // jal
+    auto #I_flag_1 <> EQ <> [op, 5'b11001] // jalr
+    auto #B_flag   <> EQ <> [op, 5'b11000] // beq, bne, blt, bge, bltu, bgeu
+    auto #I_flag_2 <> EQ <> [op, 5'b00000] // lb, lh, lw, lbu, lhu
+    auto #S_flag   <> EQ <> [op, 5'b01000] // sb, sh, sw
+
+    auto #U_flag <> OR <> [U_flag_0, U_flag_1]
+    auto #I_flag <> OR(3) <> [I_flag_0, I_flag_1, I_flag_2]
 
     let branch(cond, pred) = MUX(1) <> [CAST <> 1'b0, pred, cond]
-    [extOP] <- OR(5) <> [
+    auto #extOP <> OR(5) <> [
         branch(U_flag, 3'b001),
         branch(I_flag, 3'b000),
         branch(J_flag, 3'b100),
@@ -72,9 +70,9 @@ component InstrDecoder : [op_i, func3, func7] -> [extOP, regWr, branch_ctl, memT
         branch(S_flag, 3'b010)
     ]
     
-    regWr <- OR(4) <> [U_flag, I_flag, R_flag, J_flag]
+    auto #regWr <> OR(4) <> [U_flag, I_flag, R_flag, J_flag]
 
-    branch_ctl <- OR(3) <> [
+    auto #branch_ctl <> OR(3) <> [
         branch(J_flag,   3'b001),
         branch(I_flag_1, 3'b010),
         branch(B_flag, OR(6) <> [
@@ -88,15 +86,15 @@ component InstrDecoder : [op_i, func3, func7] -> [extOP, regWr, branch_ctl, memT
         )
     ]
 
-    memToReg <- I_flag_2
+    auto #memToReg <> I_flag_2
 
-    memWr <- S_flag
+    auto #memWr <> S_flag
 
-    memOP <- branch(OR <> [I_flag_2, S_flag], func3)
+    auto #memOP <> branch(OR <> [I_flag_2, S_flag], func3)
 
-    aSrc <- OR(3) <> [U_flag_1, J_flag, I_flag_1]
+    auto #aSrc <> OR(3) <> [U_flag_1, J_flag, I_flag_1]
 
-    bSrc <- OR(3) <> [
+    auto #bSrc <> OR(3) <> [
         branch(OR(5) <> [U_flag_0, U_flag_1, I_flag_0, I_flag_2, S_flag], 2'b01),
         branch(OR <> [J_flag, I_flag_1], 2'b10),
         branch(OR <> [R_flag, B_flag], 2'b00)
@@ -104,8 +102,8 @@ component InstrDecoder : [op_i, func3, func7] -> [extOP, regWr, branch_ctl, memT
 
     inst de_func3 of wire(bit(8))
     inst arith_ctl of wire(bit(4))
-    de_func3 <- DECODER(3) <> func3
-    arith_ctl <- OR(8) <> [
+    auto #de_func3 <> DECODER(3) <> func3
+    auto #arith_ctl <> OR(8) <> [
         branch(de_func3[3'b000], CONCAT <> [func7, 3'b000]),
         branch(de_func3[3'b001], 4'b0001),
         branch(de_func3[3'b010], 4'b0010),
@@ -116,7 +114,7 @@ component InstrDecoder : [op_i, func3, func7] -> [extOP, regWr, branch_ctl, memT
         branch(de_func3[3'b111], 4'b0111)
     ]
 
-    ctl <- OR(4) <> [
+    auto #ctl <> OR(4) <> [
         branch(U_flag_0, 4'b0011),
         branch(OR <> [I_flag_0, R_flag], arith_ctl),
         branch(B_flag, MUX(1) <> [4'b0010, 4'b1010, AND <> [func3[2], func3[1]]]),
@@ -136,9 +134,9 @@ component ImmSelector: [extOP, instr] -> [imm] {
     let immJ = CONCAT(5) <> [CAST(12) <> instr[31], instr[19:12], instr[20], instr[30:21], 1'b0]
 
     inst mask of wire(bit(8))
-    mask <- DECODER(3) <> extOP
+    #mask <> DECODER(3) <> extOP
     let branch(i, pred) = MUX(1) <> [CAST <> 1'b0, pred, mask[i]]
-    imm <- OR(5) <> [
+    #imm <> OR(5) <> [
         branch(3'b000, immI), branch(3'b001, immU), 
         branch(3'b010, immS), branch(3'b011, immB), branch(3'b100, immJ)
     ]
@@ -151,10 +149,10 @@ component ALU: [a, b, ctl] -> [result, zero, less] {
     inst result     of wire(bit(32))
 
     inst mask       of wire(bit(8))
-    mask <- DECODER(3) <> ctl[2:0]
+    #mask <> DECODER(3) <> ctl[2:0]
     let firBranch(i, pred) = MUX(1) <> [CAST <> 1'b0, pred, mask[i]]
     let secBranch(i, b0, b1) = firBranch(i, MUX(1) <> [b0, b1, ctl[3]])
-    result <- OR(8) <> [
+    #result <> OR(8) <> [
         secBranch(3'b000, ADD <> [a, b], SUB <> [a, b]),
         firBranch(3'b001, SHL <> [a, b[4:0]]),
         CAST <> secBranch(3'b010, SLT <> [a, b], ULT <> [a, b]),
@@ -165,8 +163,8 @@ component ALU: [a, b, ctl] -> [result, zero, less] {
         firBranch(3'b111, AND <> [a, b])
     ]
 
-    zero <- NOT <> OR(32) <> [result[i] | i in [0..32]]
-    less <- result[0]
+    #zero <> NOT <> OR(32) <> [result[i] | i in [0..32]]
+    #less <> result[0]
 }
 
 component BranchCond : [branch_ctl, zero, less] -> [PCAsrc, PCBsrc] {
@@ -176,9 +174,9 @@ component BranchCond : [branch_ctl, zero, less] -> [PCAsrc, PCBsrc] {
 
     inst result of wire(bit(2))
     inst mask   of wire(bit(8))
-    mask <- DECODER(3) <> branch_ctl
+    #mask <> DECODER(3) <> branch_ctl
     let branch(i, pred) = MUX(1) <> [CAST <> 1'b0, pred, mask[i]]
-    result <- OR(7) <> [
+    #result <> OR(7) <> [
         branch(3'b000, 2'b00),
         branch(3'b001, 2'b10),
         branch(3'b010, 2'b11),
@@ -187,8 +185,8 @@ component BranchCond : [branch_ctl, zero, less] -> [PCAsrc, PCBsrc] {
         branch(3'b110, CONCAT <> [less, 1'b0]),
         branch(3'b111, CONCAT <> [NOT <> less, 1'b0])
     ]
-    PCAsrc <- result[1]
-    PCBsrc <- result[0]
+    #PCAsrc <> result[1]
+    #PCBsrc <> result[0]
 }
 
 
@@ -202,16 +200,16 @@ component RegFile : [clk, RaAddr, RbAddr, WrAddr, WrValue] -> [Ra, Rb] {
     }
 
     inst mask of wire(bit(32))
-    mask <- DECODER(5) <> WrAddr
+    #mask <> DECODER(5) <> WrAddr
     for (i in [0..32]) {
-        regFile_${i} <- REGISTER(clk, true)
+        #regFile_${i} <> REGISTER(clk, true)
             <> MUX(1) <> [regFile_${i}, WrValue, mask[i]]
     }
 
     let INDEX_ACCESS = MUX(5) <> [regFile_${i} | i in [0..32]] :: [TO]
     
-    Ra <- INDEX_ACCESS <> RaAddr
-    Rb <- INDEX_ACCESS <> RbAddr
+    #Ra <> INDEX_ACCESS <> RaAddr
+    #Rb <> INDEX_ACCESS <> RbAddr
 }
 
 component MUX(width) : [input_${i} | i in [0..W]] :: [code] -> [output] {
@@ -222,9 +220,9 @@ component MUX(width) : [input_${i} | i in [0..W]] :: [code] -> [output] {
     for (i in [0..W]) {
         auto input_${i}
     }
-    mask <- DECODER(width) <> code
+    #mask <> DECODER(width) <> code
     
-    output <- OR(W) <> [
+    #output <> OR(W) <> [
         AND <> [input_${i}, CAST <> mask[i]] | i in [0..W]
     ] 
 }
@@ -234,7 +232,7 @@ component DECODER(width) : [code] -> [output] {
     inst code   of wire(bit(width))
     inst output of wire(bit(W))
     for (i in [0..W]) {
-        output[i] <- AND(width) <> [port | 
+        #output[i] <> AND(width) <> [port |
             j in [0..width],
             let port = if i & (1 << j) then TO else NOT
         ] <> [code[j] | j in [0..width]]

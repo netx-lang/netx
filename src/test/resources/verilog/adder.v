@@ -5,13 +5,13 @@ module top_1(
   input a;
   input b;
   output c;
-  wire [7:0] a; // @(2:9)
-  wire [7:0] b; // @(2:12)
-  wire [7:0] c; // @(2:15)
+  wire [7:0] a; // @(2:28)
+  wire [7:0] b; // @(2:31)
+  wire [7:0] c; // @(2:10)
   adder_1 inst_1(a, b, c);
 endmodule
 
-// @(6:10)
+// @(5:10)
 module adder_1(
   a, b, c
 );
@@ -19,10 +19,10 @@ module adder_1(
   input b;
   output c;
   wire p_0;
-  wire [7:0] a; // @(7:9)
-  wire [7:0] b; // @(7:12)
+  wire [7:0] a; // @(6:9)
+  wire [7:0] b; // @(6:12)
   wire p_2;
-  wire [7:0] c; // @(7:15)
+  wire [7:0] c; // @(6:15)
   wire p_1;
   wire p_4;
   wire p_3;
@@ -39,7 +39,7 @@ module adder_1(
   full_adder_1 inst_8(a[7], b[7], p_6, c[7], p_7);
 endmodule
 
-// @(13:10)
+// @(12:10)
 module full_adder_1(
   a, b, cin, out, cout
 );
@@ -49,19 +49,19 @@ module full_adder_1(
   output out;
   output cout;
   wire p_0;
-  wire a; // @(14:9)
-  wire b; // @(14:12)
+  wire a; // @(13:9)
+  wire b; // @(13:12)
   wire p_2;
   wire p_1;
-  wire cout; // @(14:25)
-  wire cin; // @(14:15)
-  wire out; // @(14:20)
+  wire cout; // @(13:25)
+  wire cin; // @(13:15)
+  wire out; // @(13:20)
   half_adder_1 inst_1(a, b, p_0, p_1);
   half_adder_1 inst_2(p_1, cin, p_2, out);
   assign cout = p_0 | p_2;
 endmodule
 
-// @(18:10)
+// @(17:10)
 module half_adder_1(
   a, b, carry, out
 );
@@ -69,10 +69,10 @@ module half_adder_1(
   input b;
   output carry;
   output out;
-  wire a; // @(19:26)
-  wire b; // @(19:29)
-  wire carry; // @(20:9)
-  wire out; // @(19:9)
+  wire a; // @(18:27)
+  wire b; // @(18:30)
+  wire carry; // @(19:10)
+  wire out; // @(18:10)
   assign out = a ^ b;
   assign carry = a & b;
 endmodule

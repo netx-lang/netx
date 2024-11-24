@@ -10,22 +10,22 @@
       {"type": "wire", "width": 3, "id": "output@1", "loc": "3:9"},
       {"type": "wire", "width": 8, "id": "input@0", "loc": "2:9"},
       {
-        "type": "component", "id": "encoder", "loc": "4:14",
+        "type": "component", "id": "encoder", "loc": "4:15",
         "input": ["input@0"],
         "output": ["output@1"],
         "members": [
           {
-            "type": "builtin", "id": "OR", "loc": "12:21",
+            "type": "builtin", "id": "OR", "loc": "12:22",
             "input": ["input@0[1]", "input@0[3]", "input@0[5]", "input@0[7]"],
             "output": ["output@1[0]"]
           },
           {
-            "type": "builtin", "id": "OR", "loc": "12:21",
+            "type": "builtin", "id": "OR", "loc": "12:22",
             "input": ["input@0[2]", "input@0[3]", "input@0[6]", "input@0[7]"],
             "output": ["output@1[1]"]
           },
           {
-            "type": "builtin", "id": "OR", "loc": "12:21",
+            "type": "builtin", "id": "OR", "loc": "12:22",
             "input": ["input@0[4]", "input@0[5]", "input@0[6]", "input@0[7]"],
             "output": ["output@1[2]"]
           }

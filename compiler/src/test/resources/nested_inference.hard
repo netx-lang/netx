@@ -1,14 +1,14 @@
 component top {
     inst a of wire(bit(3))
-    auto b <- sub <> a
+    auto #b <> sub <> a
 }
 component sub: [a] -> [b] {
     auto a, b
-    b <- tricky <> [a, CAST <> 1'b0]
+    #b <> tricky <> [a, CAST <> 1'b0]
 }
 component tricky : [a, b] -> [c] {
     auto a, b
-    auto c <- AND <> [
+    auto #c <> AND <> [
         AND <> [a, CAST <> 1'b1],
         AND <> [b, CAST <> 1'b1]
     ]

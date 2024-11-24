@@ -248,14 +248,30 @@ public final class Evaluator {
             case SUB -> evaluateToIntegerValue(expr.getOperand()).neg();
             case NOT -> evaluateToBoolean(expr.getOperand()).not();
             case BITWISE_NOT -> evaluateToIntegerValue(expr.getOperand()).bitwiseNot();
-            case SINK -> evaluateUnaryToInstanceType(InstanceAtom.Mode.SINK, expr);
-            case INOUT -> evaluateUnaryToInstanceType(InstanceAtom.Mode.BIDI, expr);
+            case SINK -> evaluateDecoratedInstanceAtom(InstanceAtom.Mode.SINK, expr);
+            case INOUT -> evaluateDecoratedInstanceAtom(InstanceAtom.Mode.BIDI, expr);
         };
     }
 
-    private Entity evaluateUnaryToInstanceType(InstanceAtom.Mode mode, UnaryExpr expr) {
-        var operand = requiresMutableInstance(expr.getSourceLoc(), evaluate(expr.getOperand()));
-        return InstanceAtom.of(mode, operand, expr.getSourceLoc());
+    private Entity evaluateDecoratedInstanceAtom(InstanceAtom.Mode mode, UnaryExpr expr) {
+        var operand = evaluate(expr.getOperand());
+        switch (operand) {
+            case EntityList(var list) -> {
+                List<ComponentType> result = new LinkedList<>();
+                for (var element : list) {
+                    var inst = requiresMutableInstance(expr.getSourceLoc(), element);
+                    result.add(InstanceAtom.of(mode, inst, expr.getSourceLoc()));
+                }
+                return ParallelType.from(result);
+            }
+            case MutableInstance inst -> {
+                return InstanceAtom.of(mode, inst, expr.getSourceLoc());
+            }
+            default -> {
+                log.error("{}: Expected mutable instance(s) but got {}", expr.getSourceLoc(), operand);
+                throw new CompileCancellationException();
+            }
+        }
     }
 
     public Data.Factory<?> evaluateToDataFactory(ExprNode expr) {
