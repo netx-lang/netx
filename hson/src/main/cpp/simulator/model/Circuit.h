@@ -1,5 +1,4 @@
 #pragma once
-#include <memory>
 #include <unordered_map>
 #include <vector>
 
@@ -7,11 +6,13 @@
 
 namespace hson {
     class Register;
-    class Node;
 
     class Circuit {
         std::vector<Node> nodes;
-        std::unordered_map<int, std::vector<Register>> registers;
+        std::vector<int> topology;
+        std::vector<std::vector<int> > inEdges;
+        std::vector<std::vector<int> > outEdges;
+        std::unordered_map<int, std::vector<Register> > registers;
 
     public:
         explicit Circuit(int size);
@@ -27,6 +28,12 @@ namespace hson {
                           const std::vector<int> &outputs);
 
         void addEdge(int from, int to);
+
+        [[nodiscard]] std::vector<int>::const_iterator successorsOf(int node) const;
+
+        [[nodiscard]] std::vector<int>::const_iterator predecessorsOf(int node) const;
+
+        void topologicalSort();
     };
 
     class Register {

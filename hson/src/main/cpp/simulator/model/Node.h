@@ -10,14 +10,14 @@ namespace hson {
 
     class Node {
     public:
-        void setOrder(const int order) {
-            this->order = order;
+        void setIndex(const int index) {
+            this->index = index;
         }
 
         virtual ~Node() = default;
 
     private:
-        int order = 0;
+        int index = 0;
     };
 
     class ComputationNode final : public Node {

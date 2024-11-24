@@ -32,9 +32,9 @@ namespace hson {
     void Frontend::parseData(const json &node) const {
         switch (typeOf(node.at("type"))) {
             case CLOCK: createWireNode(node, node.at("width"));
-            break;
+                break;
             case WIRE: createWireNode(node, 1);
-            break;
+                break;
             default: {
                 if (node.contains("members")) {
                     for (auto &member: node.at("members")) {
@@ -61,7 +61,7 @@ namespace hson {
         }
     }
 
-    void Frontend::parseComponent(const json& node) const {
+    void Frontend::parseComponent(const json &node) const {
         const int relation = circuit->addRelationNode(ComputationNode(node.at("id")));
         circuit->addHyperEdge(relation,
                               resolveNodeList(node, "input"),
