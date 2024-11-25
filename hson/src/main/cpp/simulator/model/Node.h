@@ -45,16 +45,19 @@ namespace hson {
 
     class DataNode : public Node {
     public:
-        [[nodiscard]] const BitVector &getValue() const {
+        [[nodiscard]] BitVector const *getValue() const {
             return value;
         }
 
-        void setValue(const BitVector &value) {
+        void setValue(BitVector *value) {
+            if (this->value != nullptr) {
+                delete this->value;
+            }
             this->value = value;
         }
 
     private:
-        BitVector value;
+        BitVector *value = nullptr;
     };
 
     class WireNode final : public DataNode {

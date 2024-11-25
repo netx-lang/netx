@@ -10,9 +10,9 @@ namespace hson {
     public:
         void run();
 
-        void setInput(const std::string &id, const BitVector &value) const;
+        void setInput(const std::string &id, BitVector *value) const;
 
-        [[nodiscard]] BitVector getOutput(const std::string &id) const;
+        [[nodiscard]] BitVector const *getOutput(const std::string &id) const;
 
         explicit Simulator(Circuit *circuit);
 
@@ -25,7 +25,7 @@ namespace hson {
     };
 
     struct comparator {
-        bool operator()(const Node *lhs, const Node *rhs) const {
+        bool operator()(Node *lhs, Node *rhs) const {
             return lhs->getTopology() < rhs->getTopology();
         }
     };

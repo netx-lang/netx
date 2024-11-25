@@ -14,10 +14,16 @@ include(FetchContent)
 FetchContent_Declare(
         nlohmann_json
         GIT_REPOSITORY https://github.com/nlohmann/json.git
-        GIT_TAG v3.11.3 # Specify the desired version
+        GIT_TAG v3.11.3
 )
 
-FetchContent_MakeAvailable(nlohmann_json)
+FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG release-1.12.1
+)
+
+FetchContent_MakeAvailable(nlohmann_json googletest)
 
 file(GLOB SOURCES
         "src/main/cpp/simulator/*.cpp"
@@ -33,3 +39,25 @@ target_link_libraries(simulator PRIVATE nlohmann_json::nlohmann_json)
 
 # Include directories (optional, nlohmann/json is header-only)
 target_include_directories(simulator PRIVATE ${nlohmann_json_SOURCE_DIR}/include)
+
+file(GLOB TEST_SOURCES "src/test/cpp/simulator/*.cpp")
+
+# Add test executable
+add_executable(simulator_tests ${TEST_SOURCES} ${SOURCES}) # Include main sources in test executable
+
+# Link the test executable with the necessary libraries
+target_link_libraries(simulator_tests PRIVATE
+        gtest
+        gtest_main
+        nlohmann_json::nlohmann_json
+)
+
+# Include directories for tests
+target_include_directories(simulator_tests PRIVATE
+        "src/main/cpp/simulator"
+        ${nlohmann_json_SOURCE_DIR}/include
+)
+
+# Discover and add tests automatically
+include(GoogleTest)
+gtest_discover_tests(simulator_tests)

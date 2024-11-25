@@ -5,7 +5,7 @@ namespace hson {
 
     }
 
-    void Simulator::setInput(const std::string &id, const BitVector &value) const {
+    void Simulator::setInput(const std::string &id, BitVector *value) const {
         const auto ptr = circuit->resolveInput(id);
         if (auto *data = reinterpret_cast<DataNode*>(ptr); data != nullptr) {
             data->setValue(value);
@@ -13,7 +13,7 @@ namespace hson {
         throw std::runtime_error("Invalid input");
     }
 
-    BitVector Simulator::getOutput(const std::string &id) const {
+    BitVector const *Simulator::getOutput(const std::string &id) const {
         const auto ptr = circuit->resolveOutput(id);
         if (const auto *data = reinterpret_cast<DataNode*>(ptr); data != nullptr) {
             return data->getValue();
