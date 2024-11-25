@@ -14,6 +14,37 @@ namespace hson {
         nodes[index].setIndex(index);
     }
 
+    void Circuit::setInput(const std::vector<int> &inNodes) {
+        for (const int index : inNodes) {
+            const auto ptr = resolveNode(index);
+            if (const auto *wire = reinterpret_cast<WireNode*>(ptr); wire != nullptr) {
+                input[wire->id()] = index;
+            }
+        }
+    }
+
+    Node *Circuit::resolveInput(const std::string &id) {
+        return resolveNode(input.at(id));
+    }
+
+    void Circuit::setOutput(const std::vector<int> &outNodes) {
+        for (const int index : outNodes) {
+            const auto ptr = resolveNode(index);
+            if (const auto *wire = reinterpret_cast<WireNode*>(ptr); wire != nullptr) {
+                output[wire->id()] = index;
+            }
+        }
+    }
+
+    Node *Circuit::resolveOutput(const std::string &id) {
+        return resolveNode(output.at(id));
+    }
+
+    Node *Circuit::resolveNode(const int index) {
+        Node *ptr = &nodes[index];
+        return ptr;
+    }
+
     void Circuit::addRegister(const int clock, const Register &reg) {
         registers[clock].push_back(reg);
     }
@@ -46,7 +77,6 @@ namespace hson {
 
     void Circuit::topologicalSort() {
         std::queue<int> queue;
-        topology.resize(nodes.size(), 0);
         auto degree = std::vector(nodes.size(), 0);
         for (int i = 0; i < nodes.size(); i++) {
             degree[i] = static_cast<int>(inEdges[i].size());
@@ -57,7 +87,7 @@ namespace hson {
         int indexer = 0;
         while (!queue.empty()) {
             const int head = queue.front();
-            topology[head] = indexer++;
+            resolveNode(head)->setTopology(indexer++);
             queue.pop();
             for (auto &successor: outEdges[head]) {
                 if (--degree[successor] == 0) {

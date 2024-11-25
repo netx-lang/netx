@@ -26,10 +26,12 @@ namespace hson {
     Circuit *Frontend::parse() {
         parseData(data.at("design"));
         parseRelation(data.at("design"));
+        circuit->setInput(data.at("design").at("input"));
+        circuit->setOutput(data.at("design").at("output"));
         return circuit;
     }
 
-    void Frontend::parseData(const json &node) const {
+    void Frontend::parseData(const json &node) const { // NOLINT(*-no-recursion)
         switch (typeOf(node.at("type"))) {
             case CLOCK: createWireNode(node, node.at("width"));
                 break;
@@ -46,7 +48,7 @@ namespace hson {
         }
     }
 
-    void Frontend::parseRelation(const json &node) const {
+    void Frontend::parseRelation(const json &node) const { // NOLINT(*-no-recursion)
         switch (typeOf(node.at("type"))) {
             case COMPONENT: parseComponent(node);
                 break;

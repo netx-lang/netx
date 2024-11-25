@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <utility>
 
 #include "BitVector.h"
 #include "Selector.h"
@@ -14,19 +15,32 @@ namespace hson {
             this->index = index;
         }
 
+        void setTopology(const int index) {
+            this->topology = index;
+        }
+
+        [[nodiscard]] int getIndex() const {
+            return index;
+        }
+
+        [[nodiscard]] int getTopology() const {
+            return topology;
+        }
+
         virtual ~Node() = default;
 
     private:
         int index = 0;
+        int topology = 0;
     };
 
     class ComputationNode final : public Node {
     public:
-        explicit ComputationNode(std::string id): id(std::move(id)) {
+        explicit ComputationNode(std::string id): identifier(std::move(id)) {
         }
 
     private:
-        std::string id;
+        std::string identifier;
     };
 
     class DataNode : public Node {
@@ -45,12 +59,20 @@ namespace hson {
 
     class WireNode final : public DataNode {
     public:
-        WireNode(std::string id, const SourceLoc loc, const int width)
-            : id(std::move(id)), loc(loc), width(width) {
+        WireNode(std::string identifier, const SourceLoc loc, const int width)
+            : identifier(std::move(identifier)), loc(loc), width(width) {
+        }
+
+        [[nodiscard]] const std::string &id() const {
+            return identifier;
+        }
+
+        [[nodiscard]] int getWidth() const {
+            return width;
         }
 
     private:
-        std::string id;
+        std::string identifier;
 
         SourceLoc loc;
 

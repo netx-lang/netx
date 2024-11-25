@@ -9,9 +9,11 @@ namespace hson {
 
     class Circuit {
         std::vector<Node> nodes;
-        std::vector<int> topology;
         std::vector<std::vector<int> > inEdges;
         std::vector<std::vector<int> > outEdges;
+
+        std::unordered_map<std::string, int> input;
+        std::unordered_map<std::string, int> output;
         std::unordered_map<int, std::vector<Register> > registers;
 
     public:
@@ -20,6 +22,16 @@ namespace hson {
         int addRelationNode(const Node &node);
 
         void addInstanceNode(int index, const Node &node);
+
+        void setInput(const std::vector<int> &inNodes);
+
+        [[nodiscard]] Node *resolveInput(const std::string &id);
+
+        void setOutput(const std::vector<int> &outNodes);
+
+        [[nodiscard]] Node *resolveOutput(const std::string &id);
+
+        [[nodiscard]] Node *resolveNode(int index);
 
         void addRegister(int clock, const Register &reg);
 
