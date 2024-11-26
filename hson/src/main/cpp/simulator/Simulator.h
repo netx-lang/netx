@@ -33,6 +33,8 @@ namespace hson {
 
         void dataNodeStep(const DataNode *node);
 
+        static bool needPropagate(const BitVector *lhs, const BitVector *rhs);
+
         void computationNodeStep(const ComputationNode *node);
 
         void step();
@@ -63,10 +65,10 @@ namespace hson {
 
         std::vector<ClockNode *> clocks;
 
-        static bool cmp(const Node* ptr1, const Node* ptr2) {
-            return ptr1->getTopology() < ptr2->getTopology();
+        static bool cmp(const Node* lhs, const Node* rhs) {
+            return lhs->getTopology() > rhs->getTopology();
         }
 
-        std::priority_queue<Node *, std::vector<Node *>, std::function<bool(const Node*, const Node*)>> worklist;
+        std::priority_queue<Node *, std::vector<Node *>, decltype(&cmp)> worklist{cmp};
     };
 } // hson

@@ -34,9 +34,9 @@ namespace hson {
 
     void Frontend::parseData(const json &node) const { // NOLINT(*-no-recursion)
         switch (typeOf(node.at("type"))) {
-            case CLOCK: createWireNode(node, node.at("width"));
+            case CLOCK: createClockNode(node);
                 break;
-            case WIRE: createClockNode(node);
+            case WIRE: createWireNode(node, node.at("width"));
                 break;
             default: {
                 if (node.contains("members")) {
@@ -65,7 +65,7 @@ namespace hson {
     }
 
     void Frontend::parseComponent(const json &node) const {
-        const int relation = circuit->addRelationNode(new ComputationNode(node.at("id")));
+        const int relation = circuit->addNode(new ComputationNode(node.at("id")));
         circuit->addHyperEdge(relation,
                               resolveNodeList(node, "input"),
                               resolveNodeList(node, "output"));
@@ -81,7 +81,7 @@ namespace hson {
             const bool isPosTriggered = attr.at("isPosTriggered") == "true";
             circuit->addRegister(clock, Register(inputs[0], outputs[0], isPosTriggered));
         } else {
-            const int relation = circuit->addRelationNode(new ComputationNode(id));
+            const int relation = circuit->addNode(new ComputationNode(id));
             circuit->addHyperEdge(relation, inputs, outputs);
         }
     }
@@ -89,12 +89,15 @@ namespace hson {
 
     int Frontend::resolveNode(const std::string &str) const {
         if (const auto pos = str.find('['); pos == std::string::npos) {
-            auto [_, index] = parseIdentifier(str);
-            return index;
+            if (const auto at = str.find('@'); at == std::string::npos) {
+                return circuit->addNode(new ConstantNode(BinaryBitVector::parse(str)));
+            } else {
+                return std::stoi(str.substr(at + 1));
+            }
         } else {
             auto [_, index] = parseIdentifier(str.substr(0, pos));
             const auto selectorStr = str.substr(pos + 1, str.size() - pos - 2);
-            const int selectIndex = circuit->addRelationNode(WireSelectNode::parse(index, selectorStr));
+            const int selectIndex = circuit->addNode(WireSelectNode::parse(index, selectorStr));
             circuit->addEdge(index, selectIndex);
             return selectIndex;
         }
@@ -116,13 +119,13 @@ namespace hson {
     void Frontend::createWireNode(const json &node, const int width) const {
         const auto loc = SourceLoc::parse(node.at("loc"));
         auto [name, index] = parseIdentifier(node.at("id"));
-        circuit->addInstanceNode(index, new WireNode(name, loc, width));
+        circuit->addNode(index, new WireNode(name, loc, width));
     }
 
     void Frontend::createClockNode(const json &node) const {
         const auto loc = SourceLoc::parse(node.at("loc"));
         auto [name, index] = parseIdentifier(node.at("id"));
-        circuit->addInstanceNode(index, new ClockNode(name, loc));
+        circuit->addNode(index, new ClockNode(name, loc));
         circuit->manager().addClock(index);
     }
 

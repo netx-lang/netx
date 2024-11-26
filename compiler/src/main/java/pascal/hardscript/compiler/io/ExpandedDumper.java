@@ -51,7 +51,7 @@ final class ExpandedDumper {
     public ObjectNode dump() {
         var result = createObjectNode();
         var node = dumperOf(design.getTop()).dump();
-        result.put("totalData", dataIndices.size() + 1);
+        result.put("totalData", dataIndices.size());
         result.putIfAbsent("design", node);
         return result;
     }

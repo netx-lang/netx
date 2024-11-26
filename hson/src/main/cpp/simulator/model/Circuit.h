@@ -20,9 +20,9 @@ namespace hson {
 
         ~Circuit();
 
-        int addRelationNode(Node *node);
+        int addNode(Node *node);
 
-        void addInstanceNode(int index, Node *node);
+        void addNode(int index, Node *node);
 
         void setInput(const std::vector<int> &inNodes);
 

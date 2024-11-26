@@ -1,5 +1,7 @@
 #include "BitVector.h"
 
+#include <format>
+
 namespace hson {
     const BinaryBitVector *BinaryBitVector::requiresValidOperand(const BitVector &other) const {
         if (const auto *that = dynamic_cast<const BinaryBitVector *>(&other); that != nullptr) {
@@ -38,11 +40,14 @@ namespace hson {
             for (auto i = literal.size() - 1; i >= pos + 2; --i) {
                 auto value = digits[literal[i]];
                 for (int j = 0; j != bit; ++j) {
+                    if (index == size) {
+                        return new BinaryBitVector(result);
+                    }
                     result.set(index++, value & 1);
                     value >>= 1;
                 }
             }
-            return new BinaryBitVector(result);
+            throw std::runtime_error("Should not reach here");
         }
         return new BinaryBitVector(
             boost::dynamic_bitset(32, std::stoi(literal)));
@@ -54,6 +59,10 @@ namespace hson {
 
     BinaryBitVector *BinaryBitVector::fromUL(const unsigned long value) {
         return new BinaryBitVector(boost::dynamic_bitset(32, value));
+    }
+
+    BinaryBitVector *BinaryBitVector::fromUL(const unsigned int width, const unsigned long value) {
+        return new BinaryBitVector(boost::dynamic_bitset(width, value));
     }
 
     BitVector * BinaryBitVector::copyOf() const {
@@ -337,5 +346,15 @@ namespace hson {
 
     bool BinaryBitVector::UGE(const BitVector &other) const {
         return !ULT(other);
+    }
+
+    std::string BinaryBitVector::print() const {
+        std::string result = std::to_string(width());
+        result.reserve(result.size() + width() + 2);
+        result.append("'b");
+        for (int i = width() - 1; i >= 0; --i) {
+            result.append(get(i) ? "1" : "0");
+        }
+        return result;
     }
 } // hson

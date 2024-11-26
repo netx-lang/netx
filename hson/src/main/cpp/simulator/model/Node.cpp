@@ -31,6 +31,9 @@ namespace hson {
     }
 
     void DataNode::setValue(BitVector *value) {
+        if (value->width() != getWidth()) {
+            throw std::runtime_error("Invalid value");
+        }
         delete this->value;
         this->value = value;
     }
@@ -45,6 +48,18 @@ namespace hson {
 
     int WireNode::getWidth() const {
         return width;
+    }
+
+    ConstantNode::ConstantNode(BitVector *value): value(value) {
+
+    }
+
+    int ConstantNode::getWidth() const {
+        return value->width();
+    }
+
+    const BitVector * ConstantNode::getValue() const {
+        return value;
     }
 
     ClockNode::ClockNode(std::string identifier, const SourceLoc loc): identifier(std::move(identifier)), loc(loc) {

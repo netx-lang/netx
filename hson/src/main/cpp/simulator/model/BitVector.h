@@ -82,6 +82,8 @@ namespace hson {
         [[nodiscard]] virtual bool UGE(const BitVector &other) const = 0;
 
         virtual ~BitVector() = default;
+
+        [[nodiscard]] virtual std::string print() const = 0;
     };
 
     class BinaryBitVector final : public BitVector {
@@ -100,6 +102,8 @@ namespace hson {
         [[nodiscard]] static BinaryBitVector *fromBool(bool value);
 
         [[nodiscard]] static BinaryBitVector *fromUL(unsigned long value);
+
+        [[nodiscard]] static BinaryBitVector *fromUL(unsigned int width, unsigned long value);
 
         [[nodiscard]] BitVector * copyOf() const override;
 
@@ -176,5 +180,7 @@ namespace hson {
         [[nodiscard]] bool UGT(const BitVector &other) const override;
 
         [[nodiscard]] bool UGE(const BitVector &other) const override;
+
+        [[nodiscard]] std::string print() const override;
     };
 } // hson

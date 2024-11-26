@@ -1,5 +1,6 @@
 #include "Simulator.h"
 
+#include <iostream>
 #include <unordered_set>
 
 namespace hson {
@@ -14,14 +15,15 @@ namespace hson {
     }
 
     void Simulator::step() {
-        auto node = worklist.top();
+        const auto node = worklist.top();
         worklist.pop();
         if (const auto compute = dynamic_cast<ComputationNode *>(node); compute != nullptr) {
-
+            computationNodeStep(compute);
         } else if (const auto data = dynamic_cast<DataNode *>(node); data != nullptr) {
             dataNodeStep(data);
+        } else {
+            throw std::runtime_error("Invalid node");
         }
-        throw std::runtime_error("Invalid node");
     }
 
     void Simulator::dataNodeStep(const DataNode * const node) {
@@ -33,13 +35,21 @@ namespace hson {
             } else if (const auto select = dynamic_cast<WireSelectNode *>(successor); select != nullptr) {
                 const auto value = node->getValue();
                 const auto selected = select->getSelector()->apply(value);
-                if (*select->getValue() != *selected) {
+                if (needPropagate(select->getValue(), selected)) {
                     worklist.push(successor);
                 }
                 select->setValue(selected);
+            } else {
+                throw std::runtime_error("Invalid successor");
             }
-            throw std::runtime_error("Invalid successor");
         }
+    }
+
+    bool Simulator::needPropagate(const BitVector *lhs, const BitVector *rhs) {
+        if (lhs == nullptr || rhs == nullptr) {
+            return true;
+        }
+        return *lhs != *rhs;
     }
 
     void Simulator::computationNodeStep(const ComputationNode * const node) {
@@ -48,9 +58,14 @@ namespace hson {
             for (const auto predecessor : circuit->predecessorsOf(node)) {
                 if (const auto data = dynamic_cast<DataNode *>(predecessor); data != nullptr) {
                     arguments.push_back(data->getValue());
+                } else {
+                    throw std::runtime_error("Invalid predecessor");
                 }
-                throw std::runtime_error("Invalid predecessor");
             }
+
+            // if (arguments[0] == NULL) {
+            //     auto shit = circuit->predecessorsOf(node);
+            // }
 
             int indexer = 0;
             const auto result = evaluate(node->id(), arguments);
@@ -64,12 +79,12 @@ namespace hson {
                     value = casted;
                 }
 
-                if (*data->getValue() != *value) {
+                if (needPropagate(data->getValue(), value)) {
                     worklist.push(successor);
                     if (const auto select = dynamic_cast<WireSelectNode *>(data); select != nullptr) {
                         const auto base = static_cast<DataNode *>(circuit->resolveNode(select->getBase())); // NO-LINT: NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
                         const auto newBase = select->getSelector()->apply(base->getValue(), value);
-                        if (*base->getValue() != *newBase) {
+                        if (needPropagate(base->getValue(), newBase)) {
                             worklist.push(base);
                         }
                         base->setValue(newBase);
@@ -102,7 +117,7 @@ namespace hson {
             if (reg.isPosTriggered() == posEdge) {
                 const auto inNode = static_cast<DataNode *>(circuit->resolveNode(reg.getInput())); // NO-LINT: NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
                 const auto outNode = static_cast<DataNode *>(circuit->resolveNode(reg.getOutput()));  // NO-LINT: NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
-                if (*inNode->getValue() != *outNode->getValue()) {
+                if (needPropagate(inNode->getValue(), outNode->getValue())) {
                     incoming.emplace_back(outNode, inNode->getValue()->copyOf());
                 }
             }
@@ -197,9 +212,8 @@ namespace hson {
         const auto ptr = circuit->resolveInput(id);
         if (auto *data = dynamic_cast<DataNode *>(ptr); data != nullptr) {
             data->setValue(value);
-            if (*data->getValue() != *value) {
-                worklist.push(ptr);
-            }
+            worklist.push(ptr);
+            return;
         }
         throw std::runtime_error("Invalid input");
     }
@@ -214,6 +228,7 @@ namespace hson {
 
     Simulator::Simulator(Circuit *circuit, const bool DO_VERIFICATION, const bool RANDOM_INIT)
         : DO_VERIFICATION(DO_VERIFICATION), circuit(circuit), supplier(RANDOM_INIT) {
+        circuit->topologicalSort();
         for (const auto node: circuit->getAllNodes()) {
             if (auto *wire = dynamic_cast<WireNode *>(node); wire != nullptr) {
                 wire->setValue(supplier.nextBitVector(wire->getWidth()));

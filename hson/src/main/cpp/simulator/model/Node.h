@@ -38,7 +38,7 @@ namespace hson {
 
     class DataNode : public Node {
     public:
-        [[nodiscard]] BitVector const *getValue() const;
+        [[nodiscard]] virtual BitVector const *getValue() const;
 
         [[nodiscard]] virtual int getWidth() const = 0;
 
@@ -66,6 +66,17 @@ namespace hson {
         SourceLoc loc;
 
         int width;
+    };
+
+    class ConstantNode final : public DataNode {
+    public:
+        explicit ConstantNode(BitVector *value);
+
+        [[nodiscard]] int getWidth() const override;
+
+        [[nodiscard]] const BitVector *getValue() const;
+    private:
+        BitVector *value;
     };
 
     class ClockNode final : public DataNode {

@@ -1,7 +1,6 @@
 #include "Circuit.h"
 
 #include <queue>
-#include <boost/iterator/zip_iterator.hpp>
 
 namespace hson {
     Circuit::Circuit(const int size) {
@@ -14,7 +13,7 @@ namespace hson {
         }
     }
 
-    void Circuit::addInstanceNode(const int index, Node *node) {
+    void Circuit::addNode(const int index, Node *node) {
         node->setIndex(index);
         nodes[index] = node;
     }
@@ -77,7 +76,7 @@ namespace hson {
         return regManager;
     }
 
-    int Circuit::addRelationNode(Node *node) {
+    int Circuit::addNode(Node *node) {
         const int index = static_cast<int>(nodes.size());
         node->setIndex(index);
         nodes.push_back(node);
@@ -127,8 +126,8 @@ namespace hson {
         int indexer = 0;
         while (!queue.empty()) {
             const int head = queue.front();
-            resolveNode(head)->setTopology(indexer++);
             queue.pop();
+            resolveNode(head)->setTopology(indexer++);
             for (auto &successor: outEdges[head]) {
                 if (--degree[successor] == 0) {
                     queue.push(successor);
