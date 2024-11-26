@@ -65,7 +65,7 @@ namespace hson {
         return new BinaryBitVector(boost::dynamic_bitset(width, value));
     }
 
-    BitVector * BinaryBitVector::copyOf() const {
+    BitVector *BinaryBitVector::copyOf() const {
         return new BinaryBitVector(boost::dynamic_bitset(data));
     }
 
@@ -148,21 +148,21 @@ namespace hson {
         return new BinaryBitVector(this->data | that->data);
     }
 
-    BitVector * BinaryBitVector::NAND(const BitVector &other) const {
+    BitVector *BinaryBitVector::NAND(const BitVector &other) const {
         const auto value = AND(other);
         const auto result = value->NOT();
         delete value;
         return result;
     }
 
-    BitVector * BinaryBitVector::XNOR(const BitVector &other) const {
+    BitVector *BinaryBitVector::XNOR(const BitVector &other) const {
         const auto value = XOR(other);
         const auto result = value->NOT();
         delete value;
         return result;
     }
 
-    BitVector * BinaryBitVector::NOR(const BitVector &other) const {
+    BitVector *BinaryBitVector::NOR(const BitVector &other) const {
         const auto value = OR(other);
         const auto result = value->NOT();
         delete value;

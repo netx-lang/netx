@@ -22,7 +22,7 @@ namespace hson {
     ComputationNode::ComputationNode(std::string id): identifier(std::move(id)) {
     }
 
-    const std::string & ComputationNode::id() const {
+    const std::string &ComputationNode::id() const {
         return identifier;
     }
 
@@ -51,21 +51,20 @@ namespace hson {
     }
 
     ConstantNode::ConstantNode(BitVector *value): value(value) {
-
     }
 
     int ConstantNode::getWidth() const {
         return value->width();
     }
 
-    const BitVector * ConstantNode::getValue() const {
+    const BitVector *ConstantNode::getValue() const {
         return value;
     }
 
     ClockNode::ClockNode(std::string identifier, const SourceLoc loc): identifier(std::move(identifier)), loc(loc) {
     }
 
-    const std::string & ClockNode::id() const {
+    const std::string &ClockNode::id() const {
         return identifier;
     }
 
@@ -98,7 +97,7 @@ namespace hson {
     }
 
     Register::Register(const int input, const int output, const bool isPosTriggered)
-    : input(input), output(output), posTriggered(isPosTriggered) {
+        : input(input), output(output), posTriggered(isPosTriggered) {
     }
 
     int Register::getInput() const {

@@ -10,7 +10,7 @@ int main() {
         "../../src/test/resources/expanded/adder.json");
     const auto circuit = frontend->parse();
     const auto simulator = new Simulator(circuit);
-    for (int i = 0 ; i != 256; ++i) {
+    for (int i = 0; i != 256; ++i) {
         for (int j = 0; j != 256; ++j) {
             simulator->setInput("a", BinaryBitVector::fromUL(8, i));
             simulator->setInput("b", BinaryBitVector::fromUL(8, j));

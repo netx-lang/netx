@@ -80,7 +80,7 @@ namespace hson {
             return result;
         }
 
-        static bool compare(const Node* lhs, const Node* rhs) {
+        static bool compare(const Node *lhs, const Node *rhs) {
             return lhs->getTopology() < rhs->getTopology();
         }
     };

@@ -3,9 +3,9 @@
 #include "model/Node.h"
 
 using namespace hson;
+
 namespace hson {
     class MockNode final : public Node {
-
     };
 }
 

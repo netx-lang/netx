@@ -25,7 +25,7 @@ namespace hson {
         }
     }
 
-    void Simulator::dataNodeStep(const DataNode * const node) {
+    void Simulator::dataNodeStep(const DataNode *const node) {
         for (const auto successor: circuit->successorsOf(node)) {
             if (const auto compute = dynamic_cast<ComputationNode *>(successor); compute != nullptr) {
                 if (DO_VERIFICATION || isBuiltin(compute->id())) {
@@ -51,10 +51,10 @@ namespace hson {
         return *lhs != *rhs;
     }
 
-    void Simulator::computationNodeStep(const ComputationNode * const node) {
+    void Simulator::computationNodeStep(const ComputationNode *const node) {
         if (isBuiltin(node->id())) {
             std::vector<const BitVector *> arguments;
-            for (const auto predecessor : circuit->predecessorsOf(node)) {
+            for (const auto predecessor: circuit->predecessorsOf(node)) {
                 if (const auto data = dynamic_cast<DataNode *>(predecessor); data != nullptr) {
                     arguments.push_back(data->getValue());
                 } else {
@@ -68,8 +68,9 @@ namespace hson {
 
             int indexer = 0;
             const auto result = evaluate(node->id(), arguments);
-            for (const auto successor : circuit->successorsOf(node)) {
-                const auto data = static_cast<DataNode *>(successor); // NO-LINT: NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
+            for (const auto successor: circuit->successorsOf(node)) {
+                const auto data = static_cast<DataNode *>(successor);
+                // NO-LINT: NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
                 auto value = result[indexer++];
 
                 if (data->getWidth() != value->width()) {
@@ -81,7 +82,8 @@ namespace hson {
                 if (needPropagate(data->getValue(), value)) {
                     worklist.push(successor);
                     if (const auto select = dynamic_cast<WireSelectNode *>(data); select != nullptr) {
-                        const auto base = static_cast<DataNode *>(circuit->resolveNode(select->getBase())); // NO-LINT: NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
+                        const auto base = static_cast<DataNode *>(circuit->resolveNode(select->getBase()));
+                        // NO-LINT: NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
                         const auto newBase = select->getSelector()->apply(base->getValue(), value);
                         if (needPropagate(base->getValue(), newBase)) {
                             worklist.push(base);
@@ -109,26 +111,28 @@ namespace hson {
             return false;
         }
 
-        std::vector<std::pair<DataNode*, BitVector*>> incoming;
+        std::vector<std::pair<DataNode *, BitVector *> > incoming;
         clock->setValue(clock->getValue()->NOT());
         const bool posEdge = clock->getValue()->toBool();
-        for (auto reg : circuit->getRegisters(clock)) {
+        for (auto reg: circuit->getRegisters(clock)) {
             if (reg.isPosTriggered() == posEdge) {
-                const auto inNode = static_cast<DataNode *>(circuit->resolveNode(reg.getInput())); // NO-LINT: NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
-                const auto outNode = static_cast<DataNode *>(circuit->resolveNode(reg.getOutput()));  // NO-LINT: NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
+                const auto inNode = static_cast<DataNode *>(circuit->resolveNode(reg.getInput()));
+                // NO-LINT: NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
+                const auto outNode = static_cast<DataNode *>(circuit->resolveNode(reg.getOutput()));
+                // NO-LINT: NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
                 if (needPropagate(inNode->getValue(), outNode->getValue())) {
                     incoming.emplace_back(outNode, inNode->getValue()->copyOf());
                 }
             }
         }
-        for (auto &[fst, snd] : incoming) {
+        for (auto &[fst, snd]: incoming) {
             fst->setValue(snd);
             worklist.push(fst);
         }
         return !incoming.empty();
     }
 
-    ClockNode * Simulator::pickClock() {
+    ClockNode *Simulator::pickClock() {
         if (clocks.empty()) {
             return nullptr;
         }
@@ -140,7 +144,7 @@ namespace hson {
 
     std::vector<BitVector *> Simulator::evaluate(const std::string &id,
                                                  const std::vector<const BitVector *> &input) {
-        static std::unordered_map<std::string, bool (BitVector::*)(const BitVector&) const> RELATIONAL = {
+        static std::unordered_map<std::string, bool (BitVector::*)(const BitVector &) const> RELATIONAL = {
             {"SLT", &BitVector::SLT},
             {"SLE", &BitVector::SLE},
             {"SGT", &BitVector::SGT},
@@ -153,7 +157,7 @@ namespace hson {
             {"NE", &BitVector::operator!=}
         };
 
-        static std::unordered_map<std::string, BitVector *(BitVector::*)(const BitVector&) const> BINARY = {
+        static std::unordered_map<std::string, BitVector *(BitVector::*)(const BitVector &) const> BINARY = {
             {"CONCAT", &BitVector::CONCAT},
             {"ADD", &BitVector::ADD},
             {"SUB", &BitVector::SUB},
@@ -199,7 +203,7 @@ namespace hson {
         }
         if (id == "CAST") {
             std::vector<BitVector *> result;
-            for (const auto value : input) {
+            for (const auto value: input) {
                 result.push_back(value->copyOf());
             }
             return result;
