@@ -6,7 +6,7 @@
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <utility>
 
-namespace hson{
+namespace hson {
     class BitVector {
     public:
         [[nodiscard]] virtual int size() const = 0;
@@ -61,12 +61,17 @@ namespace hson{
 
         static constexpr int LONG_SIZE = sizeof(unsigned long) * 8;
 
-        explicit BinaryBitVector(boost::dynamic_bitset<> data): data(std::move(data)) {}
-
         [[nodiscard]] const BinaryBitVector *requiresValidOperand(const BitVector &other) const;
 
     public:
+        explicit BinaryBitVector(boost::dynamic_bitset<> data): data(std::move(data)) {
+        }
+
         [[nodiscard]] static BinaryBitVector *parse(const std::string &literal);
+
+        [[nodiscard]] static BinaryBitVector *fromBool(bool value);
+
+        [[nodiscard]] static BinaryBitVector *fromUL(unsigned long value);
 
         [[nodiscard]] int size() const override;
 
@@ -112,5 +117,4 @@ namespace hson{
 
         bool operator==(const BitVector &other) const override;
     };
-
 } // hson

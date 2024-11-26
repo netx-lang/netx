@@ -11,21 +11,13 @@ namespace hson {
 
     class Node {
     public:
-        void setIndex(const int index) {
-            this->index = index;
-        }
+        void setIndex(int index);
 
-        void setTopology(const int index) {
-            this->topology = index;
-        }
+        void setTopology(int index);
 
-        [[nodiscard]] int getIndex() const {
-            return index;
-        }
+        [[nodiscard]] int getIndex() const;
 
-        [[nodiscard]] int getTopology() const {
-            return topology;
-        }
+        [[nodiscard]] int getTopology() const;
 
         virtual ~Node() = default;
 
@@ -36,8 +28,7 @@ namespace hson {
 
     class ComputationNode final : public Node {
     public:
-        explicit ComputationNode(std::string id): identifier(std::move(id)) {
-        }
+        explicit ComputationNode(std::string id);
 
     private:
         std::string identifier;
@@ -45,16 +36,9 @@ namespace hson {
 
     class DataNode : public Node {
     public:
-        [[nodiscard]] BitVector const *getValue() const {
-            return value;
-        }
+        [[nodiscard]] BitVector const *getValue() const;
 
-        void setValue(BitVector *value) {
-            if (this->value != nullptr) {
-                delete this->value;
-            }
-            this->value = value;
-        }
+        void setValue(BitVector *value);
 
     private:
         BitVector *value = nullptr;
@@ -62,17 +46,11 @@ namespace hson {
 
     class WireNode final : public DataNode {
     public:
-        WireNode(std::string identifier, const SourceLoc loc, const int width)
-            : identifier(std::move(identifier)), loc(loc), width(width) {
-        }
+        WireNode(std::string identifier, SourceLoc loc, int width);
 
-        [[nodiscard]] const std::string &id() const {
-            return identifier;
-        }
+        [[nodiscard]] const std::string &id() const;
 
-        [[nodiscard]] int getWidth() const {
-            return width;
-        }
+        [[nodiscard]] int getWidth() const;
 
     private:
         std::string identifier;
@@ -88,9 +66,7 @@ namespace hson {
 
         static WireSelectNode parse(int base, const std::string &str);
 
-        ~WireSelectNode() override {
-            delete selector;
-        }
+        ~WireSelectNode() override;
 
     private:
         int base;

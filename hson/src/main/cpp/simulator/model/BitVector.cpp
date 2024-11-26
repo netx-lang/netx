@@ -1,8 +1,8 @@
 #include "BitVector.h"
 
-namespace hson{
-    const BinaryBitVector * BinaryBitVector::requiresValidOperand(const BitVector &other) const {
-        if (const auto* that = dynamic_cast<const BinaryBitVector*>(&other); that != nullptr) {
+namespace hson {
+    const BinaryBitVector *BinaryBitVector::requiresValidOperand(const BitVector &other) const {
+        if (const auto *that = dynamic_cast<const BinaryBitVector *>(&other); that != nullptr) {
             if (that->size() == this->size()) {
                 return that;
             }
@@ -10,7 +10,7 @@ namespace hson{
         throw std::runtime_error("Invalid operand");
     }
 
-    BinaryBitVector * BinaryBitVector::parse(const std::string &literal) {
+    BinaryBitVector *BinaryBitVector::parse(const std::string &literal) {
         static std::unordered_map<char, int8_t> digits = {
             {'0', 0}, {'1', 1}, {'2', 2}, {'3', 3},
             {'4', 4}, {'5', 5}, {'6', 6}, {'7', 7},
@@ -26,9 +26,12 @@ namespace hson{
                     return new BinaryBitVector(
                         boost::dynamic_bitset(size, std::stoi(literal.substr(pos + 2))));
                 }
-                case 'b': bit = 1; break;
-                case 'o': bit = 3; break;
-                case 'h': bit = 4; break;
+                case 'b': bit = 1;
+                    break;
+                case 'o': bit = 3;
+                    break;
+                case 'h': bit = 4;
+                    break;
                 default: throw std::runtime_error("Invalid literal");
             }
             auto result = boost::dynamic_bitset<>(size);
@@ -40,11 +43,19 @@ namespace hson{
                 }
             }
             return new BinaryBitVector(result);
-
         }
         return new BinaryBitVector(
             boost::dynamic_bitset(32, std::stoi(literal)));
     }
+
+    BinaryBitVector *BinaryBitVector::fromBool(const bool value) {
+        return new BinaryBitVector(boost::dynamic_bitset(1, value));
+    }
+
+    BinaryBitVector *BinaryBitVector::fromUL(const unsigned long value) {
+        return new BinaryBitVector(boost::dynamic_bitset(32, value));
+    }
+
 
     int BinaryBitVector::size() const {
         return static_cast<int>(data.size());
@@ -80,39 +91,39 @@ namespace hson{
         }
     }
 
-    BitVector * BinaryBitVector::SELECT(const int from, const int to) {
+    BitVector *BinaryBitVector::SELECT(const int from, const int to) {
         const int msb = std::max(from, to), lsb = std::min(from, to);
         auto result = boost::dynamic_bitset(data >> lsb);
         result.resize(msb - lsb + 1);
         return new BinaryBitVector(result);
     }
 
-    BitVector * BinaryBitVector::CAST(const int length) {
+    BitVector *BinaryBitVector::CAST(const int length) {
         auto result = data;
         result.resize(length, msb());
         return new BinaryBitVector(result);
     }
 
-    BitVector * BinaryBitVector::AND(const BitVector &other) const {
+    BitVector *BinaryBitVector::AND(const BitVector &other) const {
         const auto that = requiresValidOperand(other);
         return new BinaryBitVector(this->data & that->data);
     }
 
-    BitVector * BinaryBitVector::XOR(const BitVector &other) const {
+    BitVector *BinaryBitVector::XOR(const BitVector &other) const {
         const auto that = requiresValidOperand(other);
         return new BinaryBitVector(this->data ^ that->data);
     }
 
-    BitVector * BinaryBitVector::OR(const BitVector &other) const {
+    BitVector *BinaryBitVector::OR(const BitVector &other) const {
         const auto that = requiresValidOperand(other);
         return new BinaryBitVector(this->data | that->data);
     }
 
-    BitVector * BinaryBitVector::NOT() const {
+    BitVector *BinaryBitVector::NOT() const {
         return new BinaryBitVector(~data);
     }
 
-    BitVector * BinaryBitVector::ASHR(const int offset) const {
+    BitVector *BinaryBitVector::ASHR(const int offset) const {
         auto result = data >> offset;
         if (msb()) {
             for (int i = 0; i != offset; ++i) {
@@ -122,15 +133,15 @@ namespace hson{
         return new BinaryBitVector(result);
     }
 
-    BitVector * BinaryBitVector::LSHR(const int offset) const {
+    BitVector *BinaryBitVector::LSHR(const int offset) const {
         return new BinaryBitVector(data >> offset);
     }
 
-    BitVector * BinaryBitVector::SHL(const int offset) const {
+    BitVector *BinaryBitVector::SHL(const int offset) const {
         return new BinaryBitVector(data << offset);
     }
 
-    BitVector * BinaryBitVector::ADD(const BitVector &other) const {
+    BitVector *BinaryBitVector::ADD(const BitVector &other) const {
         const auto that = requiresValidOperand(other);
         if (size() <= LONG_SIZE) {
             return new BinaryBitVector(
@@ -146,7 +157,7 @@ namespace hson{
         return new BinaryBitVector(result);
     }
 
-    BitVector * BinaryBitVector::SUB(const BitVector &other) const {
+    BitVector *BinaryBitVector::SUB(const BitVector &other) const {
         const auto that = requiresValidOperand(other);
         if (size() <= LONG_SIZE) {
             return new BinaryBitVector(
@@ -163,7 +174,7 @@ namespace hson{
         return new BinaryBitVector(result);
     }
 
-    BitVector * BinaryBitVector::MUL(const BitVector &other) const {
+    BitVector *BinaryBitVector::MUL(const BitVector &other) const {
         const auto that = requiresValidOperand(other);
         if (size() <= LONG_SIZE) {
             return new BinaryBitVector(
@@ -172,7 +183,7 @@ namespace hson{
         throw std::runtime_error("TODO: Not implemented");
     }
 
-    BitVector * BinaryBitVector::DIV(const BitVector &other) const {
+    BitVector *BinaryBitVector::DIV(const BitVector &other) const {
         const auto that = requiresValidOperand(other);
         if (size() <= LONG_SIZE) {
             return new BinaryBitVector(
@@ -181,7 +192,7 @@ namespace hson{
         throw std::runtime_error("TODO: Not implemented");
     }
 
-    BitVector * BinaryBitVector::NEG() const {
+    BitVector *BinaryBitVector::NEG() const {
         boost::dynamic_bitset<> result = ~data;
         for (int i = 0; i != size(); ++i) {
             if (result[i]) {
@@ -196,7 +207,7 @@ namespace hson{
 
     bool BinaryBitVector::operator==(const BitVector &other) const {
         if (other.size() == this->size()) {
-            if (const auto* that = dynamic_cast<const BinaryBitVector*>(&other); that != nullptr) {
+            if (const auto *that = dynamic_cast<const BinaryBitVector *>(&other); that != nullptr) {
                 return this->data == that->data;
             }
             for (int i = 0; i != size(); ++i) {

@@ -3,18 +3,17 @@
 #include <vector>
 
 #include "Node.h"
+#include "Register.h"
 
 namespace hson {
-    class Register;
-
     class Circuit {
         std::vector<Node> nodes;
         std::vector<std::vector<int> > inEdges;
         std::vector<std::vector<int> > outEdges;
 
+        RegisterManager regManager;
         std::unordered_map<std::string, int> input;
         std::unordered_map<std::string, int> output;
-        std::unordered_map<int, std::vector<Register> > registers;
 
     public:
         explicit Circuit(int size);
@@ -27,13 +26,19 @@ namespace hson {
 
         [[nodiscard]] Node *resolveInput(const std::string &id);
 
+        [[nodiscard]] std::vector<Node *> getInputs();
+
         void setOutput(const std::vector<int> &outNodes);
 
         [[nodiscard]] Node *resolveOutput(const std::string &id);
 
+        [[nodiscard]] std::vector<Node *> getOutputs();
+
         [[nodiscard]] Node *resolveNode(int index);
 
         void addRegister(int clock, const Register &reg);
+
+        RegisterManager &getRegisterManager();
 
         void addHyperEdge(int relation,
                           const std::vector<int> &inputs,
@@ -41,20 +46,12 @@ namespace hson {
 
         void addEdge(int from, int to);
 
-        [[nodiscard]] std::vector<int>::const_iterator successorsOf(int node) const;
+        [[nodiscard]] std::vector<Node *> successorsOf(int node);
 
-        [[nodiscard]] std::vector<int>::const_iterator predecessorsOf(int node) const;
+        [[nodiscard]] std::vector<Node *> predecessorsOf(int node);
+
+        [[nodiscard]] std::vector<Node> &getAllNodes();
 
         void topologicalSort();
-    };
-
-    class Register {
-    public:
-        Register(int input, int output, bool isPosTriggered);
-
-    private:
-        int input, output;
-
-        bool isPosTriggered;
     };
 }

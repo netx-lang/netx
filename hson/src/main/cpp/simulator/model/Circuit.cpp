@@ -1,8 +1,7 @@
 #include "Circuit.h"
 
 #include <queue>
-
-#include "Node.h"
+#include <boost/iterator/zip_iterator.hpp>
 
 namespace hson {
     Circuit::Circuit(const int size) {
@@ -15,9 +14,9 @@ namespace hson {
     }
 
     void Circuit::setInput(const std::vector<int> &inNodes) {
-        for (const int index : inNodes) {
+        for (const int index: inNodes) {
             const auto ptr = resolveNode(index);
-            if (const auto *wire = reinterpret_cast<WireNode*>(ptr); wire != nullptr) {
+            if (const auto *wire = reinterpret_cast<WireNode *>(ptr); wire != nullptr) {
                 input[wire->id()] = index;
             } else {
                 throw std::runtime_error("Input node must be a wire");
@@ -29,10 +28,18 @@ namespace hson {
         return resolveNode(input.at(id));
     }
 
+    std::vector<Node *> Circuit::getInputs() {
+        std::vector<Node *> result;
+        for (const auto &[fst, snd]: input) {
+            result.push_back(resolveNode(snd));
+        }
+        return result;
+    }
+
     void Circuit::setOutput(const std::vector<int> &outNodes) {
-        for (const int index : outNodes) {
+        for (const int index: outNodes) {
             const auto ptr = resolveNode(index);
-            if (const auto *wire = reinterpret_cast<WireNode*>(ptr); wire != nullptr) {
+            if (const auto *wire = reinterpret_cast<WireNode *>(ptr); wire != nullptr) {
                 output[wire->id()] = index;
             } else {
                 throw std::runtime_error("Input node must be a wire");
@@ -44,13 +51,25 @@ namespace hson {
         return resolveNode(output.at(id));
     }
 
+    std::vector<Node *> Circuit::getOutputs() {
+        std::vector<Node *> result;
+        for (const auto &[fst, snd]: output) {
+            result.push_back(resolveNode(snd));
+        }
+        return result;
+    }
+
     Node *Circuit::resolveNode(const int index) {
         Node *ptr = &nodes[index];
         return ptr;
     }
 
     void Circuit::addRegister(const int clock, const Register &reg) {
-        registers[clock].push_back(reg);
+        regManager.addRegister(clock, reg);
+    }
+
+    RegisterManager &Circuit::getRegisterManager() {
+        return regManager;
     }
 
     int Circuit::addRelationNode(const Node &node) {
@@ -71,12 +90,24 @@ namespace hson {
         outEdges[from].push_back(to);
     }
 
-    std::vector<int>::const_iterator Circuit::successorsOf(const int node) const {
-        return outEdges[node].begin();
+    auto Circuit::successorsOf(const int node) {
+        std::vector<Node *> successors;
+        for (const auto element: outEdges[node]) {
+            successors.push_back(resolveNode(element));
+        }
+        return successors;
     }
 
-    std::vector<int>::const_iterator Circuit::predecessorsOf(const int node) const {
-        return inEdges[node].begin();
+    auto Circuit::predecessorsOf(const int node) {
+        std::vector<Node *> predecessors;
+        for (const auto element: inEdges[node]) {
+            predecessors.push_back(resolveNode(element));
+        }
+        return predecessors;
+    }
+
+    std::vector<Node> &Circuit::getAllNodes() {
+        return nodes;
     }
 
     void Circuit::topologicalSort() {
@@ -110,9 +141,5 @@ namespace hson {
         for (auto &output: outputs) {
             addEdge(relation, output);
         }
-    }
-
-    Register::Register(const int input, const int output, const bool isPosTriggered) : input(input), output(output),
-        isPosTriggered(isPosTriggered) {
     }
 } // hson
