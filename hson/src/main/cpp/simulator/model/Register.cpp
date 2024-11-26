@@ -1,8 +1,22 @@
 #include "Register.h"
 
+#include "Node.h"
+
 namespace hson {
     Register::Register(const int input, const int output, const bool isPosTriggered)
-        : input(input), output(output), isPosTriggered(isPosTriggered) {
+        : input(input), output(output), posTriggered(isPosTriggered) {
+    }
+
+    int Register::getInput() const {
+        return input;
+    }
+
+    int Register::getOutput() const {
+        return output;
+    }
+
+    bool Register::isPosTriggered() const {
+        return posTriggered;
     }
 
     void RegisterManager::Iterator::advanceToValid() {
@@ -38,6 +52,14 @@ namespace hson {
 
     void RegisterManager::addRegister(const int clock, const Register &reg) {
         registers[clock].push_back(reg);
+    }
+
+    void RegisterManager::addClock(const int clock) {
+        registers[clock] = std::vector<Register>{};
+    }
+
+    const std::vector<Register> & RegisterManager::getRegisters(const ClockNode *clock) const {
+        return registers.at(clock->getIndex());
     }
 
     RegisterManager::Iterator RegisterManager::begin() const {

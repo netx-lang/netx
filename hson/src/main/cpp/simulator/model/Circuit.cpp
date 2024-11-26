@@ -5,12 +5,18 @@
 
 namespace hson {
     Circuit::Circuit(const int size) {
-        nodes = std::vector<Node>(size);
+        nodes = std::vector<Node*>(size);
     }
 
-    void Circuit::addInstanceNode(const int index, const Node &node) {
+    Circuit::~Circuit() {
+        for (const auto node : nodes) {
+            delete node;
+        }
+    }
+
+    void Circuit::addInstanceNode(const int index, Node *node) {
+        node->setIndex(index);
         nodes[index] = node;
-        nodes[index].setIndex(index);
     }
 
     void Circuit::setInput(const std::vector<int> &inNodes) {
@@ -24,7 +30,7 @@ namespace hson {
         }
     }
 
-    Node *Circuit::resolveInput(const std::string &id) {
+    Node *Circuit::resolveInput(const std::string &id) const {
         return resolveNode(input.at(id));
     }
 
@@ -47,7 +53,7 @@ namespace hson {
         }
     }
 
-    Node *Circuit::resolveOutput(const std::string &id) {
+    Node *Circuit::resolveOutput(const std::string &id) const {
         return resolveNode(output.at(id));
     }
 
@@ -59,23 +65,22 @@ namespace hson {
         return result;
     }
 
-    Node *Circuit::resolveNode(const int index) {
-        Node *ptr = &nodes[index];
-        return ptr;
+    Node *Circuit::resolveNode(const int index) const {
+        return nodes[index];
     }
 
     void Circuit::addRegister(const int clock, const Register &reg) {
         regManager.addRegister(clock, reg);
     }
 
-    RegisterManager &Circuit::getRegisterManager() {
+    RegisterManager &Circuit::manager() {
         return regManager;
     }
 
-    int Circuit::addRelationNode(const Node &node) {
+    int Circuit::addRelationNode(Node *node) {
         const int index = static_cast<int>(nodes.size());
+        node->setIndex(index);
         nodes.push_back(node);
-        nodes.back().setIndex(index);
         return index;
     }
 
@@ -90,23 +95,23 @@ namespace hson {
         outEdges[from].push_back(to);
     }
 
-    auto Circuit::successorsOf(const int node) {
+    std::vector<Node *> Circuit::successorsOf(const Node *node) {
         std::vector<Node *> successors;
-        for (const auto element: outEdges[node]) {
+        for (const auto element: outEdges[node->getIndex()]) {
             successors.push_back(resolveNode(element));
         }
         return successors;
     }
 
-    auto Circuit::predecessorsOf(const int node) {
+    std::vector<Node *> Circuit::predecessorsOf(const Node *node) {
         std::vector<Node *> predecessors;
-        for (const auto element: inEdges[node]) {
+        for (const auto element: inEdges[node->getIndex()]) {
             predecessors.push_back(resolveNode(element));
         }
         return predecessors;
     }
 
-    std::vector<Node> &Circuit::getAllNodes() {
+    std::vector<Node *> Circuit::getAllNodes() {
         return nodes;
     }
 

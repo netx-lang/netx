@@ -1,6 +1,6 @@
 #pragma once
 #include <queue>
-#include <bits/random.h>
+#include <random>
 
 #include "model/Circuit.h"
 
@@ -8,16 +8,21 @@ namespace hson {
     struct comparator;
 
     class ValueSupplier {
-        static constexpr bool RANDOM_INIT = false;
+        bool RANDOM_INIT;
 
         std::random_device rd;
 
-        auto mt = std::mt19937(rd());
+        std::mt19937 mt = std::mt19937(rd());
+
+        std::uniform_int_distribution<> bitGen = std::uniform_int_distribution(0, 1);
 
     public:
-        static BitVector *nextBitVector(int size);
+        explicit ValueSupplier(const bool RANDOM_INIT): RANDOM_INIT(RANDOM_INIT) {
+        }
 
-        static BitVector *nextBit();
+        BitVector *nextBitVector(int size);
+
+        BitVector *nextBit();
 
         int nextInt(int bound);
     };
@@ -26,25 +31,42 @@ namespace hson {
     public:
         void run();
 
-        void setInput(const std::string &id, BitVector *value) const;
+        void dataNodeStep(const DataNode *node);
+
+        void computationNodeStep(const ComputationNode *node);
+
+        void step();
+
+        static bool isBuiltin(const std::string &id);
+
+        bool clockStep();
+
+        ClockNode *pickClock();
+
+        static std::vector<BitVector *> evaluate(const std::string &id,
+                                                 const std::vector<const BitVector *> &input);
+
+        void setInput(const std::string &id, BitVector *value);
 
         [[nodiscard]] BitVector const *getOutput(const std::string &id) const;
 
-        explicit Simulator(Circuit *circuit);
+        explicit Simulator(Circuit *circuit, bool DO_VERIFICATION = false, bool RANDOM_INIT = false);
 
         ~Simulator();
 
     private:
+        bool DO_VERIFICATION;
+
         Circuit *circuit;
 
         ValueSupplier supplier;
 
-        class Comparator {
-            static bool compare(const Node *a, const Node *b) {
-                return a->getIndex() < b->getIndex();
-            }
-        };
+        std::vector<ClockNode *> clocks;
 
-        std::priority_queue<Node *, std::vector<Node *>, Comparator> worklist;
+        static bool cmp(const Node* ptr1, const Node* ptr2) {
+            return ptr1->getTopology() < ptr2->getTopology();
+        }
+
+        std::priority_queue<Node *, std::vector<Node *>, std::function<bool(const Node*, const Node*)>> worklist;
     };
 } // hson

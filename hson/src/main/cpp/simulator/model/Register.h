@@ -2,15 +2,23 @@
 #include <unordered_map>
 #include <vector>
 
+#include "Node.h"
+
 namespace hson {
     class Register {
     public:
         Register(int input, int output, bool isPosTriggered);
 
+        [[nodiscard]] int getInput() const;
+
+        [[nodiscard]] int getOutput() const;
+
+        [[nodiscard]] bool isPosTriggered() const;
+
     private:
         int input, output;
 
-        bool isPosTriggered;
+        bool posTriggered;
     };
 
     class RegisterManager {
@@ -37,6 +45,10 @@ namespace hson {
 
     public:
         void addRegister(int clock, const Register &reg);
+
+        void addClock(int clock);
+
+        const std::vector<Register> &getRegisters(const ClockNode *clock) const;
 
         [[nodiscard]] Iterator begin() const;
 

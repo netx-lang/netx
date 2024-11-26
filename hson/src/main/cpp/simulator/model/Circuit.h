@@ -7,7 +7,7 @@
 
 namespace hson {
     class Circuit {
-        std::vector<Node> nodes;
+        std::vector<Node*> nodes;
         std::vector<std::vector<int> > inEdges;
         std::vector<std::vector<int> > outEdges;
 
@@ -18,27 +18,29 @@ namespace hson {
     public:
         explicit Circuit(int size);
 
-        int addRelationNode(const Node &node);
+        ~Circuit();
 
-        void addInstanceNode(int index, const Node &node);
+        int addRelationNode(Node *node);
+
+        void addInstanceNode(int index, Node *node);
 
         void setInput(const std::vector<int> &inNodes);
 
-        [[nodiscard]] Node *resolveInput(const std::string &id);
+        [[nodiscard]] Node *resolveInput(const std::string &id) const;
 
         [[nodiscard]] std::vector<Node *> getInputs();
 
         void setOutput(const std::vector<int> &outNodes);
 
-        [[nodiscard]] Node *resolveOutput(const std::string &id);
+        [[nodiscard]] Node *resolveOutput(const std::string &id) const;
 
         [[nodiscard]] std::vector<Node *> getOutputs();
 
-        [[nodiscard]] Node *resolveNode(int index);
+        [[nodiscard]] Node *resolveNode(int index) const;
 
         void addRegister(int clock, const Register &reg);
 
-        RegisterManager &getRegisterManager();
+        RegisterManager &manager();
 
         void addHyperEdge(int relation,
                           const std::vector<int> &inputs,
@@ -46,11 +48,11 @@ namespace hson {
 
         void addEdge(int from, int to);
 
-        [[nodiscard]] std::vector<Node *> successorsOf(int node);
+        [[nodiscard]] std::vector<Node *> successorsOf(const Node *node);
 
-        [[nodiscard]] std::vector<Node *> predecessorsOf(int node);
+        [[nodiscard]] std::vector<Node *> predecessorsOf(const Node *node);
 
-        [[nodiscard]] std::vector<Node> &getAllNodes();
+        [[nodiscard]] std::vector<Node *> getAllNodes();
 
         void topologicalSort();
     };

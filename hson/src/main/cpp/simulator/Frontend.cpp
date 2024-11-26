@@ -36,7 +36,7 @@ namespace hson {
         switch (typeOf(node.at("type"))) {
             case CLOCK: createWireNode(node, node.at("width"));
                 break;
-            case WIRE: createWireNode(node, 1);
+            case WIRE: createClockNode(node);
                 break;
             default: {
                 if (node.contains("members")) {
@@ -65,7 +65,7 @@ namespace hson {
     }
 
     void Frontend::parseComponent(const json &node) const {
-        const int relation = circuit->addRelationNode(ComputationNode(node.at("id")));
+        const int relation = circuit->addRelationNode(new ComputationNode(node.at("id")));
         circuit->addHyperEdge(relation,
                               resolveNodeList(node, "input"),
                               resolveNodeList(node, "output"));
@@ -81,7 +81,7 @@ namespace hson {
             const bool isPosTriggered = attr.at("isPosTriggered") == "true";
             circuit->addRegister(clock, Register(inputs[0], outputs[0], isPosTriggered));
         } else {
-            const int relation = circuit->addRelationNode(ComputationNode(id));
+            const int relation = circuit->addRelationNode(new ComputationNode(id));
             circuit->addHyperEdge(relation, inputs, outputs);
         }
     }
@@ -94,8 +94,7 @@ namespace hson {
         } else {
             auto [_, index] = parseIdentifier(str.substr(0, pos));
             const auto selectorStr = str.substr(pos + 1, str.size() - pos - 2);
-            const auto node = WireSelectNode::parse(index, selectorStr);
-            const int selectIndex = circuit->addRelationNode(node);
+            const int selectIndex = circuit->addRelationNode(WireSelectNode::parse(index, selectorStr));
             circuit->addEdge(index, selectIndex);
             return selectIndex;
         }
@@ -117,7 +116,14 @@ namespace hson {
     void Frontend::createWireNode(const json &node, const int width) const {
         const auto loc = SourceLoc::parse(node.at("loc"));
         auto [name, index] = parseIdentifier(node.at("id"));
-        circuit->addInstanceNode(index, WireNode(name, loc, width));
+        circuit->addInstanceNode(index, new WireNode(name, loc, width));
+    }
+
+    void Frontend::createClockNode(const json &node) const {
+        const auto loc = SourceLoc::parse(node.at("loc"));
+        auto [name, index] = parseIdentifier(node.at("id"));
+        circuit->addInstanceNode(index, new ClockNode(name, loc));
+        circuit->manager().addClock(index);
     }
 
     Frontend::NodeType Frontend::typeOf(const std::string &type) {

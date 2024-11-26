@@ -30,6 +30,8 @@ namespace hson {
     public:
         explicit ComputationNode(std::string id);
 
+        [[nodiscard]] const std::string &id() const;
+
     private:
         std::string identifier;
     };
@@ -38,7 +40,13 @@ namespace hson {
     public:
         [[nodiscard]] BitVector const *getValue() const;
 
+        [[nodiscard]] virtual int getWidth() const = 0;
+
         void setValue(BitVector *value);
+
+        ~DataNode() override {
+            delete value;
+        }
 
     private:
         BitVector *value = nullptr;
@@ -50,7 +58,7 @@ namespace hson {
 
         [[nodiscard]] const std::string &id() const;
 
-        [[nodiscard]] int getWidth() const;
+        [[nodiscard]] int getWidth() const override;
 
     private:
         std::string identifier;
@@ -60,13 +68,37 @@ namespace hson {
         int width;
     };
 
+    class ClockNode final : public DataNode {
+    public:
+        ClockNode(std::string identifier, SourceLoc loc);
+
+        [[nodiscard]] const std::string &id() const;
+
+        [[nodiscard]] int getWidth() const override;
+
+    private:
+        std::string identifier;
+
+        SourceLoc loc;
+    };
+
     class WireSelectNode final : public DataNode {
     public:
         WireSelectNode(int base, Selector *selector);
 
-        static WireSelectNode parse(int base, const std::string &str);
+        static WireSelectNode *parse(int base, const std::string &str);
+
+        [[nodiscard]] int getBase() const {
+            return base;
+        }
+
+        [[nodiscard]] Selector * getSelector() const {
+            return selector;
+        }
 
         ~WireSelectNode() override;
+
+        [[nodiscard]] int getWidth() const override;
 
     private:
         int base;

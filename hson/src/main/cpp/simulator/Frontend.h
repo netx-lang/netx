@@ -18,6 +18,8 @@ namespace hson {
 
         void createWireNode(const json &node, int width) const;
 
+        void createClockNode(const json &node) const;
+
         void parseRelation(const json &node) const;
 
         void parseComponent(const json &node) const;
