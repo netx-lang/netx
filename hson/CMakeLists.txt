@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
 # Fetch nlohmann/json
 include(FetchContent)
@@ -32,9 +32,11 @@ file(GLOB SOURCES
         "src/main/cpp/simulator/*.h"
         "src/main/cpp/simulator/model/*.cpp"
         "src/main/cpp/simulator/model/*.h")
+list(FILTER SOURCES EXCLUDE REGEX "src/main/cpp/simulator/main.cpp")
 
 # Add the executable
-add_executable(simulator ${SOURCES})
+add_executable(simulator
+        src/main/cpp/simulator/main.cpp ${SOURCES})
 
 # Link the nlohmann/json library
 target_link_libraries(simulator PRIVATE nlohmann_json::nlohmann_json)
@@ -45,10 +47,7 @@ target_include_directories(simulator PRIVATE ${nlohmann_json_SOURCE_DIR}/include
 file(GLOB TEST_SOURCES "src/test/cpp/simulator/*.cpp")
 
 # Add test executable
-add_executable(simulator_tests ${TEST_SOURCES}
-    src/main/cpp/simulator/model/BitVector.h
-    src/main/cpp/simulator/model/BitVector.cpp
-) # Include main sources in test executable
+add_executable(simulator_tests ${TEST_SOURCES} ${SOURCES})
 
 # Link the test executable with the necessary libraries
 target_link_libraries(simulator_tests PRIVATE
@@ -60,6 +59,7 @@ target_link_libraries(simulator_tests PRIVATE
 # Include directories for tests
 target_include_directories(simulator_tests PRIVATE
         "src/main/cpp/simulator"
+        "src/main/cpp/simulator/model"
         ${nlohmann_json_SOURCE_DIR}/include
 )
 

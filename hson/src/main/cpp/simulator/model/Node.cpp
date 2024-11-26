@@ -96,4 +96,20 @@ namespace hson {
     int WireSelectNode::getWidth() const {
         return selector->width();
     }
+
+    Register::Register(const int input, const int output, const bool isPosTriggered)
+    : input(input), output(output), posTriggered(isPosTriggered) {
+    }
+
+    int Register::getInput() const {
+        return input;
+    }
+
+    int Register::getOutput() const {
+        return output;
+    }
+
+    bool Register::isPosTriggered() const {
+        return posTriggered;
+    }
 } // hson

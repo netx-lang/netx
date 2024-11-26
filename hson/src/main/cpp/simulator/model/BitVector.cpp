@@ -47,7 +47,7 @@ namespace hson {
                     value >>= 1;
                 }
             }
-            throw std::runtime_error("Should not reach here");
+            return new BinaryBitVector(result);
         }
         return new BinaryBitVector(
             boost::dynamic_bitset(32, std::stoi(literal)));

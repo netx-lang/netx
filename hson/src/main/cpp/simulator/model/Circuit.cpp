@@ -68,12 +68,12 @@ namespace hson {
         return nodes[index];
     }
 
-    void Circuit::addRegister(const int clock, const Register &reg) {
-        regManager.addRegister(clock, reg);
+    void Circuit::addClock(const int clock) {
+        registers[clock] = {};
     }
 
-    RegisterManager &Circuit::manager() {
-        return regManager;
+    void Circuit::addRegister(const int clock, const Register &reg) {
+        registers[clock].push_back(reg);
     }
 
     int Circuit::addNode(Node *node) {
@@ -112,6 +112,10 @@ namespace hson {
 
     std::vector<Node *> Circuit::getAllNodes() {
         return nodes;
+    }
+
+    std::vector<Register> Circuit::getRegisters(const ClockNode *clock) {
+        return registers.at(clock->getIndex());
     }
 
     void Circuit::topologicalSort() {

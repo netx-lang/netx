@@ -126,7 +126,7 @@ namespace hson {
         const auto loc = SourceLoc::parse(node.at("loc"));
         auto [name, index] = parseIdentifier(node.at("id"));
         circuit->addNode(index, new ClockNode(name, loc));
-        circuit->manager().addClock(index);
+        circuit->addClock(index);
     }
 
     Frontend::NodeType Frontend::typeOf(const std::string &type) {

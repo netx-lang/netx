@@ -116,4 +116,21 @@ namespace hson {
 
         Selector *selector;
     };
+
+    class Register {
+    public:
+        Register(int input, int output, bool isPosTriggered);
+
+        [[nodiscard]] int getInput() const;
+
+        [[nodiscard]] int getOutput() const;
+
+        [[nodiscard]] bool isPosTriggered() const;
+
+    private:
+        int input, output;
+
+        bool posTriggered;
+    };
+
 } // hson

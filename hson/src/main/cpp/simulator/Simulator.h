@@ -1,6 +1,7 @@
 #pragma once
 #include <queue>
 #include <random>
+#include <unordered_set>
 
 #include "model/Circuit.h"
 
@@ -25,6 +26,63 @@ namespace hson {
         BitVector *nextBit();
 
         int nextInt(int bound);
+    };
+
+    class ScheduleQueue {
+        std::vector<Node *> rep = {nullptr};
+        std::unordered_set<Node *> hash;
+
+    public:
+        [[nodiscard]] bool empty() const {
+            return rep.size() == 1;
+        }
+
+        void push(Node *node) {
+            if (hash.contains(node)) {
+                return;
+            }
+
+            size_t index = rep.size();
+            rep.push_back(nullptr);
+            while (index > 1) {
+                if (const size_t parent = index / 2; !compare(rep[parent], node)) {
+                    rep[index] = rep[parent];
+                    index = parent;
+                } else {
+                    break;
+                }
+            }
+            rep[index] = node;
+            hash.insert(node);
+        }
+
+        Node *poll() {
+            Node *result = rep[1];
+            hash.erase(result);
+
+            Node *last = rep.back();
+            rep.pop_back();
+            if (rep.size() > 1) {
+                size_t index = 1, son;
+                const size_t size = rep.size();
+                while ((son = index * 2) < size) {
+                    if (son + 1 < size && compare(rep[son + 1], rep[son])) {
+                        son++;
+                    }
+                    if (compare(last, rep[son])) {
+                        break;
+                    }
+                    rep[index] = rep[son];
+                    index = son;
+                }
+                rep[index] = last;
+            }
+            return result;
+        }
+
+        static bool compare(const Node* lhs, const Node* rhs) {
+            return lhs->getTopology() < rhs->getTopology();
+        }
     };
 
     class Simulator {
@@ -65,10 +123,6 @@ namespace hson {
 
         std::vector<ClockNode *> clocks;
 
-        static bool cmp(const Node* lhs, const Node* rhs) {
-            return lhs->getTopology() > rhs->getTopology();
-        }
-
-        std::priority_queue<Node *, std::vector<Node *>, decltype(&cmp)> worklist{cmp};
+        ScheduleQueue worklist;
     };
 } // hson

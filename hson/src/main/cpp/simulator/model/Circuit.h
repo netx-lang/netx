@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "Node.h"
-#include "Register.h"
 
 namespace hson {
     class Circuit {
@@ -11,9 +10,9 @@ namespace hson {
         std::vector<std::vector<int> > inEdges;
         std::vector<std::vector<int> > outEdges;
 
-        RegisterManager regManager;
         std::unordered_map<std::string, int> input;
         std::unordered_map<std::string, int> output;
+        std::unordered_map<int, std::vector<Register> > registers;
 
     public:
         explicit Circuit(int size);
@@ -38,9 +37,9 @@ namespace hson {
 
         [[nodiscard]] Node *resolveNode(int index) const;
 
-        void addRegister(int clock, const Register &reg);
+        void addClock(int clock);
 
-        RegisterManager &manager();
+        void addRegister(int clock, const Register &reg);
 
         void addHyperEdge(int relation,
                           const std::vector<int> &inputs,
@@ -53,6 +52,8 @@ namespace hson {
         [[nodiscard]] std::vector<Node *> predecessorsOf(const Node *node);
 
         [[nodiscard]] std::vector<Node *> getAllNodes();
+
+        [[nodiscard]] std::vector<Register> getRegisters(const ClockNode *clock);
 
         void topologicalSort();
     };

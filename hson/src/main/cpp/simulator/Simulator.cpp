@@ -15,8 +15,7 @@ namespace hson {
     }
 
     void Simulator::step() {
-        const auto node = worklist.top();
-        worklist.pop();
+        const auto node = worklist.poll();
         if (const auto compute = dynamic_cast<ComputationNode *>(node); compute != nullptr) {
             computationNodeStep(compute);
         } else if (const auto data = dynamic_cast<DataNode *>(node); data != nullptr) {
@@ -63,9 +62,9 @@ namespace hson {
                 }
             }
 
-            // if (arguments[0] == NULL) {
-            //     auto shit = circuit->predecessorsOf(node);
-            // }
+            if (arguments[0] == NULL) {
+                std::cerr << "Shit";
+            }
 
             int indexer = 0;
             const auto result = evaluate(node->id(), arguments);
@@ -113,7 +112,7 @@ namespace hson {
         std::vector<std::pair<DataNode*, BitVector*>> incoming;
         clock->setValue(clock->getValue()->NOT());
         const bool posEdge = clock->getValue()->toBool();
-        for (auto reg : circuit->manager().getRegisters(clock)) {
+        for (auto reg : circuit->getRegisters(clock)) {
             if (reg.isPosTriggered() == posEdge) {
                 const auto inNode = static_cast<DataNode *>(circuit->resolveNode(reg.getInput())); // NO-LINT: NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
                 const auto outNode = static_cast<DataNode *>(circuit->resolveNode(reg.getOutput()));  // NO-LINT: NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
