@@ -19,6 +19,8 @@ namespace hson {
             const auto ptr = resolveNode(index);
             if (const auto *wire = reinterpret_cast<WireNode*>(ptr); wire != nullptr) {
                 input[wire->id()] = index;
+            } else {
+                throw std::runtime_error("Input node must be a wire");
             }
         }
     }
@@ -32,6 +34,8 @@ namespace hson {
             const auto ptr = resolveNode(index);
             if (const auto *wire = reinterpret_cast<WireNode*>(ptr); wire != nullptr) {
                 output[wire->id()] = index;
+            } else {
+                throw std::runtime_error("Input node must be a wire");
             }
         }
     }

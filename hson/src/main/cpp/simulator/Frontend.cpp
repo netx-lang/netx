@@ -26,8 +26,9 @@ namespace hson {
     Circuit *Frontend::parse() {
         parseData(data.at("design"));
         parseRelation(data.at("design"));
-        circuit->setInput(data.at("design").at("input"));
-        circuit->setOutput(data.at("design").at("output"));
+
+        circuit->setInput(resolveNodeList(data.at("design"), "input"));
+        circuit->setOutput(resolveNodeList(data.at("design"), "output"));
         return circuit;
     }
 

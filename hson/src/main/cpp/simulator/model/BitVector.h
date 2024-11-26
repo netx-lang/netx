@@ -15,7 +15,17 @@ namespace hson{
 
         [[nodiscard]] virtual bool get(int index) const = 0;
 
+        [[nodiscard]] virtual bool msb() const = 0;
+
+        [[nodiscard]] virtual bool lsb() const = 0;
+
         virtual void set(int index, bool value) = 0;
+
+        virtual void setRange(int from, int to, BitVector *value) = 0;
+
+        [[nodiscard]] virtual BitVector *CAST(int length) = 0;
+
+        [[nodiscard]] virtual BitVector *SELECT(int from, int to) = 0;
 
         [[nodiscard]] virtual BitVector *AND(const BitVector &other) const = 0;
 
@@ -23,11 +33,11 @@ namespace hson{
 
         [[nodiscard]] virtual BitVector *OR(const BitVector &other) const = 0;
 
-        [[nodiscard]] virtual BitVector *ASHR(const BitVector &other) const = 0;
+        [[nodiscard]] virtual BitVector *ASHR(int offset) const = 0;
 
-        [[nodiscard]] virtual BitVector *LSHR(const BitVector &other) const = 0;
+        [[nodiscard]] virtual BitVector *LSHR(int offset) const = 0;
 
-        [[nodiscard]] virtual BitVector *SHL(const BitVector &other) const = 0;
+        [[nodiscard]] virtual BitVector *SHL(int offset) const = 0;
 
         [[nodiscard]] virtual BitVector *ADD(const BitVector &other) const = 0;
 
@@ -41,6 +51,8 @@ namespace hson{
 
         [[nodiscard]] virtual BitVector *NEG() const = 0;
 
+        virtual bool operator==(const BitVector &other) const = 0;
+
         virtual ~BitVector() = default;
     };
 
@@ -51,156 +63,54 @@ namespace hson{
 
         explicit BinaryBitVector(boost::dynamic_bitset<> data): data(std::move(data)) {}
 
-        [[nodiscard]] const BinaryBitVector *requiresValidOperand(const BitVector &other) const {
-            if (const auto* that = dynamic_cast<const BinaryBitVector*>(&other); that != nullptr) {
-                if (that->size() == this->size()) {
-                    return that;
-                }
-            }
-            throw std::runtime_error("Invalid operand");
-        }
+        [[nodiscard]] const BinaryBitVector *requiresValidOperand(const BitVector &other) const;
 
     public:
-        [[nodiscard]] static BinaryBitVector *parse(const std::string &literal) {
-            static std::unordered_map<char, int8_t> hexMap = {
-                {'0', 0}, {'1', 1}, {'2', 2}, {'3', 3},
-                {'4', 4}, {'5', 5}, {'6', 6}, {'7', 7},
-                {'8', 8}, {'9', 9}, {'A', 10}, {'B', 11},
-                {'C', 12}, {'D', 13}, {'E', 14}, {'F', 15}
-            };
+        [[nodiscard]] static BinaryBitVector *parse(const std::string &literal);
 
-            if (const auto pos = literal.find('\''); pos != std::string::npos) {
-                const long size = atol(literal.substr(0, pos).c_str());
-                auto result = boost::dynamic_bitset<>(size);
-                int index = 0;
-                for (auto i = literal.size() - 1; i >= pos + 2; --i) {
-                    auto hex = hexMap[literal[i]];
-                    for (int j = 0; j != 4; ++j) {
-                        result.set(index++, hex & 1);
-                        hex >>= 1;
-                    }
-                }
-                return new BinaryBitVector(result);
+        [[nodiscard]] int size() const override;
 
-            }
-            return new BinaryBitVector(
-                boost::dynamic_bitset(32, atol(literal.c_str())));
-        }
+        [[nodiscard]] unsigned long toUL() const override;
 
-        [[nodiscard]] int size() const override {
-            return static_cast<int>(data.size());
-        }
+        [[nodiscard]] bool get(int index) const override;
 
-        [[nodiscard]] unsigned long toUL() const override {
-            return data.to_ulong();
-        }
+        [[nodiscard]] bool msb() const override;
 
-        [[nodiscard]] bool get(int index) const override {
-            return data.test(index);
-        }
+        [[nodiscard]] bool lsb() const override;
 
-        void set(int index, const bool value) override {
-            data.set(index, value);
-        }
+        void set(int index, bool value) override;
 
-        [[nodiscard]] BitVector *AND(const BitVector &other) const override {
-            const auto that = requiresValidOperand(other);
-            return new BinaryBitVector(this->data & that->data);
-        }
+        void setRange(int from, int to, BitVector *value) override;
 
-        [[nodiscard]] BitVector *XOR(const BitVector &other) const override {
-            const auto that = requiresValidOperand(other);
-            return new BinaryBitVector(this->data ^ that->data);
-        }
+        [[nodiscard]] BitVector *SELECT(int from, int to) override;
 
-        [[nodiscard]] BitVector *OR(const BitVector &other) const override {
-            const auto that = requiresValidOperand(other);
-            return new BinaryBitVector(this->data | that->data);
-        }
+        [[nodiscard]] BitVector *CAST(int length) override;
 
-        [[nodiscard]] BitVector *NOT() const override {
-            return new BinaryBitVector(~data);
-        }
+        [[nodiscard]] BitVector *AND(const BitVector &other) const override;
 
-        [[nodiscard]] BitVector *ASHR(const BitVector &other) const override {
-            const auto offset = other.toUL();
-            auto result = data >> offset;
-            if (data.test(data.size() - 1)) {
-                for (int i = 0; i != offset; ++i) {
-                    result.set(data.size() - 1 - i);
-                }
-            }
-            return new BinaryBitVector(result);
-        }
+        [[nodiscard]] BitVector *XOR(const BitVector &other) const override;
 
-        [[nodiscard]] BitVector *LSHR(const BitVector &other) const override {
-            const auto offset = other.toUL();
-            return new BinaryBitVector(data >> offset);
-        }
+        [[nodiscard]] BitVector *OR(const BitVector &other) const override;
 
-        [[nodiscard]] BitVector *SHL(const BitVector &other) const override {
-            const auto offset = other.toUL();
-            return new BinaryBitVector(data << offset);
-        }
+        [[nodiscard]] BitVector *NOT() const override;
 
-        [[nodiscard]] BitVector *ADD(const BitVector &other) const override {
-            const auto that = requiresValidOperand(other);
-            if (size() <= LONG_SIZE) {
-                return new BinaryBitVector(
-                    boost::dynamic_bitset(size(), this->toUL() + that->toUL()));
-            }
-            bool carry = false;
-            boost::dynamic_bitset<> result(size());
-            for (int i = 0; i != size(); ++i) {
-                const bool sum = this->get(i) ^ that->get(i);
-                result.set(i, sum ^ carry);
-                carry = this->get(i) & that->get(i) | carry & sum;
-            }
-            return new BinaryBitVector(result);
-        }
+        [[nodiscard]] BitVector *ASHR(int offset) const override;
 
-        [[nodiscard]] BitVector *SUB(const BitVector &other) const override {
-            const auto that = requiresValidOperand(other);
-            if (size() <= LONG_SIZE) {
-                return new BinaryBitVector(
-                    boost::dynamic_bitset(size(), this->toUL() - that->toUL()));
-            }
-            const auto neg = that->NEG();
-            const auto result = this->ADD(*neg);
-            delete neg;
-            return result;
-        }
+        [[nodiscard]] BitVector *LSHR(int offset) const override;
 
-        [[nodiscard]] BitVector *MUL(const BitVector &other) const override {
-            const auto that = requiresValidOperand(other);
-            if (size() <= LONG_SIZE) {
-                return new BinaryBitVector(
-                        boost::dynamic_bitset(size(), this->toUL() * that->toUL()));
-            }
-            throw std::runtime_error("TODO: Not implemented");
-        }
+        [[nodiscard]] BitVector *SHL(int offset) const override;
 
-        [[nodiscard]] BitVector *DIV(const BitVector &other) const override {
-            const auto that = requiresValidOperand(other);
-            if (size() <= LONG_SIZE) {
-                return new BinaryBitVector(
-                        boost::dynamic_bitset(size(), this->toUL() / that->toUL()));
-            }
-            throw std::runtime_error("TODO: Not implemented");
-        }
+        [[nodiscard]] BitVector *ADD(const BitVector &other) const override;
 
-        [[nodiscard]] BitVector *NEG() const override {
-            boost::dynamic_bitset<> result = ~data;
-            for (int i = 0; i != size(); ++i) {
-                if (result[i]) {
-                    result.reset(i);
-                } else {
-                    result.set(i);
-                    break;
-                }
-            }
-            return new BinaryBitVector(result);
-        }
+        [[nodiscard]] BitVector *SUB(const BitVector &other) const override;
+
+        [[nodiscard]] BitVector *MUL(const BitVector &other) const override;
+
+        [[nodiscard]] BitVector *DIV(const BitVector &other) const override;
+
+        [[nodiscard]] BitVector *NEG() const override;
+
+        bool operator==(const BitVector &other) const override;
     };
 
 } // hson

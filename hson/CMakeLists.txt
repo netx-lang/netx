@@ -43,7 +43,10 @@ target_include_directories(simulator PRIVATE ${nlohmann_json_SOURCE_DIR}/include
 file(GLOB TEST_SOURCES "src/test/cpp/simulator/*.cpp")
 
 # Add test executable
-add_executable(simulator_tests ${TEST_SOURCES} ${SOURCES}) # Include main sources in test executable
+add_executable(simulator_tests ${TEST_SOURCES}
+    src/main/cpp/simulator/model/BitVector.h
+    src/main/cpp/simulator/model/BitVector.cpp
+) # Include main sources in test executable
 
 # Link the test executable with the necessary libraries
 target_link_libraries(simulator_tests PRIVATE

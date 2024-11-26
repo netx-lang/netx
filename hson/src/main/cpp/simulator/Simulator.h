@@ -20,13 +20,8 @@ namespace hson {
     private:
         Circuit *circuit;
 
-        std::priority_queue<Node*, std::vector<Node*>, comparator> worklist;
+        // std::priority_queue<Node*, std::vector<Node*>, comparator> worklist;
 
     };
 
-    struct comparator {
-        bool operator()(Node *lhs, Node *rhs) const {
-            return lhs->getTopology() < rhs->getTopology();
-        }
-    };
 } // hson
