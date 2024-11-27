@@ -1,4 +1,5 @@
 rootProject.name = "hardscript"
+include("util")
 include("compiler")
 include("hson")
-include("util")
+include("hardscript")

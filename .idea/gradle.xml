@@ -22,6 +22,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/buildSrc" />
             <option value="$PROJECT_DIR$/compiler" />
+            <option value="$PROJECT_DIR$/hardscript" />
             <option value="$PROJECT_DIR$/hson" />
             <option value="$PROJECT_DIR$/util" />
           </set>

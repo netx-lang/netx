@@ -44,25 +44,29 @@ target_link_libraries(simulator PRIVATE nlohmann_json::nlohmann_json)
 # Include directories (optional, nlohmann/json is header-only)
 target_include_directories(simulator PRIVATE ${nlohmann_json_SOURCE_DIR}/include)
 
-file(GLOB TEST_SOURCES "src/test/cpp/simulator/*.cpp")
+option(BUILD_TESTS "Build tests" ON)
 
-# Add test executable
-add_executable(simulator_tests ${TEST_SOURCES} ${SOURCES})
+if(BUILD_TESTS)
+    file(GLOB TEST_SOURCES "src/test/cpp/simulator/*.cpp")
 
-# Link the test executable with the necessary libraries
-target_link_libraries(simulator_tests PRIVATE
-        gtest
-        gtest_main
-        nlohmann_json::nlohmann_json
-)
+    # Add test executable
+    add_executable(simulator_tests ${TEST_SOURCES} ${SOURCES})
 
-# Include directories for tests
-target_include_directories(simulator_tests PRIVATE
-        "src/main/cpp/simulator"
-        "src/main/cpp/simulator/model"
-        ${nlohmann_json_SOURCE_DIR}/include
-)
+    # Link the test executable with the necessary libraries
+    target_link_libraries(simulator_tests PRIVATE
+            gtest
+            gtest_main
+            nlohmann_json::nlohmann_json
+    )
 
-# Discover and add tests automatically
-include(GoogleTest)
-gtest_discover_tests(simulator_tests)
+    # Include directories for tests
+    target_include_directories(simulator_tests PRIVATE
+            "src/main/cpp/simulator"
+            "src/main/cpp/simulator/model"
+            ${nlohmann_json_SOURCE_DIR}/include
+    )
+
+    # Discover and add tests automatically
+    include(GoogleTest)
+    gtest_discover_tests(simulator_tests)
+endif()

@@ -22,6 +22,10 @@ public class Builder {
         return new Builder(Configuration.forExpanded());
     }
 
+    public static Builder from(Configuration config) {
+        return new Builder(config);
+    }
+
     public HSCompiler load(CharStream charStream) {
         return new HSCompiler(config, charStream);
     }
