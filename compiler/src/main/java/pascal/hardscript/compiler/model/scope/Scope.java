@@ -7,29 +7,20 @@ import pascal.hardscript.compiler.model.scope.binding.MapBinding;
 import pascal.hardscript.compiler.model.scope.binding.SingleBinding;
 import pascal.hardscript.util.lang.Identifier;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-public abstract sealed class Scope permits BlockScope, ComponentScope, DesignScope {
-    private final Set<Alias> aliases = new HashSet<>();
+public abstract sealed class Scope permits ComponentScope, DesignScope {
     private final MapBinding binding = MapBinding.ofEmpty();
     private final Evaluator evaluator;
     private final DesignScope global;
-    private List<Scope> children;
-    private Scope parent;
+    private final List<Scope> children;
 
-    protected Scope(DesignScope global, Scope parent) {
+    protected Scope(DesignScope global) {
         this.global = global;
-        this.parent = parent;
         this.children = new ArrayList<>();
         this.evaluator = new Evaluator(this);
-    }
-
-    public Scope getParent() {
-        return parent;
-    }
-
-    public void setParent(Scope parent) {
-        this.parent = parent;
     }
 
     public DesignScope getGlobal() {
@@ -38,10 +29,6 @@ public abstract sealed class Scope permits BlockScope, ComponentScope, DesignSco
 
     public List<Scope> getChildren() {
         return children;
-    }
-
-    public void setChildren(List<Scope> children) {
-        this.children = children;
     }
 
     public void addChild(Scope child) {
@@ -60,14 +47,6 @@ public abstract sealed class Scope permits BlockScope, ComponentScope, DesignSco
         return evaluator;
     }
 
-    public void addAlias(Instance lhs, Instance rhs) {
-        aliases.add(Alias.of(lhs, rhs));
-    }
-
-    public Set<Alias> getAliases() {
-        return aliases;
-    }
-
     public void bind(SingleBinding single) {
         binding.bind(single.key(), single.value());
     }
@@ -77,14 +56,8 @@ public abstract sealed class Scope permits BlockScope, ComponentScope, DesignSco
     }
 
     public ComponentScope instantiateComponentScope(Identifier identifier) {
-        var child = new ComponentScope(this.global, this, identifier);
+        var child = new ComponentScope(this.global, identifier);
         addChild(child);
-        return child;
-    }
-
-    public BlockScope instantiateBlockScope() {
-        var child = new BlockScope(this.global, this);
-        children.add(child);
         return child;
     }
 
@@ -92,11 +65,7 @@ public abstract sealed class Scope permits BlockScope, ComponentScope, DesignSco
         if (this instanceof ComponentScope component) {
             return component;
         }
-        return switch (parent) {
-            case null -> null;
-            case ComponentScope module -> module;
-            default -> parent.getLeastUpperComponent();
-        };
+        return null;
     }
 
     public record Alias(Instance lhs, Instance rhs) {

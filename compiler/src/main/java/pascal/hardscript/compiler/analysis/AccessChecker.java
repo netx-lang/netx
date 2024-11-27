@@ -44,7 +44,7 @@ public class AccessChecker extends ModelAnalysis {
 
     @Override
     public void analyze() {
-        design.forEachSubscope(this::analyze);
+        design.forEachSubScope(this::analyze);
     }
 
     private void analyze(Scope scope) {

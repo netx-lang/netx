@@ -14,7 +14,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SimulatorTest {
-    private static final Path TEST_DIR = Path.of("src/test/resources/");
+    private static final Path TEST_DIR = Path.of("src/test/resources/testcases/");
 
     @Test
     void testAdder() throws IOException {

@@ -24,13 +24,14 @@ tasks.withType<JavaCompile> {
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-
-    implementation("com.google.code.findbugs:jsr305:3.0.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     implementation("org.slf4j:slf4j-api:2.0.9")
-    testRuntimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
-    testRuntimeOnly("org.apache.logging.log4j:log4j-api:2.20.0")
-    testRuntimeOnly("org.apache.logging.log4j:log4j-core:2.20.0")
+    implementation("com.google.code.findbugs:jsr305:3.0.2")
+
+    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
+    implementation("org.apache.logging.log4j:log4j-api:2.20.0")
+    implementation("org.apache.logging.log4j:log4j-core:2.20.0")
 
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
     implementation("com.fasterxml.jackson.core:jackson-core:2.17.2")

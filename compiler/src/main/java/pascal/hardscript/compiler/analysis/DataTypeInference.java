@@ -38,8 +38,8 @@ public final class DataTypeInference extends ModelAnalysis {
     }
 
     public void collectTypeConstraints() {
-        design.forEachSubscope(scope -> {
-            for (var alias : scope.getAliases()) {
+        design.forEachSubScope(scope -> {
+            for (var alias : ((ComponentScope) scope).getAliases()) {
                 addBinaryConstraint(EqualTypeConstraint.of(alias.lhs(), alias.rhs()));
             }
             var component = (ComponentScope) scope;
@@ -130,7 +130,7 @@ public final class DataTypeInference extends ModelAnalysis {
     }
 
     private void checkAllTyped() {
-        design.forEachSubscope(scope -> {
+        design.forEachSubScope(scope -> {
             for (var entity : scope.getEntities()) {
                 if (!(entity instanceof Instance inst)) {
                     throw new ShallNotReachHereError();

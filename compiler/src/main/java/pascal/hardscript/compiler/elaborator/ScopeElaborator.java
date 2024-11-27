@@ -11,7 +11,7 @@ import pascal.hardscript.compiler.model.component.*;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.Attributes;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.Scope;
+import pascal.hardscript.compiler.model.scope.binding.SingleBinding;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
@@ -25,12 +25,13 @@ import static pascal.hardscript.compiler.elaborator.Types.requiresMatchedSize;
 
 final class ScopeElaborator {
     private static final Logger log = LoggerFactory.getLogger(ScopeElaborator.class);
-    private final BuiltInComponentFactory factory;
-    private final Configuration config;
+    private final ComponentScope scope;
     private final Evaluator evaluator;
-    private final Scope scope;
 
-    ScopeElaborator(Configuration config, Scope scope) {
+    private final Configuration config;
+    private final BuiltInComponentFactory factory;
+
+    ScopeElaborator(Configuration config, ComponentScope scope) {
         this.config = config;
         this.scope = scope;
         this.factory = scope.getGlobal().getBuiltinFactory();
@@ -38,11 +39,15 @@ final class ScopeElaborator {
     }
 
     public void build(ComponentNode node) {
-        dispatchElementBuilder(node.getElements());
-        var component = (ComponentScope) scope;
+        buildComponentElements(node.getElements());
+        buildComponentIO(node);
+    }
+
+    private void buildComponentIO(ComponentNode node) {
         var sourceLoc = node.getSourceLoc();
-        extractIOList(sourceLoc, node.getType().getInput()).forEach(component::addInput);
-        extractIOList(sourceLoc, node.getType().getOutput()).forEach(component::addOutput);
+        var type = node.getType();
+        extractIOList(sourceLoc, type.getInput()).forEach(scope::addInput);
+        extractIOList(sourceLoc, type.getOutput()).forEach(scope::addOutput);
     }
 
     private List<Instance> extractIOList(SourceLoc sourceLoc, ExprNode node) {
@@ -65,36 +70,32 @@ final class ScopeElaborator {
         throw new CompileCancellationException();
     }
 
-    public void build(LoopNode node) {
-        dispatchElementBuilder(node.getElements());
-    }
-
-    private void dispatchElementBuilder(List<ElementNode> list) {
+    private void buildComponentElements(List<ElementNode> list) {
         for (var element : list) {
             switch (element) {
-                case LoopNode loop -> buildElement(loop);
-                case BindingNode binding -> buildElement(binding);
-                case DataInstantiationNode component -> buildElement(component);
-                case ComponentInstantiationNode instantiation -> buildElement(instantiation);
+                case LoopNode loop -> buildLoop(loop);
+                case BindingNode binding -> buildBinding(binding);
+                case DataInstantiationNode data -> buildData(data);
+                case ComponentInstantiationNode instantiation -> buildSubComponent(instantiation);
             }
         }
     }
 
-    private void buildElement(LoopNode loop) {
+    private void buildLoop(LoopNode loop) {
         var generator = loop.getGenerator();
         var id = evaluator.getIdentifierFrom(generator.getHead());
         for (var entity : evaluator.evaluateToList(generator.getFrom()).entities()) {
-            var subScope = scope.instantiateBlockScope();
-            subScope.bind(id, entity);
-            new ScopeElaborator(config, subScope).build(loop);
+            evaluator.overrideBindings(SingleBinding.of(id, entity));
+            buildComponentElements(loop.getElements());
+            evaluator.restoreBindings();
         }
     }
 
-    private void buildElement(BindingNode binding) {
+    private void buildBinding(BindingNode binding) {
         scope.bind(evaluator.evaluateBinding(binding));
     }
 
-    private void buildElement(DataInstantiationNode node) {
+    private void buildData(DataInstantiationNode node) {
         var factory = evaluator.evaluateToDataFactory(node.getType());
         var component = scope.getLeastUpperComponent();
         node.getSymbols().stream()
@@ -102,7 +103,7 @@ final class ScopeElaborator {
                 .forEach(id -> component.bind(id, factory.create(id)));
     }
 
-    private void buildElement(ComponentInstantiationNode instantiation) {
+    private void buildSubComponent(ComponentInstantiationNode instantiation) {
         var sourceLoc = instantiation.getSourceLoc();
         boolean inPlace = instantiation.needDeclareInPlace();
         var compType = evaluator.evaluateToComponentType(instantiation.getExpr(), inPlace);
@@ -142,7 +143,7 @@ final class ScopeElaborator {
 
             int size = requiresMatchedSize(sourceLoc, lhs.source(), rhs.target());
             for (int i = 0; i < size; ++i) {
-                scope.addAlias(lhs.source().get(i), rhs.target().get(i));
+                scope.getManager().assign(lhs.source().get(i), rhs.target().get(i));
             }
             return Instantiator.ComponentPort.of(lhs.target(), rhs.source());
         }
@@ -214,4 +215,5 @@ final class ScopeElaborator {
             }
         }
     }
+
 }

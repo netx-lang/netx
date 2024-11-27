@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VerilogTest {
     private static final boolean GENERATE_EXPECTED = false;
-    private static final Path TEST_DIR = Path.of("src/test/resources/");
-    private static final Path EXPECTED_DIR = Path.of("src/test/resources/verilog/");
+    private static final Path TEST_DIR = Path.of("src/test/resources/testcases/");
+    private static final Path EXPECTED_DIR = Path.of("src/test/resources/testcases/verilog/");
 
     @Test
     void testAdder() throws IOException {

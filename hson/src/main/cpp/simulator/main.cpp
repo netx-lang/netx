@@ -7,7 +7,7 @@ using namespace hson;
 
 int main() {
     const auto frontend = Frontend::loadPath(
-        "../../src/test/resources/expanded/adder.json");
+        "../../src/test/resources/testcases/expanded/adder.json");
     const auto circuit = frontend->parse();
     const auto simulator = new Simulator(circuit);
     for (int i = 0; i != 256; ++i) {

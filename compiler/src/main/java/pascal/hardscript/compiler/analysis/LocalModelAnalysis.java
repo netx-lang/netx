@@ -26,7 +26,7 @@ public abstract class LocalModelAnalysis extends ModelAnalysis {
 
     @Override
     public void analyze() {
-        design.forEachSubscope(scope -> {
+        design.forEachSubScope(scope -> {
             if (isUserDefinedComponent(scope)) {
                 analysis.accept(scope);
             }

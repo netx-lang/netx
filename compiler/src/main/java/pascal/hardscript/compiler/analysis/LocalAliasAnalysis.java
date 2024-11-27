@@ -1,5 +1,6 @@
 package pascal.hardscript.compiler.analysis;
 
+import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 
@@ -21,7 +22,8 @@ public final class LocalAliasAnalysis extends LocalModelAnalysis {
         public void analyze() {
             exploreAnalysisScopes(scope);
             inlineScope.stream()
-                    .map(Scope::getAliases)
+                    .map(ComponentScope.class::cast)
+                    .map(ComponentScope::getAliases)
                     .forEach(manager::addAlias);
             manager.resolveRepresentatives();
             eliminateDuplicatedData(Predicate.not(manager::needDump), manager::repOf);

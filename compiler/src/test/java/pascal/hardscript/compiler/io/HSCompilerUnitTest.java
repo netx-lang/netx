@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class HSCompilerUnitTest {
-    private static final Path TEST_DIR = Path.of("src/test/resources");
+    private static final Path TEST_DIR = Path.of("src/test/resources/testcases/");
 
     private static void test(String fileName) throws IOException {
         String content = new String(Files.readAllBytes(TEST_DIR.resolve(fileName)));

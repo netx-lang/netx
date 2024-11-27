@@ -14,9 +14,9 @@ public class GlobalAliasAnalysis extends ModelAnalysis {
 
     @Override
     public void analyze() {
-        design.forEachSubscope(scope -> manager.addAlias(scope.getAliases()));
+        design.forEachSubScope(scope -> manager.addAlias(((ComponentScope) scope).getAliases()));
         manager.resolveRepresentatives();
-        design.forEachSubscope(scope -> {
+        design.forEachSubScope(scope -> {
             scope.getEntities().removeIf(Predicate.not(manager::needDump));
             if (scope instanceof ComponentScope component) {
                 component.getInputs().replaceAll(manager::repOf);

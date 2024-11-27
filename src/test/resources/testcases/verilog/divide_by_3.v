@@ -9,15 +9,15 @@ module Divide_by_3_1(
   wire clk; // @(6:9)
   wire clk_3; // @(6:14)
   wire c; // @(7:15)
-  wire o_2;
-  wire o_3;
-  wire o_1;
+  wire i2_3;
+  wire i1_3;
+  wire i_4;
   reg p_0;
   reg p_1;
   reg p_2;
-  assign o_1 = ~a;
-  assign o_2 = ~b;
-  assign o_3 = o_1 & o_2;
+  assign i1_3 = ~a;
+  assign i2_3 = ~b;
+  assign i_4 = i1_3 & i2_3;
   assign clk_3 = b | c;
   assign c = p_2;
   always @(negedge clk) begin
@@ -26,7 +26,7 @@ module Divide_by_3_1(
   assign a = p_0;
   assign b = p_1;
   always @(posedge clk) begin
-    p_0 <= o_3;
+    p_0 <= i_4;
     p_1 <= a;
   end
 endmodule

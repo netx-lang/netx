@@ -19,7 +19,6 @@ import pascal.hardscript.compiler.model.instance.selector.Selector;
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
-import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.DesignScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.compiler.model.scope.binding.Binding;
@@ -388,17 +387,13 @@ public final class Evaluator {
     private Entity resolveIdentifier(Identifier id) {
         Entity entity = lookup(id);
         if (entity == null) {
-            if (scope instanceof ComponentScope) {
-                entity = global.getEvaluator().lookup(id);
-                if (entity == null) {
-                    if (global.hasDefinition(id)) {
-                        entity = ComponentAtom.of(global.getDefinition(id), id);
-                    } else if (BuiltinComponent.isBuiltin(id)) {
-                        entity = BuiltinAtom.of(BuiltinComponent.of(id), id.getSourceLoc());
-                    }
+            entity = global.getEvaluator().lookup(id);
+            if (entity == null) {
+                if (global.hasDefinition(id)) {
+                    entity = ComponentAtom.of(global.getDefinition(id), id);
+                } else if (BuiltinComponent.isBuiltin(id)) {
+                    entity = BuiltinAtom.of(BuiltinComponent.of(id), id.getSourceLoc());
                 }
-            } else {
-                entity = scope.getParent().getEvaluator().resolveIdentifier(id);
             }
         }
         return Objects.requireNonNullElseGet(entity, () -> {
@@ -498,11 +493,11 @@ public final class Evaluator {
         return Identifier.of(sb.toString()).setSourceLoc(interpolated.getSourceLoc());
     }
 
-    private void overrideBindings(Binding binding) {
+    public void overrideBindings(Binding binding) {
         bindings.addFirst(binding);
     }
 
-    private void restoreBindings() {
+    public void restoreBindings() {
         bindings.removeFirst();
     }
 

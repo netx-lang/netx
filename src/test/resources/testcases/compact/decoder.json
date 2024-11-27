@@ -22,61 +22,57 @@
       {"type": "wire", "width": 3, "id": "code", "loc": "8:9"},
       {
         "type": "builtin", "id": "NOT@1", "loc": "14:52",
-        "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "14:52"}
-        ],
         "input": ["code@0[0]"],
-        "output": ["$o@1"]
+        "output": ["$i1@4"]
       },
       {
         "type": "builtin", "id": "NOT@2", "loc": "14:52",
-        "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "14:52"}
-        ],
         "input": ["code@0[1]"],
-        "output": ["$o@2"]
+        "output": ["$i2@4"]
       },
       {
         "type": "builtin", "id": "NOT@3", "loc": "14:52",
-        "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "14:52"}
-        ],
         "input": ["code@0[2]"],
-        "output": ["$o@3"]
+        "output": ["$i3@4"]
       },
       {
         "type": "builtin", "id": "AND@4", "loc": "12:22",
-        "input": ["$o@1", "$o@2", "$o@3"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$i1", "loc": "12:22"},
+          {"type": "wire", "width": 1, "id": "$i2", "loc": "12:22"},
+          {"type": "wire", "width": 1, "id": "$i3", "loc": "12:22"}
+        ],
+        "input": ["$i1@4", "$i2@4", "$i3@4"],
         "output": ["output@0[0]"]
       },
       {
         "type": "builtin", "id": "AND@5", "loc": "12:22",
-        "input": ["code@0[0]", "$o@2", "$o@3"],
+        "input": ["code@0[0]", "$i2@4", "$i3@4"],
         "output": ["output@0[1]"]
       },
       {
         "type": "builtin", "id": "AND@6", "loc": "12:22",
-        "input": ["$o@1", "code@0[1]", "$o@3"],
+        "input": ["$i1@4", "code@0[1]", "$i3@4"],
         "output": ["output@0[2]"]
       },
       {
         "type": "builtin", "id": "AND@7", "loc": "12:22",
-        "input": ["code@0[0]", "code@0[1]", "$o@3"],
+        "input": ["code@0[0]", "code@0[1]", "$i3@4"],
         "output": ["output@0[3]"]
       },
       {
         "type": "builtin", "id": "AND@8", "loc": "12:22",
-        "input": ["$o@1", "$o@2", "code@0[2]"],
+        "input": ["$i1@4", "$i2@4", "code@0[2]"],
         "output": ["output@0[4]"]
       },
       {
         "type": "builtin", "id": "AND@9", "loc": "12:22",
-        "input": ["code@0[0]", "$o@2", "code@0[2]"],
+        "input": ["code@0[0]", "$i2@4", "code@0[2]"],
         "output": ["output@0[5]"]
       },
       {
         "type": "builtin", "id": "AND@10", "loc": "12:22",
-        "input": ["$o@1", "code@0[1]", "code@0[2]"],
+        "input": ["$i1@4", "code@0[1]", "code@0[2]"],
         "output": ["output@0[6]"]
       },
       {

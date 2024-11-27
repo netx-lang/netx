@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AnalysisTest {
 
-    private static final Path TEST_DIR = Path.of("src/test/resources/");
+    private static final Path TEST_DIR = Path.of("src/test/resources/testcases");
 
     @Test
     void testSourceLocChecker() throws IOException {
@@ -83,23 +83,25 @@ class AnalysisTest {
     @Test
     void testSelector() {
         var expected = """
-                component top: [a] -> [b, c, d, e] {
+                component top: [a] -> [b, c, d, e, f] {
                     inst a of wire(bit(8))
-                    auto b, c, d, e
+                    auto b, c, d, e, f
                     #b <> a[5:3]
                     #c <> a[1]
                     #d <> a[3]
                     #e <> 7'b1001011
+                    #f <> a
                 }
                 """;
         var actual = """
-                component top: [a] -> [b, c, d, e] {
+                component top: [a] -> [b, c, d, e, f] {
                     inst a of wire(bit(8))
-                    auto b, c, d, e
+                    auto b, c, d, e, f
                     #b <> a[5:2][3:1]
                     #c <> a[1][0]
                     #d <> a[4:3][0]
                     #e <> 8'b10010110[7:1]
+                    #f <> a
                 }
                 """;
         assertEquals(

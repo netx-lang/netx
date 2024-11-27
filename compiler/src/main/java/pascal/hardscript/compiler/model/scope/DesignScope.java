@@ -21,7 +21,7 @@ public final class DesignScope extends Scope {
     private ComponentScope top;
 
     DesignScope() {
-        super(null, null);
+        super(null);
         this.dataIndexer = new AtomicInteger(0)::incrementAndGet;
         this.factory = new BuiltInComponentFactory(dataIndexer);
     }
@@ -48,7 +48,7 @@ public final class DesignScope extends Scope {
 
     @Override
     public ComponentScope instantiateComponentScope(Identifier identifier) {
-        var child = new ComponentScope(this, this, identifier);
+        var child = new ComponentScope(this, identifier);
         addChild(child);
         return child;
     }
@@ -73,7 +73,7 @@ public final class DesignScope extends Scope {
         return Objects.requireNonNull(definitions.get(id));
     }
 
-    public void forEachSubscope(Consumer<Scope> consumer) {
+    public void forEachSubScope(Consumer<Scope> consumer) {
         Stack<Scope> stack = new Stack<>();
         stack.push(getTop());
         while (!stack.isEmpty()) {

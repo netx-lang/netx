@@ -1,24 +1,25 @@
 package pascal.hardscript.compiler.model.scope;
 
+import pascal.hardscript.compiler.analysis.AssignManager;
 import pascal.hardscript.compiler.model.component.Signature;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public final class ComponentScope extends Scope {
     private final Identifier identifier;
+    private final Set<Alias> aliases = new HashSet<>();
+    private final AssignManager manager = new AssignManager(this);
+    private Signature signature;
     private final List<Instance> inputs = new ArrayList<>();
     private final List<Instance> outputs = new ArrayList<>();
-    private Signature signature;
     private Attributes attributes;
 
-    ComponentScope(DesignScope global, Scope parent, Identifier identifier) {
-        super(global, parent);
+    ComponentScope(DesignScope global, Identifier identifier) {
+        super(global);
         this.identifier = identifier;
     }
 
@@ -60,6 +61,14 @@ public final class ComponentScope extends Scope {
 
     public void setAttributes(Attributes attributes) {
         this.attributes = attributes;
+    }
+
+    public AssignManager getManager() {
+        return manager;
+    }
+
+    public Set<Alias> getAliases() {
+        return aliases;
     }
 
     public boolean isBuiltin() {
