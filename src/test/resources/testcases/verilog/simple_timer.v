@@ -153,7 +153,7 @@ module MUX_3(
   wire [6:0] i5_34;
   wire [3:0] code; // @(61:9)
   wire [6:0] i12_34;
-  wire [6:0] out; // @(64:10)
+  wire [6:0] out; // @(64:9)
   wire [6:0] i16_34;
   wire [6:0] i2_19;
   wire [6:0] i2_17;
@@ -290,7 +290,7 @@ module MUX_2(
   wire i1_6;
   wire i2_3;
   wire [1:0] mask; // @(62:9)
-  wire out; // @(64:10)
+  wire out; // @(64:9)
   wire input_0; // @(65:16)
   wire i2_6;
   DECODER_1 inst_1(code, mask);
@@ -315,7 +315,7 @@ module MUX_1(
   wire [31:0] i1_6;
   wire [31:0] i2_3;
   wire [1:0] mask; // @(62:9)
-  wire [31:0] out; // @(64:10)
+  wire [31:0] out; // @(64:9)
   wire [31:0] input_0; // @(65:16)
   wire [31:0] i2_6;
   DECODER_1 inst_1(code, mask);

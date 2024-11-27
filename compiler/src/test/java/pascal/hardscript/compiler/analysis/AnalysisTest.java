@@ -32,8 +32,8 @@ class AnalysisTest {
                     inst b of wire(bit(4))
                     inst x of wire(bit(4))
                     inst c of wire(bit(2))
-                    #x <> OR <> [a, b]
-                    #c <> NOT <> REGISTER(clk, true) <> AND <> [a[1:0], b[1:0]]
+                    x <> OR <> [a, b]
+                    c <> NOT <> REGISTER(clk, true) <> AND <> [a[1:0], b[1:0]]
                 }
                 """;
         var actual = """
@@ -43,8 +43,8 @@ class AnalysisTest {
                     auto b
                     auto x
                     auto c
-                    #x <> OR <> [a, b]
-                    #c <> NOT <> REGISTER(clk, true) <> AND <> [a[1:0], b[1:0]]
+                    x <> OR <> [a, b]
+                    c <> NOT <> REGISTER(clk, true) <> AND <> [a[1:0], b[1:0]]
                 }
                 """;
         assertEquals(
@@ -63,16 +63,16 @@ class AnalysisTest {
         var expected = """
                 component top: [a, b] -> [e] {
                     inst a, b, c, e of wire(bit(4))
-                    #c <> AND <> [a, b]
-                    #e <> ADD <> [c, c]
+                    c <> AND <> [a, b]
+                    e <> ADD <> [c, c]
                 }
                 """;
         var actual = """
                 component top: [a, b] -> [e] {
                     inst a, b, c, e, d of wire(bit(4))
-                    #c <> AND <> [a, b]
-                    #e <> ADD <> [c, d]
-                    #d <> AND <> [a, b]
+                    c <> AND <> [a, b]
+                    e <> ADD <> [c, d]
+                    d <> AND <> [a, b]
                 }
                 """;
         assertEquals(
@@ -86,22 +86,22 @@ class AnalysisTest {
                 component top: [a] -> [b, c, d, e, f] {
                     inst a of wire(bit(8))
                     auto b, c, d, e, f
-                    #b <> a[5:3]
-                    #c <> a[1]
-                    #d <> a[3]
-                    #e <> 7'b1001011
-                    #f <> a
+                    b <> a[5:3]
+                    c <> a[1]
+                    d <> a[3]
+                    e <> 7'b1001011
+                    f <> a
                 }
                 """;
         var actual = """
                 component top: [a] -> [b, c, d, e, f] {
                     inst a of wire(bit(8))
                     auto b, c, d, e, f
-                    #b <> a[5:2][3:1]
-                    #c <> a[1][0]
-                    #d <> a[4:3][0]
-                    #e <> 8'b10010110[7:1]
-                    #f <> a
+                    b <> a[5:2][3:1]
+                    c <> a[1][0]
+                    d <> a[4:3][0]
+                    e <> 8'b10010110[7:1]
+                    f <> a
                 }
                 """;
         assertEquals(
@@ -114,13 +114,13 @@ class AnalysisTest {
         var a = """
                 component top {
                     inst a, b of wire(bit(4))
-                    #a[1:0] <> b[5:4]
+                    a[1:0] <> b[5:4]
                 }
                 """;
         var b = """
                 component top {
                     inst a, b of wire(bit(4))
-                    #a[1:0] <> AND <> [b[5:4], b[3:2]]
+                    a[1:0] <> AND <> [b[5:4], b[3:2]]
                 }
                 """;
         assertThrows(TypeCheckingException.class, () -> Builder.forExpanded().load(a).compile());

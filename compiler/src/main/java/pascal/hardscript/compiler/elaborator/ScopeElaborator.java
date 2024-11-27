@@ -117,13 +117,8 @@ final class ScopeElaborator {
             this.sourceLoc = sourceLoc;
         }
 
-        public List<Instance> instantiate(ComponentType type) {
-            var result = doInstantiate(type);
-            if (!result.source().isEmpty()) {
-                log.error("{}: Incomplete component instantiation {}", sourceLoc, type);
-                throw new CompileCancellationException();
-            }
-            return result.target();
+        public void instantiate(ComponentType type) {
+            doInstantiate(type);
         }
 
         Instantiator.ComponentPort doInstantiate(ComponentType type) {
@@ -170,9 +165,9 @@ final class ScopeElaborator {
         public Instantiator.ComponentPort instantiateBuiltinAtom(BuiltinAtom atom) {
             var component = factory.createBuiltInComponent(scope, atom);
             if (atom.getBuiltin() == BuiltinComponent.REGISTER) {
-                var clock = instantiate(requiresComponentType(sourceLoc, atom.getParameters().getFirst()));
-                requiresMatchedSize(sourceLoc, 1, clock);
-                component.getAttributes().addAttribute(Identifier.of("clock"), clock.getFirst());
+                var clock = doInstantiate(requiresComponentType(sourceLoc, atom.getParameters().getFirst()));
+                requiresMatchedSize(sourceLoc, 1, clock.target);
+                component.getAttributes().addAttribute(Identifier.of("clock"), clock.target.getFirst());
             }
             return Instantiator.ComponentPort.of(component.getOutputs(), component.getInputs());
         }

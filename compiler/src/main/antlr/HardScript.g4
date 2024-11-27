@@ -15,12 +15,12 @@ attributes
     ;
 
 element
-    : 'inst' primary_symbol (',' primary_symbol)* 'of' type=param_symbol    # DataInstantiation
-    | 'auto' primary_symbol (',' primary_symbol)*   # DataInstantiation
-    | 'for' '(' iterator ')' '{' element* '}'       # Loop
-    | binding                                       # BindingStatement
-    | expression                                    # ComponentInstantiation
-    | 'auto' expression                             # MixedInstantiation
+    : 'inst' primary_symbol (',' primary_symbol)* 'of' type=param_symbol     # DataInstantiation
+    | 'auto' primary_symbol (',' primary_symbol)*                            # DataInstantiation
+    | 'for' '(' iterator ')' '{' element* '}'                                # Loop
+    | binding                                                                # BindingStatement
+    | 'auto' expression                                                      # MixedInstantiation
+    | expression                                                             # ComponentInstantiation
     ;
 
 expression
@@ -28,7 +28,9 @@ expression
     | number                                                        # NumberExpr
     | '[' list ']'                                                  # ListExpr
     | expression (selector)+                                        # AccessExpr
-    | op=('+' | '-' | '~' | '!' | '#' | '*') expression             # UnaryExpr
+    | op='|-' expression                                            # UnaryExpr
+    | expression op='-|'                                            # UnaryExpr
+    | op=('+' | '-' | '~' | '!') expression                         # UnaryExpr
     | lhs=expression op='**' rhs=expression                         # BinaryExpr
     | lhs=expression op=('*' | '/' | '%') rhs=expression            # BinaryExpr
     | lhs=expression op=('+' | '-') rhs=expression                  # BinaryExpr

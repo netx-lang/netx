@@ -5,9 +5,9 @@ module top_1(
   input a;
   input b;
   output c;
-  wire [7:0] a; // @(2:28)
-  wire [7:0] b; // @(2:31)
-  wire [7:0] c; // @(2:10)
+  wire [7:0] a; // @(2:27)
+  wire [7:0] b; // @(2:30)
+  wire [7:0] c; // @(2:9)
   adder_1 inst_1(a, b, c);
 endmodule
 
@@ -69,10 +69,10 @@ module half_adder_1(
   input b;
   output carry;
   output out;
-  wire a; // @(18:27)
-  wire b; // @(18:30)
-  wire carry; // @(19:10)
-  wire out; // @(18:10)
+  wire a; // @(18:26)
+  wire b; // @(18:29)
+  wire carry; // @(19:9)
+  wire out; // @(18:9)
   assign out = a ^ b;
   assign carry = a & b;
 endmodule

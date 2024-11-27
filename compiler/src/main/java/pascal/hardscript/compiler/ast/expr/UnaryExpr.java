@@ -6,6 +6,7 @@ import pascal.hardscript.util.collection.BiMap;
 import java.util.Objects;
 
 import static pascal.hardscript.compiler.ast.expr.UnaryExpr.Operator.OP_MAP;
+import static pascal.hardscript.compiler.ast.expr.UnaryExpr.Operator.SOURCE;
 
 public final class UnaryExpr extends ExprNode {
     private Operator op;
@@ -59,11 +60,15 @@ public final class UnaryExpr extends ExprNode {
 
     @Override
     public String toString() {
-        return OP_MAP.getKey(op) + operand;
+        if (op == SOURCE) {
+            return operand + "-|";
+        } else {
+            return OP_MAP.getKey(op) + operand;
+        }
     }
 
     public enum Operator {
-        ADD, SUB, NOT, BITWISE_NOT, SINK, INOUT;
+        ADD, SUB, NOT, BITWISE_NOT, SINK, SOURCE;
 
         public static final BiMap<String, Operator> OP_MAP = new BiMap<>();
 
@@ -72,8 +77,8 @@ public final class UnaryExpr extends ExprNode {
             OP_MAP.put("-", SUB);
             OP_MAP.put("!", NOT);
             OP_MAP.put("~", BITWISE_NOT);
-            OP_MAP.put("#", SINK);
-            OP_MAP.put("*", INOUT);
+            OP_MAP.put("|-", SINK);
+            OP_MAP.put("-|", SOURCE);
         }
 
         public static Operator fromString(String s) {

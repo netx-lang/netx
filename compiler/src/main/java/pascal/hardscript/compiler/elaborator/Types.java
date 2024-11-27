@@ -111,7 +111,7 @@ public final class Types {
         return switch (entity) {
             case EntityList list -> makeParallelTypeFromList(list, loc);
             case ComponentType componentType -> componentType;
-            case Instance inst -> InstanceAtom.of(InstanceAtom.Mode.SOURCE, inst, loc);
+            case Instance inst -> InstanceAtom.of(InstanceAtom.Mode.BIDI, inst, loc);
             default -> {
                 log.error("{}: Cannot cast {} to component type", loc, entity);
                 throw new CompileCancellationException();

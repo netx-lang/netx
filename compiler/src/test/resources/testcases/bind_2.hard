@@ -3,7 +3,7 @@ component test {
     inst a, out of wire(bit(1))
     inst input of wire(bit(3))
 
-    #out <> AND(3) <> [gate |
+    out <> AND(3) <> [gate |
         i in [0..3],
         let gate = REGISTER(clk, true) <> AND <> [input[i], a]
     ]
