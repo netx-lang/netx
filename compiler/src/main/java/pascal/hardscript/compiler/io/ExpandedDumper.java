@@ -7,7 +7,7 @@ import pascal.hardscript.compiler.model.instance.*;
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.DesignScope;
+import pascal.hardscript.compiler.model.scope.GlobalScope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
@@ -17,12 +17,12 @@ import java.util.*;
 import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
 
 final class ExpandedDumper {
-    private final DesignScope design;
+    private final GlobalScope design;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final Map<Data, Integer> dataIndices = new HashMap<>();
 
-    public ExpandedDumper(DesignScope scope) {
+    public ExpandedDumper(GlobalScope scope) {
         this.design = scope;
     }
 

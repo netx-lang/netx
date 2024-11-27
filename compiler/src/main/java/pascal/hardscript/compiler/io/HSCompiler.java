@@ -8,7 +8,7 @@ import pascal.hardscript.compiler.antlr.HardScriptLexer;
 import pascal.hardscript.compiler.antlr.HardScriptParser;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.elaborator.Elaborator;
-import pascal.hardscript.compiler.model.scope.DesignScope;
+import pascal.hardscript.compiler.model.scope.GlobalScope;
 
 public final class HSCompiler {
     private final Configuration config;
@@ -26,20 +26,20 @@ public final class HSCompiler {
         return design;
     }
 
-    public DesignScope elaborate() {
-        DesignNode node = parse();
-        return new Elaborator(node, config).elaborate();
-    }
-
-    private static void checkType(DesignScope design) {
+    private static void checkType(GlobalScope design) {
         new MetaElimination(design).analyze();
         new DataTypeInference(design).analyze();
         new AccessChecker(design).analyze();
         new IOAnalysis(design).analyze();
     }
 
+    public GlobalScope elaborate() {
+        DesignNode node = parse();
+        return new Elaborator(node, config).elaborate();
+    }
+
     public JsonNode compile() {
-        DesignScope design = elaborate();
+        GlobalScope design = elaborate();
         checkType(design);
         if (config.fullyExpand()) {
             new GlobalAliasAnalysis(design).analyze();

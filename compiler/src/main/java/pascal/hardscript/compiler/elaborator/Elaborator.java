@@ -8,22 +8,22 @@ import pascal.hardscript.compiler.io.Configuration;
 import pascal.hardscript.compiler.model.component.ComponentAtom;
 import pascal.hardscript.compiler.model.component.Signature;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.DesignScope;
+import pascal.hardscript.compiler.model.scope.GlobalScope;
 
 public final class Elaborator {
     private static final Logger log = LoggerFactory.getLogger(Elaborator.class);
 
     private final DesignNode node;
-    private final DesignScope design;
+    private final GlobalScope design;
     private final Configuration config;
 
     public Elaborator(DesignNode node, Configuration config) {
         this.node = node;
-        this.design = DesignScope.newDesign(node);
+        this.design = GlobalScope.newDesign(node);
         this.config = config;
     }
 
-    public DesignScope elaborate() {
+    public GlobalScope elaborate() {
         var topNode = findTopNode();
         var topScope = design.instantiateTop(topNode.getIdentifier());
         new ScopeElaborator(config, topScope).build(topNode);

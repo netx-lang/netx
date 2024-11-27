@@ -7,7 +7,7 @@ import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.instance.Int32Value;
 import pascal.hardscript.compiler.model.instance.selector.BitSelector;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.DesignScope;
+import pascal.hardscript.compiler.model.scope.GlobalScope;
 import pascal.hardscript.util.lang.Identifier;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class EvaluatorUnitTest {
 
-    private static DesignScope loadDesign(String code) {
+    private static GlobalScope loadDesign(String code) {
         return Builder.forExpanded().load(CharStreams.fromString(code)).elaborate();
     }
 

@@ -11,27 +11,27 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public abstract sealed class Scope permits ComponentScope, DesignScope {
+public abstract sealed class Scope permits ComponentScope, GlobalScope {
     private final MapBinding binding = MapBinding.ofEmpty();
+    private final List<ComponentScope> children;
     private final Evaluator evaluator;
-    private final DesignScope global;
-    private final List<Scope> children;
+    private final GlobalScope global;
 
-    protected Scope(DesignScope global) {
+    protected Scope(GlobalScope global) {
         this.global = global;
         this.children = new ArrayList<>();
         this.evaluator = new Evaluator(this);
     }
 
-    public DesignScope getGlobal() {
+    public GlobalScope getGlobal() {
         return global;
     }
 
-    public List<Scope> getChildren() {
+    public List<ComponentScope> getChildren() {
         return children;
     }
 
-    public void addChild(Scope child) {
+    public void addChild(ComponentScope child) {
         children.add(child);
     }
 

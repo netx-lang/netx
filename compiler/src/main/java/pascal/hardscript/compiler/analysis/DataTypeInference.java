@@ -10,7 +10,7 @@ import pascal.hardscript.compiler.model.instance.Data;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.DesignScope;
+import pascal.hardscript.compiler.model.scope.GlobalScope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
@@ -26,7 +26,7 @@ public final class DataTypeInference extends ModelAnalysis {
     private final List<DataConstraint> constraints = new LinkedList<>();
     private final Queue<Instance> workList = new LinkedList<>();
 
-    public DataTypeInference(DesignScope design) {
+    public DataTypeInference(GlobalScope design) {
         super(design);
     }
 
@@ -39,12 +39,11 @@ public final class DataTypeInference extends ModelAnalysis {
 
     public void collectTypeConstraints() {
         design.forEachSubScope(scope -> {
-            for (var alias : ((ComponentScope) scope).getAliases()) {
+            for (var alias : scope.getAliases()) {
                 addBinaryConstraint(EqualTypeConstraint.of(alias.lhs(), alias.rhs()));
             }
-            var component = (ComponentScope) scope;
-            if (component.isBuiltin()) {
-                collectConstraintsInBuiltin(component);
+            if (scope.isBuiltin()) {
+                collectConstraintsInBuiltin(scope);
             }
         });
     }

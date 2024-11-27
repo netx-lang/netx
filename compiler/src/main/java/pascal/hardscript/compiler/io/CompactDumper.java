@@ -8,7 +8,7 @@ import pascal.hardscript.compiler.model.instance.*;
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.DesignScope;
+import pascal.hardscript.compiler.model.scope.GlobalScope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
@@ -21,15 +21,15 @@ import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
 import static pascal.hardscript.util.lang.BuiltinComponent.isBuiltin;
 
 final class CompactDumper {
-    private final DesignScope designScope;
+    private final GlobalScope globalScope;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final ArrayNode design;
     private final SignatureManager manager = new SignatureManager();
     private final List<ObjectNode> definitions = new LinkedList<>();
 
-    public CompactDumper(DesignScope scope) {
-        this.designScope = scope;
+    public CompactDumper(GlobalScope scope) {
+        this.globalScope = scope;
         this.design = objectMapper.createArrayNode();
     }
 
@@ -57,7 +57,7 @@ final class CompactDumper {
     }
 
     public ArrayNode dump() {
-        var top = designScope.getTop();
+        var top = globalScope.getTop();
         definitions.addFirst(dumperOf(top).dump());
         definitions.forEach(design::add);
         return design;

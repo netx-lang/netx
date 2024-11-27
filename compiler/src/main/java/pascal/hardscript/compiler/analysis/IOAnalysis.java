@@ -12,7 +12,7 @@ import pascal.hardscript.compiler.model.instance.selector.PartSelector;
 import pascal.hardscript.compiler.model.instance.selector.Selector;
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.DesignScope;
+import pascal.hardscript.compiler.model.scope.GlobalScope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.SourceLoc;
 
@@ -25,7 +25,7 @@ public class IOAnalysis extends ModelAnalysis{
     private final Map<Data, DataCoverage> def = new HashMap<>();
     private final Map<Data, DataCoverage> use = new HashMap<>();
 
-    public IOAnalysis(DesignScope design) {
+    public IOAnalysis(GlobalScope design) {
         super(design);
     }
 
@@ -50,8 +50,8 @@ public class IOAnalysis extends ModelAnalysis{
     @Override
     public void analyze() {
         design.forEachSubScope(scope -> {
-            if (scope instanceof ComponentScope component && !component.isBuiltin()) {
-                analyze(component);
+            if (!scope.isBuiltin()) {
+                analyze(scope);
             }
         });
     }

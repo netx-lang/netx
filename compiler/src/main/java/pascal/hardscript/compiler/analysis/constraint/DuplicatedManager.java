@@ -3,7 +3,6 @@ package pascal.hardscript.compiler.analysis.constraint;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.collection.UnionFind;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
@@ -18,9 +17,8 @@ import static pascal.hardscript.util.lang.BuiltinComponent.NO_DUMP;
 public class DuplicatedManager {
     private final UnionFind<Instance> set = new UnionFind<>();
 
-    public void collectDuplicatedComponents(Scope scope) {
+    public void collectDuplicatedComponents(ComponentScope scope) {
         Map<Identifier, List<ComponentScope>> idGroups = scope.getChildren().stream()
-                .map(ComponentScope.class::cast)
                 .collect(Collectors.groupingBy(ComponentScope::getIdentifier));
 
         List<ComponentScope> toRemove = new LinkedList<>();

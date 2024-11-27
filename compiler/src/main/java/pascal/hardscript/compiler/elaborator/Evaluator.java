@@ -19,7 +19,7 @@ import pascal.hardscript.compiler.model.instance.selector.Selector;
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
-import pascal.hardscript.compiler.model.scope.DesignScope;
+import pascal.hardscript.compiler.model.scope.GlobalScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.compiler.model.scope.binding.Binding;
 import pascal.hardscript.compiler.model.scope.binding.MapBinding;
@@ -64,7 +64,7 @@ public final class Evaluator {
     );
 
     private final LinkedList<Binding> bindings = new LinkedList<>();
-    private final DesignScope global;
+    private final GlobalScope global;
     private final Scope scope;
 
     private EvaluationMode mode = EvaluationMode.COMMON;

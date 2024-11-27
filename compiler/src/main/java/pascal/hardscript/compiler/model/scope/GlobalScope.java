@@ -14,20 +14,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public final class DesignScope extends Scope {
-    private final Supplier<Integer> dataIndexer;
+public final class GlobalScope extends Scope {
     private final Map<Identifier, ComponentNode> definitions = new HashMap<>();
     private final BuiltInComponentFactory factory;
+    private final Supplier<Integer> dataIndexer;
     private ComponentScope top;
 
-    DesignScope() {
+    GlobalScope() {
         super(null);
         this.dataIndexer = new AtomicInteger(0)::incrementAndGet;
         this.factory = new BuiltInComponentFactory(dataIndexer);
     }
 
-    public static DesignScope newDesign(DesignNode node) {
-        var scope = new DesignScope();
+    public static GlobalScope newDesign(DesignNode node) {
+        var scope = new GlobalScope();
         var evaluator = scope.getEvaluator();
         for (var binding : node.getBindings()) {
             scope.bind(evaluator.evaluateBinding(binding));
@@ -73,11 +73,11 @@ public final class DesignScope extends Scope {
         return Objects.requireNonNull(definitions.get(id));
     }
 
-    public void forEachSubScope(Consumer<Scope> consumer) {
-        Stack<Scope> stack = new Stack<>();
+    public void forEachSubScope(Consumer<ComponentScope> consumer) {
+        Stack<ComponentScope> stack = new Stack<>();
         stack.push(getTop());
         while (!stack.isEmpty()) {
-            Scope scope = stack.pop();
+            ComponentScope scope = stack.pop();
             consumer.accept(scope);
             stack.addAll(scope.getChildren());
         }

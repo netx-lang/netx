@@ -12,13 +12,14 @@ import java.util.*;
 public final class ComponentScope extends Scope {
     private final Identifier identifier;
     private final Set<Alias> aliases = new HashSet<>();
-    private final AssignManager manager = new AssignManager(this);
+
     private Signature signature;
+    private final AssignManager manager = new AssignManager(this);
     private final List<Instance> inputs = new ArrayList<>();
     private final List<Instance> outputs = new ArrayList<>();
     private Attributes attributes;
 
-    ComponentScope(DesignScope global, Identifier identifier) {
+    ComponentScope(GlobalScope global, Identifier identifier) {
         super(global);
         this.identifier = identifier;
     }

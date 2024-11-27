@@ -10,14 +10,13 @@ import pascal.hardscript.compiler.model.instance.selector.BitSelector;
 import pascal.hardscript.compiler.model.instance.selector.PartSelector;
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.compiler.model.scope.DesignScope;
-import pascal.hardscript.compiler.model.scope.Scope;
+import pascal.hardscript.compiler.model.scope.GlobalScope;
 
 public class AccessChecker extends ModelAnalysis {
 
     private static final Logger log = LoggerFactory.getLogger(AccessChecker.class);
 
-    public AccessChecker(DesignScope design) {
+    public AccessChecker(GlobalScope design) {
         super(design);
     }
 
@@ -47,15 +46,13 @@ public class AccessChecker extends ModelAnalysis {
         design.forEachSubScope(this::analyze);
     }
 
-    private void analyze(Scope scope) {
-        if (scope instanceof ComponentScope component) {
-            component.getInputs().forEach(AccessChecker::check);
-            component.getOutputs().forEach(AccessChecker::check);
-            component.getBinding().getEntities().forEach(AccessChecker::check);
-            component.getAliases().forEach(alias -> {
-                check(alias.lhs());
-                check(alias.rhs());
-            });
-        }
+    private void analyze(ComponentScope scope) {
+        scope.getInputs().forEach(AccessChecker::check);
+        scope.getOutputs().forEach(AccessChecker::check);
+        scope.getBinding().getEntities().forEach(AccessChecker::check);
+        scope.getAliases().forEach(alias -> {
+            check(alias.lhs());
+            check(alias.rhs());
+        });
     }
 }

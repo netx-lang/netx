@@ -1,12 +1,12 @@
 package pascal.hardscript.compiler.analysis;
 
 import pascal.hardscript.compiler.model.instance.Instance;
-import pascal.hardscript.compiler.model.scope.DesignScope;
+import pascal.hardscript.compiler.model.scope.GlobalScope;
 
 import java.util.function.Predicate;
 
 public class MetaElimination extends ModelAnalysis {
-    public MetaElimination(DesignScope design) {
+    public MetaElimination(GlobalScope design) {
         super(design);
     }
 
