@@ -135,7 +135,7 @@ component ImmSelector: [extOP, instr] -> [imm] {
 
     inst mask of wire(bit(8))
     mask <> DECODER(3) <> extOP
-    let branch(i, pred) = MUX(1) <> [CAST <> 1'b0, pred, mask[i]-|]
+    let branch(i, pred) = MUX(1) <> [CAST <> 1'b0, pred, mask[i]-#]
     imm <> OR(5) <> [
         branch(3'b000, immI), branch(3'b001, immU), 
         branch(3'b010, immS), branch(3'b011, immB), branch(3'b100, immJ)
@@ -150,8 +150,8 @@ component ALU: [a, b, ctl] -> [result, zero, less] {
 
     inst mask       of wire(bit(8))
     mask <> DECODER(3) <> ctl[2:0]
-    let firBranch(i, pred) = MUX(1) <> [CAST <> 1'b0, pred, mask[i]-|]
-    let secBranch(i, b0, b1) = firBranch(i, MUX(1) <> [b0, b1, ctl[3]-|])
+    let firBranch(i, pred) = MUX(1) <> [CAST <> 1'b0, pred, mask[i]-#]
+    let secBranch(i, b0, b1) = firBranch(i, MUX(1) <> [b0, b1, ctl[3]-#])
     result <> OR(8) <> [
         secBranch(3'b000, ADD <> [a, b], SUB <> [a, b]),
         firBranch(3'b001, SHL <> [a, b[4:0]]),
@@ -175,7 +175,7 @@ component BranchCond : [branch_ctl, zero, less] -> [PCAsrc, PCBsrc] {
     inst result of wire(bit(2))
     inst mask   of wire(bit(8))
     mask <> DECODER(3) <> branch_ctl
-    let branch(i, pred) = MUX(1) <> [CAST <> 1'b0, pred, mask[i]-|]
+    let branch(i, pred) = MUX(1) <> [CAST <> 1'b0, pred, mask[i]-#]
     result <> OR(7) <> [
         branch(3'b000, 2'b00),
         branch(3'b001, 2'b10),
@@ -206,7 +206,7 @@ component RegFile : [clk, RaAddr, RbAddr, WrAddr, WrValue] -> [Ra, Rb] {
             <> MUX(1) <> [regFile_${i}, WrValue, mask[i]]
     }
 
-    let INDEX_ACCESS = MUX(5) <> [regFile_${i}-| | i in [0..32]] :: [TO]
+    let INDEX_ACCESS = MUX(5) <> [regFile_${i}-# | i in [0..32]] :: [TO]
     
     Ra <> INDEX_ACCESS <> RaAddr
     Rb <> INDEX_ACCESS <> RbAddr
