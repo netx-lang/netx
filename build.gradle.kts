@@ -19,6 +19,9 @@ tasks.compileJava {
 }
 
 tasks.jar {
+    dependsOn(":util:jar")
+    dependsOn(":hson:jar")
+    dependsOn(":compiler:jar")
     manifest {
         attributes(
             "Main-Class" to "pascal.hardscript.Main",
@@ -34,7 +37,6 @@ tasks.jar {
 val cppBuildDir = file("$projectDir/hson/cpp-build")
 val cmakeSourceDir = file("$projectDir/hson")
 
-// Configure CMake task
 tasks.register("configureCMake", Exec::class) {
     group = "build"
     description = "Configures the C++ project using CMake."
@@ -43,14 +45,13 @@ tasks.register("configureCMake", Exec::class) {
         "cmake",
         cmakeSourceDir.absolutePath,
         "-DCMAKE_BUILD_TYPE=Release",
-        "-DBUILD_TESTS=OFF" // Disable tests by default
+        "-DBUILD_TESTS=OFF"
     )
     doFirst {
         cppBuildDir.mkdirs()
     }
 }
 
-// Build CMake task
 tasks.register("buildCMake", Exec::class) {
     group = "build"
     description = "Builds the C++ project using CMake."
@@ -59,7 +60,6 @@ tasks.register("buildCMake", Exec::class) {
     dependsOn("configureCMake")
 }
 
-// Clean CMake build
 tasks.register("cleanCMake", Exec::class) {
     group = "build"
     description = "Cleans the C++ build directory."
@@ -67,12 +67,10 @@ tasks.register("cleanCMake", Exec::class) {
     commandLine = listOf("cmake", "--build", ".", "--target", "clean")
 }
 
-// Integrate with Gradle clean task
 tasks.clean {
     dependsOn("cleanCMake")
 }
 
-// Ensure Gradle build depends on the CMake build
 tasks.build {
     dependsOn("buildCMake")
 }

@@ -10,6 +10,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
+option(BUILD_TESTS "Build tests" ON)
+
 # Fetch nlohmann/json
 include(FetchContent)
 
@@ -18,15 +20,17 @@ FetchContent_Declare(
         GIT_REPOSITORY https://github.com/nlohmann/json.git
         GIT_TAG v3.11.3
 )
+FetchContent_MakeAvailable(nlohmann_json)
 
-FetchContent_Declare(
-        googletest
-        GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG release-1.12.1
-)
-
-FetchContent_MakeAvailable(nlohmann_json googletest)
-
+if(BUILD_TESTS)
+    FetchContent_Declare(
+            googletest
+            GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG release-1.12.1
+    )
+    FetchContent_MakeAvailable(googletest)
+endif()
+        
 file(GLOB SOURCES
         "src/main/cpp/simulator/*.cpp"
         "src/main/cpp/simulator/*.h"
@@ -44,7 +48,6 @@ target_link_libraries(simulator PRIVATE nlohmann_json::nlohmann_json)
 # Include directories (optional, nlohmann/json is header-only)
 target_include_directories(simulator PRIVATE ${nlohmann_json_SOURCE_DIR}/include)
 
-option(BUILD_TESTS "Build tests" ON)
 
 if(BUILD_TESTS)
     file(GLOB TEST_SOURCES "src/test/cpp/simulator/*.cpp")

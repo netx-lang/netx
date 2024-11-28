@@ -4,7 +4,7 @@ Usage:
         [--compact] 
         [--top=<name>] 
         [--output=<filename>]
-    hs run <source> [--interactive] [--top=<name>]
+    hs run <source> [--top=<name>]
 
 Options:
     -o, --output=<filename>       Output file
@@ -12,7 +12,6 @@ Options:
     -e, --expanded                Compile the source code to expanded JSON representation
     -t, --top=<name>              Name of the top component
     -a, --arguments=<arguments>   Arguments to pass to the compiler
-    -i, --interactive             Run in interactive mode
 """
 from docopt import docopt
 import subprocess
