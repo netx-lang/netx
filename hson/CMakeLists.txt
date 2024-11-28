@@ -38,38 +38,31 @@ file(GLOB SOURCES
         "src/main/cpp/simulator/model/*.h")
 list(FILTER SOURCES EXCLUDE REGEX "src/main/cpp/simulator/main.cpp")
 
-# Add the executable
 add_executable(simulator
         src/main/cpp/simulator/main.cpp ${SOURCES})
 
-# Link the nlohmann/json library
 target_link_libraries(simulator PRIVATE nlohmann_json::nlohmann_json)
 
-# Include directories (optional, nlohmann/json is header-only)
 target_include_directories(simulator PRIVATE ${nlohmann_json_SOURCE_DIR}/include)
 
 
 if(BUILD_TESTS)
     file(GLOB TEST_SOURCES "src/test/cpp/simulator/*.cpp")
 
-    # Add test executable
     add_executable(simulator_tests ${TEST_SOURCES} ${SOURCES})
 
-    # Link the test executable with the necessary libraries
     target_link_libraries(simulator_tests PRIVATE
             gtest
             gtest_main
             nlohmann_json::nlohmann_json
     )
 
-    # Include directories for tests
     target_include_directories(simulator_tests PRIVATE
             "src/main/cpp/simulator"
             "src/main/cpp/simulator/model"
             ${nlohmann_json_SOURCE_DIR}/include
     )
 
-    # Discover and add tests automatically
     include(GoogleTest)
     gtest_discover_tests(simulator_tests)
 endif()
