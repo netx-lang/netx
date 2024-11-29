@@ -4,7 +4,7 @@
 
 #include "BitVector.h"
 #include "Selector.h"
-#include "SoureceLoc.h"
+#include "SourceLoc.h"
 
 namespace hson {
     class Selector;
