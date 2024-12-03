@@ -1,7 +1,7 @@
 component test {
-    inst clk of clock()
-    inst a, out of wire(bit(1))
-    inst input of wire(bit(3))
+    wire clk of clock()
+    wire a, out of bit(1)
+    wire input of bit(3)
 
     out <> AND(3) <> [gate |
         i in [0..3],

@@ -27,19 +27,19 @@ class AnalysisTest {
     void testDataTypeInference() {
         var expected = """
                 component top {
-                    inst clk of clock()
-                    inst a of wire(bit(4))
-                    inst b of wire(bit(4))
-                    inst x of wire(bit(4))
-                    inst c of wire(bit(2))
+                    wire clk of clock()
+                    wire a of bit(4)
+                    wire b of bit(4)
+                    wire x of bit(4)
+                    wire c of bit(2)
                     x <> OR <> [a, b]
                     c <> NOT <> REGISTER(clk, true) <> AND <> [a[1:0], b[1:0]]
                 }
                 """;
         var actual = """
                 component top {
-                    inst clk of clock()
-                    inst a of wire(bit(4))
+                    wire clk of clock()
+                    wire a of bit(4)
                     auto b
                     auto x
                     auto c
@@ -62,14 +62,14 @@ class AnalysisTest {
     void testDuplicatedElimination() {
         var expected = """
                 component top: [a, b] -> [e] {
-                    inst a, b, c, e of wire(bit(4))
+                    wire a, b, c, e of bit(4)
                     c <> AND <> [a, b]
                     e <> ADD <> [c, c]
                 }
                 """;
         var actual = """
                 component top: [a, b] -> [e] {
-                    inst a, b, c, e, d of wire(bit(4))
+                    wire a, b, c, e, d of bit(4)
                     c <> AND <> [a, b]
                     e <> ADD <> [c, d]
                     d <> AND <> [a, b]
@@ -84,7 +84,7 @@ class AnalysisTest {
     void testSelector() {
         var expected = """
                 component top: [a] -> [b, c, d, e, f] {
-                    inst a of wire(bit(8))
+                    wire a of bit(8)
                     auto b, c, d, e, f
                     b <> a[5:3]
                     c <> a[1]
@@ -95,7 +95,7 @@ class AnalysisTest {
                 """;
         var actual = """
                 component top: [a] -> [b, c, d, e, f] {
-                    inst a of wire(bit(8))
+                    wire a of bit(8)
                     auto b, c, d, e, f
                     b <> a[5:2][3:1]
                     c <> a[1][0]
@@ -113,13 +113,13 @@ class AnalysisTest {
     void testInvalidAccess() {
         var a = """
                 component top {
-                    inst a, b of wire(bit(4))
+                    wire a, b of bit(4)
                     a[1:0] <> b[5:4]
                 }
                 """;
         var b = """
                 component top {
-                    inst a, b of wire(bit(4))
+                    wire a, b of bit(4)
                     a[1:0] <> AND <> [b[5:4], b[3:2]]
                 }
                 """;

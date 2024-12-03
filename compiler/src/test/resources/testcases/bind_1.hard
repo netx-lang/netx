@@ -1,5 +1,5 @@
 component test : [a, b, c] -> [d] {
-    inst a, b, c, d of wire(bit(1))
+    wire a, b, c, d of bit(1)
     let gate = NOT <> AND <> [NOT, NOT]
 
     d <> gate <> [gate <> [a, b], c]

@@ -15,12 +15,17 @@ attributes
     ;
 
 element
-    : 'inst' primary_symbol (',' primary_symbol)* 'of' type=param_symbol     # DataInstantiation
-    | 'auto' primary_symbol (',' primary_symbol)*                            # DataInstantiation
-    | 'for' '(' iterator ')' '{' element* '}'                                # Loop
-    | binding                                                                # BindingStatement
-    | 'auto' expression                                                      # MixedInstantiation
-    | expression                                                             # ComponentInstantiation
+    : kind='wire'   primary_symbol_list 'of' type=symbol   # DataInstantiation
+    | kind='bundle' primary_symbol_list 'of' type=symbol   # DataInstantiation
+    | kind='auto'   primary_symbol_list                    # DataInstantiation
+    | expression                                           # ComponentInstantiation
+    | 'auto' expression                                    # MixedInstantiation
+    | binding                                              # BindingStatement
+    | 'for' '(' iterator ')' '{' element* '}'              # Loop
+    ;
+
+primary_symbol_list
+    : primary_symbol (',' primary_symbol)*
     ;
 
 expression
@@ -28,6 +33,7 @@ expression
     | number                                                        # NumberExpr
     | '[' list ']'                                                  # ListExpr
     | expression (selector)+                                        # AccessExpr
+    | expression '.' primary_symbol                                 # FieldExpr
     | op='#-' expression                                            # UnaryExpr
     | expression op='-#'                                            # UnaryExpr
     | op=('+' | '-' | '~' | '!') expression                         # UnaryExpr

@@ -194,6 +194,14 @@ public interface ASTListener {
         exitDefault(node);
     }
 
+    default void enter(FieldExpr node) {
+        enterDefault(node);
+    }
+
+    default void exit(FieldExpr node) {
+        exitDefault(node);
+    }
+
     default void enter(IdentifierSymbol node) {
         enterDefault(node);
     }

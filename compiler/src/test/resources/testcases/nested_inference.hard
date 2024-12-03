@@ -1,5 +1,5 @@
 component top {
-    inst a of wire(bit(3))
+    wire a of bit(3)
     auto b <> sub <> a
 }
 component sub: [a] -> [b] {

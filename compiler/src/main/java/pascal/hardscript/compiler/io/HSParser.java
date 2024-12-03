@@ -91,14 +91,40 @@ public final class HSParser {
     }
 
     static DataInstantiationNode parseDataInstantiationNode(DataInstantiationContext ctx) {
-        ParamSymbolExpr type = ctx.type == null ? null : parseParamSymbolExpr(ctx.type);
-        return DataInstantiationNode.of(parsePrimarySymbolList(ctx.primary_symbol()), type);
+        SymbolExpr type;
+        DataInstantiationNode.Kind kind;
+        var declarations = parsePrimarySymbolList(ctx.primary_symbol_list());
+        switch (ctx.kind.getText()) {
+            case "wire" -> {
+                kind = DataInstantiationNode.Kind.WIRE;
+                type = parseSymbolExpr(ctx.type);
+            }
+            case "auto" -> {
+                kind = DataInstantiationNode.Kind.WIRE;
+                type = null;
+            }
+            case "bundle" -> {
+                kind = DataInstantiationNode.Kind.BUNDLE;
+                type = parseSymbolExpr(ctx.type);
+            }
+            default -> throw new ShallNotReachHereError();
+        }
+        return DataInstantiationNode.of(kind, declarations, type);
+    }
+
+    static List<PrimarySymbol> parsePrimarySymbolList(Primary_symbol_listContext ctx) {
+        List<PrimarySymbol> result = new ArrayList<>();
+        for (var sub : ctx.primary_symbol()) {
+            result.add(parsePrimarySymbol(sub));
+        }
+        return result;
     }
 
     static ExprNode parseExpr(ExpressionContext ctx) {
         var result = switch (ctx) {
             case ListExprContext sub -> parseListExpr(sub);
             case UnaryExprContext sub -> parseUnaryExpr(sub);
+            case FieldExprContext sub -> parseFieldExpr(sub);
             case SymbolExprContext sub -> parseSymbolExpr(sub);
             case NumberExprContext sub -> parseNumberExpr(sub);
             case AccessExprContext sub -> parseAccessExpr(sub);
@@ -190,6 +216,12 @@ public final class HSParser {
         return BitVectorNumber.of(BitVector.parse(literal[1].substring(1), size, radix));
     }
 
+    static ExprNode parseFieldExpr(FieldExprContext ctx) {
+        return FieldExpr.of(
+                parseExpr(ctx.expression()),
+                parsePrimarySymbol(ctx.primary_symbol()));
+    }
+
     static ExprNode parseAccessExpr(AccessExprContext ctx) {
         var result = parseExpr(ctx.expression());
         for (var selector : ctx.selector()) {
@@ -246,14 +278,6 @@ public final class HSParser {
         List<ExprNode> result = new ArrayList<>();
         for (var expr : list) {
             result.add(parseExpr(expr));
-        }
-        return result;
-    }
-
-    static List<PrimarySymbol> parsePrimarySymbolList(List<Primary_symbolContext> list) {
-        List<PrimarySymbol> result = new ArrayList<>();
-        for (var symbol : list) {
-            result.add(parsePrimarySymbol(symbol));
         }
         return result;
     }

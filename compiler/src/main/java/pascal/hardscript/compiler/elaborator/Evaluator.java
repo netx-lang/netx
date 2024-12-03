@@ -17,13 +17,13 @@ import pascal.hardscript.compiler.model.instance.selector.BitSelector;
 import pascal.hardscript.compiler.model.instance.selector.PartSelector;
 import pascal.hardscript.compiler.model.instance.selector.Selector;
 import pascal.hardscript.compiler.model.instance.type.BitType;
-import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.GlobalScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.compiler.model.scope.binding.Binding;
 import pascal.hardscript.compiler.model.scope.binding.MapBinding;
 import pascal.hardscript.compiler.model.scope.binding.SingleBinding;
+import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
@@ -123,12 +123,17 @@ public final class Evaluator {
         return switch (expr) {
             case ListExpr sub -> evaluateListExpr(sub);
             case UnaryExpr sub -> evaluateUnaryExpr(sub);
+            case FieldExpr sub -> evaluateFieldExpr(sub);
             case AccessExpr sub -> evaluateAccessExpr(sub);
             case BinaryExpr sub -> evaluateBinaryExpr(sub);
             case NumberExpr sub -> evaluateNumberExpr(sub);
             case SymbolExpr sub -> evaluateSymbolExpr(sub);
             case ConditionalExpr sub -> evaluateConditionalExpr(sub);
         };
+    }
+
+    private Entity evaluateFieldExpr(FieldExpr expr) {
+        throw new TodoException(); // TODO:
     }
 
     private Entity evaluateAccessExpr(AccessExpr expr) {
@@ -326,9 +331,10 @@ public final class Evaluator {
 
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         requiresMatchedSize(sourceLoc, 1, arguments);
-        return Wire.Factory.of(
-                scope.getLeastUpperComponent(),
-                evaluateBitWidth(arguments.getFirst()), global.getDataIndexer());
+        mode = EvaluationMode.COMMON;
+        var bitType = BitType.of(evaluateToIntegerValue(arguments.getFirst()).toInt());
+        mode = EvaluationMode.DATA_FACTORY;
+        return Wire.Factory.of(scope.getLeastUpperComponent(), bitType, global.getDataIndexer());
     }
 
     private Clock.Factory evaluateClockFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
@@ -342,19 +348,6 @@ public final class Evaluator {
         }
     }
 
-    private InstanceType evaluateBitWidth(ExprNode expr) {
-        if (expr instanceof ParamSymbolExpr spec) {
-            var identifier = getIdentifierFrom(spec.getHead());
-            if (identifier.name().equals("bit")) {
-                if (spec.getArguments().size() == 1) {
-                    return BitType.of(evaluateToIntegerValue(spec.getArguments().getFirst()).toInt());
-                }
-            }
-        }
-        log.error("{}: Unexpected bit type specification: {}", expr.getSourceLoc(), expr);
-        throw new CompileCancellationException();
-    }
-
     private Entity evaluateSymbolExpr(SymbolExpr expr) {
         return switch (expr) {
             case PrimarySymbol sub -> evaluatePrimarySymbolExpr(sub);
@@ -364,11 +357,27 @@ public final class Evaluator {
 
     private Entity evaluatePrimarySymbolExpr(PrimarySymbol expr) {
         var id = getIdentifierFrom(expr);
-        Entity entity = resolveIdentifier(id);
-        if (entity instanceof Macro macro) {
-            return evaluateMacroExpr(expr.getSourceLoc(), macro, List.of());
+        if (mode == EvaluationMode.DATA_FACTORY) {
+            if (!scope.getGlobal().hasDefinition(id)) {
+                log.error("{}: Unknown component type {}", expr.getSourceLoc(), id);
+                throw new CompileCancellationException();
+            }
+            throw new TodoException(); // TODO:
+        } else {
+            Entity entity = resolveIdentifier(id);
+            if (entity instanceof Macro macro) {
+                return evaluateMacroExpr(expr.getSourceLoc(), macro, List.of());
+            }
+            return entity;
         }
-        return entity;
+    }
+
+    private Entity evaluateParamSymbolExpr(ParamSymbolExpr expr) {
+        if (mode == EvaluationMode.DATA_FACTORY) {
+            return evaluateDataFactory(expr);
+        } else {
+            return evaluateComponentType(expr);
+        }
     }
 
     public Entity evaluateMacroExpr(SourceLoc sourceLoc, Macro marco, List<Entity> parameters) {
@@ -424,13 +433,6 @@ public final class Evaluator {
         return null;
     }
 
-    private Entity evaluateParamSymbolExpr(ParamSymbolExpr expr) {
-        return switch (mode) {
-            case COMMON, DECLARE_IN_PLACE -> evaluateComponentType(expr);
-            case DATA_FACTORY -> evaluateDataFactory(expr);
-        };
-    }
-
     private Entity evaluateComponentType(ParamSymbolExpr expr) {
         var identifier = getIdentifierFrom(expr.getHead());
         var parameters = evaluateParameters(expr);
@@ -466,7 +468,7 @@ public final class Evaluator {
         var identifier = getIdentifierFrom(expr.getHead());
         var sourceLoc = expr.getSourceLoc();
         return switch (identifier.name()) {
-            case "wire" -> evaluateWireFactory(sourceLoc, expr.getArguments());
+            case "bit" -> evaluateWireFactory(sourceLoc, expr.getArguments());
             case "clock" -> evaluateClockFactory(sourceLoc, expr.getArguments());
             default -> {
                 log.error("{}: Unknown component type {}", expr.getSourceLoc(), expr);

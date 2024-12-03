@@ -1,5 +1,5 @@
 component top {
-    inst a of wire(bit(32))
+    wire a of bit(32)
     let AA = AND <> SPLIT(2)
     a <> sub(AA) <> 1
 }

@@ -3,8 +3,8 @@ let POS_REG = REG_WRAPPER(true)
 let NEG_REG = REG_WRAPPER(false)
 
 component Divide_by_3 : [clk] -> [clk_3] {
-    inst clk, clk_3 of clock()
-    inst a, b, c    of wire(bit(1))
+    wire clk, clk_3 of clock()
+    wire a, b, c    of bit(1)
     a <> POS_REG <> AND <> [NOT <> a, NOT <> b]
     b <> POS_REG <> a
     c <> NEG_REG <> b

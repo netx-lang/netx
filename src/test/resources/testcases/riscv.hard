@@ -4,11 +4,11 @@ component riscv : [
     imemAddr, 
     dmemAddr, dmemDataIn, dmemOp, dmemWe
 ] {
-    inst clk of clock()
-    inst rst of wire(bit(1))
-    inst imemDataOut of wire(bit(32))
-    inst dmemDataOut of wire(bit(32))
-    inst PC, nextPC  of wire(bit(32))
+    wire clk of clock()
+    wire rst of bit(1)
+    wire imemDataOut of bit(32)
+    wire dmemDataOut of bit(32)
+    wire PC, nextPC  of bit(32)
 
     auto instr <> imemDataOut
     auto func7 <> instr[31:25]
@@ -43,9 +43,9 @@ component riscv : [
 }
 
 component InstrDecoder : [op_i, func3, func7] -> [extOP, regWr, branch_ctl, memToReg, memWr, memOP, aSrc, bSrc, ctl] {
-    inst op_i  of wire(bit(7))
-    inst func3 of wire(bit(3))
-    inst func7 of wire(bit(1))
+    wire op_i  of bit(7)
+    wire func3 of bit(3)
+    wire func7 of bit(1)
 
     auto op <> op_i[6:2]
     auto U_flag_0 <> EQ <> [op, 5'b01101] // lui
@@ -100,8 +100,8 @@ component InstrDecoder : [op_i, func3, func7] -> [extOP, regWr, branch_ctl, memT
         branch(OR <> [R_flag, B_flag], 2'b00)
     ]
 
-    inst de_func3 of wire(bit(8))
-    inst arith_ctl of wire(bit(4))
+    wire de_func3 of bit(8)
+    wire arith_ctl of bit(4)
     auto de_func3 <> DECODER(3) <> func3
     auto arith_ctl <> OR(8) <> [
         branch(de_func3[3'b000], CONCAT <> [func7, 3'b000]),
@@ -123,9 +123,9 @@ component InstrDecoder : [op_i, func3, func7] -> [extOP, regWr, branch_ctl, memT
 }
 
 component ImmSelector: [extOP, instr] -> [imm] {
-    inst extOP of wire(bit(3))
-    inst instr of wire(bit(32))
-    inst imm   of wire(bit(32))
+    wire extOP of bit(3)
+    wire instr of bit(32)
+    wire imm   of bit(32)
 
     auto immI <> CONCAT <> [CAST(20) <> instr[31], instr[31:20]]
     auto immU <> CONCAT <> [instr[31:12], 12'b0]
@@ -133,7 +133,7 @@ component ImmSelector: [extOP, instr] -> [imm] {
     auto immB <> CONCAT(5) <> [CAST(20) <> instr[31], instr[7], instr[30:25], instr[11:8], 1'b0]
     auto immJ <> CONCAT(5) <> [CAST(12) <> instr[31], instr[19:12], instr[20], instr[30:21], 1'b0]
 
-    inst mask of wire(bit(8))
+    wire mask of bit(8)
     mask <> DECODER(3) <> extOP
     let branch(i, pred) = MUX(1) <> [CAST <> 1'b0, pred, mask[i]-#]
     imm <> OR(5) <> [
@@ -143,12 +143,12 @@ component ImmSelector: [extOP, instr] -> [imm] {
 }
 
 component ALU: [a, b, ctl] -> [result, zero, less] {
-    inst a, b       of wire(bit(32))
-    inst ctl        of wire(bit(4))
-    inst zero, less of wire(bit(1))
-    inst result     of wire(bit(32))
+    wire a, b       of bit(32)
+    wire ctl        of bit(4)
+    wire zero, less of bit(1)
+    wire result     of bit(32)
 
-    inst mask       of wire(bit(8))
+    wire mask       of bit(8)
     mask <> DECODER(3) <> ctl[2:0]
     let firBranch(i, pred) = MUX(1) <> [CAST <> 1'b0, pred, mask[i]-#]
     let secBranch(i, b0, b1) = firBranch(i, MUX(1) <> [b0, b1, ctl[3]-#])
@@ -168,12 +168,12 @@ component ALU: [a, b, ctl] -> [result, zero, less] {
 }
 
 component BranchCond : [branch_ctl, zero, less] -> [PCAsrc, PCBsrc] {
-    inst branch_ctl     of wire(bit(3))
-    inst zero, less     of wire(bit(1))
-    inst PCAsrc, PCBsrc of wire(bit(1))
+    wire branch_ctl     of bit(3)
+    wire zero, less     of bit(1)
+    wire PCAsrc, PCBsrc of bit(1)
 
-    inst result of wire(bit(2))
-    inst mask   of wire(bit(8))
+    wire result of bit(2)
+    wire mask   of bit(8)
     mask <> DECODER(3) <> branch_ctl
     let branch(i, pred) = MUX(1) <> [CAST <> 1'b0, pred, mask[i]-#]
     result <> OR(7) <> [
@@ -191,15 +191,15 @@ component BranchCond : [branch_ctl, zero, less] -> [PCAsrc, PCBsrc] {
 
 
 component RegFile : [clk, RaAddr, RbAddr, WrAddr, WrValue] -> [Ra, Rb] {
-    inst clk                    of clock()
-    inst RaAddr, RbAddr, WrAddr of wire(bit(5))
-    inst Ra, Rb, WrValue        of wire(bit(32))
+    wire clk                    of clock()
+    wire RaAddr, RbAddr, WrAddr of bit(5)
+    wire Ra, Rb, WrValue        of bit(32)
 
     for (i in [0..32]) {
-        inst regFile_${i} of wire(bit(32))
+        wire regFile_${i} of bit(32)
     }
 
-    inst mask of wire(bit(32))
+    wire mask of bit(32)
     mask <> DECODER(5) <> WrAddr
     for (i in [0..32]) {
         regFile_${i} <> REGISTER(clk, true)
@@ -214,8 +214,8 @@ component RegFile : [clk, RaAddr, RbAddr, WrAddr, WrValue] -> [Ra, Rb] {
 
 component MUX(width) : [input_${i} | i in [0..W]] :: [code] -> [output] {
     let W = 2**width
-    inst code of wire(bit(width))
-    inst mask of wire(bit(W))
+    wire code of bit(width)
+    wire mask of bit(W)
     auto output
     for (i in [0..W]) {
         auto input_${i}
@@ -229,8 +229,8 @@ component MUX(width) : [input_${i} | i in [0..W]] :: [code] -> [output] {
 
 component DECODER(width) : [code] -> [output] {
     let W = 2**width
-    inst code   of wire(bit(width))
-    inst output of wire(bit(W))
+    wire code   of bit(width)
+    wire output of bit(W)
     for (i in [0..W]) {
         output[i] <> AND(width) <> [port |
             j in [0..width],

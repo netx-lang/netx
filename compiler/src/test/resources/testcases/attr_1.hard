@@ -1,5 +1,5 @@
 component top {
-    inst a, b of wire(bit(32))
+    wire a, b of bit(32)
     a <> sub(TO)  <> 1
     b <> sub(NOT) <> 1
 }

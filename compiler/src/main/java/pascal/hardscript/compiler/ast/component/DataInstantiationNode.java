@@ -2,23 +2,25 @@ package pascal.hardscript.compiler.ast.component;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
-import pascal.hardscript.compiler.ast.expr.ParamSymbolExpr;
 import pascal.hardscript.compiler.ast.expr.PrimarySymbol;
+import pascal.hardscript.compiler.ast.expr.SymbolExpr;
 
 import java.util.List;
 import java.util.Objects;
 
 public final class DataInstantiationNode extends ElementNode {
     private final List<PrimarySymbol> symbols;
-    private ParamSymbolExpr type;
+    private final Kind kind;
+    private SymbolExpr type;
 
-    private DataInstantiationNode(List<PrimarySymbol> symbols, ParamSymbolExpr type) {
+    private DataInstantiationNode(Kind kind, List<PrimarySymbol> symbols, SymbolExpr type) {
         this.symbols = symbols;
+        this.kind = kind;
         this.type = type;
     }
 
-    public static DataInstantiationNode of(List<PrimarySymbol> ids, ParamSymbolExpr type) {
-        return new DataInstantiationNode(ids, type);
+    public static DataInstantiationNode of(Kind kind, List<PrimarySymbol> ids, SymbolExpr type) {
+        return new DataInstantiationNode(kind, ids, type);
     }
 
     @Override
@@ -39,7 +41,7 @@ public final class DataInstantiationNode extends ElementNode {
         return type;
     }
 
-    public void setType(ParamSymbolExpr type) {
+    public void setType(SymbolExpr type) {
         this.type = type;
     }
 
@@ -60,7 +62,7 @@ public final class DataInstantiationNode extends ElementNode {
     @Override
     public String toString() {
         var sb = new StringBuilder();
-        sb.append("inst ");
+        sb.append("wire ");
         sb.append(symbols.getFirst());
         for (int i = 1; i < symbols.size(); i++) {
             sb.append(", ").append(symbols.get(i));
@@ -68,5 +70,9 @@ public final class DataInstantiationNode extends ElementNode {
         sb.append(" of ");
         sb.append(Objects.requireNonNullElse(type, "auto"));
         return sb.toString();
+    }
+
+    public enum Kind {
+        WIRE, BUNDLE
     }
 }

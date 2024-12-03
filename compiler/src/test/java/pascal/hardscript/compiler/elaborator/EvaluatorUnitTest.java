@@ -31,7 +31,7 @@ class EvaluatorUnitTest {
     void testListComprehension() {
         var component = loadSingleComponent("""
                 component inverter : [x[i] | i in [0..4]] -> [x[j] | i in [0..4], let j = 3 - i] {
-                    inst x of wire(bit(4))
+                    wire x of bit(4)
                 }
                 """);
         var data = (Instance) component.getBinding().resolve(Identifier.of("x"));
@@ -47,8 +47,8 @@ class EvaluatorUnitTest {
     void testInstanceType() {
         var code = """
                 component test : [a] -> [b] {
-                    inst a of wire(bit(4))
-                    inst b of wire(bit(1))
+                    wire a of bit(4)
+                    wire b of bit(1)
                     b <> AND <> [gate |
                         i in [0..2],
                         let gate = NOT <> AND <> [NOT, NOT]
