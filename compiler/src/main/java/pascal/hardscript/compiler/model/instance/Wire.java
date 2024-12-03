@@ -36,17 +36,13 @@ public final class Wire extends Data {
     public static class Factory extends Data.Factory<Wire> {
         private final InstanceType type;
 
-        private Factory(ComponentScope parent, InstanceType type, Supplier<Integer> indexer) {
-            super(parent, indexer);
+        public Factory(InstanceType type, Supplier<Integer> indexer) {
+            super(indexer);
             this.type = type;
         }
 
-        public static Factory of(ComponentScope parent, InstanceType type, Supplier<Integer> indexer) {
-            return new Factory(parent, type, indexer);
-        }
-
         @Override
-        public Wire create(Identifier id) {
+        public Wire create(ComponentScope parent, Identifier id) {
             return new Wire(id, parent, type, indexer.get());
         }
     }

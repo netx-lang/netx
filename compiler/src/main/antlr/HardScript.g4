@@ -3,7 +3,8 @@ grammar HardScript;
 design : (component | binding)+;
 
 component
-    : 'component' ID attributes? component_type? '{' element* '}'
+    : kind='component' ID attributes? component_type? '{' element* '}'
+    | kind='interface' ID attributes? component_type? '{' element* '}'
     ;
 
 component_type
@@ -15,13 +16,17 @@ attributes
     ;
 
 element
-    : kind='wire'   primary_symbol_list 'of' type=symbol   # DataInstantiation
-    | kind='bundle' primary_symbol_list 'of' type=symbol   # DataInstantiation
-    | kind='auto'   primary_symbol_list                    # DataInstantiation
-    | expression                                           # ComponentInstantiation
-    | 'auto' expression                                    # MixedInstantiation
-    | binding                                              # BindingStatement
-    | 'for' '(' iterator ')' '{' element* '}'              # Loop
+    : binding                                 # BindingStatement
+    | explicit_data_element                   # DataInstantiation
+    | 'auto' primary_symbol_list              # DataInstantiation
+    | 'auto' expression                       # MixedInstantiation
+    | expression                              # ComponentInstantiation
+    | 'for' '(' iterator ')' '{' element* '}' # Loop
+    ;
+
+explicit_data_element
+    : kind='wire'   primary_symbol_list 'of' type=symbol
+    | kind='bundle' primary_symbol_list 'of' type=symbol
     ;
 
 primary_symbol_list
@@ -50,6 +55,7 @@ expression
     | lhs=expression op='||' rhs=expression                         # BinaryExpr
     | lhs=expression op='::' rhs=expression                         # BinaryExpr
     | lhs=expression op='<>' rhs=expression                         # BinaryExpr
+    | lhs=expression op='<+>' rhs=expression                        # BinaryExpr
     | 'if' cond=expression
       'then' thenBranch=expression
       'else' elseBranch=expression                                  # ConditionalExpr

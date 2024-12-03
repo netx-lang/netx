@@ -75,4 +75,11 @@ public final class ComponentScope extends Scope {
     public boolean isBuiltin() {
         return BuiltinComponent.isBuiltin(identifier);
     }
+
+    @Override
+    public ComponentScope instantiateComponentScope(Identifier identifier) {
+        var child = new ComponentScope(this.getGlobal(), identifier);
+        addChild(child);
+        return child;
+    }
 }

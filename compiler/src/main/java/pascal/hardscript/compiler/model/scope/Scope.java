@@ -55,18 +55,7 @@ public abstract sealed class Scope permits ComponentScope, GlobalScope {
         binding.bind(identifier, entity);
     }
 
-    public ComponentScope instantiateComponentScope(Identifier identifier) {
-        var child = new ComponentScope(this.global, identifier);
-        addChild(child);
-        return child;
-    }
-
-    public ComponentScope getLeastUpperComponent() {
-        if (this instanceof ComponentScope component) {
-            return component;
-        }
-        return null;
-    }
+    abstract public ComponentScope instantiateComponentScope(Identifier identifier);
 
     public record Alias(Instance lhs, Instance rhs) {
         public static Alias of(Instance lhs, Instance rhs) {

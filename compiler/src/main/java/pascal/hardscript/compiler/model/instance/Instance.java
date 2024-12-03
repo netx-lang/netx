@@ -6,6 +6,8 @@ import pascal.hardscript.compiler.model.instance.selector.PartSelector;
 import pascal.hardscript.compiler.model.instance.selector.Selector;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
+import pascal.hardscript.compiler.model.scope.ComponentScope;
+import pascal.hardscript.util.lang.Identifier;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -58,4 +60,8 @@ public sealed interface Instance extends Entity permits MutableInstance, Value {
     }
 
     boolean isBuiltin();
+
+    interface Factory<T extends Instance> extends Entity {
+        T create(ComponentScope parent, Identifier id);
+    }
 }

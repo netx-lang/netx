@@ -137,7 +137,7 @@ public class BuiltInComponentFactory {
 
     private Wire newWire(ComponentScope result, String name, InstanceType type) {
         var id = Identifier.of("$" + name).setSourceLoc(result.getSourceLoc());
-        var wire = Wire.Factory.of(result, type, dataIndexer).create(id);
+        var wire = new Wire.Factory(type, dataIndexer).create(result, id);
         result.bind(wire.getIdentifier(), wire);
         return wire;
     }

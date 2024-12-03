@@ -22,6 +22,7 @@ public final class HSCompiler {
     public DesignNode parse() {
         var design = HSParser.parseDesign(buildANTLRParser().design());
         new SourceLocChecker(design).analyze();
+        new InterfaceChecker(design).analyze();
         new BindingLhsAnalysis(design).analyze();
         return design;
     }

@@ -1,9 +1,9 @@
 package pascal.hardscript.compiler.analysis;
 
 import pascal.hardscript.compiler.model.Entity;
-import pascal.hardscript.compiler.model.instance.Data;
 import pascal.hardscript.compiler.model.instance.DataAccess;
 import pascal.hardscript.compiler.model.instance.Instance;
+import pascal.hardscript.compiler.model.instance.MutableInstance;
 import pascal.hardscript.compiler.model.instance.Value;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.collection.UnionFind;
@@ -55,9 +55,7 @@ public class AliasManager {
         } else if (now instanceof Value) {
             return true;
         } else {
-            var nowData = now instanceof DataAccess access ? access.base() : (Data) now;
-            var oldData = old instanceof DataAccess access ? access.base() : (Data) old;
-            return nowData.getIndex() < oldData.getIndex();
+            return ((MutableInstance) now).getIndex() < ((MutableInstance) old).getIndex();
         }
     }
 

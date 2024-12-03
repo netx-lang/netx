@@ -27,16 +27,27 @@ import java.util.List;
 public final class HSParser {
 
     public static DesignNode parseDesign(DesignContext ctx) {
-        var bindings = ctx.binding().stream().map(HSParser::parseBinding).toList();
-        var components = ctx.component().stream().map(HSParser::parseComponent).toList();
-        return DesignNode.of(bindings, components).setSourceLoc(locationOf(ctx.getStart()));
+        DesignNode result = DesignNode.of().setSourceLoc(locationOf(ctx.getStart()));
+        for (var child : ctx.children) {
+            switch (child) {
+                case BindingContext sub -> result.addDefinition(parseBinding(sub));
+                case ComponentContext sub -> result.addDefinition(parseComponent(sub));
+                default -> throw new ShallNotReachHereError();
+            }
+        }
+        return result;
     }
 
     static ComponentNode parseComponent(ComponentContext ctx) {
+        ComponentNode.Kind kind = switch (ctx.kind.getText()) {
+            case "component" -> ComponentNode.Kind.COMPONENT;
+            case "interface" -> ComponentNode.Kind.INTERFACE;
+            default -> throw new ShallNotReachHereError();
+        };
         var attributes = parseComponentAttributes(ctx);
         var elements = parseElements(ctx.element());
-        var type = parseComponentType(ctx);
-        return ComponentNode.of(parseIdentifier(ctx.ID()), type, attributes, elements)
+        var type = parseComponentType(ctx.component_type(), locationOf(ctx.getStart()));
+        return ComponentNode.of(kind, parseIdentifier(ctx.ID()), type, attributes, elements)
                 .setSourceLoc(locationOf(ctx.getStart()));
     }
 
@@ -48,10 +59,8 @@ public final class HSParser {
                 .map(HSParser::parseIdentifier).toList();
     }
 
-    static ComponentTypeNode parseComponentType(ComponentContext ctx) {
-        var typeCtx = ctx.component_type();
-        if (typeCtx == null) {
-            var sourceLoc = locationOf(ctx.ID().getSymbol());
+    static ComponentTypeNode parseComponentType(Component_typeContext ctx, SourceLoc sourceLoc) {
+        if (ctx == null) {
             var result = ComponentTypeNode.of(CommonList.ofEmpty(), CommonList.ofEmpty());
             result.walk(new ASTListener() {
                 @Override
@@ -61,8 +70,8 @@ public final class HSParser {
             });
             return result;
         } else {
-            return ComponentTypeNode.of(parseExpr(typeCtx.from), parseExpr(typeCtx.to))
-                    .setSourceLoc(locationOf(typeCtx.getStart()));
+            return ComponentTypeNode.of(parseExpr(ctx.from), parseExpr(ctx.to))
+                    .setSourceLoc(locationOf(ctx.getStart()));
         }
     }
 
@@ -70,7 +79,7 @@ public final class HSParser {
         var result = switch (ctx) {
             case BindingStatementContext sub -> parseBinding(sub.binding());
             case MixedInstantiationContext sub -> parseMixedInstantiation(sub);
-            case DataInstantiationContext sub -> parseDataInstantiationNode(sub);
+            case DataInstantiationContext sub -> parseDataInstantiation(sub);
             case ComponentInstantiationContext sub -> parseComponentInstantiation(sub);
             case LoopContext sub -> parseLoop(sub);
             default -> throw new ShallNotReachHereError();
@@ -90,7 +99,7 @@ public final class HSParser {
         return LoopNode.of(parseGeneratorQualifier(ctx.iterator()), parseElements(ctx.element()));
     }
 
-    static DataInstantiationNode parseDataInstantiationNode(DataInstantiationContext ctx) {
+    static DataInstantiationNode parseExplicitDataInstantiation(Explicit_data_elementContext ctx) {
         SymbolExpr type;
         DataInstantiationNode.Kind kind;
         var declarations = parsePrimarySymbolList(ctx.primary_symbol_list());
@@ -99,10 +108,6 @@ public final class HSParser {
                 kind = DataInstantiationNode.Kind.WIRE;
                 type = parseSymbolExpr(ctx.type);
             }
-            case "auto" -> {
-                kind = DataInstantiationNode.Kind.WIRE;
-                type = null;
-            }
             case "bundle" -> {
                 kind = DataInstantiationNode.Kind.BUNDLE;
                 type = parseSymbolExpr(ctx.type);
@@ -110,6 +115,16 @@ public final class HSParser {
             default -> throw new ShallNotReachHereError();
         }
         return DataInstantiationNode.of(kind, declarations, type);
+    }
+
+    static DataInstantiationNode parseDataInstantiation(DataInstantiationContext ctx) {
+        if (ctx.explicit_data_element() != null) {
+            return parseExplicitDataInstantiation(ctx.explicit_data_element());
+        } else {
+            return DataInstantiationNode.ofAuto(
+                    DataInstantiationNode.Kind.WIRE,
+                    parsePrimarySymbolList(ctx.primary_symbol_list()));
+        }
     }
 
     static List<PrimarySymbol> parsePrimarySymbolList(Primary_symbol_listContext ctx) {

@@ -23,6 +23,10 @@ public final class DataInstantiationNode extends ElementNode {
         return new DataInstantiationNode(kind, ids, type);
     }
 
+    public static DataInstantiationNode ofAuto(Kind kind, List<PrimarySymbol> ids) {
+        return new DataInstantiationNode(kind, ids, null);
+    }
+
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);
@@ -43,6 +47,10 @@ public final class DataInstantiationNode extends ElementNode {
 
     public void setType(SymbolExpr type) {
         this.type = type;
+    }
+
+    public Kind getKind() {
+        return kind;
     }
 
     @Override

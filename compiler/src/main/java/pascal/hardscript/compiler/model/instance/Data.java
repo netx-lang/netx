@@ -1,6 +1,5 @@
 package pascal.hardscript.compiler.model.instance;
 
-import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
@@ -27,7 +26,8 @@ public sealed abstract class Data implements MutableInstance permits Clock, Wire
         return getIdentifier().getSourceLoc();
     }
 
-    public Integer getIndex() {
+    @Override
+    public int getIndex() {
         return index;
     }
 
@@ -53,15 +53,13 @@ public sealed abstract class Data implements MutableInstance permits Clock, Wire
         return Objects.hash(index);
     }
 
-    public abstract static class Factory<T extends Data> implements Entity {
-        protected final ComponentScope parent;
+    public abstract static class Factory<T extends Data> implements Instance.Factory<T> {
         protected final Supplier<Integer> indexer;
 
-        protected Factory(ComponentScope parent, Supplier<Integer> indexer) {
-            this.parent = parent;
+        protected Factory(Supplier<Integer> indexer) {
             this.indexer = indexer;
         }
 
-        public abstract T create(Identifier id);
+        public abstract T create(ComponentScope parent, Identifier id);
     }
 }

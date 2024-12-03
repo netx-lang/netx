@@ -8,6 +8,8 @@ import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.io.Configuration;
 import pascal.hardscript.compiler.model.EntityList;
 import pascal.hardscript.compiler.model.component.*;
+import pascal.hardscript.compiler.model.instance.Data;
+import pascal.hardscript.compiler.model.instance.DataBundle;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.Attributes;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
@@ -96,11 +98,24 @@ final class ScopeElaborator {
     }
 
     private void buildData(DataInstantiationNode node) {
-        var factory = evaluator.evaluateToDataFactory(node.getType());
-        var component = scope.getLeastUpperComponent();
+        var factory = evaluator.evaluateToInstanceFactory(node.getType());
+        switch (node.getKind()) {
+            case BUNDLE -> {
+                if (!(factory instanceof DataBundle.Factory)) {
+                    log.error("{}: Expected bundle type got {}", node.getSourceLoc(), node.getType());
+                    throw new CompileCancellationException();
+                }
+            }
+            case WIRE -> {
+                if (!(factory instanceof Data.Factory)) {
+                    log.error("{}: Expected wire type but got {}", node.getSourceLoc(), node.getType());
+                    throw new CompileCancellationException();
+                }
+            }
+        }
         node.getSymbols().stream()
                 .map(evaluator::getIdentifierFrom)
-                .forEach(id -> component.bind(id, factory.create(id)));
+                .forEach(id -> scope.bind(id, factory.create(scope, id)));
     }
 
     private void buildSubComponent(ComponentInstantiationNode instantiation) {
@@ -136,11 +151,18 @@ final class ScopeElaborator {
             var rhs = doInstantiate(sequentialType.rhs());
             var lhs = doInstantiate(sequentialType.lhs());
 
-            int size = requiresMatchedSize(sourceLoc, lhs.source(), rhs.target());
-            for (int i = 0; i < size; ++i) {
-                scope.getManager().assign(lhs.source().get(i), rhs.target().get(i));
+            List<? extends Instance> receiver;
+            if (sequentialType.tied()) {
+                receiver = ((DataBundle) lhs.target().getFirst()).flatten();
+            } else {
+                receiver = lhs.source();
             }
-            return Instantiator.ComponentPort.of(lhs.target(), rhs.source());
+
+            int size = requiresMatchedSize(sourceLoc, receiver, rhs.target());
+            for (int i = 0; i < size; ++i) {
+                scope.getManager().assign(receiver.get(i), rhs.target().get(i));
+            }
+            return ComponentPort.of(lhs.target(), rhs.source());
         }
 
         public Instantiator.ComponentPort instantiateParallelType(ParallelType parallelType) {

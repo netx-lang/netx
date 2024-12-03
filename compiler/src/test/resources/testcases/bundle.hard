@@ -1,18 +1,18 @@
 component top {
     bundle a, b of Package
     wire   load of bit(32)
-    a <> Supplier <> 114
-    b <> Supplier <> 514
+    a <> Constructor <> 114
+    b <> Constructor <> 514
     load <> ADD <> [a.load, b.load]
 }
 
-component Package: [valid, load] -> [valid, load] {
+interface Package: [valid, load] -> [valid, load] {
     wire valid of bit(1)
     wire load  of bit(32)
 }
 
-component Supplier: [load] -> [packet] {
-    wire load of bit(32)
+component Constructor: [load] -> [packet] {
+    wire   load   of bit(32)
     bundle packet of Package
-    packet <> Package <> [1'b1, load]
+    packet <+> Package <> [1'b1, load]
 }

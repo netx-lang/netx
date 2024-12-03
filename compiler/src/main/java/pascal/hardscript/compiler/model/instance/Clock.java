@@ -25,16 +25,12 @@ public final class Clock extends Data {
 
     public static class Factory extends Data.Factory<Clock> {
 
-        protected Factory(ComponentScope parent, Supplier<Integer> indexer) {
-            super(parent, indexer);
-        }
-
-        public static Factory of(ComponentScope parent, Supplier<Integer> indexer) {
-            return new Factory(parent, indexer);
+        public Factory(Supplier<Integer> indexer) {
+            super(indexer);
         }
 
         @Override
-        public Clock create(Identifier id) {
+        public Clock create(ComponentScope parent, Identifier id) {
             return new Clock(id, parent, indexer.get());
         }
     }

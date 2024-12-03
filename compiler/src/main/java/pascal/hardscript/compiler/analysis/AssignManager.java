@@ -1,9 +1,6 @@
 package pascal.hardscript.compiler.analysis;
 
-import pascal.hardscript.compiler.model.instance.Data;
-import pascal.hardscript.compiler.model.instance.DataAccess;
-import pascal.hardscript.compiler.model.instance.Instance;
-import pascal.hardscript.compiler.model.instance.MutableInstance;
+import pascal.hardscript.compiler.model.instance.*;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 
@@ -50,6 +47,7 @@ public class AssignManager {
         if (inst instanceof MutableInstance mutable) {
             return switch (mutable) {
                 case Data data -> data.getParent() == scope;
+                case DataBundle bundle -> bundle.getParent() == scope;
                 case DataAccess access -> access.base().getParent() == scope;
             };
         }

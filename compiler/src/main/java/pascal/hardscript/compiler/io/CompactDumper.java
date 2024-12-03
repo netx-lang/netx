@@ -6,10 +6,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import pascal.hardscript.compiler.model.component.Signature;
 import pascal.hardscript.compiler.model.instance.*;
 import pascal.hardscript.compiler.model.instance.type.BitType;
+import pascal.hardscript.compiler.model.instance.type.InterfaceType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.GlobalScope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
+import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 
@@ -107,7 +109,7 @@ final class CompactDumper {
         }
 
         private int indexOf(Data data) {
-            var parent = data.getParent().getLeastUpperComponent();
+            var parent = data.getParent();
             if (indexMap.containsKey(parent)) {
                 return indexMap.get(parent);
             }
@@ -212,6 +214,7 @@ final class CompactDumper {
             setType(result, "wire");
             switch (wire.getType()) {
                 case BitType type -> result.put("width", type.width());
+                case InterfaceType type -> throw new TodoException();
                 case PolyType ignored -> throw new ShallNotReachHereError();
             }
             setDataID(result, wire.getIdentifier());
@@ -239,6 +242,7 @@ final class CompactDumper {
                 String s = switch (entity) {
                     case Value value -> dumpValue(value);
                     case Data data -> data.getIdentifier().name();
+                    case DataBundle bundle -> throw new TodoException();
                     case DataAccess access -> access.base().getIdentifier().name() + access.selector();
                 };
                 array.add(s);
@@ -254,6 +258,7 @@ final class CompactDumper {
             return switch (entity) {
                 case Data data -> dumpDataRef(data);
                 case Value value -> dumpValue(value);
+                case DataBundle bundle -> throw new TodoException();
                 case DataAccess access -> dumpDataAccessRef(access);
             };
         }

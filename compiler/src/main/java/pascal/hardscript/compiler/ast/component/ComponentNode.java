@@ -10,20 +10,22 @@ import java.util.Objects;
 public final class ComponentNode extends ASTNode {
     private final List<Identifier> attributes;
     private final List<ElementNode> elements;
-    private Identifier identifier;
     private ComponentTypeNode type;
+    private final Kind kind;
+    private Identifier identifier;
 
-    private ComponentNode(Identifier identifier, ComponentTypeNode type,
+    private ComponentNode(Kind kind, Identifier identifier, ComponentTypeNode type,
                           List<Identifier> attributes, List<ElementNode> elements) {
         this.identifier = identifier;
         this.type = type;
         this.attributes = attributes;
         this.elements = elements;
+        this.kind = kind;
     }
 
-    public static ComponentNode of(Identifier id, ComponentTypeNode type,
+    public static ComponentNode of(Kind kind, Identifier id, ComponentTypeNode type,
                                    List<Identifier> arguments, List<ElementNode> elements) {
-        return new ComponentNode(id, type, arguments, elements);
+        return new ComponentNode(kind, id, type, arguments, elements);
     }
 
     @Override
@@ -60,6 +62,10 @@ public final class ComponentNode extends ASTNode {
         return attributes;
     }
 
+    public Kind getKind() {
+        return kind;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) return true;
@@ -87,5 +93,9 @@ public final class ComponentNode extends ASTNode {
         elements.forEach(stmt -> sb.append("\n").append(stmt));
         sb.append("\n}");
         return sb.toString();
+    }
+
+    public enum Kind {
+        COMPONENT, INTERFACE
     }
 }

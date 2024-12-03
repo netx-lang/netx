@@ -5,10 +5,12 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import pascal.hardscript.compiler.model.instance.*;
 import pascal.hardscript.compiler.model.instance.type.BitType;
+import pascal.hardscript.compiler.model.instance.type.InterfaceType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.GlobalScope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
+import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 
@@ -136,6 +138,7 @@ final class ExpandedDumper {
             setType(result, "wire");
             switch (wire.getType()) {
                 case BitType type -> result.put("width", type.width());
+                case InterfaceType ignored -> throw new TodoException();
                 case PolyType ignored -> throw new ShallNotReachHereError();
             }
             setDataID(result, wire);
@@ -166,6 +169,7 @@ final class ExpandedDumper {
             return switch (entity) {
                 case Data data -> dumpData(data);
                 case Value value -> dumpValue(value);
+                case DataBundle ignored -> throw new TodoException();
                 case DataAccess access -> dumpDataAccess(access);
             };
         }

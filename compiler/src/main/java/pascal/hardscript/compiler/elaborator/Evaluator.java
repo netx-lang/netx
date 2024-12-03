@@ -18,12 +18,12 @@ import pascal.hardscript.compiler.model.instance.selector.PartSelector;
 import pascal.hardscript.compiler.model.instance.selector.Selector;
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
+import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.GlobalScope;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.compiler.model.scope.binding.Binding;
 import pascal.hardscript.compiler.model.scope.binding.MapBinding;
 import pascal.hardscript.compiler.model.scope.binding.SingleBinding;
-import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
@@ -90,8 +90,16 @@ public final class Evaluator {
         return requiresIntegerValue(expr.getSourceLoc(), evaluate(expr));
     }
 
+    public int evaluateToInteger(ExprNode expr) {
+        return evaluateToIntegerValue(expr).toInt();
+    }
+
     public BooleanValue evaluateToBoolean(ExprNode expr) {
         return castToBooleanValue(expr.getSourceLoc(), evaluate(expr));
+    }
+
+    public DataBundle evaluateDataBundle(ExprNode expr) {
+        return requiresDataBundle(expr.getSourceLoc(), evaluate(expr));
     }
 
     public SingleBinding evaluateBinding(BindingNode binding) {
@@ -133,7 +141,9 @@ public final class Evaluator {
     }
 
     private Entity evaluateFieldExpr(FieldExpr expr) {
-        throw new TodoException(); // TODO:
+        var bundle = evaluateDataBundle(expr.getBase());
+        var field = getIdentifierFrom(expr.getField());
+        return bundle.getField(field);
     }
 
     private Entity evaluateAccessExpr(AccessExpr expr) {
@@ -184,8 +194,8 @@ public final class Evaluator {
     }
 
     private EntityList evaluateRangeList(RangeList list) {
-        var from = evaluateToIntegerValue(list.getFrom()).toInt();
-        var to = evaluateToIntegerValue(list.getTo()).toInt();
+        var from = evaluateToInteger(list.getFrom());
+        var to = evaluateToInteger(list.getTo());
         return EntityList.of(
                 IntStream.range(Integer.min(from, to), Integer.max(from, to))
                         .mapToObj(Int32Value::of)
@@ -278,24 +288,22 @@ public final class Evaluator {
         }
     }
 
-    public Data.Factory<?> evaluateToDataFactory(ExprNode expr) {
-        Data.Factory<?> factory;
+    public Instance.Factory<?> evaluateToInstanceFactory(ExprNode expr) {
+        Instance.Factory<?> factory;
         if (expr == null) {
-            factory = Wire.Factory.of(
-                    scope.getLeastUpperComponent(),
-                    PolyType.getInstance(), global.getDataIndexer());
+            factory = new Wire.Factory(PolyType.getInstance(), global.getDataIndexer());
         } else {
             mode = EvaluationMode.DATA_FACTORY;
-            factory = requiresDataFactory(expr.getSourceLoc(), evaluate(expr));
+            factory = requiresInstanceFactory(expr.getSourceLoc(), evaluate(expr));
             mode = EvaluationMode.COMMON;
         }
         return factory;
     }
 
     private Entity evaluateBinaryExpr(BinaryExpr expr) {
-        var sourceLoc = expr.getSourceLoc();
         return switch (expr.getOp()) {
-            case COMBINE -> evaluateSequentialType(sourceLoc, evaluate(expr.getLhs()), evaluate(expr.getRhs()));
+            case COMBINE -> evaluateSequentialType(expr, false);
+            case TIE -> evaluateSequentialType(expr, true);
             case CONCAT -> evaluateListConcat(expr);
             case ADD, SUB, MUL, DIV, MOD, POW, AND, OR, XOR, XNOR,
                  EQ, NE, LT, LE, GT, GE, ARITH_SHR, ARITH_SHL, LOGIC_SHR, LOGIC_SHL ->
@@ -323,25 +331,31 @@ public final class Evaluator {
         return EntityList.of(result);
     }
 
-    private Entity evaluateSequentialType(SourceLoc sourceLoc, Entity lhs, Entity rhs) {
-        return SequentialType.of(
-                castToComponentType(lhs, sourceLoc),
-                castToComponentType(rhs, sourceLoc));
+    private Entity evaluateSequentialType(BinaryExpr expr, boolean isTied) {
+        var leftLoc = expr.getLhs().getSourceLoc();
+        var rightLoc = expr.getRhs().getSourceLoc();
+        var rhs = castToComponentType(evaluate(expr.getRhs()), rightLoc);
+        if (isTied) {
+            var bundle = requiresDataBundle(leftLoc, evaluate(expr.getLhs()));
+            var lhs = InstanceAtom.of(InstanceAtom.Mode.BIDI, bundle, leftLoc);
+            return SequentialType.ofTied(lhs, rhs);
+        } else {
+            var lhs = castToComponentType(evaluate(expr.getLhs()), leftLoc);
+            return SequentialType.ofSplit(lhs, rhs);
+        }
     }
 
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         requiresMatchedSize(sourceLoc, 1, arguments);
         mode = EvaluationMode.COMMON;
-        var bitType = BitType.of(evaluateToIntegerValue(arguments.getFirst()).toInt());
+        var bitType = BitType.of(evaluateToInteger(arguments.getFirst()));
         mode = EvaluationMode.DATA_FACTORY;
-        return Wire.Factory.of(scope.getLeastUpperComponent(), bitType, global.getDataIndexer());
+        return new Wire.Factory(bitType, global.getDataIndexer());
     }
 
     private Clock.Factory evaluateClockFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         if (arguments.isEmpty()) {
-            return Clock.Factory.of(
-                    scope.getLeastUpperComponent(),
-                    global.getDataIndexer());
+            return new Clock.Factory(global.getDataIndexer());
         } else {
             log.error("{}: Unexpected specification for component type clock: {}", sourceLoc, arguments);
             throw new CompileCancellationException();
@@ -358,11 +372,11 @@ public final class Evaluator {
     private Entity evaluatePrimarySymbolExpr(PrimarySymbol expr) {
         var id = getIdentifierFrom(expr);
         if (mode == EvaluationMode.DATA_FACTORY) {
-            if (!scope.getGlobal().hasDefinition(id)) {
-                log.error("{}: Unknown component type {}", expr.getSourceLoc(), id);
+            if (!scope.getGlobal().hasInterface(id)) {
+                log.error("{}: Unknown interface type {}", expr.getSourceLoc(), id);
                 throw new CompileCancellationException();
             }
-            throw new TodoException(); // TODO:
+            return scope.getGlobal().getInterface(id);
         } else {
             Entity entity = resolveIdentifier(id);
             if (entity instanceof Macro macro) {
@@ -398,8 +412,8 @@ public final class Evaluator {
         if (entity == null) {
             entity = global.getEvaluator().lookup(id);
             if (entity == null) {
-                if (global.hasDefinition(id)) {
-                    entity = ComponentAtom.of(global.getDefinition(id), id);
+                if (global.hasComponent(id)) {
+                    entity = ComponentAtom.of(global.getComponent(id), id);
                 } else if (BuiltinComponent.isBuiltin(id)) {
                     entity = BuiltinAtom.of(BuiltinComponent.of(id), id.getSourceLoc());
                 }
@@ -416,8 +430,8 @@ public final class Evaluator {
 
     @Nonnull
     private Entity declareDataInPlace(Identifier id) {
-        var factory = Wire.Factory.of(scope.getLeastUpperComponent(), PolyType.getInstance(), global.getDataIndexer());
-        var data = factory.create(id);
+        var factory = new Wire.Factory(PolyType.getInstance(), global.getDataIndexer());
+        var data = factory.create((ComponentScope) scope, id);
         scope.bind(id, data);
         return data;
     }

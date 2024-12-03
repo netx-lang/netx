@@ -2,11 +2,9 @@ package pascal.hardscript.compiler.analysis;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pascal.hardscript.compiler.ast.component.ComponentNode;
 import pascal.hardscript.compiler.exception.TypeCheckingException;
-import pascal.hardscript.compiler.model.instance.Clock;
-import pascal.hardscript.compiler.model.instance.Data;
-import pascal.hardscript.compiler.model.instance.DataAccess;
-import pascal.hardscript.compiler.model.instance.MutableInstance;
+import pascal.hardscript.compiler.model.instance.*;
 import pascal.hardscript.compiler.model.instance.selector.BitSelector;
 import pascal.hardscript.compiler.model.instance.selector.PartSelector;
 import pascal.hardscript.compiler.model.instance.selector.Selector;
@@ -14,6 +12,7 @@ import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.GlobalScope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
+import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.lang.SourceLoc;
 
 import java.util.BitSet;
@@ -47,10 +46,18 @@ public class IOAnalysis extends ModelAnalysis{
         throw new TypeCheckingException();
     }
 
+    private static boolean needCheck(ComponentScope scope) {
+        if (scope.isBuiltin()) {
+            return false;
+        }
+        var definition = scope.getGlobal().getComponent(scope.getIdentifier());
+        return definition.getKind() == ComponentNode.Kind.COMPONENT;
+    }
+
     @Override
     public void analyze() {
         design.forEachSubScope(scope -> {
-            if (!scope.isBuiltin()) {
+            if (needCheck(scope)) {
                 analyze(scope);
             }
         });
@@ -83,6 +90,7 @@ public class IOAnalysis extends ModelAnalysis{
                             }
                         }
                     }
+                    case DataBundle bundle -> throw new TodoException();
                     case DataAccess(var base, var selector) -> {
                         if (!(use.containsKey(base) && use.get(base).isSetFor(selector))) {
                             warnUnusedInput(sourceLoc, mutable);
@@ -106,6 +114,7 @@ public class IOAnalysis extends ModelAnalysis{
                             warnMultipleDriver(sourceLoc, mutable);
                         }
                     }
+                    case DataBundle bundle -> throw new TodoException();
                     case DataAccess(var base, var selector) -> {
                         if (!(def.containsKey(base) && def.get(base).isSetFor(selector))) {
                             errorUndefOut(sourceLoc, mutable);
@@ -129,6 +138,7 @@ public class IOAnalysis extends ModelAnalysis{
                     coverage.put(data, cover);
                 }
             }
+            case DataBundle bundle -> throw new TodoException();
             case DataAccess(var base, var selector) -> {
                 if (coverage.containsKey(base)) {
                     coverage.get(base).update(selector);

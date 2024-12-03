@@ -25,4 +25,9 @@ public record DataAccess(Data base, Selector selector) implements MutableInstanc
     public boolean isBuiltin() {
         return base.isBuiltin();
     }
+
+    @Override
+    public int getIndex() {
+        return base.getIndex();
+    }
 }

@@ -1,8 +1,8 @@
 package pascal.hardscript.compiler.model.scope;
 
-import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.component.ComponentNode;
 import pascal.hardscript.compiler.elaborator.BuiltInComponentFactory;
+import pascal.hardscript.compiler.model.instance.DataBundle;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.Identifier;
 
@@ -15,7 +15,8 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public final class GlobalScope extends Scope {
-    private final Map<Identifier, ComponentNode> definitions = new HashMap<>();
+    private final Map<Identifier, DataBundle.Factory> interfaceDef = new HashMap<>();
+    private final Map<Identifier, ComponentNode> componentDef = new HashMap<>();
     private final BuiltInComponentFactory factory;
     private final Supplier<Integer> dataIndexer;
     private ComponentScope top;
@@ -26,16 +27,8 @@ public final class GlobalScope extends Scope {
         this.factory = new BuiltInComponentFactory(dataIndexer);
     }
 
-    public static GlobalScope newDesign(DesignNode node) {
-        var scope = new GlobalScope();
-        var evaluator = scope.getEvaluator();
-        for (var binding : node.getBindings()) {
-            scope.bind(evaluator.evaluateBinding(binding));
-        }
-        for (var component : node.getComponents()) {
-            scope.definitions.put(component.getIdentifier(), component);
-        }
-        return scope;
+    public static GlobalScope newDesign() {
+        return new GlobalScope();
     }
 
     public ComponentScope instantiateTop(Identifier identifier) {
@@ -44,13 +37,6 @@ public final class GlobalScope extends Scope {
         }
         this.top = instantiateComponentScope(identifier);
         return this.top;
-    }
-
-    @Override
-    public ComponentScope instantiateComponentScope(Identifier identifier) {
-        var child = new ComponentScope(this, identifier);
-        addChild(child);
-        return child;
     }
 
     public ComponentScope getTop() {
@@ -65,12 +51,28 @@ public final class GlobalScope extends Scope {
         return factory;
     }
 
-    public boolean hasDefinition(Identifier id) {
-        return definitions.containsKey(id);
+    public boolean hasComponent(Identifier id) {
+        return componentDef.containsKey(id);
     }
 
-    public ComponentNode getDefinition(Identifier id) {
-        return Objects.requireNonNull(definitions.get(id));
+    public ComponentNode getComponent(Identifier id) {
+        return Objects.requireNonNull(componentDef.get(id));
+    }
+
+    public void addComponent(ComponentNode node) {
+        componentDef.put(node.getIdentifier(), node);
+    }
+
+    public boolean hasInterface(Identifier id) {
+        return interfaceDef.containsKey(id);
+    }
+
+    public DataBundle.Factory getInterface(Identifier id) {
+        return interfaceDef.get(id);
+    }
+
+    public void addInterface(Identifier id, DataBundle.Factory factory) {
+        interfaceDef.put(id, factory);
     }
 
     public void forEachSubScope(Consumer<ComponentScope> consumer) {
@@ -81,5 +83,12 @@ public final class GlobalScope extends Scope {
             consumer.accept(scope);
             stack.addAll(scope.getChildren());
         }
+    }
+
+    @Override
+    public ComponentScope instantiateComponentScope(Identifier identifier) {
+        var child = new ComponentScope(this, identifier);
+        addChild(child);
+        return child;
     }
 }

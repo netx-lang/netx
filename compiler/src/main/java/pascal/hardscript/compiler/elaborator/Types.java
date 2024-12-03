@@ -33,6 +33,15 @@ public final class Types {
         }
     }
 
+    public static DataBundle requiresDataBundle(SourceLoc loc, Entity entity) {
+        if (entity instanceof DataBundle bundle) {
+            return bundle;
+        } else {
+            log.error("{}: Expected data bundle but got {}", loc, entity);
+            throw new CompileCancellationException();
+        }
+    }
+
     public static Value requiresValue(SourceLoc loc, Entity entity) {
         if (entity instanceof Value value) {
             return value;
@@ -51,8 +60,8 @@ public final class Types {
         }
     }
 
-    public static Data.Factory<?> requiresDataFactory(SourceLoc loc, Entity entity) {
-        if (entity instanceof Data.Factory<?> factory) {
+    public static Instance.Factory<?> requiresInstanceFactory(SourceLoc loc, Entity entity) {
+        if (entity instanceof Instance.Factory<?> factory) {
             return factory;
         } else {
             log.error("{}: Expected component factory but got {}", loc, entity);
