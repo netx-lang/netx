@@ -10,18 +10,24 @@ import pascal.hardscript.util.lang.SourceLoc;
 import java.util.*;
 
 public final class ComponentScope extends Scope {
+    private final boolean isInterface;
     private final Identifier identifier;
     private final Set<Alias> aliases = new HashSet<>();
 
     private Signature signature;
-    private final AssignManager manager = new AssignManager(this);
-    private final List<Instance> inputs = new ArrayList<>();
-    private final List<Instance> outputs = new ArrayList<>();
     private Attributes attributes;
+    private final AssignManager manager = new AssignManager(this);
+    private List<Instance> inputs = new ArrayList<>();
+    private List<Instance> outputs = new ArrayList<>();
 
-    ComponentScope(GlobalScope global, Identifier identifier) {
+    ComponentScope(GlobalScope global, boolean isInterface, Identifier identifier) {
         super(global);
+        this.isInterface = isInterface;
         this.identifier = identifier;
+    }
+
+    public boolean isInterface() {
+        return isInterface;
     }
 
     public SourceLoc getSourceLoc() {
@@ -46,6 +52,14 @@ public final class ComponentScope extends Scope {
 
     public void addOutput(Instance... outputs) {
         Collections.addAll(this.outputs, outputs);
+    }
+
+    public void setInputs(List<Instance> inputs) {
+        this.inputs = inputs;
+    }
+
+    public void setOutputs(List<Instance> outputs) {
+        this.outputs = outputs;
     }
 
     public Signature getSignature() {
@@ -78,7 +92,14 @@ public final class ComponentScope extends Scope {
 
     @Override
     public ComponentScope instantiateComponentScope(Identifier identifier) {
-        var child = new ComponentScope(this.getGlobal(), identifier);
+        var child = new ComponentScope(this.getGlobal(), false, identifier);
+        addChild(child);
+        return child;
+    }
+
+    @Override
+    public ComponentScope instantiateInterfaceScope(Identifier identifier) {
+        var child = new ComponentScope(this.getGlobal(), true, identifier);
         addChild(child);
         return child;
     }

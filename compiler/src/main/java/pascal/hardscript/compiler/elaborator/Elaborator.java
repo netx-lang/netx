@@ -89,7 +89,7 @@ public final class Elaborator {
     }
 
     private DataBundle.Factory elaborateInterface(ComponentNode node) {
-        var scope = design.instantiateComponentScope(node.getIdentifier());
+        var scope = design.instantiateInterfaceScope(node.getIdentifier());
         new ScopeElaborator(config, scope).build(node);
 
         var indexer = design.getDataIndexer();

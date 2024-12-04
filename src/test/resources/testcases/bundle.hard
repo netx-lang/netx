@@ -1,9 +1,9 @@
-component top {
-    bundle a, b of Package
-    wire   load of bit(32)
-    a <> Constructor <> 114
-    b <> Constructor <> 514
-    load <> ADD <> [a.load, b.load]
+component top: [a, b] -> [c] {
+    wire a, b, c of bit(32)
+    bundle pa, pb of Package
+    pa <> Constructor <> a
+    pb <> Constructor <> b
+    c <> ADD <> [pa.load, pb.load]
 }
 
 interface Package: [valid, load] -> [valid, load] {

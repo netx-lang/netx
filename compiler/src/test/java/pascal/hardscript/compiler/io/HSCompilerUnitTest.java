@@ -3,7 +3,6 @@ package pascal.hardscript.compiler.io;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -61,13 +60,6 @@ class HSCompilerUnitTest {
     void testDeclInPlace() throws IOException {
         test("decl_in_place.hard");
     }
-
-    @Disabled
-    @Test
-    void testBundle() throws IOException {
-        test("bundle.hard");
-    }
-
 
     @Test
     void testInvalidInput() {

@@ -43,6 +43,11 @@ class HSCompilerTest {
     }
 
     @Test
+    void testBundle() throws IOException {
+        test("bundle");
+    }
+
+    @Test
     void testRISCV() throws IOException {
         test("riscv");
     }

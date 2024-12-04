@@ -21,33 +21,33 @@
       },
       {
         "type": "builtin", "id": "AND@3", "loc": "8:20",
+        "input": ["$i1@3", "$i2@3"],
+        "output": ["$i@4"],
         "members": [
           {"type": "wire", "width": 1, "id": "$i1", "loc": "8:20"},
           {"type": "wire", "width": 1, "id": "$i2", "loc": "8:20"}
-        ],
-        "input": ["$i1@3", "$i2@3"],
-        "output": ["$i@4"]
+        ]
       },
       {
         "type": "builtin", "id": "REGISTER@4", "loc": "1:25",
+        "input": ["$i@4"],
+        "output": ["a@0"],
         "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "members": [
           {"type": "wire", "width": 1, "id": "$i", "loc": "1:25"}
-        ],
-        "input": ["$i@4"],
-        "output": ["a@0"]
+        ]
       },
       {
         "type": "builtin", "id": "REGISTER@5", "loc": "1:25",
-        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "input": ["a@0"],
-        "output": ["b@0"]
+        "output": ["b@0"],
+        "attribute": {"isPosTrigger": "true", "clock": "clk@0"}
       },
       {
         "type": "builtin", "id": "REGISTER@6", "loc": "1:25",
-        "attribute": {"isPosTrigger": "false", "clock": "clk@0"},
         "input": ["b@0"],
-        "output": ["c@0"]
+        "output": ["c@0"],
+        "attribute": {"isPosTrigger": "false", "clock": "clk@0"}
       },
       {
         "type": "builtin", "id": "OR@7", "loc": "11:13",

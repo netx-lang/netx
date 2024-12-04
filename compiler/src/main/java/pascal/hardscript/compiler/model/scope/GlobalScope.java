@@ -87,7 +87,14 @@ public final class GlobalScope extends Scope {
 
     @Override
     public ComponentScope instantiateComponentScope(Identifier identifier) {
-        var child = new ComponentScope(this, identifier);
+        var child = new ComponentScope(this, false, identifier);
+        addChild(child);
+        return child;
+    }
+
+    @Override
+    public ComponentScope instantiateInterfaceScope(Identifier identifier) {
+        var child = new ComponentScope(this, true, identifier);
         addChild(child);
         return child;
     }

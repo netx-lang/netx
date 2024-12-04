@@ -57,6 +57,8 @@ public abstract sealed class Scope permits ComponentScope, GlobalScope {
 
     abstract public ComponentScope instantiateComponentScope(Identifier identifier);
 
+    abstract public ComponentScope instantiateInterfaceScope(Identifier identifier);
+
     public record Alias(Instance lhs, Instance rhs) {
         public static Alias of(Instance lhs, Instance rhs) {
             return new Alias(lhs, rhs);

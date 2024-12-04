@@ -1,0 +1,30 @@
+{
+  "totalData": 3,
+  "design": {
+    "type": "component",
+    "id": "top",
+    "loc": "1:10",
+    "input": ["a@0", "b@1"],
+    "output": ["c@2"],
+    "members": [
+      {"type": "wire", "width": 32, "id": "a@0", "loc": "2:9"},
+      {"type": "wire", "width": 32, "id": "b@1", "loc": "2:12"},
+      {"type": "wire", "width": 32, "id": "c@2", "loc": "2:15"},
+      {
+        "type": "component", "id": "Constructor", "loc": "4:10",
+        "input": ["a@0"],
+        "output": ["1'h01", "a@0"]
+      },
+      {
+        "type": "component", "id": "Constructor", "loc": "5:10",
+        "input": ["b@1"],
+        "output": ["1'h01", "b@1"]
+      },
+      {
+        "type": "builtin", "id": "ADD", "loc": "6:9",
+        "input": ["a@0", "b@1"],
+        "output": ["c@2"]
+      }
+    ]
+  }
+}

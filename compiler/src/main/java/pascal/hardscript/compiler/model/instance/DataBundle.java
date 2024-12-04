@@ -98,10 +98,15 @@ public final class DataBundle implements MutableInstance {
         @Override
         public DataBundle create(ComponentScope parent, Identifier id) {
             var result = new DataBundle(id, type, indexer.get());
+
             for (var entry : factories.entrySet()) {
-                var dataID = entry.getKey();
-                var factory = entry.getValue();
-                result.map.put(dataID, factory.create(parent, dataID));
+                Identifier fieldID = entry.getKey();
+                Data.Factory<?> factory = entry.getValue();
+
+                Identifier dataID = Identifier.of(id.name() + "." + fieldID.name()).setSourceLoc(id.getSourceLoc());
+                Data data = factory.create(parent, dataID);
+                result.map.put(fieldID, data);
+                parent.bind(dataID, data);
             }
             return result;
         }

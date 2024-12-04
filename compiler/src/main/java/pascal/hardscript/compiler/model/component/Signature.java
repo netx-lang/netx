@@ -9,17 +9,18 @@ import java.util.Objects;
 
 public final class Signature {
     private final ComponentAtom caller;
-    private final List<Instance> inputs, outputs;
+    private List<Instance> inputs, outputs;
     private List<InstanceType> inTypeCache, outTypeCache;
 
-    public Signature(ComponentAtom caller, List<Instance> inputs, List<Instance> outputs) {
+    public Signature(ComponentAtom caller) {
         this.caller = caller;
-        this.inputs = inputs;
-        this.outputs = outputs;
     }
 
-    public static Signature of(ComponentAtom caller, List<Instance> inputName, List<Instance> outputName) {
-        return new Signature(caller, new ArrayList<>(inputName), new ArrayList<>(outputName));
+    public static Signature of(ComponentAtom caller, List<Instance> inputs, List<Instance> outputs) {
+        var result = new Signature(caller);
+        result.setInputs(inputs);
+        result.setOutputs(outputs);
+        return result;
     }
 
     @Override
@@ -48,6 +49,14 @@ public final class Signature {
 
     public List<Instance> outputs() {
         return outputs;
+    }
+
+    public void setInputs(List<Instance> inputs) {
+        this.inputs = new ArrayList<>(inputs);
+    }
+
+    public void setOutputs(List<Instance> outputs) {
+        this.outputs = new ArrayList<>(outputs);
     }
 
     private List<InstanceType> getInType() {

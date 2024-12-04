@@ -66,6 +66,8 @@ public abstract class LocalModelAnalysis extends ModelAnalysis {
                 scope.getInputs().replaceAll(repOf::apply);
                 scope.getOutputs().replaceAll(repOf::apply);
             });
+            scope.getSignature().inputs().replaceAll(repOf::apply);
+            scope.getSignature().outputs().replaceAll(repOf::apply);
         }
     }
 }

@@ -160,7 +160,7 @@ final class ScopeElaborator {
 
             int size = requiresMatchedSize(sourceLoc, receiver, rhs.target());
             for (int i = 0; i < size; ++i) {
-                scope.getManager().assign(receiver.get(i), rhs.target().get(i));
+                scope.getManager().assign(sourceLoc, receiver.get(i), rhs.target().get(i));
             }
             return ComponentPort.of(lhs.target(), rhs.source());
         }
@@ -196,7 +196,10 @@ final class ScopeElaborator {
 
         public Instantiator.ComponentPort instantiateComponentAtom(ComponentAtom atom) {
             var node = atom.getDefinition();
-            var component = scope.instantiateComponentScope(atom.getIdentifier());
+            ComponentScope component = switch (atom.getDefinition().getKind()) {
+                case COMPONENT -> scope.instantiateComponentScope(atom.getIdentifier());
+                case INTERFACE -> scope.instantiateInterfaceScope(atom.getIdentifier());
+            };
 
             var attributes = extractAttributes(atom, node);
             for (var entry : attributes.entrySet()) {

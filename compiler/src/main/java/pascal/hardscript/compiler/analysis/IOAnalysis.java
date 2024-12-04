@@ -2,7 +2,6 @@ package pascal.hardscript.compiler.analysis;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pascal.hardscript.compiler.ast.component.ComponentNode;
 import pascal.hardscript.compiler.exception.TypeCheckingException;
 import pascal.hardscript.compiler.model.instance.*;
 import pascal.hardscript.compiler.model.instance.selector.BitSelector;
@@ -12,7 +11,6 @@ import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.GlobalScope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
-import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.lang.SourceLoc;
 
 import java.util.BitSet;
@@ -50,8 +48,7 @@ public class IOAnalysis extends ModelAnalysis{
         if (scope.isBuiltin()) {
             return false;
         }
-        var definition = scope.getGlobal().getComponent(scope.getIdentifier());
-        return definition.getKind() == ComponentNode.Kind.COMPONENT;
+        return !scope.isInterface();
     }
 
     @Override
@@ -77,29 +74,57 @@ public class IOAnalysis extends ModelAnalysis{
         checkOutputIntegrity(component, sourceLoc);
     }
 
+    private static void initializeData(Map<Data, DataCoverage> coverage, Data data) {
+        if (coverage.containsKey(data)) {
+            coverage.get(data).update();
+        } else {
+            var cover = new DataCoverage(data);
+            cover.update();
+            coverage.put(data, cover);
+        }
+    }
+
+    private static void initializeDataAccess(Map<Data, DataCoverage> coverage, DataAccess access) {
+        var base = access.base();
+        var selector = access.selector();
+        if (coverage.containsKey(base)) {
+            coverage.get(base).update(selector);
+        } else {
+            var cover = new DataCoverage(base);
+            cover.update(selector);
+            coverage.put(base, cover);
+        }
+    }
+
     private void checkInputIntegrity(ComponentScope component, SourceLoc sourceLoc) {
         for (var inst : component.getInputs()) {
             if (inst instanceof MutableInstance mutable) {
                 switch (mutable) {
-                    case Data data -> {
-                        if (!(data instanceof Clock)) {
-                            if (!(use.containsKey(data) && use.get(data).isAllSet())) {
-                                warnUnusedInput(sourceLoc, mutable);
-                            } else if (def.containsKey(data)) {
-                                errorDefineInput(sourceLoc, mutable);
-                            }
-                        }
-                    }
-                    case DataBundle bundle -> throw new TodoException();
-                    case DataAccess(var base, var selector) -> {
-                        if (!(use.containsKey(base) && use.get(base).isSetFor(selector))) {
-                            warnUnusedInput(sourceLoc, mutable);
-                        } else if (def.containsKey(base) && def.get(base).isClearFor(selector)) {
-                            errorDefineInput(sourceLoc, mutable);
-                        }
-                    }
+                    case Data data -> checkInputData(sourceLoc, data);
+                    case DataAccess access-> checkInputDataAccess(sourceLoc, access);
+                    case DataBundle _ -> throw new ShallNotReachHereError("Should be eliminated by BundleBlaster");
                 }
             }
+        }
+    }
+
+    private void checkInputData(SourceLoc sourceLoc, Data data) {
+        if (!(data instanceof Clock)) {
+            if (!(use.containsKey(data) && use.get(data).isAllSet())) {
+                warnUnusedInput(sourceLoc, data);
+            } else if (def.containsKey(data)) {
+                errorDefineInput(sourceLoc, data);
+            }
+        }
+    }
+
+    private void checkInputDataAccess(SourceLoc sourceLoc, DataAccess access) {
+        var base = access.base();
+        var selector = access.selector();
+        if (!(use.containsKey(base) && use.get(base).isSetFor(selector))) {
+            warnUnusedInput(sourceLoc, access);
+        } else if (def.containsKey(base) && def.get(base).isClearFor(selector)) {
+            errorDefineInput(sourceLoc, access);
         }
     }
 
@@ -107,46 +132,38 @@ public class IOAnalysis extends ModelAnalysis{
         for (var inst : component.getOutputs()) {
             if (inst instanceof MutableInstance mutable) {
                 switch (mutable) {
-                    case Data data -> {
-                        if (!(def.containsKey(data) && def.get(data).isAllSet())) {
-                            errorUndefOut(sourceLoc, mutable);
-                        } else if (def.get(data).isDoubleSet()) {
-                            warnMultipleDriver(sourceLoc, mutable);
-                        }
-                    }
-                    case DataBundle bundle -> throw new TodoException();
-                    case DataAccess(var base, var selector) -> {
-                        if (!(def.containsKey(base) && def.get(base).isSetFor(selector))) {
-                            errorUndefOut(sourceLoc, mutable);
-                        } else if (def.get(base).isDoubleSet()) {
-                            warnMultipleDriver(sourceLoc, mutable);
-                        }
-                    }
+                    case Data data -> checkOutputData(sourceLoc, data);
+                    case DataBundle bundle -> bundle.flatten().forEach(data -> checkOutputData(sourceLoc, data));
+                    case DataAccess access -> checkOutputDataAccess(sourceLoc, access);
                 }
             }
         }
     }
 
+    private void checkOutputData(SourceLoc sourceLoc, Data data) {
+        if (!(def.containsKey(data) && def.get(data).isAllSet())) {
+            errorUndefOut(sourceLoc, data);
+        } else if (def.get(data).isDoubleSet()) {
+            warnMultipleDriver(sourceLoc, data);
+        }
+    }
+
+    private void checkOutputDataAccess(SourceLoc sourceLoc, DataAccess access) {
+        var base = access.base();
+        var selector = access.selector();
+        if (!(def.containsKey(base) && def.get(base).isSetFor(selector))) {
+            errorUndefOut(sourceLoc, access);
+        } else if (def.get(base).isDoubleSet()) {
+            warnMultipleDriver(sourceLoc, access);
+        }
+    }
+
     private void initialize(MutableInstance inst, Map<Data, DataCoverage> coverage) {
         switch (inst) {
-            case Data data -> {
-                if (coverage.containsKey(data)) {
-                    coverage.get(data).update();
-                } else {
-                    var cover = new DataCoverage(data);
-                    cover.update();
-                    coverage.put(data, cover);
-                }
-            }
-            case DataBundle bundle -> throw new TodoException();
-            case DataAccess(var base, var selector) -> {
-                if (coverage.containsKey(base)) {
-                    coverage.get(base).update(selector);
-                } else {
-                    var cover = new DataCoverage(base);
-                    cover.update(selector);
-                    coverage.put(base, cover);
-                }
+            case Data data -> initializeData(coverage, data);
+            case DataAccess access -> initializeDataAccess(coverage, access);
+            case DataBundle _ -> {
+                // do nothing
             }
         }
     }

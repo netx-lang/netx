@@ -31,13 +31,13 @@
           },
           {
             "type": "builtin", "id": "AND", "loc": "12:21",
+            "input": ["$i1@2", "$i2@3", "$i3@4"],
+            "output": ["output@1[0]"],
             "members": [
               {"type": "wire", "width": 1, "id": "$i1@2", "loc": "12:21"},
               {"type": "wire", "width": 1, "id": "$i2@3", "loc": "12:21"},
               {"type": "wire", "width": 1, "id": "$i3@4", "loc": "12:21"}
-            ],
-            "input": ["$i1@2", "$i2@3", "$i3@4"],
-            "output": ["output@1[0]"]
+            ]
           },
           {
             "type": "builtin", "id": "AND", "loc": "12:21",

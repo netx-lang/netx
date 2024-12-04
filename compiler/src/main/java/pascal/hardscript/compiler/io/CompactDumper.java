@@ -11,7 +11,6 @@ import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.GlobalScope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
-import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 
@@ -126,25 +125,25 @@ final class CompactDumper {
             dumpDefIO(definition, "input", signature.inputs());
             dumpDefIO(definition, "output", signature.outputs());
 
-            var members = makeMembersIn(definition);
+            List<ObjectNode> needDump = new LinkedList<>();
             for (var entity : component.getEntities()) {
                 if (entity instanceof Data data) {
-                    members.add(defineData(data));
+                    needDump.add(defineData(data));
                 }
             }
             for (var child : component.getChildren()) {
-                if (!(child instanceof ComponentScope sub)) {
-                    throw new ShallNotReachHereError();
-                }
-
-                var instID = sub.getIdentifier();
+                var instID = child.getIdentifier();
                 if (BuiltinComponent.isBuiltin(instID)) {
                     if (!NO_DUMP.contains(BuiltinComponent.of(instID))) {
-                        members.add(instantiateBuiltin(sub, instID));
+                        needDump.add(instantiateBuiltin(child, instID));
                     }
-                } else {
-                    members.add(instantiate(sub));
+                } else if (!child.isInterface()) {
+                    needDump.add(instantiate(child));
                 }
+            }
+            if (!needDump.isEmpty()) {
+                var members = makeMembersIn(definition);
+                needDump.forEach(members::add);
             }
             return definition;
         }
@@ -184,21 +183,22 @@ final class CompactDumper {
             var builtin = createObjectNode();
             setType(builtin, "builtin");
             setBuiltinID(builtin, sub);
+            dumpInstIO(builtin, "input", sub.getInputs());
+            dumpInstIO(builtin, "output", sub.getOutputs());
+
             if (Objects.requireNonNull(BuiltinComponent.of(instID)) == BuiltinComponent.REGISTER) {
-                dumpAttribute(builtin, sub);
-            }
-            List<Data> needDump = new LinkedList<>();
-            for (var entity : sub.getEntities()) {
-                if (entity instanceof Data data) {
-                    needDump.add(data);
+                var attributes = createObjectNode();
+                for (var entry : sub.getAttributes().entrySet()) {
+                    attributes.put(entry.getKey().name(), dumpInstanceRef((Instance) entry.getValue()));
                 }
+                builtin.putIfAbsent("attribute", attributes);
             }
+            List<Data> needDump = sub.getEntities().stream()
+                    .filter(Data.class::isInstance).map(Data.class::cast).toList();
             if (!needDump.isEmpty()) {
                 var subarray = makeMembersIn(builtin);
                 needDump.forEach(c -> subarray.add(defineData(c)));
             }
-            dumpInstIO(builtin, "input", sub.getInputs());
-            dumpInstIO(builtin, "output", sub.getOutputs());
             return builtin;
         }
 
@@ -214,8 +214,10 @@ final class CompactDumper {
             setType(result, "wire");
             switch (wire.getType()) {
                 case BitType type -> result.put("width", type.width());
-                case InterfaceType type -> throw new TodoException();
                 case PolyType ignored -> throw new ShallNotReachHereError();
+                case InterfaceType ignore -> {
+                    // do nothing
+                }
             }
             setDataID(result, wire.getIdentifier());
             return result;
@@ -228,22 +230,14 @@ final class CompactDumper {
             return result;
         }
 
-        private void dumpAttribute(ObjectNode node, ComponentScope component) {
-            var attributes = createObjectNode();
-            for (var entry : component.getAttributes().entrySet()) {
-                attributes.put(entry.getKey().name(), dumpInstanceRef((Instance) entry.getValue()));
-            }
-            node.putIfAbsent("attribute", attributes);
-        }
-
         private void dumpDefIO(ObjectNode node, String port, List<Instance> sub) {
             var array = makeArrayIn(node, port);
             for (Instance entity : sub) {
                 String s = switch (entity) {
                     case Value value -> dumpValue(value);
                     case Data data -> data.getIdentifier().name();
-                    case DataBundle bundle -> throw new TodoException();
                     case DataAccess access -> access.base().getIdentifier().name() + access.selector();
+                    case DataBundle _ -> throw new ShallNotReachHereError("Should be eliminated in BundleBlaster");
                 };
                 array.add(s);
             }
@@ -258,8 +252,8 @@ final class CompactDumper {
             return switch (entity) {
                 case Data data -> dumpDataRef(data);
                 case Value value -> dumpValue(value);
-                case DataBundle bundle -> throw new TodoException();
                 case DataAccess access -> dumpDataAccessRef(access);
+                case DataBundle _ -> throw new ShallNotReachHereError("Should be eliminated in BundleBlaster");
             };
         }
 

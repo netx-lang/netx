@@ -10,7 +10,6 @@ import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.GlobalScope;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
-import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 
@@ -81,25 +80,25 @@ final class ExpandedDumper {
             dumpInstIO(result, "input", component.getInputs());
             dumpInstIO(result, "output", component.getOutputs());
 
-            var members = makeMembersIn(result);
+            List<ObjectNode> needDump = new LinkedList<>();
             for (var entity : component.getEntities()) {
                 if (entity instanceof Data data) {
-                    members.add(defineData(data));
+                    needDump.add(defineData(data));
                 }
             }
             for (var child : component.getChildren()) {
-                if (!(child instanceof ComponentScope sub)) {
-                    throw new ShallNotReachHereError();
-                }
-
-                var instID = sub.getIdentifier();
+                var instID = child.getIdentifier();
                 if (BuiltinComponent.isBuiltin(instID)) {
                     if (!NO_DUMP.contains(BuiltinComponent.of(instID))) {
-                        members.add(instantiateBuiltin(sub, instID));
+                        needDump.add(instantiateBuiltin(child, instID));
                     }
-                } else {
-                    members.add(dumperOf(sub).dump());
+                } else if (!child.isInterface()) {
+                    needDump.add(dumperOf(child).dump());
                 }
+            }
+            if (!needDump.isEmpty()) {
+                var members = makeMembersIn(result);
+                needDump.forEach(members::add);
             }
             return result;
         }
@@ -108,21 +107,21 @@ final class ExpandedDumper {
             var builtin = createObjectNode();
             setType(builtin, "builtin");
             setBuiltinID(builtin, instID);
+            dumpInstIO(builtin, "input", sub.getInputs());
+            dumpInstIO(builtin, "output", sub.getOutputs());
             if (Objects.requireNonNull(BuiltinComponent.of(instID)) == BuiltinComponent.REGISTER) {
-                dumpAttribute(builtin, sub);
-            }
-            List<Data> needDump = new LinkedList<>();
-            for (var entity : sub.getEntities()) {
-                if (entity instanceof Data data) {
-                    needDump.add(data);
+                var attributes = createObjectNode();
+                for (var entry : sub.getAttributes().entrySet()) {
+                    attributes.put(entry.getKey().name(), dumpInstance((Instance) entry.getValue()));
                 }
+                builtin.putIfAbsent("attribute", attributes);
             }
+            List<Data> needDump = sub.getEntities().stream()
+                    .filter(Data.class::isInstance).map(Data.class::cast).toList();
             if (!needDump.isEmpty()) {
                 var subarray = makeMembersIn(builtin);
                 needDump.forEach(c -> subarray.add(defineData(c)));
             }
-            dumpInstIO(builtin, "input", sub.getInputs());
-            dumpInstIO(builtin, "output", sub.getOutputs());
             return builtin;
         }
 
@@ -138,7 +137,9 @@ final class ExpandedDumper {
             setType(result, "wire");
             switch (wire.getType()) {
                 case BitType type -> result.put("width", type.width());
-                case InterfaceType ignored -> throw new TodoException();
+                case InterfaceType ignored -> {
+                    // do nothing
+                }
                 case PolyType ignored -> throw new ShallNotReachHereError();
             }
             setDataID(result, wire);
@@ -152,14 +153,6 @@ final class ExpandedDumper {
             return result;
         }
 
-        private void dumpAttribute(ObjectNode node, ComponentScope component) {
-            var attributes = createObjectNode();
-            for (var entry : component.getAttributes().entrySet()) {
-                attributes.put(entry.getKey().name(), dumpInstance((Instance) entry.getValue()));
-            }
-            node.putIfAbsent("attribute", attributes);
-        }
-
         private void dumpInstIO(ObjectNode node, String port, List<Instance> sub) {
             var array = makeArrayIn(node, port);
             sub.stream().map(this::dumpInstance).forEach(array::add);
@@ -169,8 +162,8 @@ final class ExpandedDumper {
             return switch (entity) {
                 case Data data -> dumpData(data);
                 case Value value -> dumpValue(value);
-                case DataBundle ignored -> throw new TodoException();
                 case DataAccess access -> dumpDataAccess(access);
+                case DataBundle _ -> throw new ShallNotReachHereError("Should be eliminated in BundleBlaster");
             };
         }
 

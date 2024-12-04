@@ -8,8 +8,8 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 public sealed abstract class Data implements MutableInstance permits Clock, Wire {
-    protected final Identifier id;
     protected final ComponentScope parent;
+    protected final Identifier id;
     private final int index;
 
     protected Data(Identifier id, ComponentScope parent, int index) {
