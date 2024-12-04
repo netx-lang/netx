@@ -3,7 +3,10 @@ package pascal.hardscript.compiler.analysis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.exception.TypeCheckingException;
-import pascal.hardscript.compiler.model.instance.*;
+import pascal.hardscript.compiler.model.instance.Clock;
+import pascal.hardscript.compiler.model.instance.Data;
+import pascal.hardscript.compiler.model.instance.DataAccess;
+import pascal.hardscript.compiler.model.instance.MutableInstance;
 import pascal.hardscript.compiler.model.instance.selector.BitSelector;
 import pascal.hardscript.compiler.model.instance.selector.PartSelector;
 import pascal.hardscript.compiler.model.instance.selector.Selector;
@@ -17,7 +20,7 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 
-public class IOAnalysis extends ModelAnalysis{
+public final class IOAnalysis extends ModelAnalysis{
     private static final Logger log = LoggerFactory.getLogger(IOAnalysis.class);
     private final Map<Data, DataCoverage> def = new HashMap<>();
     private final Map<Data, DataCoverage> use = new HashMap<>();
@@ -102,7 +105,7 @@ public class IOAnalysis extends ModelAnalysis{
                 switch (mutable) {
                     case Data data -> checkInputData(sourceLoc, data);
                     case DataAccess access-> checkInputDataAccess(sourceLoc, access);
-                    case DataBundle _ -> throw new ShallNotReachHereError("Should be eliminated by BundleBlaster");
+                    default -> throw new ShallNotReachHereError("Should be eliminated by CompositeDataBlaster");
                 }
             }
         }
@@ -133,8 +136,8 @@ public class IOAnalysis extends ModelAnalysis{
             if (inst instanceof MutableInstance mutable) {
                 switch (mutable) {
                     case Data data -> checkOutputData(sourceLoc, data);
-                    case DataBundle bundle -> bundle.flatten().forEach(data -> checkOutputData(sourceLoc, data));
                     case DataAccess access -> checkOutputDataAccess(sourceLoc, access);
+                    default -> throw new ShallNotReachHereError("Should be eliminated by CompositeDataBlaster");
                 }
             }
         }
@@ -162,7 +165,7 @@ public class IOAnalysis extends ModelAnalysis{
         switch (inst) {
             case Data data -> initializeData(coverage, data);
             case DataAccess access -> initializeDataAccess(coverage, access);
-            case DataBundle _ -> {
+            default -> {
                 // do nothing
             }
         }

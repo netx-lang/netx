@@ -48,6 +48,11 @@ class HSCompilerTest {
     }
 
     @Test
+    void testArray() throws IOException {
+        test("array");
+    }
+
+    @Test
     void testRISCV() throws IOException {
         test("riscv");
     }

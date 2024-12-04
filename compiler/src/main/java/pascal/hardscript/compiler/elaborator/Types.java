@@ -60,8 +60,8 @@ public final class Types {
         }
     }
 
-    public static Instance.Factory<?> requiresInstanceFactory(SourceLoc loc, Entity entity) {
-        if (entity instanceof Instance.Factory<?> factory) {
+    public static MutableInstance.Factory<?> requiresInstanceFactory(SourceLoc loc, Entity entity) {
+        if (entity instanceof MutableInstance.Factory<?> factory) {
             return factory;
         } else {
             log.error("{}: Expected component factory but got {}", loc, entity);

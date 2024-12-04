@@ -288,10 +288,10 @@ public final class Evaluator {
         }
     }
 
-    public Instance.Factory<?> evaluateToInstanceFactory(ExprNode expr) {
-        Instance.Factory<?> factory;
+    public MutableInstance.Factory<?> evaluateToInstanceFactory(ExprNode expr) {
+        MutableInstance.Factory<?> factory;
         if (expr == null) {
-            factory = new Wire.Factory(PolyType.getInstance(), global.getDataIndexer());
+            factory = new Wire.Factory(PolyType.getInstance(), global);
         } else {
             mode = EvaluationMode.DATA_FACTORY;
             factory = requiresInstanceFactory(expr.getSourceLoc(), evaluate(expr));
@@ -352,23 +352,6 @@ public final class Evaluator {
         return SequentialType.ofSplit(lhs, rhs);
     }
 
-    private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
-        requiresMatchedSize(sourceLoc, 1, arguments);
-        mode = EvaluationMode.COMMON;
-        var bitType = BitType.of(evaluateToInteger(arguments.getFirst()));
-        mode = EvaluationMode.DATA_FACTORY;
-        return new Wire.Factory(bitType, global.getDataIndexer());
-    }
-
-    private Clock.Factory evaluateClockFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
-        if (arguments.isEmpty()) {
-            return new Clock.Factory(global.getDataIndexer());
-        } else {
-            log.error("{}: Unexpected specification for component type clock: {}", sourceLoc, arguments);
-            throw new CompileCancellationException();
-        }
-    }
-
     private Entity evaluateSymbolExpr(SymbolExpr expr) {
         return switch (expr) {
             case PrimarySymbol sub -> evaluatePrimarySymbolExpr(sub);
@@ -395,7 +378,7 @@ public final class Evaluator {
 
     private Entity evaluateParamSymbolExpr(ParamSymbolExpr expr) {
         if (mode == EvaluationMode.DATA_FACTORY) {
-            return evaluateDataFactory(expr);
+            return evaluateInstanceFactory(expr);
         } else {
             return evaluateComponentType(expr);
         }
@@ -437,7 +420,7 @@ public final class Evaluator {
 
     @Nonnull
     private Entity declareDataInPlace(Identifier id) {
-        var factory = new Wire.Factory(PolyType.getInstance(), global.getDataIndexer());
+        var factory = new Wire.Factory(PolyType.getInstance(), global);
         var data = factory.create((ComponentScope) scope, id);
         scope.bind(id, data);
         return data;
@@ -485,17 +468,45 @@ public final class Evaluator {
     }
 
 
-    private Data.Factory<?> evaluateDataFactory(ParamSymbolExpr expr) {
+    private MutableInstance.Factory<?> evaluateInstanceFactory(ParamSymbolExpr expr) {
         var identifier = getIdentifierFrom(expr.getHead());
         var sourceLoc = expr.getSourceLoc();
         return switch (identifier.name()) {
             case "bit" -> evaluateWireFactory(sourceLoc, expr.getArguments());
+            case "array" -> evaluateArrayFactory(sourceLoc, expr.getArguments());
             case "clock" -> evaluateClockFactory(sourceLoc, expr.getArguments());
             default -> {
                 log.error("{}: Unknown component type {}", expr.getSourceLoc(), expr);
                 throw new CompileCancellationException();
             }
         };
+    }
+
+    private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
+        requiresMatchedSize(sourceLoc, 1, arguments);
+        mode = EvaluationMode.COMMON;
+        var bitType = BitType.of(evaluateToInteger(arguments.getFirst()));
+        mode = EvaluationMode.DATA_FACTORY;
+        return new Wire.Factory(bitType, global);
+    }
+
+    private Array.Factory evaluateArrayFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
+        if (arguments.size() != 2) {
+            log.error("{}: Unexpected specification for component type array: {}", sourceLoc, arguments);
+            throw new CompileCancellationException();
+        }
+        var factory = evaluateToInstanceFactory(arguments.get(0));
+        int size = evaluateToInteger(arguments.get(1));
+        return new Array.Factory(global, size, factory);
+    }
+
+    private Clock.Factory evaluateClockFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
+        if (arguments.isEmpty()) {
+            return new Clock.Factory(global);
+        } else {
+            log.error("{}: Unexpected specification for component type clock: {}", sourceLoc, arguments);
+            throw new CompileCancellationException();
+        }
     }
 
     public Identifier getIdentifierFrom(PrimarySymbol symbol) {

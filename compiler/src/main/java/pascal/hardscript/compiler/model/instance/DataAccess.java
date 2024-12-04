@@ -6,6 +6,9 @@ import pascal.hardscript.compiler.exception.TypeCheckingException;
 import pascal.hardscript.compiler.model.instance.selector.Selector;
 import pascal.hardscript.compiler.model.instance.type.BitType;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
+import pascal.hardscript.compiler.model.scope.ComponentScope;
+import pascal.hardscript.util.exception.ShallNotReachHereError;
+import pascal.hardscript.util.lang.Identifier;
 
 public record DataAccess(Data base, Selector selector) implements MutableInstance {
     private static final Logger log = LoggerFactory.getLogger(DataAccess.class);
@@ -29,5 +32,15 @@ public record DataAccess(Data base, Selector selector) implements MutableInstanc
     @Override
     public int getIndex() {
         return base.getIndex();
+    }
+
+    @Override
+    public Identifier getIdentifier() {
+        throw new ShallNotReachHereError();
+    }
+
+    @Override
+    public ComponentScope getParent() {
+        return base.getParent();
     }
 }

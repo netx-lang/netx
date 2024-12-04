@@ -7,48 +7,28 @@ import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.instance.type.InterfaceType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.util.exception.ShallNotReachHereError;
+import pascal.hardscript.compiler.model.scope.GlobalScope;
 import pascal.hardscript.util.lang.Identifier;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 
-public final class DataBundle implements MutableInstance {
+public final class DataBundle extends DataComposition {
     private static final Logger log = LoggerFactory.getLogger(DataBundle.class);
-    private final LinkedHashMap<Identifier, Data> map = new LinkedHashMap<>();
-    private final InterfaceType type;
-    private final Identifier id;
-    private final int index;
+    private final LinkedHashMap<Identifier, MutableInstance> map = new LinkedHashMap<>();
 
     private DataBundle(Identifier id, InterfaceType type, int index) {
-        this.id = id;
-        this.type = type;
-        this.index = index;
+        super(type, id, index);
     }
 
     @Override
     public InterfaceType getType() {
-        return type;
+        return (InterfaceType) super.getType();
     }
 
     @Override
-    public void setType(InstanceType type) {
-        throw new ShallNotReachHereError();
-    }
-
-    @Override
-    public boolean isBuiltin() {
-        return false;
-    }
-
-    public List<Data> flatten() {
-        return new ArrayList<>(map.values());
-    }
-
     public ComponentScope getParent() {
         return map.values().stream().findAny().orElseThrow().getParent();
     }
@@ -75,40 +55,41 @@ public final class DataBundle implements MutableInstance {
     }
 
     @Override
-    public String toString() {
-        return id.toStringWithLoc();
+    protected Collection<MutableInstance> getElements() {
+        return map.values();
     }
 
-    @Override
-    public int getIndex() {
-        return index;
-    }
-
-    public static class Factory implements Instance.Factory<DataBundle> {
-        private final LinkedHashMap<Identifier, Data.Factory<?>> factories;
-        private final Supplier<Integer> indexer;
+    public static class Factory extends MutableInstance.Factory<DataBundle> {
+        private final LinkedHashMap<Identifier, MutableInstance.Factory<?>> factories;
         private final InterfaceType type;
 
-        public Factory(LinkedHashMap<Identifier, Data.Factory<?>> factories, InterfaceType type, Supplier<Integer> indexer) {
+        public Factory(Identifier id, GlobalScope global,
+                       LinkedHashMap<Identifier, MutableInstance.Factory<?>> factories) {
+            super(global);
             this.factories = factories;
-            this.type = type;
-            this.indexer = indexer;
+            this.type = InterfaceType.of(id,
+                    factories.values().stream().map(MutableInstance.Factory::getType).toList());
         }
 
         @Override
         public DataBundle create(ComponentScope parent, Identifier id) {
-            var result = new DataBundle(id, type, indexer.get());
+            var result = new DataBundle(id, type, global.getDataIndexer().get());
 
             for (var entry : factories.entrySet()) {
                 Identifier fieldID = entry.getKey();
-                Data.Factory<?> factory = entry.getValue();
+                MutableInstance.Factory<?> factory = entry.getValue();
 
                 Identifier dataID = Identifier.of(id.name() + "." + fieldID.name()).setSourceLoc(id.getSourceLoc());
-                Data data = factory.create(parent, dataID);
+                MutableInstance data = factory.create(parent, dataID);
                 result.map.put(fieldID, data);
                 parent.bind(dataID, data);
             }
             return result;
+        }
+
+        @Override
+        public InstanceType getType() {
+            return type;
         }
     }
 }

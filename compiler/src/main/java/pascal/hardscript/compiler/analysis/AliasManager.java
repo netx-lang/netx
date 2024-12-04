@@ -1,6 +1,9 @@
 package pascal.hardscript.compiler.analysis;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.model.Entity;
+import pascal.hardscript.compiler.model.component.Signature;
 import pascal.hardscript.compiler.model.instance.DataAccess;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.instance.MutableInstance;
@@ -16,6 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class AliasManager {
+    private static final Logger log = LoggerFactory.getLogger(AliasManager.class);
     private final UnionFind<Instance> set = new UnionFind<>();
     private final Map<Instance, Instance> sourceRep = new HashMap<>();
 
@@ -38,12 +42,18 @@ public class AliasManager {
         }
     }
 
-    void setAsSourceRep(Instance inst) {
+    void setAsSourceRep(Signature sign, Instance inst) {
         if (!inst.isUserDefined()) {
             throw new ShallNotReachHereError("Cannot set a non-user-defined instance as a source representative");
         }
         if (set.contains(inst)) {
-            sourceRep.put(set.find(inst), inst);
+            var root = set.find(inst);
+            if (sourceRep.get(root) instanceof Value) {
+                log.warn("Component {} has constant IO {}",
+                        sign.caller().getIdentifier().toStringWithLoc(), inst);
+            } else {
+                sourceRep.put(root, inst);
+            }
         }
     }
 

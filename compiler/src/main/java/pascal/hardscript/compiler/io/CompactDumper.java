@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import pascal.hardscript.compiler.model.component.Signature;
 import pascal.hardscript.compiler.model.instance.*;
 import pascal.hardscript.compiler.model.instance.type.BitType;
-import pascal.hardscript.compiler.model.instance.type.InterfaceType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.GlobalScope;
@@ -215,8 +214,8 @@ final class CompactDumper {
             switch (wire.getType()) {
                 case BitType type -> result.put("width", type.width());
                 case PolyType ignored -> throw new ShallNotReachHereError();
-                case InterfaceType ignore -> {
-                    // do nothing
+                default -> {
+                    // do nothing for ArrayType and InterfaceType
                 }
             }
             setDataID(result, wire.getIdentifier());
@@ -237,7 +236,7 @@ final class CompactDumper {
                     case Value value -> dumpValue(value);
                     case Data data -> data.getIdentifier().name();
                     case DataAccess access -> access.base().getIdentifier().name() + access.selector();
-                    case DataBundle _ -> throw new ShallNotReachHereError("Should be eliminated in BundleBlaster");
+                    default -> throw new ShallNotReachHereError("Should be eliminated by CompositeDataBlaster");
                 };
                 array.add(s);
             }
@@ -253,7 +252,7 @@ final class CompactDumper {
                 case Data data -> dumpDataRef(data);
                 case Value value -> dumpValue(value);
                 case DataAccess access -> dumpDataAccessRef(access);
-                case DataBundle _ -> throw new ShallNotReachHereError("Should be eliminated in BundleBlaster");
+                default -> throw new ShallNotReachHereError("Should be eliminated by CompositeDataBlaster");
             };
         }
 

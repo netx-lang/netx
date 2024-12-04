@@ -9,11 +9,7 @@ import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.io.Configuration;
 import pascal.hardscript.compiler.model.component.ComponentAtom;
 import pascal.hardscript.compiler.model.component.Signature;
-import pascal.hardscript.compiler.model.instance.Clock;
-import pascal.hardscript.compiler.model.instance.Data;
-import pascal.hardscript.compiler.model.instance.DataBundle;
-import pascal.hardscript.compiler.model.instance.Wire;
-import pascal.hardscript.compiler.model.instance.type.InterfaceType;
+import pascal.hardscript.compiler.model.instance.*;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.GlobalScope;
@@ -71,6 +67,7 @@ public final class Elaborator {
         for (var element : node.getElements()) {
             element.match(this::addBinding, this::addComponent);
         }
+        design.resetDataIndexer();
     }
 
     private void addBinding(BindingNode node) {
@@ -92,26 +89,37 @@ public final class Elaborator {
         var scope = design.instantiateInterfaceScope(node.getIdentifier());
         new ScopeElaborator(config, scope).build(node);
 
-        var indexer = design.getDataIndexer();
-        LinkedHashMap<Identifier, Data.Factory<?>> factories = new LinkedHashMap<>();
+        LinkedHashMap<Identifier, MutableInstance.Factory<?>> factories = new LinkedHashMap<>();
         for (var inst : scope.getOutputs()) {
-            if (!(inst instanceof Data data)) {
-                log.error("{}: Expected data instance, got {}", node.getSourceLoc(), inst);
+            if (!(inst instanceof MutableInstance mutable)) {
+                log.error("{}: Expected mutable instance but got {}", node.getSourceLoc(), inst);
                 throw new CompileCancellationException();
             }
-            var factory = switch (data) {
-                case Clock _ -> new Clock.Factory(indexer);
-                case Wire wire -> {
-                    if (wire.getType() instanceof PolyType) {
-                        log.error("{}: Interface should not contain auto-typed instance: {}", node.getSourceLoc(), wire);
-                        throw new CompileCancellationException();
-                    }
-                    yield new Wire.Factory(wire.getType(), indexer);
-                }
-            };
-            factories.put(data.getIdentifier(), factory);
+            var factory = getFactoryFrom(node, mutable);
+            factories.put(mutable.getIdentifier(), factory);
         }
-        InterfaceType type = InterfaceType.of(scope);
-        return new DataBundle.Factory(factories, type, indexer);
+        return new DataBundle.Factory(scope.getIdentifier(), design, factories);
+    }
+
+    private MutableInstance.Factory<?> getFactoryFrom(ComponentNode node, MutableInstance mutable) {
+        return switch (mutable) {
+            case Clock _ -> new Clock.Factory(design);
+            case Wire wire -> {
+                if (wire.getType() instanceof PolyType) {
+                    log.error("{}: Interface should not contain auto-typed instance: {}", node.getSourceLoc(), wire);
+                    throw new CompileCancellationException();
+                }
+                yield new Wire.Factory(wire.getType(), design);
+            }
+            case DataBundle bundle -> design.getInterface(bundle.getType().getId());
+            case Array array -> {
+                var elementFactory = getFactoryFrom(node, array.getElements().getFirst());
+                yield new Array.Factory(design, array.getElements().size(), elementFactory);
+            }
+            case DataAccess _ -> {
+                log.error("{}: Interface should not contain data access: {}", node.getSourceLoc(), mutable);
+                throw new CompileCancellationException();
+            }
+        };
     }
 }

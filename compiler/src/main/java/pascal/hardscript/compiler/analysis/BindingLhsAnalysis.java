@@ -9,7 +9,7 @@ import pascal.hardscript.compiler.ast.expr.ParamSymbolExpr;
 import pascal.hardscript.compiler.ast.expr.PrimarySymbol;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 
-public class BindingLhsAnalysis extends ASTAnalysis implements ASTListener {
+public final class BindingLhsAnalysis extends ASTAnalysis implements ASTListener {
 
     private static final Logger log = LoggerFactory.getLogger(BindingLhsAnalysis.class);
 

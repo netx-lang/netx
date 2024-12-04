@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import pascal.hardscript.compiler.model.instance.*;
 import pascal.hardscript.compiler.model.instance.type.BitType;
-import pascal.hardscript.compiler.model.instance.type.InterfaceType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.GlobalScope;
@@ -137,10 +136,10 @@ final class ExpandedDumper {
             setType(result, "wire");
             switch (wire.getType()) {
                 case BitType type -> result.put("width", type.width());
-                case InterfaceType ignored -> {
-                    // do nothing
-                }
                 case PolyType ignored -> throw new ShallNotReachHereError();
+                default -> {
+                    // do nothing for ArrayType and InterfaceType
+                }
             }
             setDataID(result, wire);
             return result;
@@ -163,7 +162,7 @@ final class ExpandedDumper {
                 case Data data -> dumpData(data);
                 case Value value -> dumpValue(value);
                 case DataAccess access -> dumpDataAccess(access);
-                case DataBundle _ -> throw new ShallNotReachHereError("Should be eliminated in BundleBlaster");
+                default -> throw new ShallNotReachHereError("Should be eliminated by CompositeDataBlaster");
             };
         }
 

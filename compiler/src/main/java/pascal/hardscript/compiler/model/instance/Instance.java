@@ -1,37 +1,55 @@
 package pascal.hardscript.compiler.model.instance;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.compiler.model.instance.selector.BitSelector;
 import pascal.hardscript.compiler.model.instance.selector.PartSelector;
 import pascal.hardscript.compiler.model.instance.selector.Selector;
 import pascal.hardscript.compiler.model.instance.type.InstanceType;
 import pascal.hardscript.compiler.model.instance.type.PolyType;
-import pascal.hardscript.compiler.model.scope.ComponentScope;
-import pascal.hardscript.util.lang.Identifier;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public sealed interface Instance extends Entity permits MutableInstance, Value {
 
-    static Instance accessOf(Instance base, Selector selector) {
-        if (base instanceof Value value) {
-            return selectConstant(value, selector);
-        } else if (!(base instanceof DataAccess)) {
-            return new DataAccess((Data) base, selector);
-        }
+    Logger log = LoggerFactory.getLogger(Instance.class);
 
-        List<Selector> selectors = new LinkedList<>();
-        selectors.add(selector);
-        while (base instanceof DataAccess(Data nextBase, Selector nextSelector)) {
-            base = nextBase;
-            selectors.addFirst(nextSelector);
+    static Instance accessOf(Instance base, Selector selector) {
+        switch (base) {
+            case Value value -> {
+                return selectConstant(value, selector);
+            }
+            case Array array -> {
+                switch (selector) {
+                    case BitSelector(var index) -> {
+                        return array.getElements().get(index.toInt());
+                    }
+                    case PartSelector _ -> {
+                        log.error("Array {} cannot be accessed with a part selector {}", array, selector);
+                        throw new CompileCancellationException();
+                    }
+                }
+            }
+            case DataAccess _ -> {
+                List<Selector> selectors = new LinkedList<>();
+                selectors.add(selector);
+                while (base instanceof DataAccess(Data nextBase, Selector nextSelector)) {
+                    base = nextBase;
+                    selectors.addFirst(nextSelector);
+                }
+                var finalSelector = selectors.getFirst();
+                for (int i = 1; i < selectors.size(); i++) {
+                    finalSelector = finalSelector.refine(selectors.get(i));
+                }
+                return new DataAccess((Data) base, finalSelector);
+            }
+            default -> {
+                return new DataAccess((Data) base, selector);
+            }
         }
-        var finalSelector = selectors.getFirst();
-        for (int i = 1; i < selectors.size(); i++) {
-            finalSelector = finalSelector.refine(selectors.get(i));
-        }
-        return new DataAccess((Data) base, finalSelector);
     }
 
     private static BitVectorValue selectConstant(Value value, Selector selector) {
@@ -61,7 +79,4 @@ public sealed interface Instance extends Entity permits MutableInstance, Value {
 
     boolean isBuiltin();
 
-    interface Factory<T extends Instance> extends Entity {
-        T create(ComponentScope parent, Identifier id);
-    }
 }

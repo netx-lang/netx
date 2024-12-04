@@ -4,7 +4,7 @@ import pascal.hardscript.compiler.model.scope.GlobalScope;
 
 import java.util.function.Predicate;
 
-public class GlobalAliasAnalysis extends ModelAnalysis {
+public final class GlobalAliasAnalysis extends ModelAnalysis {
     private final AliasManager manager = new AliasManager();
 
     public GlobalAliasAnalysis(GlobalScope design) {

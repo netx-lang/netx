@@ -1,11 +1,11 @@
 package pascal.hardscript.compiler.model.instance;
 
 import pascal.hardscript.compiler.model.scope.ComponentScope;
+import pascal.hardscript.compiler.model.scope.GlobalScope;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
 
 import java.util.Objects;
-import java.util.function.Supplier;
 
 public sealed abstract class Data implements MutableInstance permits Clock, Wire {
     protected final ComponentScope parent;
@@ -18,6 +18,7 @@ public sealed abstract class Data implements MutableInstance permits Clock, Wire
         this.id = id;
     }
 
+    @Override
     public Identifier getIdentifier() {
         return id;
     }
@@ -31,6 +32,7 @@ public sealed abstract class Data implements MutableInstance permits Clock, Wire
         return index;
     }
 
+    @Override
     public ComponentScope getParent() {
         return parent;
     }
@@ -53,11 +55,10 @@ public sealed abstract class Data implements MutableInstance permits Clock, Wire
         return Objects.hash(index);
     }
 
-    public abstract static class Factory<T extends Data> implements Instance.Factory<T> {
-        protected final Supplier<Integer> indexer;
+    public abstract static class Factory<T extends Data> extends MutableInstance.Factory<T> {
 
-        protected Factory(Supplier<Integer> indexer) {
-            this.indexer = indexer;
+        protected Factory(GlobalScope global) {
+            super(global);
         }
 
         public abstract T create(ComponentScope parent, Identifier id);

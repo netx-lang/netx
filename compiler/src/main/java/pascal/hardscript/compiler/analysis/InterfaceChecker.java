@@ -8,7 +8,7 @@ import pascal.hardscript.compiler.ast.component.ComponentInstantiationNode;
 import pascal.hardscript.compiler.ast.component.ComponentNode;
 import pascal.hardscript.compiler.exception.TypeCheckingException;
 
-public class InterfaceChecker extends ASTAnalysis implements ASTListener {
+public final class InterfaceChecker extends ASTAnalysis implements ASTListener {
     private static final Logger log = LoggerFactory.getLogger(InterfaceChecker.class);
     private boolean insideInterface = false;
 

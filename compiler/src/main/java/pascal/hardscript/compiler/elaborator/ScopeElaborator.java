@@ -9,7 +9,6 @@ import pascal.hardscript.compiler.exception.TypeCheckingException;
 import pascal.hardscript.compiler.io.Configuration;
 import pascal.hardscript.compiler.model.EntityList;
 import pascal.hardscript.compiler.model.component.*;
-import pascal.hardscript.compiler.model.instance.Data;
 import pascal.hardscript.compiler.model.instance.DataBundle;
 import pascal.hardscript.compiler.model.instance.Instance;
 import pascal.hardscript.compiler.model.scope.Attributes;
@@ -108,7 +107,7 @@ final class ScopeElaborator {
                 }
             }
             case WIRE -> {
-                if (!(factory instanceof Data.Factory)) {
+                if (factory instanceof DataBundle.Factory) {
                     log.error("{}: Expected wire type but got {}", node.getSourceLoc(), node.getType());
                     throw new CompileCancellationException();
                 }

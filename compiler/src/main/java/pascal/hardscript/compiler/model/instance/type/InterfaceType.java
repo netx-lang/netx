@@ -1,18 +1,12 @@
 package pascal.hardscript.compiler.model.instance.type;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import pascal.hardscript.compiler.exception.CompileCancellationException;
-import pascal.hardscript.compiler.model.instance.Data;
-import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.util.lang.Identifier;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public final class InterfaceType implements InstanceType{
-    private static final Logger log = LoggerFactory.getLogger(InterfaceType.class);
+public final class InterfaceType implements InstanceType {
     private final List<InstanceType> types = new ArrayList<>();
     private final Identifier id;
 
@@ -20,15 +14,9 @@ public final class InterfaceType implements InstanceType{
         this.id = id;
     }
 
-    public static InterfaceType of(ComponentScope scope) {
-        var result = new InterfaceType(scope.getIdentifier());
-        for (var inst : scope.getOutputs()) {
-            if (!(inst instanceof Data data)) {
-                log.error("{}: Expected data instance, got {}", scope.getSourceLoc(), inst);
-                throw new CompileCancellationException();
-            }
-            result.types.add(data.getType());
-        }
+    public static InterfaceType of(Identifier id, List<InstanceType> types) {
+        var result = new InterfaceType(id);
+        result.types.addAll(types);
         return result;
     }
 

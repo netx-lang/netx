@@ -5,13 +5,14 @@ import pascal.hardscript.compiler.model.scope.GlobalScope;
 
 import java.util.function.Predicate;
 
-public class MetaElimination extends ModelAnalysis {
+public final class MetaElimination extends ModelAnalysis {
     public MetaElimination(GlobalScope design) {
         super(design);
     }
 
     @Override
     public void analyze() {
-        design.forEachSubScope(scope -> scope.getEntities().removeIf(Predicate.not(Instance.class::isInstance)));
+        design.forEachSubScope(scope ->
+                scope.getEntities().removeIf(Predicate.not(Instance.class::isInstance)));
     }
 }

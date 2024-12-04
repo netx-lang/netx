@@ -31,7 +31,7 @@ public final class HSCompiler {
         new MetaElimination(design).analyze();
         new DataTypeInference(design).analyze();
         new AccessChecker(design).analyze();
-        new BundleBlaster(design).analyze();
+        new CompositeDataBlaster(design).analyze();
         new IOAnalysis(design).analyze();
     }
 

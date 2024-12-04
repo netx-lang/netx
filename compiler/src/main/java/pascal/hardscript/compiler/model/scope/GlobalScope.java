@@ -18,13 +18,13 @@ public final class GlobalScope extends Scope {
     private final Map<Identifier, DataBundle.Factory> interfaceDef = new HashMap<>();
     private final Map<Identifier, ComponentNode> componentDef = new HashMap<>();
     private final BuiltInComponentFactory factory;
-    private final Supplier<Integer> dataIndexer;
+    private Supplier<Integer> dataIndexer;
     private ComponentScope top;
 
     GlobalScope() {
         super(null);
         this.dataIndexer = new AtomicInteger(0)::incrementAndGet;
-        this.factory = new BuiltInComponentFactory(dataIndexer);
+        this.factory = new BuiltInComponentFactory(this);
     }
 
     public static GlobalScope newDesign() {
@@ -45,6 +45,10 @@ public final class GlobalScope extends Scope {
 
     public Supplier<Integer> getDataIndexer() {
         return dataIndexer;
+    }
+
+    public void resetDataIndexer() {
+        dataIndexer = new AtomicInteger(0)::incrementAndGet;
     }
 
     public BuiltInComponentFactory getBuiltinFactory() {
