@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.component.*;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
+import pascal.hardscript.compiler.exception.TypeCheckingException;
 import pascal.hardscript.compiler.io.Configuration;
 import pascal.hardscript.compiler.model.EntityList;
 import pascal.hardscript.compiler.model.component.*;
@@ -146,14 +147,54 @@ final class ScopeElaborator {
             };
         }
 
-        public Instantiator.ComponentPort instantiateSequentialType(SequentialType sequentialType) {
+        private static List<AtomType> leftMostAtomsOf(ComponentType type) {
+            List<AtomType> result = new ArrayList<>();
+            switch (type) {
+                case ParallelType parallelType -> {
+                    for (var sub : parallelType.types()) {
+                        result.addAll(leftMostAtomsOf(sub));
+                    }
+                }
+                case AtomType atomType -> result.add(atomType);
+                case SequentialType sequentialType -> result.addAll(leftMostAtomsOf(sequentialType.lhs()));
+            }
+            return result;
+        }
+
+        private static void checkTiedType(SourceLoc sourceLoc, List<DataBundle> to, List<AtomType> from) {
+            int size = requiresMatchedSize(sourceLoc, from, to);
+            for (int i = 0; i < size; i++) {
+                if (from.get(i) instanceof ComponentAtom atom) {
+                    checkSingleTiedType(sourceLoc, to.get(i), atom);
+                } else {
+                    log.error("{}: Expected interface but got {}", sourceLoc, from.get(i));
+                    throw new TypeCheckingException();
+                }
+            }
+        }
+
+        private static void checkSingleTiedType(SourceLoc sourceLoc, DataBundle lhs, ComponentAtom rhs) {
+            var lhsID = lhs.getType().getId();
+            var rhsID = rhs.getDefinition().getIdentifier();
+            if (rhs.getDefinition().getKind() == ComponentNode.Kind.INTERFACE) {
+                if (lhsID.equals(rhsID)) {
+                    return;
+                }
+            }
+            log.error("{}: Unmatched type in tied expression {} and {}", sourceLoc, lhsID, rhsID);
+            throw new TypeCheckingException();
+        }
+
+        private Instantiator.ComponentPort instantiateSequentialType(SequentialType sequentialType) {
             // right-hand-side goes first
             var rhs = doInstantiate(sequentialType.rhs());
             var lhs = doInstantiate(sequentialType.lhs());
 
             List<? extends Instance> receiver;
             if (sequentialType.tied()) {
-                receiver = ((DataBundle) lhs.target().getFirst()).flatten();
+                var bundles = lhs.source().stream().map(DataBundle.class::cast).toList();
+                checkTiedType(sourceLoc, bundles, leftMostAtomsOf(sequentialType.rhs()));
+                receiver = bundles.stream().map(DataBundle::flatten).flatMap(List::stream).toList();
             } else {
                 receiver = lhs.source();
             }
@@ -165,7 +206,7 @@ final class ScopeElaborator {
             return ComponentPort.of(lhs.target(), rhs.source());
         }
 
-        public Instantiator.ComponentPort instantiateParallelType(ParallelType parallelType) {
+        private Instantiator.ComponentPort instantiateParallelType(ParallelType parallelType) {
             List<Instance> input = new LinkedList<>(), output = new LinkedList<>();
             for (var sub : parallelType.types()) {
                 var port = doInstantiate(sub);
@@ -184,7 +225,7 @@ final class ScopeElaborator {
             };
         }
 
-        public Instantiator.ComponentPort instantiateBuiltinAtom(BuiltinAtom atom) {
+        private Instantiator.ComponentPort instantiateBuiltinAtom(BuiltinAtom atom) {
             var component = factory.createBuiltInComponent(scope, atom);
             if (atom.getBuiltin() == BuiltinComponent.REGISTER) {
                 var clock = doInstantiate(requiresComponentType(sourceLoc, atom.getParameters().getFirst()));
@@ -194,7 +235,7 @@ final class ScopeElaborator {
             return Instantiator.ComponentPort.of(component.getOutputs(), component.getInputs());
         }
 
-        public Instantiator.ComponentPort instantiateComponentAtom(ComponentAtom atom) {
+        private Instantiator.ComponentPort instantiateComponentAtom(ComponentAtom atom) {
             var node = atom.getDefinition();
             ComponentScope component = switch (atom.getDefinition().getKind()) {
                 case COMPONENT -> scope.instantiateComponentScope(atom.getIdentifier());

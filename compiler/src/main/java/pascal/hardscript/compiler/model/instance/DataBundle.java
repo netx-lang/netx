@@ -20,18 +20,18 @@ import java.util.function.Supplier;
 public final class DataBundle implements MutableInstance {
     private static final Logger log = LoggerFactory.getLogger(DataBundle.class);
     private final LinkedHashMap<Identifier, Data> map = new LinkedHashMap<>();
-    private final InstanceType type;
+    private final InterfaceType type;
     private final Identifier id;
     private final int index;
 
-    private DataBundle(Identifier id, InstanceType type, int index) {
+    private DataBundle(Identifier id, InterfaceType type, int index) {
         this.id = id;
         this.type = type;
         this.index = index;
     }
 
     @Override
-    public InstanceType getType() {
+    public InterfaceType getType() {
         return type;
     }
 

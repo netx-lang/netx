@@ -334,15 +334,22 @@ public final class Evaluator {
     private Entity evaluateSequentialType(BinaryExpr expr, boolean isTied) {
         var leftLoc = expr.getLhs().getSourceLoc();
         var rightLoc = expr.getRhs().getSourceLoc();
-        var rhs = castToComponentType(evaluate(expr.getRhs()), rightLoc);
+        ComponentType lhs, rhs = castToComponentType(evaluate(expr.getRhs()), rightLoc);
         if (isTied) {
-            var bundle = requiresDataBundle(leftLoc, evaluate(expr.getLhs()));
-            var lhs = InstanceAtom.of(InstanceAtom.Mode.BIDI, bundle, leftLoc);
+            var lhsEntity = evaluate(expr.getLhs());
+            if (lhsEntity instanceof EntityList(var list)) {
+                return ParallelType.from(list.stream()
+                        .map(element -> requiresDataBundle(leftLoc, element))
+                        .map(ComponentType.class::cast).toList());
+            } else {
+                lhs = InstanceAtom.of(InstanceAtom.Mode.BIDI,
+                        requiresMutableInstance(leftLoc, lhsEntity), leftLoc);
+            }
             return SequentialType.ofTied(lhs, rhs);
         } else {
-            var lhs = castToComponentType(evaluate(expr.getLhs()), leftLoc);
-            return SequentialType.ofSplit(lhs, rhs);
+            lhs = castToComponentType(evaluate(expr.getLhs()), leftLoc);
         }
+        return SequentialType.ofSplit(lhs, rhs);
     }
 
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
