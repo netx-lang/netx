@@ -7,6 +7,7 @@ import pascal.hardscript.compiler.model.instance.MutableInstance;
 import pascal.hardscript.compiler.model.instance.Value;
 import pascal.hardscript.compiler.model.scope.Scope;
 import pascal.hardscript.util.collection.UnionFind;
+import pascal.hardscript.util.exception.ShallNotReachHereError;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -37,7 +38,16 @@ public class AliasManager {
         }
     }
 
-    public boolean needDump(Entity entity) {
+    void setAsSourceRep(Instance inst) {
+        if (!inst.isUserDefined()) {
+            throw new ShallNotReachHereError("Cannot set a non-user-defined instance as a source representative");
+        }
+        if (set.contains(inst)) {
+            sourceRep.put(set.find(inst), inst);
+        }
+    }
+
+    boolean needDump(Entity entity) {
         if (entity instanceof Instance inst) {
             if (inst.isUserDefined()) {
                 return repOf(inst) == inst;

@@ -30,10 +30,11 @@
   },
   {
     "type": "component", "id": "Constructor", "defIndex": 1, "loc": "14:10",
-    "input": ["load"],
-    "output": ["1'h01", "load"],
+    "input": ["packet.load"],
+    "output": ["packet.valid", "packet.load"],
     "members": [
-      {"type": "wire", "width": 32, "id": "load", "loc": "15:11"}
+      {"type": "wire", "width": 32, "id": "packet.load", "loc": "16:11"},
+      {"type": "wire", "width": 1, "id": "packet.valid", "loc": "16:11"}
     ]
   }
 ]

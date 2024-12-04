@@ -2,7 +2,7 @@
   {
     "type": "component", "id": "riscv", "defIndex": 1, "loc": "1:10",
     "input": ["clk", "rst", "imemDataOut", "dmemDataOut"],
-    "output": ["output", "result", "Rb", "dmemOp", "dmemWe"],
+    "output": ["output", "dmemAddr", "dmemDataIn", "dmemOp", "dmemWe"],
     "members": [
       {"type": "clock", "id": "clk", "loc": "7:9"},
       {"type": "wire", "width": 3, "id": "dmemOp", "loc": "21:54"},
@@ -12,6 +12,8 @@
       {"type": "wire", "width": 1, "id": "less", "loc": "26:24"},
       {"type": "wire", "width": 1, "id": "aSrc", "loc": "21:62"},
       {"type": "wire", "width": 32, "id": "PC", "loc": "11:9"},
+      {"type": "wire", "width": 32, "id": "dmemAddr", "loc": "41:9"},
+      {"type": "wire", "width": 32, "id": "dmemDataIn", "loc": "42:9"},
       {"type": "wire", "width": 1, "id": "regWr", "loc": "21:17"},
       {"type": "wire", "width": 3, "id": "extOP", "loc": "21:10"},
       {"type": "wire", "width": 1, "id": "PCBsrc", "loc": "31:18"},
@@ -20,9 +22,7 @@
       {"type": "wire", "width": 1, "id": "dmemWe", "loc": "21:46"},
       {"type": "wire", "width": 2, "id": "bSrc", "loc": "21:68"},
       {"type": "wire", "width": 32, "id": "Ra", "loc": "24:10"},
-      {"type": "wire", "width": 32, "id": "Rb", "loc": "24:14"},
       {"type": "wire", "width": 3, "id": "branch_ctl", "loc": "21:24"},
-      {"type": "wire", "width": 32, "id": "result", "loc": "26:10"},
       {"type": "wire", "width": 1, "id": "rst", "loc": "8:9"},
       {"type": "wire", "width": 32, "id": "nextPC", "loc": "11:13"},
       {"type": "wire", "width": 4, "id": "ctl", "loc": "21:74"},
@@ -45,7 +45,7 @@
       {
         "type": "instantiate", "id": "RegFile@4", "defIndex": 1, "loc": "24:21",
         "input": ["clk@0", "imemDataOut@0[19:15]", "imemDataOut@0[24:20]", "imemDataOut@0[11:7]", "output@3"],
-        "output": ["Ra@0", "Rb@0"]
+        "output": ["Ra@0", "dmemDataIn@0"]
       },
       {
         "type": "instantiate", "id": "MUX@5", "defIndex": 4, "loc": "27:8",
@@ -54,13 +54,13 @@
       },
       {
         "type": "instantiate", "id": "MUX@6", "defIndex": 6, "loc": "28:8",
-        "input": ["Rb@0", "imm@0", "4", "4", "bSrc@0"],
+        "input": ["dmemDataIn@0", "imm@0", "4", "4", "bSrc@0"],
         "output": ["output@6"]
       },
       {
         "type": "instantiate", "id": "ALU@7", "defIndex": 1, "loc": "26:33",
         "input": ["output@5", "output@6", "ctl@0"],
-        "output": ["result@0", "zero@0", "less@0"]
+        "output": ["dmemAddr@0", "zero@0", "less@0"]
       },
       {
         "type": "instantiate", "id": "BranchCond@8", "defIndex": 1, "loc": "31:29",
@@ -1801,9 +1801,10 @@
   {
     "type": "component", "id": "InstrDecoder", "defIndex": 1, "loc": "45:10",
     "input": ["op_i", "func3", "func7"],
-    "output": ["extOP", "regWr", "branch_ctl", "I_flag_2", "S_flag", "memOP", "aSrc", "bSrc", "ctl"],
+    "output": ["extOP", "regWr", "branch_ctl", "memToReg", "memWr", "memOP", "aSrc", "bSrc", "ctl"],
     "members": [
       {"type": "wire", "width": 1, "id": "R_flag", "loc": "54:9"},
+      {"type": "wire", "width": 1, "id": "memWr", "loc": "91:9"},
       {"type": "wire", "width": 1, "id": "U_flag", "loc": "61:9"},
       {"type": "wire", "width": 1, "id": "func7", "loc": "48:9"},
       {"type": "wire", "width": 1, "id": "U_flag_1", "loc": "52:9"},
@@ -1817,12 +1818,11 @@
       {"type": "wire", "width": 1, "id": "I_flag_0", "loc": "53:9"},
       {"type": "wire", "width": 1, "id": "B_flag", "loc": "57:9"},
       {"type": "wire", "width": 3, "id": "extOP", "loc": "65:9"},
-      {"type": "wire", "width": 1, "id": "I_flag_2", "loc": "58:9"},
+      {"type": "wire", "width": 1, "id": "memToReg", "loc": "89:9"},
       {"type": "wire", "width": 8, "id": "de_func3", "loc": "103:9"},
       {"type": "wire", "width": 2, "id": "bSrc", "loc": "97:9"},
       {"type": "wire", "width": 3, "id": "branch_ctl", "loc": "75:9"},
       {"type": "wire", "width": 3, "id": "memOP", "loc": "93:9"},
-      {"type": "wire", "width": 1, "id": "S_flag", "loc": "59:9"},
       {"type": "wire", "width": 4, "id": "ctl", "loc": "117:9"},
       {"type": "wire", "width": 1, "id": "I_flag", "loc": "62:9"},
       {"type": "wire", "width": 4, "id": "arith_ctl", "loc": "104:9"},
@@ -1864,12 +1864,12 @@
       {
         "type": "builtin", "id": "EQ@8", "loc": "58:21",
         "input": ["op_i@0[6:2]", "5'h00"],
-        "output": ["I_flag_2@0"]
+        "output": ["memToReg@0"]
       },
       {
         "type": "builtin", "id": "EQ@9", "loc": "59:21",
         "input": ["op_i@0[6:2]", "5'h08"],
-        "output": ["S_flag@0"]
+        "output": ["memWr@0"]
       },
       {
         "type": "builtin", "id": "OR@10", "loc": "61:19",
@@ -1878,7 +1878,7 @@
       },
       {
         "type": "builtin", "id": "OR@11", "loc": "62:19",
-        "input": ["I_flag_0@0", "I_flag_1@0", "I_flag_2@0"],
+        "input": ["I_flag_0@0", "I_flag_1@0", "memToReg@0"],
         "output": ["I_flag@0"]
       },
       {
@@ -1908,7 +1908,7 @@
       },
       {
         "type": "instantiate", "id": "MUX@17", "defIndex": 1, "loc": "64:29",
-        "input": ["input_0@13", "3'h02", "S_flag@0"],
+        "input": ["input_0@13", "3'h02", "memWr@0"],
         "output": ["output@17"]
       },
       {
@@ -2008,7 +2008,7 @@
       },
       {
         "type": "builtin", "id": "OR@37", "loc": "93:25",
-        "input": ["I_flag_2@0", "S_flag@0"],
+        "input": ["memToReg@0", "memWr@0"],
         "output": ["code@38"]
       },
       {
@@ -2028,7 +2028,7 @@
       },
       {
         "type": "builtin", "id": "OR@41", "loc": "98:15",
-        "input": ["U_flag_0@0", "U_flag_1@0", "I_flag_0@0", "I_flag_2@0", "S_flag@0"],
+        "input": ["U_flag_0@0", "U_flag_1@0", "I_flag_0@0", "memToReg@0", "memWr@0"],
         "output": ["code@42"]
       },
       {
@@ -2158,7 +2158,7 @@
       },
       {
         "type": "builtin", "id": "OR@67", "loc": "121:15",
-        "input": ["U_flag_1@0", "J_flag@0", "I_flag_1@0", "I_flag_2@0", "S_flag@0"],
+        "input": ["U_flag_1@0", "J_flag@0", "I_flag_1@0", "memToReg@0", "memWr@0"],
         "output": ["code@68"]
       },
       {

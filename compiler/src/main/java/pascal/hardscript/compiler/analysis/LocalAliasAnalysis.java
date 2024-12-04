@@ -24,6 +24,9 @@ public final class LocalAliasAnalysis extends LocalModelAnalysis {
                     .map(ComponentScope::getAliases)
                     .forEach(manager::addAlias);
             manager.resolveRepresentatives();
+            var signature = scope.getSignature();
+            signature.inputs().forEach(manager::setAsSourceRep);
+            signature.outputs().forEach(manager::setAsSourceRep);
             eliminateDuplicatedData(Predicate.not(manager::needDump), manager::repOf);
         }
     }
