@@ -10,7 +10,11 @@ import pascal.hardscript.compiler.io.Configuration;
 import pascal.hardscript.compiler.model.EntityList;
 import pascal.hardscript.compiler.model.component.*;
 import pascal.hardscript.compiler.model.instance.DataBundle;
+import pascal.hardscript.compiler.model.instance.DataComposition;
 import pascal.hardscript.compiler.model.instance.Instance;
+import pascal.hardscript.compiler.model.instance.type.ArrayType;
+import pascal.hardscript.compiler.model.instance.type.InstanceType;
+import pascal.hardscript.compiler.model.instance.type.InterfaceType;
 import pascal.hardscript.compiler.model.scope.Attributes;
 import pascal.hardscript.compiler.model.scope.ComponentScope;
 import pascal.hardscript.compiler.model.scope.binding.SingleBinding;
@@ -19,6 +23,7 @@ import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.lang.SourceLoc;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -100,22 +105,30 @@ final class ScopeElaborator {
     private void buildData(DataInstantiationNode node) {
         var factory = evaluator.evaluateToInstanceFactory(node.getType());
         switch (node.getKind()) {
-            case BUNDLE -> {
-                if (!(factory instanceof DataBundle.Factory)) {
-                    log.error("{}: Expected bundle type got {}", node.getSourceLoc(), node.getType());
-                    throw new CompileCancellationException();
-                }
-            }
-            case WIRE -> {
-                if (factory instanceof DataBundle.Factory) {
-                    log.error("{}: Expected wire type but got {}", node.getSourceLoc(), node.getType());
-                    throw new CompileCancellationException();
-                }
-            }
+            case BUNDLE -> checkFactoryLegality(node.getSourceLoc(), factory.getType(), true);
+            case WIRE -> checkFactoryLegality(node.getSourceLoc(), factory.getType(), false);
         }
         node.getSymbols().stream()
                 .map(evaluator::getIdentifierFrom)
                 .forEach(id -> scope.bind(id, factory.create(scope, id)));
+    }
+
+    private void checkFactoryLegality(SourceLoc sourceLoc, InstanceType type, boolean isBundle) {
+        if (type instanceof ArrayType arrayType) {
+            checkFactoryLegality(sourceLoc, arrayType.baseType(), isBundle);
+        } else {
+            if (isBundle) {
+                if (!(type instanceof InterfaceType)) {
+                    log.error("{}: Expected bundle type got {}", sourceLoc, type);
+                    throw new CompileCancellationException();
+                }
+            } else {
+                if (type instanceof InterfaceType) {
+                    log.error("{}: Expected wire type but got {}", sourceLoc, type);
+                    throw new CompileCancellationException();
+                }
+            }
+        }
     }
 
     private void buildSubComponent(ComponentInstantiationNode instantiation) {
@@ -193,7 +206,7 @@ final class ScopeElaborator {
             if (sequentialType.tied()) {
                 var bundles = lhs.source().stream().map(DataBundle.class::cast).toList();
                 checkTiedType(sourceLoc, bundles, leftMostAtomsOf(sequentialType.rhs()));
-                receiver = bundles.stream().map(DataBundle::flatten).flatMap(List::stream).toList();
+                receiver = bundles.stream().map(DataComposition::getElements).flatMap(Collection::stream).toList();
             } else {
                 receiver = lhs.source();
             }

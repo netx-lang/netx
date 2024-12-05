@@ -19,7 +19,7 @@ public abstract sealed class DataComposition implements MutableInstance permits 
         this.index = index;
     }
 
-    abstract protected Collection<MutableInstance> getElements();
+    abstract public Collection<MutableInstance> getElements();
 
     public List<Data> flatten() {
         List<Data> result = new LinkedList<>();

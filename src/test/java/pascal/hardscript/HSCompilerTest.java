@@ -53,6 +53,11 @@ class HSCompilerTest {
     }
 
     @Test
+    void testNestedType() throws IOException {
+        test("nested_type");
+    }
+
+    @Test
     void testRISCV() throws IOException {
         test("riscv");
     }

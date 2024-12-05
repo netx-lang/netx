@@ -293,7 +293,7 @@ public final class Evaluator {
         if (expr == null) {
             factory = new Wire.Factory(PolyType.getInstance(), global);
         } else {
-            mode = EvaluationMode.DATA_FACTORY;
+            mode = EvaluationMode.FACTORY;
             factory = requiresInstanceFactory(expr.getSourceLoc(), evaluate(expr));
             mode = EvaluationMode.COMMON;
         }
@@ -361,7 +361,7 @@ public final class Evaluator {
 
     private Entity evaluatePrimarySymbolExpr(PrimarySymbol expr) {
         var id = getIdentifierFrom(expr);
-        if (mode == EvaluationMode.DATA_FACTORY) {
+        if (mode == EvaluationMode.FACTORY) {
             if (!scope.getGlobal().hasInterface(id)) {
                 log.error("{}: Unknown interface type {}", expr.getSourceLoc(), id);
                 throw new CompileCancellationException();
@@ -377,7 +377,7 @@ public final class Evaluator {
     }
 
     private Entity evaluateParamSymbolExpr(ParamSymbolExpr expr) {
-        if (mode == EvaluationMode.DATA_FACTORY) {
+        if (mode == EvaluationMode.FACTORY) {
             return evaluateInstanceFactory(expr);
         } else {
             return evaluateComponentType(expr);
@@ -486,7 +486,7 @@ public final class Evaluator {
         requiresMatchedSize(sourceLoc, 1, arguments);
         mode = EvaluationMode.COMMON;
         var bitType = BitType.of(evaluateToInteger(arguments.getFirst()));
-        mode = EvaluationMode.DATA_FACTORY;
+        mode = EvaluationMode.FACTORY;
         return new Wire.Factory(bitType, global);
     }
 
@@ -536,6 +536,6 @@ public final class Evaluator {
     }
 
     enum EvaluationMode {
-        COMMON, DATA_FACTORY, DECLARE_IN_PLACE
+        COMMON, FACTORY, DECLARE_IN_PLACE
     }
 }

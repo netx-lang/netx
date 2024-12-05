@@ -55,7 +55,7 @@ public final class DataBundle extends DataComposition {
     }
 
     @Override
-    protected Collection<MutableInstance> getElements() {
+    public Collection<MutableInstance> getElements() {
         return map.values();
     }
 
