@@ -145,51 +145,51 @@ public final class BitVector {
     }
 
     public BitVector concat(BitVector that) {
-        var rep = this.toBigInteger().shiftLeft(that.size).or(that.toBigInteger());
+        var rep = this.toUnsignedBigInteger().shiftLeft(that.size).or(that.toUnsignedBigInteger());
         return fromBigInteger(this.size + that.size, rep);
 
     }
 
     public BitVector neg() {
-        return fromBigInteger(size, toBigInteger().negate());
+        return fromBigInteger(size, toUnsignedBigInteger().negate());
     }
 
     public BitVector not() {
-        return fromBigInteger(size, toBigInteger().not());
+        return fromBigInteger(size, toUnsignedBigInteger().not());
     }
 
     public BitVector add(BitVector that) {
         requiresSameSize(this, that);
-        return fromBigInteger(size, toBigInteger().add(that.toBigInteger()));
+        return fromBigInteger(size, toUnsignedBigInteger().add(that.toUnsignedBigInteger()));
     }
 
     public BitVector sub(BitVector that) {
         requiresSameSize(this, that);
-        return fromBigInteger(size, toBigInteger().subtract(that.toBigInteger()));
+        return fromBigInteger(size, toUnsignedBigInteger().subtract(that.toUnsignedBigInteger()));
     }
 
     public BitVector mul(BitVector that) {
         requiresSameSize(this, that);
-        return fromBigInteger(size, toBigInteger().multiply(that.toBigInteger()));
+        return fromBigInteger(size, toUnsignedBigInteger().multiply(that.toUnsignedBigInteger()));
     }
 
     public BitVector div(BitVector that) {
         requiresSameSize(this, that);
-        return fromBigInteger(size, toBigInteger().divide(that.toBigInteger()));
+        return fromBigInteger(size, toUnsignedBigInteger().divide(that.toUnsignedBigInteger()));
     }
 
     public BitVector mod(BitVector that) {
         requiresSameSize(this, that);
-        return fromBigInteger(size, toBigInteger().mod(that.toBigInteger()));
+        return fromBigInteger(size, toUnsignedBigInteger().mod(that.toUnsignedBigInteger()));
     }
 
     public BitVector pow(BitVector that) {
-        return fromBigInteger(size, toBigInteger().pow(that.toInt()));
+        return fromBigInteger(size, toUnsignedBigInteger().pow(that.toInt()));
     }
 
     public BitVector and(BitVector that) {
         requiresSameSize(this, that);
-        return fromBigInteger(size, toBigInteger().and(that.toBigInteger()));
+        return fromBigInteger(size, toUnsignedBigInteger().and(that.toUnsignedBigInteger()));
     }
 
     public BitVector nand(BitVector that) {
@@ -198,7 +198,7 @@ public final class BitVector {
 
     public BitVector or(BitVector that) {
         requiresSameSize(this, that);
-        return fromBigInteger(size, toBigInteger().or(that.toBigInteger()));
+        return fromBigInteger(size, toUnsignedBigInteger().or(that.toUnsignedBigInteger()));
     }
 
     public BitVector nor(BitVector that) {
@@ -207,7 +207,7 @@ public final class BitVector {
 
     public BitVector xor(BitVector that) {
         requiresSameSize(this, that);
-        return fromBigInteger(size, toBigInteger().xor(that.toBigInteger()));
+        return fromBigInteger(size, toUnsignedBigInteger().xor(that.toUnsignedBigInteger()));
     }
 
     public BitVector xnor(BitVector that) {
@@ -219,7 +219,7 @@ public final class BitVector {
         if (!msb()) {
             return lshr(offset);
         } else {
-            var rep = toBigInteger();
+            var rep = toUnsignedBigInteger();
             var high = BigInteger.ONE.shiftLeft(size + 1).subtract(BigInteger.ONE);
             var low = BigInteger.ONE.shiftLeft(size - offset).subtract(BigInteger.ONE);
             return fromBigInteger(size, rep.shiftRight(offset).or(high.xor(low)));
@@ -227,15 +227,15 @@ public final class BitVector {
     }
 
     public BitVector lshr(int offset) {
-        return fromBigInteger(size, toBigInteger().shiftRight(offset));
+        return fromBigInteger(size, toUnsignedBigInteger().shiftRight(offset));
     }
 
     public BitVector shl(int offset) {
-        return fromBigInteger(size, toBigInteger().shiftLeft(offset));
+        return fromBigInteger(size, toUnsignedBigInteger().shiftLeft(offset));
     }
 
     public boolean eq(BitVector that) {
-        return toBigInteger().equals(that.toBigInteger());
+        return toUnsignedBigInteger().equals(that.toUnsignedBigInteger());
     }
 
     public boolean ne(BitVector that) {

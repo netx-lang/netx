@@ -13,7 +13,7 @@ import java.util.function.BinaryOperator;
 public class Evaluator {
     private static final Map<BuiltinComponent, BiFunction<BitVector, BitVector, Boolean>> RELATIONAL_OP;
     private static final Map<BuiltinComponent, BiFunction<BitVector, Integer, BitVector>> SHIFT_OP;
-    private static final Map<BuiltinComponent, BinaryOperator<BitVector>> BINARY_OP;
+    private static final Map<BuiltinComponent, BinaryOperator<BitVector>> MULTIN_OP;
 
     static {
         RELATIONAL_OP = new HashMap<>();
@@ -28,18 +28,18 @@ public class Evaluator {
         RELATIONAL_OP.put(BuiltinComponent.UGT, BitVector::ugt);
         RELATIONAL_OP.put(BuiltinComponent.UGE, BitVector::uge);
 
-        BINARY_OP = new HashMap<>();
-        BINARY_OP.put(BuiltinComponent.ADD, BitVector::add);
-        BINARY_OP.put(BuiltinComponent.SUB, BitVector::sub);
-        BINARY_OP.put(BuiltinComponent.MUL, BitVector::mul);
-        BINARY_OP.put(BuiltinComponent.DIV, BitVector::div);
-        BINARY_OP.put(BuiltinComponent.MOD, BitVector::mod);
-        BINARY_OP.put(BuiltinComponent.OR, BitVector::or);
-        BINARY_OP.put(BuiltinComponent.AND, BitVector::and);
-        BINARY_OP.put(BuiltinComponent.XOR, BitVector::xor);
-        BINARY_OP.put(BuiltinComponent.NOR, BitVector::nor);
-        BINARY_OP.put(BuiltinComponent.NAND, BitVector::nand);
-        BINARY_OP.put(BuiltinComponent.XNOR, BitVector::xnor);
+        MULTIN_OP = new HashMap<>();
+        MULTIN_OP.put(BuiltinComponent.ADD, BitVector::add);
+        MULTIN_OP.put(BuiltinComponent.SUB, BitVector::sub);
+        MULTIN_OP.put(BuiltinComponent.MUL, BitVector::mul);
+        MULTIN_OP.put(BuiltinComponent.DIV, BitVector::div);
+        MULTIN_OP.put(BuiltinComponent.MOD, BitVector::mod);
+        MULTIN_OP.put(BuiltinComponent.OR, BitVector::or);
+        MULTIN_OP.put(BuiltinComponent.AND, BitVector::and);
+        MULTIN_OP.put(BuiltinComponent.XOR, BitVector::xor);
+        MULTIN_OP.put(BuiltinComponent.NOR, BitVector::nor);
+        MULTIN_OP.put(BuiltinComponent.NAND, BitVector::nand);
+        MULTIN_OP.put(BuiltinComponent.XNOR, BitVector::xnor);
 
         SHIFT_OP = new HashMap<>();
         SHIFT_OP.put(BuiltinComponent.SHL, BitVector::shl);
@@ -52,9 +52,8 @@ public class Evaluator {
             case CAST -> inputs;
             case NOT -> evaluateNotGate(inputs);
             case CONCAT -> evaluateMultiIn(BitVector::concat, inputs);
-            case ADD, SUB, MUL, DIV, MOD -> evaluateBinary(BINARY_OP.get(builtin), inputs);
+            case ADD, SUB, MUL, DIV, MOD, OR, AND, XOR, NAND, NOR, XNOR -> evaluateMultiIn(MULTIN_OP.get(builtin), inputs);
             case SHL, ASHR, LSHR -> evaluateShift(SHIFT_OP.get(builtin), inputs);
-            case OR, AND, XOR, NAND, NOR, XNOR -> evaluateMultiIn(BINARY_OP.get(builtin), inputs);
             case EQ, NE, SLT, SGT, SLE, ULT, SGE, UGT, ULE, UGE -> evaluateRelation(RELATIONAL_OP.get(builtin), inputs);
             case REGISTER, IGNORE, SPLIT, TO -> throw new TodoException("Replace this exception");
         };
@@ -62,13 +61,6 @@ public class Evaluator {
 
     private static List<BitVector> evaluateMultiIn(BinaryOperator<BitVector> op, List<BitVector> inputs) {
         return List.of(inputs.stream().reduce(op).orElseThrow());
-    }
-
-    private static List<BitVector> evaluateBinary(BinaryOperator<BitVector> op, List<BitVector> inputs) {
-        if (inputs.size() != 2) {
-            throw new IllegalArgumentException("Binary operation must have exactly two inputs");
-        }
-        return List.of(op.apply(inputs.get(0), inputs.get(1)));
     }
 
     private static List<BitVector> evaluateShift(

@@ -1,39 +1,29 @@
 [
   {
-    "type": "component", "id": "top", "defIndex": 1, "loc": "1:10",
-    "input": ["a@0", "b@0"],
-    "output": ["c@0"],
+    "type": "component", "id": "top", "defIndex": 1, "loc": "6:10",
+    "input": ["pin[0].valid@0", "pin[0].load@0", "pin[1].valid@0", "pin[1].load@0", "pin[2].valid@0", "pin[2].load@0", "pin[3].valid@0", "pin[3].load@0"],
+    "output": ["pout.valid@0", "pout.load@0"],
     "members": [
-      {"type": "wire", "width": 32, "id": "a", "loc": "2:9"},
-      {"type": "wire", "width": 32, "id": "b", "loc": "2:12"},
-      {"type": "wire", "width": 32, "id": "c", "loc": "2:15"},
-      {"type": "wire", "width": 1, "id": "pa.valid", "loc": "3:11"},
-      {"type": "wire", "width": 32, "id": "pa.load", "loc": "3:11"},
-      {"type": "wire", "width": 1, "id": "pb.valid", "loc": "3:15"},
-      {"type": "wire", "width": 32, "id": "pb.load", "loc": "3:15"},
+      {"type": "wire", "width": 32, "id": "pin[2].load", "loc": "7:11"},
+      {"type": "wire", "width": 32, "id": "pin[3].load", "loc": "7:11"},
+      {"type": "wire", "width": 32, "id": "pout.load", "loc": "8:11"},
+      {"type": "wire", "width": 1, "id": "pin[0].valid", "loc": "7:11"},
+      {"type": "wire", "width": 1, "id": "pin[1].valid", "loc": "7:11"},
+      {"type": "wire", "width": 1, "id": "pin[2].valid", "loc": "7:11"},
+      {"type": "wire", "width": 1, "id": "pin[3].valid", "loc": "7:11"},
+      {"type": "wire", "width": 32, "id": "pin[0].load", "loc": "7:11"},
+      {"type": "wire", "width": 32, "id": "pin[1].load", "loc": "7:11"},
+      {"type": "wire", "width": 1, "id": "pout.valid", "loc": "8:11"},
       {
-        "type": "instantiate", "id": "Constructor@1", "defIndex": 1, "loc": "4:10",
-        "input": ["a@0"],
-        "output": ["pa.valid@0", "pa.load@0"]
+        "type": "builtin", "id": "AND@1", "loc": "10:8",
+        "input": ["pin[0].valid@0", "pin[1].valid@0", "pin[2].valid@0", "pin[3].valid@0"],
+        "output": ["pout.valid@0"]
       },
       {
-        "type": "instantiate", "id": "Constructor@2", "defIndex": 1, "loc": "5:10",
-        "input": ["b@0"],
-        "output": ["pb.valid@0", "pb.load@0"]
-      },
-      {
-        "type": "builtin", "id": "ADD@3", "loc": "6:9",
-        "input": ["pa.load@0", "pb.load@0"],
-        "output": ["c@0"]
+        "type": "builtin", "id": "ADD@2", "loc": "11:8",
+        "input": ["pin[0].load@0", "pin[1].load@0", "pin[2].load@0", "pin[3].load@0"],
+        "output": ["pout.load@0"]
       }
-    ]
-  },
-  {
-    "type": "component", "id": "Constructor", "defIndex": 1, "loc": "14:10",
-    "input": ["packet.load@0"],
-    "output": ["1'h01", "packet.load@0"],
-    "members": [
-      {"type": "wire", "width": 32, "id": "packet.load", "loc": "16:11"}
     ]
   }
 ]

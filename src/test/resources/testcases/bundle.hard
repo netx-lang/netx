@@ -1,18 +1,20 @@
-component top: [a, b] -> [c] {
-    wire a, b, c of bit(32)
-    bundle pa, pb of Package
-    pa <> Constructor <> a
-    pb <> Constructor <> b
-    c <> ADD <> [pa.load, pb.load]
-}
-
 interface Package: [valid, load] -> [valid, load] {
     wire valid of bit(1)
     wire load  of bit(32)
 }
 
-component Constructor: [load] -> [packet] {
-    wire   load   of bit(32)
-    bundle packet of Package
-    packet <+> Package <> [1'b1, load]
+component top: [pin] -> [pout] {
+    bundle pin of array(Package, 4)
+    bundle pout of Package
+    pout <+> Package <> [
+        AND(4) <> [pin[i].valid | i in [0..4]],
+        ADD(4) <> [pin[i].load  | i in [0..4]]
+    ]
+}
+
+component Checker: [admin, pin] -> [pout] {
+    wire admin of bit(1)
+    bundle pin, pout of Package
+    pout.valid <> AND <> [admin, pin.valid]
+    pout.load  <> pin.load
 }

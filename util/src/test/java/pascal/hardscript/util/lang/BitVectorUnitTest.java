@@ -153,6 +153,12 @@ class BitVectorUnitTest {
         BitVector bv4 = BitVector.parse("1010010111111010000010111", 25, 2);
         BitVector bv5 = BitVector.parse("0010101111000101110101100", 25, 2);
         BitVector bv6 = BitVector.parse("1101000110111111111000011", 25, 2);
+        var a = BitVector.parse("6B52DC46", 32, 16);
+        var b = BitVector.parse("9491C51A", 32, 16);
+        var c = BitVector.parse("54C3E406", 32, 16);
+        var d = BitVector.parse("357F60B5", 32, 16);
+        var e = BitVector.parse("8A27E61B", 32, 16);
+        assertEquals(e, a.add(b).add(c).add(d));
         assertEquals(bv3, bv1.add(bv2));
         assertEquals(bv6, bv4.add(bv5));
     }

@@ -1,29 +1,31 @@
 {
-  "totalData": 3,
+  "totalData": 10,
   "design": {
     "type": "component",
     "id": "top",
-    "loc": "1:10",
-    "input": ["a@0", "b@1"],
-    "output": ["c@2"],
+    "loc": "6:10",
+    "input": ["pin[0].valid@0", "pin[0].load@1", "pin[1].valid@2", "pin[1].load@3", "pin[2].valid@4", "pin[2].load@5", "pin[3].valid@6", "pin[3].load@7"],
+    "output": ["pout.valid@8", "pout.load@9"],
     "members": [
-      {"type": "wire", "width": 32, "id": "a@0", "loc": "2:9"},
-      {"type": "wire", "width": 32, "id": "b@1", "loc": "2:12"},
-      {"type": "wire", "width": 32, "id": "c@2", "loc": "2:15"},
+      {"type": "wire", "width": 32, "id": "pin[2].load@5", "loc": "7:11"},
+      {"type": "wire", "width": 32, "id": "pin[3].load@7", "loc": "7:11"},
+      {"type": "wire", "width": 32, "id": "pout.load@9", "loc": "8:11"},
+      {"type": "wire", "width": 1, "id": "pin[0].valid@0", "loc": "7:11"},
+      {"type": "wire", "width": 1, "id": "pin[1].valid@2", "loc": "7:11"},
+      {"type": "wire", "width": 1, "id": "pin[2].valid@4", "loc": "7:11"},
+      {"type": "wire", "width": 1, "id": "pin[3].valid@6", "loc": "7:11"},
+      {"type": "wire", "width": 32, "id": "pin[0].load@1", "loc": "7:11"},
+      {"type": "wire", "width": 32, "id": "pin[1].load@3", "loc": "7:11"},
+      {"type": "wire", "width": 1, "id": "pout.valid@8", "loc": "8:11"},
       {
-        "type": "component", "id": "Constructor", "loc": "4:10",
-        "input": ["a@0"],
-        "output": ["1'h01", "a@0"]
+        "type": "builtin", "id": "AND", "loc": "10:8",
+        "input": ["pin[0].valid@0", "pin[1].valid@2", "pin[2].valid@4", "pin[3].valid@6"],
+        "output": ["pout.valid@8"]
       },
       {
-        "type": "component", "id": "Constructor", "loc": "5:10",
-        "input": ["b@1"],
-        "output": ["1'h01", "b@1"]
-      },
-      {
-        "type": "builtin", "id": "ADD", "loc": "6:9",
-        "input": ["a@0", "b@1"],
-        "output": ["c@2"]
+        "type": "builtin", "id": "ADD", "loc": "11:8",
+        "input": ["pin[0].load@1", "pin[1].load@3", "pin[2].load@5", "pin[3].load@7"],
+        "output": ["pout.load@9"]
       }
     ]
   }

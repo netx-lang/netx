@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -78,6 +80,31 @@ public class SimulatorTest {
         simulator.setInput("rst", high);
         simulator.runUntil(3);
         assertEquals(List.of(0, 0, 0, 1, 1, 2, 2, 3, 3, 0), count);
+    }
+
+    @Test
+    void testBundle() throws IOException {
+        var simulator = buildSimulator("bundle.hard");
+        Function<Integer, String> valid = i -> String.format("pin[%d].valid", i);
+        Function<Integer, String> load = i -> String.format("pin[%d].load", i);
+
+        Random random = new Random();
+        var high = BitVector.fromBoolean(true);
+        for (int i = 0; i < 4; i++) {
+            simulator.setInput(valid.apply(i), high);
+        }
+        for (int i = 0; i < 1000; i++) {
+            int sum = 0;
+            for (int j = 0; j < 4; j++) {
+                int loadValue = random.nextInt(114514);
+                System.out.println(BitVector.fromInt(loadValue));
+                simulator.setInput(load.apply(j), BitVector.fromInt(loadValue));
+                sum += loadValue;
+            }
+            simulator.run();
+            assertEquals(high, simulator.getOutput("pout.valid"));
+            assertEquals(BitVector.fromInt(sum), simulator.getOutput("pout.load"));
+        }
     }
 
     private static Simulator buildSimulator(String other) throws IOException {
