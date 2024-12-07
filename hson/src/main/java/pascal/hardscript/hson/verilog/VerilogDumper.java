@@ -7,6 +7,7 @@ import pascal.hardscript.hson.verilog.model.ref.WireRef;
 import pascal.hardscript.hson.verilog.model.ref.WireRefSelect;
 import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
+import pascal.hardscript.util.lang.SourceLoc;
 import pascal.hardscript.util.print.NotepadWriter;
 
 import java.util.*;
@@ -77,6 +78,20 @@ public class VerilogDumper {
         notepad.close();
     }
 
+    private static String getHeading(boolean isInput, boolean isOutput) {
+        String heading;
+        if (isInput && isOutput) {
+            heading = "inout";
+        } else if (isInput) {
+            heading = "input";
+        } else if (isOutput) {
+            heading = "output";
+        } else {
+            heading = "wire";
+        }
+        return heading;
+    }
+
     private void dumpModule(VModule module) {
         notepad.println("// @(" + module.getId().getSourceLoc() + ")");
         notepad.println("module " + instNameOf(module) + "(");
@@ -86,8 +101,8 @@ public class VerilogDumper {
         notepad.decIndent();
         notepad.println(");");
         notepad.incIndent();
-        defineModuleWires(module);
-        defineModuleRegisters(module);
+        dumpModuleWires(module);
+        dumpModuleRegisters(module);
         module.getInstantiations().forEach(this::dumpInstantiation);
         module.getAssigns().forEach(this::dumpAssign);
         dumpRegisters(module.getAllRegisters());
@@ -96,7 +111,7 @@ public class VerilogDumper {
         notepad.newLine();
     }
 
-    private void defineModuleRegisters(VModule module) {
+    private void dumpModuleRegisters(VModule module) {
         for (var reg : module.getAllRegisters()) {
             var wire = reg.getTrueReg();
             notepad.print("reg " + typeOf(wire) + idOf(wire.id()) + ";");
@@ -108,31 +123,92 @@ public class VerilogDumper {
         }
     }
 
-    private void defineModuleWires(VModule module) {
-        Set<String> inputSet = new HashSet<>();
-        Set<String> outputSet = new HashSet<>();
-        module.getInputs().stream()
-                .map(VerilogDumper::baseStringOf)
-                .filter(Objects::nonNull)
-                .forEach(inputSet::add);
-        module.getOutputs().stream()
-                .map(VerilogDumper::baseStringOf)
-                .filter(Objects::nonNull)
-                .forEach(outputSet::add);
-        for (var wire : module.getAllWires()) {
-            String heading = "wire";
-            if (inputSet.contains(wire.id().name())) {
-                heading = "input";
-            } else if (outputSet.contains(wire.id().name())) {
-                heading = "output";
-            }
-            notepad.print(heading + " " + typeOf(wire) + idOf(wire.id()) + ";");
-            if (wire.id().getSourceLoc() != null) {
-                notepad.println(" // @(" + wire.id().getSourceLoc() + ")");
-            } else {
-                notepad.newLine();
+    private void dumpModuleWires(VModule module) {
+        var declarations = groupDeclarationsByHeading(module);
+        for (var entry : declarations.entrySet()) {
+            var wires = entry.getValue().stream().collect(Collectors.groupingBy(WireDeclaration::type));
+            for (var wireEntry : wires.entrySet()) {
+                List<WireDeclaration> located = new LinkedList<>(), nonLocated = new LinkedList<>();
+                for (var wire : wireEntry.getValue()) {
+                    if (wire.loc != null) {
+                        located.add(wire);
+                    } else {
+                        nonLocated.add(wire);
+                    }
+                }
+                Runnable printHeading = () -> {
+                    notepad.print(entry.getKey() + " ");
+                    notepad.print(wireEntry.getKey());
+                };
+                dumpLocatedDeclarationByLine(printHeading, located);
+                if (!nonLocated.isEmpty()) {
+                    printHeading.run();
+                    dumpWireWithoutLocation(nonLocated);
+                }
             }
         }
+    }
+
+    private void dumpLocatedDeclarationByLine(Runnable printHeading, List<WireDeclaration> declarations) {
+        if (declarations.isEmpty()) {
+            return;
+        }
+        for (int i = 0; i < declarations.size(); i += 8) {
+            printHeading.run();
+            var subList = declarations.subList(i, Math.min(i + 8, declarations.size()));
+            dumpWireWithLocation(subList);
+        }
+    }
+
+    private Map<String, List<WireDeclaration>> groupDeclarationsByHeading(VModule module) {
+        var inputSet = module.getInputs().stream()
+                .map(VerilogDumper::baseStringOf).filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        var outputSet = module.getOutputs().stream()
+                .map(VerilogDumper::baseStringOf).filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<String, List<WireDeclaration>> declarations = new HashMap<>();
+        for (var wire : module.getAllWires()) {
+            boolean isInput = inputSet.contains(wire.id().name());
+            boolean isOutput = outputSet.contains(wire.id().name());
+            String heading = getHeading(isInput, isOutput);
+            var declaration = new WireDeclaration(typeOf(wire), idOf(wire.id()), wire.id().getSourceLoc());
+            if (declarations.containsKey(heading)) {
+                declarations.get(heading).add(declaration);
+            } else {
+                declarations.put(heading, new LinkedList<>(List.of(declaration)));
+            }
+        }
+        return declarations;
+    }
+
+    private void dumpWireWithLocation(List<WireDeclaration> located) {
+        var iter = located.iterator();
+        notepad.print(iter.next().name);
+        while (iter.hasNext()) {
+            notepad.print(", " + iter.next().name);
+        }
+        notepad.print(";");
+
+        notepad.print(" //");
+        iter = located.iterator();
+        notepad.print(" @(" + iter.next().loc + ")");
+        while (iter.hasNext()) {
+            notepad.print(", @(" + iter.next().loc + ")");
+        }
+        notepad.newLine();
+    }
+
+    private void dumpWireWithoutLocation(List<WireDeclaration> nonLocated) {
+        var iter = nonLocated.iterator();
+        notepad.print(iter.next().name);
+        while (iter.hasNext()) {
+            notepad.print(", " + iter.next().name);
+        }
+        notepad.println(";");
+    }
+
+    record WireDeclaration(String type, String name, SourceLoc loc) {
     }
 
     private void dumpIOPorts(List<DataRef> inputs, List<DataRef> outputs) {

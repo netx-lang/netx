@@ -2,46 +2,13 @@
 module top_1(
   clk_50, hex_0, hex_1, hex_2, hex_3, hex_4, hex_5, hex_6, hex_7
 );
-  wire ms_clk; // @(9:6)
+  output [6:0] hex_1, hex_0, hex_3, hex_2, hex_5, hex_4, hex_7, hex_6; // @(4:7), @(4:7), @(4:7), @(4:7), @(4:7), @(4:7), @(4:7), @(4:7)
   input clk_50; // @(2:6)
-  wire [31:0] \$i_19 ;
-  wire [3:0] \$p_5 ;
-  wire [3:0] \$p_6 ;
-  wire [31:0] \$p_3 ;
-  wire [31:0] \$i_27 ;
-  wire [31:0] \$p_4 ;
-  wire [3:0] \$p_9 ;
-  wire [3:0] \$p_7 ;
-  wire s_clk; // @(9:14)
-  wire [31:0] \$i_23 ;
-  wire [3:0] \$p_8 ;
-  wire [31:0] \$i1_26 ;
-  wire [3:0] \$p_10 ;
-  wire [31:0] \$i1_22 ;
-  output [6:0] hex_1; // @(4:7)
-  output [6:0] hex_0; // @(4:7)
-  wire [31:0] ms; // @(10:6)
-  output [6:0] hex_3; // @(4:7)
-  output [6:0] hex_2; // @(4:7)
-  wire [31:0] \$i_7 ;
-  wire [3:0] \$p_1 ;
-  wire h_clk; // @(9:28)
+  wire ms_clk, s_clk, h_clk, m_clk; // @(9:6), @(9:14), @(9:28), @(9:21)
   wire \$p_2 ;
-  wire [3:0] \$p_0 ;
-  wire [31:0] \$i_35 ;
-  wire [31:0] \$i_15 ;
-  wire [31:0] \$i_31 ;
-  wire [31:0] \$i_11 ;
-  wire [31:0] \$i1_18 ;
-  output [6:0] hex_5; // @(4:7)
-  output [6:0] hex_4; // @(4:7)
-  wire [31:0] \$i1_34 ;
-  output [6:0] hex_7; // @(4:7)
-  output [6:0] hex_6; // @(4:7)
-  wire [31:0] \$i1_14 ;
-  wire m_clk; // @(9:21)
-  wire [31:0] \$i1_30 ;
-  wire [31:0] \$i1_10 ;
+  wire [3:0] \$p_5 , \$p_6 , \$p_9 , \$p_7 , \$p_8 , \$p_10 , \$p_1 , \$p_0 ;
+  wire [31:0] ms; // @(10:6)
+  wire [31:0] \$i_19 , \$p_3 , \$i_27 , \$p_4 , \$i_23 , \$i1_26 , \$i1_22 , \$i_7 , \$i_35 , \$i_15 , \$i_31 , \$i_11 , \$i1_18 , \$i1_34 , \$i1_14 , \$i1_30 , \$i1_10 ;
   reg [31:0] \$p_11 ;
   hex_trigger_1 \$inst_16 (\$p_0 , hex_2);
   hex_trigger_1 \$inst_32 (\$p_1 , hex_6);
@@ -97,57 +64,12 @@ endmodule
 module MUX_3(
   code, input_0, input_1, input_2, input_3, input_4, input_5, input_6, input_7, input_8, input_9, input_10, input_11, input_12, input_13, input_14, input_15, out
 );
-  input [6:0] input_9; // @(65:16)
-  wire [6:0] \$i14_34 ;
-  input [6:0] input_5; // @(65:16)
-  input [6:0] input_6; // @(65:16)
-  input [6:0] input_7; // @(65:16)
-  input [6:0] input_8; // @(65:16)
-  wire [6:0] \$i10_34 ;
-  wire [6:0] \$i2_33 ;
-  wire [6:0] \$i2_34 ;
-  wire [6:0] \$i2_31 ;
-  wire [6:0] \$i6_34 ;
-  wire [6:0] \$i13_34 ;
-  wire [6:0] \$i2_5 ;
-  wire [6:0] \$i2_3 ;
-  wire [6:0] \$i2_9 ;
-  wire [6:0] \$i2_7 ;
-  input [6:0] input_14; // @(65:16)
-  input [6:0] input_15; // @(65:16)
-  input [6:0] input_12; // @(65:16)
-  input [6:0] input_13; // @(65:16)
-  wire [6:0] \$i1_34 ;
-  input [6:0] input_10; // @(65:16)
-  input [6:0] input_11; // @(65:16)
-  wire [6:0] \$i9_34 ;
-  wire [6:0] \$i5_34 ;
-  input [3:0] code; // @(61:9)
-  wire [6:0] \$i12_34 ;
   output [6:0] out; // @(64:9)
-  wire [6:0] \$i16_34 ;
-  wire [6:0] \$i2_19 ;
-  wire [6:0] \$i2_17 ;
-  wire [6:0] \$i2_15 ;
-  wire [6:0] \$i2_13 ;
-  wire [6:0] \$i2_11 ;
-  wire [6:0] \$i8_34 ;
-  wire [6:0] \$i4_34 ;
+  input [3:0] code; // @(61:9)
+  input [6:0] input_9, input_5, input_6, input_7, input_8, input_14, input_15, input_12; // @(65:16), @(65:16), @(65:16), @(65:16), @(65:16), @(65:16), @(65:16), @(65:16)
+  input [6:0] input_13, input_10, input_11, input_1, input_2, input_3, input_4, input_0; // @(65:16), @(65:16), @(65:16), @(65:16), @(65:16), @(65:16), @(65:16), @(65:16)
   wire [15:0] mask; // @(62:9)
-  wire [6:0] \$i11_34 ;
-  wire [6:0] \$i15_34 ;
-  wire [6:0] \$i2_29 ;
-  input [6:0] input_1; // @(65:16)
-  input [6:0] input_2; // @(65:16)
-  wire [6:0] \$i2_27 ;
-  input [6:0] input_3; // @(65:16)
-  input [6:0] input_4; // @(65:16)
-  wire [6:0] \$i2_25 ;
-  wire [6:0] \$i3_34 ;
-  wire [6:0] \$i2_23 ;
-  wire [6:0] \$i7_34 ;
-  input [6:0] input_0; // @(65:16)
-  wire [6:0] \$i2_21 ;
+  wire [6:0] \$i14_34 , \$i10_34 , \$i2_33 , \$i2_34 , \$i2_31 , \$i6_34 , \$i13_34 , \$i2_5 , \$i2_3 , \$i2_9 , \$i2_7 , \$i1_34 , \$i9_34 , \$i5_34 , \$i12_34 , \$i16_34 , \$i2_19 , \$i2_17 , \$i2_15 , \$i2_13 , \$i2_11 , \$i8_34 , \$i4_34 , \$i11_34 , \$i15_34 , \$i2_29 , \$i2_27 , \$i2_25 , \$i3_34 , \$i2_23 , \$i7_34 , \$i2_21 ;
   DECODER_2 \$inst_1 (code, mask);
   assign \$i2_3  = $signed(mask[0]);
   assign \$i1_34  = input_0 & \$i2_3 ;
@@ -188,12 +110,9 @@ endmodule
 module DECODER_2(
   code, out
 );
-  input [3:0] code; // @(71:9)
-  wire \$i2_5 ;
-  wire \$i1_5 ;
-  wire \$i4_5 ;
   output [15:0] out; // @(72:9)
-  wire \$i3_5 ;
+  input [3:0] code; // @(71:9)
+  wire \$i2_5 , \$i1_5 , \$i4_5 , \$i3_5 ;
   assign \$i1_5  = ~code[0];
   assign \$i2_5  = ~code[1];
   assign \$i3_5  = ~code[2];
@@ -220,14 +139,11 @@ endmodule
 module clock_divider_1(
   clk_50, clk
 );
-  wire \$p_3 ;
   output clk; // @(26:14)
-  wire \$p_4 ;
-  wire [31:0] count; // @(27:6)
   input clk_50; // @(26:6)
-  wire [31:0] \$p_1 ;
-  wire [31:0] \$p_2 ;
-  wire \$p_0 ;
+  wire \$p_3 , \$p_4 , \$p_0 ;
+  wire [31:0] count; // @(27:6)
+  wire [31:0] \$p_1 , \$p_2 ;
   reg [31:0] \$p_5 ;
   reg \$p_6 ;
   MUX_1 \$inst_3 (\$p_0 , \$p_1 , 32'h00000000, \$p_2 );
@@ -247,15 +163,10 @@ endmodule
 module MUX_2(
   code, input_0, input_1, out
 );
-  input code; // @(61:9)
-  input input_1; // @(65:16)
-  wire \$i2_5 ;
-  wire \$i1_6 ;
-  wire \$i2_3 ;
-  wire [1:0] mask; // @(62:9)
   output out; // @(64:9)
-  input input_0; // @(65:16)
-  wire \$i2_6 ;
+  input code, input_1, input_0; // @(61:9), @(65:16), @(65:16)
+  wire \$i2_5 , \$i1_6 , \$i2_3 , \$i2_6 ;
+  wire [1:0] mask; // @(62:9)
   DECODER_1 \$inst_1 (code, mask);
   assign \$i2_3  = $signed(mask[0]);
   assign \$i1_6  = input_0 & \$i2_3 ;
@@ -268,15 +179,11 @@ endmodule
 module MUX_1(
   code, input_0, input_1, out
 );
-  input code; // @(61:9)
-  input [31:0] input_1; // @(65:16)
-  wire [31:0] \$i2_5 ;
-  wire [31:0] \$i1_6 ;
-  wire [31:0] \$i2_3 ;
-  wire [1:0] mask; // @(62:9)
   output [31:0] out; // @(64:9)
-  input [31:0] input_0; // @(65:16)
-  wire [31:0] \$i2_6 ;
+  input code; // @(61:9)
+  input [31:0] input_1, input_0; // @(65:16), @(65:16)
+  wire [1:0] mask; // @(62:9)
+  wire [31:0] \$i2_5 , \$i1_6 , \$i2_3 , \$i2_6 ;
   DECODER_1 \$inst_1 (code, mask);
   assign \$i2_3  = $signed(mask[0]);
   assign \$i1_6  = input_0 & \$i2_3 ;
@@ -289,9 +196,9 @@ endmodule
 module DECODER_1(
   code, out
 );
+  output [1:0] out; // @(72:9)
   input code; // @(71:9)
   wire \$i1_2 ;
-  output [1:0] out; // @(72:9)
   assign \$i1_2  = ~code[0];
   assign out[0] = \$i1_2 ;
   assign out[1] = code[0];

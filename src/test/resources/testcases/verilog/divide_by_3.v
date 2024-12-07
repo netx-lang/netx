@@ -2,14 +2,10 @@
 module Divide_by_3_1(
   clk, clk_3
 );
-  wire a; // @(7:9)
-  wire b; // @(7:12)
-  input clk; // @(6:9)
   output clk_3; // @(6:14)
-  wire c; // @(7:15)
-  wire \$i2_3 ;
-  wire \$i1_3 ;
-  wire \$i_4 ;
+  input clk; // @(6:9)
+  wire a, b, c; // @(7:9), @(7:12), @(7:15)
+  wire \$i2_3 , \$i1_3 , \$i_4 ;
   reg \$p_0 ;
   reg \$p_1 ;
   reg \$p_2 ;
