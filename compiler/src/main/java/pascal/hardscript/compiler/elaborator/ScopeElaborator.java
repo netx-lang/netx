@@ -145,20 +145,6 @@ final class ScopeElaborator {
             this.sourceLoc = sourceLoc;
         }
 
-        public void instantiate(ComponentType type) {
-            doInstantiate(type);
-        }
-
-        Instantiator.ComponentPort doInstantiate(ComponentType type) {
-            return switch (type) {
-                case BuiltinAtom atom -> instantiateBuiltinAtom(atom);
-                case InstanceAtom atom -> instantiateInstanceAtom(atom);
-                case ComponentAtom atom -> instantiateComponentAtom(atom);
-                case ParallelType parallelType -> instantiateParallelType(parallelType);
-                case SequentialType sequentialType -> instantiateSequentialType(sequentialType);
-            };
-        }
-
         private static List<AtomType> leftMostAtomsOf(ComponentType type) {
             List<AtomType> result = new ArrayList<>();
             switch (type) {
@@ -195,6 +181,20 @@ final class ScopeElaborator {
             }
             log.error("{}: Unmatched type in tied expression {} and {}", sourceLoc, lhsID, rhsID);
             throw new TypeCheckingException();
+        }
+
+        public void instantiate(ComponentType type) {
+            doInstantiate(type);
+        }
+
+        Instantiator.ComponentPort doInstantiate(ComponentType type) {
+            return switch (type) {
+                case BuiltinAtom atom -> instantiateBuiltinAtom(atom);
+                case InstanceAtom atom -> instantiateInstanceAtom(atom);
+                case ComponentAtom atom -> instantiateComponentAtom(atom);
+                case ParallelType parallelType -> instantiateParallelType(parallelType);
+                case SequentialType sequentialType -> instantiateSequentialType(sequentialType);
+            };
         }
 
         private Instantiator.ComponentPort instantiateSequentialType(SequentialType sequentialType) {

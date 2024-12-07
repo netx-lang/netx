@@ -121,8 +121,8 @@ final class CompactDumper {
             setType(definition, "component");
             setDefID(definition, signature.caller().getDefinition().getIdentifier(), index);
 
-            dumpDefIO(definition, "input", signature.inputs());
-            dumpDefIO(definition, "output", signature.outputs());
+            dumpInstIO(definition, "input", signature.inputs());
+            dumpInstIO(definition, "output", signature.outputs());
 
             List<ObjectNode> needDump = new LinkedList<>();
             for (var entity : component.getEntities()) {
@@ -227,19 +227,6 @@ final class CompactDumper {
             setType(result, "clock");
             setDataID(result, clock.getIdentifier());
             return result;
-        }
-
-        private void dumpDefIO(ObjectNode node, String port, List<Instance> sub) {
-            var array = makeArrayIn(node, port);
-            for (Instance entity : sub) {
-                String s = switch (entity) {
-                    case Value value -> dumpValue(value);
-                    case Data data -> data.getIdentifier().name();
-                    case DataAccess access -> access.base().getIdentifier().name() + access.selector();
-                    default -> throw new ShallNotReachHereError("Should be eliminated by CompositeDataBlaster");
-                };
-                array.add(s);
-            }
         }
 
         private void dumpInstIO(ObjectNode node, String port, List<Instance> sub) {

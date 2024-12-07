@@ -19,20 +19,20 @@ public final class HSCompiler {
         this.charStream = charStream;
     }
 
-    public DesignNode parse() {
-        var design = HSParser.parseDesign(buildANTLRParser().design());
-        new SourceLocChecker(design).analyze();
-        new InterfaceChecker(design).analyze();
-        new BindingLhsAnalysis(design).analyze();
-        return design;
-    }
-
     private static void checkType(GlobalScope design) {
         new MetaElimination(design).analyze();
         new DataTypeInference(design).analyze();
         new AccessChecker(design).analyze();
         new CompositeDataBlaster(design).analyze();
         new IOAnalysis(design).analyze();
+    }
+
+    public DesignNode parse() {
+        var design = HSParser.parseDesign(buildANTLRParser().design());
+        new SourceLocChecker(design).analyze();
+        new InterfaceChecker(design).analyze();
+        new BindingLhsAnalysis(design).analyze();
+        return design;
     }
 
     public GlobalScope elaborate() {

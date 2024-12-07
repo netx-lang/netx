@@ -1,8 +1,8 @@
 [
   {
     "type": "component", "id": "riscv", "defIndex": 1, "loc": "1:10",
-    "input": ["clk", "rst", "imemDataOut", "dmemDataOut"],
-    "output": ["output", "dmemAddr", "dmemDataIn", "dmemOp", "dmemWe"],
+    "input": ["clk@0", "rst@0", "imemDataOut@0", "dmemDataOut@0"],
+    "output": ["output@12", "dmemAddr@0", "dmemDataIn@0", "dmemOp@0", "dmemWe@0"],
     "members": [
       {"type": "clock", "id": "clk", "loc": "7:9"},
       {"type": "wire", "width": 3, "id": "dmemOp", "loc": "21:54"},
@@ -97,8 +97,8 @@
   },
   {
     "type": "component", "id": "BranchCond", "defIndex": 1, "loc": "170:10",
-    "input": ["branch_ctl", "zero", "less"],
-    "output": ["PCAsrc", "PCBsrc"],
+    "input": ["branch_ctl@0", "zero@0", "less@0"],
+    "output": ["PCAsrc@0", "PCBsrc@0"],
     "members": [
       {"type": "wire", "width": 3, "id": "branch_ctl", "loc": "171:9"},
       {"type": "wire", "width": 2, "id": "result", "loc": "175:9"},
@@ -197,8 +197,8 @@
   },
   {
     "type": "component", "id": "ALU", "defIndex": 1, "loc": "145:10",
-    "input": ["a", "b", "ctl"],
-    "output": ["result", "zero", "less"],
+    "input": ["a@0", "b@0", "ctl@0"],
+    "output": ["result@0", "zero@0", "less@0"],
     "members": [
       {"type": "wire", "width": 32, "id": "a", "loc": "146:9"},
       {"type": "wire", "width": 32, "id": "b", "loc": "146:12"},
@@ -357,8 +357,8 @@
   },
   {
     "type": "component", "id": "MUX", "defIndex": 7, "loc": "215:10",
-    "input": ["input_0", "input_1", "code"],
-    "output": ["output"],
+    "input": ["input_0@0", "input_1@0", "code@0"],
+    "output": ["output@0"],
     "members": [
       {"type": "wire", "width": 1, "id": "output", "loc": "219:9"},
       {"type": "wire", "width": 1, "id": "code", "loc": "217:9"},
@@ -409,8 +409,8 @@
   },
   {
     "type": "component", "id": "MUX", "defIndex": 6, "loc": "215:10",
-    "input": ["input_0", "input_1", "input_2", "input_3", "code"],
-    "output": ["output"],
+    "input": ["input_0@0", "input_1@0", "input_2@0", "input_3@0", "code@0"],
+    "output": ["output@0"],
     "members": [
       {"type": "wire", "width": 32, "id": "output", "loc": "219:9"},
       {"type": "wire", "width": 2, "id": "code", "loc": "217:9"},
@@ -491,8 +491,8 @@
   },
   {
     "type": "component", "id": "DECODER", "defIndex": 4, "loc": "230:10",
-    "input": ["code"],
-    "output": ["output"],
+    "input": ["code@0"],
+    "output": ["output@0"],
     "members": [
       {"type": "wire", "width": 4, "id": "output", "loc": "233:9"},
       {"type": "wire", "width": 2, "id": "code", "loc": "232:9"},
@@ -534,8 +534,8 @@
   },
   {
     "type": "component", "id": "RegFile", "defIndex": 1, "loc": "193:10",
-    "input": ["clk", "RaAddr", "RbAddr", "WrAddr", "WrValue"],
-    "output": ["Ra", "Rb"],
+    "input": ["clk@0", "RaAddr@0", "RbAddr@0", "WrAddr@0", "WrValue@0"],
+    "output": ["Ra@0", "Rb@0"],
     "members": [
       {"type": "clock", "id": "clk", "loc": "194:9"},
       {"type": "wire", "width": 32, "id": "regFile_23", "loc": "199:13"},
@@ -948,8 +948,8 @@
   },
   {
     "type": "component", "id": "MUX", "defIndex": 5, "loc": "215:10",
-    "input": ["input_0", "input_1", "input_2", "input_3", "input_4", "input_5", "input_6", "input_7", "input_8", "input_9", "input_10", "input_11", "input_12", "input_13", "input_14", "input_15", "input_16", "input_17", "input_18", "input_19", "input_20", "input_21", "input_22", "input_23", "input_24", "input_25", "input_26", "input_27", "input_28", "input_29", "input_30", "input_31", "code"],
-    "output": ["output"],
+    "input": ["input_0@0", "input_1@0", "input_2@0", "input_3@0", "input_4@0", "input_5@0", "input_6@0", "input_7@0", "input_8@0", "input_9@0", "input_10@0", "input_11@0", "input_12@0", "input_13@0", "input_14@0", "input_15@0", "input_16@0", "input_17@0", "input_18@0", "input_19@0", "input_20@0", "input_21@0", "input_22@0", "input_23@0", "input_24@0", "input_25@0", "input_26@0", "input_27@0", "input_28@0", "input_29@0", "input_30@0", "input_31@0", "code@0"],
+    "output": ["output@0"],
     "members": [
       {"type": "wire", "width": 32, "id": "input_19", "loc": "221:13"},
       {"type": "wire", "width": 32, "id": "input_17", "loc": "221:13"},
@@ -1450,8 +1450,8 @@
   },
   {
     "type": "component", "id": "DECODER", "defIndex": 3, "loc": "230:10",
-    "input": ["code"],
-    "output": ["output"],
+    "input": ["code@0"],
+    "output": ["output@0"],
     "members": [
       {"type": "wire", "width": 32, "id": "output", "loc": "233:9"},
       {"type": "wire", "width": 5, "id": "code", "loc": "232:9"},
@@ -1651,8 +1651,8 @@
   },
   {
     "type": "component", "id": "ImmSelector", "defIndex": 1, "loc": "125:10",
-    "input": ["extOP", "instr"],
-    "output": ["imm"],
+    "input": ["extOP@0", "instr@0"],
+    "output": ["imm@0"],
     "members": [
       {"type": "wire", "width": 32, "id": "instr", "loc": "127:9"},
       {"type": "wire", "width": 32, "id": "immJ", "loc": "134:9"},
@@ -1748,8 +1748,8 @@
   },
   {
     "type": "component", "id": "MUX", "defIndex": 4, "loc": "215:10",
-    "input": ["input_0", "input_1", "code"],
-    "output": ["output"],
+    "input": ["input_0@0", "input_1@0", "code@0"],
+    "output": ["output@0"],
     "members": [
       {"type": "wire", "width": 32, "id": "output", "loc": "219:9"},
       {"type": "wire", "width": 1, "id": "code", "loc": "217:9"},
@@ -1800,8 +1800,8 @@
   },
   {
     "type": "component", "id": "InstrDecoder", "defIndex": 1, "loc": "45:10",
-    "input": ["op_i", "func3", "func7"],
-    "output": ["extOP", "regWr", "branch_ctl", "memToReg", "memWr", "memOP", "aSrc", "bSrc", "ctl"],
+    "input": ["op_i@0", "func3@0", "func7@0"],
+    "output": ["extOP@0", "regWr@0", "branch_ctl@0", "memToReg@0", "memWr@0", "memOP@0", "aSrc@0", "bSrc@0", "ctl@0"],
     "members": [
       {"type": "wire", "width": 1, "id": "R_flag", "loc": "54:9"},
       {"type": "wire", "width": 1, "id": "memWr", "loc": "91:9"},
@@ -2175,8 +2175,8 @@
   },
   {
     "type": "component", "id": "MUX", "defIndex": 3, "loc": "215:10",
-    "input": ["input_0", "input_1", "code"],
-    "output": ["output"],
+    "input": ["input_0@0", "input_1@0", "code@0"],
+    "output": ["output@0"],
     "members": [
       {"type": "wire", "width": 4, "id": "output", "loc": "219:9"},
       {"type": "wire", "width": 1, "id": "code", "loc": "217:9"},
@@ -2227,8 +2227,8 @@
   },
   {
     "type": "component", "id": "DECODER", "defIndex": 2, "loc": "230:10",
-    "input": ["code"],
-    "output": ["output"],
+    "input": ["code@0"],
+    "output": ["output@0"],
     "members": [
       {"type": "wire", "width": 8, "id": "output", "loc": "233:9"},
       {"type": "wire", "width": 3, "id": "code", "loc": "232:9"},
@@ -2296,8 +2296,8 @@
   },
   {
     "type": "component", "id": "MUX", "defIndex": 2, "loc": "215:10",
-    "input": ["input_0", "input_1", "code"],
-    "output": ["output"],
+    "input": ["input_0@0", "input_1@0", "code@0"],
+    "output": ["output@0"],
     "members": [
       {"type": "wire", "width": 2, "id": "output", "loc": "219:9"},
       {"type": "wire", "width": 1, "id": "code", "loc": "217:9"},
@@ -2348,8 +2348,8 @@
   },
   {
     "type": "component", "id": "MUX", "defIndex": 1, "loc": "215:10",
-    "input": ["input_0", "input_1", "code"],
-    "output": ["output"],
+    "input": ["input_0@0", "input_1@0", "code@0"],
+    "output": ["output@0"],
     "members": [
       {"type": "wire", "width": 3, "id": "output", "loc": "219:9"},
       {"type": "wire", "width": 1, "id": "code", "loc": "217:9"},
@@ -2400,8 +2400,8 @@
   },
   {
     "type": "component", "id": "DECODER", "defIndex": 1, "loc": "230:10",
-    "input": ["code"],
-    "output": ["output"],
+    "input": ["code@0"],
+    "output": ["output@0"],
     "members": [
       {"type": "wire", "width": 2, "id": "output", "loc": "233:9"},
       {"type": "wire", "width": 1, "id": "code", "loc": "232:9"},

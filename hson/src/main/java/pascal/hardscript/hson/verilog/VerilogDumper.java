@@ -9,13 +9,34 @@ import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 import pascal.hardscript.util.print.NotepadWriter;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class VerilogDumper {
+    private static final Set<String> VERILOG_KEYWORDS;
+
+    static {
+        VERILOG_KEYWORDS = new HashSet<>();
+        VERILOG_KEYWORDS.addAll(Arrays.asList(
+                "always", "and", "assign", "automatic", "begin", "buf", "bufif0", "bufif1",
+                "case", "casex", "casez", "cell", "cmos", "config", "deassign", "default",
+                "defparam", "design", "disable", "edge", "else", "end", "endcase", "endconfig",
+                "endfunction", "endgenerate", "endmodule", "endprimitive", "endspecify", "endtable", "endtask", "event",
+                "for", "force", "forever", "fork", "function", "generate", "genvar", "highz0",
+                "highz1", "if", "ifnone", "incdir", "include", "initial", "inout", "input",
+                "instance", "integer", "join", "large", "liblist", "library", "localparam", "macromodule",
+                "medium", "module", "nand", "negedge", "nmos", "nor", "noshowcancelled", "not",
+                "notif0", "notif1", "or", "output", "parameter", "pmos", "posedge", "primitive",
+                "pull0", "pull1", "pulldown", "pullup", "pulsestyle_onevent", "pulsestyle_ondetect", "rcmos", "real",
+                "realtime", "reg", "release", "repeat", "rnmos", "rpmos", "rtran", "rtranif0",
+                "rtranif1", "scalared", "showcancelled", "signed", "small", "specify", "specparam", "strong0",
+                "strong1", "supply0", "supply1", "table", "task", "time", "tran", "tranif0",
+                "tranif1", "tri", "tri0", "tri1", "triand", "trior", "trireg", "unsigned",
+                "use", "uwire", "vectored", "wait", "wand", "weak0", "weak1", "while",
+                "wire", "wor", "xnor", "xor"
+        ));
+    }
+
     private final NotepadWriter notepad;
     private final List<VModule> design;
 
@@ -33,6 +54,23 @@ public class VerilogDumper {
         }
     }
 
+    public static String escape(String str) {
+        if (str.matches("[a-zA-Z_][a-zA-Z0-9_]*")) {
+            if (!VERILOG_KEYWORDS.contains(str)) {
+                return str;
+            }
+        }
+        return "\\" + str + " ";
+    }
+
+    private static String baseStringOf(DataRef ref) {
+        return switch (ref) {
+            case WireRefSelect select -> baseStringOf(select.base());
+            case WireRef wire -> wire.name();
+            case Constant _ -> null;
+        };
+    }
+
     public void dump() {
         design.forEach(this::dumpModule);
         notepad.flush();
@@ -43,33 +81,22 @@ public class VerilogDumper {
         notepad.println("// @(" + module.getId().getSourceLoc() + ")");
         notepad.println("module " + instNameOf(module) + "(");
         notepad.incIndent();
-
-        List<String> ports = new LinkedList<>();
-        ports.addAll(module.getInputs());
-        ports.addAll(module.getOutputs());
-        var iter = ports.iterator();
-        if (iter.hasNext()) {
-            notepad.print(iter.next());
-            iter.forEachRemaining(str -> notepad.print(", " + str));
-        }
+        dumpIOPorts(module.getInputs(), module.getOutputs());
         notepad.newLine();
         notepad.decIndent();
         notepad.println(");");
         notepad.incIndent();
-        for (var str : module.getInputs()) {
-            notepad.println("input " + str + ";");
-        }
-        for (var str : module.getOutputs()) {
-            notepad.println("output " + str + ";");
-        }
-        for (var wire : module.getAllWires()) {
-            notepad.print("wire " + typeOf(wire) + idOf(wire.id()) + ";");
-            if (wire.id().getSourceLoc() != null) {
-                notepad.println(" // @(" + wire.id().getSourceLoc() + ")");
-            } else {
-                notepad.newLine();
-            }
-        }
+        defineModuleWires(module);
+        defineModuleRegisters(module);
+        module.getInstantiations().forEach(this::dumpInstantiation);
+        module.getAssigns().forEach(this::dumpAssign);
+        dumpRegisters(module.getAllRegisters());
+        notepad.decIndent();
+        notepad.println("endmodule");
+        notepad.newLine();
+    }
+
+    private void defineModuleRegisters(VModule module) {
         for (var reg : module.getAllRegisters()) {
             var wire = reg.getTrueReg();
             notepad.print("reg " + typeOf(wire) + idOf(wire.id()) + ";");
@@ -79,12 +106,44 @@ public class VerilogDumper {
                 notepad.newLine();
             }
         }
-        module.getInstantiations().forEach(this::dumpInstantiation);
-        module.getAssigns().forEach(this::dumpAssign);
-        dumpRegisters(module.getAllRegisters());
-        notepad.decIndent();
-        notepad.println("endmodule");
-        notepad.newLine();
+    }
+
+    private void defineModuleWires(VModule module) {
+        Set<String> inputSet = new HashSet<>();
+        Set<String> outputSet = new HashSet<>();
+        module.getInputs().stream()
+                .map(VerilogDumper::baseStringOf)
+                .filter(Objects::nonNull)
+                .forEach(inputSet::add);
+        module.getOutputs().stream()
+                .map(VerilogDumper::baseStringOf)
+                .filter(Objects::nonNull)
+                .forEach(outputSet::add);
+        for (var wire : module.getAllWires()) {
+            String heading = "wire";
+            if (inputSet.contains(wire.id().name())) {
+                heading = "input";
+            } else if (outputSet.contains(wire.id().name())) {
+                heading = "output";
+            }
+            notepad.print(heading + " " + typeOf(wire) + idOf(wire.id()) + ";");
+            if (wire.id().getSourceLoc() != null) {
+                notepad.println(" // @(" + wire.id().getSourceLoc() + ")");
+            } else {
+                notepad.newLine();
+            }
+        }
+    }
+
+    private void dumpIOPorts(List<DataRef> inputs, List<DataRef> outputs) {
+        List<DataRef> ports = new LinkedList<>();
+        ports.addAll(inputs);
+        ports.addAll(outputs);
+        var iter = ports.iterator();
+        if (iter.hasNext()) {
+            notepad.print(dumpDataRef(iter.next()));
+            iter.forEachRemaining(str -> notepad.print(", " + dumpDataRef(str)));
+        }
     }
 
     private void dumpAssign(Assign assign) {
@@ -117,15 +176,8 @@ public class VerilogDumper {
 
     private void dumpInstantiation(Instantiation inst) {
         notepad.print(instNameOf(inst.getModule()));
-        notepad.print(" inst_" + inst.getInstIndex() + "(");
-        List<DataRef> port = new LinkedList<>();
-        port.addAll(inst.getInputs());
-        port.addAll(inst.getOutputs());
-        var iter = port.iterator();
-        if (iter.hasNext()) {
-            notepad.print(dumpDataRef(iter.next()));
-            iter.forEachRemaining(str -> notepad.print(", " + dumpDataRef(str)));
-        }
+        notepad.print(" " + escape("$inst_" + inst.getInstIndex()) + "(");
+        dumpIOPorts(inst.getInputs(), inst.getOutputs());
         notepad.println(");");
     }
 
@@ -170,26 +222,25 @@ public class VerilogDumper {
     }
 
     private String dumpDataRef(DataRef ref) {
-        var str =  switch (ref) {
+        return switch (ref) {
             case Constant constant -> constant.value().toString();
             case WireRefSelect access -> dumpDataRef(access.base()) + access.selector().toString();
             case WireRef wireRef -> {
                 String result = "";
                 if (wireRef.instance() != null) {
-                    result += "inst_" + wireRef.instance().getInstIndex() + ".";
+                    result += "$inst_" + wireRef.instance().getInstIndex() + ".";
                 }
-                result += wireRef.name();
+                result += escape(wireRef.name());
                 yield result;
             }
         };
-        return str.replace("$", "");
     }
 
     private String idOf(Identifier id) {
-        return id.name().replace("$", "");
+        return escape(id.name());
     }
 
     private String instNameOf(VModule module) {
-        return module.getId().name().replace("$", "") + "_" + module.getDefIndex();
+        return escape(module.getId().name() + "_" + module.getDefIndex());
     }
 }

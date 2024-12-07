@@ -27,11 +27,11 @@ class HSParserUnitTest {
         var context = makeParser("check_${[a, b]}_this_${man}");
         var identifier = HSParser.parsePrimarySymbol(context.primary_symbol());
         assertEquals(InterpolatedSymbol.of(
-                        List.of("check_", "_this_"),
-                        List.of(CommonList.of(
-                                        List.of(IdentifierSymbol.of(Identifier.of("a")),
-                                                IdentifierSymbol.of(Identifier.of("b")))),
-                                IdentifierSymbol.of(Identifier.of("man")))), identifier);
+                List.of("check_", "_this_"),
+                List.of(CommonList.of(
+                                List.of(IdentifierSymbol.of(Identifier.of("a")),
+                                        IdentifierSymbol.of(Identifier.of("b")))),
+                        IdentifierSymbol.of(Identifier.of("man")))), identifier);
     }
 
     @Test

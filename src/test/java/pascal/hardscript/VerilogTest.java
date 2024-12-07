@@ -32,6 +32,11 @@ public class VerilogTest {
         test("simple_timer");
     }
 
+    @Test
+    void testNestedType() throws IOException {
+        test("nested_type");
+    }
+
     private static void test(String other) throws IOException {
         var design = Builder.forCompact().loadPath(TEST_DIR.resolve(other + ".hard")).compile();
         var vModules = HFrontend.load(design).parse();

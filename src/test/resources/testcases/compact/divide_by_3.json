@@ -1,8 +1,8 @@
 [
   {
     "type": "component", "id": "Divide_by_3", "defIndex": 1, "loc": "5:10",
-    "input": ["clk"],
-    "output": ["clk_3"],
+    "input": ["clk@0"],
+    "output": ["clk_3@0"],
     "members": [
       {"type": "clock", "id": "clk", "loc": "6:9"},
       {"type": "clock", "id": "clk_3", "loc": "6:14"},

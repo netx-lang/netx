@@ -1,8 +1,8 @@
 [
   {
     "type": "component", "id": "counter", "defIndex": 1, "loc": "1:10",
-    "input": ["clk", "rst"],
-    "output": ["count"],
+    "input": ["clk@0", "rst@0"],
+    "output": ["count@0"],
     "members": [
       {"type": "clock", "id": "clk", "loc": "4:9"},
       {"type": "wire", "width": 1, "id": "rst", "loc": "3:9"},
@@ -27,8 +27,8 @@
   },
   {
     "type": "component", "id": "MUX", "defIndex": 1, "loc": "8:10",
-    "input": ["ctl", "i0", "i1"],
-    "output": ["output"],
+    "input": ["ctl@0", "i0@0", "i1@0"],
+    "output": ["output@0"],
     "members": [
       {"type": "wire", "width": 32, "id": "output", "loc": "9:22"},
       {"type": "wire", "width": 32, "id": "i0", "loc": "9:14"},

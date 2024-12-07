@@ -1,14 +1,18 @@
 package pascal.hardscript.hson.verilog;
 
+import pascal.hardscript.hson.verilog.model.Assign;
 import pascal.hardscript.hson.verilog.model.Instantiation;
 import pascal.hardscript.hson.verilog.model.VModule;
 import pascal.hardscript.hson.verilog.model.Wire;
+import pascal.hardscript.hson.verilog.model.ref.Constant;
 import pascal.hardscript.hson.verilog.model.ref.DataRef;
 import pascal.hardscript.hson.verilog.model.ref.WireRef;
 import pascal.hardscript.hson.verilog.model.ref.WireRefSelect;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
+import pascal.hardscript.util.lang.BuiltinComponent;
 import pascal.hardscript.util.lang.Identifier;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,14 +36,58 @@ public class VerilogAnalysis {
         private final Supplier<Integer> tempIndexer = new AtomicInteger(0)::getAndIncrement;
         private final Map<DataRef, WireRef> tempWires = new HashMap<>();
         private final VModule module;
+        private int constantPortCount = 0;
 
         private ModuleAnalysis(VModule module) {
             this.module = module;
         }
 
         public void analyze() {
+            analyzeConstantPorts();
             analyzeInstRef();
             analyzeRegister();
+        }
+
+        public void analyzeConstantPorts() {
+            analyzeConstantInputs();
+            analyzeConstantOutputs();
+        }
+
+        private void analyzeConstantInputs() {
+            if (module.getInputs().stream().anyMatch(Constant.class::isInstance)) {
+                List<DataRef> newInputs = new ArrayList<>();
+                for (var ref : module.getInputs()) {
+                    if (ref instanceof Constant(var value)) {
+                        var wire = Wire.of(Identifier.of("$c_" + constantPortCount++), value.size());
+                        module.add(wire);
+                        newInputs.add(WireRef.of(null, wire.id().name()));
+                    } else {
+                        newInputs.add(ref);
+                    }
+                }
+                module.setInputs(newInputs);
+            }
+        }
+
+        private void analyzeConstantOutputs() {
+            if (module.getOutputs().stream().anyMatch(Constant.class::isInstance)) {
+                List<DataRef> newOutputs = new ArrayList<>();
+                for (var ref : module.getOutputs()) {
+                    if (ref instanceof Constant(var value)) {
+                        var wire = Wire.of(Identifier.of("$c_" + constantPortCount++), value.size());
+                        var wireRef = WireRef.of(null, wire.id().name());
+                        newOutputs.add(wireRef);
+                        module.add(wire);
+                        var assign = Assign.of(BuiltinComponent.TO);
+                        assign.setInputs(List.of(ref));
+                        assign.setOutputs(List.of(wireRef));
+                        module.add(-1, assign);
+                    } else {
+                        newOutputs.add(ref);
+                    }
+                }
+                module.setOutputs(newOutputs);
+            }
         }
 
         public void analyzeInstRef() {
@@ -116,7 +164,7 @@ public class VerilogAnalysis {
         }
 
         private Wire makeTempWire(int width) {
-            var tempName = "p_" + tempIndexer.get();
+            var tempName = "$p_" + tempIndexer.get();
             return Wire.of(Identifier.of(tempName), width);
         }
 

@@ -13,10 +13,9 @@ public final class ComponentScope extends Scope {
     private final boolean isInterface;
     private final Identifier identifier;
     private final Set<Alias> aliases = new HashSet<>();
-
+    private final AssignManager manager = new AssignManager(this);
     private Signature signature;
     private Attributes attributes;
-    private final AssignManager manager = new AssignManager(this);
     private List<Instance> inputs = new ArrayList<>();
     private List<Instance> outputs = new ArrayList<>();
 
@@ -42,8 +41,16 @@ public final class ComponentScope extends Scope {
         return inputs;
     }
 
+    public void setInputs(List<Instance> inputs) {
+        this.inputs = inputs;
+    }
+
     public List<Instance> getOutputs() {
         return outputs;
+    }
+
+    public void setOutputs(List<Instance> outputs) {
+        this.outputs = outputs;
     }
 
     public void addInput(Instance... inputs) {
@@ -52,14 +59,6 @@ public final class ComponentScope extends Scope {
 
     public void addOutput(Instance... outputs) {
         Collections.addAll(this.outputs, outputs);
-    }
-
-    public void setInputs(List<Instance> inputs) {
-        this.inputs = inputs;
-    }
-
-    public void setOutputs(List<Instance> outputs) {
-        this.outputs = outputs;
     }
 
     public Signature getSignature() {

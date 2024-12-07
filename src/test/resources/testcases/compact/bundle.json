@@ -1,8 +1,8 @@
 [
   {
     "type": "component", "id": "top", "defIndex": 1, "loc": "1:10",
-    "input": ["a", "b"],
-    "output": ["c"],
+    "input": ["a@0", "b@0"],
+    "output": ["c@0"],
     "members": [
       {"type": "wire", "width": 32, "id": "a", "loc": "2:9"},
       {"type": "wire", "width": 32, "id": "b", "loc": "2:12"},
@@ -30,8 +30,8 @@
   },
   {
     "type": "component", "id": "Constructor", "defIndex": 1, "loc": "14:10",
-    "input": ["packet.load"],
-    "output": ["1'h01", "packet.load"],
+    "input": ["packet.load@0"],
+    "output": ["1'h01", "packet.load@0"],
     "members": [
       {"type": "wire", "width": 32, "id": "packet.load", "loc": "16:11"}
     ]

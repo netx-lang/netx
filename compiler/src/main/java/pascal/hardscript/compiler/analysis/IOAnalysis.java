@@ -20,7 +20,7 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class IOAnalysis extends ModelAnalysis{
+public final class IOAnalysis extends ModelAnalysis {
     private static final Logger log = LoggerFactory.getLogger(IOAnalysis.class);
     private final Map<Data, DataCoverage> def = new HashMap<>();
     private final Map<Data, DataCoverage> use = new HashMap<>();
@@ -54,6 +54,28 @@ public final class IOAnalysis extends ModelAnalysis{
         return !scope.isInterface();
     }
 
+    private static void initializeData(Map<Data, DataCoverage> coverage, Data data) {
+        if (coverage.containsKey(data)) {
+            coverage.get(data).update();
+        } else {
+            var cover = new DataCoverage(data);
+            cover.update();
+            coverage.put(data, cover);
+        }
+    }
+
+    private static void initializeDataAccess(Map<Data, DataCoverage> coverage, DataAccess access) {
+        var base = access.base();
+        var selector = access.selector();
+        if (coverage.containsKey(base)) {
+            coverage.get(base).update(selector);
+        } else {
+            var cover = new DataCoverage(base);
+            cover.update(selector);
+            coverage.put(base, cover);
+        }
+    }
+
     @Override
     public void analyze() {
         design.forEachSubScope(scope -> {
@@ -77,34 +99,12 @@ public final class IOAnalysis extends ModelAnalysis{
         checkOutputIntegrity(component, sourceLoc);
     }
 
-    private static void initializeData(Map<Data, DataCoverage> coverage, Data data) {
-        if (coverage.containsKey(data)) {
-            coverage.get(data).update();
-        } else {
-            var cover = new DataCoverage(data);
-            cover.update();
-            coverage.put(data, cover);
-        }
-    }
-
-    private static void initializeDataAccess(Map<Data, DataCoverage> coverage, DataAccess access) {
-        var base = access.base();
-        var selector = access.selector();
-        if (coverage.containsKey(base)) {
-            coverage.get(base).update(selector);
-        } else {
-            var cover = new DataCoverage(base);
-            cover.update(selector);
-            coverage.put(base, cover);
-        }
-    }
-
     private void checkInputIntegrity(ComponentScope component, SourceLoc sourceLoc) {
         for (var inst : component.getInputs()) {
             if (inst instanceof MutableInstance mutable) {
                 switch (mutable) {
                     case Data data -> checkInputData(sourceLoc, data);
-                    case DataAccess access-> checkInputDataAccess(sourceLoc, access);
+                    case DataAccess access -> checkInputDataAccess(sourceLoc, access);
                     default -> throw new ShallNotReachHereError("Should be eliminated by CompositeDataBlaster");
                 }
             }

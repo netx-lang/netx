@@ -30,6 +30,11 @@ public final class Elaborator {
         this.config = config;
     }
 
+    private static void setDesignSignature(ComponentScope topScope, ComponentNode topNode) {
+        var atom = ComponentAtom.of(topNode, topNode.getIdentifier());
+        topScope.setSignature(Signature.of(atom, topScope.getInputs(), topScope.getOutputs()));
+    }
+
     public GlobalScope elaborate() {
         addGlobalInformation();
         var topNode = findTopNode();
@@ -39,11 +44,6 @@ public final class Elaborator {
             setDesignSignature(topScope, topNode);
         }
         return design;
-    }
-
-    private static void setDesignSignature(ComponentScope topScope, ComponentNode topNode) {
-        var atom = ComponentAtom.of(topNode, topNode.getIdentifier());
-        topScope.setSignature(Signature.of(atom, topScope.getInputs(), topScope.getOutputs()));
     }
 
     private ComponentNode findTopNode() {

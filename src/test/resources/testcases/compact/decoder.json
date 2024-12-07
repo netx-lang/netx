@@ -1,8 +1,8 @@
 [
   {
     "type": "component", "id": "top", "defIndex": 1, "loc": "1:10",
-    "input": ["input"],
-    "output": ["output"],
+    "input": ["input@0"],
+    "output": ["output@0"],
     "members": [
       {"type": "wire", "width": 8, "id": "output", "loc": "3:9"},
       {"type": "wire", "width": 3, "id": "input", "loc": "2:9"},
@@ -15,8 +15,8 @@
   },
   {
     "type": "component", "id": "decoder", "defIndex": 1, "loc": "7:10",
-    "input": ["code"],
-    "output": ["output"],
+    "input": ["code@0"],
+    "output": ["output@0"],
     "members": [
       {"type": "wire", "width": 8, "id": "output", "loc": "9:9"},
       {"type": "wire", "width": 3, "id": "code", "loc": "8:9"},

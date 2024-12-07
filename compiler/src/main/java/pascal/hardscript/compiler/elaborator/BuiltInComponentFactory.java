@@ -28,7 +28,8 @@ public class BuiltInComponentFactory {
             case TO -> createTOComponent(parent, type);
             case CAST -> createCASTComponent(parent, type);
             case NOT -> createNOTComponent(parent, type);
-            case OR, AND, XOR, NOR, NAND, XNOR, CONCAT, ADD, SUB, MUL, DIV, MOD -> createMultiInputComponent(parent, type);
+            case OR, AND, XOR, NOR, NAND, XNOR, CONCAT, ADD, SUB, MUL, DIV, MOD ->
+                    createMultiInputComponent(parent, type);
             case EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE -> createRelationalOpComponent(parent, type);
             case SHL, ASHR, LSHR -> createShiftComponent(parent, type);
         };

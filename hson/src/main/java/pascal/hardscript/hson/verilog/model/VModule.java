@@ -1,5 +1,6 @@
 package pascal.hardscript.hson.verilog.model;
 
+import pascal.hardscript.hson.verilog.model.ref.DataRef;
 import pascal.hardscript.util.lang.Identifier;
 
 import java.util.*;
@@ -10,10 +11,9 @@ public final class VModule {
 
     private final Map<Integer, Assign> assignments = new HashMap<>();
     private final Map<Integer, Instantiation> instantiations = new HashMap<>();
-
-    private List<String> inputs, outputs;
     private final Map<String, Wire> wires = new HashMap<>();
     private final List<Register> registers = new LinkedList<>();
+    private List<DataRef> inputs, outputs;
 
     public VModule(Identifier id, int defIndex) {
         this.id = id;
@@ -72,19 +72,19 @@ public final class VModule {
         return wires.values();
     }
 
-    public List<String> getInputs() {
+    public List<DataRef> getInputs() {
         return inputs;
     }
 
-    public void setInputs(List<String> inputs) {
+    public void setInputs(List<DataRef> inputs) {
         this.inputs = inputs;
     }
 
-    public List<String> getOutputs() {
+    public List<DataRef> getOutputs() {
         return outputs;
     }
 
-    public void setOutputs(List<String> outputs) {
+    public void setOutputs(List<DataRef> outputs) {
         this.outputs = outputs;
     }
 }

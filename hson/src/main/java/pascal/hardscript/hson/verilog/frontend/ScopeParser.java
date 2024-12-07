@@ -39,13 +39,9 @@ public final class ScopeParser {
 
     public void parse() {
         parseDataMembers();
-        module.setInputs(resolvePortList(json, "input"));
-        module.setOutputs(resolvePortList(json, "output"));
+        module.setInputs(refParser.resolveDataRefList(json, "input"));
+        module.setOutputs(refParser.resolveDataRefList(json, "output"));
         parseComponentMembers();
-    }
-
-    private List<String> resolvePortList(JsonNode node, String field) {
-        return streamOf(node, field).map(JsonNode::textValue).toList();
     }
 
     private void parseDataMembers() {

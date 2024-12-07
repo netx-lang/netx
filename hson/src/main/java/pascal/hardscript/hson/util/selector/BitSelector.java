@@ -2,7 +2,7 @@ package pascal.hardscript.hson.util.selector;
 
 import pascal.hardscript.util.lang.BitVector;
 
-public record BitSelector(int index) implements Selector{
+public record BitSelector(int index) implements Selector {
     public static BitSelector of(int index) {
         return new BitSelector(index);
     }

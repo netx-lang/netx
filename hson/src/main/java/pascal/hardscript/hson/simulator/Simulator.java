@@ -201,7 +201,7 @@ public final class Simulator {
     private static class ScheduleQueue extends PriorityQueue<Node> {
         @Override
         public boolean offer(Node e) {
-            if(!super.contains(e)) {
+            if (!super.contains(e)) {
                 return super.offer(e);
             }
             return false;

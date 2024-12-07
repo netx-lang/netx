@@ -41,26 +41,26 @@ public final class Evaluator {
     private static final Logger log = LoggerFactory.getLogger(Evaluator.class);
     private static final Map<BinaryExpr.Operator, BiFunction<IntegerValue, IntegerValue, Value>>
             BINARY_OPERATOR_MAP = Map.ofEntries(
-                    Map.entry(BinaryExpr.Operator.ADD, IntegerValue::add),
-                    Map.entry(BinaryExpr.Operator.SUB, IntegerValue::sub),
-                    Map.entry(BinaryExpr.Operator.MUL, IntegerValue::mul),
-                    Map.entry(BinaryExpr.Operator.DIV, IntegerValue::div),
-                    Map.entry(BinaryExpr.Operator.MOD, IntegerValue::mod),
-                    Map.entry(BinaryExpr.Operator.POW, IntegerValue::pow),
-                    Map.entry(BinaryExpr.Operator.AND, IntegerValue::and),
-                    Map.entry(BinaryExpr.Operator.OR, IntegerValue::or),
-                    Map.entry(BinaryExpr.Operator.XOR, IntegerValue::xor),
-                    Map.entry(BinaryExpr.Operator.XNOR, IntegerValue::xnor),
-                    Map.entry(BinaryExpr.Operator.ARITH_SHR, IntegerValue::ashr),
-                    Map.entry(BinaryExpr.Operator.LOGIC_SHR, IntegerValue::lshr),
-                    Map.entry(BinaryExpr.Operator.ARITH_SHL, IntegerValue::shl),
-                    Map.entry(BinaryExpr.Operator.LOGIC_SHL, IntegerValue::shl),
-                    Map.entry(BinaryExpr.Operator.EQ, IntegerValue::eq),
-                    Map.entry(BinaryExpr.Operator.NE, IntegerValue::ne),
-                    Map.entry(BinaryExpr.Operator.LT, IntegerValue::lt),
-                    Map.entry(BinaryExpr.Operator.LE, IntegerValue::le),
-                    Map.entry(BinaryExpr.Operator.GT, IntegerValue::gt),
-                    Map.entry(BinaryExpr.Operator.GE, IntegerValue::ge)
+            Map.entry(BinaryExpr.Operator.ADD, IntegerValue::add),
+            Map.entry(BinaryExpr.Operator.SUB, IntegerValue::sub),
+            Map.entry(BinaryExpr.Operator.MUL, IntegerValue::mul),
+            Map.entry(BinaryExpr.Operator.DIV, IntegerValue::div),
+            Map.entry(BinaryExpr.Operator.MOD, IntegerValue::mod),
+            Map.entry(BinaryExpr.Operator.POW, IntegerValue::pow),
+            Map.entry(BinaryExpr.Operator.AND, IntegerValue::and),
+            Map.entry(BinaryExpr.Operator.OR, IntegerValue::or),
+            Map.entry(BinaryExpr.Operator.XOR, IntegerValue::xor),
+            Map.entry(BinaryExpr.Operator.XNOR, IntegerValue::xnor),
+            Map.entry(BinaryExpr.Operator.ARITH_SHR, IntegerValue::ashr),
+            Map.entry(BinaryExpr.Operator.LOGIC_SHR, IntegerValue::lshr),
+            Map.entry(BinaryExpr.Operator.ARITH_SHL, IntegerValue::shl),
+            Map.entry(BinaryExpr.Operator.LOGIC_SHL, IntegerValue::shl),
+            Map.entry(BinaryExpr.Operator.EQ, IntegerValue::eq),
+            Map.entry(BinaryExpr.Operator.NE, IntegerValue::ne),
+            Map.entry(BinaryExpr.Operator.LT, IntegerValue::lt),
+            Map.entry(BinaryExpr.Operator.LE, IntegerValue::le),
+            Map.entry(BinaryExpr.Operator.GT, IntegerValue::gt),
+            Map.entry(BinaryExpr.Operator.GE, IntegerValue::ge)
     );
 
     private final LinkedList<Binding> bindings = new LinkedList<>();

@@ -25,7 +25,7 @@ public final class FrontendUtils {
 
     public static ComponentRef instRefOf(JsonNode node) {
         var literal = node.get("id").textValue().split("@");
-        return ComponentRef.of(literal[0],  defIndexOf(node), Integer.parseUnsignedInt(literal[1]));
+        return ComponentRef.of(literal[0], defIndexOf(node), Integer.parseUnsignedInt(literal[1]));
     }
 
     public static BuiltinRef builtinRefOf(JsonNode node) {
