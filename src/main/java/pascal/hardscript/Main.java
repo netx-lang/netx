@@ -3,9 +3,9 @@ package pascal.hardscript;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import pascal.hardscript.compiler.io.Builder;
 import pascal.hardscript.compiler.io.Configuration;
-import pascal.hardscript.hson.verilog.VerilogDumper;
-import pascal.hardscript.hson.verilog.frontend.HFrontend;
 import pascal.hardscript.util.print.NotepadWriter;
+import pascal.hardscript.verilog.VerilogDumper;
+import pascal.hardscript.verilog.frontend.HFrontend;
 import picocli.CommandLine;
 
 import java.io.IOException;

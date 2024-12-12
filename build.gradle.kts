@@ -6,7 +6,8 @@ plugins {
 dependencies {
     implementation(project(":util"))
     implementation(project(":compiler"))
-    implementation(project(":hson"))
+    implementation(project(":verilog"))
+    implementation(project(":simulator"))
 
     implementation("info.picocli:picocli:4.7.4")
     annotationProcessor("info.picocli:picocli-codegen:4.7.4")
@@ -23,7 +24,8 @@ tasks.compileJava {
 
 tasks.jar {
     dependsOn(":util:jar")
-    dependsOn(":hson:jar")
+    dependsOn(":verilog:jar")
+    dependsOn(":simulator:jar")
     dependsOn(":compiler:jar")
     manifest {
         attributes(
@@ -37,8 +39,8 @@ tasks.jar {
     }
 }
 
-val cppBuildDir = file("$projectDir/hson/cpp-build")
-val cmakeSourceDir = file("$projectDir/hson")
+val cppBuildDir = file("$projectDir/simulator/cpp-build")
+val cmakeSourceDir = file("$projectDir/simulator")
 
 tasks.register("configureCMake", Exec::class) {
     group = "build"

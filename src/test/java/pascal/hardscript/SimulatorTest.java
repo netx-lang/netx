@@ -2,8 +2,8 @@ package pascal.hardscript;
 
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.io.Builder;
-import pascal.hardscript.hson.simulator.Simulator;
-import pascal.hardscript.hson.simulator.frontend.HFrontend;
+import pascal.hardscript.simulator.Simulator;
+import pascal.hardscript.simulator.frontend.HFrontend;
 import pascal.hardscript.util.lang.BitVector;
 
 import java.io.IOException;
@@ -97,7 +97,6 @@ public class SimulatorTest {
             int sum = 0;
             for (int j = 0; j < 4; j++) {
                 int loadValue = random.nextInt(114514);
-                System.out.println(BitVector.fromInt(loadValue));
                 simulator.setInput(load.apply(j), BitVector.fromInt(loadValue));
                 sum += loadValue;
             }

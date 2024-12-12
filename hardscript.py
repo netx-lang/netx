@@ -64,7 +64,7 @@ def build_nested_completer(ports):
 
 def REPL(json):
     process = subprocess.Popen(
-        ['./hson/cpp-build/simulator', json],
+        ['./simulator/cpp-build/simulator', json],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

@@ -2,9 +2,9 @@ package pascal.hardscript;
 
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.io.Builder;
-import pascal.hardscript.hson.verilog.VerilogDumper;
-import pascal.hardscript.hson.verilog.frontend.HFrontend;
 import pascal.hardscript.util.print.NotepadWriter;
+import pascal.hardscript.verilog.VerilogDumper;
+import pascal.hardscript.verilog.frontend.HFrontend;
 
 import java.io.IOException;
 import java.nio.file.Files;

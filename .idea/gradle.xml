@@ -23,8 +23,9 @@
             <option value="$PROJECT_DIR$/buildSrc" />
             <option value="$PROJECT_DIR$/compiler" />
             <option value="$PROJECT_DIR$/hardscript" />
-            <option value="$PROJECT_DIR$/hson" />
+            <option value="$PROJECT_DIR$/simulator" />
             <option value="$PROJECT_DIR$/util" />
+            <option value="$PROJECT_DIR$/verilog" />
           </set>
         </option>
       </GradleProjectSettings>
