@@ -7,8 +7,8 @@
     "input": ["input@0"],
     "output": ["output@1"],
     "members": [
-      {"type": "wire", "width": 8, "id": "output@1", "loc": "3:9"},
       {"type": "wire", "width": 3, "id": "input@0", "loc": "2:9"},
+      {"type": "wire", "width": 8, "id": "output@1", "loc": "3:9"},
       {
         "type": "component", "id": "decoder", "loc": "4:14",
         "input": ["input@0"],

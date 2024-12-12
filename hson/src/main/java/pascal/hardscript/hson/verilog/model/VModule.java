@@ -3,15 +3,18 @@ package pascal.hardscript.hson.verilog.model;
 import pascal.hardscript.hson.verilog.model.ref.DataRef;
 import pascal.hardscript.util.lang.Identifier;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 public final class VModule {
     private final Identifier id;
     private final int defIndex;
 
-    private final Map<Integer, Assign> assignments = new HashMap<>();
-    private final Map<Integer, Instantiation> instantiations = new HashMap<>();
-    private final Map<String, Wire> wires = new HashMap<>();
+    private final LinkedHashMap<Integer, Assign> assignments = new LinkedHashMap<>();
+    private final LinkedHashMap<Integer, Instantiation> instantiations = new LinkedHashMap<>();
+    private final LinkedHashMap<String, Wire> wires = new LinkedHashMap<>();
     private final List<Register> registers = new LinkedList<>();
     private List<DataRef> inputs, outputs;
 

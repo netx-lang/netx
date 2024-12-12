@@ -5,7 +5,7 @@ module Divide_by_3_1(
   output clk_3; // @(6:14)
   input clk; // @(6:9)
   wire a, b, c; // @(7:9), @(7:12), @(7:15)
-  wire \$i2_3 , \$i1_3 , \$i_4 ;
+  wire \$i1_3 , \$i2_3 , \$i_4 ;
   reg \$p_0 ;
   reg \$p_1 ;
   reg \$p_2 ;

@@ -1,4 +1,4 @@
-interface Package: [valid, load] -> [valid, load] {
+interface Package: [valid, load] {
     wire valid of bit(1)
     wire load  of bit(32)
 }

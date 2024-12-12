@@ -4,7 +4,7 @@ design : (component | binding)+;
 
 component
     : kind='component' ID attributes? component_type? '{' element* '}'
-    | kind='interface' ID attributes? component_type? '{' element* '}'
+    | kind='interface' ID attributes? ':' type=expression '{' element* '}'
     ;
 
 component_type

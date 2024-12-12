@@ -4,8 +4,8 @@
     "input": ["input@0"],
     "output": ["output@0"],
     "members": [
-      {"type": "wire", "width": 3, "id": "output", "loc": "3:9"},
       {"type": "wire", "width": 8, "id": "input", "loc": "2:9"},
+      {"type": "wire", "width": 3, "id": "output", "loc": "3:9"},
       {
         "type": "instantiate", "id": "encoder@1", "defIndex": 1, "loc": "4:14",
         "input": ["input@0"],
@@ -18,8 +18,8 @@
     "input": ["code@0"],
     "output": ["output@0"],
     "members": [
-      {"type": "wire", "width": 3, "id": "output", "loc": "9:9"},
       {"type": "wire", "width": 8, "id": "code", "loc": "8:9"},
+      {"type": "wire", "width": 3, "id": "output", "loc": "9:9"},
       {
         "type": "builtin", "id": "OR@1", "loc": "12:21",
         "input": ["code@0[1]", "code@0[3]", "code@0[5]", "code@0[7]"],

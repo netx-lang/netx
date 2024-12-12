@@ -46,7 +46,15 @@ public final class HSParser {
         };
         var attributes = parseComponentAttributes(ctx);
         var elements = parseElements(ctx.element());
-        var type = parseComponentType(ctx.component_type(), locationOf(ctx.getStart()));
+
+        ComponentTypeNode type = switch (kind) {
+            case COMPONENT -> parseComponentType(ctx.component_type(), locationOf(ctx.getStart()));
+            case INTERFACE -> {
+                var port = parseExpr(ctx.type);
+                yield ComponentTypeNode.of(port, port).setSourceLoc(locationOf(ctx.type.getStart()));
+            }
+        };
+
         return ComponentNode.of(kind, parseIdentifier(ctx.ID()), type, attributes, elements)
                 .setSourceLoc(locationOf(ctx.getStart()));
     }

@@ -4,9 +4,9 @@
     "input": ["clk@0", "rst@0"],
     "output": ["count@0"],
     "members": [
-      {"type": "clock", "id": "clk", "loc": "4:9"},
-      {"type": "wire", "width": 1, "id": "rst", "loc": "3:9"},
       {"type": "wire", "width": 32, "id": "count", "loc": "2:9"},
+      {"type": "wire", "width": 1, "id": "rst", "loc": "3:9"},
+      {"type": "clock", "id": "clk", "loc": "4:9"},
       {
         "type": "builtin", "id": "ADD@1", "loc": "5:49",
         "input": ["count@0", "1"],
@@ -30,10 +30,10 @@
     "input": ["ctl@0", "i0@0", "i1@0"],
     "output": ["output@0"],
     "members": [
-      {"type": "wire", "width": 32, "id": "output", "loc": "9:22"},
+      {"type": "wire", "width": 1, "id": "ctl", "loc": "9:9"},
       {"type": "wire", "width": 32, "id": "i0", "loc": "9:14"},
       {"type": "wire", "width": 32, "id": "i1", "loc": "9:18"},
-      {"type": "wire", "width": 1, "id": "ctl", "loc": "9:9"},
+      {"type": "wire", "width": 32, "id": "output", "loc": "9:22"},
       {
         "type": "builtin", "id": "NOT@1", "loc": "11:28",
         "input": ["ctl@0"],

@@ -3,12 +3,11 @@ module top_1(
   d, \$c_0 , \$c_1 , \b.b[0].left , \b.b[0].right , \b.b[1].left , \b.b[1].right , \b.b[2].left , \b.b[2].right , \b.b[3].left , \b.b[3].right , \b.c 
 );
   output [2:0] \b.c ; // @(14:11)
-  output [1:0] \b.b[2].right , \b.b[3].left , \b.b[1].right , \b.b[2].left , \b.b[0].left , \b.b[0].right , \b.b[3].right , \b.b[1].left ; // @(14:11), @(14:11), @(14:11), @(14:11), @(14:11), @(14:11), @(14:11), @(14:11)
-  output [1:0] \$c_1 , \$c_0 ;
+  output [1:0] \b.b[0].left , \b.b[0].right , \b.b[1].left , \b.b[1].right , \b.b[2].left , \b.b[2].right , \b.b[3].left , \b.b[3].right ; // @(14:11), @(14:11), @(14:11), @(14:11), @(14:11), @(14:11), @(14:11), @(14:11)
+  output [1:0] \$c_0 , \$c_1 ;
   input d; // @(16:12)
   wire c; // @(16:9)
-  wire [1:0] \$i2_4 , \$i1_4 , \$i1_9 , \$i2_6 , \$i1_17 , \$i1_13 ;
-  assign \$c_1  = 2'h03;
+  wire [1:0] \$i1_4 , \$i2_4 , \$i2_6 , \$i1_9 , \$i1_13 , \$i1_17 ;
   assign c = ~d;
   assign \$i1_4  = $signed(32'h00000000);
   assign \$i2_4  = $signed(c);
@@ -25,5 +24,6 @@ module top_1(
   assign \b.b[3].left  = \$i1_17  + \$i2_4 ;
   assign \b.b[3].right  = \$i1_17  + \$i2_6 ;
   assign \b.c  = $signed(c);
+  assign \$c_1  = 2'h03;
 endmodule
 

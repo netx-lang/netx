@@ -1,9 +1,9 @@
-interface A : [left, right] -> [left, right] {
+interface A : [left, right] {
     wire left  of bit(2)
     wire right of bit(2)
 }
 
-interface B : [a, b, c] -> [a, b, c] {
+interface B : [a, b, c] {
     bundle a of A
     bundle b of array(A, 4)
     wire c   of bit(3)

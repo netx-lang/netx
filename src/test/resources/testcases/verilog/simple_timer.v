@@ -2,52 +2,52 @@
 module top_1(
   clk_50, hex_0, hex_1, hex_2, hex_3, hex_4, hex_5, hex_6, hex_7
 );
-  output [6:0] hex_1, hex_0, hex_3, hex_2, hex_5, hex_4, hex_7, hex_6; // @(4:7), @(4:7), @(4:7), @(4:7), @(4:7), @(4:7), @(4:7), @(4:7)
+  output [6:0] hex_0, hex_1, hex_2, hex_3, hex_4, hex_5, hex_6, hex_7; // @(4:7), @(4:7), @(4:7), @(4:7), @(4:7), @(4:7), @(4:7), @(4:7)
   input clk_50; // @(2:6)
-  wire ms_clk, s_clk, h_clk, m_clk; // @(9:6), @(9:14), @(9:28), @(9:21)
-  wire \$p_2 ;
-  wire [3:0] \$p_5 , \$p_6 , \$p_9 , \$p_7 , \$p_8 , \$p_10 , \$p_1 , \$p_0 ;
+  wire ms_clk, s_clk, m_clk, h_clk; // @(9:6), @(9:14), @(9:21), @(9:28)
+  wire \$p_0 ;
+  wire [3:0] \$p_3 , \$p_4 , \$p_5 , \$p_6 , \$p_7 , \$p_8 , \$p_9 , \$p_10 ;
   wire [31:0] ms; // @(10:6)
-  wire [31:0] \$i_19 , \$p_3 , \$i_27 , \$p_4 , \$i_23 , \$i1_26 , \$i1_22 , \$i_7 , \$i_35 , \$i_15 , \$i_31 , \$i_11 , \$i1_18 , \$i1_34 , \$i1_14 , \$i1_30 , \$i1_10 ;
+  wire [31:0] \$i_7 , \$i1_10 , \$i_11 , \$i1_14 , \$i_15 , \$i1_18 , \$i_19 , \$i1_22 , \$i_23 , \$i1_26 , \$i_27 , \$i1_30 , \$i_31 , \$i1_34 , \$i_35 , \$p_1 , \$p_2 ;
   reg [31:0] \$p_11 ;
-  hex_trigger_1 \$inst_16 (\$p_0 , hex_2);
-  hex_trigger_1 \$inst_32 (\$p_1 , hex_6);
   clock_divider_1 \$inst_1 (clk_50, ms_clk);
-  MUX_1 \$inst_4 (\$p_2 , \$p_3 , 32'h00000000, \$p_4 );
-  hex_trigger_1 \$inst_20 (\$p_5 , hex_3);
-  hex_trigger_1 \$inst_36 (\$p_6 , hex_7);
-  hex_trigger_1 \$inst_8 (\$p_7 , hex_0);
-  hex_trigger_1 \$inst_24 (\$p_8 , hex_4);
-  hex_trigger_1 \$inst_12 (\$p_9 , hex_1);
-  hex_trigger_1 \$inst_28 (\$p_10 , hex_5);
-  assign \$p_2  = ms == 32'h0083D5FF;
-  assign \$p_3  = ms + 32'h00000001;
+  MUX_1 \$inst_4 (\$p_0 , \$p_1 , 32'h00000000, \$p_2 );
+  hex_trigger_1 \$inst_8 (\$p_3 , hex_0);
+  hex_trigger_1 \$inst_12 (\$p_4 , hex_1);
+  hex_trigger_1 \$inst_16 (\$p_5 , hex_2);
+  hex_trigger_1 \$inst_20 (\$p_6 , hex_3);
+  hex_trigger_1 \$inst_24 (\$p_7 , hex_4);
+  hex_trigger_1 \$inst_28 (\$p_8 , hex_5);
+  hex_trigger_1 \$inst_32 (\$p_9 , hex_6);
+  hex_trigger_1 \$inst_36 (\$p_10 , hex_7);
+  assign \$p_0  = ms == 32'h0083D5FF;
+  assign \$p_1  = ms + 32'h00000001;
   assign \$i_7  = ms % 32'h0000000A;
-  assign \$p_7  = $signed(\$i_7 );
+  assign \$p_3  = $signed(\$i_7 );
   assign \$i1_10  = ms % 32'h00000064;
   assign \$i_11  = \$i1_10  / 32'h0000000A;
-  assign \$p_9  = $signed(\$i_11 );
+  assign \$p_4  = $signed(\$i_11 );
   assign \$i1_14  = ms % 32'h000003E8;
   assign \$i_15  = \$i1_14  / 32'h00000064;
-  assign \$p_0  = $signed(\$i_15 );
+  assign \$p_5  = $signed(\$i_15 );
   assign \$i1_18  = ms % 32'h00001770;
   assign \$i_19  = \$i1_18  / 32'h000003E8;
-  assign \$p_5  = $signed(\$i_19 );
+  assign \$p_6  = $signed(\$i_19 );
   assign \$i1_22  = ms % 32'h0000EA60;
   assign \$i_23  = \$i1_22  / 32'h00001770;
-  assign \$p_8  = $signed(\$i_23 );
+  assign \$p_7  = $signed(\$i_23 );
   assign \$i1_26  = ms % 32'h00057E40;
   assign \$i_27  = \$i1_26  / 32'h0000EA60;
-  assign \$p_10  = $signed(\$i_27 );
+  assign \$p_8  = $signed(\$i_27 );
   assign \$i1_30  = ms % 32'h0036EE80;
   assign \$i_31  = \$i1_30  / 32'h00057E40;
-  assign \$p_1  = $signed(\$i_31 );
+  assign \$p_9  = $signed(\$i_31 );
   assign \$i1_34  = ms % 32'h05265C00;
   assign \$i_35  = \$i1_34  / 32'h0036EE80;
-  assign \$p_6  = $signed(\$i_35 );
+  assign \$p_10  = $signed(\$i_35 );
   assign ms = \$p_11 ;
   always @(posedge ms_clk) begin
-    \$p_11  <= \$p_4 ;
+    \$p_11  <= \$p_2 ;
   end
 endmodule
 
@@ -66,10 +66,10 @@ module MUX_3(
 );
   output [6:0] out; // @(64:9)
   input [3:0] code; // @(61:9)
-  input [6:0] input_9, input_5, input_6, input_7, input_8, input_14, input_15, input_12; // @(65:16), @(65:16), @(65:16), @(65:16), @(65:16), @(65:16), @(65:16), @(65:16)
-  input [6:0] input_13, input_10, input_11, input_1, input_2, input_3, input_4, input_0; // @(65:16), @(65:16), @(65:16), @(65:16), @(65:16), @(65:16), @(65:16), @(65:16)
+  input [6:0] input_0, input_1, input_2, input_3, input_4, input_5, input_6, input_7; // @(65:16), @(65:16), @(65:16), @(65:16), @(65:16), @(65:16), @(65:16), @(65:16)
+  input [6:0] input_8, input_9, input_10, input_11, input_12, input_13, input_14, input_15; // @(65:16), @(65:16), @(65:16), @(65:16), @(65:16), @(65:16), @(65:16), @(65:16)
   wire [15:0] mask; // @(62:9)
-  wire [6:0] \$i14_34 , \$i10_34 , \$i2_33 , \$i2_34 , \$i2_31 , \$i6_34 , \$i13_34 , \$i2_5 , \$i2_3 , \$i2_9 , \$i2_7 , \$i1_34 , \$i9_34 , \$i5_34 , \$i12_34 , \$i16_34 , \$i2_19 , \$i2_17 , \$i2_15 , \$i2_13 , \$i2_11 , \$i8_34 , \$i4_34 , \$i11_34 , \$i15_34 , \$i2_29 , \$i2_27 , \$i2_25 , \$i3_34 , \$i2_23 , \$i7_34 , \$i2_21 ;
+  wire [6:0] \$i2_3 , \$i2_5 , \$i2_7 , \$i2_9 , \$i2_11 , \$i2_13 , \$i2_15 , \$i2_17 , \$i2_19 , \$i2_21 , \$i2_23 , \$i2_25 , \$i2_27 , \$i2_29 , \$i2_31 , \$i2_33 , \$i1_34 , \$i2_34 , \$i3_34 , \$i4_34 , \$i5_34 , \$i6_34 , \$i7_34 , \$i8_34 , \$i9_34 , \$i10_34 , \$i11_34 , \$i12_34 , \$i13_34 , \$i14_34 , \$i15_34 , \$i16_34 ;
   DECODER_2 \$inst_1 (code, mask);
   assign \$i2_3  = $signed(mask[0]);
   assign \$i1_34  = input_0 & \$i2_3 ;
@@ -112,7 +112,7 @@ module DECODER_2(
 );
   output [15:0] out; // @(72:9)
   input [3:0] code; // @(71:9)
-  wire \$i2_5 , \$i1_5 , \$i4_5 , \$i3_5 ;
+  wire \$i1_5 , \$i2_5 , \$i3_5 , \$i4_5 ;
   assign \$i1_5  = ~code[0];
   assign \$i2_5  = ~code[1];
   assign \$i3_5  = ~code[2];
@@ -141,7 +141,7 @@ module clock_divider_1(
 );
   output clk; // @(26:14)
   input clk_50; // @(26:6)
-  wire \$p_3 , \$p_4 , \$p_0 ;
+  wire \$p_0 , \$p_3 , \$p_4 ;
   wire [31:0] count; // @(27:6)
   wire [31:0] \$p_1 , \$p_2 ;
   reg [31:0] \$p_5 ;
@@ -164,8 +164,8 @@ module MUX_2(
   code, input_0, input_1, out
 );
   output out; // @(64:9)
-  input code, input_1, input_0; // @(61:9), @(65:16), @(65:16)
-  wire \$i2_5 , \$i1_6 , \$i2_3 , \$i2_6 ;
+  input code, input_0, input_1; // @(61:9), @(65:16), @(65:16)
+  wire \$i2_3 , \$i2_5 , \$i1_6 , \$i2_6 ;
   wire [1:0] mask; // @(62:9)
   DECODER_1 \$inst_1 (code, mask);
   assign \$i2_3  = $signed(mask[0]);
@@ -181,9 +181,9 @@ module MUX_1(
 );
   output [31:0] out; // @(64:9)
   input code; // @(61:9)
-  input [31:0] input_1, input_0; // @(65:16), @(65:16)
+  input [31:0] input_0, input_1; // @(65:16), @(65:16)
+  wire [31:0] \$i2_3 , \$i2_5 , \$i1_6 , \$i2_6 ;
   wire [1:0] mask; // @(62:9)
-  wire [31:0] \$i2_5 , \$i1_6 , \$i2_3 , \$i2_6 ;
   DECODER_1 \$inst_1 (code, mask);
   assign \$i2_3  = $signed(mask[0]);
   assign \$i1_6  = input_0 & \$i2_3 ;

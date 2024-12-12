@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 public final class MapBinding implements Binding {
-    private final Map<Identifier, Entity> bindings = new HashMap<>();
+    private final LinkedHashMap<Identifier, Entity> bindings = new LinkedHashMap<>();
 
     private MapBinding() {
 
