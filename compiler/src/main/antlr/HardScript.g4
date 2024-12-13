@@ -1,6 +1,6 @@
 grammar HardScript;
 
-design : (component | binding)+;
+design : (component | binding_statement)+;
 
 component
     : kind='component' ID attributes? component_type? '{' element* '}'
@@ -16,21 +16,25 @@ attributes
     ;
 
 element
-    : binding                                 # BindingStatement
-    | explicit_data_element                   # DataInstantiation
-    | 'auto' primary_symbol_list              # DataInstantiation
-    | 'auto' expression                       # MixedInstantiation
-    | expression                              # ComponentInstantiation
+    : binding_statement                       # BindingStatement
+    | data_declaration ';'                    # DataDeclaration
+    | 'auto' expression ';'                   # MixedInstantiation
+    | expression ';'                          # ComponentInstantiation
     | 'for' '(' iterator ')' '{' element* '}' # Loop
     ;
 
-explicit_data_element
-    : kind='wire'   primary_symbol_list 'of' type=symbol
-    | kind='bundle' primary_symbol_list 'of' type=symbol
+data_declaration
+    : kind='wire'   declaration_list 'of' type=symbol
+    | kind='bundle' declaration_list 'of' type=symbol
+    | kind='auto'   declaration_list
     ;
 
-primary_symbol_list
-    : primary_symbol (',' primary_symbol)*
+declaration_symbol
+    : ID ('[' expression ']')*
+    ;
+
+declaration_list
+    : declaration_symbol (',' declaration_symbol)*
     ;
 
 expression
@@ -38,7 +42,7 @@ expression
     | number                                                        # NumberExpr
     | '[' list ']'                                                  # ListExpr
     | expression (selector)+                                        # AccessExpr
-    | expression '.' primary_symbol                                 # FieldExpr
+    | expression '.' ID                                 # FieldExpr
     | op='#-' expression                                            # UnaryExpr
     | expression op='-#'                                            # UnaryExpr
     | op=('+' | '-' | '~' | '!') expression                         # UnaryExpr
@@ -81,7 +85,11 @@ qualifier
     ;
 
 iterator
-    : primary_symbol 'in' expression
+    : ID 'in' expression
+    ;
+
+binding_statement
+    : binding ';'
     ;
 
 binding
@@ -89,22 +97,9 @@ binding
     ;
 
 symbol
-    : param_symbol   # ParamSymbol
-    | primary_symbol # PrimarySymbol
-    ;
-
-primary_symbol
-    : ID # Identifier
-    | ID (interpolation | ID)+ # Interpolated
-    ;
-
-param_symbol
-    : primary_symbol '(' expression (',' expression)* ')'
-    | primary_symbol '(' ')'
-    ;
-
-interpolation
-    : '$' '{' expression '}'
+    : ID '(' expression (',' expression)* ')' # ParamSymbol
+    | ID '(' ')'                              # ParamSymbol
+    | ID                                      # PrimarySymbol
     ;
 
 number

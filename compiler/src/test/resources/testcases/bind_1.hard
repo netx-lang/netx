@@ -1,6 +1,6 @@
 component test : [a, b, c] -> [d] {
-    wire a, b, c, d of bit(1)
-    let gate = NOT <> AND <> [NOT, NOT]
+    wire a, b, c, d of bit(1);
+    let gate = NOT <> AND <> [NOT, NOT];
 
-    d <> gate <> [gate <> [a, b], c]
+    d <> gate <> [gate <> [a, b], c];
 }

@@ -1,18 +1,18 @@
 component top {
-    wire data of bit(4)
-    let macro(a, b, c, d) = many_ports <> [a, b, c, d]
+    wire data of bit(4);
+    let macro(a, b, c, d) = many_ports <> [a, b, c, d];
 
-    let A(a, b, c) = macro(a, b, c, data[3])
-    let B(a, b) = A(a, b, data[2])
-    let C(a) = B(a, data[1])
-    let D = C(data[0])
-    [IGNORE | i in [0..4]] <> D
+    let A(a, b, c) = macro(a, b, c, data[3]);
+    let B(a, b) = A(a, b, data[2]);
+    let C(a) = B(a, data[1]);
+    let D = C(data[0]);
+    [IGNORE | i in [0..4]] <> D;
 }
 
 component many_ports : [input[i] | i in [0..4]] -> [output[i] | i in [0..4]] {
-    wire input of bit(4)
-    wire output of bit(4)
+    wire input of bit(4);
+    wire output of bit(4);
     for (i in [0..4]) {
-        output[(i + 1) % 4] <> input[i]
+        output[(i + 1) % 4] <> input[i];
     }
 }

@@ -9,6 +9,7 @@ import pascal.hardscript.compiler.exception.TypeCheckingException;
 import pascal.hardscript.compiler.io.Configuration;
 import pascal.hardscript.compiler.model.EntityList;
 import pascal.hardscript.compiler.model.component.*;
+import pascal.hardscript.compiler.model.instance.Array;
 import pascal.hardscript.compiler.model.instance.DataBundle;
 import pascal.hardscript.compiler.model.instance.DataComposition;
 import pascal.hardscript.compiler.model.instance.Instance;
@@ -90,7 +91,7 @@ final class ScopeElaborator {
 
     private void buildLoop(LoopNode loop) {
         var generator = loop.getGenerator();
-        var id = evaluator.getIdentifierFrom(generator.getHead());
+        var id = generator.getHead();
         for (var entity : evaluator.evaluateToList(generator.getFrom()).entities()) {
             evaluator.overrideBindings(SingleBinding.of(id, entity));
             buildComponentElements(loop.getElements());
@@ -103,14 +104,22 @@ final class ScopeElaborator {
     }
 
     private void buildData(DataInstantiationNode node) {
-        var factory = evaluator.evaluateToInstanceFactory(node.getType());
+        var baseFactory = evaluator.evaluateToInstanceFactory(node.getType());
         switch (node.getKind()) {
-            case BUNDLE -> checkFactoryLegality(node.getSourceLoc(), factory.getType(), true);
-            case WIRE -> checkFactoryLegality(node.getSourceLoc(), factory.getType(), false);
+            case BUNDLE -> checkFactoryLegality(node.getSourceLoc(), baseFactory.getType(), true);
+            case WIRE -> checkFactoryLegality(node.getSourceLoc(), baseFactory.getType(), false);
         }
-        node.getSymbols().stream()
-                .map(evaluator::getIdentifierFrom)
-                .forEach(id -> scope.bind(id, factory.create(scope, id)));
+        for (var rest : node.getDataRests()) {
+            var factory = baseFactory;
+            if (!rest.getDimensions().isEmpty()) {
+                for (ExprNode dimension : rest.getDimensions()) {
+                    var size = evaluator.evaluateToInt(dimension);
+                    factory = new Array.Factory(scope.getGlobal(), size, factory);
+                }
+            }
+            var id = rest.getIdentifier();
+            scope.bind(id, factory.create(scope, id));
+        }
     }
 
     private void checkFactoryLegality(SourceLoc sourceLoc, InstanceType type, boolean isBundle) {

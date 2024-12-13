@@ -1,14 +1,14 @@
 component counter : [clk, rst] -> [count] {
-    wire count of bit(32)
-    wire rst of bit(1)
-    wire clk of clock()
-    count <> REGISTER(clk, true) <> MUX <> [rst, ADD <> [count, 1], 0]
+    wire count of bit(32);
+    wire rst of bit(1);
+    wire clk of clock();
+    count <> REGISTER(clk, true) <> MUX <> [rst, ADD <> [count, 1], 0];
 }
 
 component MUX : [ctl, i0, i1] -> [output] {
-    auto ctl, i0, i1, output
+    auto ctl, i0, i1, output;
     output <> OR <> [
         AND <> [i0, CAST <> NOT <> ctl],
         AND <> [i1, CAST <> ctl]
-    ]
+    ];
 }

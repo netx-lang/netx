@@ -5,15 +5,15 @@ import pascal.hardscript.util.lang.Identifier;
 
 import java.util.Objects;
 
-public final class IdentifierSymbol extends PrimarySymbol {
+public final class IdentifierExpr extends SymbolExpr {
     private Identifier identifier;
 
-    private IdentifierSymbol(Identifier identifier) {
+    private IdentifierExpr(Identifier identifier) {
         this.identifier = identifier;
     }
 
-    public static IdentifierSymbol of(Identifier identifier) {
-        return new IdentifierSymbol(identifier);
+    public static IdentifierExpr of(Identifier identifier) {
+        return new IdentifierExpr(identifier);
     }
 
     @Override
@@ -34,7 +34,7 @@ public final class IdentifierSymbol extends PrimarySymbol {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (IdentifierSymbol) obj;
+        var that = (IdentifierExpr) obj;
         return Objects.equals(this.identifier, that.identifier);
     }
 

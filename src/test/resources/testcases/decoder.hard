@@ -1,17 +1,17 @@
 component top : [input] -> [output] {
-    wire input of bit(3)
-    wire output of bit(8)
-    output <> decoder(3) <> input
+    wire input of bit(3);
+    wire output of bit(8);
+    output <> decoder(3) <> input;
 }
 
 component decoder(width) : [code] -> [output] {
-    wire code of bit(width)
-    wire output of bit(2**width)
+    wire code of bit(width);
+    wire output of bit(2**width);
 
     for (i in [0..2**width]) {
         output[i] <> AND(width) <> [port |
             j in [0..width],
             let port = if i & (1 << j) then TO else NOT
-        ] <> [code[j] | j in [0..width]]
+        ] <> [code[j] | j in [0..width]];
     }
 }

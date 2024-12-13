@@ -1,25 +1,25 @@
 interface A : [left, right] {
-    wire left  of bit(2)
-    wire right of bit(2)
+    wire left  of bit(2);
+    wire right of bit(2);
 }
 
 interface B : [a, b, c] {
-    bundle a of A
-    bundle b of array(A, 4)
-    wire c   of bit(3)
+    bundle a    of A;
+    bundle b[4] of A;
+    wire c      of bit(3);
 }
 
 component top: [d] -> [b] {
-    bundle a of A
-    bundle b of B
-    bundle aa of array(A, 4)
-    wire c, d of bit(1)
-    c <> NOT <> d
+    bundle a of A;
+    bundle b of B;
+    bundle aa[4] of A;
+    wire c, d of bit(1);
+    c <> NOT <> d;
     for (i in [0..4]) {
         aa[i] <+> A <> [
             ADD <> [CAST <> i, CAST <> c],
-            ADD <> [CAST <> i, CAST <> d]]
+            ADD <> [CAST <> i, CAST <> d]];
     }
-    a <+> A <> [2'b00, 2'b11]
-    b <+> B <> [a, aa, CAST <> c]
+    a <+> A <> [2'b00, 2'b11];
+    b <+> B <> [a, aa, CAST <> c];
 }

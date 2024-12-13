@@ -2,43 +2,38 @@ package pascal.hardscript.compiler.ast.component;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
-import pascal.hardscript.compiler.ast.expr.PrimarySymbol;
 import pascal.hardscript.compiler.ast.expr.SymbolExpr;
 
 import java.util.List;
 import java.util.Objects;
 
 public final class DataInstantiationNode extends ElementNode {
-    private final List<PrimarySymbol> symbols;
+    private final List<DataRestNode> dataRests;
     private final Kind kind;
     private SymbolExpr type;
 
-    private DataInstantiationNode(Kind kind, List<PrimarySymbol> symbols, SymbolExpr type) {
-        this.symbols = symbols;
+    private DataInstantiationNode(Kind kind, List<DataRestNode> dataRests, SymbolExpr type) {
+        this.dataRests = dataRests;
         this.kind = kind;
         this.type = type;
     }
 
-    public static DataInstantiationNode of(Kind kind, List<PrimarySymbol> ids, SymbolExpr type) {
+    public static DataInstantiationNode of(Kind kind, List<DataRestNode> ids, SymbolExpr type) {
         return new DataInstantiationNode(kind, ids, type);
-    }
-
-    public static DataInstantiationNode ofAuto(Kind kind, List<PrimarySymbol> ids) {
-        return new DataInstantiationNode(kind, ids, null);
     }
 
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);
-        symbols.forEach(symbol -> symbol.walk(listener));
+        dataRests.forEach(symbol -> symbol.walk(listener));
         if (type != null) {
             type.walk(listener);
         }
         listener.exit(this);
     }
 
-    public List<PrimarySymbol> getSymbols() {
-        return symbols;
+    public List<DataRestNode> getDataRests() {
+        return dataRests;
     }
 
     public ExprNode getType() {
@@ -58,22 +53,22 @@ public final class DataInstantiationNode extends ElementNode {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (DataInstantiationNode) obj;
-        return Objects.equals(this.symbols, that.symbols) &&
+        return Objects.equals(this.dataRests, that.dataRests) &&
                 Objects.equals(this.type, that.type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(symbols, type);
+        return Objects.hash(dataRests, type);
     }
 
     @Override
     public String toString() {
         var sb = new StringBuilder();
         sb.append("wire ");
-        sb.append(symbols.getFirst());
-        for (int i = 1; i < symbols.size(); i++) {
-            sb.append(", ").append(symbols.get(i));
+        sb.append(dataRests.getFirst());
+        for (int i = 1; i < dataRests.size(); i++) {
+            sb.append(", ").append(dataRests.get(i));
         }
         sb.append(" of ");
         sb.append(Objects.requireNonNullElse(type, "auto"));

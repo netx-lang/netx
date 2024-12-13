@@ -1,9 +1,9 @@
 component top {
-    wire a of bit(32)
-    let AA = AND <> SPLIT(2)
-    a <> sub(AA) <> 1
+    wire a of bit(32);
+    let AA = AND <> SPLIT(2);
+    a <> sub(AA) <> 1;
 }
 
 component sub(op): [a] -> [b] {
-    auto b <> OR <> [op <> a, op <> a]
+    auto b <> OR <> [op <> a, op <> a];
 }

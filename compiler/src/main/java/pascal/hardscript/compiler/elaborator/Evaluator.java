@@ -90,7 +90,7 @@ public final class Evaluator {
         return requiresIntegerValue(expr.getSourceLoc(), evaluate(expr));
     }
 
-    public int evaluateToInteger(ExprNode expr) {
+    public int evaluateToInt(ExprNode expr) {
         return evaluateToIntegerValue(expr).toInt();
     }
 
@@ -107,13 +107,13 @@ public final class Evaluator {
         List<Identifier> freeVariables;
         switch (binding.getHead()) {
             case ParamSymbolExpr param -> {
-                id = getIdentifierFrom(param.getHead());
+                id = param.getHead();
                 freeVariables = param.getArguments().stream()
-                        .map(PrimarySymbol.class::cast)
-                        .map(this::getIdentifierFrom).toList();
+                        .map(IdentifierExpr.class::cast)
+                        .map(IdentifierExpr::getIdentifier).toList();
             }
-            case PrimarySymbol primary -> {
-                id = getIdentifierFrom(primary);
+            case IdentifierExpr primary -> {
+                id = primary.getIdentifier();
                 freeVariables = List.of();
             }
         }
@@ -142,8 +142,7 @@ public final class Evaluator {
 
     private Entity evaluateFieldExpr(FieldExpr expr) {
         var bundle = evaluateDataBundle(expr.getBase());
-        var field = getIdentifierFrom(expr.getField());
-        return bundle.getField(field);
+        return bundle.getField(expr.getField());
     }
 
     private Entity evaluateAccessExpr(AccessExpr expr) {
@@ -194,8 +193,8 @@ public final class Evaluator {
     }
 
     private EntityList evaluateRangeList(RangeList list) {
-        var from = evaluateToInteger(list.getFrom());
-        var to = evaluateToInteger(list.getTo());
+        var from = evaluateToInt(list.getFrom());
+        var to = evaluateToInt(list.getTo());
         return EntityList.of(
                 IntStream.range(Integer.min(from, to), Integer.max(from, to))
                         .mapToObj(Int32Value::of)
@@ -214,7 +213,7 @@ public final class Evaluator {
             switch (qualifiers.pop()) {
                 case GeneratorQualifier generator -> {
                     result = new LinkedList<>();
-                    var id = getIdentifierFrom(generator.getHead());
+                    var id = generator.getHead();
                     var list = evaluateToList(generator.getFrom());
                     for (var entity : list.entities()) {
                         overrideBindings(SingleBinding.of(id, entity));
@@ -354,13 +353,13 @@ public final class Evaluator {
 
     private Entity evaluateSymbolExpr(SymbolExpr expr) {
         return switch (expr) {
-            case PrimarySymbol sub -> evaluatePrimarySymbolExpr(sub);
+            case IdentifierExpr sub -> evaluatePrimarySymbolExpr(sub);
             case ParamSymbolExpr sub -> evaluateParamSymbolExpr(sub);
         };
     }
 
-    private Entity evaluatePrimarySymbolExpr(PrimarySymbol expr) {
-        var id = getIdentifierFrom(expr);
+    private Entity evaluatePrimarySymbolExpr(IdentifierExpr expr) {
+        var id = expr.getIdentifier();
         if (mode == EvaluationMode.FACTORY) {
             if (!scope.getGlobal().hasInterface(id)) {
                 log.error("{}: Unknown interface type {}", expr.getSourceLoc(), id);
@@ -438,9 +437,8 @@ public final class Evaluator {
     }
 
     private Entity evaluateComponentType(ParamSymbolExpr expr) {
-        var identifier = getIdentifierFrom(expr.getHead());
-        var parameters = evaluateParameters(expr);
-        Entity prototype = resolveIdentifier(identifier);
+        Entity prototype = resolveIdentifier(expr.getHead());
+        List<Entity> parameters = evaluateParameters(expr);
         if (prototype instanceof Macro macro) {
             return evaluateMacroExpr(expr.getSourceLoc(), macro, parameters);
         } else if (prototype instanceof AtomType atom) {
@@ -469,11 +467,9 @@ public final class Evaluator {
 
 
     private MutableInstance.Factory<?> evaluateInstanceFactory(ParamSymbolExpr expr) {
-        var identifier = getIdentifierFrom(expr.getHead());
         var sourceLoc = expr.getSourceLoc();
-        return switch (identifier.name()) {
+        return switch (expr.getHead().name()) {
             case "bit" -> evaluateWireFactory(sourceLoc, expr.getArguments());
-            case "array" -> evaluateArrayFactory(sourceLoc, expr.getArguments());
             case "clock" -> evaluateClockFactory(sourceLoc, expr.getArguments());
             default -> {
                 log.error("{}: Unknown component type {}", expr.getSourceLoc(), expr);
@@ -485,19 +481,9 @@ public final class Evaluator {
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         requiresMatchedSize(sourceLoc, 1, arguments);
         mode = EvaluationMode.COMMON;
-        var bitType = BitType.of(evaluateToInteger(arguments.getFirst()));
+        var bitType = BitType.of(evaluateToInt(arguments.getFirst()));
         mode = EvaluationMode.FACTORY;
         return new Wire.Factory(bitType, global);
-    }
-
-    private Array.Factory evaluateArrayFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
-        if (arguments.size() != 2) {
-            log.error("{}: Unexpected specification for component type array: {}", sourceLoc, arguments);
-            throw new CompileCancellationException();
-        }
-        var factory = evaluateToInstanceFactory(arguments.get(0));
-        int size = evaluateToInteger(arguments.get(1));
-        return new Array.Factory(global, size, factory);
     }
 
     private Clock.Factory evaluateClockFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
@@ -507,24 +493,6 @@ public final class Evaluator {
             log.error("{}: Unexpected specification for component type clock: {}", sourceLoc, arguments);
             throw new CompileCancellationException();
         }
-    }
-
-    public Identifier getIdentifierFrom(PrimarySymbol symbol) {
-        return switch (symbol) {
-            case IdentifierSymbol id -> id.getIdentifier();
-            case InterpolatedSymbol interpolated -> evaluateInterpolation(interpolated);
-        };
-    }
-
-    private Identifier evaluateInterpolation(InterpolatedSymbol interpolated) {
-        var sb = new StringBuilder();
-        var exprIter = interpolated.getExprs().iterator();
-        for (var fragment : interpolated.getFragments()) {
-            sb.append(fragment);
-            sb.append(evaluate(exprIter.next()));
-        }
-        exprIter.forEachRemaining(expr -> sb.append(evaluate(expr)));
-        return Identifier.of(sb.toString()).setSourceLoc(interpolated.getSourceLoc());
     }
 
     public void overrideBindings(Binding binding) {

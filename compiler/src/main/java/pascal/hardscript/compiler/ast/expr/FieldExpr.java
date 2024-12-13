@@ -1,19 +1,20 @@
 package pascal.hardscript.compiler.ast.expr;
 
 import pascal.hardscript.compiler.ast.ASTListener;
+import pascal.hardscript.util.lang.Identifier;
 
 import java.util.Objects;
 
 public final class FieldExpr extends ExprNode {
     private ExprNode base;
-    private PrimarySymbol field;
+    private Identifier field;
 
-    private FieldExpr(ExprNode base, PrimarySymbol field) {
+    private FieldExpr(ExprNode base, Identifier field) {
         this.base = base;
         this.field = field;
     }
 
-    public static FieldExpr of(ExprNode base, PrimarySymbol field) {
+    public static FieldExpr of(ExprNode base, Identifier field) {
         return new FieldExpr(base, field);
     }
 
@@ -25,11 +26,11 @@ public final class FieldExpr extends ExprNode {
         this.base = base;
     }
 
-    public PrimarySymbol getField() {
+    public Identifier getField() {
         return field;
     }
 
-    public void setField(PrimarySymbol field) {
+    public void setField(Identifier field) {
         this.field = field;
     }
 
@@ -37,7 +38,6 @@ public final class FieldExpr extends ExprNode {
     public void walk(ASTListener listener) {
         listener.enter(this);
         base.walk(listener);
-        field.walk(listener);
         listener.exit(this);
     }
 

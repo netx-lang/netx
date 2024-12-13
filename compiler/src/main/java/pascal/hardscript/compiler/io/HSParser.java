@@ -1,7 +1,6 @@
 package pascal.hardscript.compiler.io;
 
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import pascal.hardscript.compiler.antlr.HardScriptParser.*;
 import pascal.hardscript.compiler.ast.ASTListener;
@@ -30,7 +29,7 @@ public final class HSParser {
         DesignNode result = DesignNode.of().setSourceLoc(locationOf(ctx.getStart()));
         for (var child : ctx.children) {
             switch (child) {
-                case BindingContext sub -> result.addDefinition(parseBinding(sub));
+                case Binding_statementContext sub -> result.addDefinition(parseBinding(sub.binding()));
                 case ComponentContext sub -> result.addDefinition(parseComponent(sub));
                 default -> throw new ShallNotReachHereError();
             }
@@ -85,9 +84,9 @@ public final class HSParser {
 
     static ElementNode parseElement(ElementContext ctx) {
         var result = switch (ctx) {
-            case BindingStatementContext sub -> parseBinding(sub.binding());
+            case BindingStatementContext sub -> parseBinding(sub.binding_statement().binding());
             case MixedInstantiationContext sub -> parseMixedInstantiation(sub);
-            case DataInstantiationContext sub -> parseDataInstantiation(sub);
+            case DataDeclarationContext sub -> parseDataInstantiation(sub);
             case ComponentInstantiationContext sub -> parseComponentInstantiation(sub);
             case LoopContext sub -> parseLoop(sub);
             default -> throw new ShallNotReachHereError();
@@ -107,38 +106,37 @@ public final class HSParser {
         return LoopNode.of(parseGeneratorQualifier(ctx.iterator()), parseElements(ctx.element()));
     }
 
-    static DataInstantiationNode parseExplicitDataInstantiation(Explicit_data_elementContext ctx) {
+    static DataInstantiationNode parseDataInstantiation(DataDeclarationContext ctx) {
+        var decl = ctx.data_declaration();
         SymbolExpr type;
         DataInstantiationNode.Kind kind;
-        var declarations = parsePrimarySymbolList(ctx.primary_symbol_list());
-        switch (ctx.kind.getText()) {
+        var declarations = parseDeclarationList(decl.declaration_list());
+        switch (decl.kind.getText()) {
             case "wire" -> {
                 kind = DataInstantiationNode.Kind.WIRE;
-                type = parseSymbolExpr(ctx.type);
+                type = parseSymbolExpr(decl.type);
             }
             case "bundle" -> {
                 kind = DataInstantiationNode.Kind.BUNDLE;
-                type = parseSymbolExpr(ctx.type);
+                type = parseSymbolExpr(decl.type);
+            }
+            case "auto" -> {
+                kind = DataInstantiationNode.Kind.WIRE;
+                type = null;
             }
             default -> throw new ShallNotReachHereError();
         }
         return DataInstantiationNode.of(kind, declarations, type);
     }
 
-    static DataInstantiationNode parseDataInstantiation(DataInstantiationContext ctx) {
-        if (ctx.explicit_data_element() != null) {
-            return parseExplicitDataInstantiation(ctx.explicit_data_element());
-        } else {
-            return DataInstantiationNode.ofAuto(
-                    DataInstantiationNode.Kind.WIRE,
-                    parsePrimarySymbolList(ctx.primary_symbol_list()));
-        }
-    }
-
-    static List<PrimarySymbol> parsePrimarySymbolList(Primary_symbol_listContext ctx) {
-        List<PrimarySymbol> result = new ArrayList<>();
-        for (var sub : ctx.primary_symbol()) {
-            result.add(parsePrimarySymbol(sub));
+    static List<DataRestNode> parseDeclarationList(Declaration_listContext ctx) {
+        List<DataRestNode> result = new ArrayList<>();
+        for (var sub : ctx.declaration_symbol()) {
+            DataRestNode data = DataRestNode.of(
+                    parseIdentifier(sub.ID()),
+                    sub.expression().stream().map(HSParser::parseExpr).toList()
+            ).setSourceLoc(locationOf(sub.getStart()));
+            result.add(data);
         }
         return result;
     }
@@ -165,8 +163,8 @@ public final class HSParser {
 
     static SymbolExpr parseSymbolExpr(SymbolContext ctx) {
         return switch (ctx) {
-            case PrimarySymbolContext sub -> parsePrimarySymbol(sub.primary_symbol());
-            case ParamSymbolContext sub -> parseParamSymbolExpr(sub.param_symbol());
+            case PrimarySymbolContext sub -> parsePrimarySymbol(sub);
+            case ParamSymbolContext sub -> parseParamSymbolExpr(sub);
             default -> throw new ShallNotReachHereError();
         };
     }
@@ -198,8 +196,10 @@ public final class HSParser {
     }
 
     static GeneratorQualifier parseGeneratorQualifier(IteratorContext ctx) {
-        return GeneratorQualifier.of(parsePrimarySymbol(ctx.primary_symbol()), parseExpr(ctx.expression()))
-                .setSourceLoc(locationOf(ctx.getStart()));
+        return GeneratorQualifier.of(
+                parseIdentifier(ctx.ID()),
+                parseExpr(ctx.expression())
+        ).setSourceLoc(locationOf(ctx.getStart()));
     }
 
     static BindingNode parseBinding(BindingContext ctx) {
@@ -242,7 +242,7 @@ public final class HSParser {
     static ExprNode parseFieldExpr(FieldExprContext ctx) {
         return FieldExpr.of(
                 parseExpr(ctx.expression()),
-                parsePrimarySymbol(ctx.primary_symbol()));
+                parseIdentifier(ctx.ID()));
     }
 
     static ExprNode parseAccessExpr(AccessExprContext ctx) {
@@ -262,10 +262,11 @@ public final class HSParser {
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static ParamSymbolExpr parseParamSymbolExpr(Param_symbolContext ctx) {
+    static ParamSymbolExpr parseParamSymbolExpr(ParamSymbolContext ctx) {
         return ParamSymbolExpr.of(
-                parsePrimarySymbol(ctx.primary_symbol()),
-                parseExprList(ctx.expression())).setSourceLoc(locationOf(ctx.getStart()));
+                parseIdentifier(ctx.ID()),
+                parseExprList(ctx.expression())
+        ).setSourceLoc(locationOf(ctx.getStart()));
     }
 
     static ExprNode parseConditionalExpr(ConditionalExprContext ctx) {
@@ -276,17 +277,8 @@ public final class HSParser {
         return Identifier.of(ID.getText()).setSourceLoc(locationOf(ID.getSymbol()));
     }
 
-    static PrimarySymbol parsePrimarySymbol(Primary_symbolContext ctx) {
-        var result = switch (ctx) {
-            case IdentifierContext sub -> IdentifierSymbol.of(parseIdentifier(sub.ID()));
-            case InterpolatedContext sub -> InterpolatedSymbol.of(
-                    sub.ID().stream().map(ParseTree::getText).toList(),
-                    sub.interpolation().stream()
-                            .map(InterpolationContext::expression)
-                            .map(HSParser::parseExpr).toList());
-            default -> throw new ShallNotReachHereError();
-        };
-        return result.setSourceLoc(locationOf(ctx.getStart()));
+    static IdentifierExpr parsePrimarySymbol(PrimarySymbolContext ctx) {
+        return IdentifierExpr.of(parseIdentifier(ctx.ID())).setSourceLoc(locationOf(ctx.getStart()));
     }
 
     static List<ElementNode> parseElements(List<ElementContext> list) {

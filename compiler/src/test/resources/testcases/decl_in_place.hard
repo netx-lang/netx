@@ -1,5 +1,0 @@
-component top {
-    let xd = 19
-    wire test_1 of bit(32)
-    auto [test_${i} | i in [0..xd]] <> [AND <> [i, 514] | i in [0..xd]]
-}

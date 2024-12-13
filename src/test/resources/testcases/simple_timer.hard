@@ -1,40 +1,38 @@
-component top: [clk_50] -> [hex_${i} | i in [0..8]] {
-	wire clk_50 of clock()
-	for (i in [0..8]) {
-		wire hex_${i} of bit(7)
-	}
+component top: [clk_50] -> [hex] {
+	wire clk_50 of clock();
+	wire hex[8] of bit(7);
 
-	let REG(clk) = REGISTER(clk, true)
+	let REG(clk) = REGISTER(clk, true);
 
-	wire ms_clk, s_clk, m_clk, h_clk of clock()
-	wire ms of bit(32)
+	wire ms_clk, s_clk, m_clk, h_clk of clock();
+	wire ms of bit(32);
 
-	ms_clk <> clock_divider(500000) <> clk_50
-	ms <> REG(ms_clk) <> MUX(1) <> [EQ <> [ms, 24 * 3600 * 100 - 1], ADD <> [ms, 1], 0]
+	ms_clk <> clock_divider(500000) <> clk_50;
+	ms <> REG(ms_clk) <> MUX(1) <> [EQ <> [ms, 24 * 3600 * 100 - 1], ADD <> [ms, 1], 0];
 
-	hex_0 <> hex_trigger <> CAST <> MOD <> [ms, 10]
-	hex_1 <> hex_trigger <> CAST <> DIV <> [MOD <> [ms, 100], 10]
-	hex_2 <> hex_trigger <> CAST <> DIV <> [MOD <> [ms, 1000], 100]
-	hex_3 <> hex_trigger <> CAST <> DIV <> [MOD <> [ms, 6000], 1000]
-	hex_4 <> hex_trigger <> CAST <> DIV <> [MOD <> [ms, 60000], 6000]
-	hex_5 <> hex_trigger <> CAST <> DIV <> [MOD <> [ms, 360000], 60000]
-	hex_6 <> hex_trigger <> CAST <> DIV <> [MOD <> [ms, 3600000], 360000]
-	hex_7 <> hex_trigger <> CAST <> DIV <> [MOD <> [ms, 86400000], 3600000]
+	hex[0] <> hex_trigger <> CAST <> MOD <> [ms, 10];
+	hex[1] <> hex_trigger <> CAST <> DIV <> [MOD <> [ms, 100], 10];
+	hex[2] <> hex_trigger <> CAST <> DIV <> [MOD <> [ms, 1000], 100];
+	hex[3] <> hex_trigger <> CAST <> DIV <> [MOD <> [ms, 6000], 1000];
+	hex[4] <> hex_trigger <> CAST <> DIV <> [MOD <> [ms, 60000], 6000];
+	hex[5] <> hex_trigger <> CAST <> DIV <> [MOD <> [ms, 360000], 60000];
+	hex[6] <> hex_trigger <> CAST <> DIV <> [MOD <> [ms, 3600000], 360000];
+	hex[7] <> hex_trigger <> CAST <> DIV <> [MOD <> [ms, 86400000], 3600000];
 }
 
 component clock_divider(max): [clk_50] -> [clk] {
-	wire clk_50, clk of clock()
-	wire count       of bit(32)
+	wire clk_50, clk of clock();
+	wire count       of bit(32);
 
-	let REG = REGISTER(clk_50, true)
-	let ctl = EQ <> [count, max / 2 - 1]
-	count <> REG <> MUX(1) <> [ctl, ADD <> [count, 1], 0]
-	clk   <> REG <> MUX(1) <> [ctl, clk, NOT <> clk]
+	let REG = REGISTER(clk_50, true);
+	let ctl = EQ <> [count, max / 2 - 1];
+	count <> REG <> MUX(1) <> [ctl, ADD <> [count, 1], 0];
+	clk   <> REG <> MUX(1) <> [ctl, clk, NOT <> clk];
 }
 
 component hex_trigger: [num] -> [code] {
-	wire num  of bit(4)
-	wire code of bit(7)
+	wire num  of bit(4);
+	wire code of bit(7);
 	code <> MUX(4) <> [
 	    num,
 		7'b1000000, // 0
@@ -53,27 +51,28 @@ component hex_trigger: [num] -> [code] {
 		7'b0100001, // d
 		7'b0000110, // E
 		7'b0001110  // F
-	]
+	];
 }
 
-component MUX(width) : [code] :: [input_${i} | i in [0..W]] -> [out] {
-    let W = 2**width
-    wire code of bit(width)
-    wire mask of bit(W)
-    mask <> DECODER(width) <> code
-    auto out <> OR(W) <> [
-        AND <> [input_${i}, CAST <> mask[i]] | i in [0..W]
-    ]
+component MUX(width) : [code] :: [input[i] | i in [0..W]] -> [out] {
+    let W = 2**width;
+    wire code of bit(width);
+    wire mask of bit(W);
+    auto input[W], out;
+    mask <> DECODER(width) <> code;
+    out <> OR(W) <> [
+        AND <> [input[i], CAST <> mask[i]] | i in [0..W]
+    ];
 }
 
 component DECODER(width) : [code] -> [out] {
-    let W = 2**width
-    wire code of bit(width)
-    wire out  of bit(W)
+    let W = 2**width;
+    wire code of bit(width);
+    wire out  of bit(W);
     for (i in [0..W]) {
         out[i] <> AND(width) <> [port |
             j in [0..width],
             let port = if i & (1 << j) then TO else NOT
-        ] <> [code[j] | j in [0..width]]
+        ] <> [code[j] | j in [0..width]];
     }
 }

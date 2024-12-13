@@ -1,13 +1,13 @@
 component top: [x] -> [arr, brr] {
-    wire x of bit(32)
-    wire arr of array(bit(32), 8)
-    wire brr of array(array(bit(32), 8), 4)
+    wire x of bit(32);
+    wire arr[8] of bit(32);
+    wire brr[8][4] of bit(32);
     for (i in [0..8]) {
-        arr[i] <> ADD <> [x, i]
+        arr[i] <> ADD <> [x, i];
     }
     for (i in [0..4]) {
         for (j in [0..8]) {
-            brr[i][j] <> ADD <> [x, i * 8 + j]
+            brr[i][j] <> ADD <> [x, i * 8 + j];
         }
     }
 }

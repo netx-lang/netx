@@ -74,6 +74,14 @@ public interface ASTListener {
         exitDefault(node);
     }
 
+    default void enter(DataRestNode node) {
+        enterDefault(node);
+    }
+
+    default void exit(DataRestNode node) {
+        exitDefault(node);
+    }
+
     default void enter(DesignNode node) {
         enterDefault(node);
     }
@@ -202,19 +210,11 @@ public interface ASTListener {
         exitDefault(node);
     }
 
-    default void enter(IdentifierSymbol node) {
+    default void enter(IdentifierExpr node) {
         enterDefault(node);
     }
 
-    default void exit(IdentifierSymbol node) {
-        exitDefault(node);
-    }
-
-    default void enter(InterpolatedSymbol node) {
-        enterDefault(node);
-    }
-
-    default void exit(InterpolatedSymbol node) {
+    default void exit(IdentifierExpr node) {
         exitDefault(node);
     }
 
