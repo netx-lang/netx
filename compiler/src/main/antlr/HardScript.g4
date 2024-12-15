@@ -42,9 +42,9 @@ expression
     | number                                                        # NumberExpr
     | '[' list ']'                                                  # ListExpr
     | expression (selector)+                                        # AccessExpr
-    | expression '.' ID                                 # FieldExpr
-    | op='#-' expression                                            # UnaryExpr
-    | expression op='-#'                                            # UnaryExpr
+    | expression '.' ID                                             # FieldExpr
+    | prev='#' expression                                           # UnaryExpr
+    | expression post='#'                                           # UnaryExpr
     | op=('+' | '-' | '~' | '!') expression                         # UnaryExpr
     | lhs=expression op='**' rhs=expression                         # BinaryExpr
     | lhs=expression op=('*' | '/' | '%') rhs=expression            # BinaryExpr

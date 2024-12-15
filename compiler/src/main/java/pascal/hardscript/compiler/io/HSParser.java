@@ -208,7 +208,14 @@ public final class HSParser {
     }
 
     static ExprNode parseUnaryExpr(UnaryExprContext ctx) {
-        UnaryExpr.Operator op = UnaryExpr.Operator.fromString(ctx.op.getText());
+        UnaryExpr.Operator op;
+        if (ctx.prev != null) {
+            op = UnaryExpr.Operator.SINK;
+        } else if (ctx.post != null) {
+            op = UnaryExpr.Operator.SOURCE;
+        } else {
+            op = UnaryExpr.Operator.fromString(ctx.op.getText());
+        }
         return UnaryExpr.of(op, parseExpr(ctx.expression()));
     }
 

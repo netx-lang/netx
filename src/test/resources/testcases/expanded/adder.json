@@ -16,7 +16,7 @@
         "output": ["c@2"],
         "members": [
           {
-            "type": "component", "id": "full_adder", "loc": "7:35",
+            "type": "component", "id": "full_adder", "loc": "7:34",
             "input": ["a@0[0]", "b@1[0]", "1'h00"],
             "output": ["c@2[0]", "cout@3"],
             "members": [
@@ -66,7 +66,7 @@
             ]
           },
           {
-            "type": "component", "id": "full_adder", "loc": "7:35",
+            "type": "component", "id": "full_adder", "loc": "7:34",
             "input": ["a@0[1]", "b@1[1]", "cout@3"],
             "output": ["c@2[1]", "cout@7"],
             "members": [
@@ -116,7 +116,7 @@
             ]
           },
           {
-            "type": "component", "id": "full_adder", "loc": "7:35",
+            "type": "component", "id": "full_adder", "loc": "7:34",
             "input": ["a@0[2]", "b@1[2]", "cout@7"],
             "output": ["c@2[2]", "cout@11"],
             "members": [
@@ -166,7 +166,7 @@
             ]
           },
           {
-            "type": "component", "id": "full_adder", "loc": "7:35",
+            "type": "component", "id": "full_adder", "loc": "7:34",
             "input": ["a@0[3]", "b@1[3]", "cout@11"],
             "output": ["c@2[3]", "cout@15"],
             "members": [
@@ -216,7 +216,7 @@
             ]
           },
           {
-            "type": "component", "id": "full_adder", "loc": "7:35",
+            "type": "component", "id": "full_adder", "loc": "7:34",
             "input": ["a@0[4]", "b@1[4]", "cout@15"],
             "output": ["c@2[4]", "cout@19"],
             "members": [
@@ -266,7 +266,7 @@
             ]
           },
           {
-            "type": "component", "id": "full_adder", "loc": "7:35",
+            "type": "component", "id": "full_adder", "loc": "7:34",
             "input": ["a@0[5]", "b@1[5]", "cout@19"],
             "output": ["c@2[5]", "cout@23"],
             "members": [
@@ -316,7 +316,7 @@
             ]
           },
           {
-            "type": "component", "id": "full_adder", "loc": "7:35",
+            "type": "component", "id": "full_adder", "loc": "7:34",
             "input": ["a@0[6]", "b@1[6]", "cout@23"],
             "output": ["c@2[6]", "cout@27"],
             "members": [
@@ -366,7 +366,7 @@
             ]
           },
           {
-            "type": "component", "id": "full_adder", "loc": "7:35",
+            "type": "component", "id": "full_adder", "loc": "7:34",
             "input": ["a@0[7]", "b@1[7]", "cout@27"],
             "output": ["c@2[7]", "cout@31"],
             "members": [
