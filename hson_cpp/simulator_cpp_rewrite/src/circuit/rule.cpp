@@ -9,6 +9,129 @@ using namespace boost::lambda2;
 
 namespace hson {
     namespace impl {
+        struct id_clock final : clock_impl {
+            const id_t id;
+            const bool posEdge;
+
+            explicit id_clock(id_t id, const bool posEdge)
+                : clock_impl({id}), id(id), posEdge(posEdge) {
+            }
+
+            bool triggered(value_storage &values) const override {
+                const auto &clk = values[id];
+                assert(!clk.empty());
+                if (posEdge) return clk.all();
+                return clk.none();
+            }
+        };
+
+        struct id_source final : source_impl {
+            const id_t id;
+
+            explicit id_source(id_t id)
+                : source_impl({id}), id(id) {
+            }
+
+            value_t get(value_storage &values) const override {
+                return values[id];
+            }
+        };
+
+        struct id_sink final : sink_impl {
+            const id_t id;
+
+            explicit id_sink(id_t id)
+                : sink_impl({id}), id(id) {
+            }
+
+            bool put(value_storage &values, value_t v) const override {
+                auto &out = values[id];
+                if (out == v) return false;
+                out = std::move(v);
+                return true;
+            }
+        };
+
+        struct select_source final : source_impl {
+            const id_t id;
+            const size_t from;
+            const size_t to;
+            const size_t len;
+
+            /**
+             *
+             * @param id Input id
+             * @param from From index (inclusive)
+             * @param to To index (inclusive)
+             */
+            select_source(id_t id, const size_t from, const size_t to)
+                : source_impl({id}), id(id),
+                  from((assert(from <= to), from)), to(to), len(to - from + 1) {
+            }
+
+            value_t get(value_storage &values) const override {
+                value_t res(len);
+                const auto &in = values[id];
+                assert(in.size() > to);
+                for (size_t i = 0; i < len; ++i) res[i] = in[from + i];
+                return res;
+            }
+        };
+
+        struct select_sink final : sink_impl {
+            const id_t id;
+            const size_t from;
+            const size_t to;
+            const size_t len;
+
+            /**
+             *
+             * @param id Output id
+             * @param from From index (inclusive)
+             * @param to To index (inclusive)
+             */
+            select_sink(id_t id, const size_t from, const size_t to)
+                : sink_impl({id}), id(id),
+                  from((assert(from <= to), from)), to(to), len(to - from + 1) {
+            }
+
+            bool put(value_storage &values, value_t v) const override {
+                auto &out = values[id];
+                assert(v.size() == len && out.size() > to);
+                bool flag = false;
+                for (size_t i = 0; i < len; ++i) {
+                    if (out[from + i] == v[i]) continue;
+                    flag = true;
+                    out[from + i] = v[i];
+                }
+                return flag;
+            }
+        };
+    }
+
+    namespace data_factory {
+        clock_t id_clock(id_t id, const bool posEdge) {
+            return clock_t{new impl::id_clock(id, posEdge)};
+        }
+
+        source_t id_source(const id_t id) {
+            return source_t{new impl::id_source(id)};
+        }
+
+        sink_t id_sink(const id_t id) {
+            return sink_t{new impl::id_sink(id)};
+        }
+
+        source_t select_source(const id_t id, const size_t from, const size_t to) {
+            return source_t{new impl::select_source(id, from, to)};
+        }
+
+        sink_t select_sink(const id_t id, const size_t from, const size_t to) {
+            return sink_t{new impl::select_sink(id, from, to)};
+        }
+    }
+
+    namespace impl {
         struct binary_rule final : rule_impl {
             const source_t a;
             const source_t b;
@@ -64,19 +187,19 @@ namespace hson {
     }
 
     namespace rule_factory {
-        rule_t make_not_rule(source_t in, sink_t out) {
+        rule_t not_rule(source_t in, sink_t out) {
             return rule_t{new impl::unary_rule(std::move(in), std::move(out), ~_1)};
         }
 
-        rule_t make_and_rule(source_t a, source_t b, sink_t out) {
+        rule_t and_rule(source_t a, source_t b, sink_t out) {
             return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 & _2)};
         }
 
-        rule_t make_or_rule(source_t a, source_t b, sink_t out) {
+        rule_t or_rule(source_t a, source_t b, sink_t out) {
             return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 | _2)};
         }
 
-        rule_t make_register_rule(clock_t clk, source_t in, sink_t out) {
+        rule_t register_rule(clock_t clk, source_t in, sink_t out) {
             return rule_t{new impl::register_rule(std::move(clk), std::move(in), std::move(out))};
         }
     }
