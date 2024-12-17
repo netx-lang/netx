@@ -108,11 +108,20 @@ namespace hson {
         }
     };
 
+    namespace data_factory {
+        [[nodiscard]] clock_t id_clock(id_t id, bool posEdge = true);
+        [[nodiscard]] source_t id_source(id_t id);
+        [[nodiscard]] sink_t id_sink(id_t id);
+
+        [[nodiscard]] source_t select_source(id_t id, size_t from, size_t to);
+        [[nodiscard]] sink_t select_sink(id_t id, size_t from, size_t to);
+    }
+
     namespace rule_factory {
-        rule_t make_not_rule(source_t in, sink_t out);
-        rule_t make_and_rule(source_t a, source_t b, sink_t out);
-        rule_t make_or_rule(source_t a, source_t b, sink_t out);
-        rule_t make_register_rule(clock_t clk, source_t in, sink_t out);
+        [[nodiscard]] rule_t not_rule(source_t in, sink_t out);
+        [[nodiscard]] rule_t and_rule(source_t a, source_t b, sink_t out);
+        [[nodiscard]] rule_t or_rule(source_t a, source_t b, sink_t out);
+        [[nodiscard]] rule_t register_rule(clock_t clk, source_t in, sink_t out);
     }
 
     class rule_set {

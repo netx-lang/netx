@@ -27,9 +27,9 @@ namespace hson {
 
         id_set update_batch(const value_storage& toUpdate) {
             id_set hint;
-            for (const auto & update : toUpdate) {
-                hint.insert(update.first);
-                values[update.first] = update.second;
+            for (const auto &[id, value] : toUpdate) {
+                hint.insert(id);
+                values[id] = value;
             }
             return rules.update(values, hint);
         }
