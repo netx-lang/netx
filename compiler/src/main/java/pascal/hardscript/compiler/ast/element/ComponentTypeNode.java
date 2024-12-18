@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.ast.component;
+package pascal.hardscript.compiler.ast.element;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.ASTNode;

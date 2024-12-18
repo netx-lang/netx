@@ -1,6 +1,6 @@
 package pascal.hardscript.compiler.ast;
 
-import pascal.hardscript.compiler.ast.component.*;
+import pascal.hardscript.compiler.ast.element.*;
 import pascal.hardscript.compiler.ast.expr.*;
 import pascal.hardscript.compiler.ast.expr.qualifier.BindingQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.FilterQualifier;
@@ -223,6 +223,22 @@ public interface ASTListener {
     }
 
     default void exit(ParamSymbolExpr node) {
+        exitDefault(node);
+    }
+
+    default void enter(PackageInfoNode node) {
+        enterDefault(node);
+    }
+
+    default void exit(PackageInfoNode node) {
+        exitDefault(node);
+    }
+
+    default void enter(ImportNode node) {
+        enterDefault(node);
+    }
+
+    default void exit(ImportNode node) {
         exitDefault(node);
     }
 }

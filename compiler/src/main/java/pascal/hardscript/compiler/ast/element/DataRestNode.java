@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.ast.component;
+package pascal.hardscript.compiler.ast.element;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.ASTNode;
@@ -9,9 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class DataRestNode extends ASTNode {
-
     private Identifier identifier;
-
     private List<ExprNode> dimensions;
 
     private DataRestNode(Identifier identifier, List<ExprNode> dimensions) {

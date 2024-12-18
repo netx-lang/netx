@@ -1,4 +1,4 @@
-package pascal.hardscript.compiler.ast.component;
+package pascal.hardscript.compiler.ast.element;
 
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.ASTNode;
@@ -7,15 +7,15 @@ import pascal.hardscript.util.lang.Identifier;
 import java.util.List;
 import java.util.Objects;
 
-public final class ComponentNode extends ASTNode {
+public final class ComponentNode extends ASTNode implements PackageElement {
     private final List<Identifier> attributes;
-    private final List<ElementNode> elements;
+    private final List<ComponentElement> elements;
     private final Kind kind;
     private ComponentTypeNode type;
     private Identifier identifier;
 
     private ComponentNode(Kind kind, Identifier identifier, ComponentTypeNode type,
-                          List<Identifier> attributes, List<ElementNode> elements) {
+                          List<Identifier> attributes, List<ComponentElement> elements) {
         this.identifier = identifier;
         this.type = type;
         this.attributes = attributes;
@@ -24,7 +24,7 @@ public final class ComponentNode extends ASTNode {
     }
 
     public static ComponentNode of(Kind kind, Identifier id, ComponentTypeNode type,
-                                   List<Identifier> arguments, List<ElementNode> elements) {
+                                   List<Identifier> arguments, List<ComponentElement> elements) {
         return new ComponentNode(kind, id, type, arguments, elements);
     }
 
@@ -54,7 +54,7 @@ public final class ComponentNode extends ASTNode {
         this.type = type;
     }
 
-    public List<ElementNode> getElements() {
+    public List<ComponentElement> getElements() {
         return elements;
     }
 

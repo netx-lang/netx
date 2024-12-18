@@ -57,6 +57,11 @@ class HSCompilerUnitTest {
     }
 
     @Test
+    void testPackage() throws IOException {
+        test("package.hard");
+    }
+
+    @Test
     void testInvalidInput() {
         CharStream charStream = CharStreams.fromString("invalid input");
         HSCompiler compiler = Builder.forExpanded().load(charStream);

@@ -3,8 +3,9 @@ package pascal.hardscript.compiler.elaborator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.DesignNode;
-import pascal.hardscript.compiler.ast.component.BindingNode;
-import pascal.hardscript.compiler.ast.component.ComponentNode;
+import pascal.hardscript.compiler.ast.element.BindingNode;
+import pascal.hardscript.compiler.ast.element.ComponentNode;
+import pascal.hardscript.compiler.ast.element.ImportNode;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.io.Configuration;
 import pascal.hardscript.compiler.model.component.ComponentAtom;
@@ -49,9 +50,7 @@ public final class Elaborator {
     private ComponentNode findTopNode() {
         ComponentNode result = null;
         for (var element : node.getElements()) {
-            var optional = element.asRight();
-            if (optional.isPresent()) {
-                var component = optional.get().value();
+            if (element instanceof ComponentNode component) {
                 if (config.topName().equals(component.getIdentifier().name())) {
                     return component;
                 } else if (result == null) {
@@ -65,7 +64,13 @@ public final class Elaborator {
 
     private void addGlobalInformation() {
         for (var element : node.getElements()) {
-            element.match(this::addBinding, this::addComponent);
+            switch (element) {
+                case BindingNode binding -> addBinding(binding);
+                case ComponentNode component -> addComponent(component);
+                case ImportNode _ -> {
+                    // TODO:
+                }
+            }
         }
         design.resetDataIndexer();
     }

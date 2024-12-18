@@ -1,6 +1,6 @@
 package pascal.hardscript.compiler.model.component;
 
-import pascal.hardscript.compiler.ast.component.ComponentNode;
+import pascal.hardscript.compiler.ast.element.ComponentNode;
 import pascal.hardscript.compiler.model.Entity;
 import pascal.hardscript.util.lang.Identifier;
 

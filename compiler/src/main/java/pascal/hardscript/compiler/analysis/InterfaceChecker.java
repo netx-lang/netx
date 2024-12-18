@@ -4,8 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.DesignNode;
-import pascal.hardscript.compiler.ast.component.ComponentInstantiationNode;
-import pascal.hardscript.compiler.ast.component.ComponentNode;
+import pascal.hardscript.compiler.ast.element.ComponentInstantiationNode;
+import pascal.hardscript.compiler.ast.element.ComponentNode;
 import pascal.hardscript.compiler.exception.TypeCheckingException;
 
 public final class InterfaceChecker extends ASTAnalysis implements ASTListener {

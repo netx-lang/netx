@@ -1,12 +1,13 @@
-package pascal.hardscript.compiler.ast.component;
+package pascal.hardscript.compiler.ast.element;
 
 import pascal.hardscript.compiler.ast.ASTListener;
+import pascal.hardscript.compiler.ast.ASTNode;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
 import pascal.hardscript.compiler.ast.expr.SymbolExpr;
 
 import java.util.Objects;
 
-public final class BindingNode extends ElementNode {
+public final class BindingNode extends ASTNode implements ComponentElement, PackageElement {
     private SymbolExpr head;
     private ExprNode expr;
 

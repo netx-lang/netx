@@ -7,7 +7,7 @@ import pascal.hardscript.util.print.NotepadWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class Builder {
+public final class Builder {
     private final Configuration config;
 
     private Builder(Configuration config) {

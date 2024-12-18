@@ -1,7 +1,7 @@
 package pascal.hardscript.compiler.ast.expr.qualifier;
 
 import pascal.hardscript.compiler.ast.ASTListener;
-import pascal.hardscript.compiler.ast.component.BindingNode;
+import pascal.hardscript.compiler.ast.element.BindingNode;
 
 import java.util.Objects;
 

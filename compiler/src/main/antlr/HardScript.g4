@@ -1,6 +1,35 @@
 grammar HardScript;
 
-design : (component | binding_statement)+;
+design
+    : header? (binding_statement | import_statement | component)+
+    ;
+
+header
+    : kind='application' ID ';'
+    | kind='library' ID ';'
+    ;
+
+binding_statement
+    : binding ';'
+    ;
+
+import_statement
+    : 'import' lib_reference ('as' lib_alias)? ';'
+    ;
+
+lib_reference
+    : ID ('.' ID)* ('.' lib_reference_set)? # CommonLibRef
+    | ID ('.' ID)* '.' '*'                  # WildcardLibRef
+    ;
+
+lib_reference_set
+    : '{' ID (',' ID)* '}'
+    ;
+
+lib_alias
+    : ID
+    | lib_reference_set
+    ;
 
 component
     : kind='component' ID attributes? component_type? '{' element* '}'
@@ -86,10 +115,6 @@ qualifier
 
 iterator
     : ID 'in' expression
-    ;
-
-binding_statement
-    : binding ';'
     ;
 
 binding

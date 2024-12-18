@@ -55,22 +55,22 @@ class AnalysisTest {
     @Test
     void testNestedDataTypeInference() {
         var code = """
-            component top {
-                wire a of bit(3);
-                auto b <> sub <> a;
-            }
-            component sub: [a] -> [b] {
-                auto a, b;
-                b <> tricky <> [a, CAST <> 1'b0];
-            }
-            component tricky : [a, b] -> [c] {
-                auto a, b;
-                auto c <> AND <> [
-                    AND <> [a, CAST <> 1'b1],
-                    AND <> [b, CAST <> 1'b1]
-                ];
-            }
-            """;
+                component top {
+                    wire a of bit(3);
+                    auto b <> sub <> a;
+                }
+                component sub: [a] -> [b] {
+                    auto a, b;
+                    b <> tricky <> [a, CAST <> 1'b0];
+                }
+                component tricky : [a, b] -> [c] {
+                    auto a, b;
+                    auto c <> AND <> [
+                        AND <> [a, CAST <> 1'b1],
+                        AND <> [b, CAST <> 1'b1]
+                    ];
+                }
+                """;
         assertDoesNotThrow(() -> Builder.forExpanded().load(code).compile());
     }
 

@@ -2,7 +2,7 @@ package pascal.hardscript.compiler.elaborator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pascal.hardscript.compiler.ast.component.*;
+import pascal.hardscript.compiler.ast.element.*;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.compiler.exception.TypeCheckingException;
@@ -78,7 +78,7 @@ final class ScopeElaborator {
         throw new CompileCancellationException();
     }
 
-    private void buildComponentElements(List<ElementNode> list) {
+    private void buildComponentElements(List<ComponentElement> list) {
         for (var element : list) {
             switch (element) {
                 case LoopNode loop -> buildLoop(loop);

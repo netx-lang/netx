@@ -1,21 +1,22 @@
-package pascal.hardscript.compiler.ast.component;
+package pascal.hardscript.compiler.ast.element;
 
 import pascal.hardscript.compiler.ast.ASTListener;
+import pascal.hardscript.compiler.ast.ASTNode;
 import pascal.hardscript.compiler.ast.expr.qualifier.GeneratorQualifier;
 
 import java.util.List;
 import java.util.Objects;
 
-public final class LoopNode extends ElementNode {
+public final class LoopNode extends ASTNode implements ComponentElement {
     private final GeneratorQualifier generator;
-    private final List<ElementNode> elements;
+    private final List<ComponentElement> elements;
 
-    private LoopNode(GeneratorQualifier generator, List<ElementNode> elements) {
+    private LoopNode(GeneratorQualifier generator, List<ComponentElement> elements) {
         this.generator = generator;
         this.elements = elements;
     }
 
-    public static LoopNode of(GeneratorQualifier iterators, List<ElementNode> elements) {
+    public static LoopNode of(GeneratorQualifier iterators, List<ComponentElement> elements) {
         return new LoopNode(iterators, elements);
     }
 
@@ -31,7 +32,7 @@ public final class LoopNode extends ElementNode {
         return generator;
     }
 
-    public List<ElementNode> getElements() {
+    public List<ComponentElement> getElements() {
         return elements;
     }
 

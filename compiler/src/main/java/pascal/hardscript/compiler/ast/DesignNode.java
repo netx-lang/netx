@@ -1,47 +1,44 @@
 package pascal.hardscript.compiler.ast;
 
-import pascal.hardscript.compiler.ast.component.BindingNode;
-import pascal.hardscript.compiler.ast.component.ComponentNode;
-import pascal.hardscript.util.type.Either;
-import pascal.hardscript.util.type.Left;
-import pascal.hardscript.util.type.Right;
+import pascal.hardscript.compiler.ast.element.PackageElement;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public final class DesignNode extends ASTNode {
-    private final List<Either<BindingNode, ComponentNode>> elements = new ArrayList<>();
+    private final List<PackageElement> elements = new ArrayList<>();
+    private PackageInfoNode packageInfo;
 
-    private DesignNode() {
+    private DesignNode(PackageInfoNode packageInfo) {
+        this.packageInfo = packageInfo;
     }
 
-    public static DesignNode of() {
-        return new DesignNode();
+    public static DesignNode of(PackageInfoNode packageInfo) {
+        return new DesignNode(packageInfo);
     }
 
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);
-        elements.forEach(either -> {
-            switch (either) {
-                case Left(var left) -> left.walk(listener);
-                case Right(var right) -> right.walk(listener);
-            }
-        });
+        elements.forEach(either -> either.walk(listener));
         listener.exit(this);
     }
 
-    public List<Either<BindingNode, ComponentNode>> getElements() {
+    public List<PackageElement> getElements() {
         return elements;
     }
 
-    public void addDefinition(BindingNode binding) {
-        elements.add(Either.makeLeft(binding));
+    public PackageInfoNode getPackageInfo() {
+        return packageInfo;
     }
 
-    public void addDefinition(ComponentNode component) {
-        elements.add(Either.makeRight(component));
+    public void setPackageInfo(PackageInfoNode packageInfo) {
+        this.packageInfo = packageInfo;
+    }
+
+    public void addDefinition(PackageElement element) {
+        elements.add(element);
     }
 
     @Override
@@ -61,11 +58,12 @@ public final class DesignNode extends ASTNode {
     public String toString() {
         var sb = new StringBuilder();
         for (var definition : elements) {
-            sb.append(definition.map(
-                    BindingNode::toString,
-                    ComponentNode::toString
-            )).append('\n');
+            sb.append(definition).append('\n');
         }
         return sb.toString();
+    }
+
+    public enum Type {
+        LIBRARY, APPLICATION
     }
 }

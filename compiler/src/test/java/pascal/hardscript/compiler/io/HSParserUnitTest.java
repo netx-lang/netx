@@ -3,7 +3,7 @@ package pascal.hardscript.compiler.io;
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.antlr.HardScriptParser;
-import pascal.hardscript.compiler.ast.component.BindingNode;
+import pascal.hardscript.compiler.ast.element.BindingNode;
 import pascal.hardscript.compiler.ast.expr.*;
 import pascal.hardscript.compiler.ast.expr.qualifier.BindingQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.GeneratorQualifier;

@@ -1,13 +1,14 @@
-package pascal.hardscript.compiler.ast.component;
+package pascal.hardscript.compiler.ast.element;
 
 import pascal.hardscript.compiler.ast.ASTListener;
+import pascal.hardscript.compiler.ast.ASTNode;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
 import pascal.hardscript.compiler.ast.expr.SymbolExpr;
 
 import java.util.List;
 import java.util.Objects;
 
-public final class DataInstantiationNode extends ElementNode {
+public final class DataInstantiationNode extends ASTNode implements ComponentElement {
     private final List<DataRestNode> dataRests;
     private final Kind kind;
     private SymbolExpr type;

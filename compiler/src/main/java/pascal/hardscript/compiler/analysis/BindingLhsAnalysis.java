@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.DesignNode;
-import pascal.hardscript.compiler.ast.component.BindingNode;
+import pascal.hardscript.compiler.ast.element.BindingNode;
 import pascal.hardscript.compiler.ast.expr.IdentifierExpr;
 import pascal.hardscript.compiler.ast.expr.ParamSymbolExpr;
 import pascal.hardscript.compiler.exception.CompileCancellationException;

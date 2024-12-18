@@ -1,0 +1,11 @@
+application my_app;
+
+import random;
+import whatever.{b, c, d};
+let hello = 1;
+import std.selector.mux as mms;
+import std.selector.{encoder, decoder} as {eer, ddr};
+import my_lib.*;
+component top {
+
+}

@@ -1,11 +1,12 @@
-package pascal.hardscript.compiler.ast.component;
+package pascal.hardscript.compiler.ast.element;
 
 import pascal.hardscript.compiler.ast.ASTListener;
+import pascal.hardscript.compiler.ast.ASTNode;
 import pascal.hardscript.compiler.ast.expr.ExprNode;
 
 import java.util.Objects;
 
-public final class ComponentInstantiationNode extends ElementNode {
+public final class ComponentInstantiationNode extends ASTNode implements ComponentElement {
     private boolean declareInPlace;
     private ExprNode expr;
 

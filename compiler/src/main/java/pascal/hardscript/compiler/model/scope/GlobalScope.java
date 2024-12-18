@@ -1,6 +1,6 @@
 package pascal.hardscript.compiler.model.scope;
 
-import pascal.hardscript.compiler.ast.component.ComponentNode;
+import pascal.hardscript.compiler.ast.element.ComponentNode;
 import pascal.hardscript.compiler.elaborator.BuiltInComponentFactory;
 import pascal.hardscript.compiler.model.instance.DataBundle;
 import pascal.hardscript.util.exception.ShallNotReachHereError;

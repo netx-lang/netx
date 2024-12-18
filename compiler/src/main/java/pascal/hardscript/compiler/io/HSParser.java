@@ -2,11 +2,14 @@ package pascal.hardscript.compiler.io;
 
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.antlr.HardScriptParser.*;
 import pascal.hardscript.compiler.ast.ASTListener;
 import pascal.hardscript.compiler.ast.ASTNode;
 import pascal.hardscript.compiler.ast.DesignNode;
-import pascal.hardscript.compiler.ast.component.*;
+import pascal.hardscript.compiler.ast.PackageInfoNode;
+import pascal.hardscript.compiler.ast.element.*;
 import pascal.hardscript.compiler.ast.expr.*;
 import pascal.hardscript.compiler.ast.expr.qualifier.BindingQualifier;
 import pascal.hardscript.compiler.ast.expr.qualifier.FilterQualifier;
@@ -15,6 +18,7 @@ import pascal.hardscript.compiler.ast.expr.qualifier.Qualifier;
 import pascal.hardscript.compiler.ast.expr.selector.BitSelector;
 import pascal.hardscript.compiler.ast.expr.selector.PartSelector;
 import pascal.hardscript.compiler.ast.expr.selector.Selector;
+import pascal.hardscript.compiler.exception.CompileCancellationException;
 import pascal.hardscript.util.exception.ShallNotReachHereError;
 import pascal.hardscript.util.lang.BitVector;
 import pascal.hardscript.util.lang.Identifier;
@@ -25,16 +29,46 @@ import java.util.List;
 
 public final class HSParser {
 
+    private static final Logger log = LoggerFactory.getLogger(HSParser.class);
+
     public static DesignNode parseDesign(DesignContext ctx) {
-        DesignNode result = DesignNode.of().setSourceLoc(locationOf(ctx.getStart()));
+        DesignNode result = DesignNode.of(parsePackageInfo(ctx.header())).setSourceLoc(locationOf(ctx.getStart()));
         for (var child : ctx.children) {
             switch (child) {
-                case Binding_statementContext sub -> result.addDefinition(parseBinding(sub.binding()));
-                case ComponentContext sub -> result.addDefinition(parseComponent(sub));
+                case Binding_statementContext sub -> parseBindingInto(sub, result);
+                case Import_statementContext sub -> parseImportInto(sub, result);
+                case ComponentContext sub -> parseComponentInto(sub, result);
+                case HeaderContext _ -> {
+                    // do nothing
+                }
                 default -> throw new ShallNotReachHereError();
             }
         }
         return result;
+    }
+
+    static void parseBindingInto(Binding_statementContext ctx, DesignNode design) {
+        design.addDefinition(parseBinding(ctx.binding()));
+    }
+
+    static void parseImportInto(Import_statementContext ctx, DesignNode design) {
+        parseImport(ctx).forEach(design::addDefinition);
+    }
+
+    static void parseComponentInto(ComponentContext ctx, DesignNode design) {
+        design.addDefinition(parseComponent(ctx));
+    }
+
+    static PackageInfoNode parsePackageInfo(HeaderContext ctx) {
+        if (ctx == null) {
+            return PackageInfoNode.of(PackageInfoNode.Kind.APPLICATION, null);
+        }
+        PackageInfoNode.Kind kind = switch (ctx.kind.getText()) {
+            case "library" -> PackageInfoNode.Kind.LIBRARY;
+            case "application" -> PackageInfoNode.Kind.APPLICATION;
+            default -> throw new ShallNotReachHereError();
+        };
+        return PackageInfoNode.of(kind, parseIdentifier(ctx.ID()));
     }
 
     static ComponentNode parseComponent(ComponentContext ctx) {
@@ -56,6 +90,56 @@ public final class HSParser {
 
         return ComponentNode.of(kind, parseIdentifier(ctx.ID()), type, attributes, elements)
                 .setSourceLoc(locationOf(ctx.getStart()));
+    }
+
+    static List<ImportNode> parseImport(Import_statementContext ctx) {
+        return switch (ctx.lib_reference()) {
+            case CommonLibRefContext refCtx -> parseCommonImport(ctx, refCtx);
+            case WildcardLibRefContext refCtx -> parseWildcardImport(ctx, refCtx);
+            default -> throw new ShallNotReachHereError();
+        };
+    }
+
+    private static List<ImportNode> parseWildcardImport(Import_statementContext ctx, WildcardLibRefContext refCtx) {
+        return List.of(
+                ImportNode.ofWildcard(refCtx.ID().stream().map(HSParser::parseIdentifier).toList()
+                ).setSourceLoc(locationOf(ctx.getStart())));
+    }
+
+    private static List<ImportNode> parseCommonImport(Import_statementContext ctx, CommonLibRefContext refCtx) {
+        var prefix = refCtx.ID().stream().map(HSParser::parseIdentifier).toList();
+        List<ImportNode> results;
+        if (refCtx.lib_reference_set() != null) {
+            results = refCtx.lib_reference_set().ID().stream()
+                    .map(HSParser::parseIdentifier)
+                    .map(id -> new ArrayList<>(prefix) {{
+                        add(id);
+                    }})
+                    .map(ImportNode::of)
+                    .toList();
+        } else {
+            results = List.of(ImportNode.of(prefix));
+        }
+        if (ctx.lib_alias() != null) {
+            parseImportAlias(ctx.lib_alias(), results);
+        }
+        results.forEach(stmt -> stmt.setSourceLoc(locationOf(ctx.getStart())));
+        return results;
+    }
+
+    private static void parseImportAlias(Lib_aliasContext ctx, List<ImportNode> results) {
+        List<Identifier> aliasID;
+        if (ctx.ID() != null) {
+            aliasID = List.of(parseIdentifier(ctx.ID()));
+        } else {
+            aliasID = ctx.lib_reference_set().ID().stream().map(HSParser::parseIdentifier).toList();
+        }
+        if (aliasID.size() != results.size()) {
+            log.error("{}: Unmatched number of import alias", locationOf(ctx.getStart()));
+            throw new CompileCancellationException();
+        }
+        var iter = aliasID.iterator();
+        results.forEach(stmt -> stmt.setAlias(iter.next()));
     }
 
     static List<Identifier> parseComponentAttributes(ComponentContext ctx) {
@@ -82,7 +166,7 @@ public final class HSParser {
         }
     }
 
-    static ElementNode parseElement(ElementContext ctx) {
+    static ComponentElement parseElement(ElementContext ctx) {
         var result = switch (ctx) {
             case BindingStatementContext sub -> parseBinding(sub.binding_statement().binding());
             case MixedInstantiationContext sub -> parseMixedInstantiation(sub);
@@ -288,8 +372,8 @@ public final class HSParser {
         return IdentifierExpr.of(parseIdentifier(ctx.ID())).setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static List<ElementNode> parseElements(List<ElementContext> list) {
-        List<ElementNode> result = new ArrayList<>();
+    static List<ComponentElement> parseElements(List<ElementContext> list) {
+        List<ComponentElement> result = new ArrayList<>();
         for (var element : list) {
             result.add(parseElement(element));
         }
