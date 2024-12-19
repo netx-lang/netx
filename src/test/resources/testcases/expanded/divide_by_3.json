@@ -3,15 +3,15 @@
   "design": {
     "type": "component",
     "id": "Divide_by_3",
-    "loc": "5:10",
+    "loc": "1:10",
     "input": ["clk@0"],
     "output": ["clk_3@1"],
     "members": [
-      {"type": "clock", "id": "clk@0", "loc": "6:9"},
-      {"type": "clock", "id": "clk_3@1", "loc": "6:14"},
-      {"type": "wire", "width": 1, "id": "a@2", "loc": "7:9"},
-      {"type": "wire", "width": 1, "id": "b@3", "loc": "7:12"},
-      {"type": "wire", "width": 1, "id": "c@4", "loc": "7:15"},
+      {"type": "clock", "id": "clk@0", "loc": "2:9"},
+      {"type": "clock", "id": "clk_3@1", "loc": "2:14"},
+      {"type": "wire", "width": 1, "id": "a@2", "loc": "3:9"},
+      {"type": "wire", "width": 1, "id": "b@3", "loc": "3:12"},
+      {"type": "wire", "width": 1, "id": "c@4", "loc": "3:15"},
       {
         "type": "builtin", "id": "NOT", "loc": "8:28",
         "input": ["a@2"],
@@ -32,22 +32,22 @@
         ]
       },
       {
-        "type": "builtin", "id": "REGISTER", "loc": "1:25",
+        "type": "builtin", "id": "REGISTER", "loc": "5:29",
         "input": ["$i@7"],
         "output": ["a@2"],
         "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
         "members": [
-          {"type": "wire", "width": 1, "id": "$i@7", "loc": "1:25"}
+          {"type": "wire", "width": 1, "id": "$i@7", "loc": "5:29"}
         ]
       },
       {
-        "type": "builtin", "id": "REGISTER", "loc": "1:25",
+        "type": "builtin", "id": "REGISTER", "loc": "5:29",
         "input": ["a@2"],
         "output": ["b@3"],
         "attribute": {"isPosTrigger": "true", "clock": "clk@0"}
       },
       {
-        "type": "builtin", "id": "REGISTER", "loc": "1:25",
+        "type": "builtin", "id": "REGISTER", "loc": "5:29",
         "input": ["b@3"],
         "output": ["c@4"],
         "attribute": {"isPosTrigger": "false", "clock": "clk@0"}

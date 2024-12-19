@@ -3,7 +3,6 @@ package pascal.hardscript.compiler.elaborator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.DesignNode;
-import pascal.hardscript.compiler.ast.element.BindingNode;
 import pascal.hardscript.compiler.ast.element.ComponentNode;
 import pascal.hardscript.compiler.ast.element.ImportNode;
 import pascal.hardscript.compiler.exception.CompileCancellationException;
@@ -65,7 +64,6 @@ public final class Elaborator {
     private void addGlobalInformation() {
         for (var element : node.getElements()) {
             switch (element) {
-                case BindingNode binding -> addBinding(binding);
                 case ComponentNode component -> addComponent(component);
                 case ImportNode _ -> {
                     // TODO:
@@ -73,11 +71,6 @@ public final class Elaborator {
             }
         }
         design.resetDataIndexer();
-    }
-
-    private void addBinding(BindingNode node) {
-        var evaluator = design.getEvaluator();
-        design.bind(evaluator.evaluateBinding(node));
     }
 
     private void addComponent(ComponentNode node) {

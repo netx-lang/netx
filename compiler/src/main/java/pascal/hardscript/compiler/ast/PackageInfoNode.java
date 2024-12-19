@@ -17,7 +17,7 @@ public class PackageInfoNode extends ASTNode {
         return new PackageInfoNode(kind, id);
     }
 
-    public Identifier getId() {
+    public Identifier getIdentifier() {
         return id;
     }
 

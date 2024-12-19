@@ -35,7 +35,6 @@ public final class HSParser {
         DesignNode result = DesignNode.of(parsePackageInfo(ctx.header())).setSourceLoc(locationOf(ctx.getStart()));
         for (var child : ctx.children) {
             switch (child) {
-                case Binding_statementContext sub -> parseBindingInto(sub, result);
                 case Import_statementContext sub -> parseImportInto(sub, result);
                 case ComponentContext sub -> parseComponentInto(sub, result);
                 case HeaderContext _ -> {
@@ -45,10 +44,6 @@ public final class HSParser {
             }
         }
         return result;
-    }
-
-    static void parseBindingInto(Binding_statementContext ctx, DesignNode design) {
-        design.addDefinition(parseBinding(ctx.binding()));
     }
 
     static void parseImportInto(Import_statementContext ctx, DesignNode design) {
@@ -77,8 +72,6 @@ public final class HSParser {
             case "interface" -> ComponentNode.Kind.INTERFACE;
             default -> throw new ShallNotReachHereError();
         };
-        var attributes = parseComponentAttributes(ctx);
-        var elements = parseElements(ctx.element());
 
         ComponentTypeNode type = switch (kind) {
             case COMPONENT -> parseComponentType(ctx.component_type(), locationOf(ctx.getStart()));
@@ -88,8 +81,16 @@ public final class HSParser {
             }
         };
 
-        return ComponentNode.of(kind, parseIdentifier(ctx.ID()), type, attributes, elements)
-                .setSourceLoc(locationOf(ctx.getStart()));
+        var identifier = parseIdentifier(ctx.ID());
+        var attributes = parseComponentAttributes(ctx);
+        var result= switch (ctx.component_body()) {
+            case ImplementedContext body ->
+                    ComponentNode.of(kind, identifier, type, attributes, parseElements(body.element()));
+            case PassedContext _ ->
+                    ComponentNode.ofPassed(kind, identifier, type, attributes);
+            default -> throw new ShallNotReachHereError();
+        };
+        return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
     static List<ImportNode> parseImport(Import_statementContext ctx) {
@@ -168,7 +169,7 @@ public final class HSParser {
 
     static ComponentElement parseElement(ElementContext ctx) {
         var result = switch (ctx) {
-            case BindingStatementContext sub -> parseBinding(sub.binding_statement().binding());
+            case BindingStatementContext sub -> parseBinding(sub.binding());
             case MixedInstantiationContext sub -> parseMixedInstantiation(sub);
             case DataDeclarationContext sub -> parseDataInstantiation(sub);
             case ComponentInstantiationContext sub -> parseComponentInstantiation(sub);

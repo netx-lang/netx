@@ -11,6 +11,7 @@ public final class ImportNode extends ASTNode implements PackageElement {
     private List<Identifier> reference;
     private Identifier alias;
     private boolean isWildcard;
+    private ComponentNode imported;
 
     private ImportNode(List<Identifier> reference, Identifier alias, boolean isWildcard) {
         this.reference = reference;
@@ -52,6 +53,14 @@ public final class ImportNode extends ASTNode implements PackageElement {
 
     public void setWildcard(boolean wildcard) {
         isWildcard = wildcard;
+    }
+
+    public ComponentNode getImported() {
+        return imported;
+    }
+
+    public void setImported(ComponentNode imported) {
+        this.imported = imported;
     }
 
     @Override

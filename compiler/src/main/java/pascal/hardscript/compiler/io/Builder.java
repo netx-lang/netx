@@ -1,9 +1,12 @@
 package pascal.hardscript.compiler.io;
 
+import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
+import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.print.NotepadWriter;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -35,7 +38,19 @@ public final class Builder {
     }
 
     public HSCompiler loadPath(Path path) throws IOException {
-        return new HSCompiler(config, CharStreams.fromPath(path));
+        var fileName = path.getFileName().toString();
+        var extension = fileName.substring(fileName.lastIndexOf('.') + 1);
+        return switch (extension) {
+            case "hard" -> new HSCompiler(config, CharStreams.fromPath(path));
+            case "toml" -> {
+                TomlMapper mapper = new TomlMapper();
+                new ProjectCompiler(config, mapper.readTree(new FileInputStream(path.toFile())));
+
+                throw new TodoException();
+            }
+            default ->
+                throw new IOException("Invalid file extension: " + extension);
+        };
     }
 
     public HSPrinter printer(NotepadWriter writer) {

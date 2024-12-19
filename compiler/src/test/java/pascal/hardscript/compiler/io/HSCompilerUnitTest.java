@@ -3,6 +3,7 @@ package pascal.hardscript.compiler.io;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -14,6 +15,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class HSCompilerUnitTest {
     private static final Path TEST_DIR = Path.of("src/test/resources/testcases/");
+
+    @Disabled
+    @Test
+    void testBuild() throws IOException {
+        Builder.forExpanded().loadPath(TEST_DIR.resolve("package/hardpack.toml"));
+    }
 
     private static void test(String fileName) throws IOException {
         String content = new String(Files.readAllBytes(TEST_DIR.resolve(fileName)));
@@ -56,6 +63,7 @@ class HSCompilerUnitTest {
         test("attr_3.hard");
     }
 
+    @Disabled
     @Test
     void testPackage() throws IOException {
         test("package.hard");

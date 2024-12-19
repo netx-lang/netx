@@ -7,7 +7,7 @@ import pascal.hardscript.compiler.ast.expr.SymbolExpr;
 
 import java.util.Objects;
 
-public final class BindingNode extends ASTNode implements ComponentElement, PackageElement {
+public final class BindingNode extends ASTNode implements ComponentElement {
     private SymbolExpr head;
     private ExprNode expr;
 

@@ -1,0 +1,14 @@
+application my_app;
+
+import util.*;
+import my_lib.selector.mux;
+import my_lib.arithmetic.{adder, multiplier} as {foo, bar};
+
+component my_component : [a, b] -> [c] {
+    wire a, b, c of bit(1);
+    c <> mux <> [
+        my_and <> [a, b],
+        foo <> [a, b],
+        bar <> [a, b]
+    ]
+}

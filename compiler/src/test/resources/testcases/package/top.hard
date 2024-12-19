@@ -1,0 +1,5 @@
+application my_app;
+
+component top : [a, b] -> [c] {
+    auto c <> my_component <> [a, b];
+}

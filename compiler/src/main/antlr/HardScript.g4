@@ -1,16 +1,12 @@
 grammar HardScript;
 
 design
-    : header? (binding_statement | import_statement | component)+
+    : header? (import_statement | component)+
     ;
 
 header
     : kind='application' ID ';'
     | kind='library' ID ';'
-    ;
-
-binding_statement
-    : binding ';'
     ;
 
 import_statement
@@ -32,12 +28,17 @@ lib_alias
     ;
 
 component
-    : kind='component' ID attributes? component_type? '{' element* '}'
-    | kind='interface' ID attributes? ':' type=expression '{' element* '}'
+    : kind='component' ID attributes? (':' component_type)? component_body
+    | kind='interface' ID attributes? ':' type=expression component_body
     ;
 
 component_type
-    : ':' from=expression '->' to=expression
+    : from=expression '->' to=expression
+    ;
+
+component_body
+    : '{' element* '}'  # Implemented
+    | 'pass' ';'        # Passed
     ;
 
 attributes
@@ -45,7 +46,7 @@ attributes
     ;
 
 element
-    : binding_statement                       # BindingStatement
+    : binding ';'                             # BindingStatement
     | data_declaration ';'                    # DataDeclaration
     | 'auto' expression ';'                   # MixedInstantiation
     | expression ';'                          # ComponentInstantiation

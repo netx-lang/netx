@@ -1,0 +1,5 @@
+library util;
+
+component my_and: [a, b] -> [c] {
+    auto c <> AND <> [a, b];
+}

@@ -1,0 +1,9 @@
+library selector;
+
+component mux: [sel, a, b] -> [out] {
+    wire sel of bit(1);
+    auto out <> OR <> [
+        AND <> [a, sel],
+        AND <> [b, NOT <> sel]
+    ]
+}
