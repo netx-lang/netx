@@ -1,36 +1,46 @@
 package pascal.hardscript.compiler.io;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import org.antlr.v4.runtime.CharStreams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.element.ImportNode;
 import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.lang.Identifier;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public final class ProjectCompiler {
-    private static final Path DIR = Path.of(System.getProperty("user.dir"));
+public final class ProjectCompiler implements Compiler {
+    private static final TomlMapper MAPPER = new TomlMapper();
+    private static final Logger log = LoggerFactory.getLogger(ProjectCompiler.class);
 
     private final List<DesignNode> nodes = new ArrayList<>();
     private final ImportManager manager = new ImportManager();
     private final Configuration config;
     private final JsonNode toml;
+    private final Path dir;
 
-    public ProjectCompiler(Configuration config, JsonNode toml) {
+    public ProjectCompiler(Configuration config, Path path) throws IOException {
         this.config = config;
-        this.toml = toml;
+        this.toml = MAPPER.readTree(new FileInputStream(path.toFile()));
+        this.dir = path.getParent();
     }
 
-    public JsonNode compile() throws IOException {
+    public void parse() throws IOException {
         resolveIncludeDesign();
+        resolveDependencies();
         manager.initialize(nodes, resolveDependencies());
+    }
+
+    @Override
+    public JsonNode compile() throws IOException {
+        parse();
         nodes.forEach(this::doImport);
         return null;
     }
@@ -40,16 +50,21 @@ public final class ProjectCompiler {
         var exclude = extractSourceFiles(toml.get("project").get("exclude"));
         for (var file : include) {
             if (!exclude.contains(file)) {
+                log.info("Start Parsing: {}", file);
                 nodes.add(new HSCompiler(config, CharStreams.fromPath(file)).parse());
             }
         }
     }
 
     LinkedHashSet<Path> extractSourceFiles(JsonNode toml) throws IOException {
+        if (toml == null) {
+            return new LinkedHashSet<>();
+        }
+
         LinkedHashSet<Path> result = new LinkedHashSet<>();
         var sourceIter = toml.elements();
         while (sourceIter.hasNext()) {
-            var path = DIR.resolve(sourceIter.next().textValue());
+            var path = dir.resolve(sourceIter.next().textValue());
             if (Files.isDirectory(path)) {
                 try (var stream = Files.walk(path)) {
                     stream.filter(Files::isRegularFile).forEach(result::add);
@@ -62,13 +77,21 @@ public final class ProjectCompiler {
     }
 
     Map<Identifier, List<DesignNode>> resolveDependencies() throws IOException {
+        if (!toml.has("dependencies")) {
+            return Map.of();
+        }
+
+        Map<Identifier, List<DesignNode>> result = new HashMap<>();
         var iter = toml.get("dependencies").fields();
         while (iter.hasNext()) {
             var entry = iter.next();
+            log.info("Start resolving dependency: {}", entry.getKey());
             var spec = entry.getValue();
             if (spec.has("path")) {
-                // TODO: implement local dependency
-                throw new TodoException();
+                var libRoot = dir.resolve(spec.get("path").textValue());
+                var libCompiler = new ProjectCompiler(config, libRoot.resolve("hardpack.toml"));
+                libCompiler.parse();
+                result.put(Identifier.of(entry.getKey()), libCompiler.nodes);
             } else if (spec.has("git")) {
                 // TODO: implement git dependency
                 throw new TodoException();
@@ -76,7 +99,7 @@ public final class ProjectCompiler {
                 throw new IOException("Invalid dependency specification" + entry.getKey());
             }
         }
-        return null;
+        return result;
     }
 
     void doImport(DesignNode node) {

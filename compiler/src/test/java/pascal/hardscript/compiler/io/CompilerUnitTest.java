@@ -13,18 +13,23 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class HSCompilerUnitTest {
+class CompilerUnitTest {
     private static final Path TEST_DIR = Path.of("src/test/resources/testcases/");
 
+    @Test
+    void testPackage() throws IOException {
+        var compiler = (HSCompiler) Builder.forExpanded().loadPath(TEST_DIR.resolve("package.hard"));
+        assertNotNull(compiler.parse());
+    }
     @Disabled
     @Test
     void testBuild() throws IOException {
-        Builder.forExpanded().loadPath(TEST_DIR.resolve("package/hardpack.toml"));
+        var compiler = Builder.forExpanded().loadPath(TEST_DIR.resolve("package/hardpack.toml"));
+        assertNotNull(compiler.compile());
     }
 
     private static void test(String fileName) throws IOException {
         String content = new String(Files.readAllBytes(TEST_DIR.resolve(fileName)));
-
         CharStream charStream = CharStreams.fromString(content);
         HSCompiler compiler = Builder.forExpanded().load(charStream);
         assertNotNull(compiler.compile());
@@ -39,7 +44,7 @@ class HSCompilerUnitTest {
 
     @Test
     void loadPathWithValidPath() throws IOException {
-        HSCompiler compiler = Builder.forExpanded().loadPath(TEST_DIR.resolve("bind_1.hard"));
+        Compiler compiler = Builder.forExpanded().loadPath(TEST_DIR.resolve("bind_1.hard"));
         assertNotNull(compiler);
     }
 
@@ -61,12 +66,6 @@ class HSCompilerUnitTest {
         test("attr_1.hard");
         test("attr_2.hard");
         test("attr_3.hard");
-    }
-
-    @Disabled
-    @Test
-    void testPackage() throws IOException {
-        test("package.hard");
     }
 
     @Test

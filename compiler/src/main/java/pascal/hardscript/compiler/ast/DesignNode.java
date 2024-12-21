@@ -57,6 +57,7 @@ public final class DesignNode extends ASTNode {
     @Override
     public String toString() {
         var sb = new StringBuilder();
+        sb.append(packageInfo);
         for (var definition : elements) {
             sb.append(definition).append('\n');
         }

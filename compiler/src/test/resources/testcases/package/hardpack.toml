@@ -4,4 +4,4 @@ version = "0.1.0"
 include = ["top.hard", "src/"]
 
 [dependencies]
-my_lib = { path = "../lib", version = ">=0.1.0" }
+my_lib = { path = "lib", version = ">=0.1.0" }

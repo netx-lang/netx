@@ -11,7 +11,7 @@ import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class HSCompilerTest {
+class CompilerTest {
     private static final boolean GENERATE_EXPECTED = false;
     private static final Path TEST_DIR = Path.of("src/test/resources/testcases/");
 

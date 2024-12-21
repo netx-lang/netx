@@ -26,7 +26,6 @@
             <option value="$PROJECT_DIR$/simulator" />
             <option value="$PROJECT_DIR$/util" />
             <option value="$PROJECT_DIR$/verilog" />
-            <option value="$PROJECT_DIR$/visualizer" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -47,7 +47,13 @@ public class PackageInfoNode extends ASTNode {
 
     @Override
     public String toString() {
-        return kind.name().toLowerCase() + " " + id + ";";
+        var sb = new StringBuilder();
+        sb.append(kind.name().toLowerCase());
+        if (id != null) {
+            sb.append(" ").append(id);
+        }
+        sb.append(";\n");
+        return sb.toString();
     }
 
     @Override

@@ -10,7 +10,7 @@ import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.elaborator.Elaborator;
 import pascal.hardscript.compiler.model.scope.GlobalScope;
 
-public final class HSCompiler {
+public final class HSCompiler implements Compiler {
     private final Configuration config;
     private final CharStream charStream;
 
@@ -40,6 +40,7 @@ public final class HSCompiler {
         return new Elaborator(node, config).elaborate();
     }
 
+    @Override
     public JsonNode compile() {
         GlobalScope design = elaborate();
         checkType(design);

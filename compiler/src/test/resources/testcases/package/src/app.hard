@@ -10,5 +10,5 @@ component my_component : [a, b] -> [c] {
         my_and <> [a, b],
         foo <> [a, b],
         bar <> [a, b]
-    ]
+    ];
 }

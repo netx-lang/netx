@@ -5,5 +5,5 @@ component mux: [sel, a, b] -> [out] {
     auto out <> OR <> [
         AND <> [a, sel],
         AND <> [b, NOT <> sel]
-    ]
+    ];
 }

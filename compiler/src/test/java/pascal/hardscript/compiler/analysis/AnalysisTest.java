@@ -3,6 +3,7 @@ package pascal.hardscript.compiler.analysis;
 import org.junit.jupiter.api.Test;
 import pascal.hardscript.compiler.exception.TypeCheckingException;
 import pascal.hardscript.compiler.io.Builder;
+import pascal.hardscript.compiler.io.HSCompiler;
 import pascal.hardscript.util.TestUtils;
 
 import java.io.IOException;
@@ -18,8 +19,10 @@ class AnalysisTest {
     @Test
     void testSourceLocChecker() throws IOException {
         for (var testcase : TestUtils.collectAllFilesUnder(TEST_DIR)) {
-            var frontend = Builder.forExpanded().loadPath(testcase);
-            new SourceLocChecker(frontend.parse()).analyze();
+            if (testcase.getFileName().endsWith(".hard")) {
+                var compiler = (HSCompiler) Builder.forExpanded().loadPath(testcase);
+                new SourceLocChecker(compiler.parse()).analyze();
+            }
         }
     }
 
