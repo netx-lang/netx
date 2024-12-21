@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.hardscript.compiler.ast.DesignNode;
 import pascal.hardscript.compiler.ast.element.ImportNode;
+import pascal.hardscript.compiler.ast.element.PackageElement;
 import pascal.hardscript.util.exception.TodoException;
 import pascal.hardscript.util.lang.Identifier;
 
@@ -17,9 +18,11 @@ import java.nio.file.Path;
 import java.util.*;
 
 public final class ProjectCompiler implements Compiler {
+    private static final String DEFAULT_CONFIG = "hardpack.toml";
     private static final TomlMapper MAPPER = new TomlMapper();
     private static final Logger log = LoggerFactory.getLogger(ProjectCompiler.class);
 
+    private final List<ProjectCompiler> dependencies = new ArrayList<>();
     private final List<DesignNode> nodes = new ArrayList<>();
     private final ImportManager manager = new ImportManager();
     private final Configuration config;
@@ -34,7 +37,6 @@ public final class ProjectCompiler implements Compiler {
 
     public void parse() throws IOException {
         resolveIncludeDesign();
-        resolveDependencies();
         manager.initialize(nodes, resolveDependencies());
     }
 
@@ -42,7 +44,8 @@ public final class ProjectCompiler implements Compiler {
     public JsonNode compile() throws IOException {
         parse();
         nodes.forEach(this::doImport);
-        return null;
+        // TODO:
+        throw new TodoException();
     }
 
     void resolveIncludeDesign() throws IOException {
@@ -89,8 +92,9 @@ public final class ProjectCompiler implements Compiler {
             var spec = entry.getValue();
             if (spec.has("path")) {
                 var libRoot = dir.resolve(spec.get("path").textValue());
-                var libCompiler = new ProjectCompiler(config, libRoot.resolve("hardpack.toml"));
+                var libCompiler = new ProjectCompiler(config, libRoot.resolve(DEFAULT_CONFIG));
                 libCompiler.parse();
+                dependencies.add(libCompiler);
                 result.put(Identifier.of(entry.getKey()), libCompiler.nodes);
             } else if (spec.has("git")) {
                 // TODO: implement git dependency
@@ -103,10 +107,22 @@ public final class ProjectCompiler implements Compiler {
     }
 
     void doImport(DesignNode node) {
+        var newElements = new LinkedList<PackageElement>();
         for (var element : node.getElements()) {
             if (element instanceof ImportNode importNode) {
-
+                if (importNode.isWildcard()) {
+                    var prefix = importNode.getReference();
+                    var components = manager.resolveWildcard(prefix);
+                    for (var component : components) {
+                        var reference = new LinkedList<>(prefix);
+                        reference.add(component.getIdentifier());
+                        newElements.add(ImportNode.of(reference));
+                    }
+                    continue;
+                }
             }
+            newElements.add(element);
         }
+        node.setElements(newElements);
     }
 }

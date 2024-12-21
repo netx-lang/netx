@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Objects;
 
 public final class DesignNode extends ASTNode {
-    private final List<PackageElement> elements = new ArrayList<>();
+    private List<PackageElement> elements = new ArrayList<>();
     private PackageInfoNode packageInfo;
 
     private DesignNode(PackageInfoNode packageInfo) {
@@ -27,6 +27,10 @@ public final class DesignNode extends ASTNode {
 
     public List<PackageElement> getElements() {
         return elements;
+    }
+
+    public void setElements(List<PackageElement> elements) {
+        this.elements = elements;
     }
 
     public PackageInfoNode getPackageInfo() {
