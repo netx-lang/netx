@@ -14,8 +14,8 @@ dependencies {
 }
 
 application {
-    applicationName = "hs"
-    mainClass.set("pascal.hardscript.Main")
+    applicationName = "nx"
+    mainClass.set("pascal.netx.Main")
 }
 
 tasks.compileJava {
@@ -29,7 +29,7 @@ tasks.jar {
     dependsOn(":compiler:jar")
     manifest {
         attributes(
-            "Main-Class" to "pascal.hardscript.Main",
+            "Main-Class" to "pascal.netx.Main",
             "Multi-Release" to "true"
         )
     }

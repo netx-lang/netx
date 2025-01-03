@@ -3,7 +3,7 @@ plugins {
     `maven-publish`
 }
 
-group = "pascal.hardscript"
+group = "pascal.netx"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -25,7 +25,6 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    implementation("org.slf4j:slf4j-api:2.0.9")
     implementation("com.google.code.findbugs:jsr305:3.0.2")
 
     implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")

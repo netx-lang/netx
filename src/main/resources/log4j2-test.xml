@@ -19,12 +19,12 @@
             <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="${consolePattern}" disableAnsi="false"/>
         </Console>
-        <File name="logFile" fileName="build/outputs/hardscript.log" append="false">
+        <File name="logFile" fileName="build/outputs/netx.log" append="false">
             <PatternLayout pattern="${filePattern}"/>
         </File>
     </Appenders>
     <Loggers>
-        <Logger name="pascal.hardscript" level="debug" additivity="false">
+        <Logger name="pascal.netx" level="debug" additivity="false">
             <AppenderRef ref="stdout">
                 <!-- Filter messages to keep the console clean. Turn the level
                  to "DEBUG" when debugging or simply refer to the log file. -->

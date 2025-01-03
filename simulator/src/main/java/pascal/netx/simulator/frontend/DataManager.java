@@ -1,0 +1,22 @@
+package pascal.netx.simulator.frontend;
+
+import pascal.netx.simulator.model.DataNode;
+
+import javax.annotation.Nonnull;
+
+public final class DataManager {
+    private final DataNode[] nodes;
+
+    public DataManager(int dataCount) {
+        nodes = new DataNode[dataCount];
+    }
+
+    public void addNode(int index, DataNode node) {
+        nodes[index] = node;
+    }
+
+    @Nonnull
+    public DataNode resolve(int index) {
+        return nodes[index];
+    }
+}
