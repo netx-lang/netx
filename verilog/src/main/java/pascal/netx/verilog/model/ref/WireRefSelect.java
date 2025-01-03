@@ -1,6 +1,6 @@
 package pascal.netx.verilog.model.ref;
 
-import pascal.netx.util.hson.selector.Selector;
+import pascal.netx.util.nxon.selector.Selector;
 
 public record WireRefSelect(WireRef base, Selector selector) implements DataRef {
 

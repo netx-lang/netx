@@ -2,10 +2,10 @@
 #include <string>
 #include <utility>
 
-namespace hson {
+namespace nxon {
     struct SourceLoc {
         int line, column;
 
         static SourceLoc parse(const std::string &loc);
     };
-} // hson
+} // nxon

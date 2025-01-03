@@ -2,7 +2,7 @@
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <utility>
 
-namespace hson {
+namespace nxon {
     class BitVector {
     public:
         [[nodiscard]] virtual int width() const = 0;
@@ -183,4 +183,4 @@ namespace hson {
 
         [[nodiscard]] std::string print() const override;
     };
-} // hson
+} // nxon

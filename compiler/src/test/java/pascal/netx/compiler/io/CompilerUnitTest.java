@@ -18,7 +18,7 @@ class CompilerUnitTest {
 
     @Test
     void testPackage() throws IOException {
-        var compiler = (HSCompiler) Builder.forExpanded().loadPath(TEST_DIR.resolve("package.nx"));
+        var compiler = (NXCompiler) Builder.forExpanded().loadPath(TEST_DIR.resolve("package.nx"));
         assertNotNull(compiler.parse());
     }
     @Disabled
@@ -31,14 +31,14 @@ class CompilerUnitTest {
     private static void test(String fileName) throws IOException {
         String content = new String(Files.readAllBytes(TEST_DIR.resolve(fileName)));
         CharStream charStream = CharStreams.fromString(content);
-        HSCompiler compiler = Builder.forExpanded().load(charStream);
+        NXCompiler compiler = Builder.forExpanded().load(charStream);
         assertNotNull(compiler.compile());
     }
 
     @Test
     void loadWithValidCharStream() {
         CharStream charStream = CharStreams.fromString("valid input");
-        HSCompiler compiler = Builder.forExpanded().load(charStream);
+        NXCompiler compiler = Builder.forExpanded().load(charStream);
         assertNotNull(compiler);
     }
 
@@ -71,7 +71,7 @@ class CompilerUnitTest {
     @Test
     void testInvalidInput() {
         CharStream charStream = CharStreams.fromString("invalid input");
-        HSCompiler compiler = Builder.forExpanded().load(charStream);
+        NXCompiler compiler = Builder.forExpanded().load(charStream);
         assertThrows(ParseCancellationException.class, compiler::compile);
     }
 }

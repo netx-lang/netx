@@ -2,7 +2,7 @@ package pascal.netx.simulator.frontend;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import pascal.netx.simulator.model.Circuit;
-import pascal.netx.util.hson.AbstractHFrontend;
+import pascal.netx.util.nxon.AbstractHFrontend;
 
 import java.io.IOException;
 import java.io.InputStream;

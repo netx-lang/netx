@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace hson {
+namespace nxon {
     int BitSelector::width() const {
         return 1;
     }
@@ -36,4 +36,4 @@ namespace hson {
         result->setRange(from, to, value);
         return result;
     }
-} // hson
+} // nxon

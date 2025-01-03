@@ -2,10 +2,10 @@ package pascal.netx.verilog.frontend;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import pascal.netx.util.exception.ShallNotReachHereError;
-import pascal.netx.util.hson.HsonType;
-import pascal.netx.util.hson.selector.BitSelector;
-import pascal.netx.util.hson.selector.PartSelector;
-import pascal.netx.util.hson.selector.Selector;
+import pascal.netx.util.nxon.NxonType;
+import pascal.netx.util.nxon.selector.BitSelector;
+import pascal.netx.util.nxon.selector.PartSelector;
+import pascal.netx.util.nxon.selector.Selector;
 import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -22,7 +22,7 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static pascal.netx.util.hson.FrontendUtils.*;
+import static pascal.netx.util.nxon.FrontendUtils.*;
 
 public final class ScopeParser {
     private final HFrontend frontend;
@@ -57,7 +57,7 @@ public final class ScopeParser {
 
     private void parseComponentMembers() {
         forEachMember(json, node -> {
-            if (Objects.requireNonNull(typeOf(node)) == HsonType.INSTANTIATE) {
+            if (Objects.requireNonNull(typeOf(node)) == NxonType.INSTANTIATE) {
                 prepareInstantiation(node);
             }
         });

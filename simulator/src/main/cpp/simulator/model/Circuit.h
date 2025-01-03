@@ -4,7 +4,7 @@
 
 #include "Node.h"
 
-namespace hson {
+namespace nxon {
     class Circuit {
         std::vector<Node*> nodes;
         std::vector<std::vector<int> > inEdges;

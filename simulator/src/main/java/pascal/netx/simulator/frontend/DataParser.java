@@ -7,7 +7,7 @@ import pascal.netx.simulator.model.WireNode;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.type.Pair;
 
-import static pascal.netx.util.hson.FrontendUtils.*;
+import static pascal.netx.util.nxon.FrontendUtils.*;
 
 public final class DataParser {
     private final Circuit circuit;

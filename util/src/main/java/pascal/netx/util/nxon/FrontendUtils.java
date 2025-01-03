@@ -1,4 +1,4 @@
-package pascal.netx.util.hson;
+package pascal.netx.util.nxon;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -14,9 +14,9 @@ import java.util.stream.StreamSupport;
 
 public final class FrontendUtils {
 
-    public static HsonType typeOf(JsonNode node) {
+    public static NxonType typeOf(JsonNode node) {
         String type = node.get("type").textValue();
-        return HsonType.valueOf(type.toUpperCase());
+        return NxonType.valueOf(type.toUpperCase());
     }
 
     public static Identifier identifierOf(JsonNode node) {

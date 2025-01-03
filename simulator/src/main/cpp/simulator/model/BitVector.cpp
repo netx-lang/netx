@@ -2,7 +2,7 @@
 
 #include <format>
 
-namespace hson {
+namespace nxon {
     const BinaryBitVector *BinaryBitVector::requiresValidOperand(const BitVector &other) const {
         if (const auto *that = dynamic_cast<const BinaryBitVector *>(&other); that != nullptr) {
             if (that->width() == this->width()) {
@@ -357,4 +357,4 @@ namespace hson {
         }
         return result;
     }
-} // hson
+} // nxon

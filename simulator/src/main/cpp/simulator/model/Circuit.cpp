@@ -2,7 +2,7 @@
 
 #include <queue>
 
-namespace hson {
+namespace nxon {
     Circuit::Circuit(const int size) {
         nodes = std::vector<Node*>(size);
     }
@@ -150,4 +150,4 @@ namespace hson {
             addEdge(relation, output);
         }
     }
-} // hson
+} // nxon

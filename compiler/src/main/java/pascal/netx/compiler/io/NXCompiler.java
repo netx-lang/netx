@@ -10,11 +10,11 @@ import pascal.netx.compiler.ast.DesignNode;
 import pascal.netx.compiler.elaborator.Elaborator;
 import pascal.netx.compiler.model.scope.GlobalScope;
 
-public final class HSCompiler implements Compiler {
+public final class NXCompiler implements Compiler {
     private final Configuration config;
     private final CharStream charStream;
 
-    public HSCompiler(Configuration config, CharStream charStream) {
+    public NXCompiler(Configuration config, CharStream charStream) {
         this.config = config;
         this.charStream = charStream;
     }
@@ -28,7 +28,7 @@ public final class HSCompiler implements Compiler {
     }
 
     public DesignNode parse() {
-        var design = HSParser.parseDesign(buildANTLRParser().design());
+        var design = NXParser.parseDesign(buildANTLRParser().design());
         new SourceLocChecker(design).analyze();
         new InterfaceChecker(design).analyze();
         new BindingLhsAnalysis(design).analyze();

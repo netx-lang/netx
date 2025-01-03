@@ -15,7 +15,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class HSParserUnitTest {
+class NXParserUnitTest {
 
     static NetXParser makeParser(String code) {
         var frontend = Builder.forExpanded().load(CharStreams.fromString(code));
@@ -25,7 +25,7 @@ class HSParserUnitTest {
     @Test
     void testParseAccessExpr() {
         var context = makeParser("arr[1][2:0]").expression();
-        var accessExpr = HSParser.parseExpr(context);
+        var accessExpr = NXParser.parseExpr(context);
         assertEquals(AccessExpr.of(AccessExpr.of(
                         IdentifierExpr.of(Identifier.of("arr")),
                         BitSelector.of(IntNumber.of(1))),
@@ -35,7 +35,7 @@ class HSParserUnitTest {
     @Test
     void testParseListExpr() {
         var context = makeParser("[port | i in [0..5], let port = [1, x[i]]]").expression();
-        var listExpr = HSParser.parseExpr(context);
+        var listExpr = NXParser.parseExpr(context);
         assertEquals(ListComprehension.of(
                 IdentifierExpr.of(Identifier.of("port")), List.of(
                         GeneratorQualifier.of(

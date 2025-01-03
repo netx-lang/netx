@@ -1,7 +1,7 @@
 package pascal.netx.verilog.frontend;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import pascal.netx.util.hson.AbstractHFrontend;
+import pascal.netx.util.nxon.AbstractHFrontend;
 import pascal.netx.verilog.model.VModule;
 
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static pascal.netx.util.hson.FrontendUtils.*;
+import static pascal.netx.util.nxon.FrontendUtils.*;
 
 public class HFrontend extends AbstractHFrontend<List<VModule>> {
     private final Map<ModuleIndex, VModule> definitions = new HashMap<>();

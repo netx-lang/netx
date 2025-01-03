@@ -26,26 +26,26 @@ public final class Builder {
         return new Builder(config);
     }
 
-    public HSCompiler load(CharStream charStream) {
-        return new HSCompiler(config, charStream);
+    public NXCompiler load(CharStream charStream) {
+        return new NXCompiler(config, charStream);
     }
 
-    public HSCompiler load(String string) {
-        return new HSCompiler(config, CharStreams.fromString(string));
+    public NXCompiler load(String string) {
+        return new NXCompiler(config, CharStreams.fromString(string));
     }
 
     public Compiler loadPath(Path path) throws IOException {
         var fileName = path.getFileName().toString();
         var extension = fileName.substring(fileName.lastIndexOf('.') + 1);
         return switch (extension) {
-            case "nx" -> new HSCompiler(config, CharStreams.fromPath(path));
+            case "nx" -> new NXCompiler(config, CharStreams.fromPath(path));
             case "toml" -> new ProjectCompiler(config, path);
             default ->
                 throw new IOException("Invalid file extension: " + extension);
         };
     }
 
-    public HSPrinter printer(NotepadWriter writer) {
-        return new HSPrinter(config, writer);
+    public NXPrinter printer(NotepadWriter writer) {
+        return new NXPrinter(config, writer);
     }
 }

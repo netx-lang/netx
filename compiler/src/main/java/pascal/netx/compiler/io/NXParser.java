@@ -27,9 +27,9 @@ import pascal.netx.util.lang.SourceLoc;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class HSParser {
+public final class NXParser {
 
-    private static final Logger log = LoggerFactory.getLogger(HSParser.class);
+    private static final Logger log = LoggerFactory.getLogger(NXParser.class);
 
     public static DesignNode parseDesign(DesignContext ctx) {
         DesignNode result = DesignNode.of(parsePackageInfo(ctx.header())).setSourceLoc(locationOf(ctx.getStart()));
@@ -103,16 +103,16 @@ public final class HSParser {
 
     private static List<ImportNode> parseWildcardImport(Import_statementContext ctx, WildcardLibRefContext refCtx) {
         return List.of(
-                ImportNode.ofWildcard(refCtx.ID().stream().map(HSParser::parseIdentifier).toList()
+                ImportNode.ofWildcard(refCtx.ID().stream().map(NXParser::parseIdentifier).toList()
                 ).setSourceLoc(locationOf(ctx.getStart())));
     }
 
     private static List<ImportNode> parseCommonImport(Import_statementContext ctx, CommonLibRefContext refCtx) {
-        var prefix = refCtx.ID().stream().map(HSParser::parseIdentifier).toList();
+        var prefix = refCtx.ID().stream().map(NXParser::parseIdentifier).toList();
         List<ImportNode> results;
         if (refCtx.lib_reference_set() != null) {
             results = refCtx.lib_reference_set().ID().stream()
-                    .map(HSParser::parseIdentifier)
+                    .map(NXParser::parseIdentifier)
                     .map(id -> new ArrayList<>(prefix) {{
                         add(id);
                     }})
@@ -133,7 +133,7 @@ public final class HSParser {
         if (ctx.ID() != null) {
             aliasID = List.of(parseIdentifier(ctx.ID()));
         } else {
-            aliasID = ctx.lib_reference_set().ID().stream().map(HSParser::parseIdentifier).toList();
+            aliasID = ctx.lib_reference_set().ID().stream().map(NXParser::parseIdentifier).toList();
         }
         if (aliasID.size() != results.size()) {
             log.error("{}: Unmatched number of import alias", locationOf(ctx.getStart()));
@@ -148,7 +148,7 @@ public final class HSParser {
             return List.of();
         }
         return ctx.attributes().ID().stream()
-                .map(HSParser::parseIdentifier).toList();
+                .map(NXParser::parseIdentifier).toList();
     }
 
     static ComponentTypeNode parseComponentType(Component_typeContext ctx, SourceLoc sourceLoc) {
@@ -219,7 +219,7 @@ public final class HSParser {
         for (var sub : ctx.declaration_symbol()) {
             DataRestNode data = DataRestNode.of(
                     parseIdentifier(sub.ID()),
-                    sub.expression().stream().map(HSParser::parseExpr).toList()
+                    sub.expression().stream().map(NXParser::parseExpr).toList()
             ).setSourceLoc(locationOf(sub.getStart()));
             result.add(data);
         }
@@ -267,7 +267,7 @@ public final class HSParser {
     static ListComprehension parseListComprehension(ListComprehensionContext ctx) {
         return ListComprehension.of(
                 parseExpr(ctx.expression()),
-                ctx.qualifier().stream().map(HSParser::parserQualifier).toList());
+                ctx.qualifier().stream().map(NXParser::parserQualifier).toList());
     }
 
     static Qualifier parserQualifier(QualifierContext ctx) {

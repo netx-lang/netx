@@ -6,7 +6,7 @@
 #include "Selector.h"
 #include "SoureceLoc.h"
 
-namespace hson {
+namespace nxon {
     class Selector;
 
     class Node {
@@ -133,4 +133,4 @@ namespace hson {
         bool posTriggered;
     };
 
-} // hson
+} // nxon

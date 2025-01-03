@@ -6,7 +6,7 @@
 
 #include "model/Node.h"
 
-namespace hson {
+namespace nxon {
     Frontend::Frontend(const json &data): data(data) {
         const int count = data.at("totalData");
         circuit = new Circuit(count);
@@ -139,4 +139,4 @@ namespace hson {
         };
         return map[type];
     }
-} // hson
+} // nxon

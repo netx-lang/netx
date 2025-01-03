@@ -2,10 +2,10 @@ package pascal.netx.simulator.frontend;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import pascal.netx.util.exception.ShallNotReachHereError;
-import pascal.netx.util.hson.HsonType;
-import pascal.netx.util.hson.selector.BitSelector;
-import pascal.netx.util.hson.selector.PartSelector;
-import pascal.netx.util.hson.selector.Selector;
+import pascal.netx.util.nxon.NxonType;
+import pascal.netx.util.nxon.selector.BitSelector;
+import pascal.netx.util.nxon.selector.PartSelector;
+import pascal.netx.util.nxon.selector.Selector;
 import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -17,7 +17,7 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static pascal.netx.util.hson.FrontendUtils.*;
+import static pascal.netx.util.nxon.FrontendUtils.*;
 
 public final class RelationParser {
     private final Circuit circuit;
@@ -43,7 +43,7 @@ public final class RelationParser {
 
     private void parse(JsonNode node) {
         switch (typeOf(node)) {
-            case HsonType.CLOCK, WIRE -> {
+            case NxonType.CLOCK, WIRE -> {
                 return;
             }
         }

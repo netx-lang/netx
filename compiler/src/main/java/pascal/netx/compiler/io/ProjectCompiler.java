@@ -54,7 +54,7 @@ public final class ProjectCompiler implements Compiler {
         for (var file : include) {
             if (!exclude.contains(file)) {
                 log.info("Start Parsing: {}", file);
-                nodes.add(new HSCompiler(config, CharStreams.fromPath(file)).parse());
+                nodes.add(new NXCompiler(config, CharStreams.fromPath(file)).parse());
             }
         }
     }

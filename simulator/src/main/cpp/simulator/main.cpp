@@ -3,7 +3,7 @@
 #include "Frontend.h"
 #include "Simulator.h"
 
-namespace hson {
+namespace nxon {
     class CommandLine {
         Simulator *simulator;
 
@@ -101,7 +101,7 @@ namespace hson {
 }
 
 int main(int argc, char *argv[]) {
-    auto commandLind = hson::CommandLine(argv[1]);
+    auto commandLind = nxon::CommandLine(argv[1]);
 
     std::string input;
     while (true) {

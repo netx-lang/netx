@@ -2,7 +2,7 @@
 
 #include "Selector.h"
 
-namespace hson {
+namespace nxon {
     void Node::setIndex(const int index) {
         this->index = index;
     }
@@ -111,4 +111,4 @@ namespace hson {
     bool Register::isPosTriggered() const {
         return posTriggered;
     }
-} // hson
+} // nxon

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <unordered_set>
 
-namespace hson {
+namespace nxon {
     void Simulator::run() {
         bool hasProgress = true;
         while (hasProgress) {
@@ -276,4 +276,4 @@ namespace hson {
         }
         return 0;
     }
-} // hson
+} // nxon

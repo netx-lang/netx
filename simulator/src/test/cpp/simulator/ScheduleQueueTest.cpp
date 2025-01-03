@@ -2,9 +2,9 @@
 #include "Simulator.h"
 #include "model/Node.h"
 
-using namespace hson;
+using namespace nxon;
 
-namespace hson {
+namespace nxon {
     class MockNode final : public Node {
     };
 }

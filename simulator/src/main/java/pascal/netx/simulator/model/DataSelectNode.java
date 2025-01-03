@@ -1,6 +1,6 @@
 package pascal.netx.simulator.model;
 
-import pascal.netx.util.hson.selector.Selector;
+import pascal.netx.util.nxon.selector.Selector;
 import pascal.netx.util.lang.BitVector;
 
 public final class DataSelectNode extends DataNode {

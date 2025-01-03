@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 #include "model/BitVector.h"
 
-using namespace hson;
+using namespace nxon;
 
 TEST(BinaryBitVector, ParseValidLiteral) {
     const auto bv1 = BinaryBitVector::parse("20'd114514");

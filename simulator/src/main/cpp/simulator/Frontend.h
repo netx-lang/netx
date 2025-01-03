@@ -4,7 +4,7 @@
 
 #include "model/Circuit.h"
 
-namespace hson {
+namespace nxon {
     using json = nlohmann::json;
 
     class Frontend {
@@ -45,4 +45,4 @@ namespace hson {
 
         Circuit *parse();
     };
-} // hson
+} // nxon

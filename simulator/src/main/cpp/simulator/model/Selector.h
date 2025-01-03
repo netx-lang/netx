@@ -1,7 +1,7 @@
 #pragma once
 #include "BitVector.h"
 
-namespace hson {
+namespace nxon {
     class Selector {
     public:
         virtual ~Selector() = default;
@@ -42,4 +42,4 @@ namespace hson {
     private:
         int from, to;
     };
-} // hson
+} // nxon

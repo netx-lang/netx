@@ -10,13 +10,13 @@ import pascal.netx.util.print.NotepadWriter;
 
 import java.util.Map;
 
-public final class HSPrinter {
+public final class NXPrinter {
     private final Configuration config;
 
     private final int componentHead;
     private final NotepadWriter writer;
 
-    HSPrinter(Configuration config, NotepadWriter writer) {
+    NXPrinter(Configuration config, NotepadWriter writer) {
         this.config = config;
         this.writer = writer;
         this.componentHead = config.fullyExpand() ? 3 : 4;
@@ -54,7 +54,7 @@ public final class HSPrinter {
     }
 
     private void printMember(JsonNode node) {
-        switch (HsonType.typeOf(node)) {
+        switch (NxonType.typeOf(node)) {
             case WIRE, CLOCK -> printData(node);
             case REGISTER -> printObject(node);
             case BUILTIN -> printObject(node, 3);
@@ -180,10 +180,10 @@ public final class HSPrinter {
         writer.print(": ");
     }
 
-    public enum HsonType {
+    public enum NxonType {
         COMPONENT, REGISTER, BUILTIN, INSTANTIATE, CLOCK, WIRE;
 
-        public static HsonType typeOf(JsonNode node) {
+        public static NxonType typeOf(JsonNode node) {
             return valueOf(node.get("type").textValue().toUpperCase());
         }
     }

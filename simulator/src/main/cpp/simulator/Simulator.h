@@ -5,7 +5,7 @@
 
 #include "model/Circuit.h"
 
-namespace hson {
+namespace nxon {
     struct comparator;
 
     class ValueSupplier {
@@ -125,4 +125,4 @@ namespace hson {
 
         ScheduleQueue worklist;
     };
-} // hson
+} // nxon
