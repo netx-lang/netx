@@ -21,21 +21,24 @@ public final class ModuleScope extends Scope {
     private Supplier<Integer> dataIndexer;
     private ComponentScope top;
 
-    ModuleScope() {
+    ModuleScope(Scope parent) {
+        super(parent);
         this.dataIndexer = new AtomicInteger(0)::incrementAndGet;
         this.factory = new BuiltInComponentFactory(this);
     }
 
-    public static ModuleScope newDesign() {
-        return new ModuleScope();
+    public static ModuleScope newModule() {
+        // TODO: specify parent
+        return new ModuleScope(null);
     }
 
     public ComponentScope instantiateTop(Identifier identifier) {
-        if (this.top != null) {
+        if (top != null) {
             throw new ShallNotReachHereError();
         }
-        this.top = instantiateComponentScope(identifier);
-        return this.top;
+        top = ComponentScope.newComponent(this, identifier);
+        addChild(top);
+        return top;
     }
 
     public ComponentScope getTop() {
@@ -86,19 +89,5 @@ public final class ModuleScope extends Scope {
             consumer.accept(scope);
             stack.addAll(scope.getChildren());
         }
-    }
-
-    @Override
-    public ComponentScope instantiateComponentScope(Identifier identifier) {
-        var child = new ComponentScope(this, false, identifier);
-        addChild(child);
-        return child;
-    }
-
-    @Override
-    public ComponentScope instantiateInterfaceScope(Identifier identifier) {
-        var child = new ComponentScope(this, true, identifier);
-        addChild(child);
-        return child;
     }
 }

@@ -4,6 +4,7 @@ import pascal.netx.compiler.analysis.AssignManager;
 import pascal.netx.compiler.elaborator.ComponentEvaluator;
 import pascal.netx.compiler.model.component.Signature;
 import pascal.netx.compiler.model.instance.Instance;
+import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
@@ -29,11 +30,28 @@ public final class ComponentScope extends Scope {
      */
     private Signature signature;
 
-    ComponentScope(ModuleScope module, boolean isInterface, Identifier identifier) {
-        this.module = module;
+    ComponentScope(Scope parent, boolean isInterface, Identifier identifier) {
+        super(parent);
+        this.module = switch (parent) {
+            case ModuleScope scope -> scope;
+            case ComponentScope scope -> scope.getModule();
+            default -> throw new ShallNotReachHereError();
+        };
         this.isInterface = isInterface;
         this.identifier = identifier;
         this.evaluator = new ComponentEvaluator(this);
+    }
+
+    public static ComponentScope newComponent(Scope parent, Identifier identifier) {
+        var result = new ComponentScope(parent, false, identifier);
+        parent.addChild(result);
+        return result;
+    }
+
+    public static ComponentScope newInterface(Scope parent, Identifier identifier) {
+        var result = new ComponentScope(parent, true, identifier);
+        parent.addChild(result);
+        return result;
     }
 
     public boolean isInterface() {
@@ -106,19 +124,5 @@ public final class ComponentScope extends Scope {
 
     public boolean isBuiltin() {
         return BuiltinComponent.isBuiltin(identifier);
-    }
-
-    @Override
-    public ComponentScope instantiateComponentScope(Identifier identifier) {
-        var child = new ComponentScope(this.getModule(), false, identifier);
-        addChild(child);
-        return child;
-    }
-
-    @Override
-    public ComponentScope instantiateInterfaceScope(Identifier identifier) {
-        var child = new ComponentScope(this.getModule(), true, identifier);
-        addChild(child);
-        return child;
     }
 }

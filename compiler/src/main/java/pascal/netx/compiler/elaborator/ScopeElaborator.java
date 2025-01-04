@@ -259,8 +259,8 @@ final class ScopeElaborator {
         private Instantiator.ComponentPort instantiateComponentAtom(ComponentAtom atom) {
             var node = atom.getDefinition();
             ComponentScope component = switch (atom.getDefinition().getKind()) {
-                case COMPONENT -> scope.instantiateComponentScope(atom.getIdentifier());
-                case INTERFACE -> scope.instantiateInterfaceScope(atom.getIdentifier());
+                case COMPONENT -> ComponentScope.newComponent(scope, atom.getIdentifier());
+                case INTERFACE -> ComponentScope.newInterface(scope, atom.getIdentifier());
             };
 
             var attributes = extractAttributes(atom, node);

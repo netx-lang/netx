@@ -5,6 +5,7 @@ import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.compiler.model.scope.binding.Binding;
 import pascal.netx.compiler.model.scope.binding.MonoBinding;
 import pascal.netx.compiler.model.scope.binding.MultiBinding;
+import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 
 import javax.annotation.Nullable;
@@ -12,14 +13,20 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract sealed class Scope permits ComponentScope, ModuleScope {
+public abstract sealed class Scope permits ComponentScope, ModuleScope, ProjectScope {
+    private final Scope parent;
     private final LinkedList<Binding> bindings;
     private final List<ComponentScope> children;
 
-    protected Scope() {
+    protected Scope(Scope parent) {
+        this.parent = parent;
         this.children = new ArrayList<>();
         this.bindings = new LinkedList<>();
         this.bindings.add(MultiBinding.ofEmpty());
+    }
+
+    public Scope getParent() {
+        return parent;
     }
 
     public List<ComponentScope> getChildren() {
@@ -31,7 +38,10 @@ public abstract sealed class Scope permits ComponentScope, ModuleScope {
     }
 
     public Binding getBinding() {
-        return bindings.getLast();
+        if (bindings.size() != 1) {
+            throw new ShallNotReachHereError("Scope has overridden bindings");
+        }
+        return bindings.getFirst();
     }
 
     public void bind(MonoBinding single) {
@@ -60,10 +70,6 @@ public abstract sealed class Scope permits ComponentScope, ModuleScope {
         }
         return null;
     }
-
-    abstract public ComponentScope instantiateComponentScope(Identifier identifier);
-
-    abstract public ComponentScope instantiateInterfaceScope(Identifier identifier);
 
     public record Alias(Instance lhs, Instance rhs) {
         public static Alias of(Instance lhs, Instance rhs) {

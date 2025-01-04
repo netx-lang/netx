@@ -21,12 +21,12 @@ public final class Elaborator {
     private static final Logger log = LoggerFactory.getLogger(Elaborator.class);
 
     private final DesignNode node;
-    private final ModuleScope design;
+    private final ModuleScope module;
     private final Configuration config;
 
     public Elaborator(DesignNode node, Configuration config) {
         this.node = node;
-        this.design = ModuleScope.newDesign();
+        this.module = ModuleScope.newModule();
         this.config = config;
     }
 
@@ -38,12 +38,12 @@ public final class Elaborator {
     public ModuleScope elaborate() {
         addGlobalInformation();
         var topNode = findTopNode();
-        var topScope = design.instantiateTop(topNode.getIdentifier());
+        var topScope = module.instantiateTop(topNode.getIdentifier());
         new ScopeElaborator(config, topScope).build(topNode);
         if (!config.fullyExpand()) {
             setDesignSignature(topScope, topNode);
         }
-        return design;
+        return module;
     }
 
     private ComponentNode findTopNode() {
@@ -70,21 +70,21 @@ public final class Elaborator {
                 }
             }
         }
-        design.resetDataIndexer();
+        module.resetDataIndexer();
     }
 
     private void addComponent(ComponentNode node) {
         switch (node.getKind()) {
-            case COMPONENT -> design.addComponent(node);
+            case COMPONENT -> module.addComponent(node);
             case INTERFACE -> {
-                design.addComponent(node);
-                design.addInterface(node.getIdentifier(), elaborateInterface(node));
+                module.addComponent(node);
+                module.addInterface(node.getIdentifier(), elaborateInterface(node));
             }
         }
     }
 
     private DataBundle.Factory elaborateInterface(ComponentNode node) {
-        var scope = design.instantiateInterfaceScope(node.getIdentifier());
+        var scope = ComponentScope.newInterface(module, node.getIdentifier());
         new ScopeElaborator(config, scope).build(node);
 
         LinkedHashMap<Identifier, MutableInstance.Factory<?>> factories = new LinkedHashMap<>();
@@ -96,23 +96,23 @@ public final class Elaborator {
             var factory = getFactoryFrom(node, mutable);
             factories.put(mutable.getIdentifier(), factory);
         }
-        return new DataBundle.Factory(scope.getIdentifier(), design, factories);
+        return new DataBundle.Factory(scope.getIdentifier(), module, factories);
     }
 
     private MutableInstance.Factory<?> getFactoryFrom(ComponentNode node, MutableInstance mutable) {
         return switch (mutable) {
-            case Clock _ -> new Clock.Factory(design);
+            case Clock _ -> new Clock.Factory(module);
             case Wire wire -> {
                 if (wire.getType() instanceof PolyType) {
                     log.error("{}: Interface should not contain auto-typed instance: {}", node.getSourceLoc(), wire);
                     throw new CompileCancellationException();
                 }
-                yield new Wire.Factory(wire.getType(), design);
+                yield new Wire.Factory(wire.getType(), module);
             }
-            case DataBundle bundle -> design.getInterface(bundle.getType().getId());
+            case DataBundle bundle -> module.getInterface(bundle.getType().getId());
             case Array array -> {
                 var elementFactory = getFactoryFrom(node, array.getElements().getFirst());
-                yield new Array.Factory(design, array.getElements().size(), elementFactory);
+                yield new Array.Factory(module, array.getElements().size(), elementFactory);
             }
             case DataAccess _ -> {
                 log.error("{}: Interface should not contain data access: {}", node.getSourceLoc(), mutable);

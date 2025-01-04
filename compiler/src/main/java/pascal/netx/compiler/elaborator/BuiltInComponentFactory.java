@@ -127,7 +127,7 @@ public class BuiltInComponentFactory {
     }
 
     private ComponentScope instantiate(Scope parent, BuiltinAtom type) {
-        return parent.instantiateComponentScope(
+        return ComponentScope.newComponent(parent,
                 Identifier.of(type.getBuiltin().name()).setSourceLoc(type.getSourceLoc()));
     }
 
