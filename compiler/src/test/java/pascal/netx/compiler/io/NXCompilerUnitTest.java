@@ -13,13 +13,14 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class CompilerUnitTest {
+class NXCompilerUnitTest {
     private static final Path TEST_DIR = Path.of("src/test/resources/testcases/");
 
-    @Test
-    void testPackage() throws IOException {
-        var compiler = (NXCompiler) Builder.forExpanded().loadPath(TEST_DIR.resolve("package.nx"));
-        assertNotNull(compiler.parse());
+    private static void test(String fileName) throws IOException {
+        String content = new String(Files.readAllBytes(TEST_DIR.resolve(fileName)));
+        CharStream charStream = CharStreams.fromString(content);
+        ModuleCompiler compiler = Builder.forExpanded().load(charStream);
+        assertNotNull(compiler.compile());
     }
     @Disabled
     @Test
@@ -28,23 +29,22 @@ class CompilerUnitTest {
         assertNotNull(compiler.compile());
     }
 
-    private static void test(String fileName) throws IOException {
-        String content = new String(Files.readAllBytes(TEST_DIR.resolve(fileName)));
-        CharStream charStream = CharStreams.fromString(content);
-        NXCompiler compiler = Builder.forExpanded().load(charStream);
-        assertNotNull(compiler.compile());
+    @Test
+    void testPackage() throws IOException {
+        var compiler = (ModuleCompiler) Builder.forExpanded().loadPath(TEST_DIR.resolve("package.nx"));
+        assertNotNull(compiler.parse());
     }
 
     @Test
     void loadWithValidCharStream() {
         CharStream charStream = CharStreams.fromString("valid input");
-        NXCompiler compiler = Builder.forExpanded().load(charStream);
+        ModuleCompiler compiler = Builder.forExpanded().load(charStream);
         assertNotNull(compiler);
     }
 
     @Test
     void loadPathWithValidPath() throws IOException {
-        Compiler compiler = Builder.forExpanded().loadPath(TEST_DIR.resolve("bind_1.nx"));
+        NXCompiler compiler = Builder.forExpanded().loadPath(TEST_DIR.resolve("bind_1.nx"));
         assertNotNull(compiler);
     }
 
@@ -71,7 +71,7 @@ class CompilerUnitTest {
     @Test
     void testInvalidInput() {
         CharStream charStream = CharStreams.fromString("invalid input");
-        NXCompiler compiler = Builder.forExpanded().load(charStream);
+        ModuleCompiler compiler = Builder.forExpanded().load(charStream);
         assertThrows(ParseCancellationException.class, compiler::compile);
     }
 }

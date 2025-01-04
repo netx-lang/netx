@@ -10,7 +10,7 @@ import pascal.netx.compiler.model.instance.Data;
 import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.compiler.model.instance.type.InstanceType;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.GlobalScope;
+import pascal.netx.compiler.model.scope.ModuleScope;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -26,7 +26,7 @@ public final class DataTypeInference extends ModelAnalysis {
     private final List<DataConstraint> constraints = new LinkedList<>();
     private final Queue<Instance> workList = new LinkedList<>();
 
-    public DataTypeInference(GlobalScope design) {
+    public DataTypeInference(ModuleScope design) {
         super(design);
     }
 
@@ -128,17 +128,17 @@ public final class DataTypeInference extends ModelAnalysis {
     }
 
     private void checkAllTyped() {
-        design.forEachSubScope(scope -> {
-            for (var entity : scope.getEntities()) {
-                if (!(entity instanceof Instance inst)) {
-                    throw new ShallNotReachHereError();
+        design.forEachSubScope(scope ->
+                scope.getBinding().forEachEntity(entity -> {
+                    if (!(entity instanceof Instance inst)) {
+                        throw new ShallNotReachHereError();
+                    }
+                    if (inst.hasImplicitType()) {
+                        log.error("{}: Cannot infer type of data: {}", ((Data) inst).getSourceLoc(), inst);
+                        throw new TypeCheckingException();
+                    }
                 }
-                if (inst.hasImplicitType()) {
-                    log.error("{}: Cannot infer type of data: {}", ((Data) inst).getSourceLoc(), inst);
-                    throw new TypeCheckingException();
-                }
-            }
-        });
+        ));
         constraints.forEach(this::throwIfConstraintNotHolds);
     }
 

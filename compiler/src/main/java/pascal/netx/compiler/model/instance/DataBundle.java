@@ -7,7 +7,7 @@ import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.instance.type.InstanceType;
 import pascal.netx.compiler.model.instance.type.InterfaceType;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.GlobalScope;
+import pascal.netx.compiler.model.scope.ModuleScope;
 import pascal.netx.util.lang.Identifier;
 
 import javax.annotation.Nonnull;
@@ -63,9 +63,9 @@ public final class DataBundle extends DataComposition {
         private final LinkedHashMap<Identifier, MutableInstance.Factory<?>> factories;
         private final InterfaceType type;
 
-        public Factory(Identifier id, GlobalScope global,
+        public Factory(Identifier id, ModuleScope module,
                        LinkedHashMap<Identifier, MutableInstance.Factory<?>> factories) {
-            super(global);
+            super(module);
             this.factories = factories;
             this.type = InterfaceType.of(id,
                     factories.values().stream().map(MutableInstance.Factory::getType).toList());
@@ -73,7 +73,7 @@ public final class DataBundle extends DataComposition {
 
         @Override
         public DataBundle create(ComponentScope parent, Identifier id) {
-            var result = new DataBundle(id, type, global.getDataIndexer().get());
+            var result = new DataBundle(id, type, module.getDataIndexer().get());
 
             for (var entry : factories.entrySet()) {
                 Identifier fieldID = entry.getKey();

@@ -2,18 +2,18 @@ package pascal.netx.compiler.analysis;
 
 import pascal.netx.compiler.analysis.constraint.DuplicatedManager;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.GlobalScope;
+import pascal.netx.compiler.model.scope.ModuleScope;
 
-public final class LocalDuplicatedElimination extends LocalModelAnalysis {
+public final class ComponentDuplicatedElimination extends ComponentModelAnalysis {
 
-    public LocalDuplicatedElimination(GlobalScope design) {
-        super(design, scope -> new ComponentDuplicatedAnalysis(scope).analyze(scope));
+    public ComponentDuplicatedElimination(ModuleScope design) {
+        super(design, scope -> new Analyzer(scope).analyze(scope));
     }
 
-    private static class ComponentDuplicatedAnalysis extends ComponentAnalysis {
+    private static class Analyzer extends ComponentModelAnalysis.Analyzer {
         private final DuplicatedManager manager = new DuplicatedManager();
 
-        protected ComponentDuplicatedAnalysis(ComponentScope scope) {
+        protected Analyzer(ComponentScope scope) {
             super(scope);
         }
 

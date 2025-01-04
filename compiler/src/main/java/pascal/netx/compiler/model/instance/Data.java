@@ -1,7 +1,7 @@
 package pascal.netx.compiler.model.instance;
 
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.GlobalScope;
+import pascal.netx.compiler.model.scope.ModuleScope;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
 
@@ -57,8 +57,8 @@ public sealed abstract class Data implements MutableInstance permits Clock, Wire
 
     public abstract static class Factory<T extends Data> extends MutableInstance.Factory<T> {
 
-        protected Factory(GlobalScope global) {
-            super(global);
+        protected Factory(ModuleScope module) {
+            super(module);
         }
 
         public abstract T create(ComponentScope parent, Identifier id);

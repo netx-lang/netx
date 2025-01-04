@@ -1,18 +1,18 @@
 package pascal.netx.compiler.analysis;
 
 import pascal.netx.compiler.model.instance.Instance;
-import pascal.netx.compiler.model.scope.GlobalScope;
+import pascal.netx.compiler.model.scope.ModuleScope;
 
 import java.util.function.Predicate;
 
 public final class MetaElimination extends ModelAnalysis {
-    public MetaElimination(GlobalScope design) {
+    public MetaElimination(ModuleScope design) {
         super(design);
     }
 
     @Override
     public void analyze() {
         design.forEachSubScope(scope ->
-                scope.getEntities().removeIf(Predicate.not(Instance.class::isInstance)));
+                scope.getBinding().releaseIf(Predicate.not(Instance.class::isInstance)));
     }
 }

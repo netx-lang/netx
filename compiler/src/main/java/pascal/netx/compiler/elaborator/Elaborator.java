@@ -12,7 +12,7 @@ import pascal.netx.compiler.model.component.Signature;
 import pascal.netx.compiler.model.instance.*;
 import pascal.netx.compiler.model.instance.type.PolyType;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.GlobalScope;
+import pascal.netx.compiler.model.scope.ModuleScope;
 import pascal.netx.util.lang.Identifier;
 
 import java.util.LinkedHashMap;
@@ -21,12 +21,12 @@ public final class Elaborator {
     private static final Logger log = LoggerFactory.getLogger(Elaborator.class);
 
     private final DesignNode node;
-    private final GlobalScope design;
+    private final ModuleScope design;
     private final Configuration config;
 
     public Elaborator(DesignNode node, Configuration config) {
         this.node = node;
-        this.design = GlobalScope.newDesign();
+        this.design = ModuleScope.newDesign();
         this.config = config;
     }
 
@@ -35,7 +35,7 @@ public final class Elaborator {
         topScope.setSignature(Signature.of(atom, topScope.getInputs(), topScope.getOutputs()));
     }
 
-    public GlobalScope elaborate() {
+    public ModuleScope elaborate() {
         addGlobalInformation();
         var topNode = findTopNode();
         var topScope = design.instantiateTop(topNode.getIdentifier());

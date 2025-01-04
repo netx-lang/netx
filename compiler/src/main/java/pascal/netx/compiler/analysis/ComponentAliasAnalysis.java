@@ -1,20 +1,20 @@
 package pascal.netx.compiler.analysis;
 
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.GlobalScope;
+import pascal.netx.compiler.model.scope.ModuleScope;
 
 import java.util.function.Predicate;
 
-public final class LocalAliasAnalysis extends LocalModelAnalysis {
+public final class ComponentAliasAnalysis extends ComponentModelAnalysis {
 
-    public LocalAliasAnalysis(GlobalScope design) {
-        super(design, scope -> new ComponentAliasAnalysis(scope).analyze());
+    public ComponentAliasAnalysis(ModuleScope design) {
+        super(design, scope -> new Analyzer(scope).analyze());
     }
 
-    private static class ComponentAliasAnalysis extends ComponentAnalysis {
+    private static class Analyzer extends ComponentModelAnalysis.Analyzer {
         private final AliasManager manager = new AliasManager();
 
-        private ComponentAliasAnalysis(ComponentScope scope) {
+        private Analyzer(ComponentScope scope) {
             super(scope);
         }
 

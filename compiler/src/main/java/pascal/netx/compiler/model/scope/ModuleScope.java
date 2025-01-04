@@ -14,21 +14,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public final class GlobalScope extends Scope {
+public final class ModuleScope extends Scope {
     private final Map<Identifier, DataBundle.Factory> interfaceDef = new HashMap<>();
     private final Map<Identifier, ComponentNode> componentDef = new HashMap<>();
     private final BuiltInComponentFactory factory;
     private Supplier<Integer> dataIndexer;
     private ComponentScope top;
 
-    GlobalScope() {
-        super(null);
+    ModuleScope() {
         this.dataIndexer = new AtomicInteger(0)::incrementAndGet;
         this.factory = new BuiltInComponentFactory(this);
     }
 
-    public static GlobalScope newDesign() {
-        return new GlobalScope();
+    public static ModuleScope newDesign() {
+        return new ModuleScope();
     }
 
     public ComponentScope instantiateTop(Identifier identifier) {

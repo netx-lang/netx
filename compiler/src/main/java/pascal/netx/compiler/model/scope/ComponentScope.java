@@ -1,6 +1,7 @@
 package pascal.netx.compiler.model.scope;
 
 import pascal.netx.compiler.analysis.AssignManager;
+import pascal.netx.compiler.elaborator.ComponentEvaluator;
 import pascal.netx.compiler.model.component.Signature;
 import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.util.lang.BuiltinComponent;
@@ -10,19 +11,29 @@ import pascal.netx.util.lang.SourceLoc;
 import java.util.*;
 
 public final class ComponentScope extends Scope {
+    private final ModuleScope module;
     private final boolean isInterface;
     private final Identifier identifier;
+
+    private final ComponentEvaluator evaluator;
     private final Set<Alias> aliases = new HashSet<>();
     private final AssignManager manager = new AssignManager(this);
-    private Signature signature;
+
     private Attributes attributes;
     private List<Instance> inputs = new ArrayList<>();
     private List<Instance> outputs = new ArrayList<>();
 
-    ComponentScope(GlobalScope global, boolean isInterface, Identifier identifier) {
-        super(global);
+    /**
+     * Only used in compact compilation mode to distinguish the components.
+     * In expanded mode, the signature is null since every instance is unique.
+     */
+    private Signature signature;
+
+    ComponentScope(ModuleScope module, boolean isInterface, Identifier identifier) {
+        this.module = module;
         this.isInterface = isInterface;
         this.identifier = identifier;
+        this.evaluator = new ComponentEvaluator(this);
     }
 
     public boolean isInterface() {
@@ -35,6 +46,14 @@ public final class ComponentScope extends Scope {
 
     public Identifier getIdentifier() {
         return identifier;
+    }
+
+    public ModuleScope getModule() {
+        return module;
+    }
+
+    public ComponentEvaluator getEvaluator() {
+        return evaluator;
     }
 
     public List<Instance> getInputs() {
@@ -91,14 +110,14 @@ public final class ComponentScope extends Scope {
 
     @Override
     public ComponentScope instantiateComponentScope(Identifier identifier) {
-        var child = new ComponentScope(this.getGlobal(), false, identifier);
+        var child = new ComponentScope(this.getModule(), false, identifier);
         addChild(child);
         return child;
     }
 
     @Override
     public ComponentScope instantiateInterfaceScope(Identifier identifier) {
-        var child = new ComponentScope(this.getGlobal(), true, identifier);
+        var child = new ComponentScope(this.getModule(), true, identifier);
         addChild(child);
         return child;
     }

@@ -7,17 +7,17 @@ import pascal.netx.compiler.model.instance.type.InstanceType;
 import pascal.netx.compiler.model.instance.type.PolyType;
 import pascal.netx.compiler.model.scope.Attributes;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.GlobalScope;
+import pascal.netx.compiler.model.scope.ModuleScope;
 import pascal.netx.compiler.model.scope.Scope;
 import pascal.netx.util.lang.Identifier;
 
 import static pascal.netx.compiler.elaborator.Types.*;
 
 public class BuiltInComponentFactory {
-    private final GlobalScope global;
+    private final ModuleScope module;
 
-    public BuiltInComponentFactory(GlobalScope global) {
-        this.global = global;
+    public BuiltInComponentFactory(ModuleScope module) {
+        this.module = module;
     }
 
     public ComponentScope createBuiltInComponent(Scope parent, BuiltinAtom type) {
@@ -137,7 +137,7 @@ public class BuiltInComponentFactory {
 
     private Wire newWire(ComponentScope result, String name, InstanceType type) {
         var id = Identifier.of("$" + name).setSourceLoc(result.getSourceLoc());
-        var wire = new Wire.Factory(type, global).create(result, id);
+        var wire = new Wire.Factory(type, module).create(result, id);
         result.bind(wire.getIdentifier(), wire);
         return wire;
     }

@@ -10,13 +10,13 @@ import pascal.netx.compiler.model.instance.selector.BitSelector;
 import pascal.netx.compiler.model.instance.selector.PartSelector;
 import pascal.netx.compiler.model.instance.type.BitType;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.GlobalScope;
+import pascal.netx.compiler.model.scope.ModuleScope;
 
 public class AccessChecker extends ModelAnalysis {
 
     private static final Logger log = LoggerFactory.getLogger(AccessChecker.class);
 
-    public AccessChecker(GlobalScope design) {
+    public AccessChecker(ModuleScope design) {
         super(design);
     }
 
@@ -49,7 +49,7 @@ public class AccessChecker extends ModelAnalysis {
     private void analyze(ComponentScope scope) {
         scope.getInputs().forEach(AccessChecker::check);
         scope.getOutputs().forEach(AccessChecker::check);
-        scope.getBinding().getEntities().forEach(AccessChecker::check);
+        scope.getBinding().forEachEntity(AccessChecker::check);
         scope.getAliases().forEach(alias -> {
             check(alias.lhs());
             check(alias.rhs());

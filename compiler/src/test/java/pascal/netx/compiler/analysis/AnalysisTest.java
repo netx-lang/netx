@@ -3,7 +3,7 @@ package pascal.netx.compiler.analysis;
 import org.junit.jupiter.api.Test;
 import pascal.netx.compiler.exception.TypeCheckingException;
 import pascal.netx.compiler.io.Builder;
-import pascal.netx.compiler.io.NXCompiler;
+import pascal.netx.compiler.io.ModuleCompiler;
 import pascal.netx.util.TestUtils;
 
 import java.io.IOException;
@@ -13,14 +13,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 class AnalysisTest {
-
     private static final Path TEST_DIR = Path.of("src/test/resources/testcases");
 
     @Test
     void testSourceLocChecker() throws IOException {
         for (var testcase : TestUtils.collectAllFilesUnder(TEST_DIR)) {
             if (testcase.getFileName().endsWith(".nx")) {
-                var compiler = (NXCompiler) Builder.forExpanded().loadPath(testcase);
+                var compiler = (ModuleCompiler) Builder.forExpanded().loadPath(testcase);
                 new SourceLocChecker(compiler.parse()).analyze();
             }
         }

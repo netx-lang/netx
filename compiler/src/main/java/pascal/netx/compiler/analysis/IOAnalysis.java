@@ -12,7 +12,7 @@ import pascal.netx.compiler.model.instance.selector.PartSelector;
 import pascal.netx.compiler.model.instance.selector.Selector;
 import pascal.netx.compiler.model.instance.type.BitType;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.GlobalScope;
+import pascal.netx.compiler.model.scope.ModuleScope;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.SourceLoc;
 
@@ -25,7 +25,7 @@ public final class IOAnalysis extends ModelAnalysis {
     private final Map<Data, DataCoverage> def = new HashMap<>();
     private final Map<Data, DataCoverage> use = new HashMap<>();
 
-    public IOAnalysis(GlobalScope design) {
+    public IOAnalysis(ModuleScope design) {
         super(design);
     }
 

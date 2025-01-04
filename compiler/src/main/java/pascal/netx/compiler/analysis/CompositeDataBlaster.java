@@ -5,14 +5,14 @@ import pascal.netx.compiler.model.instance.DataBundle;
 import pascal.netx.compiler.model.instance.DataComposition;
 import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.GlobalScope;
+import pascal.netx.compiler.model.scope.ModuleScope;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public final class CompositeDataBlaster extends ModelAnalysis {
-    public CompositeDataBlaster(GlobalScope design) {
+    public CompositeDataBlaster(ModuleScope design) {
         super(design);
     }
 

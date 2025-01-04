@@ -3,7 +3,7 @@ package pascal.netx.compiler.analysis;
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.GlobalScope;
+import pascal.netx.compiler.model.scope.ModuleScope;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -11,10 +11,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public abstract class LocalModelAnalysis extends ModelAnalysis {
+public abstract class ComponentModelAnalysis extends ModelAnalysis {
     private final Consumer<ComponentScope> analysis;
 
-    public LocalModelAnalysis(GlobalScope design, Consumer<ComponentScope> analysis) {
+    public ComponentModelAnalysis(ModuleScope design, Consumer<ComponentScope> analysis) {
         super(design);
         this.analysis = analysis;
     }
@@ -28,7 +28,7 @@ public abstract class LocalModelAnalysis extends ModelAnalysis {
         });
     }
 
-    protected abstract static class ComponentAnalysis {
+    protected abstract static class Analyzer {
         protected final ComponentScope scope;
 
         /**
@@ -41,7 +41,7 @@ public abstract class LocalModelAnalysis extends ModelAnalysis {
          */
         protected final List<ComponentScope> subUserDef = new LinkedList<>();
 
-        protected ComponentAnalysis(ComponentScope scope) {
+        protected Analyzer(ComponentScope scope) {
             this.scope = scope;
         }
 
@@ -58,7 +58,7 @@ public abstract class LocalModelAnalysis extends ModelAnalysis {
 
         public void eliminateDuplicatedData(Predicate<Entity> needRemove, Function<Instance, Instance> repOf) {
             anaScope.forEach(scope -> {
-                scope.getEntities().removeIf(needRemove);
+                scope.getBinding().releaseIf(needRemove);
                 scope.getInputs().replaceAll(repOf::apply);
                 scope.getOutputs().replaceAll(repOf::apply);
             });

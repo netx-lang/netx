@@ -8,7 +8,7 @@ import pascal.netx.compiler.model.instance.*;
 import pascal.netx.compiler.model.instance.type.BitType;
 import pascal.netx.compiler.model.instance.type.PolyType;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.GlobalScope;
+import pascal.netx.compiler.model.scope.ModuleScope;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -21,15 +21,15 @@ import static pascal.netx.util.lang.BuiltinComponent.NO_DUMP;
 import static pascal.netx.util.lang.BuiltinComponent.isBuiltin;
 
 final class CompactDumper {
-    private final GlobalScope globalScope;
+    private final ModuleScope moduleScope;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final ArrayNode design;
     private final SignatureManager manager = new SignatureManager();
     private final List<ObjectNode> definitions = new LinkedList<>();
 
-    public CompactDumper(GlobalScope scope) {
-        this.globalScope = scope;
+    public CompactDumper(ModuleScope scope) {
+        this.moduleScope = scope;
         this.design = objectMapper.createArrayNode();
     }
 
@@ -57,7 +57,7 @@ final class CompactDumper {
     }
 
     public ArrayNode dump() {
-        var top = globalScope.getTop();
+        var top = moduleScope.getTop();
         definitions.addFirst(dumperOf(top).dump());
         definitions.forEach(design::add);
         return design;
@@ -125,11 +125,7 @@ final class CompactDumper {
             dumpInstIO(definition, "output", signature.outputs());
 
             List<ObjectNode> needDump = new LinkedList<>();
-            for (var entity : component.getEntities()) {
-                if (entity instanceof Data data) {
-                    needDump.add(defineData(data));
-                }
-            }
+            component.getBinding().forEachData(data -> needDump.add(defineData(data)));
             for (var child : component.getChildren()) {
                 var instID = child.getIdentifier();
                 if (BuiltinComponent.isBuiltin(instID)) {
@@ -192,8 +188,8 @@ final class CompactDumper {
                 }
                 builtin.putIfAbsent("attribute", attributes);
             }
-            List<Data> needDump = sub.getEntities().stream()
-                    .filter(Data.class::isInstance).map(Data.class::cast).toList();
+            List<Data> needDump = new LinkedList<>();
+            sub.getBinding().forEachData(needDump::add);
             if (!needDump.isEmpty()) {
                 var subarray = makeMembersIn(builtin);
                 needDump.forEach(c -> subarray.add(defineData(c)));

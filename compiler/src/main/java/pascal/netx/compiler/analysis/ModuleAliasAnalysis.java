@@ -1,13 +1,13 @@
 package pascal.netx.compiler.analysis;
 
-import pascal.netx.compiler.model.scope.GlobalScope;
+import pascal.netx.compiler.model.scope.ModuleScope;
 
 import java.util.function.Predicate;
 
-public final class GlobalAliasAnalysis extends ModelAnalysis {
+public final class ModuleAliasAnalysis extends ModelAnalysis {
     private final AliasManager manager = new AliasManager();
 
-    public GlobalAliasAnalysis(GlobalScope design) {
+    public ModuleAliasAnalysis(ModuleScope design) {
         super(design);
     }
 
@@ -16,7 +16,7 @@ public final class GlobalAliasAnalysis extends ModelAnalysis {
         design.forEachSubScope(scope -> manager.addAlias(scope.getAliases()));
         manager.resolveRepresentatives();
         design.forEachSubScope(scope -> {
-            scope.getEntities().removeIf(Predicate.not(manager::needDump));
+            scope.getBinding().releaseIf(Predicate.not(manager::needDump));
             scope.getInputs().replaceAll(manager::repOf);
             scope.getOutputs().replaceAll(manager::repOf);
         });

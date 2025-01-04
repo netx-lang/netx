@@ -1,30 +1,25 @@
 package pascal.netx.compiler.model.scope;
 
-import pascal.netx.compiler.elaborator.Evaluator;
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.instance.Instance;
-import pascal.netx.compiler.model.scope.binding.MapBinding;
-import pascal.netx.compiler.model.scope.binding.SingleBinding;
+import pascal.netx.compiler.model.scope.binding.Binding;
+import pascal.netx.compiler.model.scope.binding.MonoBinding;
+import pascal.netx.compiler.model.scope.binding.MultiBinding;
 import pascal.netx.util.lang.Identifier;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
-public abstract sealed class Scope permits ComponentScope, GlobalScope {
-    private final MapBinding binding = MapBinding.ofEmpty();
+public abstract sealed class Scope permits ComponentScope, ModuleScope {
+    private final LinkedList<Binding> bindings;
     private final List<ComponentScope> children;
-    private final Evaluator evaluator;
-    private final GlobalScope global;
 
-    protected Scope(GlobalScope global) {
-        this.global = global;
+    protected Scope() {
         this.children = new ArrayList<>();
-        this.evaluator = new Evaluator(this);
-    }
-
-    public GlobalScope getGlobal() {
-        return global;
+        this.bindings = new LinkedList<>();
+        this.bindings.add(MultiBinding.ofEmpty());
     }
 
     public List<ComponentScope> getChildren() {
@@ -35,24 +30,35 @@ public abstract sealed class Scope permits ComponentScope, GlobalScope {
         children.add(child);
     }
 
-    public MapBinding getBinding() {
-        return binding;
+    public Binding getBinding() {
+        return bindings.getLast();
     }
 
-    public Collection<Entity> getEntities() {
-        return binding.getEntities();
-    }
-
-    public Evaluator getEvaluator() {
-        return evaluator;
-    }
-
-    public void bind(SingleBinding single) {
-        binding.bind(single.key(), single.value());
+    public void bind(MonoBinding single) {
+        getBinding().bind(single);
     }
 
     public void bind(Identifier identifier, Entity entity) {
-        binding.bind(identifier, entity);
+        getBinding().bind(identifier, entity);
+    }
+
+    public void overrideBindings(Binding binding) {
+        bindings.addFirst(binding);
+    }
+
+    public void restoreBindings() {
+        bindings.removeFirst();
+    }
+
+    @Nullable
+    public Entity lookup(Identifier id) {
+        for (var binding : bindings) {
+            var entity = binding.lookup(id);
+            if (entity != null) {
+                return entity;
+            }
+        }
+        return null;
     }
 
     abstract public ComponentScope instantiateComponentScope(Identifier identifier);

@@ -19,17 +19,14 @@ import pascal.netx.compiler.model.instance.selector.Selector;
 import pascal.netx.compiler.model.instance.type.BitType;
 import pascal.netx.compiler.model.instance.type.PolyType;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.GlobalScope;
-import pascal.netx.compiler.model.scope.Scope;
-import pascal.netx.compiler.model.scope.binding.Binding;
-import pascal.netx.compiler.model.scope.binding.MapBinding;
-import pascal.netx.compiler.model.scope.binding.SingleBinding;
+import pascal.netx.compiler.model.scope.ModuleScope;
+import pascal.netx.compiler.model.scope.binding.MonoBinding;
+import pascal.netx.compiler.model.scope.binding.MultiBinding;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
@@ -37,8 +34,8 @@ import java.util.stream.IntStream;
 
 import static pascal.netx.compiler.elaborator.Types.*;
 
-public final class Evaluator {
-    private static final Logger log = LoggerFactory.getLogger(Evaluator.class);
+public final class ComponentEvaluator {
+    private static final Logger log = LoggerFactory.getLogger(ComponentEvaluator.class);
     private static final Map<BinaryExpr.Operator, BiFunction<IntegerValue, IntegerValue, Value>>
             BINARY_OPERATOR_MAP = Map.ofEntries(
             Map.entry(BinaryExpr.Operator.ADD, IntegerValue::add),
@@ -63,16 +60,14 @@ public final class Evaluator {
             Map.entry(BinaryExpr.Operator.GE, IntegerValue::ge)
     );
 
-    private final LinkedList<Binding> bindings = new LinkedList<>();
-    private final GlobalScope global;
-    private final Scope scope;
+    private final ModuleScope module;
+    private final ComponentScope scope;
 
     private EvaluationMode mode = EvaluationMode.COMMON;
 
-    public Evaluator(Scope scope) {
-        this.scope = scope;
-        this.global = scope.getGlobal();
-        bindings.add(scope.getBinding());
+    public ComponentEvaluator(ComponentScope component) {
+        this.scope = component;
+        this.module = component.getModule();
     }
 
     public ComponentType evaluateToComponentType(ExprNode expr, boolean needDeclareInPlace) {
@@ -102,7 +97,7 @@ public final class Evaluator {
         return requiresDataBundle(expr.getSourceLoc(), evaluate(expr));
     }
 
-    public SingleBinding evaluateBinding(BindingNode binding) {
+    public MonoBinding evaluateBinding(BindingNode binding) {
         Identifier id;
         List<Identifier> freeVariables;
         switch (binding.getHead()) {
@@ -117,7 +112,7 @@ public final class Evaluator {
                 freeVariables = List.of();
             }
         }
-        return SingleBinding.of(id, Macro.of(freeVariables, binding.getExpr()));
+        return MonoBinding.of(id, Macro.of(freeVariables, binding.getExpr()));
     }
 
     public Entity evaluateAndDeclInPlace(ExprNode expr) {
@@ -216,9 +211,9 @@ public final class Evaluator {
                     var id = generator.getHead();
                     var list = evaluateToList(generator.getFrom());
                     for (var entity : list.entities()) {
-                        overrideBindings(SingleBinding.of(id, entity));
+                        scope.overrideBindings(MonoBinding.of(id, entity));
                         result.addAll(doListComprehension(head, new LinkedList<>(qualifiers)));
-                        restoreBindings();
+                        scope.restoreBindings();
                     }
                 }
                 case FilterQualifier filter -> {
@@ -231,9 +226,9 @@ public final class Evaluator {
                 }
                 case BindingQualifier qualifier -> {
                     var binding = qualifier.getBinding();
-                    overrideBindings(evaluateBinding(binding));
+                    scope.overrideBindings(evaluateBinding(binding));
                     result = doListComprehension(head, new LinkedList<>(qualifiers));
-                    restoreBindings();
+                    scope.restoreBindings();
                 }
             }
         }
@@ -290,7 +285,7 @@ public final class Evaluator {
     public MutableInstance.Factory<?> evaluateToInstanceFactory(ExprNode expr) {
         MutableInstance.Factory<?> factory;
         if (expr == null) {
-            factory = new Wire.Factory(PolyType.getInstance(), global);
+            factory = new Wire.Factory(PolyType.getInstance(), module);
         } else {
             mode = EvaluationMode.FACTORY;
             factory = requiresInstanceFactory(expr.getSourceLoc(), evaluate(expr));
@@ -361,11 +356,11 @@ public final class Evaluator {
     private Entity evaluatePrimarySymbolExpr(IdentifierExpr expr) {
         var id = expr.getIdentifier();
         if (mode == EvaluationMode.FACTORY) {
-            if (!scope.getGlobal().hasInterface(id)) {
+            if (!scope.getModule().hasInterface(id)) {
                 log.error("{}: Unknown interface type {}", expr.getSourceLoc(), id);
                 throw new CompileCancellationException();
             }
-            return scope.getGlobal().getInterface(id);
+            return scope.getModule().getInterface(id);
         } else {
             Entity entity = resolveIdentifier(id);
             if (entity instanceof Macro macro) {
@@ -385,24 +380,24 @@ public final class Evaluator {
 
     public Entity evaluateMacroExpr(SourceLoc sourceLoc, Macro marco, List<Entity> parameters) {
         int size = requiresMatchedSize(sourceLoc, marco.identifiers(), parameters);
-        var bindings = MapBinding.ofEmpty();
+        var bindings = MultiBinding.ofEmpty();
         for (int i = 0; i < size; i++) {
             bindings.bind(marco.identifiers().get(i), parameters.get(i));
         }
-        overrideBindings(bindings);
+        scope.overrideBindings(bindings);
         var result = evaluate(marco.expr());
-        restoreBindings();
+        scope.restoreBindings();
         return result;
     }
 
     @Nonnull
     private Entity resolveIdentifier(Identifier id) {
-        Entity entity = lookup(id);
+        Entity entity = scope.lookup(id);
         if (entity == null) {
-            entity = global.getEvaluator().lookup(id);
+            entity = module.lookup(id);
             if (entity == null) {
-                if (global.hasComponent(id)) {
-                    entity = ComponentAtom.of(global.getComponent(id), id);
+                if (module.hasComponent(id)) {
+                    entity = ComponentAtom.of(module.getComponent(id), id);
                 } else if (BuiltinComponent.isBuiltin(id)) {
                     entity = BuiltinAtom.of(BuiltinComponent.of(id), id.getSourceLoc());
                 }
@@ -419,21 +414,10 @@ public final class Evaluator {
 
     @Nonnull
     private Entity declareDataInPlace(Identifier id) {
-        var factory = new Wire.Factory(PolyType.getInstance(), global);
-        var data = factory.create((ComponentScope) scope, id);
+        var factory = new Wire.Factory(PolyType.getInstance(), module);
+        var data = factory.create(scope, id);
         scope.bind(id, data);
         return data;
-    }
-
-    @Nullable
-    private Entity lookup(Identifier id) {
-        for (var binding : bindings) {
-            var entity = binding.lookup(id);
-            if (entity != null) {
-                return entity;
-            }
-        }
-        return null;
     }
 
     private Entity evaluateComponentType(ParamSymbolExpr expr) {
@@ -465,7 +449,6 @@ public final class Evaluator {
         return result;
     }
 
-
     private MutableInstance.Factory<?> evaluateInstanceFactory(ParamSymbolExpr expr) {
         var sourceLoc = expr.getSourceLoc();
         return switch (expr.getHead().name()) {
@@ -483,24 +466,16 @@ public final class Evaluator {
         mode = EvaluationMode.COMMON;
         var bitType = BitType.of(evaluateToInt(arguments.getFirst()));
         mode = EvaluationMode.FACTORY;
-        return new Wire.Factory(bitType, global);
+        return new Wire.Factory(bitType, module);
     }
 
     private Clock.Factory evaluateClockFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         if (arguments.isEmpty()) {
-            return new Clock.Factory(global);
+            return new Clock.Factory(module);
         } else {
             log.error("{}: Unexpected specification for component type clock: {}", sourceLoc, arguments);
             throw new CompileCancellationException();
         }
-    }
-
-    public void overrideBindings(Binding binding) {
-        bindings.addFirst(binding);
-    }
-
-    public void restoreBindings() {
-        bindings.removeFirst();
     }
 
     enum EvaluationMode {

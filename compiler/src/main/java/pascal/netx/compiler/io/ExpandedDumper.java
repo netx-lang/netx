@@ -7,7 +7,7 @@ import pascal.netx.compiler.model.instance.*;
 import pascal.netx.compiler.model.instance.type.BitType;
 import pascal.netx.compiler.model.instance.type.PolyType;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.GlobalScope;
+import pascal.netx.compiler.model.scope.ModuleScope;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -17,12 +17,12 @@ import java.util.*;
 import static pascal.netx.util.lang.BuiltinComponent.NO_DUMP;
 
 final class ExpandedDumper {
-    private final GlobalScope design;
+    private final ModuleScope design;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final Map<Data, Integer> dataIndices = new HashMap<>();
 
-    public ExpandedDumper(GlobalScope scope) {
+    public ExpandedDumper(ModuleScope scope) {
         this.design = scope;
     }
 
@@ -80,11 +80,7 @@ final class ExpandedDumper {
             dumpInstIO(result, "output", component.getOutputs());
 
             List<ObjectNode> needDump = new LinkedList<>();
-            for (var entity : component.getEntities()) {
-                if (entity instanceof Data data) {
-                    needDump.add(defineData(data));
-                }
-            }
+            component.getBinding().forEachData(data -> needDump.add(defineData(data)));
             for (var child : component.getChildren()) {
                 var instID = child.getIdentifier();
                 if (BuiltinComponent.isBuiltin(instID)) {
@@ -115,8 +111,8 @@ final class ExpandedDumper {
                 }
                 builtin.putIfAbsent("attribute", attributes);
             }
-            List<Data> needDump = sub.getEntities().stream()
-                    .filter(Data.class::isInstance).map(Data.class::cast).toList();
+            List<Data> needDump = new LinkedList<>();
+            sub.getBinding().forEachData(needDump::add);
             if (!needDump.isEmpty()) {
                 var subarray = makeMembersIn(builtin);
                 needDump.forEach(c -> subarray.add(defineData(c)));

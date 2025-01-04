@@ -18,7 +18,7 @@ import pascal.netx.compiler.model.instance.type.InstanceType;
 import pascal.netx.compiler.model.instance.type.InterfaceType;
 import pascal.netx.compiler.model.scope.Attributes;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.binding.SingleBinding;
+import pascal.netx.compiler.model.scope.binding.MonoBinding;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
@@ -34,7 +34,7 @@ import static pascal.netx.compiler.elaborator.Types.requiresMatchedSize;
 final class ScopeElaborator {
     private static final Logger log = LoggerFactory.getLogger(ScopeElaborator.class);
     private final ComponentScope scope;
-    private final Evaluator evaluator;
+    private final ComponentEvaluator evaluator;
 
     private final Configuration config;
     private final BuiltInComponentFactory factory;
@@ -42,7 +42,7 @@ final class ScopeElaborator {
     ScopeElaborator(Configuration config, ComponentScope scope) {
         this.config = config;
         this.scope = scope;
-        this.factory = scope.getGlobal().getBuiltinFactory();
+        this.factory = scope.getModule().getBuiltinFactory();
         this.evaluator = scope.getEvaluator();
     }
 
@@ -93,9 +93,9 @@ final class ScopeElaborator {
         var generator = loop.getGenerator();
         var id = generator.getHead();
         for (var entity : evaluator.evaluateToList(generator.getFrom()).entities()) {
-            evaluator.overrideBindings(SingleBinding.of(id, entity));
+            scope.overrideBindings(MonoBinding.of(id, entity));
             buildComponentElements(loop.getElements());
-            evaluator.restoreBindings();
+            scope.restoreBindings();
         }
     }
 
@@ -114,7 +114,7 @@ final class ScopeElaborator {
             if (!rest.getDimensions().isEmpty()) {
                 for (ExprNode dimension : rest.getDimensions()) {
                     var size = evaluator.evaluateToInt(dimension);
-                    factory = new Array.Factory(scope.getGlobal(), size, factory);
+                    factory = new Array.Factory(scope.getModule(), size, factory);
                 }
             }
             var id = rest.getIdentifier();

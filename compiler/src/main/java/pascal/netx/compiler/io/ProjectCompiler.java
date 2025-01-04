@@ -17,7 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-public final class ProjectCompiler implements Compiler {
+public final class ProjectCompiler implements NXCompiler {
     private static final String DEFAULT_CONFIG = "_netx.toml";
     private static final TomlMapper MAPPER = new TomlMapper();
     private static final Logger log = LoggerFactory.getLogger(ProjectCompiler.class);
@@ -54,7 +54,7 @@ public final class ProjectCompiler implements Compiler {
         for (var file : include) {
             if (!exclude.contains(file)) {
                 log.info("Start Parsing: {}", file);
-                nodes.add(new NXCompiler(config, CharStreams.fromPath(file)).parse());
+                nodes.add(new ModuleCompiler(config, CharStreams.fromPath(file)).parse());
             }
         }
     }

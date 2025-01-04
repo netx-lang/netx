@@ -26,19 +26,19 @@ public final class Builder {
         return new Builder(config);
     }
 
-    public NXCompiler load(CharStream charStream) {
-        return new NXCompiler(config, charStream);
+    public ModuleCompiler load(CharStream charStream) {
+        return new ModuleCompiler(config, charStream);
     }
 
-    public NXCompiler load(String string) {
-        return new NXCompiler(config, CharStreams.fromString(string));
+    public ModuleCompiler load(String string) {
+        return new ModuleCompiler(config, CharStreams.fromString(string));
     }
 
-    public Compiler loadPath(Path path) throws IOException {
+    public NXCompiler loadPath(Path path) throws IOException {
         var fileName = path.getFileName().toString();
         var extension = fileName.substring(fileName.lastIndexOf('.') + 1);
         return switch (extension) {
-            case "nx" -> new NXCompiler(config, CharStreams.fromPath(path));
+            case "nx" -> new ModuleCompiler(config, CharStreams.fromPath(path));
             case "toml" -> new ProjectCompiler(config, path);
             default ->
                 throw new IOException("Invalid file extension: " + extension);
