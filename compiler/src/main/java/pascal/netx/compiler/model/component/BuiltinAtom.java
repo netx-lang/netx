@@ -6,7 +6,7 @@ import pascal.netx.util.lang.SourceLoc;
 
 import java.util.List;
 
-public final class BuiltinAtom extends AtomType {
+public final class BuiltinAtom extends AtomExpr {
     private final BuiltinComponent builtin;
     private final SourceLoc sourceLoc;
 

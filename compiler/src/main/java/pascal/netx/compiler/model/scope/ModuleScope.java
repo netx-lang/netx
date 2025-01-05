@@ -2,6 +2,7 @@ package pascal.netx.compiler.model.scope;
 
 import pascal.netx.compiler.ast.element.ComponentNode;
 import pascal.netx.compiler.elaborator.BuiltInComponentFactory;
+import pascal.netx.compiler.elaborator.InterfaceElaborator;
 import pascal.netx.compiler.model.instance.DataBundle;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
@@ -45,6 +46,16 @@ public final class ModuleScope extends Scope {
         return top;
     }
 
+    public void forEachSubScope(Consumer<ComponentScope> consumer) {
+        Stack<ComponentScope> stack = new Stack<>();
+        stack.push(getTop());
+        while (!stack.isEmpty()) {
+            ComponentScope scope = stack.pop();
+            consumer.accept(scope);
+            stack.addAll(scope.getChildren());
+        }
+    }
+
     public Supplier<Integer> getDataIndexer() {
         return dataIndexer;
     }
@@ -56,6 +67,8 @@ public final class ModuleScope extends Scope {
     public BuiltInComponentFactory getBuiltinFactory() {
         return factory;
     }
+
+    // ------ Module Information for Common Components ------
 
     public boolean hasComponent(Identifier id) {
         return componentDef.containsKey(id);
@@ -69,6 +82,8 @@ public final class ModuleScope extends Scope {
         componentDef.put(node.getIdentifier(), node);
     }
 
+    // ------ Module Information Interface Components ------
+
     public boolean hasInterface(Identifier id) {
         return interfaceDef.containsKey(id);
     }
@@ -77,17 +92,8 @@ public final class ModuleScope extends Scope {
         return interfaceDef.get(id);
     }
 
-    public void addInterface(Identifier id, DataBundle.Factory factory) {
-        interfaceDef.put(id, factory);
-    }
-
-    public void forEachSubScope(Consumer<ComponentScope> consumer) {
-        Stack<ComponentScope> stack = new Stack<>();
-        stack.push(getTop());
-        while (!stack.isEmpty()) {
-            ComponentScope scope = stack.pop();
-            consumer.accept(scope);
-            stack.addAll(scope.getChildren());
-        }
+    public void addInterface(ComponentNode node) {
+        addComponent(node);
+        interfaceDef.put(node.getIdentifier(), new InterfaceElaborator(this).elaborate(node));
     }
 }

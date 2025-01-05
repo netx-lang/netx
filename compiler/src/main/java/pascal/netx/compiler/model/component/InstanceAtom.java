@@ -3,7 +3,7 @@ package pascal.netx.compiler.model.component;
 import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.util.lang.SourceLoc;
 
-public final class InstanceAtom extends AtomType {
+public final class InstanceAtom extends AtomExpr {
     private final Mode mode;
     private final Instance instance;
     private final SourceLoc sourceLoc;

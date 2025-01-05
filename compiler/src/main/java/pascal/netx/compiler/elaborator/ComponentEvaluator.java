@@ -11,6 +11,7 @@ import pascal.netx.compiler.ast.expr.qualifier.Qualifier;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.EntityList;
+import pascal.netx.compiler.model.Utils;
 import pascal.netx.compiler.model.component.*;
 import pascal.netx.compiler.model.instance.*;
 import pascal.netx.compiler.model.instance.selector.BitSelector;
@@ -32,7 +33,7 @@ import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.stream.IntStream;
 
-import static pascal.netx.compiler.elaborator.Types.*;
+import static pascal.netx.compiler.model.Entities.*;
 
 public final class ComponentEvaluator {
     private static final Logger log = LoggerFactory.getLogger(ComponentEvaluator.class);
@@ -70,7 +71,7 @@ public final class ComponentEvaluator {
         this.module = component.getModule();
     }
 
-    public ComponentType evaluateToComponentType(ExprNode expr, boolean needDeclareInPlace) {
+    public Expr evaluateToComponentType(ExprNode expr, boolean needDeclareInPlace) {
         if (needDeclareInPlace) {
             return castToComponentType(evaluateAndDeclInPlace(expr), expr.getSourceLoc());
         }
@@ -265,12 +266,12 @@ public final class ComponentEvaluator {
         var operand = evaluate(expr.getOperand());
         switch (operand) {
             case EntityList(var list) -> {
-                List<ComponentType> result = new LinkedList<>();
+                List<Expr> result = new LinkedList<>();
                 for (var element : list) {
                     var inst = requiresMutableInstance(expr.getSourceLoc(), element);
                     result.add(InstanceAtom.of(mode, inst, expr.getSourceLoc()));
                 }
-                return ParallelType.from(result);
+                return ParallelExpr.from(result);
             }
             case MutableInstance inst -> {
                 return InstanceAtom.of(mode, inst, expr.getSourceLoc());
@@ -296,8 +297,8 @@ public final class ComponentEvaluator {
 
     private Entity evaluateBinaryExpr(BinaryExpr expr) {
         return switch (expr.getOp()) {
-            case COMBINE -> evaluateSequentialType(expr, false);
-            case TIE -> evaluateSequentialType(expr, true);
+            case COMBINE -> evaluateSequentialExpr(expr, false);
+            case TIE -> evaluateSequentialExpr(expr, true);
             case CONCAT -> evaluateListConcat(expr);
             case ADD, SUB, MUL, DIV, MOD, POW, AND, OR, XOR, XNOR,
                  EQ, NE, LT, LE, GT, GE, ARITH_SHR, ARITH_SHL, LOGIC_SHR, LOGIC_SHL ->
@@ -325,25 +326,25 @@ public final class ComponentEvaluator {
         return EntityList.of(result);
     }
 
-    private Entity evaluateSequentialType(BinaryExpr expr, boolean isTied) {
+    private Entity evaluateSequentialExpr(BinaryExpr expr, boolean isTied) {
         var leftLoc = expr.getLhs().getSourceLoc();
         var rightLoc = expr.getRhs().getSourceLoc();
-        ComponentType lhs, rhs = castToComponentType(evaluate(expr.getRhs()), rightLoc);
+        Expr lhs, rhs = castToComponentType(evaluate(expr.getRhs()), rightLoc);
         if (isTied) {
             var lhsEntity = evaluate(expr.getLhs());
             if (lhsEntity instanceof EntityList(var list)) {
-                return ParallelType.from(list.stream()
+                return ParallelExpr.from(list.stream()
                         .map(element -> requiresDataBundle(leftLoc, element))
-                        .map(ComponentType.class::cast).toList());
+                        .map(Expr.class::cast).toList());
             } else {
                 lhs = InstanceAtom.of(InstanceAtom.Mode.BIDI,
                         requiresMutableInstance(leftLoc, lhsEntity), leftLoc);
             }
-            return SequentialType.ofTied(lhs, rhs);
+            return SequentialExpr.ofTied(lhs, rhs);
         } else {
             lhs = castToComponentType(evaluate(expr.getLhs()), leftLoc);
         }
-        return SequentialType.ofSplit(lhs, rhs);
+        return SequentialExpr.ofSplit(lhs, rhs);
     }
 
     private Entity evaluateSymbolExpr(SymbolExpr expr) {
@@ -379,7 +380,7 @@ public final class ComponentEvaluator {
     }
 
     public Entity evaluateMacroExpr(SourceLoc sourceLoc, Macro marco, List<Entity> parameters) {
-        int size = requiresMatchedSize(sourceLoc, marco.identifiers(), parameters);
+        int size = Utils.requiresMatchedSize(sourceLoc, marco.identifiers(), parameters);
         var bindings = MultiBinding.ofEmpty();
         for (int i = 0; i < size; i++) {
             bindings.bind(marco.identifiers().get(i), parameters.get(i));
@@ -425,7 +426,7 @@ public final class ComponentEvaluator {
         List<Entity> parameters = evaluateParameters(expr);
         if (prototype instanceof Macro macro) {
             return evaluateMacroExpr(expr.getSourceLoc(), macro, parameters);
-        } else if (prototype instanceof AtomType atom) {
+        } else if (prototype instanceof AtomExpr atom) {
             atom.setParameters(parameters);
             return atom;
         } else {
@@ -439,7 +440,7 @@ public final class ComponentEvaluator {
         for (var arg : expr.getArguments()) {
             var entity = evaluate(arg);
             var param = switch (entity) {
-                case ComponentType type -> type;
+                case Expr type -> type;
                 case Data ignored -> castToComponentType(entity, arg.getSourceLoc());
                 case DataAccess ignored -> castToComponentType(entity, arg.getSourceLoc());
                 default -> requiresValue(arg.getSourceLoc(), entity);
@@ -462,7 +463,7 @@ public final class ComponentEvaluator {
     }
 
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
-        requiresMatchedSize(sourceLoc, 1, arguments);
+        Utils.requiresMatchedSize(sourceLoc, 1, arguments);
         mode = EvaluationMode.COMMON;
         var bitType = BitType.of(evaluateToInt(arguments.getFirst()));
         mode = EvaluationMode.FACTORY;

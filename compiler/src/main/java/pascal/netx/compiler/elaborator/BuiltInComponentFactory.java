@@ -1,5 +1,6 @@
 package pascal.netx.compiler.elaborator;
 
+import pascal.netx.compiler.model.Utils;
 import pascal.netx.compiler.model.component.BuiltinAtom;
 import pascal.netx.compiler.model.instance.Wire;
 import pascal.netx.compiler.model.instance.type.BitType;
@@ -11,7 +12,8 @@ import pascal.netx.compiler.model.scope.ModuleScope;
 import pascal.netx.compiler.model.scope.Scope;
 import pascal.netx.util.lang.Identifier;
 
-import static pascal.netx.compiler.elaborator.Types.*;
+import static pascal.netx.compiler.model.Entities.requiresBooleanValue;
+import static pascal.netx.compiler.model.Entities.requiresIntegerValue;
 
 public class BuiltInComponentFactory {
     private final ModuleScope module;
@@ -57,7 +59,7 @@ public class BuiltInComponentFactory {
     }
 
     private ComponentScope createREGISTERComponent(Scope parent, BuiltinAtom type) {
-        requiresMatchedSize(type.getSourceLoc(), 2, type.getParameters());
+        Utils.requiresMatchedSize(type.getSourceLoc(), 2, type.getParameters());
         var result = instantiate(parent, type);
         var attributes = new Attributes();
         var isPosTrigger = requiresBooleanValue(type.getSourceLoc(), type.getParameters().get(1));
@@ -69,7 +71,7 @@ public class BuiltInComponentFactory {
     }
 
     private ComponentScope createSPLITComponent(Scope parent, BuiltinAtom type) {
-        requiresMatchedSize(type.getSourceLoc(), 1, type.getParameters());
+        Utils.requiresMatchedSize(type.getSourceLoc(), 1, type.getParameters());
         int split = requiresIntegerValue(type.getSourceLoc(), type.getParameters().getFirst()).toInt();
 
         var Component = instantiate(parent, type);
@@ -87,7 +89,7 @@ public class BuiltInComponentFactory {
             result.addInput(newWire(result, "i"));
             result.addOutput(newWire(result, "o"));
         } else {
-            requiresMatchedSize(type.getSourceLoc(), 1, type.getParameters());
+            Utils.requiresMatchedSize(type.getSourceLoc(), 1, type.getParameters());
             int width = requiresIntegerValue(type.getSourceLoc(), type.getParameters().getFirst()).toInt();
             result.addInput(newWire(result, "i"));
             result.addOutput(newWire(result, "o", BitType.of(width)));
@@ -96,7 +98,7 @@ public class BuiltInComponentFactory {
     }
 
     private ComponentScope createRelationalOpComponent(Scope parent, BuiltinAtom type) {
-        requiresMatchedSize(type.getSourceLoc(), 0, type.getParameters());
+        Utils.requiresMatchedSize(type.getSourceLoc(), 0, type.getParameters());
         var result = instantiate(parent, type);
         result.addInput(newWire(result, "i1"), newWire(result, "i2"));
         result.addOutput(newWire(result, "o", BitType.forBoolean()));
@@ -104,7 +106,7 @@ public class BuiltInComponentFactory {
     }
 
     private ComponentScope createShiftComponent(Scope parent, BuiltinAtom type) {
-        requiresMatchedSize(type.getSourceLoc(), 0, type.getParameters());
+        Utils.requiresMatchedSize(type.getSourceLoc(), 0, type.getParameters());
         var result = instantiate(parent, type);
         result.addInput(newWire(result, "i"), newWire(result, "off"));
         result.addOutput(newWire(result, "o"));
@@ -114,7 +116,7 @@ public class BuiltInComponentFactory {
     private ComponentScope createMultiInputComponent(Scope parent, BuiltinAtom type) {
         int ports = 2;
         if (!type.getParameters().isEmpty()) {
-            requiresMatchedSize(type.getSourceLoc(), 1, type.getParameters());
+            Utils.requiresMatchedSize(type.getSourceLoc(), 1, type.getParameters());
             ports = requiresIntegerValue(type.getSourceLoc(), type.getParameters().getFirst()).toInt();
         }
 

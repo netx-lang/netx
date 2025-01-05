@@ -24,7 +24,7 @@ public final class InterfaceType implements InstanceType {
         return Collections.unmodifiableList(types);
     }
 
-    public Identifier getId() {
+    public Identifier getIdentifier() {
         return id;
     }
 }

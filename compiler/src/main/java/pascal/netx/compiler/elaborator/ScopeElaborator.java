@@ -28,8 +28,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import static pascal.netx.compiler.elaborator.Types.requiresComponentType;
-import static pascal.netx.compiler.elaborator.Types.requiresMatchedSize;
+import static pascal.netx.compiler.model.Entities.requiresComponentType;
+import static pascal.netx.compiler.model.Utils.requiresMatchedSize;
 
 final class ScopeElaborator {
     private static final Logger log = LoggerFactory.getLogger(ScopeElaborator.class);
@@ -154,67 +154,60 @@ final class ScopeElaborator {
             this.sourceLoc = sourceLoc;
         }
 
-        private static List<AtomType> leftMostAtomsOf(ComponentType type) {
-            List<AtomType> result = new ArrayList<>();
-            switch (type) {
-                case ParallelType parallelType -> {
-                    for (var sub : parallelType.types()) {
-                        result.addAll(leftMostAtomsOf(sub));
-                    }
-                }
-                case AtomType atomType -> result.add(atomType);
-                case SequentialType sequentialType -> result.addAll(leftMostAtomsOf(sequentialType.lhs()));
+        private static List<AtomExpr> leftMostAtomsOf(Expr expr) {
+            List<AtomExpr> result = new ArrayList<>();
+            switch (expr) {
+                case AtomExpr e -> result.add(e);
+                case SequentialExpr e -> result.addAll(leftMostAtomsOf(e.lhs()));
+                case ParallelExpr e -> e.exprs().forEach(sub -> result.addAll(leftMostAtomsOf(sub)));
             }
             return result;
         }
 
-        private static void checkTiedType(SourceLoc sourceLoc, List<DataBundle> to, List<AtomType> from) {
+        /**
+         * Check whether the type of e_1 and e_2 matches in e_1 <+> e_2
+         */
+        private static void checkTiedType(SourceLoc sourceLoc, List<DataBundle> to, List<AtomExpr> from) {
             int size = requiresMatchedSize(sourceLoc, from, to);
             for (int i = 0; i < size; i++) {
-                if (from.get(i) instanceof ComponentAtom atom) {
-                    checkSingleTiedType(sourceLoc, to.get(i), atom);
+                if (from.get(i) instanceof ComponentAtom fi
+                        && fi.getDefinition().getKind() == ComponentNode.Kind.INTERFACE) {
+                    var lhsID = to.get(i).getType().getIdentifier();
+                    var rhsID = fi.getDefinition().getIdentifier();
+                    if (lhsID.equals(rhsID)) {
+                        continue;
+                    }
+                    log.error("{}: Unmatched type in isTied expression {} and {}", sourceLoc, lhsID, rhsID);
                 } else {
                     log.error("{}: Expected interface but got {}", sourceLoc, from.get(i));
-                    throw new TypeCheckingException();
                 }
+                throw new TypeCheckingException();
             }
         }
 
-        private static void checkSingleTiedType(SourceLoc sourceLoc, DataBundle lhs, ComponentAtom rhs) {
-            var lhsID = lhs.getType().getId();
-            var rhsID = rhs.getDefinition().getIdentifier();
-            if (rhs.getDefinition().getKind() == ComponentNode.Kind.INTERFACE) {
-                if (lhsID.equals(rhsID)) {
-                    return;
-                }
-            }
-            log.error("{}: Unmatched type in tied expression {} and {}", sourceLoc, lhsID, rhsID);
-            throw new TypeCheckingException();
-        }
-
-        public void instantiate(ComponentType type) {
+        public void instantiate(Expr type) {
             doInstantiate(type);
         }
 
-        Instantiator.ComponentPort doInstantiate(ComponentType type) {
+        Instantiator.ComponentPort doInstantiate(Expr type) {
             return switch (type) {
                 case BuiltinAtom atom -> instantiateBuiltinAtom(atom);
                 case InstanceAtom atom -> instantiateInstanceAtom(atom);
                 case ComponentAtom atom -> instantiateComponentAtom(atom);
-                case ParallelType parallelType -> instantiateParallelType(parallelType);
-                case SequentialType sequentialType -> instantiateSequentialType(sequentialType);
+                case SequentialExpr expr -> instantiateSequentialExpr(expr);
+                case ParallelExpr expr -> instantiateParallelExpr(expr);
             };
         }
 
-        private Instantiator.ComponentPort instantiateSequentialType(SequentialType sequentialType) {
+        private Instantiator.ComponentPort instantiateSequentialExpr(SequentialExpr sequentialExpr) {
             // right-hand-side goes first
-            var rhs = doInstantiate(sequentialType.rhs());
-            var lhs = doInstantiate(sequentialType.lhs());
+            var rhs = doInstantiate(sequentialExpr.rhs());
+            var lhs = doInstantiate(sequentialExpr.lhs());
 
             List<? extends Instance> receiver;
-            if (sequentialType.tied()) {
+            if (sequentialExpr.isTied()) {
                 var bundles = lhs.source().stream().map(DataBundle.class::cast).toList();
-                checkTiedType(sourceLoc, bundles, leftMostAtomsOf(sequentialType.rhs()));
+                checkTiedType(sourceLoc, bundles, leftMostAtomsOf(sequentialExpr.rhs()));
                 receiver = bundles.stream().map(DataComposition::getElements).flatMap(Collection::stream).toList();
             } else {
                 receiver = lhs.source();
@@ -227,9 +220,9 @@ final class ScopeElaborator {
             return ComponentPort.of(lhs.target(), rhs.source());
         }
 
-        private Instantiator.ComponentPort instantiateParallelType(ParallelType parallelType) {
+        private Instantiator.ComponentPort instantiateParallelExpr(ParallelExpr parallelExpr) {
             List<Instance> input = new LinkedList<>(), output = new LinkedList<>();
-            for (var sub : parallelType.types()) {
+            for (var sub : parallelExpr.exprs()) {
                 var port = doInstantiate(sub);
                 input.addAll(port.target());
                 output.addAll(port.source());

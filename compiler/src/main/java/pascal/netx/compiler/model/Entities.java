@@ -1,37 +1,19 @@
-package pascal.netx.compiler.elaborator;
+package pascal.netx.compiler.model;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.exception.CompileCancellationException;
-import pascal.netx.compiler.model.Entity;
-import pascal.netx.compiler.model.EntityList;
-import pascal.netx.compiler.model.component.ComponentType;
+import pascal.netx.compiler.model.component.Expr;
 import pascal.netx.compiler.model.component.InstanceAtom;
-import pascal.netx.compiler.model.component.ParallelType;
+import pascal.netx.compiler.model.component.ParallelExpr;
 import pascal.netx.compiler.model.instance.*;
 import pascal.netx.util.lang.SourceLoc;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public final class Types {
-    private static final Logger log = LoggerFactory.getLogger(Types.class);
-
-    public static int requiresMatchedSize(SourceLoc sourceLoc, List<?> target, List<?> source) {
-        if (target.size() != source.size()) {
-            log.error("{}: Instantiation with mismatched component size: {} vs {}",
-                    sourceLoc, target.size(), source.size());
-            throw new CompileCancellationException();
-        }
-        return target.size();
-    }
-
-    public static void requiresMatchedSize(SourceLoc sourceLoc, int expected, List<?> actual) {
-        if (expected != actual.size()) {
-            log.error("{}: Expected list of size {} but got {}", sourceLoc, expected, actual);
-            throw new CompileCancellationException();
-        }
-    }
+public final class Entities {
+    private static final Logger log = LoggerFactory.getLogger(Entities.class);
 
     public static DataBundle requiresDataBundle(SourceLoc loc, Entity entity) {
         if (entity instanceof DataBundle bundle) {
@@ -107,19 +89,19 @@ public final class Types {
         }
     }
 
-    public static ComponentType requiresComponentType(SourceLoc loc, Entity entity) {
-        if (entity instanceof ComponentType componentType) {
-            return componentType;
+    public static Expr requiresComponentType(SourceLoc loc, Entity entity) {
+        if (entity instanceof Expr expr) {
+            return expr;
         } else {
             log.error("{}: Expected component type but got {}", loc, entity);
             throw new CompileCancellationException();
         }
     }
 
-    public static ComponentType castToComponentType(Entity entity, SourceLoc loc) {
+    public static Expr castToComponentType(Entity entity, SourceLoc loc) {
         return switch (entity) {
             case EntityList list -> makeParallelTypeFromList(list, loc);
-            case ComponentType componentType -> componentType;
+            case Expr expr -> expr;
             case Instance inst -> InstanceAtom.of(InstanceAtom.Mode.BIDI, inst, loc);
             default -> {
                 log.error("{}: Cannot cast {} to component type", loc, entity);
@@ -128,9 +110,9 @@ public final class Types {
         };
     }
 
-    private static ParallelType makeParallelTypeFromList(EntityList list, SourceLoc sourceLoc) {
-        List<ComponentType> result = new LinkedList<>();
+    private static ParallelExpr makeParallelTypeFromList(EntityList list, SourceLoc sourceLoc) {
+        List<Expr> result = new LinkedList<>();
         list.forEach(entity -> result.add(castToComponentType(entity, sourceLoc)));
-        return ParallelType.from(result);
+        return ParallelExpr.from(result);
     }
 }

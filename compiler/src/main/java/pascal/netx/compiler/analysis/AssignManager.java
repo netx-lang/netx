@@ -1,6 +1,6 @@
 package pascal.netx.compiler.analysis;
 
-import pascal.netx.compiler.elaborator.Types;
+import pascal.netx.compiler.model.Utils;
 import pascal.netx.compiler.model.instance.Data;
 import pascal.netx.compiler.model.instance.DataComposition;
 import pascal.netx.compiler.model.instance.Instance;
@@ -27,7 +27,7 @@ public final class AssignManager {
         define(lhs);
         if (lhs instanceof DataComposition lhsComposite && rhs instanceof DataComposition rhsComposite) {
             List<Data> lhsFlatten = lhsComposite.flatten(), rhsFlatten = rhsComposite.flatten();
-            int size = Types.requiresMatchedSize(sourceLoc, lhsFlatten, rhsFlatten);
+            int size = Utils.requiresMatchedSize(sourceLoc, lhsFlatten, rhsFlatten);
             for (int i = 0; i < size; i++) {
                 define(lhsFlatten.get(i));
                 use(rhsFlatten.get(i));

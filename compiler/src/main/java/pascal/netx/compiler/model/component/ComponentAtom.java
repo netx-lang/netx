@@ -6,7 +6,7 @@ import pascal.netx.util.lang.Identifier;
 
 import java.util.List;
 
-public final class ComponentAtom extends AtomType {
+public final class ComponentAtom extends AtomExpr {
     private final ComponentNode definition;
     private Identifier identifier;
 
