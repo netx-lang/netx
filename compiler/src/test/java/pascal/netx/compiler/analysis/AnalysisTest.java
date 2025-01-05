@@ -1,9 +1,10 @@
 package pascal.netx.compiler.analysis;
 
+import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
 import pascal.netx.compiler.exception.TypeCheckingException;
 import pascal.netx.compiler.io.Builder;
-import pascal.netx.compiler.io.ModuleCompiler;
+import pascal.netx.compiler.io.NXParser;
 import pascal.netx.util.TestUtils;
 
 import java.io.IOException;
@@ -19,8 +20,8 @@ class AnalysisTest {
     void testSourceLocChecker() throws IOException {
         for (var testcase : TestUtils.collectAllFilesUnder(TEST_DIR)) {
             if (testcase.getFileName().endsWith(".nx")) {
-                var compiler = (ModuleCompiler) Builder.forExpanded().loadPath(testcase);
-                new SourceLocChecker(compiler.parse()).analyze();
+                var node = new NXParser(CharStreams.fromPath(testcase)).parse();
+                new SourceLocChecker(node).analyze();
             }
         }
     }

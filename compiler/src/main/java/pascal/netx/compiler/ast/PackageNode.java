@@ -6,16 +6,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public final class DesignNode extends ASTNode {
+public final class PackageNode extends ASTNode {
     private List<PackageElement> elements = new ArrayList<>();
     private PackageInfoNode packageInfo;
 
-    private DesignNode(PackageInfoNode packageInfo) {
+    private PackageNode(PackageInfoNode packageInfo) {
         this.packageInfo = packageInfo;
     }
 
-    public static DesignNode of(PackageInfoNode packageInfo) {
-        return new DesignNode(packageInfo);
+    public static PackageNode of(PackageInfoNode packageInfo) {
+        return new PackageNode(packageInfo);
     }
 
     @Override
@@ -49,7 +49,7 @@ public final class DesignNode extends ASTNode {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (DesignNode) obj;
+        var that = (PackageNode) obj;
         return Objects.equals(this.elements, that.elements);
     }
 
@@ -66,9 +66,5 @@ public final class DesignNode extends ASTNode {
             sb.append(definition).append('\n');
         }
         return sb.toString();
-    }
-
-    public enum Type {
-        LIBRARY, APPLICATION
     }
 }

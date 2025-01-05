@@ -7,7 +7,7 @@ import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.compiler.model.instance.Int32Value;
 import pascal.netx.compiler.model.instance.selector.BitSelector;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.ModuleScope;
+import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.util.lang.Identifier;
 
 import java.util.ArrayList;
@@ -18,9 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ComponentEvaluatorUnitTest {
-
-    private static ModuleScope loadDesign(String code) {
-        return Builder.forExpanded().load(CharStreams.fromString(code)).elaborate();
+    private static PackageScope loadDesign(String code) {
+        return Builder.forExpanded().load(CharStreams.fromString(code)).elaborate().getTop();
     }
 
     private static ComponentScope loadSingleComponent(String code) {

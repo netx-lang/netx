@@ -20,7 +20,7 @@ import pascal.netx.compiler.model.instance.selector.Selector;
 import pascal.netx.compiler.model.instance.type.BitType;
 import pascal.netx.compiler.model.instance.type.PolyType;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.ModuleScope;
+import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.binding.MonoBinding;
 import pascal.netx.compiler.model.scope.binding.MultiBinding;
 import pascal.netx.util.lang.BuiltinComponent;
@@ -61,14 +61,14 @@ public final class ComponentEvaluator {
             Map.entry(BinaryExpr.Operator.GE, IntegerValue::ge)
     );
 
-    private final ModuleScope module;
+    private final PackageScope pack;
     private final ComponentScope scope;
 
     private EvaluationMode mode = EvaluationMode.COMMON;
 
     public ComponentEvaluator(ComponentScope component) {
         this.scope = component;
-        this.module = component.getModule();
+        this.pack = component.getPack();
     }
 
     public Expr evaluateToComponentType(ExprNode expr, boolean needDeclareInPlace) {
@@ -286,7 +286,7 @@ public final class ComponentEvaluator {
     public MutableInstance.Factory<?> evaluateToInstanceFactory(ExprNode expr) {
         MutableInstance.Factory<?> factory;
         if (expr == null) {
-            factory = new Wire.Factory(PolyType.getInstance(), module);
+            factory = new Wire.Factory(PolyType.getInstance(), pack);
         } else {
             mode = EvaluationMode.FACTORY;
             factory = requiresInstanceFactory(expr.getSourceLoc(), evaluate(expr));
@@ -357,11 +357,11 @@ public final class ComponentEvaluator {
     private Entity evaluatePrimarySymbolExpr(IdentifierExpr expr) {
         var id = expr.getIdentifier();
         if (mode == EvaluationMode.FACTORY) {
-            if (!scope.getModule().hasInterface(id)) {
+            if (!scope.getPack().hasInterface(id)) {
                 log.error("{}: Unknown interface type {}", expr.getSourceLoc(), id);
                 throw new CompileCancellationException();
             }
-            return scope.getModule().getInterface(id);
+            return scope.getPack().getInterface(id);
         } else {
             Entity entity = resolveIdentifier(id);
             if (entity instanceof Macro macro) {
@@ -395,10 +395,10 @@ public final class ComponentEvaluator {
     private Entity resolveIdentifier(Identifier id) {
         Entity entity = scope.lookup(id);
         if (entity == null) {
-            entity = module.lookup(id);
+            entity = pack.lookup(id);
             if (entity == null) {
-                if (module.hasComponent(id)) {
-                    entity = ComponentAtom.of(module.getComponent(id), id);
+                if (pack.hasComponent(id)) {
+                    entity = ComponentAtom.of(pack.getComponent(id), id);
                 } else if (BuiltinComponent.isBuiltin(id)) {
                     entity = BuiltinAtom.of(BuiltinComponent.of(id), id.getSourceLoc());
                 }
@@ -415,7 +415,7 @@ public final class ComponentEvaluator {
 
     @Nonnull
     private Entity declareDataInPlace(Identifier id) {
-        var factory = new Wire.Factory(PolyType.getInstance(), module);
+        var factory = new Wire.Factory(PolyType.getInstance(), pack);
         var data = factory.create(scope, id);
         scope.bind(id, data);
         return data;
@@ -467,12 +467,12 @@ public final class ComponentEvaluator {
         mode = EvaluationMode.COMMON;
         var bitType = BitType.of(evaluateToInt(arguments.getFirst()));
         mode = EvaluationMode.FACTORY;
-        return new Wire.Factory(bitType, module);
+        return new Wire.Factory(bitType, pack);
     }
 
     private Clock.Factory evaluateClockFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         if (arguments.isEmpty()) {
-            return new Clock.Factory(module);
+            return new Clock.Factory(pack);
         } else {
             log.error("{}: Unexpected specification for component type clock: {}", sourceLoc, arguments);
             throw new CompileCancellationException();

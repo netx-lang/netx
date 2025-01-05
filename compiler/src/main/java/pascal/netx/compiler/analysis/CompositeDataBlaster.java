@@ -5,14 +5,14 @@ import pascal.netx.compiler.model.instance.DataBundle;
 import pascal.netx.compiler.model.instance.DataComposition;
 import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.ModuleScope;
+import pascal.netx.compiler.model.scope.PackageScope;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public final class CompositeDataBlaster extends ModelAnalysis {
-    public CompositeDataBlaster(ModuleScope design) {
+    public CompositeDataBlaster(PackageScope design) {
         super(design);
     }
 
@@ -34,7 +34,7 @@ public final class CompositeDataBlaster extends ModelAnalysis {
 
     @Override
     public void analyze() {
-        design.forEachSubScope(this::analyze);
+        pack.forEachSubComponent(this::analyze);
     }
 
     private void analyze(ComponentScope scope) {

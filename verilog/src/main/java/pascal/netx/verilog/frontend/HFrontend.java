@@ -15,7 +15,7 @@ import java.util.Map;
 import static pascal.netx.util.nxon.FrontendUtils.*;
 
 public class HFrontend extends AbstractHFrontend<List<VModule>> {
-    private final Map<ModuleIndex, VModule> definitions = new HashMap<>();
+    private final Map<VModuleIndex, VModule> definitions = new HashMap<>();
     private final List<JsonNode> defNodes = new LinkedList<>();
 
     private HFrontend(JsonNode json) {
@@ -45,18 +45,18 @@ public class HFrontend extends AbstractHFrontend<List<VModule>> {
         for (var node : defNodes) {
             var id = identifierOf(node);
             var defIndex = defIndexOf(node);
-            definitions.put(ModuleIndex.of(id.name(), defIndex), VModule.of(id, defIndex));
+            definitions.put(VModuleIndex.of(id.name(), defIndex), VModule.of(id, defIndex));
         }
         for (var node : defNodes) {
             var id = identifierOf(node);
-            var module = definitions.get(ModuleIndex.of(id.name(), defIndexOf(node)));
+            var module = definitions.get(VModuleIndex.of(id.name(), defIndexOf(node)));
             new ScopeParser(this, node, module).parse();
             result.add(module);
         }
         return result;
     }
 
-    public VModule resolveModuleDef(ModuleIndex index) {
+    public VModule resolveModuleDef(VModuleIndex index) {
         return definitions.get(index);
     }
 

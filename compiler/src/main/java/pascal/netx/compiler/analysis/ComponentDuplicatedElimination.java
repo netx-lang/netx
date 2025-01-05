@@ -2,11 +2,11 @@ package pascal.netx.compiler.analysis;
 
 import pascal.netx.compiler.analysis.constraint.DuplicatedManager;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.ModuleScope;
+import pascal.netx.compiler.model.scope.PackageScope;
 
 public final class ComponentDuplicatedElimination extends ComponentModelAnalysis {
 
-    public ComponentDuplicatedElimination(ModuleScope design) {
+    public ComponentDuplicatedElimination(PackageScope design) {
         super(design, scope -> new Analyzer(scope).analyze(scope));
     }
 

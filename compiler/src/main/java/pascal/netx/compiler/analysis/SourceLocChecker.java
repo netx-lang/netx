@@ -2,14 +2,14 @@ package pascal.netx.compiler.analysis;
 
 import pascal.netx.compiler.ast.ASTListener;
 import pascal.netx.compiler.ast.ASTNode;
-import pascal.netx.compiler.ast.DesignNode;
+import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.expr.IdentifierExpr;
 
 import java.util.Objects;
 
 public final class SourceLocChecker extends ASTAnalysis implements ASTListener {
 
-    public SourceLocChecker(DesignNode design) {
+    public SourceLocChecker(PackageNode design) {
         super(design);
     }
 

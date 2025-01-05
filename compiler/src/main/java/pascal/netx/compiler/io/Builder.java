@@ -26,20 +26,25 @@ public final class Builder {
         return new Builder(config);
     }
 
-    public ModuleCompiler load(CharStream charStream) {
-        return new ModuleCompiler(config, charStream);
+    public NXCompiler load(CharStream charStream) {
+        var root = new NXParser(charStream).parse();
+        return NXCompiler.forSinglePackage(root, config);
     }
 
-    public ModuleCompiler load(String string) {
-        return new ModuleCompiler(config, CharStreams.fromString(string));
+    public NXCompiler load(String string) {
+        var root = new NXParser(CharStreams.fromString(string)).parse();
+        return NXCompiler.forSinglePackage(root, config);
     }
 
     public NXCompiler loadPath(Path path) throws IOException {
         var fileName = path.getFileName().toString();
         var extension = fileName.substring(fileName.lastIndexOf('.') + 1);
         return switch (extension) {
-            case "nx" -> new ModuleCompiler(config, CharStreams.fromPath(path));
-            case "toml" -> new ProjectCompiler(config, path);
+            case "nx" -> {
+                var root = new NXParser(CharStreams.fromPath(path)).parse();
+                yield NXCompiler.forSinglePackage(root, config);
+            }
+            case "toml" -> new ProjectConfigReader(config, path).build();
             default ->
                 throw new IOException("Invalid file extension: " + extension);
         };

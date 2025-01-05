@@ -12,7 +12,7 @@ import pascal.netx.util.lang.SourceLoc;
 import java.util.*;
 
 public final class ComponentScope extends Scope {
-    private final ModuleScope module;
+    private final PackageScope pack;
     private final boolean isInterface;
     private final Identifier identifier;
 
@@ -32,9 +32,9 @@ public final class ComponentScope extends Scope {
 
     ComponentScope(Scope parent, boolean isInterface, Identifier identifier) {
         super(parent);
-        this.module = switch (parent) {
-            case ModuleScope scope -> scope;
-            case ComponentScope scope -> scope.getModule();
+        this.pack = switch (parent) {
+            case PackageScope scope -> scope;
+            case ComponentScope scope -> scope.getPack();
             default -> throw new ShallNotReachHereError();
         };
         this.isInterface = isInterface;
@@ -66,8 +66,8 @@ public final class ComponentScope extends Scope {
         return identifier;
     }
 
-    public ModuleScope getModule() {
-        return module;
+    public PackageScope getPack() {
+        return pack;
     }
 
     public ComponentEvaluator getEvaluator() {
@@ -124,5 +124,11 @@ public final class ComponentScope extends Scope {
 
     public boolean isBuiltin() {
         return BuiltinComponent.isBuiltin(identifier);
+    }
+
+    public record Alias(Instance lhs, Instance rhs) {
+        public static Alias of(Instance lhs, Instance rhs) {
+            return new Alias(lhs, rhs);
+        }
     }
 }

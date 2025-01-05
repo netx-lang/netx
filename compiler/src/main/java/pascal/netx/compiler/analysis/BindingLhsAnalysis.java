@@ -3,7 +3,7 @@ package pascal.netx.compiler.analysis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.ASTListener;
-import pascal.netx.compiler.ast.DesignNode;
+import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.BindingNode;
 import pascal.netx.compiler.ast.expr.IdentifierExpr;
 import pascal.netx.compiler.ast.expr.ParamSymbolExpr;
@@ -13,7 +13,7 @@ public final class BindingLhsAnalysis extends ASTAnalysis implements ASTListener
 
     private static final Logger log = LoggerFactory.getLogger(BindingLhsAnalysis.class);
 
-    public BindingLhsAnalysis(DesignNode design) {
+    public BindingLhsAnalysis(PackageNode design) {
         super(design);
     }
 

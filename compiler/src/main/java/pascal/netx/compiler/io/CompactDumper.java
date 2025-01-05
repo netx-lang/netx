@@ -8,7 +8,7 @@ import pascal.netx.compiler.model.instance.*;
 import pascal.netx.compiler.model.instance.type.BitType;
 import pascal.netx.compiler.model.instance.type.PolyType;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.ModuleScope;
+import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -21,15 +21,15 @@ import static pascal.netx.util.lang.BuiltinComponent.NO_DUMP;
 import static pascal.netx.util.lang.BuiltinComponent.isBuiltin;
 
 final class CompactDumper {
-    private final ModuleScope moduleScope;
+    private final PackageScope packageScope;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final ArrayNode design;
     private final SignatureManager manager = new SignatureManager();
     private final List<ObjectNode> definitions = new LinkedList<>();
 
-    public CompactDumper(ModuleScope scope) {
-        this.moduleScope = scope;
+    public CompactDumper(PackageScope scope) {
+        this.packageScope = scope;
         this.design = objectMapper.createArrayNode();
     }
 
@@ -57,7 +57,7 @@ final class CompactDumper {
     }
 
     public ArrayNode dump() {
-        var top = moduleScope.getTop();
+        var top = packageScope.getTop();
         definitions.addFirst(dumperOf(top).dump());
         definitions.forEach(design::add);
         return design;
@@ -126,7 +126,8 @@ final class CompactDumper {
 
             List<ObjectNode> needDump = new LinkedList<>();
             component.getBinding().forEachData(data -> needDump.add(defineData(data)));
-            for (var child : component.getChildren()) {
+            for (var kid : component.getChildren()) {
+                var child = (ComponentScope) kid;
                 var instID = child.getIdentifier();
                 if (BuiltinComponent.isBuiltin(instID)) {
                     if (!NO_DUMP.contains(BuiltinComponent.of(instID))) {

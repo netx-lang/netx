@@ -7,7 +7,7 @@ import pascal.netx.compiler.model.instance.*;
 import pascal.netx.compiler.model.instance.type.BitType;
 import pascal.netx.compiler.model.instance.type.PolyType;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.ModuleScope;
+import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -17,12 +17,12 @@ import java.util.*;
 import static pascal.netx.util.lang.BuiltinComponent.NO_DUMP;
 
 final class ExpandedDumper {
-    private final ModuleScope design;
+    private final PackageScope design;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final Map<Data, Integer> dataIndices = new HashMap<>();
 
-    public ExpandedDumper(ModuleScope scope) {
+    public ExpandedDumper(PackageScope scope) {
         this.design = scope;
     }
 
@@ -81,7 +81,8 @@ final class ExpandedDumper {
 
             List<ObjectNode> needDump = new LinkedList<>();
             component.getBinding().forEachData(data -> needDump.add(defineData(data)));
-            for (var child : component.getChildren()) {
+            for (var kid : component.getChildren()) {
+                var child = (ComponentScope) kid;
                 var instID = child.getIdentifier();
                 if (BuiltinComponent.isBuiltin(instID)) {
                     if (!NO_DUMP.contains(BuiltinComponent.of(instID))) {

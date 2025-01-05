@@ -11,21 +11,31 @@ import pascal.netx.compiler.ast.expr.selector.BitSelector;
 import pascal.netx.compiler.ast.expr.selector.PartSelector;
 import pascal.netx.util.lang.Identifier;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class NXParserUnitTest {
+    private static final Path TEST_DIR = Path.of("src/test/resources/testcases/");
 
     static NetXParser makeParser(String code) {
-        var frontend = Builder.forExpanded().load(CharStreams.fromString(code));
+        var frontend = new NXParser(CharStreams.fromString(code));
         return frontend.buildANTLRParser();
+    }
+
+    @Test
+    void testPackage() throws IOException {
+        var compiler = new NXParser(CharStreams.fromPath(TEST_DIR.resolve("package.nx")));
+        assertNotNull(compiler.parse());
     }
 
     @Test
     void testParseAccessExpr() {
         var context = makeParser("arr[1][2:0]").expression();
-        var accessExpr = NXParser.parseExpr(context);
+        var accessExpr = TreeParser.parseExpr(context);
         assertEquals(AccessExpr.of(AccessExpr.of(
                         IdentifierExpr.of(Identifier.of("arr")),
                         BitSelector.of(IntNumber.of(1))),
@@ -35,7 +45,7 @@ class NXParserUnitTest {
     @Test
     void testParseListExpr() {
         var context = makeParser("[port | i in [0..5], let port = [1, x[i]]]").expression();
-        var listExpr = NXParser.parseExpr(context);
+        var listExpr = TreeParser.parseExpr(context);
         assertEquals(ListComprehension.of(
                 IdentifierExpr.of(Identifier.of("port")), List.of(
                         GeneratorQualifier.of(

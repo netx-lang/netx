@@ -19,7 +19,7 @@ class NXCompilerUnitTest {
     private static void test(String fileName) throws IOException {
         String content = new String(Files.readAllBytes(TEST_DIR.resolve(fileName)));
         CharStream charStream = CharStreams.fromString(content);
-        ModuleCompiler compiler = Builder.forExpanded().load(charStream);
+        NXCompiler compiler = Builder.forExpanded().load(charStream);
         assertNotNull(compiler.compile());
     }
     @Disabled
@@ -30,15 +30,10 @@ class NXCompilerUnitTest {
     }
 
     @Test
-    void testPackage() throws IOException {
-        var compiler = (ModuleCompiler) Builder.forExpanded().loadPath(TEST_DIR.resolve("package.nx"));
-        assertNotNull(compiler.parse());
-    }
-
-    @Test
-    void loadWithValidCharStream() {
-        CharStream charStream = CharStreams.fromString("valid input");
-        ModuleCompiler compiler = Builder.forExpanded().load(charStream);
+    void loadWithValidCharStream() throws IOException {
+        var string = Files.readString(TEST_DIR.resolve("bind_1.nx"));
+        CharStream charStream = CharStreams.fromString(string);
+        NXCompiler compiler = Builder.forExpanded().load(charStream);
         assertNotNull(compiler);
     }
 
@@ -71,7 +66,6 @@ class NXCompilerUnitTest {
     @Test
     void testInvalidInput() {
         CharStream charStream = CharStreams.fromString("invalid input");
-        ModuleCompiler compiler = Builder.forExpanded().load(charStream);
-        assertThrows(ParseCancellationException.class, compiler::compile);
+        assertThrows(ParseCancellationException.class, () -> Builder.forExpanded().load(charStream));
     }
 }

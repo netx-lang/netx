@@ -8,7 +8,7 @@ import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.model.instance.*;
 import pascal.netx.compiler.model.instance.type.PolyType;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.ModuleScope;
+import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.util.lang.Identifier;
 
 import java.util.LinkedHashMap;
@@ -16,15 +16,15 @@ import java.util.LinkedHashMap;
 public class InterfaceElaborator {
     private static final Logger log = LoggerFactory.getLogger(InterfaceElaborator.class);
 
-    private final ModuleScope module;
+    private final PackageScope pack;
 
-    public InterfaceElaborator(ModuleScope module) {
-        this.module = module;
+    public InterfaceElaborator(PackageScope pack) {
+        this.pack = pack;
     }
 
     public DataBundle.Factory elaborate(ComponentNode node) {
-        var scope = ComponentScope.newInterface(module, node.getIdentifier());
-        new ScopeElaborator(Configuration.forExpanded(), scope).build(node);
+        var scope = ComponentScope.newInterface(pack, node.getIdentifier());
+        new ComponentElaborator(Configuration.forExpanded(), scope).build(node);
 
         LinkedHashMap<Identifier, MutableInstance.Factory<?>> factories = new LinkedHashMap<>();
         for (var inst : scope.getOutputs()) {
@@ -35,23 +35,23 @@ public class InterfaceElaborator {
             var factory = getFactoryFrom(node, mutable);
             factories.put(mutable.getIdentifier(), factory);
         }
-        return new DataBundle.Factory(scope.getIdentifier(), module, factories);
+        return new DataBundle.Factory(scope.getIdentifier(), pack, factories);
     }
 
     private MutableInstance.Factory<?> getFactoryFrom(ComponentNode node, MutableInstance mutable) {
         return switch (mutable) {
-            case Clock _ -> new Clock.Factory(module);
+            case Clock _ -> new Clock.Factory(pack);
             case Wire wire -> {
                 if (wire.getType() instanceof PolyType) {
                     log.error("{}: Interface shall not contain auto-typed instance: {}", node.getSourceLoc(), wire);
                     throw new CompileCancellationException();
                 }
-                yield new Wire.Factory(wire.getType(), module);
+                yield new Wire.Factory(wire.getType(), pack);
             }
-            case DataBundle bundle -> module.getInterface(bundle.getType().getIdentifier());
+            case DataBundle bundle -> pack.getInterface(bundle.getType().getIdentifier());
             case Array array -> {
                 var elementFactory = getFactoryFrom(node, array.getElements().getFirst());
-                yield new Array.Factory(module, array.getElements().size(), elementFactory);
+                yield new Array.Factory(pack, array.getElements().size(), elementFactory);
             }
             case DataAccess _ -> {
                 log.error("{}: Interface shall not contain data access: {}", node.getSourceLoc(), mutable);

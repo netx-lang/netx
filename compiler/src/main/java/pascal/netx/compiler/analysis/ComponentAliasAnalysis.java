@@ -1,13 +1,13 @@
 package pascal.netx.compiler.analysis;
 
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.ModuleScope;
+import pascal.netx.compiler.model.scope.PackageScope;
 
 import java.util.function.Predicate;
 
 public final class ComponentAliasAnalysis extends ComponentModelAnalysis {
 
-    public ComponentAliasAnalysis(ModuleScope design) {
+    public ComponentAliasAnalysis(PackageScope design) {
         super(design, scope -> new Analyzer(scope).analyze());
     }
 

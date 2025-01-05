@@ -7,11 +7,11 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pascal.netx.compiler.ast.DesignNode;
+import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.ImportNode;
 import pascal.netx.compiler.ast.element.PackageElement;
 import pascal.netx.compiler.exception.CompileCancellationException;
-import pascal.netx.util.exception.TodoException;
+import pascal.netx.compiler.model.scope.ProjectScope;
 import pascal.netx.util.lang.Identifier;
 
 import java.io.FileInputStream;
@@ -19,14 +19,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
-public final class ProjectCompiler implements NXCompiler {
+public final class ProjectConfigReader {
     private static final String DEFAULT_CONFIG = "_netx.toml";
     private static final TomlMapper MAPPER = new TomlMapper();
-    private static final Logger log = LoggerFactory.getLogger(ProjectCompiler.class);
+    private static final Logger log = LoggerFactory.getLogger(ProjectConfigReader.class);
 
-    private final List<ProjectCompiler> dependencies = new ArrayList<>();
-    private final List<DesignNode> nodes = new ArrayList<>();
+    private final List<NXCompiler> dependencies = new ArrayList<>();
+    private final List<PackageNode> nodes = new ArrayList<>();
     private final ImportManager manager = new ImportManager();
     private final Configuration config;
     private final JsonNode toml;
@@ -34,30 +35,29 @@ public final class ProjectCompiler implements NXCompiler {
     private final Path dir;
     private final Path buildDir;
 
-    private final Info info;
+    private final ProjectScope.Info info;
 
-    public ProjectCompiler(Configuration config, Path path) throws IOException {
+    public ProjectConfigReader(Configuration config, Path path) throws IOException {
         this.config = config;
         this.toml = MAPPER.readTree(new FileInputStream(path.toFile()));
         this.dir = path.getParent();
         this.buildDir = Files.createDirectories(dir.resolve("build"));
 
         var projectInfo = toml.get("project");
-        this.info = new Info(
+        this.info = new ProjectScope.Info(
                 projectInfo.get("name").textValue(),
-                Version.of(projectInfo.get("version").textValue()));
+                ProjectScope.Version.of(projectInfo.get("version").textValue()));
     }
 
-    @Override
-    public JsonNode compile() throws IOException {
+    public NXCompiler build() throws IOException {
         parse();
         nodes.forEach(this::doImport);
-        // TODO:
-        throw new TodoException();
+        return new NXCompiler(nodes, config, new PackageManager(dependencies, manager));
     }
 
     void parse() throws IOException {
         resolveIncludeDesign();
+        collectPackage();
         manager.initialize(nodes, resolveDependencies());
     }
 
@@ -67,8 +67,20 @@ public final class ProjectCompiler implements NXCompiler {
         for (var file : include) {
             if (!exclude.contains(file)) {
                 log.info("Start Parsing: {}", file);
-                nodes.add(new ModuleCompiler(config, CharStreams.fromPath(file)).parse());
+                nodes.add(new NXParser(CharStreams.fromPath(file)).parse());
             }
+        }
+    }
+
+    void collectPackage() {
+        var groups = nodes.stream().collect(Collectors.groupingBy(PackageNode::getPackageInfo));
+        nodes.clear();
+        for (var entry : groups.entrySet()) {
+            var design = PackageNode.of(entry.getKey());
+            for (var node : entry.getValue()) {
+                node.getElements().forEach(design::addDefinition);
+            }
+            nodes.add(design);
         }
     }
 
@@ -92,12 +104,12 @@ public final class ProjectCompiler implements NXCompiler {
         return result;
     }
 
-    Map<Identifier, List<DesignNode>> resolveDependencies() throws IOException {
+    Map<Identifier, List<PackageNode>> resolveDependencies() throws IOException {
         if (!toml.has("dependencies")) {
             return Map.of();
         }
 
-        Map<Identifier, List<DesignNode>> result = new HashMap<>();
+        Map<Identifier, List<PackageNode>> result = new HashMap<>();
         var iter = toml.get("dependencies").fields();
         while (iter.hasNext()) {
             var entry = iter.next();
@@ -113,18 +125,17 @@ public final class ProjectCompiler implements NXCompiler {
                 throw new IOException("Invalid dependency specification" + entry.getKey());
             }
             var libCompiler = resolveDependency(path, spec);
-            dependencies.add(libCompiler);
-            libCompiler.parse();
+            dependencies.add(libCompiler.build());
             result.put(Identifier.of(entry.getKey()), libCompiler.nodes);
         }
         return result;
     }
 
-    private ProjectCompiler resolveDependency(Path libRoot, JsonNode spec) throws IOException {
+    private ProjectConfigReader resolveDependency(Path libRoot, JsonNode spec) throws IOException {
         var versionSpec = VersionSpec.of(spec.get("version").textValue());
-        var libCompiler = new ProjectCompiler(config, libRoot.resolve(DEFAULT_CONFIG));
-        if (!versionSpec.isCompatibleWith(libCompiler.info.version)) {
-            log.error("Dependency {} version mismatch", libCompiler.info.name);
+        var libCompiler = new ProjectConfigReader(config, libRoot.resolve(DEFAULT_CONFIG));
+        if (!versionSpec.isCompatibleWith(libCompiler.info.version())) {
+            log.error("Dependency {} version mismatch", libCompiler.info.name());
             throw new CompileCancellationException();
         }
         return libCompiler;
@@ -143,7 +154,7 @@ public final class ProjectCompiler implements NXCompiler {
         }
     }
 
-    void doImport(DesignNode node) {
+    void doImport(PackageNode node) {
         var newElements = new LinkedList<PackageElement>();
         for (var element : node.getElements()) {
             if (element instanceof ImportNode importNode) {
@@ -163,46 +174,23 @@ public final class ProjectCompiler implements NXCompiler {
         node.setElements(newElements);
     }
 
-    public record Info(String name, Version version) {
-
-    }
-
-    public record Version(int major, int minor, int patch) implements Comparable<Version> {
-        public static Version of(String version) {
-            var parts = version.split("\\.");
-            return new Version(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
-        }
-
-        @Override
-        public int compareTo(Version other) {
-            if (major != other.major) {
-                return Integer.compare(major, other.major);
-            }
-            if (minor != other.minor) {
-                return Integer.compare(minor, other.minor);
-            }
-            return Integer.compare(patch, other.patch);
-        }
-
-    }
-
-    record VersionSpec(Kind kind, Version base) {
+    record VersionSpec(Kind kind, ProjectScope.Version base) {
         public static VersionSpec of(String spec) {
             spec = spec.replace(" ", "");
             if (spec.startsWith(">=")) {
-                return new VersionSpec(Kind.GE, Version.of(spec.substring(2)));
+                return new VersionSpec(Kind.GE, ProjectScope.Version.of(spec.substring(2)));
             } else if (spec.startsWith("<=")) {
-                return new VersionSpec(Kind.LE, Version.of(spec.substring(2)));
+                return new VersionSpec(Kind.LE, ProjectScope.Version.of(spec.substring(2)));
             } else if (spec.startsWith(">")) {
-                return new VersionSpec(Kind.GT, Version.of(spec.substring(1)));
+                return new VersionSpec(Kind.GT, ProjectScope.Version.of(spec.substring(1)));
             } else if (spec.startsWith("<")) {
-                return new VersionSpec(Kind.LT, Version.of(spec.substring(1)));
+                return new VersionSpec(Kind.LT, ProjectScope.Version.of(spec.substring(1)));
             } else {
-                return new VersionSpec(Kind.EXACT, Version.of(spec));
+                return new VersionSpec(Kind.EXACT, ProjectScope.Version.of(spec));
             }
         }
 
-        boolean isCompatibleWith(Version version) {
+        boolean isCompatibleWith(ProjectScope.Version version) {
             return switch (kind) {
                 case EXACT -> base.equals(version);
                 case GT -> base.compareTo(version) < 0;

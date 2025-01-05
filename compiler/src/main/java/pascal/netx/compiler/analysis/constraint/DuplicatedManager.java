@@ -19,6 +19,7 @@ public class DuplicatedManager {
 
     public void collectDuplicatedComponents(ComponentScope scope) {
         Map<Identifier, List<ComponentScope>> idGroups = scope.getChildren().stream()
+                .map(ComponentScope.class::cast)
                 .collect(Collectors.groupingBy(ComponentScope::getIdentifier));
 
         List<ComponentScope> toRemove = new LinkedList<>();

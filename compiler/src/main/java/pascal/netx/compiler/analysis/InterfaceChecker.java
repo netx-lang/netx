@@ -3,7 +3,7 @@ package pascal.netx.compiler.analysis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.ASTListener;
-import pascal.netx.compiler.ast.DesignNode;
+import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.ComponentInstantiationNode;
 import pascal.netx.compiler.ast.element.ComponentNode;
 import pascal.netx.compiler.exception.TypeCheckingException;
@@ -12,7 +12,7 @@ public final class InterfaceChecker extends ASTAnalysis implements ASTListener {
     private static final Logger log = LoggerFactory.getLogger(InterfaceChecker.class);
     private boolean insideInterface = false;
 
-    public InterfaceChecker(DesignNode design) {
+    public InterfaceChecker(PackageNode design) {
         super(design);
     }
 

@@ -1,12 +1,12 @@
 package pascal.netx.compiler.analysis;
 
-import pascal.netx.compiler.ast.DesignNode;
+import pascal.netx.compiler.ast.PackageNode;
 
 public abstract class ASTAnalysis implements Analysis {
 
-    protected final DesignNode design;
+    protected final PackageNode design;
 
-    public ASTAnalysis(DesignNode design) {
+    public ASTAnalysis(PackageNode design) {
         this.design = design;
     }
 }

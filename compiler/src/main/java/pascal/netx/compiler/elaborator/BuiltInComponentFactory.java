@@ -8,7 +8,7 @@ import pascal.netx.compiler.model.instance.type.InstanceType;
 import pascal.netx.compiler.model.instance.type.PolyType;
 import pascal.netx.compiler.model.scope.Attributes;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.ModuleScope;
+import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.Scope;
 import pascal.netx.util.lang.Identifier;
 
@@ -16,10 +16,10 @@ import static pascal.netx.compiler.model.Entities.requiresBooleanValue;
 import static pascal.netx.compiler.model.Entities.requiresIntegerValue;
 
 public class BuiltInComponentFactory {
-    private final ModuleScope module;
+    private final PackageScope pack;
 
-    public BuiltInComponentFactory(ModuleScope module) {
-        this.module = module;
+    public BuiltInComponentFactory(PackageScope pack) {
+        this.pack = pack;
     }
 
     public ComponentScope createBuiltInComponent(Scope parent, BuiltinAtom type) {
@@ -139,7 +139,7 @@ public class BuiltInComponentFactory {
 
     private Wire newWire(ComponentScope result, String name, InstanceType type) {
         var id = Identifier.of("$" + name).setSourceLoc(result.getSourceLoc());
-        var wire = new Wire.Factory(type, module).create(result, id);
+        var wire = new Wire.Factory(type, pack).create(result, id);
         result.bind(wire.getIdentifier(), wire);
         return wire;
     }

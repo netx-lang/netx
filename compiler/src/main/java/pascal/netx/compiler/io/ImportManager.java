@@ -2,8 +2,8 @@ package pascal.netx.compiler.io;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pascal.netx.compiler.ast.DesignNode;
 import pascal.netx.compiler.ast.PackageInfoNode;
+import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.ComponentNode;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.util.lang.Identifier;
@@ -15,7 +15,11 @@ public final class ImportManager {
     private final LibraryMap projectMap = new LibraryMap();
     private final RepoMap dependencyMap = new RepoMap();
 
-    public void initialize(List<DesignNode> project, Map<Identifier, List<DesignNode>> dependencies) {
+    public static ImportManager ofEmpty() {
+        return new ImportManager();
+    }
+
+    public void initialize(List<PackageNode> project, Map<Identifier, List<PackageNode>> dependencies) {
         buildLibMapForRepo(project, projectMap);
         for (var repo : dependencies.entrySet()) {
             var libMap = new LibraryMap();
@@ -92,7 +96,7 @@ public final class ImportManager {
         return projectMap.get(reference.getFirst());
     }
 
-    private void buildLibMapForRepo(List<DesignNode> project, LibraryMap map) {
+    private void buildLibMapForRepo(List<PackageNode> project, LibraryMap map) {
         for (var definition : project) {
             var packageInfo = definition.getPackageInfo();
             if (packageInfo.getKind() == PackageInfoNode.Kind.LIBRARY) {

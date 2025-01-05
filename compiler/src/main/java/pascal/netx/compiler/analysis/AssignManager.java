@@ -6,7 +6,6 @@ import pascal.netx.compiler.model.instance.DataComposition;
 import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.compiler.model.instance.MutableInstance;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.Scope;
 import pascal.netx.util.lang.SourceLoc;
 
 import java.util.ArrayList;
@@ -31,10 +30,10 @@ public final class AssignManager {
             for (int i = 0; i < size; i++) {
                 define(lhsFlatten.get(i));
                 use(rhsFlatten.get(i));
-                scope.getAliases().add(Scope.Alias.of(rhsFlatten.get(i), lhsFlatten.get(i)));
+                scope.getAliases().add(ComponentScope.Alias.of(rhsFlatten.get(i), lhsFlatten.get(i)));
             }
         } else {
-            scope.getAliases().add(Scope.Alias.of(rhs, lhs));
+            scope.getAliases().add(ComponentScope.Alias.of(rhs, lhs));
         }
     }
 

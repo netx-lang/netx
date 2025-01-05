@@ -2,19 +2,19 @@ package pascal.netx.compiler.analysis;
 
 import pascal.netx.compiler.analysis.constraint.DuplicatedManager;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.ModuleScope;
+import pascal.netx.compiler.model.scope.PackageScope;
 
-public final class ModuleDuplicatedElimination extends ModelAnalysis {
+public final class PackageDuplicatedElimination extends ModelAnalysis {
     private final DuplicatedManager manager = new DuplicatedManager();
 
-    public ModuleDuplicatedElimination(ModuleScope design) {
+    public PackageDuplicatedElimination(PackageScope design) {
         super(design);
     }
 
     @Override
     public void analyze() {
-        design.forEachSubScope(manager::collectDuplicatedComponents);
-        design.forEachSubScope(this::replaceDuplicatedInstances);
+        pack.forEachSubComponent(manager::collectDuplicatedComponents);
+        pack.forEachSubComponent(this::replaceDuplicatedInstances);
     }
 
     private void replaceDuplicatedInstances(ComponentScope scope) {

@@ -28,17 +28,17 @@ public class VerilogAnalysis {
 
     public void analyze() {
         for (var module : design) {
-            new ModuleAnalysis(module).analyze();
+            new PackageAnalysis(module).analyze();
         }
     }
 
-    private static class ModuleAnalysis {
+    private static class PackageAnalysis {
         private final Supplier<Integer> tempIndexer = new AtomicInteger(0)::getAndIncrement;
         private final Map<DataRef, WireRef> tempWires = new HashMap<>();
         private final VModule module;
         private int constantPortCount = 0;
 
-        private ModuleAnalysis(VModule module) {
+        private PackageAnalysis(VModule module) {
             this.module = module;
         }
 

@@ -21,7 +21,7 @@ public class PackageInfoNode extends ASTNode {
         return id;
     }
 
-    public void setId(Identifier id) {
+    public void setIdentifier(Identifier id) {
         this.id = id;
     }
 

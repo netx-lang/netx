@@ -2,26 +2,27 @@ package pascal.netx.compiler.elaborator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pascal.netx.compiler.ast.DesignNode;
+import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.ComponentNode;
 import pascal.netx.compiler.ast.element.ImportNode;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.model.component.ComponentAtom;
 import pascal.netx.compiler.model.component.Signature;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.ModuleScope;
+import pascal.netx.compiler.model.scope.PackageScope;
+import pascal.netx.compiler.model.scope.ProjectScope;
 
-public final class Elaborator {
-    private static final Logger log = LoggerFactory.getLogger(Elaborator.class);
+public final class PackageElaborator {
+    private static final Logger log = LoggerFactory.getLogger(PackageElaborator.class);
 
-    private final DesignNode node;
-    private final ModuleScope module;
+    private final PackageNode node;
+    private final PackageScope pack;
     private final Configuration config;
 
-    public Elaborator(DesignNode node, Configuration config) {
+    public PackageElaborator(ProjectScope parent, PackageNode node, Configuration config) {
         this.node = node;
         this.config = config;
-        this.module = ModuleScope.newModule();
+        this.pack = PackageScope.newPackage(parent);
     }
 
     private static void setDesignSignature(ComponentScope topScope, ComponentNode topNode) {
@@ -29,15 +30,15 @@ public final class Elaborator {
         topScope.setSignature(Signature.of(atom, topScope.getInputs(), topScope.getOutputs()));
     }
 
-    public ModuleScope elaborate() {
-        addModuleInformation();
+    public PackageScope elaborate() {
+        addPackageInformation();
         var topNode = findTopNode();
-        var topScope = module.instantiateTop(topNode.getIdentifier());
-        new ScopeElaborator(config, topScope).build(topNode);
+        var topScope = pack.instantiateTop(topNode.getIdentifier());
+        new ComponentElaborator(config, topScope).build(topNode);
         if (!config.fullyExpand()) {
             setDesignSignature(topScope, topNode);
         }
-        return module;
+        return pack;
     }
 
     private ComponentNode findTopNode() {
@@ -55,22 +56,22 @@ public final class Elaborator {
         return result;
     }
 
-    private void addModuleInformation() {
+    private void addPackageInformation() {
         for (var element : node.getElements()) {
             switch (element) {
-                case ComponentNode component -> addComponent(component);
-                case ImportNode _ -> {
-                    // TODO:
+                case ComponentNode component -> addComponentInfo(component);
+                case ImportNode _import -> {
+
                 }
             }
         }
-        module.resetDataIndexer();
+        pack.resetDataIndexer();
     }
 
-    private void addComponent(ComponentNode node) {
+    private void addComponentInfo(ComponentNode node) {
         switch (node.getKind()) {
-            case COMPONENT -> module.addComponent(node);
-            case INTERFACE -> module.addInterface(node);
+            case COMPONENT -> pack.addComponent(node);
+            case INTERFACE -> pack.addInterface(node);
         }
     }
 }

@@ -15,22 +15,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public final class ModuleScope extends Scope {
+public final class PackageScope extends Scope {
     private final Map<Identifier, DataBundle.Factory> interfaceDef = new HashMap<>();
     private final Map<Identifier, ComponentNode> componentDef = new HashMap<>();
     private final BuiltInComponentFactory factory;
     private Supplier<Integer> dataIndexer;
     private ComponentScope top;
 
-    ModuleScope(Scope parent) {
+    PackageScope(Scope parent) {
         super(parent);
         this.dataIndexer = new AtomicInteger(0)::incrementAndGet;
         this.factory = new BuiltInComponentFactory(this);
     }
 
-    public static ModuleScope newModule() {
-        // TODO: specify parent
-        return new ModuleScope(null);
+    public static PackageScope newPackage(ProjectScope parent) {
+        return new PackageScope(parent);
     }
 
     public ComponentScope instantiateTop(Identifier identifier) {
@@ -46,13 +45,13 @@ public final class ModuleScope extends Scope {
         return top;
     }
 
-    public void forEachSubScope(Consumer<ComponentScope> consumer) {
+    public void forEachSubComponent(Consumer<ComponentScope> consumer) {
         Stack<ComponentScope> stack = new Stack<>();
         stack.push(getTop());
         while (!stack.isEmpty()) {
             ComponentScope scope = stack.pop();
             consumer.accept(scope);
-            stack.addAll(scope.getChildren());
+            scope.getChildren().forEach(child -> stack.push((ComponentScope) child));
         }
     }
 

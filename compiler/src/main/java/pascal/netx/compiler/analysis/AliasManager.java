@@ -8,7 +8,7 @@ import pascal.netx.compiler.model.instance.DataAccess;
 import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.compiler.model.instance.MutableInstance;
 import pascal.netx.compiler.model.instance.Value;
-import pascal.netx.compiler.model.scope.Scope;
+import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.util.collection.UnionFind;
 import pascal.netx.util.exception.ShallNotReachHereError;
 
@@ -23,7 +23,7 @@ public class AliasManager {
     private final UnionFind<Instance> set = new UnionFind<>();
     private final Map<Instance, Instance> sourceRep = new HashMap<>();
 
-    void addAlias(Collection<Scope.Alias> aliases) {
+    void addAlias(Collection<ComponentScope.Alias> aliases) {
         for (var alias : aliases) {
             set.union(alias.lhs(), alias.rhs());
         }

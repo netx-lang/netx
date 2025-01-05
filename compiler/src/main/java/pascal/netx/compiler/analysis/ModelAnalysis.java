@@ -1,11 +1,11 @@
 package pascal.netx.compiler.analysis;
 
-import pascal.netx.compiler.model.scope.ModuleScope;
+import pascal.netx.compiler.model.scope.PackageScope;
 
 public abstract class ModelAnalysis implements Analysis {
-    protected final ModuleScope design;
+    protected final PackageScope pack;
 
-    public ModelAnalysis(ModuleScope design) {
-        this.design = design;
+    public ModelAnalysis(PackageScope pack) {
+        this.pack = pack;
     }
 }

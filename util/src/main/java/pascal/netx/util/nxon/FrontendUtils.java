@@ -71,9 +71,9 @@ public final class FrontendUtils {
         return (ArrayNode) node.get(field);
     }
 
-    public record ModuleIndex(String name, int index) {
-        public static ModuleIndex of(String name, int index) {
-            return new ModuleIndex(name, index);
+    public record VModuleIndex(String name, int index) {
+        public static VModuleIndex of(String name, int index) {
+            return new VModuleIndex(name, index);
         }
     }
 
@@ -83,9 +83,9 @@ public final class FrontendUtils {
         }
     }
 
-    public record ComponentRef(ModuleIndex moduleIndex, int instIndex) {
+    public record ComponentRef(VModuleIndex moduleIndex, int instIndex) {
         public static ComponentRef of(String name, int defIndex, int instIndex) {
-            return new ComponentRef(ModuleIndex.of(name, defIndex), instIndex);
+            return new ComponentRef(VModuleIndex.of(name, defIndex), instIndex);
         }
     }
 }

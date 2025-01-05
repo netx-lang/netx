@@ -31,18 +31,18 @@ import java.util.List;
 import static pascal.netx.compiler.model.Entities.requiresComponentType;
 import static pascal.netx.compiler.model.Utils.requiresMatchedSize;
 
-final class ScopeElaborator {
-    private static final Logger log = LoggerFactory.getLogger(ScopeElaborator.class);
+final class ComponentElaborator {
+    private static final Logger log = LoggerFactory.getLogger(ComponentElaborator.class);
     private final ComponentScope scope;
     private final ComponentEvaluator evaluator;
 
     private final Configuration config;
     private final BuiltInComponentFactory factory;
 
-    ScopeElaborator(Configuration config, ComponentScope scope) {
+    ComponentElaborator(Configuration config, ComponentScope scope) {
         this.config = config;
         this.scope = scope;
-        this.factory = scope.getModule().getBuiltinFactory();
+        this.factory = scope.getPack().getBuiltinFactory();
         this.evaluator = scope.getEvaluator();
     }
 
@@ -114,7 +114,7 @@ final class ScopeElaborator {
             if (!rest.getDimensions().isEmpty()) {
                 for (ExprNode dimension : rest.getDimensions()) {
                     var size = evaluator.evaluateToInt(dimension);
-                    factory = new Array.Factory(scope.getModule(), size, factory);
+                    factory = new Array.Factory(scope.getPack(), size, factory);
                 }
             }
             var id = rest.getIdentifier();
@@ -261,7 +261,7 @@ final class ScopeElaborator {
                 component.bind(entry.getKey(), entry.getValue());
             }
             component.setAttributes(attributes);
-            new ScopeElaborator(config, component).build(node);
+            new ComponentElaborator(config, component).build(node);
             if (!config.fullyExpand()) {
                 setSignatureFor(atom, component);
             }

@@ -1,7 +1,6 @@
 package pascal.netx.compiler.model.scope;
 
 import pascal.netx.compiler.model.Entity;
-import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.compiler.model.scope.binding.Binding;
 import pascal.netx.compiler.model.scope.binding.MonoBinding;
 import pascal.netx.compiler.model.scope.binding.MultiBinding;
@@ -13,10 +12,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract sealed class Scope permits ComponentScope, ModuleScope, ProjectScope {
+public abstract sealed class Scope permits ComponentScope, PackageScope, ProjectScope {
     private final Scope parent;
     private final LinkedList<Binding> bindings;
-    private final List<ComponentScope> children;
+    private final List<Scope> children;
 
     protected Scope(Scope parent) {
         this.parent = parent;
@@ -29,11 +28,11 @@ public abstract sealed class Scope permits ComponentScope, ModuleScope, ProjectS
         return parent;
     }
 
-    public List<ComponentScope> getChildren() {
+    public List<Scope> getChildren() {
         return children;
     }
 
-    public void addChild(ComponentScope child) {
+    public void addChild(Scope child) {
         children.add(child);
     }
 
@@ -69,11 +68,5 @@ public abstract sealed class Scope permits ComponentScope, ModuleScope, ProjectS
             }
         }
         return null;
-    }
-
-    public record Alias(Instance lhs, Instance rhs) {
-        public static Alias of(Instance lhs, Instance rhs) {
-            return new Alias(lhs, rhs);
-        }
     }
 }

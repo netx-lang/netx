@@ -82,11 +82,11 @@ public interface ASTListener {
         exitDefault(node);
     }
 
-    default void enter(DesignNode node) {
+    default void enter(PackageNode node) {
         enterDefault(node);
     }
 
-    default void exit(DesignNode node) {
+    default void exit(PackageNode node) {
         exitDefault(node);
     }
 

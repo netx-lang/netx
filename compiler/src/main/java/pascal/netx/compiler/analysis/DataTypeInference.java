@@ -10,7 +10,7 @@ import pascal.netx.compiler.model.instance.Data;
 import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.compiler.model.instance.type.InstanceType;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.ModuleScope;
+import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -26,7 +26,7 @@ public final class DataTypeInference extends ModelAnalysis {
     private final List<DataConstraint> constraints = new LinkedList<>();
     private final Queue<Instance> workList = new LinkedList<>();
 
-    public DataTypeInference(ModuleScope design) {
+    public DataTypeInference(PackageScope design) {
         super(design);
     }
 
@@ -38,7 +38,7 @@ public final class DataTypeInference extends ModelAnalysis {
     }
 
     public void collectTypeConstraints() {
-        design.forEachSubScope(scope -> {
+        pack.forEachSubComponent(scope -> {
             for (var alias : scope.getAliases()) {
                 addBinaryConstraint(EqualTypeConstraint.of(alias.lhs(), alias.rhs()));
             }
@@ -128,7 +128,7 @@ public final class DataTypeInference extends ModelAnalysis {
     }
 
     private void checkAllTyped() {
-        design.forEachSubScope(scope ->
+        pack.forEachSubComponent(scope ->
                 scope.getBinding().forEachEntity(entity -> {
                     if (!(entity instanceof Instance inst)) {
                         throw new ShallNotReachHereError();

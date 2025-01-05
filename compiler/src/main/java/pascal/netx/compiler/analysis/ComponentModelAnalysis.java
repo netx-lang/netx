@@ -3,7 +3,7 @@ package pascal.netx.compiler.analysis;
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.ModuleScope;
+import pascal.netx.compiler.model.scope.PackageScope;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -14,14 +14,14 @@ import java.util.function.Predicate;
 public abstract class ComponentModelAnalysis extends ModelAnalysis {
     private final Consumer<ComponentScope> analysis;
 
-    public ComponentModelAnalysis(ModuleScope design, Consumer<ComponentScope> analysis) {
+    public ComponentModelAnalysis(PackageScope design, Consumer<ComponentScope> analysis) {
         super(design);
         this.analysis = analysis;
     }
 
     @Override
     public void analyze() {
-        design.forEachSubScope(scope -> {
+        pack.forEachSubComponent(scope -> {
             if (!scope.isBuiltin()) {
                 analysis.accept(scope);
             }
@@ -47,7 +47,8 @@ public abstract class ComponentModelAnalysis extends ModelAnalysis {
 
         protected void exploreAnalysisScopes(ComponentScope scope) {
             anaScope.add(scope);
-            for (var child : scope.getChildren()) {
+            for (var kid : scope.getChildren()) {
+                var child = (ComponentScope) kid;
                 if (child.isBuiltin()) {
                     anaScope.add(child);
                 } else {
