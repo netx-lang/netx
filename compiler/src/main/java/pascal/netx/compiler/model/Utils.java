@@ -7,7 +7,7 @@ import pascal.netx.util.lang.SourceLoc;
 
 import java.util.List;
 
-public class Utils {
+public final class Utils {
     private static final Logger log = LoggerFactory.getLogger(Utils.class);
 
     public static int requiresMatchedSize(SourceLoc sourceLoc, List<?> target, List<?> source) {
