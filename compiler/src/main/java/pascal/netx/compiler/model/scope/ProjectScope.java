@@ -3,7 +3,9 @@ package pascal.netx.compiler.model.scope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.exception.CompileCancellationException;
+import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.io.PackageManager;
+import pascal.netx.util.exception.ShallNotReachHereError;
 
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -15,6 +17,7 @@ public final class ProjectScope extends Scope {
     private final PackageManager manager;
 
     private PackageScope top;
+    private NXCompiler compiler;
 
     public ProjectScope(Info info, PackageManager manager) {
         super(null);
@@ -28,6 +31,17 @@ public final class ProjectScope extends Scope {
 
     public PackageManager getManager() {
         return manager;
+    }
+
+    public NXCompiler getCompiler() {
+        return compiler;
+    }
+
+    public void setCompiler(NXCompiler compiler) {
+        if (this.compiler != null) {
+            throw new ShallNotReachHereError();
+        }
+        this.compiler = compiler;
     }
 
     public PackageScope getTop() {

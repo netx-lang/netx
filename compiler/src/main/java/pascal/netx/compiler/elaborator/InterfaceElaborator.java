@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.element.ComponentNode;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.io.Configuration;
+import pascal.netx.compiler.model.Utils;
 import pascal.netx.compiler.model.instance.*;
 import pascal.netx.compiler.model.instance.type.PolyType;
 import pascal.netx.compiler.model.scope.ComponentScope;
@@ -35,23 +36,23 @@ public class InterfaceElaborator {
             var factory = getFactoryFrom(node, mutable);
             factories.put(mutable.getIdentifier(), factory);
         }
-        return new DataBundle.Factory(scope.getIdentifier(), pack, factories);
+        return new DataBundle.Factory(scope.getIdentifier(), Utils.compilerOf(pack), factories);
     }
 
     private MutableInstance.Factory<?> getFactoryFrom(ComponentNode node, MutableInstance mutable) {
         return switch (mutable) {
-            case Clock _ -> new Clock.Factory(pack);
+            case Clock _ -> new Clock.Factory(Utils.compilerOf(pack));
             case Wire wire -> {
                 if (wire.getType() instanceof PolyType) {
                     log.error("{}: Interface shall not contain auto-typed instance: {}", node.getSourceLoc(), wire);
                     throw new CompileCancellationException();
                 }
-                yield new Wire.Factory(wire.getType(), pack);
+                yield new Wire.Factory(wire.getType(), Utils.compilerOf(pack));
             }
             case DataBundle bundle -> pack.getInterface(bundle.getType().getIdentifier());
             case Array array -> {
                 var elementFactory = getFactoryFrom(node, array.getElements().getFirst());
-                yield new Array.Factory(pack, array.getElements().size(), elementFactory);
+                yield new Array.Factory(Utils.compilerOf(pack), array.getElements().size(), elementFactory);
             }
             case DataAccess _ -> {
                 log.error("{}: Interface shall not contain data access: {}", node.getSourceLoc(), mutable);

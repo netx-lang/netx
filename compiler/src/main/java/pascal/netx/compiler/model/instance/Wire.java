@@ -1,8 +1,8 @@
 package pascal.netx.compiler.model.instance;
 
+import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.model.instance.type.InstanceType;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.util.lang.Identifier;
 
 public final class Wire extends Data {
@@ -35,14 +35,14 @@ public final class Wire extends Data {
     public static class Factory extends Data.Factory<Wire> {
         private final InstanceType type;
 
-        public Factory(InstanceType type, PackageScope module) {
-            super(module);
+        public Factory(InstanceType type, NXCompiler compiler) {
+            super(compiler);
             this.type = type;
         }
 
         @Override
         public Wire create(ComponentScope parent, Identifier id) {
-            return new Wire(id, parent, type, pack.getDataIndexer().get());
+            return new Wire(id, parent, type, compiler.getDataIndexer().get());
         }
 
         @Override

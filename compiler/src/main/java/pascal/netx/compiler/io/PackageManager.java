@@ -6,6 +6,7 @@ import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.ComponentNode;
 import pascal.netx.compiler.ast.element.ImportNode;
 import pascal.netx.compiler.exception.CompileCancellationException;
+import pascal.netx.compiler.model.scope.ProjectScope;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
@@ -17,9 +18,10 @@ import java.util.Objects;
 
 public final class PackageManager {
     private static final Logger log = LoggerFactory.getLogger(PackageManager.class);
+
     private final Map<Identifier, NXCompiler> repositories = new HashMap<>();
     private final Map<Identifier, PackageNode> packages = new HashMap<>();
-    private NXCompiler compiler;
+    private ProjectScope project;
 
     public static PackageManager ofEmpty() {
         return new PackageManager();
@@ -33,17 +35,21 @@ public final class PackageManager {
         packages.put(pack.getPackageInfo().getIdentifier(), pack);
     }
 
-    public void setCompiler(NXCompiler compiler) {
-        if (this.compiler != null) {
+    public void setProject(ProjectScope project) {
+        if (this.project != null) {
             throw new ShallNotReachHereError();
         }
-        this.compiler = compiler;
+        this.project = project;
     }
 
     public NXCompiler dispatchCompiler(SourceLoc sourceLoc, List<Identifier> reference) {
-        return switch (reference.size()) {
-            case 2 -> Objects.requireNonNull(compiler);
-            case 3 -> resolveRepo(sourceLoc, reference.getFirst());
+       return switch (reference.size()) {
+            case 2 -> Objects.requireNonNull(project.getCompiler());
+            case 3 -> {
+                var result = resolveRepo(sourceLoc, reference.getFirst());
+                result.setDataIndexer(project.getCompiler().getDataIndexer());
+                yield result;
+            }
             default -> {
                 log.error("{}: Invalid reference in import: {}", sourceLoc, reference);
                 throw new CompileCancellationException();

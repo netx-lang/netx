@@ -29,6 +29,8 @@ public abstract sealed class Scope permits ComponentScope, PackageScope, Project
     }
 
     public void setParent(Scope parent) {
+        this.parent.children.removeIf(child -> child == this);
+        parent.addChild(this);
         this.parent = parent;
     }
 

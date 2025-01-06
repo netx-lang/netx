@@ -3,11 +3,15 @@ package pascal.netx.compiler.io;
 import com.fasterxml.jackson.databind.JsonNode;
 import pascal.netx.compiler.analysis.*;
 import pascal.netx.compiler.ast.PackageNode;
+import pascal.netx.compiler.elaborator.BuiltInComponentFactory;
 import pascal.netx.compiler.elaborator.PackageElaborator;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.ProjectScope;
 import pascal.netx.util.lang.Identifier;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 public final class NXCompiler {
     private final Configuration config;
@@ -15,11 +19,17 @@ public final class NXCompiler {
 
     private final ProjectScope project;
 
+    private final BuiltInComponentFactory factory;
+    private Supplier<Integer> dataIndexer;
+
     public NXCompiler(ProjectScope.Info info, Configuration config, PackageManager manager) {
         this.config = config;
         this.manager = manager;
         this.project = new ProjectScope(info, manager);
-        manager.setCompiler(this);
+        project.setCompiler(this);
+        manager.setProject(project);
+        this.dataIndexer = newIndexer();
+        this.factory = new BuiltInComponentFactory(this);
     }
 
     public static NXCompiler forSinglePackage(PackageNode node, Configuration config) {
@@ -72,5 +82,21 @@ public final class NXCompiler {
 
     public PackageManager getPackManager() {
         return manager;
+    }
+
+    public static Supplier<Integer> newIndexer() {
+        return new AtomicInteger(0)::incrementAndGet;
+    }
+
+    public Supplier<Integer> getDataIndexer() {
+        return dataIndexer;
+    }
+
+    public void setDataIndexer(Supplier<Integer> indexer) {
+        dataIndexer = indexer;
+    }
+
+    public BuiltInComponentFactory getBuiltinFactory() {
+        return factory;
     }
 }

@@ -1,9 +1,9 @@
 package pascal.netx.compiler.model.instance;
 
+import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.model.instance.type.BitType;
 import pascal.netx.compiler.model.instance.type.InstanceType;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 
@@ -24,13 +24,13 @@ public final class Clock extends Data {
 
     public static class Factory extends Data.Factory<Clock> {
 
-        public Factory(PackageScope global) {
-            super(global);
+        public Factory(NXCompiler compiler) {
+            super(compiler);
         }
 
         @Override
         public Clock create(ComponentScope parent, Identifier id) {
-            return new Clock(id, parent, pack.getDataIndexer().get());
+            return new Clock(id, parent, compiler.getDataIndexer().get());
         }
 
         @Override

@@ -9,6 +9,7 @@ import pascal.netx.compiler.exception.TypeCheckingException;
 import pascal.netx.compiler.model.instance.Data;
 import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.compiler.model.instance.type.InstanceType;
+import pascal.netx.compiler.model.instance.type.PolyType;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.util.exception.ShallNotReachHereError;
@@ -123,6 +124,9 @@ public final class DataTypeInference extends ModelAnalysis {
     }
 
     private void setTypeFor(Instance instance, InstanceType type) {
+        if (type instanceof PolyType) {
+            throw new ShallNotReachHereError();
+        }
         instance.setType(type);
         workList.add(instance);
     }

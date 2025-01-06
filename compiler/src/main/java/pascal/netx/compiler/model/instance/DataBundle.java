@@ -3,11 +3,11 @@ package pascal.netx.compiler.model.instance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.exception.CompileCancellationException;
+import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.instance.type.InstanceType;
 import pascal.netx.compiler.model.instance.type.InterfaceType;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.util.lang.Identifier;
 
 import javax.annotation.Nonnull;
@@ -63,9 +63,9 @@ public final class DataBundle extends DataComposition {
         private final LinkedHashMap<Identifier, MutableInstance.Factory<?>> factories;
         private final InterfaceType type;
 
-        public Factory(Identifier id, PackageScope module,
+        public Factory(Identifier id, NXCompiler compiler,
                        LinkedHashMap<Identifier, MutableInstance.Factory<?>> factories) {
-            super(module);
+            super(compiler);
             this.factories = factories;
             this.type = InterfaceType.of(id,
                     factories.values().stream().map(MutableInstance.Factory::getType).toList());
@@ -73,7 +73,7 @@ public final class DataBundle extends DataComposition {
 
         @Override
         public DataBundle create(ComponentScope parent, Identifier id) {
-            var result = new DataBundle(id, type, pack.getDataIndexer().get());
+            var result = new DataBundle(id, type, compiler.getDataIndexer().get());
 
             for (var entry : factories.entrySet()) {
                 Identifier fieldID = entry.getKey();

@@ -3,6 +3,10 @@ package pascal.netx.compiler.model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.exception.CompileCancellationException;
+import pascal.netx.compiler.io.NXCompiler;
+import pascal.netx.compiler.model.scope.ComponentScope;
+import pascal.netx.compiler.model.scope.PackageScope;
+import pascal.netx.compiler.model.scope.ProjectScope;
 import pascal.netx.util.lang.SourceLoc;
 
 import java.util.List;
@@ -24,5 +28,21 @@ public final class Utils {
             log.error("{}: Expected list of size {} but got {}", sourceLoc, expected, actual);
             throw new CompileCancellationException();
         }
+    }
+
+    public static ProjectScope projectOf(PackageScope pack) {
+        return pack.getProject();
+    }
+
+    public static ProjectScope projectOf(ComponentScope component) {
+        return projectOf(component.getPackage());
+    }
+
+    public static NXCompiler compilerOf(ComponentScope component) {
+        return compilerOf(component.getPackage());
+    }
+
+    public static NXCompiler compilerOf(PackageScope pack) {
+        return pack.getProject().getCompiler();
     }
 }

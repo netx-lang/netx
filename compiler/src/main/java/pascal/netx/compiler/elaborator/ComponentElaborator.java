@@ -31,7 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static pascal.netx.compiler.model.Entities.requiresComponentType;
-import static pascal.netx.compiler.model.Utils.requiresMatchedSize;
+import static pascal.netx.compiler.model.Utils.*;
 
 final class ComponentElaborator {
     private static final Logger log = LoggerFactory.getLogger(ComponentElaborator.class);
@@ -44,7 +44,7 @@ final class ComponentElaborator {
     ComponentElaborator(Configuration config, ComponentScope scope) {
         this.config = config;
         this.scope = scope;
-        this.factory = scope.getPackage().getBuiltinFactory();
+        this.factory = compilerOf(scope).getBuiltinFactory();
         this.evaluator = scope.getEvaluator();
     }
 
@@ -116,7 +116,7 @@ final class ComponentElaborator {
             if (!rest.getDimensions().isEmpty()) {
                 for (ExprNode dimension : rest.getDimensions()) {
                     var size = evaluator.evaluateToInt(dimension);
-                    factory = new Array.Factory(scope.getPackage(), size, factory);
+                    factory = new Array.Factory(compilerOf(scope), size, factory);
                 }
             }
             var id = rest.getIdentifier();
@@ -243,13 +243,13 @@ final class ComponentElaborator {
         }
 
         private ComponentPort instantiateImportedAtom(ImportedAtom atom) {
-            var manager = scope.getPackage().getProject().getManager();
-            var sourceLoc = atom.getSourceLoc();
-            var reference = atom.getReferences();
-            var compiler = manager.dispatchCompiler(sourceLoc, reference);
+            SourceLoc sourceLoc = atom.getSourceLoc();
+            List<Identifier> reference = atom.getReferences();
+
+            var compiler = projectOf(scope).getManager().dispatchCompiler(sourceLoc, reference);
             var component = switch (reference.size()) {
                 case 2 -> {
-                    var pack = manager.resolvePackage(sourceLoc, reference.get(0));
+                    var pack = compiler.getPackManager().resolvePackage(sourceLoc, reference.get(0));
                     yield compiler.elaborate(pack, reference.get(1));
                 }
                 case 3 -> {
@@ -258,6 +258,9 @@ final class ComponentElaborator {
                 }
                 default -> throw new ShallNotReachHereError();
             };
+
+            component.setParent(scope);
+            component.setPackage(scope.getPackage());
 
             return ComponentPort.of(component.getOutputs(), component.getInputs());
         }

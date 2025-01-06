@@ -3,7 +3,6 @@ package pascal.netx.compiler.io;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -22,7 +21,7 @@ class NXCompilerUnitTest {
         NXCompiler compiler = Builder.forExpanded().load(charStream);
         assertNotNull(compiler.compile());
     }
-    @Disabled
+
     @Test
     void testBuild() throws IOException {
         var compiler = Builder.forExpanded().loadPath(TEST_DIR.resolve("package/_netx.toml"));

@@ -287,7 +287,7 @@ public final class ComponentEvaluator {
     public MutableInstance.Factory<?> evaluateToInstanceFactory(ExprNode expr) {
         MutableInstance.Factory<?> factory;
         if (expr == null) {
-            factory = new Wire.Factory(PolyType.getInstance(), pack);
+            factory = new Wire.Factory(PolyType.getInstance(), Utils.compilerOf(pack));
         } else {
             mode = EvaluationMode.FACTORY;
             factory = requiresInstanceFactory(expr.getSourceLoc(), evaluate(expr));
@@ -418,7 +418,7 @@ public final class ComponentEvaluator {
 
     @Nonnull
     private Entity declareDataInPlace(Identifier id) {
-        var factory = new Wire.Factory(PolyType.getInstance(), pack);
+        var factory = new Wire.Factory(PolyType.getInstance(), Utils.compilerOf(pack));
         var data = factory.create(scope, id);
         scope.bind(id, data);
         return data;
@@ -470,12 +470,12 @@ public final class ComponentEvaluator {
         mode = EvaluationMode.COMMON;
         var bitType = BitType.of(evaluateToInt(arguments.getFirst()));
         mode = EvaluationMode.FACTORY;
-        return new Wire.Factory(bitType, pack);
+        return new Wire.Factory(bitType, Utils.compilerOf(pack));
     }
 
     private Clock.Factory evaluateClockFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
         if (arguments.isEmpty()) {
-            return new Clock.Factory(pack);
+            return new Clock.Factory(Utils.compilerOf(pack));
         } else {
             log.error("{}: Unexpected specification for component type clock: {}", sourceLoc, arguments);
             throw new CompileCancellationException();

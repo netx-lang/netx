@@ -2,32 +2,25 @@ package pascal.netx.compiler.model.scope;
 
 import pascal.netx.compiler.ast.element.ComponentNode;
 import pascal.netx.compiler.ast.element.ImportNode;
-import pascal.netx.compiler.elaborator.BuiltInComponentFactory;
 import pascal.netx.compiler.elaborator.InterfaceElaborator;
 import pascal.netx.compiler.model.instance.DataBundle;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public final class PackageScope extends Scope {
     private final Map<Identifier, DataBundle.Factory> interfaceDef = new HashMap<>();
     private final Map<Identifier, ComponentNode> componentDef = new HashMap<>();
     private final Map<Identifier, List<Identifier>> importDef = new HashMap<>();
-    private final BuiltInComponentFactory factory;
-    private ProjectScope project;
+    private final ProjectScope project;
 
-    private Supplier<Integer> dataIndexer;
     private ComponentScope top;
 
     PackageScope(ProjectScope parent) {
         super(parent);
         this.project = parent;
-        this.dataIndexer = new AtomicInteger(0)::incrementAndGet;
-        this.factory = new BuiltInComponentFactory(this);
     }
 
     public static PackageScope newPackage(ProjectScope parent) {
@@ -39,7 +32,6 @@ public final class PackageScope extends Scope {
             throw new ShallNotReachHereError();
         }
         top = ComponentScope.newComponent(this, identifier);
-        addChild(top);
         return top;
     }
 
@@ -51,10 +43,6 @@ public final class PackageScope extends Scope {
         return project;
     }
 
-    public void setProject(ProjectScope project) {
-        this.project = project;
-    }
-
     public void forEachSubComponent(Consumer<ComponentScope> consumer) {
         Stack<ComponentScope> stack = new Stack<>();
         stack.push(getTop());
@@ -63,18 +51,6 @@ public final class PackageScope extends Scope {
             consumer.accept(scope);
             scope.getChildren().forEach(child -> stack.push((ComponentScope) child));
         }
-    }
-
-    public Supplier<Integer> getDataIndexer() {
-        return dataIndexer;
-    }
-
-    public void resetDataIndexer() {
-        dataIndexer = new AtomicInteger(0)::incrementAndGet;
-    }
-
-    public BuiltInComponentFactory getBuiltinFactory() {
-        return factory;
     }
 
     // ------- Module Information for Imported Components -------

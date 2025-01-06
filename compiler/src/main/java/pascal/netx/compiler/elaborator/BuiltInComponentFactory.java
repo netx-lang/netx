@@ -1,5 +1,6 @@
 package pascal.netx.compiler.elaborator;
 
+import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.model.Utils;
 import pascal.netx.compiler.model.expr.BuiltinAtom;
 import pascal.netx.compiler.model.instance.Wire;
@@ -8,7 +9,6 @@ import pascal.netx.compiler.model.instance.type.InstanceType;
 import pascal.netx.compiler.model.instance.type.PolyType;
 import pascal.netx.compiler.model.scope.Attributes;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.Scope;
 import pascal.netx.util.lang.Identifier;
 
@@ -16,10 +16,10 @@ import static pascal.netx.compiler.model.Entities.requiresBooleanValue;
 import static pascal.netx.compiler.model.Entities.requiresIntegerValue;
 
 public class BuiltInComponentFactory {
-    private final PackageScope pack;
+    private final NXCompiler compiler;
 
-    public BuiltInComponentFactory(PackageScope pack) {
-        this.pack = pack;
+    public BuiltInComponentFactory(NXCompiler compiler) {
+        this.compiler = compiler;
     }
 
     public ComponentScope createBuiltInComponent(Scope parent, BuiltinAtom type) {
@@ -139,7 +139,7 @@ public class BuiltInComponentFactory {
 
     private Wire newWire(ComponentScope result, String name, InstanceType type) {
         var id = Identifier.of("$" + name).setSourceLoc(result.getSourceLoc());
-        var wire = new Wire.Factory(type, pack).create(result, id);
+        var wire = new Wire.Factory(type, compiler).create(result, id);
         result.bind(wire.getIdentifier(), wire);
         return wire;
     }

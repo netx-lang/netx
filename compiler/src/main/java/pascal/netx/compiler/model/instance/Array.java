@@ -1,8 +1,8 @@
 package pascal.netx.compiler.model.instance;
 
+import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.model.instance.type.ArrayType;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.util.lang.Identifier;
 
 import java.util.ArrayList;
@@ -49,8 +49,8 @@ public final class Array extends DataComposition {
         private final ArrayType type;
         private final int size;
 
-        public Factory(PackageScope module, int size, MutableInstance.Factory<?> elementFactory) {
-            super(module);
+        public Factory(NXCompiler compiler, int size, MutableInstance.Factory<?> elementFactory) {
+            super(compiler);
             this.size = size;
             this.elementFactory = elementFactory;
             this.type = ArrayType.of(elementFactory.getType(), size);
@@ -58,7 +58,7 @@ public final class Array extends DataComposition {
 
         @Override
         public Array create(ComponentScope parent, Identifier id) {
-            var result = new Array(id, type, pack.getDataIndexer().get());
+            var result = new Array(id, type, compiler.getDataIndexer().get());
             for (int i = 0; i < size; i++) {
                 var elementID = Identifier.of(String.format("%s[%d]", id.name(), i))
                         .setSourceLoc(id.getSourceLoc());
