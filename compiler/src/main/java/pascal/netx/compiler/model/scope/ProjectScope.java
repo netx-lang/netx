@@ -3,18 +3,23 @@ package pascal.netx.compiler.model.scope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.exception.CompileCancellationException;
+import pascal.netx.compiler.io.PackageManager;
 
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public final class ProjectScope extends Scope {
     private static final Logger log = LoggerFactory.getLogger(ProjectScope.class);
+
     private final Info info;
+    private final PackageManager manager;
+
     private PackageScope top;
 
-    public ProjectScope(Info info) {
+    public ProjectScope(Info info, PackageManager manager) {
         super(null);
         this.info = info;
+        this.manager = manager;
     }
 
     public PackageScope getTop() {
@@ -42,7 +47,15 @@ public final class ProjectScope extends Scope {
     }
 
     public record Info(String name, Version version) {
+        private static final Info EMPTY = new Info(null, null);
 
+        public static Info empty() {
+            return EMPTY;
+        }
+
+        public boolean isEmpty() {
+            return this == EMPTY;
+        }
     }
 
     public record Version(int major, int minor, int patch) implements Comparable<Version> {

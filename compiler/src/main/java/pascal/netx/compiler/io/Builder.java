@@ -44,7 +44,11 @@ public final class Builder {
                 var root = new NXParser(CharStreams.fromPath(path)).parse();
                 yield NXCompiler.forSinglePackage(root, config);
             }
-            case "toml" -> new ProjectConfigReader(config, path).build();
+            case "toml" -> {
+                var projConfReader = new ProjectConfigReader(config, path);
+                projConfReader.buildCompiler();
+                yield projConfReader.getCompiler();
+            }
             default ->
                 throw new IOException("Invalid file extension: " + extension);
         };

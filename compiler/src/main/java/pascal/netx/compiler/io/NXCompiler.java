@@ -2,27 +2,26 @@ package pascal.netx.compiler.io;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import pascal.netx.compiler.analysis.*;
-import pascal.netx.compiler.ast.PackageInfoNode;
 import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.elaborator.PackageElaborator;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.ProjectScope;
 
-import java.util.List;
-
 public final class NXCompiler {
-    private final PackageManager manager;
+    private final ProjectScope.Info info;
     private final Configuration config;
-    private final List<PackageNode> packs;
+    private final PackageManager manager;
 
-    public NXCompiler(List<PackageNode> packs, Configuration config, PackageManager manager) {
+    public NXCompiler(ProjectScope.Info info, Configuration config, PackageManager manager) {
+        this.info = info;
         this.config = config;
-        this.packs = packs;
         this.manager = manager;
     }
 
     public static NXCompiler forSinglePackage(PackageNode node, Configuration config) {
-        return new NXCompiler(List.of(node), config, PackageManager.ofEmpty());
+        var manager = PackageManager.ofEmpty();
+        manager.addPackage(node);
+        return new NXCompiler(ProjectScope.Info.empty(), config, manager);
     }
 
     private static void checkType(PackageScope design) {
@@ -34,16 +33,11 @@ public final class NXCompiler {
     }
 
     public ProjectScope elaborate() {
-        // FIXME: project infomation, project elaborator
-        var result = new ProjectScope(null);
-        for (var pack : packs) {
-            var scope = new PackageElaborator(result, pack, config).elaborate();
-            result.addChild(scope);
-            if (pack.getPackageInfo().getKind() == PackageInfoNode.Kind.APPLICATION) {
-                result.setTop(scope);
-            }
-        }
-        return result;
+        var project = new ProjectScope(info, manager);
+        var scope = new PackageElaborator(project, manager.findApplicationPack(), config).elaborate();
+        project.setTop(scope);
+        project.addChild(scope);
+        return project;
     }
 
     public JsonNode compile() {
@@ -66,5 +60,9 @@ public final class NXCompiler {
                     .forEach(ModelAnalysis::analyze);
             return new CompactDumper(design.getTop()).dump();
         }
+    }
+
+    public PackageManager getPackManager() {
+        return manager;
     }
 }

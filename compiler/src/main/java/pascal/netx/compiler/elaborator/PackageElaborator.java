@@ -60,9 +60,7 @@ public final class PackageElaborator {
         for (var element : node.getElements()) {
             switch (element) {
                 case ComponentNode component -> addComponentInfo(component);
-                case ImportNode _import -> {
-
-                }
+                case ImportNode import_ -> pack.addImportRef(import_);
             }
         }
         pack.resetDataIndexer();

@@ -1,16 +1,14 @@
 package pascal.netx.compiler.model.scope;
 
 import pascal.netx.compiler.ast.element.ComponentNode;
+import pascal.netx.compiler.ast.element.ImportNode;
 import pascal.netx.compiler.elaborator.BuiltInComponentFactory;
 import pascal.netx.compiler.elaborator.InterfaceElaborator;
 import pascal.netx.compiler.model.instance.DataBundle;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Stack;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -18,6 +16,7 @@ import java.util.function.Supplier;
 public final class PackageScope extends Scope {
     private final Map<Identifier, DataBundle.Factory> interfaceDef = new HashMap<>();
     private final Map<Identifier, ComponentNode> componentDef = new HashMap<>();
+    private final Map<Identifier, List<Identifier>> importRef = new HashMap<>();
     private final BuiltInComponentFactory factory;
     private Supplier<Integer> dataIndexer;
     private ComponentScope top;
@@ -66,6 +65,15 @@ public final class PackageScope extends Scope {
     public BuiltInComponentFactory getBuiltinFactory() {
         return factory;
     }
+
+    public void addImportRef(ImportNode node) {
+        if (node.hasAlias()) {
+            importRef.put(node.getAlias(), node.getReference());
+        } else {
+            importRef.put(node.getReference().getLast(), node.getReference());
+        }
+    }
+
 
     // ------ Module Information for Common Components ------
 

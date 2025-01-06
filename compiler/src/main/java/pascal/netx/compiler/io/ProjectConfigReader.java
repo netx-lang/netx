@@ -18,7 +18,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public final class ProjectConfigReader {
@@ -26,9 +29,9 @@ public final class ProjectConfigReader {
     private static final TomlMapper MAPPER = new TomlMapper();
     private static final Logger log = LoggerFactory.getLogger(ProjectConfigReader.class);
 
-    private final List<NXCompiler> dependencies = new ArrayList<>();
-    private final List<PackageNode> nodes = new ArrayList<>();
-    private final ImportManager manager = new ImportManager();
+    private final List<PackageNode> packages = new ArrayList<>();
+
+    private final PackageManager manager = new PackageManager();
     private final Configuration config;
     private final JsonNode toml;
 
@@ -36,6 +39,7 @@ public final class ProjectConfigReader {
     private final Path buildDir;
 
     private final ProjectScope.Info info;
+    private NXCompiler compiler;
 
     public ProjectConfigReader(Configuration config, Path path) throws IOException {
         this.config = config;
@@ -49,38 +53,43 @@ public final class ProjectConfigReader {
                 ProjectScope.Version.of(projectInfo.get("version").textValue()));
     }
 
-    public NXCompiler build() throws IOException {
+    public void buildCompiler() throws IOException {
         parse();
-        nodes.forEach(this::doImport);
-        return new NXCompiler(nodes, config, new PackageManager(dependencies, manager));
+        packages.forEach(this::resolveWildcardImportIn);
+        packages.forEach(manager::addPackage);
+        this.compiler = new NXCompiler(info, config, manager);
+    }
+
+    public NXCompiler getCompiler() {
+        return compiler;
     }
 
     void parse() throws IOException {
-        resolveIncludeDesign();
+        resolveIncludePath();
         collectPackage();
-        manager.initialize(nodes, resolveDependencies());
+        resolveRepoDependencies();
     }
 
-    void resolveIncludeDesign() throws IOException {
+    void resolveIncludePath() throws IOException {
         var include = extractSourceFiles(toml.get("project").get("include"));
         var exclude = extractSourceFiles(toml.get("project").get("exclude"));
         for (var file : include) {
             if (!exclude.contains(file)) {
                 log.info("Start Parsing: {}", file);
-                nodes.add(new NXParser(CharStreams.fromPath(file)).parse());
+                packages.add(new NXParser(CharStreams.fromPath(file)).parse());
             }
         }
     }
 
     void collectPackage() {
-        var groups = nodes.stream().collect(Collectors.groupingBy(PackageNode::getPackageInfo));
-        nodes.clear();
+        var groups = packages.stream().collect(Collectors.groupingBy(PackageNode::getPackageInfo));
+        packages.clear();
         for (var entry : groups.entrySet()) {
             var design = PackageNode.of(entry.getKey());
             for (var node : entry.getValue()) {
                 node.getElements().forEach(design::addDefinition);
             }
-            nodes.add(design);
+            packages.add(design);
         }
     }
 
@@ -104,12 +113,11 @@ public final class ProjectConfigReader {
         return result;
     }
 
-    Map<Identifier, List<PackageNode>> resolveDependencies() throws IOException {
+    void resolveRepoDependencies() throws IOException {
         if (!toml.has("dependencies")) {
-            return Map.of();
+            return;
         }
 
-        Map<Identifier, List<PackageNode>> result = new HashMap<>();
         var iter = toml.get("dependencies").fields();
         while (iter.hasNext()) {
             var entry = iter.next();
@@ -124,11 +132,10 @@ public final class ProjectConfigReader {
             } else {
                 throw new IOException("Invalid dependency specification" + entry.getKey());
             }
-            var libCompiler = resolveDependency(path, spec);
-            dependencies.add(libCompiler.build());
-            result.put(Identifier.of(entry.getKey()), libCompiler.nodes);
+            var projConfReader = resolveDependency(path, spec);
+            projConfReader.buildCompiler();
+            manager.addRepoDependency(Identifier.of(entry.getKey()), projConfReader.compiler);
         }
-        return result;
     }
 
     private ProjectConfigReader resolveDependency(Path libRoot, JsonNode spec) throws IOException {
@@ -154,16 +161,14 @@ public final class ProjectConfigReader {
         }
     }
 
-    void doImport(PackageNode node) {
+    void resolveWildcardImportIn(PackageNode node) {
         var newElements = new LinkedList<PackageElement>();
         for (var element : node.getElements()) {
             if (element instanceof ImportNode importNode) {
                 if (importNode.isWildcard()) {
-                    var prefix = importNode.getReference();
-                    var components = manager.resolveWildcard(prefix);
-                    for (var component : components) {
-                        var reference = new LinkedList<>(prefix);
-                        reference.add(component.getIdentifier());
+                    var components = manager.resolveWildcard(importNode);
+                    for (var id : components) {
+                        var reference = new LinkedList<>(importNode.getReference()) {{ add(id); }};
                         newElements.add(ImportNode.of(reference));
                     }
                     continue;

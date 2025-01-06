@@ -42,6 +42,10 @@ public final class ImportNode extends ASTNode implements PackageElement {
         return alias;
     }
 
+    public boolean hasAlias() {
+        return alias != null;
+    }
+
     public void setAlias(Identifier alias) {
         this.alias = alias;
     }

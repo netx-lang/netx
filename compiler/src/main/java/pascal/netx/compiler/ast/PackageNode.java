@@ -41,6 +41,10 @@ public final class PackageNode extends ASTNode {
         this.packageInfo = packageInfo;
     }
 
+    public boolean isApplication() {
+        return packageInfo.getKind() == PackageInfoNode.Kind.APPLICATION;
+    }
+
     public void addDefinition(PackageElement element) {
         elements.add(element);
     }
