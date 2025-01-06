@@ -13,4 +13,8 @@ public record Configuration(boolean fullyExpand, String topName) {
     public static Configuration forExpanded() {
         return new Configuration(true, "top");
     }
+
+    public Configuration forAnotherTop(String topName) {
+        return new Configuration(fullyExpand, topName);
+    }
 }

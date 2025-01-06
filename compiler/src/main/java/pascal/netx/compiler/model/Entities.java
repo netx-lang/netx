@@ -3,9 +3,9 @@ package pascal.netx.compiler.model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.exception.CompileCancellationException;
-import pascal.netx.compiler.model.component.Expr;
-import pascal.netx.compiler.model.component.InstanceAtom;
-import pascal.netx.compiler.model.component.ParallelExpr;
+import pascal.netx.compiler.model.expr.Expr;
+import pascal.netx.compiler.model.expr.InstanceAtom;
+import pascal.netx.compiler.model.expr.ParallelExpr;
 import pascal.netx.compiler.model.instance.*;
 import pascal.netx.util.lang.SourceLoc;
 

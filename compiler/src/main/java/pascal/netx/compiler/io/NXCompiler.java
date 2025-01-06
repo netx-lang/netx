@@ -4,18 +4,22 @@ import com.fasterxml.jackson.databind.JsonNode;
 import pascal.netx.compiler.analysis.*;
 import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.elaborator.PackageElaborator;
+import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.ProjectScope;
+import pascal.netx.util.lang.Identifier;
 
 public final class NXCompiler {
-    private final ProjectScope.Info info;
     private final Configuration config;
     private final PackageManager manager;
 
+    private final ProjectScope project;
+
     public NXCompiler(ProjectScope.Info info, Configuration config, PackageManager manager) {
-        this.info = info;
         this.config = config;
         this.manager = manager;
+        this.project = new ProjectScope(info, manager);
+        manager.setCompiler(this);
     }
 
     public static NXCompiler forSinglePackage(PackageNode node, Configuration config) {
@@ -33,11 +37,15 @@ public final class NXCompiler {
     }
 
     public ProjectScope elaborate() {
-        var project = new ProjectScope(info, manager);
         var scope = new PackageElaborator(project, manager.findApplicationPack(), config).elaborate();
         project.setTop(scope);
         project.addChild(scope);
         return project;
+    }
+
+    public ComponentScope elaborate(PackageNode pack, Identifier top) {
+        var scope = new PackageElaborator(project, pack, config.forAnotherTop(top.name())).elaborate();
+        return scope.getTop();
     }
 
     public JsonNode compile() {

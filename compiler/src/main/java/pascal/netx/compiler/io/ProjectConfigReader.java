@@ -55,8 +55,8 @@ public final class ProjectConfigReader {
 
     public void buildCompiler() throws IOException {
         parse();
-        packages.forEach(this::resolveWildcardImportIn);
         packages.forEach(manager::addPackage);
+        packages.forEach(this::resolveWildcardImportIn);
         this.compiler = new NXCompiler(info, config, manager);
     }
 

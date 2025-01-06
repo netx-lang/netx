@@ -16,13 +16,16 @@ import java.util.function.Supplier;
 public final class PackageScope extends Scope {
     private final Map<Identifier, DataBundle.Factory> interfaceDef = new HashMap<>();
     private final Map<Identifier, ComponentNode> componentDef = new HashMap<>();
-    private final Map<Identifier, List<Identifier>> importRef = new HashMap<>();
+    private final Map<Identifier, List<Identifier>> importDef = new HashMap<>();
     private final BuiltInComponentFactory factory;
+    private ProjectScope project;
+
     private Supplier<Integer> dataIndexer;
     private ComponentScope top;
 
-    PackageScope(Scope parent) {
+    PackageScope(ProjectScope parent) {
         super(parent);
+        this.project = parent;
         this.dataIndexer = new AtomicInteger(0)::incrementAndGet;
         this.factory = new BuiltInComponentFactory(this);
     }
@@ -42,6 +45,14 @@ public final class PackageScope extends Scope {
 
     public ComponentScope getTop() {
         return top;
+    }
+
+    public ProjectScope getProject() {
+        return project;
+    }
+
+    public void setProject(ProjectScope project) {
+        this.project = project;
     }
 
     public void forEachSubComponent(Consumer<ComponentScope> consumer) {
@@ -66,14 +77,23 @@ public final class PackageScope extends Scope {
         return factory;
     }
 
-    public void addImportRef(ImportNode node) {
-        if (node.hasAlias()) {
-            importRef.put(node.getAlias(), node.getReference());
-        } else {
-            importRef.put(node.getReference().getLast(), node.getReference());
-        }
+    // ------- Module Information for Imported Components -------
+
+    public boolean hasImport(Identifier id) {
+        return importDef.containsKey(id);
     }
 
+    public List<Identifier> getImport(Identifier id) {
+        return importDef.get(id);
+    }
+
+    public void addImport(ImportNode node) {
+        if (node.hasAlias()) {
+            importDef.put(node.getAlias(), node.getReference());
+        } else {
+            importDef.put(node.getReference().getLast(), node.getReference());
+        }
+    }
 
     // ------ Module Information for Common Components ------
 

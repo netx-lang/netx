@@ -1,7 +1,7 @@
 package pascal.netx.compiler.elaborator;
 
 import pascal.netx.compiler.model.Utils;
-import pascal.netx.compiler.model.component.BuiltinAtom;
+import pascal.netx.compiler.model.expr.BuiltinAtom;
 import pascal.netx.compiler.model.instance.Wire;
 import pascal.netx.compiler.model.instance.type.BitType;
 import pascal.netx.compiler.model.instance.type.InstanceType;

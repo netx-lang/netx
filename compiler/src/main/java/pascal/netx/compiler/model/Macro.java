@@ -1,7 +1,6 @@
-package pascal.netx.compiler.model.component;
+package pascal.netx.compiler.model;
 
 import pascal.netx.compiler.ast.expr.ExprNode;
-import pascal.netx.compiler.model.Entity;
 import pascal.netx.util.lang.Identifier;
 
 import java.util.List;

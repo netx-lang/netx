@@ -3,7 +3,7 @@ package pascal.netx.compiler.analysis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.model.Entity;
-import pascal.netx.compiler.model.component.Signature;
+import pascal.netx.compiler.model.Signature;
 import pascal.netx.compiler.model.instance.DataAccess;
 import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.compiler.model.instance.MutableInstance;

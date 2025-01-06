@@ -13,9 +13,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 public abstract sealed class Scope permits ComponentScope, PackageScope, ProjectScope {
-    private final Scope parent;
     private final LinkedList<Binding> bindings;
     private final List<Scope> children;
+    private Scope parent;
 
     protected Scope(Scope parent) {
         this.parent = parent;
@@ -26,6 +26,10 @@ public abstract sealed class Scope permits ComponentScope, PackageScope, Project
 
     public Scope getParent() {
         return parent;
+    }
+
+    public void setParent(Scope parent) {
+        this.parent = parent;
     }
 
     public List<Scope> getChildren() {

@@ -6,8 +6,8 @@ import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.ComponentNode;
 import pascal.netx.compiler.ast.element.ImportNode;
 import pascal.netx.compiler.io.Configuration;
-import pascal.netx.compiler.model.component.ComponentAtom;
-import pascal.netx.compiler.model.component.Signature;
+import pascal.netx.compiler.model.Signature;
+import pascal.netx.compiler.model.expr.ComponentAtom;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.ProjectScope;
@@ -60,7 +60,7 @@ public final class PackageElaborator {
         for (var element : node.getElements()) {
             switch (element) {
                 case ComponentNode component -> addComponentInfo(component);
-                case ImportNode import_ -> pack.addImportRef(import_);
+                case ImportNode import_ -> pack.addImport(import_);
             }
         }
         pack.resetDataIndexer();

@@ -1,17 +1,17 @@
 library arithmetic;
 
 component adder: [a, b] -> [c] {
-    c <> ADD <> [a, b];
+    auto c <> ADD <> [a, b];
 }
 
 component subtractor: [a, b] -> [c] {
-    c <> SUB <> [a, b];
+    auto c <> SUB <> [a, b];
 }
 
 component multiplier: [a, b] -> [c] {
-    c <> MUL <> [a, b];
+    auto c <> MUL <> [a, b];
 }
 
 component divider: [a, b] -> [c] {
-    c <> DIV <> [a, b];
+    auto c <> DIV <> [a, b];
 }

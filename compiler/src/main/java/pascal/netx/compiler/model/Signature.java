@@ -1,5 +1,6 @@
-package pascal.netx.compiler.model.component;
+package pascal.netx.compiler.model;
 
+import pascal.netx.compiler.model.expr.ComponentAtom;
 import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.compiler.model.instance.type.InstanceType;
 

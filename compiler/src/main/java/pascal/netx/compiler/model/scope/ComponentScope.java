@@ -2,7 +2,7 @@ package pascal.netx.compiler.model.scope;
 
 import pascal.netx.compiler.analysis.AssignManager;
 import pascal.netx.compiler.elaborator.ComponentEvaluator;
-import pascal.netx.compiler.model.component.Signature;
+import pascal.netx.compiler.model.Signature;
 import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
@@ -12,9 +12,9 @@ import pascal.netx.util.lang.SourceLoc;
 import java.util.*;
 
 public final class ComponentScope extends Scope {
-    private final PackageScope pack;
     private final boolean isInterface;
     private final Identifier identifier;
+    private PackageScope pack;
 
     private final ComponentEvaluator evaluator;
     private final Set<Alias> aliases = new HashSet<>();
@@ -34,7 +34,7 @@ public final class ComponentScope extends Scope {
         super(parent);
         this.pack = switch (parent) {
             case PackageScope scope -> scope;
-            case ComponentScope scope -> scope.getPack();
+            case ComponentScope scope -> scope.getPackage();
             default -> throw new ShallNotReachHereError();
         };
         this.isInterface = isInterface;
@@ -66,8 +66,12 @@ public final class ComponentScope extends Scope {
         return identifier;
     }
 
-    public PackageScope getPack() {
+    public PackageScope getPackage() {
         return pack;
+    }
+
+    public void setPackage(PackageScope pack) {
+        this.pack = pack;
     }
 
     public ComponentEvaluator getEvaluator() {

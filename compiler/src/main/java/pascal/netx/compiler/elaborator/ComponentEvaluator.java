@@ -11,8 +11,9 @@ import pascal.netx.compiler.ast.expr.qualifier.Qualifier;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.EntityList;
+import pascal.netx.compiler.model.Macro;
 import pascal.netx.compiler.model.Utils;
-import pascal.netx.compiler.model.component.*;
+import pascal.netx.compiler.model.expr.*;
 import pascal.netx.compiler.model.instance.*;
 import pascal.netx.compiler.model.instance.selector.BitSelector;
 import pascal.netx.compiler.model.instance.selector.PartSelector;
@@ -68,10 +69,10 @@ public final class ComponentEvaluator {
 
     public ComponentEvaluator(ComponentScope component) {
         this.scope = component;
-        this.pack = component.getPack();
+        this.pack = component.getPackage();
     }
 
-    public Expr evaluateToComponentType(ExprNode expr, boolean needDeclareInPlace) {
+    public Expr evaluateToComponentExpr(ExprNode expr, boolean needDeclareInPlace) {
         if (needDeclareInPlace) {
             return castToComponentType(evaluateAndDeclInPlace(expr), expr.getSourceLoc());
         }
@@ -357,11 +358,11 @@ public final class ComponentEvaluator {
     private Entity evaluatePrimarySymbolExpr(IdentifierExpr expr) {
         var id = expr.getIdentifier();
         if (mode == EvaluationMode.FACTORY) {
-            if (!scope.getPack().hasInterface(id)) {
+            if (!scope.getPackage().hasInterface(id)) {
                 log.error("{}: Unknown interface type {}", expr.getSourceLoc(), id);
                 throw new CompileCancellationException();
             }
-            return scope.getPack().getInterface(id);
+            return scope.getPackage().getInterface(id);
         } else {
             Entity entity = resolveIdentifier(id);
             if (entity instanceof Macro macro) {
@@ -399,6 +400,8 @@ public final class ComponentEvaluator {
             if (entity == null) {
                 if (pack.hasComponent(id)) {
                     entity = ComponentAtom.of(pack.getComponent(id), id);
+                } else if (pack.hasImport(id)) {
+                    entity = ImportedAtom.of(pack.getImport(id), id.getSourceLoc());
                 } else if (BuiltinComponent.isBuiltin(id)) {
                     entity = BuiltinAtom.of(BuiltinComponent.of(id), id.getSourceLoc());
                 }

@@ -22,6 +22,14 @@ public final class ProjectScope extends Scope {
         this.manager = manager;
     }
 
+    public Info getInfo() {
+        return info;
+    }
+
+    public PackageManager getManager() {
+        return manager;
+    }
+
     public PackageScope getTop() {
         return top;
     }
@@ -40,10 +48,6 @@ public final class ProjectScope extends Scope {
 
     public Stream<PackageScope> packages() {
         return getChildren().stream().map(PackageScope.class::cast);
-    }
-
-    public Info getInfo() {
-        return info;
     }
 
     public record Info(String name, Version version) {

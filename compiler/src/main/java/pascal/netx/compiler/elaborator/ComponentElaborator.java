@@ -8,7 +8,8 @@ import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.exception.TypeCheckingException;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.model.EntityList;
-import pascal.netx.compiler.model.component.*;
+import pascal.netx.compiler.model.Signature;
+import pascal.netx.compiler.model.expr.*;
 import pascal.netx.compiler.model.instance.Array;
 import pascal.netx.compiler.model.instance.DataBundle;
 import pascal.netx.compiler.model.instance.DataComposition;
@@ -19,6 +20,7 @@ import pascal.netx.compiler.model.instance.type.InterfaceType;
 import pascal.netx.compiler.model.scope.Attributes;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.binding.MonoBinding;
+import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
@@ -42,7 +44,7 @@ final class ComponentElaborator {
     ComponentElaborator(Configuration config, ComponentScope scope) {
         this.config = config;
         this.scope = scope;
-        this.factory = scope.getPack().getBuiltinFactory();
+        this.factory = scope.getPackage().getBuiltinFactory();
         this.evaluator = scope.getEvaluator();
     }
 
@@ -114,7 +116,7 @@ final class ComponentElaborator {
             if (!rest.getDimensions().isEmpty()) {
                 for (ExprNode dimension : rest.getDimensions()) {
                     var size = evaluator.evaluateToInt(dimension);
-                    factory = new Array.Factory(scope.getPack(), size, factory);
+                    factory = new Array.Factory(scope.getPackage(), size, factory);
                 }
             }
             var id = rest.getIdentifier();
@@ -143,7 +145,7 @@ final class ComponentElaborator {
     private void buildSubComponent(ComponentInstantiationNode instantiation) {
         var sourceLoc = instantiation.getSourceLoc();
         boolean inPlace = instantiation.needDeclareInPlace();
-        var compType = evaluator.evaluateToComponentType(instantiation.getExpr(), inPlace);
+        var compType = evaluator.evaluateToComponentExpr(instantiation.getExpr(), inPlace);
         new Instantiator(sourceLoc).instantiate(compType);
     }
 
@@ -189,17 +191,18 @@ final class ComponentElaborator {
             doInstantiate(type);
         }
 
-        Instantiator.ComponentPort doInstantiate(Expr type) {
+        ComponentPort doInstantiate(Expr type) {
             return switch (type) {
                 case BuiltinAtom atom -> instantiateBuiltinAtom(atom);
                 case InstanceAtom atom -> instantiateInstanceAtom(atom);
+                case ImportedAtom atom -> instantiateImportedAtom(atom);
                 case ComponentAtom atom -> instantiateComponentAtom(atom);
                 case SequentialExpr expr -> instantiateSequentialExpr(expr);
                 case ParallelExpr expr -> instantiateParallelExpr(expr);
             };
         }
 
-        private Instantiator.ComponentPort instantiateSequentialExpr(SequentialExpr sequentialExpr) {
+        private ComponentPort instantiateSequentialExpr(SequentialExpr sequentialExpr) {
             // right-hand-side goes first
             var rhs = doInstantiate(sequentialExpr.rhs());
             var lhs = doInstantiate(sequentialExpr.lhs());
@@ -220,14 +223,14 @@ final class ComponentElaborator {
             return ComponentPort.of(lhs.target(), rhs.source());
         }
 
-        private Instantiator.ComponentPort instantiateParallelExpr(ParallelExpr parallelExpr) {
+        private ComponentPort instantiateParallelExpr(ParallelExpr parallelExpr) {
             List<Instance> input = new LinkedList<>(), output = new LinkedList<>();
             for (var sub : parallelExpr.exprs()) {
                 var port = doInstantiate(sub);
                 input.addAll(port.target());
                 output.addAll(port.source());
             }
-            return Instantiator.ComponentPort.of(input, output);
+            return ComponentPort.of(input, output);
         }
 
         private ComponentPort instantiateInstanceAtom(InstanceAtom atom) {
@@ -239,17 +242,37 @@ final class ComponentElaborator {
             };
         }
 
-        private Instantiator.ComponentPort instantiateBuiltinAtom(BuiltinAtom atom) {
+        private ComponentPort instantiateImportedAtom(ImportedAtom atom) {
+            var manager = scope.getPackage().getProject().getManager();
+            var sourceLoc = atom.getSourceLoc();
+            var reference = atom.getReferences();
+            var compiler = manager.dispatchCompiler(sourceLoc, reference);
+            var component = switch (reference.size()) {
+                case 2 -> {
+                    var pack = manager.resolvePackage(sourceLoc, reference.get(0));
+                    yield compiler.elaborate(pack, reference.get(1));
+                }
+                case 3 -> {
+                    var pack = compiler.getPackManager().resolvePackage(sourceLoc, reference.get(1));
+                    yield compiler.elaborate(pack, reference.get(2));
+                }
+                default -> throw new ShallNotReachHereError();
+            };
+
+            return ComponentPort.of(component.getOutputs(), component.getInputs());
+        }
+
+        private ComponentPort instantiateBuiltinAtom(BuiltinAtom atom) {
             var component = factory.createBuiltInComponent(scope, atom);
             if (atom.getBuiltin() == BuiltinComponent.REGISTER) {
                 var clock = doInstantiate(requiresComponentType(sourceLoc, atom.getParameters().getFirst()));
                 requiresMatchedSize(sourceLoc, 1, clock.target);
                 component.getAttributes().addAttribute(Identifier.of("clock"), clock.target.getFirst());
             }
-            return Instantiator.ComponentPort.of(component.getOutputs(), component.getInputs());
+            return ComponentPort.of(component.getOutputs(), component.getInputs());
         }
 
-        private Instantiator.ComponentPort instantiateComponentAtom(ComponentAtom atom) {
+        private ComponentPort instantiateComponentAtom(ComponentAtom atom) {
             var node = atom.getDefinition();
             ComponentScope component = switch (atom.getDefinition().getKind()) {
                 case COMPONENT -> ComponentScope.newComponent(scope, atom.getIdentifier());
@@ -265,7 +288,7 @@ final class ComponentElaborator {
             if (!config.fullyExpand()) {
                 setSignatureFor(atom, component);
             }
-            return Instantiator.ComponentPort.of(component.getOutputs(), component.getInputs());
+            return ComponentPort.of(component.getOutputs(), component.getInputs());
         }
 
         private void setSignatureFor(ComponentAtom atom, ComponentScope scope) {
@@ -285,8 +308,8 @@ final class ComponentElaborator {
         }
 
         private record ComponentPort(List<Instance> target, List<Instance> source) {
-            public static Instantiator.ComponentPort of(List<Instance> target, List<Instance> source) {
-                return new Instantiator.ComponentPort(target, source);
+            public static ComponentPort of(List<Instance> target, List<Instance> source) {
+                return new ComponentPort(target, source);
             }
         }
     }

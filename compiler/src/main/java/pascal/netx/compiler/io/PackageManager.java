@@ -13,11 +13,13 @@ import pascal.netx.util.lang.SourceLoc;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public final class PackageManager {
     private static final Logger log = LoggerFactory.getLogger(PackageManager.class);
     private final Map<Identifier, NXCompiler> repositories = new HashMap<>();
     private final Map<Identifier, PackageNode> packages = new HashMap<>();
+    private NXCompiler compiler;
 
     public static PackageManager ofEmpty() {
         return new PackageManager();
@@ -29,6 +31,24 @@ public final class PackageManager {
 
     public void addPackage(PackageNode pack) {
         packages.put(pack.getPackageInfo().getIdentifier(), pack);
+    }
+
+    public void setCompiler(NXCompiler compiler) {
+        if (this.compiler != null) {
+            throw new ShallNotReachHereError();
+        }
+        this.compiler = compiler;
+    }
+
+    public NXCompiler dispatchCompiler(SourceLoc sourceLoc, List<Identifier> reference) {
+        return switch (reference.size()) {
+            case 2 -> Objects.requireNonNull(compiler);
+            case 3 -> resolveRepo(sourceLoc, reference.getFirst());
+            default -> {
+                log.error("{}: Invalid reference in import: {}", sourceLoc, reference);
+                throw new CompileCancellationException();
+            }
+        };
     }
 
     public List<Identifier> resolveWildcard(ImportNode node) {
@@ -61,6 +81,7 @@ public final class PackageManager {
     public PackageNode resolvePackage(SourceLoc sourceLoc, Identifier identifier) {
         if (!packages.containsKey(identifier)) {
             log.error("{}: Cannot resolve package: {}", sourceLoc, identifier);
+            throw new CompileCancellationException();
         }
         return packages.get(identifier);
     }
@@ -68,6 +89,7 @@ public final class PackageManager {
     public NXCompiler resolveRepo(SourceLoc sourceLoc, Identifier identifier) {
         if (!repositories.containsKey(identifier)) {
             log.error("{}: Cannot resolve repository: {}", sourceLoc, identifier);
+            throw new CompileCancellationException();
         }
         return repositories.get(identifier);
     }

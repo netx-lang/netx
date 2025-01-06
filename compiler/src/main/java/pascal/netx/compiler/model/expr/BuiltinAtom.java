@@ -1,4 +1,4 @@
-package pascal.netx.compiler.model.component;
+package pascal.netx.compiler.model.expr;
 
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.util.lang.BuiltinComponent;
