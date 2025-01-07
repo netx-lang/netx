@@ -1,5 +1,6 @@
 package pascal.netx.compiler.io;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
@@ -9,11 +10,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class NXCompilerUnitTest {
     private static final Path TEST_DIR = Path.of("src/test/resources/testcases/");
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static void test(String fileName) throws IOException {
         String content = new String(Files.readAllBytes(TEST_DIR.resolve(fileName)));
@@ -23,9 +24,16 @@ class NXCompilerUnitTest {
     }
 
     @Test
-    void testBuild() throws IOException {
-        var compiler = Builder.forExpanded().loadPath(TEST_DIR.resolve("package/_netx.toml"));
-        assertNotNull(compiler.compile());
+    void testProjectBuild() throws IOException {
+        var compiler = Builder.forExpanded().loadPath(TEST_DIR.resolve("project/_netx.toml"));
+        var expected = MAPPER.reader().readTree(
+                Files.readString(TEST_DIR.resolve("expected/project_e.json")));
+        assertEquals(expected, compiler.compile());
+
+        compiler = Builder.forCompact().loadPath(TEST_DIR.resolve("project/_netx.toml"));
+        expected = MAPPER.reader().readTree(
+                Files.readString(TEST_DIR.resolve("expected/project_c.json")));
+        assertEquals(expected, compiler.compile());
     }
 
     @Test

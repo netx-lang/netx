@@ -1,0 +1,95 @@
+{
+    "totalData": 9,
+    "design": {
+        "type": "component",
+        "id": "top",
+        "loc": "3:10",
+        "input": ["a@0", "b@1"],
+        "output": ["c@2"],
+        "members": [
+            {"type": "wire", "width": 1, "id": "a@0", "loc": "4:31"},
+            {"type": "wire", "width": 1, "id": "b@1", "loc": "4:34"},
+            {"type": "wire", "width": 1, "id": "c@2", "loc": "4:9"},
+            {
+                "type": "component", "id": "my_component", "loc": "4:14",
+                "input": ["a@0", "b@1"],
+                "output": ["c@2"],
+                "members": [
+                    {
+                        "type": "component", "id": "my_and", "loc": "3:10",
+                        "input": ["a@0", "b@1"],
+                        "output": ["c@3"],
+                        "members": [
+                            {"type": "wire", "width": 1, "id": "c@3", "loc": "4:9"},
+                            {
+                                "type": "builtin", "id": "AND", "loc": "4:14",
+                                "input": ["a@0", "b@1"],
+                                "output": ["c@3"]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "component", "id": "adder", "loc": "3:10",
+                        "input": ["a@0", "b@1"],
+                        "output": ["c@4"],
+                        "members": [
+                            {"type": "wire", "width": 1, "id": "c@4", "loc": "4:9"},
+                            {
+                                "type": "builtin", "id": "ADD", "loc": "4:14",
+                                "input": ["a@0", "b@1"],
+                                "output": ["c@4"]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "component", "id": "multiplier", "loc": "11:10",
+                        "input": ["a@0", "b@1"],
+                        "output": ["c@5"],
+                        "members": [
+                            {"type": "wire", "width": 1, "id": "c@5", "loc": "12:9"},
+                            {
+                                "type": "builtin", "id": "MUL", "loc": "12:14",
+                                "input": ["a@0", "b@1"],
+                                "output": ["c@5"]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "component", "id": "mux", "loc": "3:10",
+                        "input": ["c@3", "c@4", "c@5"],
+                        "output": ["c@2"],
+                        "members": [
+                            {
+                                "type": "builtin", "id": "AND", "loc": "6:8",
+                                "input": ["c@4", "c@3"],
+                                "output": ["$i1@6"]
+                            },
+                            {
+                                "type": "builtin", "id": "NOT", "loc": "7:19",
+                                "input": ["c@3"],
+                                "output": ["$i2@7"]
+                            },
+                            {
+                                "type": "builtin", "id": "AND", "loc": "7:8",
+                                "input": ["c@5", "$i2@7"],
+                                "output": ["$i2@8"],
+                                "members": [
+                                    {"type": "wire", "width": 1, "id": "$i2@7", "loc": "7:8"}
+                                ]
+                            },
+                            {
+                                "type": "builtin", "id": "OR", "loc": "5:16",
+                                "input": ["$i1@6", "$i2@8"],
+                                "output": ["c@2"],
+                                "members": [
+                                    {"type": "wire", "width": 1, "id": "$i1@6", "loc": "5:16"},
+                                    {"type": "wire", "width": 1, "id": "$i2@8", "loc": "5:16"}
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,130 @@
+[
+    {
+        "type": "component", "id": "top", "defIndex": 1, "loc": "3:10",
+        "input": ["a@0", "b@0"],
+        "output": ["c@0"],
+        "members": [
+            {"type": "wire", "width": 1, "id": "a", "loc": "4:31"},
+            {"type": "wire", "width": 1, "id": "b", "loc": "4:34"},
+            {"type": "wire", "width": 1, "id": "c", "loc": "4:9"},
+            {
+                "type": "instantiate", "id": "my_component@1", "defIndex": 1, "loc": "4:14",
+                "input": ["a@0", "b@0"],
+                "output": ["c@0"]
+            }
+        ]
+    },
+    {
+        "type": "component", "id": "my_component", "defIndex": 1, "loc": "7:10",
+        "input": ["a@0", "b@0"],
+        "output": ["c@0"],
+        "members": [
+            {"type": "wire", "width": 1, "id": "a", "loc": "8:9"},
+            {"type": "wire", "width": 1, "id": "b", "loc": "8:12"},
+            {"type": "wire", "width": 1, "id": "c", "loc": "8:15"},
+            {
+                "type": "instantiate", "id": "my_and@1", "defIndex": 1, "loc": "3:10",
+                "input": ["a@0", "b@0"],
+                "output": ["c@1"]
+            },
+            {
+                "type": "instantiate", "id": "adder@2", "defIndex": 1, "loc": "3:10",
+                "input": ["a@0", "b@0"],
+                "output": ["c@2"]
+            },
+            {
+                "type": "instantiate", "id": "multiplier@3", "defIndex": 1, "loc": "11:10",
+                "input": ["a@0", "b@0"],
+                "output": ["c@3"]
+            },
+            {
+                "type": "instantiate", "id": "mux@4", "defIndex": 1, "loc": "3:10",
+                "input": ["c@1", "c@2", "c@3"],
+                "output": ["c@0"]
+            }
+        ]
+    },
+    {
+        "type": "component", "id": "mux", "defIndex": 1, "loc": "3:10",
+        "input": ["sel@0", "a@0", "b@0"],
+        "output": ["out@0"],
+        "members": [
+            {"type": "wire", "width": 1, "id": "sel", "loc": "4:9"},
+            {"type": "wire", "width": 1, "id": "a", "loc": "6:16"},
+            {"type": "wire", "width": 1, "id": "b", "loc": "7:16"},
+            {"type": "wire", "width": 1, "id": "out", "loc": "5:9"},
+            {
+                "type": "builtin", "id": "AND@1", "loc": "6:8",
+                "input": ["a@0", "sel@0"],
+                "output": ["$i1@4"]
+            },
+            {
+                "type": "builtin", "id": "NOT@2", "loc": "7:19",
+                "input": ["sel@0"],
+                "output": ["$i2@3"]
+            },
+            {
+                "type": "builtin", "id": "AND@3", "loc": "7:8",
+                "input": ["b@0", "$i2@3"],
+                "output": ["$i2@4"],
+                "members": [
+                    {"type": "wire", "width": 1, "id": "$i2", "loc": "7:8"}
+                ]
+            },
+            {
+                "type": "builtin", "id": "OR@4", "loc": "5:16",
+                "input": ["$i1@4", "$i2@4"],
+                "output": ["out@0"],
+                "members": [
+                    {"type": "wire", "width": 1, "id": "$i1", "loc": "5:16"},
+                    {"type": "wire", "width": 1, "id": "$i2", "loc": "5:16"}
+                ]
+            }
+        ]
+    },
+    {
+        "type": "component", "id": "multiplier", "defIndex": 1, "loc": "11:10",
+        "input": ["a@0", "b@0"],
+        "output": ["c@0"],
+        "members": [
+            {"type": "wire", "width": 1, "id": "a", "loc": "12:22"},
+            {"type": "wire", "width": 1, "id": "b", "loc": "12:25"},
+            {"type": "wire", "width": 1, "id": "c", "loc": "12:9"},
+            {
+                "type": "builtin", "id": "MUL@1", "loc": "12:14",
+                "input": ["a@0", "b@0"],
+                "output": ["c@0"]
+            }
+        ]
+    },
+    {
+        "type": "component", "id": "adder", "defIndex": 1, "loc": "3:10",
+        "input": ["a@0", "b@0"],
+        "output": ["c@0"],
+        "members": [
+            {"type": "wire", "width": 1, "id": "a", "loc": "4:22"},
+            {"type": "wire", "width": 1, "id": "b", "loc": "4:25"},
+            {"type": "wire", "width": 1, "id": "c", "loc": "4:9"},
+            {
+                "type": "builtin", "id": "ADD@1", "loc": "4:14",
+                "input": ["a@0", "b@0"],
+                "output": ["c@0"]
+            }
+        ]
+    },
+    {
+        "type": "component", "id": "my_and", "defIndex": 1, "loc": "3:10",
+        "input": ["a@0", "b@0"],
+        "output": ["c@0"],
+        "members": [
+            {"type": "wire", "width": 1, "id": "a", "loc": "4:22"},
+            {"type": "wire", "width": 1, "id": "b", "loc": "4:25"},
+            {"type": "wire", "width": 1, "id": "c", "loc": "4:9"},
+            {
+                "type": "builtin", "id": "AND@1", "loc": "4:14",
+                "input": ["a@0", "b@0"],
+                "output": ["c@0"]
+            }
+        ]
+    }
+]
