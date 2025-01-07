@@ -14,6 +14,8 @@ import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.ProjectScope;
 
+import static pascal.netx.compiler.model.Utils.requiresMatchedSize;
+
 public final class PackageElaborator {
     private static final Logger log = LoggerFactory.getLogger(PackageElaborator.class);
 
@@ -36,11 +38,22 @@ public final class PackageElaborator {
         addPackageInformation();
         var topNode = findTopNode();
         var topScope = pack.instantiateTop(topNode.getIdentifier());
+        bindConfigParameters(topNode, topScope);
         new ComponentElaborator(config, topScope).build(topNode);
         if (!config.fullyExpand()) {
             setDesignSignature(topScope, topNode);
         }
         return pack;
+    }
+
+    private void bindConfigParameters(ComponentNode topNode, ComponentScope topScope) {
+        if (config.parameters() != null) {
+            var iterator = config.parameters().iterator();
+            requiresMatchedSize(topNode.getSourceLoc(), topNode.getAttributes(), config.parameters());
+            for (var id : topNode.getAttributes()) {
+                topScope.bind(id, iterator.next());
+            }
+        }
     }
 
     private ComponentNode findTopNode() {

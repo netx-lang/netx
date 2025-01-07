@@ -213,10 +213,10 @@ final class ComponentElaborator {
 
         private ComponentPort instantiatePrimaryExpr(PrimaryExpr expr) {
             return switch (expr) {
-                case ComponentRef ref -> instantiateComponentAtom(ref);
-                case VariableRef ref -> instantiateInstanceAtom(ref);
-                case BuiltinRef ref -> instantiateBuiltinAtom(ref);
-                case ImportRef ref -> instantiateImportedAtom(ref);
+                case ComponentRef ref -> instantiateComponentRef(ref);
+                case VariableRef ref -> instantiateInstanceRef(ref);
+                case BuiltinRef ref -> instantiateBuiltinRef(ref);
+                case ImportRef ref -> instantiateImportRef(ref);
             };
         }
 
@@ -251,12 +251,12 @@ final class ComponentElaborator {
             return ComponentPort.of(input, output);
         }
 
-        private ComponentPort instantiateInstanceAtom(VariableRef ref) {
+        private ComponentPort instantiateInstanceRef(VariableRef ref) {
             var inst = List.of(ref.getInstance());
             return ComponentPort.of(inst, inst);
         }
 
-        private ComponentPort instantiateImportedAtom(ImportRef ref) {
+        private ComponentPort instantiateImportRef(ImportRef ref) {
             SourceLoc sourceLoc = ref.getSourceLoc();
             List<Identifier> reference = ref.getReferences();
 
@@ -264,11 +264,11 @@ final class ComponentElaborator {
             var component = switch (reference.size()) {
                 case 2 -> {
                     var pack = compiler.getPackManager().resolvePackage(sourceLoc, reference.get(0));
-                    yield compiler.elaborate(pack, reference.get(1));
+                    yield compiler.elaborate(pack, reference.get(1), ref.getParameters());
                 }
                 case 3 -> {
                     var pack = compiler.getPackManager().resolvePackage(sourceLoc, reference.get(1));
-                    yield compiler.elaborate(pack, reference.get(2));
+                    yield compiler.elaborate(pack, reference.get(2), ref.getParameters());
                 }
                 default -> throw new ShallNotReachHereError();
             };
@@ -279,7 +279,7 @@ final class ComponentElaborator {
             return ComponentPort.of(component.getOutputs(), component.getInputs());
         }
 
-        private ComponentPort instantiateBuiltinAtom(BuiltinRef ref) {
+        private ComponentPort instantiateBuiltinRef(BuiltinRef ref) {
             var component = factory.createBuiltInComponent(scope, ref);
             if (ref.getBuiltin() == BuiltinComponent.REGISTER) {
                 var clock = doInstantiate(requiresInstantiateExpr(sourceLoc, ref.getParameters().getFirst()));
@@ -289,7 +289,7 @@ final class ComponentElaborator {
             return ComponentPort.of(component.getOutputs(), component.getInputs());
         }
 
-        private ComponentPort instantiateComponentAtom(ComponentRef ref) {
+        private ComponentPort instantiateComponentRef(ComponentRef ref) {
             var node = ref.getDefinition();
             ComponentScope component = switch (ref.getDefinition().getKind()) {
                 case COMPONENT -> ComponentScope.newComponent(scope, ref.getIdentifier());
