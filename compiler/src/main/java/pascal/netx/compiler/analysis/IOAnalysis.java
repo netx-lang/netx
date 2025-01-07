@@ -3,16 +3,16 @@ package pascal.netx.compiler.analysis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.exception.TypeCheckingException;
-import pascal.netx.compiler.model.instance.Clock;
-import pascal.netx.compiler.model.instance.Data;
-import pascal.netx.compiler.model.instance.DataAccess;
-import pascal.netx.compiler.model.instance.MutableInstance;
-import pascal.netx.compiler.model.instance.selector.BitSelector;
-import pascal.netx.compiler.model.instance.selector.PartSelector;
-import pascal.netx.compiler.model.instance.selector.Selector;
-import pascal.netx.compiler.model.instance.type.BitType;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
+import pascal.netx.compiler.model.variable.Access;
+import pascal.netx.compiler.model.variable.Clock;
+import pascal.netx.compiler.model.variable.Data;
+import pascal.netx.compiler.model.variable.Mutable;
+import pascal.netx.compiler.model.variable.selector.BitSelector;
+import pascal.netx.compiler.model.variable.selector.PartSelector;
+import pascal.netx.compiler.model.variable.selector.Selector;
+import pascal.netx.compiler.model.variable.type.BitType;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.SourceLoc;
 
@@ -29,20 +29,20 @@ public final class IOAnalysis extends ModelAnalysis {
         super(design);
     }
 
-    private static void errorDefineInput(SourceLoc sourceLoc, MutableInstance mutable) {
+    private static void errorDefineInput(SourceLoc sourceLoc, Mutable mutable) {
         log.error("{}: component defines its input {}", sourceLoc, mutable);
         throw new TypeCheckingException();
     }
 
-    private static void warnUnusedInput(SourceLoc sourceLoc, MutableInstance mutable) {
+    private static void warnUnusedInput(SourceLoc sourceLoc, Mutable mutable) {
         log.warn("{}: component has unused bits of input {}", sourceLoc, mutable);
     }
 
-    private static void warnMultipleDriver(SourceLoc sourceLoc, MutableInstance mutable) {
+    private static void warnMultipleDriver(SourceLoc sourceLoc, Mutable mutable) {
         log.warn("{}: component has multiple driver to its output {}", sourceLoc, mutable);
     }
 
-    private static void errorUndefOut(SourceLoc sourceLoc, MutableInstance mutable) {
+    private static void errorUndefOut(SourceLoc sourceLoc, Mutable mutable) {
         log.error("{}: component has undefined bits of output {}", sourceLoc, mutable);
         throw new TypeCheckingException();
     }
@@ -64,7 +64,7 @@ public final class IOAnalysis extends ModelAnalysis {
         }
     }
 
-    private static void initializeDataAccess(Map<Data, DataCoverage> coverage, DataAccess access) {
+    private static void initializeDataAccess(Map<Data, DataCoverage> coverage, Access access) {
         var base = access.base();
         var selector = access.selector();
         if (coverage.containsKey(base)) {
@@ -101,10 +101,10 @@ public final class IOAnalysis extends ModelAnalysis {
 
     private void checkInputIntegrity(ComponentScope component, SourceLoc sourceLoc) {
         for (var inst : component.getInputs()) {
-            if (inst instanceof MutableInstance mutable) {
+            if (inst instanceof Mutable mutable) {
                 switch (mutable) {
                     case Data data -> checkInputData(sourceLoc, data);
-                    case DataAccess access -> checkInputDataAccess(sourceLoc, access);
+                    case Access access -> checkInputDataAccess(sourceLoc, access);
                     default -> throw new ShallNotReachHereError("Should be eliminated by CompositeDataBlaster");
                 }
             }
@@ -121,7 +121,7 @@ public final class IOAnalysis extends ModelAnalysis {
         }
     }
 
-    private void checkInputDataAccess(SourceLoc sourceLoc, DataAccess access) {
+    private void checkInputDataAccess(SourceLoc sourceLoc, Access access) {
         var base = access.base();
         var selector = access.selector();
         if (!(use.containsKey(base) && use.get(base).isSetFor(selector))) {
@@ -133,10 +133,10 @@ public final class IOAnalysis extends ModelAnalysis {
 
     private void checkOutputIntegrity(ComponentScope component, SourceLoc sourceLoc) {
         for (var inst : component.getOutputs()) {
-            if (inst instanceof MutableInstance mutable) {
+            if (inst instanceof Mutable mutable) {
                 switch (mutable) {
                     case Data data -> checkOutputData(sourceLoc, data);
-                    case DataAccess access -> checkOutputDataAccess(sourceLoc, access);
+                    case Access access -> checkOutputDataAccess(sourceLoc, access);
                     default -> throw new ShallNotReachHereError("Should be eliminated by CompositeDataBlaster");
                 }
             }
@@ -151,7 +151,7 @@ public final class IOAnalysis extends ModelAnalysis {
         }
     }
 
-    private void checkOutputDataAccess(SourceLoc sourceLoc, DataAccess access) {
+    private void checkOutputDataAccess(SourceLoc sourceLoc, Access access) {
         var base = access.base();
         var selector = access.selector();
         if (!(def.containsKey(base) && def.get(base).isSetFor(selector))) {
@@ -161,10 +161,10 @@ public final class IOAnalysis extends ModelAnalysis {
         }
     }
 
-    private void initialize(MutableInstance inst, Map<Data, DataCoverage> coverage) {
+    private void initialize(Mutable inst, Map<Data, DataCoverage> coverage) {
         switch (inst) {
             case Data data -> initializeData(coverage, data);
-            case DataAccess access -> initializeDataAccess(coverage, access);
+            case Access access -> initializeDataAccess(coverage, access);
             default -> {
                 // do nothing
             }

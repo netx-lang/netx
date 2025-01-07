@@ -1,6 +1,6 @@
-package pascal.netx.compiler.model.instance.type;
+package pascal.netx.compiler.model.variable.type;
 
-public final class PolyType implements InstanceType {
+public final class PolyType implements Type {
     private static final PolyType INSTANCE = new PolyType();
 
     private PolyType() {

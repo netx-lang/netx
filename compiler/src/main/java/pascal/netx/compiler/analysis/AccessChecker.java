@@ -4,13 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.exception.TypeCheckingException;
 import pascal.netx.compiler.model.Entity;
-import pascal.netx.compiler.model.instance.DataAccess;
-import pascal.netx.compiler.model.instance.IntegerValue;
-import pascal.netx.compiler.model.instance.selector.BitSelector;
-import pascal.netx.compiler.model.instance.selector.PartSelector;
-import pascal.netx.compiler.model.instance.type.BitType;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
+import pascal.netx.compiler.model.variable.Access;
+import pascal.netx.compiler.model.variable.IntegerValue;
+import pascal.netx.compiler.model.variable.selector.BitSelector;
+import pascal.netx.compiler.model.variable.selector.PartSelector;
+import pascal.netx.compiler.model.variable.type.BitType;
 
 public class AccessChecker extends ModelAnalysis {
 
@@ -21,7 +21,7 @@ public class AccessChecker extends ModelAnalysis {
     }
 
     private static void check(Entity entity) {
-        if (entity instanceof DataAccess(var base, var selector)) {
+        if (entity instanceof Access(var base, var selector)) {
             var baseWidth = ((BitType) base.getType()).width();
             switch (selector) {
                 case BitSelector(var index) -> {

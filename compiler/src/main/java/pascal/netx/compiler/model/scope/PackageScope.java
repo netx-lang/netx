@@ -3,7 +3,7 @@ package pascal.netx.compiler.model.scope;
 import pascal.netx.compiler.ast.element.ComponentNode;
 import pascal.netx.compiler.ast.element.ImportNode;
 import pascal.netx.compiler.elaborator.InterfaceElaborator;
-import pascal.netx.compiler.model.instance.DataBundle;
+import pascal.netx.compiler.model.variable.Bundle;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 
@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public final class PackageScope extends Scope {
-    private final Map<Identifier, DataBundle.Factory> interfaceDef = new HashMap<>();
+    private final Map<Identifier, Bundle.Factory> interfaceDef = new HashMap<>();
     private final Map<Identifier, ComponentNode> componentDef = new HashMap<>();
     private final Map<Identifier, List<Identifier>> importDef = new HashMap<>();
     private final ProjectScope project;
@@ -91,7 +91,7 @@ public final class PackageScope extends Scope {
         return interfaceDef.containsKey(id);
     }
 
-    public DataBundle.Factory getInterface(Identifier id) {
+    public Bundle.Factory getInterface(Identifier id) {
         return interfaceDef.get(id);
     }
 

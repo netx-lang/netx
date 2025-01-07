@@ -9,7 +9,7 @@ import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.model.Signature;
 import pascal.netx.compiler.model.Utils;
-import pascal.netx.compiler.model.expr.ComponentAtom;
+import pascal.netx.compiler.model.expr.ComponentRef;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.ProjectScope;
@@ -28,7 +28,7 @@ public final class PackageElaborator {
     }
 
     private static void setDesignSignature(ComponentScope topScope, ComponentNode topNode) {
-        var atom = ComponentAtom.of(topNode, topNode.getIdentifier());
+        var atom = ComponentRef.of(topNode, topNode.getIdentifier());
         topScope.setSignature(Signature.of(atom, topScope.getInputs(), topScope.getOutputs()));
     }
 

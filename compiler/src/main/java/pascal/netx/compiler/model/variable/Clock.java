@@ -1,9 +1,9 @@
-package pascal.netx.compiler.model.instance;
+package pascal.netx.compiler.model.variable;
 
 import pascal.netx.compiler.io.NXCompiler;
-import pascal.netx.compiler.model.instance.type.BitType;
-import pascal.netx.compiler.model.instance.type.InstanceType;
 import pascal.netx.compiler.model.scope.ComponentScope;
+import pascal.netx.compiler.model.variable.type.BitType;
+import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 
@@ -13,12 +13,12 @@ public final class Clock extends Data {
     }
 
     @Override
-    public InstanceType getType() {
+    public Type getType() {
         return BitType.forClock();
     }
 
     @Override
-    public void setType(InstanceType type) {
+    public void setType(Type type) {
         throw new ShallNotReachHereError();
     }
 
@@ -34,7 +34,7 @@ public final class Clock extends Data {
         }
 
         @Override
-        public InstanceType getType() {
+        public Type getType() {
             return BitType.forClock();
         }
     }

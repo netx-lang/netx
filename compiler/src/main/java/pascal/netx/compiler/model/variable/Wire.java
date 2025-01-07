@@ -1,29 +1,29 @@
-package pascal.netx.compiler.model.instance;
+package pascal.netx.compiler.model.variable;
 
 import pascal.netx.compiler.io.NXCompiler;
-import pascal.netx.compiler.model.instance.type.InstanceType;
 import pascal.netx.compiler.model.scope.ComponentScope;
+import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.lang.Identifier;
 
 public final class Wire extends Data {
-    private InstanceType type;
+    private Type type;
 
-    public Wire(Identifier id, ComponentScope parent, InstanceType type, int index) {
+    public Wire(Identifier id, ComponentScope parent, Type type, int index) {
         super(id, parent, index);
         this.type = type;
     }
 
-    public static Wire of(Identifier id, ComponentScope parent, InstanceType width, int index) {
+    public static Wire of(Identifier id, ComponentScope parent, Type width, int index) {
         return new Wire(id, parent, width, index);
     }
 
     @Override
-    public InstanceType getType() {
+    public Type getType() {
         return type;
     }
 
     @Override
-    public void setType(InstanceType type) {
+    public void setType(Type type) {
         this.type = type;
     }
 
@@ -33,9 +33,9 @@ public final class Wire extends Data {
     }
 
     public static class Factory extends Data.Factory<Wire> {
-        private final InstanceType type;
+        private final Type type;
 
-        public Factory(InstanceType type, NXCompiler compiler) {
+        public Factory(Type type, NXCompiler compiler) {
             super(compiler);
             this.type = type;
         }
@@ -46,7 +46,7 @@ public final class Wire extends Data {
         }
 
         @Override
-        public InstanceType getType() {
+        public Type getType() {
             return type;
         }
     }

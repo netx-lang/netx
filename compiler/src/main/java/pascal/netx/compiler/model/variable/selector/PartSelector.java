@@ -1,8 +1,8 @@
-package pascal.netx.compiler.model.instance.selector;
+package pascal.netx.compiler.model.variable.selector;
 
 import pascal.netx.compiler.exception.CompileCancellationException;
-import pascal.netx.compiler.model.instance.Int32Value;
-import pascal.netx.compiler.model.instance.IntegerValue;
+import pascal.netx.compiler.model.variable.Int32Value;
+import pascal.netx.compiler.model.variable.IntegerValue;
 
 public record PartSelector(IntegerValue start, IntegerValue end) implements Selector {
 

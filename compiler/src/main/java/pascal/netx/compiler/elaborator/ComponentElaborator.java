@@ -10,27 +10,24 @@ import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.model.EntityList;
 import pascal.netx.compiler.model.Signature;
 import pascal.netx.compiler.model.expr.*;
-import pascal.netx.compiler.model.instance.Array;
-import pascal.netx.compiler.model.instance.DataBundle;
-import pascal.netx.compiler.model.instance.DataComposition;
-import pascal.netx.compiler.model.instance.Instance;
-import pascal.netx.compiler.model.instance.type.ArrayType;
-import pascal.netx.compiler.model.instance.type.InstanceType;
-import pascal.netx.compiler.model.instance.type.InterfaceType;
 import pascal.netx.compiler.model.scope.Attributes;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.binding.MonoBinding;
+import pascal.netx.compiler.model.variable.Array;
+import pascal.netx.compiler.model.variable.Bundle;
+import pascal.netx.compiler.model.variable.Composition;
+import pascal.netx.compiler.model.variable.Variable;
+import pascal.netx.compiler.model.variable.type.ArrayType;
+import pascal.netx.compiler.model.variable.type.InterfaceType;
+import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
-import static pascal.netx.compiler.model.Entities.requiresComponentType;
+import static pascal.netx.compiler.model.Entities.requiresInstantiateExpr;
 import static pascal.netx.compiler.model.Utils.*;
 
 final class ComponentElaborator {
@@ -60,21 +57,21 @@ final class ComponentElaborator {
         extractIOList(sourceLoc, type.getOutput()).forEach(scope::addOutput);
     }
 
-    private List<Instance> extractIOList(SourceLoc sourceLoc, ExprNode node) {
+    private List<Variable> extractIOList(SourceLoc sourceLoc, ExprNode node) {
         var entity = evaluator.evaluate(node);
         if (entity instanceof EntityList(var list)) {
-            List<Instance> result = new ArrayList<>();
+            List<Variable> result = new ArrayList<>();
             for (var member : list) {
-                if (member instanceof Instance instance) {
-                    result.add(instance);
+                if (member instanceof Variable variable) {
+                    result.add(variable);
                 } else {
                     log.error("{}: Expected list of instances but got {}", sourceLoc, list);
                     throw new CompileCancellationException();
                 }
             }
             return result;
-        } else if (entity instanceof Instance instance) {
-            return List.of(instance);
+        } else if (entity instanceof Variable variable) {
+            return List.of(variable);
         }
         log.error("{}: Expected list of instances but got {}", sourceLoc, entity);
         throw new CompileCancellationException();
@@ -106,7 +103,7 @@ final class ComponentElaborator {
     }
 
     private void buildData(DataInstantiationNode node) {
-        var baseFactory = evaluator.evaluateToInstanceFactory(node.getType());
+        var baseFactory = evaluator.evaluateToMutableFactory(node.getType());
         switch (node.getKind()) {
             case BUNDLE -> checkFactoryLegality(node.getSourceLoc(), baseFactory.getType(), true);
             case WIRE -> checkFactoryLegality(node.getSourceLoc(), baseFactory.getType(), false);
@@ -124,7 +121,7 @@ final class ComponentElaborator {
         }
     }
 
-    private void checkFactoryLegality(SourceLoc sourceLoc, InstanceType type, boolean isBundle) {
+    private void checkFactoryLegality(SourceLoc sourceLoc, Type type, boolean isBundle) {
         if (type instanceof ArrayType arrayType) {
             checkFactoryLegality(sourceLoc, arrayType.baseType(), isBundle);
         } else {
@@ -156,12 +153,17 @@ final class ComponentElaborator {
             this.sourceLoc = sourceLoc;
         }
 
-        private static List<AtomExpr> leftMostAtomsOf(Expr expr) {
-            List<AtomExpr> result = new ArrayList<>();
+        private static List<PrimaryExpr> leftMostAtomsOf(Expr expr) {
+            List<PrimaryExpr> result = new ArrayList<>();
             switch (expr) {
-                case AtomExpr e -> result.add(e);
+                case PrimaryExpr e -> result.add(e);
                 case SequentialExpr e -> result.addAll(leftMostAtomsOf(e.lhs()));
                 case ParallelExpr e -> e.exprs().forEach(sub -> result.addAll(leftMostAtomsOf(sub)));
+                case DecoratedExpr e -> {
+                    if (Objects.requireNonNull(e.decorator()) != DecoratedExpr.Decorator.SINK) {
+                        result.addAll(leftMostAtomsOf(e.operand()));
+                    }
+                }
             }
             return result;
         }
@@ -169,10 +171,10 @@ final class ComponentElaborator {
         /**
          * Check whether the type of e_1 and e_2 matches in e_1 <+> e_2
          */
-        private static void checkTiedType(SourceLoc sourceLoc, List<DataBundle> to, List<AtomExpr> from) {
+        private static void checkTiedType(SourceLoc sourceLoc, List<Bundle> to, List<PrimaryExpr> from) {
             int size = requiresMatchedSize(sourceLoc, from, to);
             for (int i = 0; i < size; i++) {
-                if (from.get(i) instanceof ComponentAtom fi
+                if (from.get(i) instanceof ComponentRef fi
                         && fi.getDefinition().getKind() == ComponentNode.Kind.INTERFACE) {
                     var lhsID = to.get(i).getType().getIdentifier();
                     var rhsID = fi.getDefinition().getIdentifier();
@@ -191,14 +193,30 @@ final class ComponentElaborator {
             doInstantiate(type);
         }
 
-        ComponentPort doInstantiate(Expr type) {
-            return switch (type) {
-                case BuiltinAtom atom -> instantiateBuiltinAtom(atom);
-                case InstanceAtom atom -> instantiateInstanceAtom(atom);
-                case ImportedAtom atom -> instantiateImportedAtom(atom);
-                case ComponentAtom atom -> instantiateComponentAtom(atom);
-                case SequentialExpr expr -> instantiateSequentialExpr(expr);
-                case ParallelExpr expr -> instantiateParallelExpr(expr);
+        ComponentPort doInstantiate(Expr expr) {
+            return switch (expr) {
+                case SequentialExpr sequential -> instantiateSequentialExpr(sequential);
+                case ParallelExpr parallel -> instantiateParallelExpr(parallel);
+                case PrimaryExpr primary -> instantiatePrimaryExpr(primary);
+                case DecoratedExpr decorated -> instantiateDecoratedExpr(decorated);
+            };
+        }
+
+        private ComponentPort instantiateDecoratedExpr(DecoratedExpr expr) {
+            var port = doInstantiate(expr.operand());
+            return switch (expr.decorator()) {
+                case SOURCE -> ComponentPort.of(port.target, List.of());
+                case SINK -> ComponentPort.of(List.of(), port.source);
+                case BIDI -> port;
+            };
+        }
+
+        private ComponentPort instantiatePrimaryExpr(PrimaryExpr expr) {
+            return switch (expr) {
+                case ComponentRef ref -> instantiateComponentAtom(ref);
+                case VariableRef ref -> instantiateInstanceAtom(ref);
+                case BuiltinRef ref -> instantiateBuiltinAtom(ref);
+                case ImportRef ref -> instantiateImportedAtom(ref);
             };
         }
 
@@ -207,11 +225,11 @@ final class ComponentElaborator {
             var rhs = doInstantiate(sequentialExpr.rhs());
             var lhs = doInstantiate(sequentialExpr.lhs());
 
-            List<? extends Instance> receiver;
+            List<? extends Variable> receiver;
             if (sequentialExpr.isTied()) {
-                var bundles = lhs.source().stream().map(DataBundle.class::cast).toList();
+                var bundles = lhs.source().stream().map(Bundle.class::cast).toList();
                 checkTiedType(sourceLoc, bundles, leftMostAtomsOf(sequentialExpr.rhs()));
-                receiver = bundles.stream().map(DataComposition::getElements).flatMap(Collection::stream).toList();
+                receiver = bundles.stream().map(Composition::getElements).flatMap(Collection::stream).toList();
             } else {
                 receiver = lhs.source();
             }
@@ -224,7 +242,7 @@ final class ComponentElaborator {
         }
 
         private ComponentPort instantiateParallelExpr(ParallelExpr parallelExpr) {
-            List<Instance> input = new LinkedList<>(), output = new LinkedList<>();
+            List<Variable> input = new LinkedList<>(), output = new LinkedList<>();
             for (var sub : parallelExpr.exprs()) {
                 var port = doInstantiate(sub);
                 input.addAll(port.target());
@@ -233,18 +251,14 @@ final class ComponentElaborator {
             return ComponentPort.of(input, output);
         }
 
-        private ComponentPort instantiateInstanceAtom(InstanceAtom atom) {
-            var inst = List.of(atom.getInstance());
-            return switch (atom.getMode()) {
-                case SOURCE -> ComponentPort.of(inst, List.of());
-                case SINK -> ComponentPort.of(List.of(), inst);
-                case BIDI -> ComponentPort.of(inst, inst);
-            };
+        private ComponentPort instantiateInstanceAtom(VariableRef ref) {
+            var inst = List.of(ref.getInstance());
+            return ComponentPort.of(inst, inst);
         }
 
-        private ComponentPort instantiateImportedAtom(ImportedAtom atom) {
-            SourceLoc sourceLoc = atom.getSourceLoc();
-            List<Identifier> reference = atom.getReferences();
+        private ComponentPort instantiateImportedAtom(ImportRef ref) {
+            SourceLoc sourceLoc = ref.getSourceLoc();
+            List<Identifier> reference = ref.getReferences();
 
             var compiler = projectOf(scope).getManager().dispatchCompiler(sourceLoc, reference);
             var component = switch (reference.size()) {
@@ -265,53 +279,53 @@ final class ComponentElaborator {
             return ComponentPort.of(component.getOutputs(), component.getInputs());
         }
 
-        private ComponentPort instantiateBuiltinAtom(BuiltinAtom atom) {
-            var component = factory.createBuiltInComponent(scope, atom);
-            if (atom.getBuiltin() == BuiltinComponent.REGISTER) {
-                var clock = doInstantiate(requiresComponentType(sourceLoc, atom.getParameters().getFirst()));
+        private ComponentPort instantiateBuiltinAtom(BuiltinRef ref) {
+            var component = factory.createBuiltInComponent(scope, ref);
+            if (ref.getBuiltin() == BuiltinComponent.REGISTER) {
+                var clock = doInstantiate(requiresInstantiateExpr(sourceLoc, ref.getParameters().getFirst()));
                 requiresMatchedSize(sourceLoc, 1, clock.target);
                 component.getAttributes().addAttribute(Identifier.of("clock"), clock.target.getFirst());
             }
             return ComponentPort.of(component.getOutputs(), component.getInputs());
         }
 
-        private ComponentPort instantiateComponentAtom(ComponentAtom atom) {
-            var node = atom.getDefinition();
-            ComponentScope component = switch (atom.getDefinition().getKind()) {
-                case COMPONENT -> ComponentScope.newComponent(scope, atom.getIdentifier());
-                case INTERFACE -> ComponentScope.newInterface(scope, atom.getIdentifier());
+        private ComponentPort instantiateComponentAtom(ComponentRef ref) {
+            var node = ref.getDefinition();
+            ComponentScope component = switch (ref.getDefinition().getKind()) {
+                case COMPONENT -> ComponentScope.newComponent(scope, ref.getIdentifier());
+                case INTERFACE -> ComponentScope.newInterface(scope, ref.getIdentifier());
             };
 
-            var attributes = extractAttributes(atom, node);
+            var attributes = extractAttributes(ref, node);
             for (var entry : attributes.entrySet()) {
                 component.bind(entry.getKey(), entry.getValue());
             }
             component.setAttributes(attributes);
             new ComponentElaborator(config, component).build(node);
             if (!config.fullyExpand()) {
-                setSignatureFor(atom, component);
+                setSignatureFor(ref, component);
             }
             return ComponentPort.of(component.getOutputs(), component.getInputs());
         }
 
-        private void setSignatureFor(ComponentAtom atom, ComponentScope scope) {
-            var signature = Signature.of(atom, scope.getInputs(), scope.getOutputs());
+        private void setSignatureFor(ComponentRef ref, ComponentScope scope) {
+            var signature = Signature.of(ref, scope.getInputs(), scope.getOutputs());
             scope.setSignature(signature);
         }
 
-        private Attributes extractAttributes(ComponentAtom atom, ComponentNode node) {
+        private Attributes extractAttributes(ComponentRef ref, ComponentNode node) {
             Attributes attributes = new Attributes();
-            int size = requiresMatchedSize(sourceLoc, node.getAttributes(), atom.getParameters());
+            int size = requiresMatchedSize(sourceLoc, node.getAttributes(), ref.getParameters());
             for (int i = 0; i < size; i++) {
                 var id = node.getAttributes().get(i);
-                var entity = atom.getParameters().get(i);
+                var entity = ref.getParameters().get(i);
                 attributes.addAttribute(id, entity);
             }
             return attributes;
         }
 
-        private record ComponentPort(List<Instance> target, List<Instance> source) {
-            public static ComponentPort of(List<Instance> target, List<Instance> source) {
+        private record ComponentPort(List<Variable> target, List<Variable> source) {
+            public static ComponentPort of(List<Variable> target, List<Variable> source) {
                 return new ComponentPort(target, source);
             }
         }

@@ -1,7 +1,6 @@
 package pascal.netx.compiler.model.scope;
 
 import pascal.netx.compiler.model.Entity;
-import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.util.lang.Identifier;
 
 import java.util.HashMap;
@@ -17,10 +16,6 @@ public final class Attributes {
 
     public Entity get(Identifier id) {
         return attributes.get(id);
-    }
-
-    public boolean contains(Instance instance) {
-        return attributes.containsValue(instance);
     }
 
     public Set<Map.Entry<Identifier, Entity>> entrySet() {

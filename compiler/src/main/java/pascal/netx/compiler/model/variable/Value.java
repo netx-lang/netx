@@ -1,12 +1,12 @@
-package pascal.netx.compiler.model.instance;
+package pascal.netx.compiler.model.variable;
 
-import pascal.netx.compiler.model.instance.type.InstanceType;
+import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BitVector;
 
-public sealed interface Value extends Instance permits BooleanValue, IntegerValue {
+public sealed interface Value extends Variable permits BooleanValue, IntegerValue {
     @Override
-    default void setType(InstanceType type) {
+    default void setType(Type type) {
         throw new ShallNotReachHereError();
     }
 

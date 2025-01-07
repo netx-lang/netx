@@ -1,8 +1,8 @@
 package pascal.netx.compiler.model;
 
-import pascal.netx.compiler.model.instance.selector.BitSelector;
-import pascal.netx.compiler.model.instance.selector.PartSelector;
-import pascal.netx.compiler.model.instance.selector.Selector;
+import pascal.netx.compiler.model.variable.selector.BitSelector;
+import pascal.netx.compiler.model.variable.selector.PartSelector;
+import pascal.netx.compiler.model.variable.selector.Selector;
 
 import java.util.List;
 import java.util.function.Consumer;

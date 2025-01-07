@@ -4,7 +4,7 @@ import pascal.netx.compiler.model.Entity;
 
 import java.util.List;
 
-public sealed abstract class AtomExpr implements Expr permits BuiltinAtom, ComponentAtom, ImportedAtom, InstanceAtom {
+public sealed abstract class PrimaryExpr implements Expr permits BuiltinRef, ComponentRef, ImportRef, VariableRef {
     protected List<Entity> parameters;
 
     public List<Entity> getParameters() {

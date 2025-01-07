@@ -4,9 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.expr.Expr;
-import pascal.netx.compiler.model.expr.InstanceAtom;
 import pascal.netx.compiler.model.expr.ParallelExpr;
-import pascal.netx.compiler.model.instance.*;
+import pascal.netx.compiler.model.expr.VariableRef;
+import pascal.netx.compiler.model.variable.*;
 import pascal.netx.util.lang.SourceLoc;
 
 import java.util.LinkedList;
@@ -15,8 +15,8 @@ import java.util.List;
 public final class Entities {
     private static final Logger log = LoggerFactory.getLogger(Entities.class);
 
-    public static DataBundle requiresDataBundle(SourceLoc loc, Entity entity) {
-        if (entity instanceof DataBundle bundle) {
+    public static Bundle requiresDataBundle(SourceLoc loc, Entity entity) {
+        if (entity instanceof Bundle bundle) {
             return bundle;
         } else {
             log.error("{}: Expected data bundle but got {}", loc, entity);
@@ -33,8 +33,8 @@ public final class Entities {
         }
     }
 
-    public static MutableInstance requiresMutableInstance(SourceLoc loc, Entity entity) {
-        if (entity instanceof MutableInstance instance) {
+    public static Mutable requiresMutable(SourceLoc loc, Entity entity) {
+        if (entity instanceof Mutable instance) {
             return instance;
         } else {
             log.error("{}: Expected instance but got {}", loc, entity);
@@ -42,8 +42,8 @@ public final class Entities {
         }
     }
 
-    public static MutableInstance.Factory<?> requiresInstanceFactory(SourceLoc loc, Entity entity) {
-        if (entity instanceof MutableInstance.Factory<?> factory) {
+    public static Mutable.Factory<?> requiresMutableFactory(SourceLoc loc, Entity entity) {
+        if (entity instanceof Mutable.Factory<?> factory) {
             return factory;
         } else {
             log.error("{}: Expected component factory but got {}", loc, entity);
@@ -89,7 +89,7 @@ public final class Entities {
         }
     }
 
-    public static Expr requiresComponentType(SourceLoc loc, Entity entity) {
+    public static Expr requiresInstantiateExpr(SourceLoc loc, Entity entity) {
         if (entity instanceof Expr expr) {
             return expr;
         } else {
@@ -98,11 +98,11 @@ public final class Entities {
         }
     }
 
-    public static Expr castToComponentType(Entity entity, SourceLoc loc) {
+    public static Expr castToInstantiateExpr(Entity entity, SourceLoc loc) {
         return switch (entity) {
             case EntityList list -> makeParallelTypeFromList(list, loc);
             case Expr expr -> expr;
-            case Instance inst -> InstanceAtom.of(InstanceAtom.Mode.BIDI, inst, loc);
+            case Variable inst -> VariableRef.of(inst, loc);
             default -> {
                 log.error("{}: Cannot cast {} to component type", loc, entity);
                 throw new CompileCancellationException();
@@ -112,7 +112,7 @@ public final class Entities {
 
     private static ParallelExpr makeParallelTypeFromList(EntityList list, SourceLoc sourceLoc) {
         List<Expr> result = new LinkedList<>();
-        list.forEach(entity -> result.add(castToComponentType(entity, sourceLoc)));
+        list.forEach(entity -> result.add(castToInstantiateExpr(entity, sourceLoc)));
         return ParallelExpr.from(result);
     }
 }

@@ -1,4 +1,4 @@
-package pascal.netx.compiler.model.instance;
+package pascal.netx.compiler.model.variable;
 
 import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.model.scope.ComponentScope;
@@ -7,7 +7,7 @@ import pascal.netx.util.lang.SourceLoc;
 
 import java.util.Objects;
 
-public sealed abstract class Data implements MutableInstance permits Clock, Wire {
+public sealed abstract class Data implements Mutable permits Clock, Wire {
     protected final ComponentScope parent;
     protected final Identifier id;
     private final int index;
@@ -55,7 +55,7 @@ public sealed abstract class Data implements MutableInstance permits Clock, Wire
         return Objects.hash(index);
     }
 
-    public abstract static class Factory<T extends Data> extends MutableInstance.Factory<T> {
+    public abstract static class Factory<T extends Data> extends Mutable.Factory<T> {
 
         protected Factory(NXCompiler compiler) {
             super(compiler);

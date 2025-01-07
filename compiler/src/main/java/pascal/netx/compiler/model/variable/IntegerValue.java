@@ -1,4 +1,4 @@
-package pascal.netx.compiler.model.instance;
+package pascal.netx.compiler.model.variable;
 
 public sealed interface IntegerValue extends Value permits BitVectorValue, Int32Value {
 

@@ -3,11 +3,11 @@ package pascal.netx.compiler.io;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import pascal.netx.compiler.model.instance.*;
-import pascal.netx.compiler.model.instance.type.BitType;
-import pascal.netx.compiler.model.instance.type.PolyType;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
+import pascal.netx.compiler.model.variable.*;
+import pascal.netx.compiler.model.variable.type.BitType;
+import pascal.netx.compiler.model.variable.type.PolyType;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -108,7 +108,7 @@ final class ExpandedDumper {
             if (Objects.requireNonNull(BuiltinComponent.of(instID)) == BuiltinComponent.REGISTER) {
                 var attributes = createObjectNode();
                 for (var entry : sub.getAttributes().entrySet()) {
-                    attributes.put(entry.getKey().name(), dumpInstance((Instance) entry.getValue()));
+                    attributes.put(entry.getKey().name(), dumpVariable((Variable) entry.getValue()));
                 }
                 builtin.putIfAbsent("attribute", attributes);
             }
@@ -149,16 +149,16 @@ final class ExpandedDumper {
             return result;
         }
 
-        private void dumpInstIO(ObjectNode node, String port, List<Instance> sub) {
+        private void dumpInstIO(ObjectNode node, String port, List<Variable> sub) {
             var array = makeArrayIn(node, port);
-            sub.stream().map(this::dumpInstance).forEach(array::add);
+            sub.stream().map(this::dumpVariable).forEach(array::add);
         }
 
-        private String dumpInstance(Instance entity) {
+        private String dumpVariable(Variable entity) {
             return switch (entity) {
                 case Data data -> dumpData(data);
                 case Value value -> dumpValue(value);
-                case DataAccess access -> dumpDataAccess(access);
+                case Access access -> dumpDataAccess(access);
                 default -> throw new ShallNotReachHereError("Should be eliminated by CompositeDataBlaster");
             };
         }
@@ -179,7 +179,7 @@ final class ExpandedDumper {
             };
         }
 
-        private String dumpDataAccess(DataAccess access) {
+        private String dumpDataAccess(Access access) {
             return dumpData(access.base()) + access.selector();
         }
 

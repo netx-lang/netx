@@ -1,23 +1,23 @@
 package pascal.netx.compiler.model;
 
-import pascal.netx.compiler.model.expr.ComponentAtom;
-import pascal.netx.compiler.model.instance.Instance;
-import pascal.netx.compiler.model.instance.type.InstanceType;
+import pascal.netx.compiler.model.expr.ComponentRef;
+import pascal.netx.compiler.model.variable.Variable;
+import pascal.netx.compiler.model.variable.type.Type;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public final class Signature {
-    private final ComponentAtom caller;
-    private List<Instance> inputs, outputs;
-    private List<InstanceType> inTypeCache, outTypeCache;
+    private final ComponentRef caller;
+    private List<Variable> inputs, outputs;
+    private List<Type> inTypeCache, outTypeCache;
 
-    public Signature(ComponentAtom caller) {
+    public Signature(ComponentRef caller) {
         this.caller = caller;
     }
 
-    public static Signature of(ComponentAtom caller, List<Instance> inputs, List<Instance> outputs) {
+    public static Signature of(ComponentRef caller, List<Variable> inputs, List<Variable> outputs) {
         var result = new Signature(caller);
         result.setInputs(inputs);
         result.setOutputs(outputs);
@@ -40,36 +40,36 @@ public final class Signature {
         return Objects.hash(caller.getDefinition(), caller.getParameters(), getInType(), getOutType());
     }
 
-    public ComponentAtom caller() {
+    public ComponentRef caller() {
         return caller;
     }
 
-    public List<Instance> inputs() {
+    public List<Variable> inputs() {
         return inputs;
     }
 
-    public List<Instance> outputs() {
+    public List<Variable> outputs() {
         return outputs;
     }
 
-    public void setInputs(List<Instance> inputs) {
+    public void setInputs(List<Variable> inputs) {
         this.inputs = new ArrayList<>(inputs);
     }
 
-    public void setOutputs(List<Instance> outputs) {
+    public void setOutputs(List<Variable> outputs) {
         this.outputs = new ArrayList<>(outputs);
     }
 
-    private List<InstanceType> getInType() {
+    private List<Type> getInType() {
         if (inTypeCache == null) {
-            inTypeCache = inputs.stream().map(Instance::getType).toList();
+            inTypeCache = inputs.stream().map(Variable::getType).toList();
         }
         return inTypeCache;
     }
 
-    private List<InstanceType> getOutType() {
+    private List<Type> getOutType() {
         if (outTypeCache == null) {
-            outTypeCache = outputs.stream().map(Instance::getType).toList();
+            outTypeCache = outputs.stream().map(Variable::getType).toList();
         }
         return outTypeCache;
     }

@@ -1,11 +1,11 @@
 package pascal.netx.compiler.analysis;
 
 import pascal.netx.compiler.model.Utils;
-import pascal.netx.compiler.model.instance.Data;
-import pascal.netx.compiler.model.instance.DataComposition;
-import pascal.netx.compiler.model.instance.Instance;
-import pascal.netx.compiler.model.instance.MutableInstance;
 import pascal.netx.compiler.model.scope.ComponentScope;
+import pascal.netx.compiler.model.variable.Composition;
+import pascal.netx.compiler.model.variable.Data;
+import pascal.netx.compiler.model.variable.Mutable;
+import pascal.netx.compiler.model.variable.Variable;
 import pascal.netx.util.lang.SourceLoc;
 
 import java.util.ArrayList;
@@ -14,17 +14,17 @@ import java.util.List;
 
 public final class AssignManager {
     private final ComponentScope scope;
-    private final List<MutableInstance> defCount = new ArrayList<>();
-    private final List<MutableInstance> useCount = new ArrayList<>();
+    private final List<Mutable> defCount = new ArrayList<>();
+    private final List<Mutable> useCount = new ArrayList<>();
 
     public AssignManager(ComponentScope scope) {
         this.scope = scope;
     }
 
-    public void assign(SourceLoc sourceLoc, Instance lhs, Instance rhs) {
+    public void assign(SourceLoc sourceLoc, Variable lhs, Variable rhs) {
         use(rhs);
         define(lhs);
-        if (lhs instanceof DataComposition lhsComposite && rhs instanceof DataComposition rhsComposite) {
+        if (lhs instanceof Composition lhsComposite && rhs instanceof Composition rhsComposite) {
             List<Data> lhsFlatten = lhsComposite.flatten(), rhsFlatten = rhsComposite.flatten();
             int size = Utils.requiresMatchedSize(sourceLoc, lhsFlatten, rhsFlatten);
             for (int i = 0; i < size; i++) {
@@ -37,28 +37,28 @@ public final class AssignManager {
         }
     }
 
-    private void define(Instance inst) {
+    private void define(Variable inst) {
         if (needUpdate(inst)) {
-            defCount.add((MutableInstance) inst);
+            defCount.add((Mutable) inst);
         }
     }
 
-    private void use(Instance inst) {
+    private void use(Variable inst) {
         if (needUpdate(inst)) {
-            useCount.add((MutableInstance) inst);
+            useCount.add((Mutable) inst);
         }
     }
 
-    public List<MutableInstance> getDefCount() {
+    public List<Mutable> getDefCount() {
         return Collections.unmodifiableList(defCount);
     }
 
-    public List<MutableInstance> getUseCount() {
+    public List<Mutable> getUseCount() {
         return Collections.unmodifiableList(useCount);
     }
 
-    private boolean needUpdate(Instance inst) {
-        if (inst instanceof MutableInstance mutable) {
+    private boolean needUpdate(Variable inst) {
+        if (inst instanceof Mutable mutable) {
             return mutable.getParent() == scope;
         }
         return false;

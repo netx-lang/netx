@@ -5,17 +5,17 @@ import pascal.netx.util.lang.SourceLoc;
 
 import java.util.List;
 
-public final class ImportedAtom extends AtomExpr {
+public final class ImportRef extends PrimaryExpr {
     private final List<Identifier> references;
     private final SourceLoc sourceLoc;
 
-    public ImportedAtom(List<Identifier> references, SourceLoc sourceLoc) {
+    public ImportRef(List<Identifier> references, SourceLoc sourceLoc) {
         this.references = references;
         this.sourceLoc = sourceLoc;
     }
 
-    public static ImportedAtom of(List<Identifier> references, SourceLoc sourceLoc) {
-        return new ImportedAtom(references, sourceLoc);
+    public static ImportRef of(List<Identifier> references, SourceLoc sourceLoc) {
+        return new ImportRef(references, sourceLoc);
     }
 
     public List<Identifier> getReferences() {

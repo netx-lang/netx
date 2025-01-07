@@ -1,11 +1,11 @@
 package pascal.netx.compiler.analysis;
 
-import pascal.netx.compiler.model.instance.Array;
-import pascal.netx.compiler.model.instance.DataBundle;
-import pascal.netx.compiler.model.instance.DataComposition;
-import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
+import pascal.netx.compiler.model.variable.Array;
+import pascal.netx.compiler.model.variable.Bundle;
+import pascal.netx.compiler.model.variable.Composition;
+import pascal.netx.compiler.model.variable.Variable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,10 +16,10 @@ public final class CompositeDataBlaster extends ModelAnalysis {
         super(design);
     }
 
-    private static List<Instance> blastFor(List<Instance> ports) {
-        List<Instance> result = new ArrayList<>();
+    private static List<Variable> blastFor(List<Variable> ports) {
+        List<Variable> result = new ArrayList<>();
         for (var inst : ports) {
-            if (Objects.requireNonNull(inst) instanceof DataComposition composition) {
+            if (Objects.requireNonNull(inst) instanceof Composition composition) {
                 result.addAll(composition.flatten());
             } else {
                 result.add(inst);
@@ -28,8 +28,8 @@ public final class CompositeDataBlaster extends ModelAnalysis {
         return result;
     }
 
-    private static boolean isComposite(Instance instance) {
-        return instance instanceof DataBundle || instance instanceof Array;
+    private static boolean isComposite(Variable variable) {
+        return variable instanceof Bundle || variable instanceof Array;
     }
 
     @Override
@@ -38,7 +38,7 @@ public final class CompositeDataBlaster extends ModelAnalysis {
     }
 
     private void analyze(ComponentScope scope) {
-        List<Instance> inputs = scope.getInputs(), outputs = scope.getOutputs();
+        List<Variable> inputs = scope.getInputs(), outputs = scope.getOutputs();
         if (inputs.stream().anyMatch(CompositeDataBlaster::isComposite)) {
             scope.setInputs(blastFor(inputs));
         }

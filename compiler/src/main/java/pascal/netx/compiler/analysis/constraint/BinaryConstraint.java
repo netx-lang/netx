@@ -1,25 +1,25 @@
 package pascal.netx.compiler.analysis.constraint;
 
-import pascal.netx.compiler.model.instance.Instance;
-import pascal.netx.compiler.model.instance.type.InstanceType;
+import pascal.netx.compiler.model.variable.Variable;
+import pascal.netx.compiler.model.variable.type.Type;
 
 public abstract sealed class BinaryConstraint implements DataConstraint permits EqualTypeConstraint {
-    protected final Instance lhs, rhs;
+    protected final Variable lhs, rhs;
 
-    protected BinaryConstraint(Instance lhs, Instance rhs) {
+    protected BinaryConstraint(Variable lhs, Variable rhs) {
         this.lhs = lhs;
         this.rhs = rhs;
     }
 
-    public Instance getLhs() {
+    public Variable getLhs() {
         return lhs;
     }
 
-    public Instance getRhs() {
+    public Variable getRhs() {
         return rhs;
     }
 
-    public abstract InstanceType expectedLhs();
+    public abstract Type expectedLhs();
 
-    public abstract InstanceType expectedRhs();
+    public abstract Type expectedRhs();
 }

@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import pascal.netx.compiler.model.Signature;
-import pascal.netx.compiler.model.instance.*;
-import pascal.netx.compiler.model.instance.type.BitType;
-import pascal.netx.compiler.model.instance.type.PolyType;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
+import pascal.netx.compiler.model.variable.*;
+import pascal.netx.compiler.model.variable.type.BitType;
+import pascal.netx.compiler.model.variable.type.PolyType;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -185,7 +185,7 @@ final class CompactDumper {
             if (Objects.requireNonNull(BuiltinComponent.of(instID)) == BuiltinComponent.REGISTER) {
                 var attributes = createObjectNode();
                 for (var entry : sub.getAttributes().entrySet()) {
-                    attributes.put(entry.getKey().name(), dumpInstanceRef((Instance) entry.getValue()));
+                    attributes.put(entry.getKey().name(), dumpVariableRef((Variable) entry.getValue()));
                 }
                 builtin.putIfAbsent("attribute", attributes);
             }
@@ -226,16 +226,16 @@ final class CompactDumper {
             return result;
         }
 
-        private void dumpInstIO(ObjectNode node, String port, List<Instance> sub) {
+        private void dumpInstIO(ObjectNode node, String port, List<Variable> sub) {
             var array = makeArrayIn(node, port);
-            sub.stream().map(this::dumpInstanceRef).forEach(array::add);
+            sub.stream().map(this::dumpVariableRef).forEach(array::add);
         }
 
-        private String dumpInstanceRef(Instance entity) {
+        private String dumpVariableRef(Variable entity) {
             return switch (entity) {
                 case Data data -> dumpDataRef(data);
                 case Value value -> dumpValue(value);
-                case DataAccess access -> dumpDataAccessRef(access);
+                case Access access -> dumpDataAccessRef(access);
                 default -> throw new ShallNotReachHereError("Should be eliminated by CompositeDataBlaster");
             };
         }
@@ -252,7 +252,7 @@ final class CompactDumper {
             };
         }
 
-        private String dumpDataAccessRef(DataAccess access) {
+        private String dumpDataAccessRef(Access access) {
             return dumpDataRef(access.base()) + access.selector();
         }
 

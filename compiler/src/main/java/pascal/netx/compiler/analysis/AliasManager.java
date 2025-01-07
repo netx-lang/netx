@@ -4,11 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.Signature;
-import pascal.netx.compiler.model.instance.DataAccess;
-import pascal.netx.compiler.model.instance.Instance;
-import pascal.netx.compiler.model.instance.MutableInstance;
-import pascal.netx.compiler.model.instance.Value;
 import pascal.netx.compiler.model.scope.ComponentScope;
+import pascal.netx.compiler.model.variable.Access;
+import pascal.netx.compiler.model.variable.Mutable;
+import pascal.netx.compiler.model.variable.Value;
+import pascal.netx.compiler.model.variable.Variable;
 import pascal.netx.util.collection.UnionFind;
 import pascal.netx.util.exception.ShallNotReachHereError;
 
@@ -20,8 +20,8 @@ import java.util.Objects;
 
 public class AliasManager {
     private static final Logger log = LoggerFactory.getLogger(AliasManager.class);
-    private final UnionFind<Instance> set = new UnionFind<>();
-    private final Map<Instance, Instance> sourceRep = new HashMap<>();
+    private final UnionFind<Variable> set = new UnionFind<>();
+    private final Map<Variable, Variable> sourceRep = new HashMap<>();
 
     void addAlias(Collection<ComponentScope.Alias> aliases) {
         for (var alias : aliases) {
@@ -42,7 +42,7 @@ public class AliasManager {
         }
     }
 
-    void setAsSourceRep(Signature sign, Instance inst) {
+    void setAsSourceRep(Signature sign, Variable inst) {
         if (!inst.isUserDefined()) {
             throw new ShallNotReachHereError("Cannot set a non-user-defined instance as a source representative");
         }
@@ -58,7 +58,7 @@ public class AliasManager {
     }
 
     boolean needDump(Entity entity) {
-        if (entity instanceof Instance inst) {
+        if (entity instanceof Variable inst) {
             if (inst.isUserDefined()) {
                 return repOf(inst) == inst;
             } else {
@@ -68,18 +68,18 @@ public class AliasManager {
         return false;
     }
 
-    boolean needUpdate(Instance now, Instance old) {
+    boolean needUpdate(Variable now, Variable old) {
         // Prefer Value to Data
         if (old instanceof Value) {
             return false;
         } else if (now instanceof Value) {
             return true;
         } else {
-            return ((MutableInstance) now).getIndex() < ((MutableInstance) old).getIndex();
+            return ((Mutable) now).getIndex() < ((Mutable) old).getIndex();
         }
     }
 
-    boolean hasSourceAlias(Instance inst) {
+    boolean hasSourceAlias(Variable inst) {
         if (set.contains(inst)) {
             return sourceRep.containsKey(set.find(inst));
         }
@@ -87,7 +87,7 @@ public class AliasManager {
     }
 
     @Nonnull
-    Instance repOf(Instance inst) {
+    Variable repOf(Variable inst) {
         // We need to keep trying to get the representative until reach a fixed point,
         // since there may have a representation chain such as x -> y[2:0] -> z[2:0]
         while (true) {
@@ -100,11 +100,11 @@ public class AliasManager {
     }
 
     @Nonnull
-    Instance getNextRep(Instance inst) {
+    Variable getNextRep(Variable inst) {
         // If the inst is a DataAccess, find the alias of its base
-        if (inst instanceof DataAccess(var base, var selector)) {
+        if (inst instanceof Access(var base, var selector)) {
             if (hasSourceAlias(base) && repOf(base) != base) {
-                return Instance.accessOf(repOf(base), selector);
+                return Variable.accessOf(repOf(base), selector);
             }
         }
         // Otherwise find the alias of the inst itself

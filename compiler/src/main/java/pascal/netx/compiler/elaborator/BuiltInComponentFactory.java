@@ -2,14 +2,14 @@ package pascal.netx.compiler.elaborator;
 
 import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.model.Utils;
-import pascal.netx.compiler.model.expr.BuiltinAtom;
-import pascal.netx.compiler.model.instance.Wire;
-import pascal.netx.compiler.model.instance.type.BitType;
-import pascal.netx.compiler.model.instance.type.InstanceType;
-import pascal.netx.compiler.model.instance.type.PolyType;
+import pascal.netx.compiler.model.expr.BuiltinRef;
 import pascal.netx.compiler.model.scope.Attributes;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.Scope;
+import pascal.netx.compiler.model.variable.Wire;
+import pascal.netx.compiler.model.variable.type.BitType;
+import pascal.netx.compiler.model.variable.type.PolyType;
+import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.lang.Identifier;
 
 import static pascal.netx.compiler.model.Entities.requiresBooleanValue;
@@ -22,7 +22,7 @@ public class BuiltInComponentFactory {
         this.compiler = compiler;
     }
 
-    public ComponentScope createBuiltInComponent(Scope parent, BuiltinAtom type) {
+    public ComponentScope createBuiltInComponent(Scope parent, BuiltinRef type) {
         return switch (type.getBuiltin()) {
             case REGISTER -> createREGISTERComponent(parent, type);
             case IGNORE -> createIGNOREComponent(parent, type);
@@ -37,20 +37,20 @@ public class BuiltInComponentFactory {
         };
     }
 
-    public ComponentScope createIGNOREComponent(Scope parent, BuiltinAtom type) {
+    public ComponentScope createIGNOREComponent(Scope parent, BuiltinRef type) {
         var result = instantiate(parent, type);
         result.addInput(newWire(result, "i"));
         return result;
     }
 
-    private ComponentScope createNOTComponent(Scope parent, BuiltinAtom type) {
+    private ComponentScope createNOTComponent(Scope parent, BuiltinRef type) {
         var result = instantiate(parent, type);
         result.addInput(newWire(result, "i"));
         result.addOutput(newWire(result, "o"));
         return result;
     }
 
-    private ComponentScope createTOComponent(Scope parent, BuiltinAtom type) {
+    private ComponentScope createTOComponent(Scope parent, BuiltinRef type) {
         var result = instantiate(parent, type);
         var entity = newWire(result, "t");
         result.addInput(entity);
@@ -58,7 +58,7 @@ public class BuiltInComponentFactory {
         return result;
     }
 
-    private ComponentScope createREGISTERComponent(Scope parent, BuiltinAtom type) {
+    private ComponentScope createREGISTERComponent(Scope parent, BuiltinRef type) {
         Utils.requiresMatchedSize(type.getSourceLoc(), 2, type.getParameters());
         var result = instantiate(parent, type);
         var attributes = new Attributes();
@@ -70,7 +70,7 @@ public class BuiltInComponentFactory {
         return result;
     }
 
-    private ComponentScope createSPLITComponent(Scope parent, BuiltinAtom type) {
+    private ComponentScope createSPLITComponent(Scope parent, BuiltinRef type) {
         Utils.requiresMatchedSize(type.getSourceLoc(), 1, type.getParameters());
         int split = requiresIntegerValue(type.getSourceLoc(), type.getParameters().getFirst()).toInt();
 
@@ -83,7 +83,7 @@ public class BuiltInComponentFactory {
         return Component;
     }
 
-    private ComponentScope createCASTComponent(Scope parent, BuiltinAtom type) {
+    private ComponentScope createCASTComponent(Scope parent, BuiltinRef type) {
         var result = instantiate(parent, type);
         if (type.getParameters().isEmpty()) {
             result.addInput(newWire(result, "i"));
@@ -97,7 +97,7 @@ public class BuiltInComponentFactory {
         return result;
     }
 
-    private ComponentScope createRelationalOpComponent(Scope parent, BuiltinAtom type) {
+    private ComponentScope createRelationalOpComponent(Scope parent, BuiltinRef type) {
         Utils.requiresMatchedSize(type.getSourceLoc(), 0, type.getParameters());
         var result = instantiate(parent, type);
         result.addInput(newWire(result, "i1"), newWire(result, "i2"));
@@ -105,7 +105,7 @@ public class BuiltInComponentFactory {
         return result;
     }
 
-    private ComponentScope createShiftComponent(Scope parent, BuiltinAtom type) {
+    private ComponentScope createShiftComponent(Scope parent, BuiltinRef type) {
         Utils.requiresMatchedSize(type.getSourceLoc(), 0, type.getParameters());
         var result = instantiate(parent, type);
         result.addInput(newWire(result, "i"), newWire(result, "off"));
@@ -113,7 +113,7 @@ public class BuiltInComponentFactory {
         return result;
     }
 
-    private ComponentScope createMultiInputComponent(Scope parent, BuiltinAtom type) {
+    private ComponentScope createMultiInputComponent(Scope parent, BuiltinRef type) {
         int ports = 2;
         if (!type.getParameters().isEmpty()) {
             Utils.requiresMatchedSize(type.getSourceLoc(), 1, type.getParameters());
@@ -128,7 +128,7 @@ public class BuiltInComponentFactory {
         return result;
     }
 
-    private ComponentScope instantiate(Scope parent, BuiltinAtom type) {
+    private ComponentScope instantiate(Scope parent, BuiltinRef type) {
         return ComponentScope.newComponent(parent,
                 Identifier.of(type.getBuiltin().name()).setSourceLoc(type.getSourceLoc()));
     }
@@ -137,7 +137,7 @@ public class BuiltInComponentFactory {
         return newWire(result, name, PolyType.getInstance());
     }
 
-    private Wire newWire(ComponentScope result, String name, InstanceType type) {
+    private Wire newWire(ComponentScope result, String name, Type type) {
         var id = Identifier.of("$" + name).setSourceLoc(result.getSourceLoc());
         var wire = new Wire.Factory(type, compiler).create(result, id);
         result.bind(wire.getIdentifier(), wire);

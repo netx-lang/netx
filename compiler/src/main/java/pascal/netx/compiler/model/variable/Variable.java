@@ -1,23 +1,23 @@
-package pascal.netx.compiler.model.instance;
+package pascal.netx.compiler.model.variable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.Entity;
-import pascal.netx.compiler.model.instance.selector.BitSelector;
-import pascal.netx.compiler.model.instance.selector.PartSelector;
-import pascal.netx.compiler.model.instance.selector.Selector;
-import pascal.netx.compiler.model.instance.type.InstanceType;
-import pascal.netx.compiler.model.instance.type.PolyType;
+import pascal.netx.compiler.model.variable.selector.BitSelector;
+import pascal.netx.compiler.model.variable.selector.PartSelector;
+import pascal.netx.compiler.model.variable.selector.Selector;
+import pascal.netx.compiler.model.variable.type.PolyType;
+import pascal.netx.compiler.model.variable.type.Type;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public sealed interface Instance extends Entity permits MutableInstance, Value {
+public sealed interface Variable extends Entity permits Mutable, Value {
 
-    Logger log = LoggerFactory.getLogger(Instance.class);
+    Logger log = LoggerFactory.getLogger(Variable.class);
 
-    static Instance accessOf(Instance base, Selector selector) {
+    static Variable accessOf(Variable base, Selector selector) {
         switch (base) {
             case Value value -> {
                 return selectConstant(value, selector);
@@ -33,10 +33,10 @@ public sealed interface Instance extends Entity permits MutableInstance, Value {
                     }
                 }
             }
-            case DataAccess _ -> {
+            case Access _ -> {
                 List<Selector> selectors = new LinkedList<>();
                 selectors.add(selector);
-                while (base instanceof DataAccess(Data nextBase, Selector nextSelector)) {
+                while (base instanceof Access(Data nextBase, Selector nextSelector)) {
                     base = nextBase;
                     selectors.addFirst(nextSelector);
                 }
@@ -44,10 +44,10 @@ public sealed interface Instance extends Entity permits MutableInstance, Value {
                 for (int i = 1; i < selectors.size(); i++) {
                     finalSelector = finalSelector.refine(selectors.get(i));
                 }
-                return new DataAccess((Data) base, finalSelector);
+                return new Access((Data) base, finalSelector);
             }
             default -> {
-                return new DataAccess((Data) base, selector);
+                return new Access((Data) base, selector);
             }
         }
     }
@@ -65,9 +65,9 @@ public sealed interface Instance extends Entity permits MutableInstance, Value {
         return BitVectorValue.of(value.toBitVector().select(msb, lsb));
     }
 
-    InstanceType getType();
+    Type getType();
 
-    void setType(InstanceType type);
+    void setType(Type type);
 
     default boolean hasImplicitType() {
         return getType() instanceof PolyType;

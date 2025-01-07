@@ -3,11 +3,11 @@ package pascal.netx.compiler.elaborator;
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
 import pascal.netx.compiler.io.Builder;
-import pascal.netx.compiler.model.instance.Instance;
-import pascal.netx.compiler.model.instance.Int32Value;
-import pascal.netx.compiler.model.instance.selector.BitSelector;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
+import pascal.netx.compiler.model.variable.Int32Value;
+import pascal.netx.compiler.model.variable.Variable;
+import pascal.netx.compiler.model.variable.selector.BitSelector;
 import pascal.netx.util.lang.Identifier;
 
 import java.util.ArrayList;
@@ -33,17 +33,17 @@ class ComponentEvaluatorUnitTest {
                     wire x of bit(4);
                 }
                 """);
-        var data = (Instance) component.getBinding().resolve(Identifier.of("x"));
+        var data = (Variable) component.getBinding().resolve(Identifier.of("x"));
         var expected = new ArrayList<>(IntStream.range(0, 4)
                 .mapToObj(Int32Value::of).map(BitSelector::of)
-                .map(selector -> Instance.accessOf(data, selector)).toList());
+                .map(selector -> Variable.accessOf(data, selector)).toList());
         assertEquals(expected, component.getInputs());
         Collections.reverse(expected);
         assertEquals(expected, component.getOutputs());
     }
 
     @Test
-    void testInstanceType() {
+    void testInstantiation() {
         var code = """
                 component test : [a] -> [b] {
                     wire a of bit(4);

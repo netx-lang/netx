@@ -1,24 +1,24 @@
 package pascal.netx.compiler.analysis.constraint;
 
-import pascal.netx.compiler.model.instance.Instance;
-import pascal.netx.compiler.model.instance.type.InstanceType;
+import pascal.netx.compiler.model.variable.Variable;
+import pascal.netx.compiler.model.variable.type.Type;
 
 public final class EqualTypeConstraint extends BinaryConstraint {
-    private EqualTypeConstraint(Instance lhs, Instance rhs) {
+    private EqualTypeConstraint(Variable lhs, Variable rhs) {
         super(lhs, rhs);
     }
 
-    public static EqualTypeConstraint of(Instance lhs, Instance rhs) {
+    public static EqualTypeConstraint of(Variable lhs, Variable rhs) {
         return new EqualTypeConstraint(lhs, rhs);
     }
 
     @Override
-    public InstanceType expectedLhs() {
+    public Type expectedLhs() {
         return rhs.getType();
     }
 
     @Override
-    public InstanceType expectedRhs() {
+    public Type expectedRhs() {
         return lhs.getType();
     }
 

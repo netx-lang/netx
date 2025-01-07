@@ -1,15 +1,15 @@
 package pascal.netx.compiler.analysis.constraint;
 
-import pascal.netx.compiler.model.instance.Clock;
-import pascal.netx.compiler.model.instance.Instance;
+import pascal.netx.compiler.model.variable.Clock;
+import pascal.netx.compiler.model.variable.Variable;
 
 public final class ClockConstraint extends UnaryConstraint {
 
-    private ClockConstraint(Instance inst) {
+    private ClockConstraint(Variable inst) {
         super(inst);
     }
 
-    public static ClockConstraint of(Instance inst) {
+    public static ClockConstraint of(Variable inst) {
         return new ClockConstraint(inst);
     }
 

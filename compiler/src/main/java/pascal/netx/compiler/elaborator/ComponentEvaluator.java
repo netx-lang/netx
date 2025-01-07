@@ -14,16 +14,16 @@ import pascal.netx.compiler.model.EntityList;
 import pascal.netx.compiler.model.Macro;
 import pascal.netx.compiler.model.Utils;
 import pascal.netx.compiler.model.expr.*;
-import pascal.netx.compiler.model.instance.*;
-import pascal.netx.compiler.model.instance.selector.BitSelector;
-import pascal.netx.compiler.model.instance.selector.PartSelector;
-import pascal.netx.compiler.model.instance.selector.Selector;
-import pascal.netx.compiler.model.instance.type.BitType;
-import pascal.netx.compiler.model.instance.type.PolyType;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.binding.MonoBinding;
 import pascal.netx.compiler.model.scope.binding.MultiBinding;
+import pascal.netx.compiler.model.variable.*;
+import pascal.netx.compiler.model.variable.selector.BitSelector;
+import pascal.netx.compiler.model.variable.selector.PartSelector;
+import pascal.netx.compiler.model.variable.selector.Selector;
+import pascal.netx.compiler.model.variable.type.BitType;
+import pascal.netx.compiler.model.variable.type.PolyType;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
@@ -74,9 +74,9 @@ public final class ComponentEvaluator {
 
     public Expr evaluateToComponentExpr(ExprNode expr, boolean needDeclareInPlace) {
         if (needDeclareInPlace) {
-            return castToComponentType(evaluateAndDeclInPlace(expr), expr.getSourceLoc());
+            return castToInstantiateExpr(evaluateAndDeclInPlace(expr), expr.getSourceLoc());
         }
-        return castToComponentType(evaluate(expr), expr.getSourceLoc());
+        return castToInstantiateExpr(evaluate(expr), expr.getSourceLoc());
     }
 
     public EntityList evaluateToList(ExprNode expr) {
@@ -95,7 +95,7 @@ public final class ComponentEvaluator {
         return castToBooleanValue(expr.getSourceLoc(), evaluate(expr));
     }
 
-    public DataBundle evaluateDataBundle(ExprNode expr) {
+    public Bundle evaluateDataBundle(ExprNode expr) {
         return requiresDataBundle(expr.getSourceLoc(), evaluate(expr));
     }
 
@@ -146,9 +146,9 @@ public final class ComponentEvaluator {
         var base = evaluate(expr.getBase());
         var selector = evaluateSelector(expr.getSelector());
         return switch (base) {
-            case Instance inst -> {
+            case Variable inst -> {
                 try {
-                    yield Instance.accessOf(inst, selector);
+                    yield Variable.accessOf(inst, selector);
                 } catch (CompileCancellationException e) {
                     log.error("{}: invalid selectors {}", expr.getSourceLoc(), expr);
                     throw e;
@@ -258,39 +258,41 @@ public final class ComponentEvaluator {
             case SUB -> evaluateToIntegerValue(expr.getOperand()).neg();
             case NOT -> evaluateToBoolean(expr.getOperand()).not();
             case BITWISE_NOT -> evaluateToIntegerValue(expr.getOperand()).bitwiseNot();
-            case SINK -> evaluateDecoratedInstanceAtom(InstanceAtom.Mode.SINK, expr);
-            case SOURCE -> evaluateDecoratedInstanceAtom(InstanceAtom.Mode.SOURCE, expr);
+            case SINK -> evaluateDecoratedExpr(DecoratedExpr.Decorator.SINK, expr.getOperand());
+            case SOURCE -> evaluateDecoratedExpr(DecoratedExpr.Decorator.SOURCE, expr.getOperand());
         };
     }
 
-    private Entity evaluateDecoratedInstanceAtom(InstanceAtom.Mode mode, UnaryExpr expr) {
-        var operand = evaluate(expr.getOperand());
-        switch (operand) {
+    private Entity evaluateDecoratedExpr(DecoratedExpr.Decorator decorator, ExprNode base) {
+        var operand = evaluate(base);
+        return switch (operand) {
             case EntityList(var list) -> {
                 List<Expr> result = new LinkedList<>();
                 for (var element : list) {
-                    var inst = requiresMutableInstance(expr.getSourceLoc(), element);
-                    result.add(InstanceAtom.of(mode, inst, expr.getSourceLoc()));
+                    if (!(element instanceof Expr expr)) {
+                        log.error("{}: Expected instantiate expr but got {}", base.getSourceLoc(), element);
+                        throw new CompileCancellationException();
+                    }
+                    result.add(DecoratedExpr.of(decorator, expr));
                 }
-                return ParallelExpr.from(result);
+                yield ParallelExpr.from(result);
             }
-            case MutableInstance inst -> {
-                return InstanceAtom.of(mode, inst, expr.getSourceLoc());
-            }
+            case Expr expr -> DecoratedExpr.of(decorator, expr);
+            case Mutable mutable -> DecoratedExpr.of(decorator, VariableRef.of(mutable, base.getSourceLoc()));
             default -> {
-                log.error("{}: Expected mutable instance(s) but got {}", expr.getSourceLoc(), operand);
-                throw new CompileCancellationException();
+                log.error("{}: Expected instantiate expr(s) but got {}", base.getSourceLoc(), operand);
+                throw  new CompileCancellationException();
             }
-        }
+        };
     }
 
-    public MutableInstance.Factory<?> evaluateToInstanceFactory(ExprNode expr) {
-        MutableInstance.Factory<?> factory;
+    public Mutable.Factory<?> evaluateToMutableFactory(ExprNode expr) {
+        Mutable.Factory<?> factory;
         if (expr == null) {
             factory = new Wire.Factory(PolyType.getInstance(), Utils.compilerOf(pack));
         } else {
             mode = EvaluationMode.FACTORY;
-            factory = requiresInstanceFactory(expr.getSourceLoc(), evaluate(expr));
+            factory = requiresMutableFactory(expr.getSourceLoc(), evaluate(expr));
             mode = EvaluationMode.COMMON;
         }
         return factory;
@@ -330,7 +332,7 @@ public final class ComponentEvaluator {
     private Entity evaluateSequentialExpr(BinaryExpr expr, boolean isTied) {
         var leftLoc = expr.getLhs().getSourceLoc();
         var rightLoc = expr.getRhs().getSourceLoc();
-        Expr lhs, rhs = castToComponentType(evaluate(expr.getRhs()), rightLoc);
+        Expr lhs, rhs = castToInstantiateExpr(evaluate(expr.getRhs()), rightLoc);
         if (isTied) {
             var lhsEntity = evaluate(expr.getLhs());
             if (lhsEntity instanceof EntityList(var list)) {
@@ -338,12 +340,12 @@ public final class ComponentEvaluator {
                         .map(element -> requiresDataBundle(leftLoc, element))
                         .map(Expr.class::cast).toList());
             } else {
-                lhs = InstanceAtom.of(InstanceAtom.Mode.BIDI,
-                        requiresMutableInstance(leftLoc, lhsEntity), leftLoc);
+                lhs = VariableRef.of(
+                        requiresMutable(leftLoc, lhsEntity), leftLoc);
             }
             return SequentialExpr.ofTied(lhs, rhs);
         } else {
-            lhs = castToComponentType(evaluate(expr.getLhs()), leftLoc);
+            lhs = castToInstantiateExpr(evaluate(expr.getLhs()), leftLoc);
         }
         return SequentialExpr.ofSplit(lhs, rhs);
     }
@@ -374,7 +376,7 @@ public final class ComponentEvaluator {
 
     private Entity evaluateParamSymbolExpr(ParamSymbolExpr expr) {
         if (mode == EvaluationMode.FACTORY) {
-            return evaluateInstanceFactory(expr);
+            return evaluateVariableFactory(expr);
         } else {
             return evaluateComponentType(expr);
         }
@@ -399,11 +401,11 @@ public final class ComponentEvaluator {
             entity = pack.lookup(id);
             if (entity == null) {
                 if (pack.hasComponent(id)) {
-                    entity = ComponentAtom.of(pack.getComponent(id), id);
+                    entity = ComponentRef.of(pack.getComponent(id), id);
                 } else if (pack.hasImport(id)) {
-                    entity = ImportedAtom.of(pack.getImport(id), id.getSourceLoc());
+                    entity = ImportRef.of(pack.getImport(id), id.getSourceLoc());
                 } else if (BuiltinComponent.isBuiltin(id)) {
-                    entity = BuiltinAtom.of(BuiltinComponent.of(id), id.getSourceLoc());
+                    entity = BuiltinRef.of(BuiltinComponent.of(id), id.getSourceLoc());
                 }
             }
         }
@@ -429,7 +431,7 @@ public final class ComponentEvaluator {
         List<Entity> parameters = evaluateParameters(expr);
         if (prototype instanceof Macro macro) {
             return evaluateMacroExpr(expr.getSourceLoc(), macro, parameters);
-        } else if (prototype instanceof AtomExpr atom) {
+        } else if (prototype instanceof PrimaryExpr atom) {
             atom.setParameters(parameters);
             return atom;
         } else {
@@ -444,8 +446,8 @@ public final class ComponentEvaluator {
             var entity = evaluate(arg);
             var param = switch (entity) {
                 case Expr type -> type;
-                case Data ignored -> castToComponentType(entity, arg.getSourceLoc());
-                case DataAccess ignored -> castToComponentType(entity, arg.getSourceLoc());
+                case Data ignored -> castToInstantiateExpr(entity, arg.getSourceLoc());
+                case Access ignored -> castToInstantiateExpr(entity, arg.getSourceLoc());
                 default -> requiresValue(arg.getSourceLoc(), entity);
             };
             result.add(param);
@@ -453,7 +455,7 @@ public final class ComponentEvaluator {
         return result;
     }
 
-    private MutableInstance.Factory<?> evaluateInstanceFactory(ParamSymbolExpr expr) {
+    private Mutable.Factory<?> evaluateVariableFactory(ParamSymbolExpr expr) {
         var sourceLoc = expr.getSourceLoc();
         return switch (expr.getHead().name()) {
             case "bit" -> evaluateWireFactory(sourceLoc, expr.getArguments());

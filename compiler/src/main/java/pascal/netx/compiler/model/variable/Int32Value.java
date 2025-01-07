@@ -1,7 +1,7 @@
-package pascal.netx.compiler.model.instance;
+package pascal.netx.compiler.model.variable;
 
-import pascal.netx.compiler.model.instance.type.BitType;
-import pascal.netx.compiler.model.instance.type.InstanceType;
+import pascal.netx.compiler.model.variable.type.BitType;
+import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.lang.BitVector;
 
 public record Int32Value(int value) implements IntegerValue {
@@ -125,7 +125,7 @@ public record Int32Value(int value) implements IntegerValue {
     }
 
     @Override
-    public InstanceType getType() {
+    public Type getType() {
         return BitType.forInt32();
     }
 

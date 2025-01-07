@@ -1,4 +1,4 @@
-package pascal.netx.compiler.model.instance.selector;
+package pascal.netx.compiler.model.variable.selector;
 
 public sealed interface Selector permits PartSelector, BitSelector {
     int getWidth();

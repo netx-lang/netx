@@ -1,13 +1,13 @@
-package pascal.netx.compiler.model.instance;
+package pascal.netx.compiler.model.variable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.model.Entity;
-import pascal.netx.compiler.model.instance.type.InstanceType;
-import pascal.netx.compiler.model.instance.type.InterfaceType;
 import pascal.netx.compiler.model.scope.ComponentScope;
+import pascal.netx.compiler.model.variable.type.InterfaceType;
+import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.lang.Identifier;
 
 import javax.annotation.Nonnull;
@@ -15,11 +15,11 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 
-public final class DataBundle extends DataComposition {
-    private static final Logger log = LoggerFactory.getLogger(DataBundle.class);
-    private final LinkedHashMap<Identifier, MutableInstance> map = new LinkedHashMap<>();
+public final class Bundle extends Composition {
+    private static final Logger log = LoggerFactory.getLogger(Bundle.class);
+    private final LinkedHashMap<Identifier, Mutable> map = new LinkedHashMap<>();
 
-    private DataBundle(Identifier id, InterfaceType type, int index) {
+    private Bundle(Identifier id, InterfaceType type, int index) {
         super(type, id, index);
     }
 
@@ -45,7 +45,7 @@ public final class DataBundle extends DataComposition {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        DataBundle that = (DataBundle) o;
+        Bundle that = (Bundle) o;
         return map.values().equals(that.map.values());
     }
 
@@ -55,32 +55,32 @@ public final class DataBundle extends DataComposition {
     }
 
     @Override
-    public Collection<MutableInstance> getElements() {
+    public Collection<Mutable> getElements() {
         return map.values();
     }
 
-    public static class Factory extends MutableInstance.Factory<DataBundle> {
-        private final LinkedHashMap<Identifier, MutableInstance.Factory<?>> factories;
+    public static class Factory extends Mutable.Factory<Bundle> {
+        private final LinkedHashMap<Identifier, Mutable.Factory<?>> factories;
         private final InterfaceType type;
 
         public Factory(Identifier id, NXCompiler compiler,
-                       LinkedHashMap<Identifier, MutableInstance.Factory<?>> factories) {
+                       LinkedHashMap<Identifier, Mutable.Factory<?>> factories) {
             super(compiler);
             this.factories = factories;
             this.type = InterfaceType.of(id,
-                    factories.values().stream().map(MutableInstance.Factory::getType).toList());
+                    factories.values().stream().map(Mutable.Factory::getType).toList());
         }
 
         @Override
-        public DataBundle create(ComponentScope parent, Identifier id) {
-            var result = new DataBundle(id, type, compiler.getDataIndexer().get());
+        public Bundle create(ComponentScope parent, Identifier id) {
+            var result = new Bundle(id, type, compiler.getDataIndexer().get());
 
             for (var entry : factories.entrySet()) {
                 Identifier fieldID = entry.getKey();
-                MutableInstance.Factory<?> factory = entry.getValue();
+                Mutable.Factory<?> factory = entry.getValue();
 
                 Identifier dataID = Identifier.of(id.name() + "." + fieldID.name()).setSourceLoc(id.getSourceLoc());
-                MutableInstance data = factory.create(parent, dataID);
+                Mutable data = factory.create(parent, dataID);
                 result.map.put(fieldID, data);
                 parent.bind(dataID, data);
             }
@@ -88,7 +88,7 @@ public final class DataBundle extends DataComposition {
         }
 
         @Override
-        public InstanceType getType() {
+        public Type getType() {
             return type;
         }
     }

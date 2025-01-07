@@ -3,7 +3,7 @@ package pascal.netx.compiler.model.scope;
 import pascal.netx.compiler.analysis.AssignManager;
 import pascal.netx.compiler.elaborator.ComponentEvaluator;
 import pascal.netx.compiler.model.Signature;
-import pascal.netx.compiler.model.instance.Instance;
+import pascal.netx.compiler.model.variable.Variable;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -21,8 +21,8 @@ public final class ComponentScope extends Scope {
     private final AssignManager manager = new AssignManager(this);
 
     private Attributes attributes;
-    private List<Instance> inputs = new ArrayList<>();
-    private List<Instance> outputs = new ArrayList<>();
+    private List<Variable> inputs = new ArrayList<>();
+    private List<Variable> outputs = new ArrayList<>();
 
     /**
      * Only used in compact compilation mode to distinguish the components.
@@ -78,27 +78,27 @@ public final class ComponentScope extends Scope {
         return evaluator;
     }
 
-    public List<Instance> getInputs() {
+    public List<Variable> getInputs() {
         return inputs;
     }
 
-    public void setInputs(List<Instance> inputs) {
+    public void setInputs(List<Variable> inputs) {
         this.inputs = inputs;
     }
 
-    public List<Instance> getOutputs() {
+    public List<Variable> getOutputs() {
         return outputs;
     }
 
-    public void setOutputs(List<Instance> outputs) {
+    public void setOutputs(List<Variable> outputs) {
         this.outputs = outputs;
     }
 
-    public void addInput(Instance... inputs) {
+    public void addInput(Variable... inputs) {
         Collections.addAll(this.inputs, inputs);
     }
 
-    public void addOutput(Instance... outputs) {
+    public void addOutput(Variable... outputs) {
         Collections.addAll(this.outputs, outputs);
     }
 
@@ -130,8 +130,8 @@ public final class ComponentScope extends Scope {
         return BuiltinComponent.isBuiltin(identifier);
     }
 
-    public record Alias(Instance lhs, Instance rhs) {
-        public static Alias of(Instance lhs, Instance rhs) {
+    public record Alias(Variable lhs, Variable rhs) {
+        public static Alias of(Variable lhs, Variable rhs) {
             return new Alias(lhs, rhs);
         }
     }

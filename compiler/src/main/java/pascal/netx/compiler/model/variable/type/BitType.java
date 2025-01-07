@@ -1,6 +1,6 @@
-package pascal.netx.compiler.model.instance.type;
+package pascal.netx.compiler.model.variable.type;
 
-public record BitType(int width) implements InstanceType {
+public record BitType(int width) implements Type {
     private static final BitType BOOLEAN = new BitType(1);
     private static final BitType CLOCK = new BitType(1);
     private static final BitType INT32 = new BitType(32);

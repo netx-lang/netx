@@ -1,7 +1,7 @@
 package pascal.netx.compiler.model.scope.binding;
 
 import pascal.netx.compiler.model.Entity;
-import pascal.netx.compiler.model.instance.Data;
+import pascal.netx.compiler.model.variable.Data;
 import pascal.netx.util.lang.Identifier;
 
 import javax.annotation.Nonnull;

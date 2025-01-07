@@ -1,8 +1,8 @@
 package pascal.netx.compiler.analysis.constraint;
 
 import pascal.netx.compiler.model.Entity;
-import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.compiler.model.scope.ComponentScope;
+import pascal.netx.compiler.model.variable.Variable;
 import pascal.netx.util.collection.UnionFind;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import static pascal.netx.util.lang.BuiltinComponent.NO_DUMP;
 
 public class DuplicatedManager {
-    private final UnionFind<Instance> set = new UnionFind<>();
+    private final UnionFind<Variable> set = new UnionFind<>();
 
     public void collectDuplicatedComponents(ComponentScope scope) {
         Map<Identifier, List<ComponentScope>> idGroups = scope.getChildren().stream()
@@ -64,18 +64,18 @@ public class DuplicatedManager {
     }
 
     public boolean needRemove(Entity entity) {
-        if (entity instanceof Instance instance) {
-            if (set.contains(instance)) {
-                return set.find(instance) != instance;
+        if (entity instanceof Variable variable) {
+            if (set.contains(variable)) {
+                return set.find(variable) != variable;
             }
         }
         return false;
     }
 
-    public Instance repOf(Instance instance) {
-        if (set.contains(instance)) {
-            return set.find(instance);
+    public Variable repOf(Variable variable) {
+        if (set.contains(variable)) {
+            return set.find(variable);
         }
-        return instance;
+        return variable;
     }
 }

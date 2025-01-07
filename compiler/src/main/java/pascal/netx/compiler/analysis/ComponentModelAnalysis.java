@@ -1,9 +1,9 @@
 package pascal.netx.compiler.analysis;
 
 import pascal.netx.compiler.model.Entity;
-import pascal.netx.compiler.model.instance.Instance;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
+import pascal.netx.compiler.model.variable.Variable;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -57,7 +57,7 @@ public abstract class ComponentModelAnalysis extends ModelAnalysis {
             }
         }
 
-        public void eliminateDuplicatedData(Predicate<Entity> needRemove, Function<Instance, Instance> repOf) {
+        public void eliminateDuplicatedData(Predicate<Entity> needRemove, Function<Variable, Variable> repOf) {
             anaScope.forEach(scope -> {
                 scope.getBinding().releaseIf(needRemove);
                 scope.getInputs().replaceAll(repOf::apply);

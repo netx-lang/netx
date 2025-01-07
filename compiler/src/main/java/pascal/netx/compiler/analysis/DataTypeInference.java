@@ -6,12 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.analysis.constraint.*;
 import pascal.netx.compiler.exception.TypeCheckingException;
-import pascal.netx.compiler.model.instance.Data;
-import pascal.netx.compiler.model.instance.Instance;
-import pascal.netx.compiler.model.instance.type.InstanceType;
-import pascal.netx.compiler.model.instance.type.PolyType;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
+import pascal.netx.compiler.model.variable.Data;
+import pascal.netx.compiler.model.variable.Variable;
+import pascal.netx.compiler.model.variable.type.PolyType;
+import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -23,9 +23,9 @@ import java.util.stream.Stream;
 
 public final class DataTypeInference extends ModelAnalysis {
     private static final Logger log = LoggerFactory.getLogger(DataTypeInference.class);
-    private final Graph<Instance, BinaryConstraint> graph = new SimpleGraph<>(BinaryConstraint.class);
+    private final Graph<Variable, BinaryConstraint> graph = new SimpleGraph<>(BinaryConstraint.class);
     private final List<DataConstraint> constraints = new LinkedList<>();
-    private final Queue<Instance> workList = new LinkedList<>();
+    private final Queue<Variable> workList = new LinkedList<>();
 
     public DataTypeInference(PackageScope design) {
         super(design);
@@ -69,9 +69,9 @@ public final class DataTypeInference extends ModelAnalysis {
     }
 
     private void addContainsForRegister(ComponentScope component) {
-        Instance input = component.getInputs().getFirst(), output = component.getOutputs().getFirst();
+        Variable input = component.getInputs().getFirst(), output = component.getOutputs().getFirst();
         addConstraint(EqualTypeConstraint.of(input, output));
-        addConstraint(ClockConstraint.of((Instance) component.getAttributes().get(Identifier.of("clock"))));
+        addConstraint(ClockConstraint.of((Variable) component.getAttributes().get(Identifier.of("clock"))));
     }
 
     private void addConstraint(DataConstraint constraint) {
@@ -86,7 +86,7 @@ public final class DataTypeInference extends ModelAnalysis {
     }
 
     private void addBinaryConstraint(BinaryConstraint binary) {
-        Instance lhs = binary.getLhs(), rhs = binary.getRhs();
+        Variable lhs = binary.getLhs(), rhs = binary.getRhs();
         if (lhs == rhs) {
             return;
         }
@@ -112,7 +112,7 @@ public final class DataTypeInference extends ModelAnalysis {
             var data = workList.poll();
             if (graph.containsVertex(data)) {
                 for (var constraint : graph.edgesOf(data)) {
-                    Instance lhs = constraint.getLhs(), rhs = constraint.getRhs();
+                    Variable lhs = constraint.getLhs(), rhs = constraint.getRhs();
                     if (lhs.hasImplicitType()) {
                         setTypeFor(lhs, constraint.expectedLhs());
                     } else if (rhs.hasImplicitType()) {
@@ -123,18 +123,18 @@ public final class DataTypeInference extends ModelAnalysis {
         }
     }
 
-    private void setTypeFor(Instance instance, InstanceType type) {
+    private void setTypeFor(Variable variable, Type type) {
         if (type instanceof PolyType) {
             throw new ShallNotReachHereError();
         }
-        instance.setType(type);
-        workList.add(instance);
+        variable.setType(type);
+        workList.add(variable);
     }
 
     private void checkAllTyped() {
         pack.forEachSubComponent(scope ->
                 scope.getBinding().forEachEntity(entity -> {
-                    if (!(entity instanceof Instance inst)) {
+                    if (!(entity instanceof Variable inst)) {
                         throw new ShallNotReachHereError();
                     }
                     if (inst.hasImplicitType()) {
