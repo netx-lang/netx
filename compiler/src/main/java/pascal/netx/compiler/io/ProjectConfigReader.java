@@ -148,25 +148,39 @@ public final class ProjectConfigReader {
         return libCompiler;
     }
 
-    private Path cloneGitRepo(String name, JsonNode spec) {
-        var repoDir = buildDir.resolve(name);
-        if (Files.exists(repoDir)) {
-            try (var repo = Git.open(repoDir.toFile())) {
-                repo.pull().call();
-            } catch (IOException | GitAPIException e) {
-                log.error("Failed to pull git repository", e);
-                throw new CompileCancellationException();
+    private static void checkoutGitRepo(JsonNode spec, Git repo) throws GitAPIException {
+        String checkout = null;
+        if (spec.has("commit")) {
+            checkout = spec.get("commit").textValue();
+        } else if (spec.has("branch")) {
+            checkout = spec.get("branch").textValue();
+        } else if (spec.has("tag")) {
+            checkout = spec.get("tag").textValue();
+        }
+
+        if (checkout != null) {
+            repo.checkout().setName(checkout).call();
+        }
+    }
+
+    private Path cloneGitRepo(String name, JsonNode spec) throws IOException {
+        Git repo;
+        Path repoDir = buildDir.resolve(name);
+        try {
+            if (Files.exists(repoDir)) {
+                repo = Git.open(repoDir.toFile());
+                repo.fetch().call();
+            } else {
+                repo = Git.cloneRepository()
+                        .setURI(spec.get("git").textValue())
+                        .setDirectory(repoDir.toFile())
+                        .call();
             }
-        } else {
-            try (var _ = Git.cloneRepository()
-                    .setURI(spec.get("git").textValue())
-                    .setDirectory(repoDir.toFile())
-                    .call()) {
-                return repoDir;
-            } catch (GitAPIException e) {
-                log.error("Failed to clone git repository", e);
-                throw new CompileCancellationException();
-            }
+            checkoutGitRepo(spec, repo);
+            repo.close();
+        } catch (GitAPIException e) {
+            log.error("Failed to open git repository", e);
+            throw new CompileCancellationException();
         }
         return repoDir;
     }
