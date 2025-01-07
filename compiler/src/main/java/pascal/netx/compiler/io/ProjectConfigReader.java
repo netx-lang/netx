@@ -45,7 +45,7 @@ public final class ProjectConfigReader {
         this.config = config;
         this.toml = MAPPER.readTree(new FileInputStream(path.toFile()));
         this.dir = path.getParent();
-        this.buildDir = Files.createDirectories(dir.resolve("build"));
+        this.buildDir = dir.resolve("build");
 
         var projectInfo = toml.get("project");
         this.info = new ProjectScope.Info(
@@ -128,7 +128,7 @@ public final class ProjectConfigReader {
             if (spec.has("path")) {
                 path = dir.resolve(spec.get("path").textValue());
             } else if (spec.has("git")) {
-                path = cloneGitRepo(spec);
+                path = cloneGitRepo(entry.getKey(), spec);
             } else {
                 throw new IOException("Invalid dependency specification" + entry.getKey());
             }
@@ -148,17 +148,27 @@ public final class ProjectConfigReader {
         return libCompiler;
     }
 
-    private Path cloneGitRepo(JsonNode spec) {
-        try (var repo = Git.cloneRepository()
-                .setURI(spec.get("git").textValue())
-                .setDirectory(buildDir.toFile())
-                .call()) {
-            var id = repo.getRepository().getIdentifier();
-            return buildDir.resolve(id);
-        } catch (GitAPIException e) {
-            log.error("Failed to clone git repository", e);
-            throw new CompileCancellationException();
+    private Path cloneGitRepo(String name, JsonNode spec) {
+        var repoDir = buildDir.resolve(name);
+        if (Files.exists(repoDir)) {
+            try (var repo = Git.open(repoDir.toFile())) {
+                repo.pull().call();
+            } catch (IOException | GitAPIException e) {
+                log.error("Failed to pull git repository", e);
+                throw new CompileCancellationException();
+            }
+        } else {
+            try (var _ = Git.cloneRepository()
+                    .setURI(spec.get("git").textValue())
+                    .setDirectory(repoDir.toFile())
+                    .call()) {
+                return repoDir;
+            } catch (GitAPIException e) {
+                log.error("Failed to clone git repository", e);
+                throw new CompileCancellationException();
+            }
         }
+        return repoDir;
     }
 
     void resolveWildcardImportIn(PackageNode node) {

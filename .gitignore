@@ -47,3 +47,6 @@ compiler/src/main/antlr/.antlr/
 ### CMake ##
 cmake-build-debug/
 cpp-build/
+
+### Remote Test ###
+**/resources/**/build

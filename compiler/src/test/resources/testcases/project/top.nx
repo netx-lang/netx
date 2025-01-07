@@ -1,5 +1,9 @@
 application my_app;
 
+import std.selector.MUX;
+
 component top : [a, b] -> [c] {
-    auto c <> my_component <> [a, b];
+    auto c <> MUX(1) <> [
+        1'b1, my_component <> [a, b], 1'b0
+    ];
 }

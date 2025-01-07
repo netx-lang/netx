@@ -12,6 +12,7 @@ dependencies {
     implementation("org.jgrapht:jgrapht-io:1.5.2")
 
     implementation("org.eclipse.jgit:org.eclipse.jgit:7.1.0.202411261347-r")
+    implementation("org.eclipse.jgit:org.eclipse.jgit.ssh.apache:7.1.0.202411261347-r")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-toml:2.15.2")
 }
 
