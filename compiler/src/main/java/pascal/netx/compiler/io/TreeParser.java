@@ -37,6 +37,7 @@ public final class TreeParser {
             switch (child) {
                 case Import_statementContext sub -> parseImportInto(sub, result);
                 case ComponentContext sub -> parseComponentInto(sub, result);
+                case EnumContext sub -> parseEnumInto(sub, result);
                 case HeaderContext _ -> {
                     // do nothing
                 }
@@ -52,6 +53,17 @@ public final class TreeParser {
 
     static void parseComponentInto(ComponentContext ctx, PackageNode design) {
         design.addDefinition(parseComponent(ctx));
+    }
+
+    static void parseEnumInto(EnumContext ctx, PackageNode design) {
+        design.addDefinition(parseEnum(ctx));
+    }
+
+    static EnumNode parseEnum(EnumContext ctx) {
+        var iterator = ctx.ID().iterator();
+        EnumNode result = EnumNode.of(parseIdentifier(iterator.next()));
+        iterator.forEachRemaining(field -> result.addField(parseIdentifier(field)));
+        return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
     static PackageInfoNode parsePackageInfo(HeaderContext ctx) {

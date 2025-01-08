@@ -1,19 +1,27 @@
 package pascal.netx.compiler.model.scope;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.element.ComponentNode;
+import pascal.netx.compiler.ast.element.EnumNode;
 import pascal.netx.compiler.ast.element.ImportNode;
 import pascal.netx.compiler.elaborator.InterfaceElaborator;
+import pascal.netx.compiler.model.variable.BitVectorValue;
 import pascal.netx.compiler.model.variable.Bundle;
 import pascal.netx.util.exception.ShallNotReachHereError;
+import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.lang.Identifier;
 
+import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Consumer;
 
 public final class PackageScope extends Scope {
+    private static final Logger log = LoggerFactory.getLogger(PackageScope.class);
     private final Map<Identifier, Bundle.Factory> interfaceDef = new HashMap<>();
     private final Map<Identifier, ComponentNode> componentDef = new HashMap<>();
     private final Map<Identifier, List<Identifier>> importDef = new HashMap<>();
+    private final Map<Identifier, Enum> enumDef = new HashMap<>();
     private final ProjectScope project;
 
     private ComponentScope top;
@@ -51,6 +59,37 @@ public final class PackageScope extends Scope {
             consumer.accept(scope);
             scope.getChildren().forEach(child -> stack.push((ComponentScope) child));
         }
+    }
+
+    // ------- Module Information for Enum -------
+    public boolean hasEnum(Identifier id) {
+        return enumDef.containsKey(id);
+    }
+
+    public Enum getEnum(Identifier id) {
+        return enumDef.get(id);
+    }
+
+    public void addEnum(EnumNode node) {
+        Map<Identifier, BitVectorValue> enumMap = new HashMap<>();
+        int width = BigInteger.valueOf(node.getFields().size() - 1).bitLength();
+        for (int i = 0; i < node.getFields().size(); i++) {
+            enumMap.put(node.getFields().get(i), BitVectorValue.of(BitVector.fromInt(i, width)));
+        }
+        enumDef.put(node.getName(), new Enum(node.getName(), width, enumMap));
+    }
+
+    public BitVectorValue lookupEnum(Identifier id) {
+        BitVectorValue result = null;
+        for (var def : enumDef.values()) {
+            if (def.fields().containsKey(id)) {
+                if (result != null) {
+                    log.warn("Enum field '{}' is ambiguous", id);
+                }
+                result = def.fields().get(id);
+            }
+        }
+        return result;
     }
 
     // ------- Module Information for Imported Components -------

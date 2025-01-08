@@ -1,7 +1,7 @@
 grammar NetX;
 
 design
-    : header? (import_statement | component)+
+    : header? (import_statement | component | enum)+
     ;
 
 header
@@ -30,6 +30,10 @@ lib_alias
 component
     : kind='component' ID attributes? (':' component_type)? component_body
     | kind='interface' ID attributes? ':' type=expression component_body
+    ;
+
+enum
+    : 'enum' ID '{' ID (',' ID)* '}'
     ;
 
 component_type

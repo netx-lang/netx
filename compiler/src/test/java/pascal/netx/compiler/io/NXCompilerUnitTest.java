@@ -37,6 +37,14 @@ class NXCompilerUnitTest {
     }
 
     @Test
+    void testEnum() throws IOException {
+        var compiler = Builder.forCompact().loadPath(TEST_DIR.resolve("enum.nx"));
+        var expected = MAPPER.reader().readTree(
+                Files.readString(TEST_DIR.resolve("expected/enum.json")));
+        assertEquals(expected, compiler.compile());
+    }
+
+    @Test
     void loadWithValidCharStream() throws IOException {
         var string = Files.readString(TEST_DIR.resolve("bind_1.nx"));
         CharStream charStream = CharStreams.fromString(string);

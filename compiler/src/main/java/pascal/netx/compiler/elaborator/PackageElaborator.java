@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.ComponentNode;
+import pascal.netx.compiler.ast.element.EnumNode;
 import pascal.netx.compiler.ast.element.ImportNode;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXCompiler;
@@ -79,6 +80,7 @@ public final class PackageElaborator {
             switch (element) {
                 case ComponentNode component -> addComponentInfo(component);
                 case ImportNode import_ -> pack.addImport(import_);
+                case EnumNode enum_ -> pack.addEnum(enum_);
             }
         }
         compiler.setDataIndexer(indexer);

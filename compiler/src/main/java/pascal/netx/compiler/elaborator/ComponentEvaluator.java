@@ -138,6 +138,12 @@ public final class ComponentEvaluator {
     }
 
     private Entity evaluateFieldExpr(FieldExpr expr) {
+        if (expr.getBase() instanceof IdentifierExpr idExpr) {
+            var id = idExpr.getIdentifier();
+            if (pack.hasComponent(id)) {
+                return pack.getEnum(id).fields().get(expr.getField());
+            }
+        }
         var bundle = evaluateDataBundle(expr.getBase());
         return bundle.getField(expr.getField());
     }
@@ -360,11 +366,15 @@ public final class ComponentEvaluator {
     private Entity evaluatePrimarySymbolExpr(IdentifierExpr expr) {
         var id = expr.getIdentifier();
         if (mode == EvaluationMode.FACTORY) {
-            if (!scope.getPackage().hasInterface(id)) {
+            var pack = scope.getPackage();
+            if (pack.hasInterface(id)) {
+                return scope.getPackage().getInterface(id);
+            } else if (pack.hasEnum(id)) {
+                return new Wire.Factory(BitType.of(pack.getEnum(id).width()), Utils.compilerOf(pack));
+            } else {
                 log.error("{}: Unknown interface type {}", expr.getSourceLoc(), id);
                 throw new CompileCancellationException();
             }
-            return scope.getPackage().getInterface(id);
         } else {
             Entity entity = resolveIdentifier(id);
             if (entity instanceof Macro macro) {
@@ -378,7 +388,7 @@ public final class ComponentEvaluator {
         if (mode == EvaluationMode.FACTORY) {
             return evaluateVariableFactory(expr);
         } else {
-            return evaluateComponentType(expr);
+            return evaluateInstantiateExpr(expr);
         }
     }
 
@@ -406,6 +416,8 @@ public final class ComponentEvaluator {
                     entity = ImportRef.of(pack.getImport(id), id.getSourceLoc());
                 } else if (BuiltinComponent.isBuiltin(id)) {
                     entity = BuiltinRef.of(BuiltinComponent.of(id), id.getSourceLoc());
+                } else {
+                    entity = pack.lookupEnum(id);
                 }
             }
         }
@@ -426,7 +438,7 @@ public final class ComponentEvaluator {
         return data;
     }
 
-    private Entity evaluateComponentType(ParamSymbolExpr expr) {
+    private Entity evaluateInstantiateExpr(ParamSymbolExpr expr) {
         Entity prototype = resolveIdentifier(expr.getHead());
         List<Entity> parameters = evaluateParameters(expr);
         if (prototype instanceof Macro macro) {

@@ -241,4 +241,12 @@ public interface ASTListener {
     default void exit(ImportNode node) {
         exitDefault(node);
     }
+
+    default void enter(EnumNode node) {
+        enterDefault(node);
+    }
+
+    default void exit(EnumNode node) {
+        exitDefault(node);
+    }
 }

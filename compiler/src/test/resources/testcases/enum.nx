@@ -1,0 +1,22 @@
+enum State {
+    BAD, GOOD
+}
+
+component REG(rst, clk) : [i] -> [o] {
+    auto o <> REGISTER(clk, true) <> OR <> [
+        AND <> [CAST <> rst, CAST <> 1'b0],
+        AND <> [NOT <> CAST <> rst, i]
+    ];
+}
+
+component top : [i, rst, clk] -> [state] {
+   wire i, rst of bit(1);
+   wire clk of clock();
+   wire state of State;
+
+   let TRIGGER = CAST <> EQ <> [i, 1'b1];
+   state <> REG(rst, clk) <> OR <> [
+     AND <> [TRIGGER, GOOD],
+     AND <> [NOT <> TRIGGER, state]
+   ];
+}
