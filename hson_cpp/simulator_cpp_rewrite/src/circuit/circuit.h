@@ -14,10 +14,20 @@ namespace hson {
     class circuit {
         rule_set rules;
         value_storage values;
+        id_set clocks;
 
     public:
         void add_rule(const rule_t& newRule) {
             rules.add(newRule);
+        }
+
+        void add_clock(const id_t id) {
+            clocks.insert(id);
+        }
+
+        id_set flip_clocks() {
+            for (const auto& clock : clocks) values[clock].flip();
+            return rules.update(values, clocks);
         }
 
         id_set update(id_t id, value_t newValue) {

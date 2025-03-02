@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 project(simulator_cpp_rewrite_src VERSION 1.0 LANGUAGES CXX)
 
 add_library(simulator_cpp_rewrite)
-target_link_libraries(simulator_cpp_rewrite PRIVATE OpenMP::OpenMP_CXX)
+target_link_libraries(simulator_cpp_rewrite PRIVATE OpenMP::OpenMP_CXX nlohmann_json::nlohmann_json)
 
 target_sources(simulator_cpp_rewrite PRIVATE cli.cpp)
 add_subdirectory(circuit)
