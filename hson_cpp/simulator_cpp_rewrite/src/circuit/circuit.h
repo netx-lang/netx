@@ -16,8 +16,8 @@ namespace hson {
         value_storage values;
 
     public:
-        void add_rule(rule_t newRule) {
-            rules.add(std::move(newRule));
+        void add_rule(const rule_t& newRule) {
+            rules.add(newRule);
         }
 
         id_set update(id_t id, value_t newValue) {
@@ -32,6 +32,10 @@ namespace hson {
                 values[id] = value;
             }
             return rules.update(values, hint);
+        }
+
+        [[nodiscard]] value_t get_value(id_t id) const {
+            return values.at(id);
         }
     };
 }

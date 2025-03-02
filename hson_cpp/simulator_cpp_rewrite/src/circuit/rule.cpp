@@ -187,6 +187,10 @@ namespace hson {
     }
 
     namespace rule_factory {
+        rule_t id_rule(source_t in, sink_t out) {
+            return rule_t{new impl::unary_rule(std::move(in), std::move(out), _1)};
+        }
+
         rule_t not_rule(source_t in, sink_t out) {
             return rule_t{new impl::unary_rule(std::move(in), std::move(out), ~_1)};
         }
@@ -197,6 +201,10 @@ namespace hson {
 
         rule_t or_rule(source_t a, source_t b, sink_t out) {
             return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 | _2)};
+        }
+
+        rule_t xor_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 ^ _2)};
         }
 
         rule_t register_rule(clock_t clk, source_t in, sink_t out) {
