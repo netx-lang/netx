@@ -13,8 +13,12 @@ namespace hson {
     namespace impl {
         struct rule_impl {
             const id_set triggers;
+            const id_set dependencies;
+            const id_set outcomes;
 
-            explicit rule_impl(id_set triggers) : triggers(std::move(triggers)) {}
+            explicit rule_impl(id_set triggers, id_set outcomes) : triggers(triggers), dependencies(std::move(triggers)), outcomes(std::move(outcomes)) {}
+
+            explicit rule_impl(id_set triggers, id_set dependencies, id_set outcomes) : triggers(std::move(triggers)), dependencies(std::move(dependencies)), outcomes(std::move(outcomes)) {}
 
             virtual ~rule_impl() = default;
 
@@ -59,6 +63,14 @@ namespace hson {
 
         [[nodiscard]] auto& triggers() const {
             return get()->triggers;
+        }
+
+        [[nodiscard]] auto& dependencies() const {
+            return get()->dependencies;
+        }
+
+        [[nodiscard]] auto& outcomes() const {
+            return get()->outcomes;
         }
 
         auto perform(value_storage& values) const {

@@ -140,7 +140,7 @@ namespace hson {
 
             binary_rule(source_t a, source_t b, sink_t out,
                         std::function<value_t(const value_t &, const value_t &)> op)
-                : rule_impl(a.dependencies() + b.dependencies()), a(std::move(a)), b(std::move(b)),
+                : rule_impl(a.dependencies() + b.dependencies(), out.outcomes()), a(std::move(a)), b(std::move(b)),
                   out(std::move(out)), op(std::move(op)) {
             }
 
@@ -158,7 +158,7 @@ namespace hson {
 
             unary_rule(source_t x, sink_t out,
                        std::function<value_t(const value_t &)> op)
-                : rule_impl(x.dependencies()), in(std::move(x)), out(std::move(out)), op(std::move(op)) {
+                : rule_impl(x.dependencies(), out.outcomes()), in(std::move(x)), out(std::move(out)), op(std::move(op)) {
             }
 
             id_set perform(value_storage &values) const override {
@@ -174,7 +174,7 @@ namespace hson {
             const sink_t out;
 
             register_rule(clock_t clk, source_t in, sink_t out)
-                : rule_impl(clk.dependencies()), clk(std::move(clk)),
+                : rule_impl(clk.dependencies(), clk.dependencies() + in.dependencies(), out.outcomes()), clk(std::move(clk)),
                   in(std::move(in)), out(std::move(out)) {
             }
 

@@ -8,5 +8,6 @@ if(POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)
 endif()
 find_package(Boost 1.70 REQUIRED)
+find_package(OpenMP REQUIRED)
 
 add_subdirectory(src)
