@@ -118,18 +118,20 @@ namespace hson {
     }
 
     namespace rule_factory {
+        [[nodiscard]] rule_t id_rule(source_t in, sink_t out);
         [[nodiscard]] rule_t not_rule(source_t in, sink_t out);
         [[nodiscard]] rule_t and_rule(source_t a, source_t b, sink_t out);
         [[nodiscard]] rule_t or_rule(source_t a, source_t b, sink_t out);
+        [[nodiscard]] rule_t xor_rule(source_t a, source_t b, sink_t out);
         [[nodiscard]] rule_t register_rule(clock_t clk, source_t in, sink_t out);
     }
 
     class rule_set {
         std::multimap<id_t, rule_t> triggerRules;
     public:
-        void add(rule_t newRule) {
+        void add(const rule_t& newRule) {
             for (id_t trigger : newRule.triggers())
-                triggerRules.emplace(trigger, std::move(newRule));
+                triggerRules.emplace(trigger, newRule);
         }
 
         id_set update(value_storage& values, const id_set& hint, const bool toFixed = true) const {
