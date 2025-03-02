@@ -34,7 +34,7 @@ namespace hson {
             return rules.update(values, hint);
         }
 
-        [[nodiscard]] value_t get_value(id_t id) const {
+        [[nodiscard]] value_t get_value(const id_t id) const {
             return values.at(id);
         }
     };
