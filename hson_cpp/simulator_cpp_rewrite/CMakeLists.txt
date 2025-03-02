@@ -9,5 +9,6 @@ if(POLICY CMP0167)
 endif()
 find_package(Boost 1.70 REQUIRED)
 find_package(OpenMP REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 add_subdirectory(src)
