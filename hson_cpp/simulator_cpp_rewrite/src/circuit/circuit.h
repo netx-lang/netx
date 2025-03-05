@@ -17,7 +17,7 @@ namespace hson {
         id_set clocks;
 
     public:
-        void add_rule(const rule_t& newRule) {
+        void add_rule(const rule_t &newRule) {
             rules.add(newRule);
         }
 
@@ -26,7 +26,7 @@ namespace hson {
         }
 
         id_set flip_clocks() {
-            for (const auto& clock : clocks) values[clock].flip();
+            for (const auto &clock: clocks) values[clock] = ~values[clock];
             return rules.update(values, clocks);
         }
 
@@ -35,9 +35,9 @@ namespace hson {
             return rules.update(values, {{id}});
         }
 
-        id_set update_batch(const value_storage& toUpdate) {
+        id_set update_batch(const value_storage &toUpdate) {
             id_set hint;
-            for (const auto &[id, value] : toUpdate) {
+            for (const auto &[id, value]: toUpdate) {
                 hint.insert(id);
                 values[id] = value;
             }

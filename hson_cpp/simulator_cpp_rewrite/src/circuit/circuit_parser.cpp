@@ -56,7 +56,9 @@ namespace hson {
     static void parse_builtin(const nlohmann::json &json, parse_context &context) {
         const auto &input = json["input"];
         const auto &output = json["output"];
-        switch (builtin_type_map.at(json["id"])) {
+        const std::string builtin_id = json["id"];
+        if (!builtin_type_map.contains(builtin_id)) throw std::runtime_error("Unknown builtin id " + builtin_id);
+        switch (builtin_type_map.at(builtin_id)) {
             case builtin_type::NOT: {
                 context.circuit.add_rule(rule_factory::not_rule(parse_source(input[0], context),
                                                                 parse_sink(output[0], context)));
@@ -103,7 +105,9 @@ namespace hson {
     };
 
     static void parse_member(const nlohmann::json &json, parse_context &context) {
-        switch (member_type_map.at(json["type"])) {
+        const std::string member_type = json["type"];
+        if (!member_type_map.contains(member_type)) throw std::runtime_error("Unknown member type " + member_type);
+        switch (member_type_map.at(member_type)) {
             case member_type::WIRE: {
                 context.id_map[json["id"]] = ++context.counter;
                 context.size_map[context.counter] = json["width"];
@@ -135,7 +139,7 @@ namespace hson {
 
         value_storage initial_values;
         for (const auto &id: context.id_map | std::views::values)
-            initial_values[id] = boost::dynamic_bitset(context.size_map[id], 0ul);
+            initial_values[id] = value_t(context.size_map[id], 0ul);
         context.circuit.update_batch(initial_values);
 
         return context;
