@@ -20,8 +20,8 @@ namespace hson {
             bool triggered(value_storage &values) const override {
                 const auto &clk = values[id];
                 assert(!clk.empty());
-                if (posEdge) return clk.all();
-                return clk.none();
+                if (posEdge) return static_cast<bool>(clk);
+                return !static_cast<bool>(clk);
             }
         };
 
@@ -70,11 +70,7 @@ namespace hson {
             }
 
             value_t get(value_storage &values) const override {
-                value_t res(len);
-                const auto &in = values[id];
-                assert(in.size() > to);
-                for (size_t i = 0; i < len; ++i) res[i] = in[from + i];
-                return res;
+                return values[id].slice(from, to).from_slice();
             }
         };
 
@@ -96,15 +92,10 @@ namespace hson {
             }
 
             bool put(value_storage &values, value_t v) const override {
-                auto &out = values[id];
-                assert(v.size() == len && out.size() > to);
-                bool flag = false;
-                for (size_t i = 0; i < len; ++i) {
-                    if (out[from + i] == v[i]) continue;
-                    flag = true;
-                    out[from + i] = v[i];
-                }
-                return flag;
+                auto out = values[id].slice(from, to);
+                if (out.from_slice() == v) return false;
+                out = std::move(v);
+                return true;
             }
         };
     }
@@ -158,7 +149,8 @@ namespace hson {
 
             unary_rule(source_t x, sink_t out,
                        std::function<value_t(const value_t &)> op)
-                : rule_impl(x.dependencies(), out.outcomes()), in(std::move(x)), out(std::move(out)), op(std::move(op)) {
+                : rule_impl(x.dependencies(), out.outcomes()), in(std::move(x)), out(std::move(out)),
+                  op(std::move(op)) {
             }
 
             id_set perform(value_storage &values) const override {
@@ -174,7 +166,8 @@ namespace hson {
             const sink_t out;
 
             register_rule(clock_t clk, source_t in, sink_t out)
-                : rule_impl(clk.dependencies(), clk.dependencies() + in.dependencies(), out.outcomes()), clk(std::move(clk)),
+                : rule_impl(clk.dependencies(), clk.dependencies() + in.dependencies(), out.outcomes()),
+                  clk(std::move(clk)),
                   in(std::move(in)), out(std::move(out)) {
             }
 
