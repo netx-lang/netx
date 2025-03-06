@@ -26,7 +26,7 @@ namespace hson {
         }
 
         id_set flip_clocks() {
-            for (const auto &clock: clocks) values[clock] = ~values[clock];
+            for (const auto &clock: clocks) values[clock].flip();
             return rules.update(values, clocks);
         }
 

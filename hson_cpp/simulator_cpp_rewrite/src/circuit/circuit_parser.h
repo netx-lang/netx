@@ -10,9 +10,8 @@
 
 namespace hson {
     struct parse_context {
-        id_t counter = 0;
+        id_t members_total;
         hson::circuit circuit;
-        std::map<std::string, id_t> id_map;
         std::map<id_t, size_t> size_map;
     };
 
