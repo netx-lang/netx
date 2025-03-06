@@ -37,6 +37,16 @@ namespace hson {
             }
         };
 
+        struct constant_source final : source_impl {
+            const value_t value;
+
+            explicit constant_source(value_t value) : source_impl({}), value(std::move(value)) {}
+
+            value_t get(value_storage &values) const override {
+                return value;
+            }
+        };
+
         struct id_sink final : sink_impl {
             const id_t id;
 
@@ -98,6 +108,20 @@ namespace hson {
                 return true;
             }
         };
+
+        struct sign_extend_sink_adapter final : sink_impl {
+            const sink_t underlying;
+
+            explicit sign_extend_sink_adapter(sink_t underlying)
+                : sink_impl(underlying.outcomes()), underlying(std::move(underlying)) {
+            }
+
+            bool put(value_storage &values, const value_t v) const override {
+                size_t len = 0;
+                for (const auto& outcome : outcomes) len = std::max(len, values[outcome].size());
+                return underlying.put(values, v.signed_widen(len));
+            }
+        };
     }
 
     namespace data_factory {
@@ -119,6 +143,14 @@ namespace hson {
 
         sink_t select_sink(const id_t id, const size_t from, const size_t to) {
             return sink_t{new impl::select_sink(id, from, to)};
+        }
+
+        source_t constant_source(value_t value) {
+            return source_t{new impl::constant_source(std::move(value))};
+        }
+
+        sink_t sign_extend_sink_adapter(sink_t sink) {
+            return sink_t{new impl::sign_extend_sink_adapter(std::move(sink))};
         }
     }
 
@@ -198,6 +230,26 @@ namespace hson {
 
         rule_t xor_rule(source_t a, source_t b, sink_t out) {
             return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 ^ _2)};
+        }
+
+        rule_t add_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 + _2)};
+        }
+
+        rule_t sub_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 - _2)};
+        }
+
+        rule_t mul_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 * _2)};
+        }
+
+        rule_t div_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 / _2)};
+        }
+
+        rule_t mod_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 % _2)};
         }
 
         rule_t register_rule(clock_t clk, source_t in, sink_t out) {

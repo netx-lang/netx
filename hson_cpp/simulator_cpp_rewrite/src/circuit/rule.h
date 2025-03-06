@@ -142,6 +142,10 @@ namespace hson {
         [[nodiscard]] source_t select_source(id_t id, size_t from, size_t to);
 
         [[nodiscard]] sink_t select_sink(id_t id, size_t from, size_t to);
+
+        [[nodiscard]] source_t constant_source(value_t value);
+
+        [[nodiscard]] sink_t sign_extend_sink_adapter(sink_t sink);
     }
 
     namespace rule_factory {
@@ -154,6 +158,16 @@ namespace hson {
         [[nodiscard]] rule_t or_rule(source_t a, source_t b, sink_t out);
 
         [[nodiscard]] rule_t xor_rule(source_t a, source_t b, sink_t out);
+
+        [[nodiscard]] rule_t add_rule(source_t a, source_t b, sink_t out);
+
+        [[nodiscard]] rule_t sub_rule(source_t a, source_t b, sink_t out);
+
+        [[nodiscard]] rule_t mul_rule(source_t a, source_t b, sink_t out);
+
+        [[nodiscard]] rule_t div_rule(source_t a, source_t b, sink_t out);
+
+        [[nodiscard]] rule_t mod_rule(source_t a, source_t b, sink_t out);
 
         [[nodiscard]] rule_t register_rule(clock_t clk, source_t in, sink_t out);
     }
