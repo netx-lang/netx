@@ -52,7 +52,7 @@ namespace hson {
     }
 
     enum class builtin_type {
-        NOT, AND, OR, XOR, ADD, SUB, MUL, DIV, MOD, CAST, REGISTER
+        NOT, AND, OR, XOR, ADD, SUB, MUL, DIV, MOD, EQ, CAST, REGISTER
     };
 
     static const std::map<std::string, builtin_type> builtin_type_map{
@@ -65,6 +65,7 @@ namespace hson {
         {"MUL", builtin_type::MUL},
         {"DIV", builtin_type::DIV},
         {"MOD", builtin_type::MOD},
+        {"EQ", builtin_type::EQ},
         {"CAST", builtin_type::CAST},
         {"REGISTER", builtin_type::REGISTER}
     };
@@ -124,6 +125,12 @@ namespace hson {
             }
             case builtin_type::MOD: {
                 context.circuit.add_rule(rule_factory::mod_rule(parse_source(input[0]),
+                                                                parse_source(input[1]),
+                                                                parse_sink(output[0])));
+                break;
+            }
+            case builtin_type::EQ: {
+                context.circuit.add_rule(rule_factory::eq_rule(parse_source(input[0]),
                                                                 parse_source(input[1]),
                                                                 parse_sink(output[0])));
                 break;

@@ -252,6 +252,12 @@ namespace hson {
             return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 % _2)};
         }
 
+        rule_t eq_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
+                return value_t{1, x == y};
+            })};
+        }
+
         rule_t register_rule(clock_t clk, source_t in, sink_t out) {
             return rule_t{new impl::register_rule(std::move(clk), std::move(in), std::move(out))};
         }

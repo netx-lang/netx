@@ -169,6 +169,8 @@ namespace hson {
 
         [[nodiscard]] rule_t mod_rule(source_t a, source_t b, sink_t out);
 
+        [[nodiscard]] rule_t eq_rule(source_t a, source_t b, sink_t out);
+
         [[nodiscard]] rule_t register_rule(clock_t clk, source_t in, sink_t out);
     }
 
