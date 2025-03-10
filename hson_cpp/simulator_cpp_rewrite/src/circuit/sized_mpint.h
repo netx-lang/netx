@@ -36,7 +36,7 @@ namespace hson::impl {
             base_t::operator&=(mask);
         }
 
-        bool normalize_sign(sized_mpint& other) {
+        bool normalize_sign(sized_mpint &other) {
             bool result_sign = false;
             if (sign()) {
                 negate();
@@ -48,8 +48,9 @@ namespace hson::impl {
             }
             return result_sign;
         }
+
     public:
-        friend std::ostream& operator<<(std::ostream& out, const sized_mpint& self) {
+        friend std::ostream &operator<<(std::ostream &out, const sized_mpint &self) {
             sized_mpint tmp = self;
             const bool flag = tmp.sign();
             if (flag) tmp.negate();
@@ -59,7 +60,7 @@ namespace hson::impl {
             return out;
         }
 
-        static sized_mpint parse(const std::string& str) {
+        static sized_mpint parse(const std::string &str) {
             if (const auto pos = str.find('\''); pos != std::string::npos) {
                 const size_t size = std::stoull(str.substr(0, pos));
                 int base;
@@ -297,6 +298,13 @@ namespace hson::impl {
             sized_mpint result = *this;
             result %= other;
             return result;
+        }
+
+        [[nodiscard]] sized_mpint concat(const sized_mpint &other) const {
+            auto tmp = dynamic_cast<const base_t &>(*this);
+            tmp <<= other.size();
+            tmp |= other;
+            return {size() + other.size(), std::move(tmp)};
         }
     };
 
