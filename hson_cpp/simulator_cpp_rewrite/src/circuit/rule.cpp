@@ -28,8 +28,8 @@ namespace hson {
         struct id_source final : source_impl {
             const id_t id;
 
-            explicit id_source(id_t id)
-                : source_impl({id}), id(id) {
+            explicit id_source(id_t id, const size_t len)
+                : source_impl({id}, len), id(id) {
             }
 
             value_t get(value_storage &values) const override {
@@ -40,7 +40,8 @@ namespace hson {
         struct constant_source final : source_impl {
             const value_t value;
 
-            explicit constant_source(value_t value) : source_impl({}), value(std::move(value)) {}
+            explicit constant_source(value_t value) : source_impl({}, value.size()), value(std::move(value)) {
+            }
 
             value_t get(value_storage &values) const override {
                 return value;
@@ -50,11 +51,12 @@ namespace hson {
         struct id_sink final : sink_impl {
             const id_t id;
 
-            explicit id_sink(id_t id)
-                : sink_impl({id}), id(id) {
+            explicit id_sink(id_t id, const size_t len)
+                : sink_impl({id}, len), id(id) {
             }
 
             bool put(value_storage &values, value_t v) const override {
+                assert(len == v.size());
                 auto &out = values[id];
                 if (out == v) return false;
                 out = std::move(v);
@@ -75,7 +77,7 @@ namespace hson {
              * @param to To index (inclusive)
              */
             select_source(id_t id, const size_t from, const size_t to)
-                : source_impl({id}), id(id),
+                : source_impl({id}, to - from + 1), id(id),
                   from((assert(from <= to), from)), to(to), len(to - from + 1) {
             }
 
@@ -97,11 +99,12 @@ namespace hson {
              * @param to To index (inclusive)
              */
             select_sink(id_t id, const size_t from, const size_t to)
-                : sink_impl({id}), id(id),
+                : sink_impl({id}, to - from + 1), id(id),
                   from((assert(from <= to), from)), to(to), len(to - from + 1) {
             }
 
             bool put(value_storage &values, value_t v) const override {
+                assert(len == v.size());
                 auto out = values[id].slice(from, to);
                 if (out.from_slice() == v) return false;
                 out = std::move(v);
@@ -113,28 +116,26 @@ namespace hson {
             const sink_t underlying;
 
             explicit sign_extend_sink_adapter(sink_t underlying)
-                : sink_impl(underlying.outcomes()), underlying(std::move(underlying)) {
+                : sink_impl(underlying.outcomes(), underlying.len()), underlying(std::move(underlying)) {
             }
 
             bool put(value_storage &values, const value_t v) const override {
-                size_t len = 0;
-                for (const auto& outcome : outcomes) len = std::max(len, values[outcome].size());
                 return underlying.put(values, v.signed_widen(len));
             }
         };
     }
 
     namespace data_factory {
-        clock_t id_clock(id_t id, const bool posEdge) {
+        clock_t id_clock(const id_t id, const bool posEdge) {
             return clock_t{new impl::id_clock(id, posEdge)};
         }
 
-        source_t id_source(const id_t id) {
-            return source_t{new impl::id_source(id)};
+        source_t id_source(const id_t id, const size_t len) {
+            return source_t{new impl::id_source(id, len)};
         }
 
-        sink_t id_sink(const id_t id) {
-            return sink_t{new impl::id_sink(id)};
+        sink_t id_sink(const id_t id, const size_t len) {
+            return sink_t{new impl::id_sink(id, len)};
         }
 
         source_t select_source(const id_t id, const size_t from, const size_t to) {
@@ -250,6 +251,14 @@ namespace hson {
 
         rule_t mod_rule(source_t a, source_t b, sink_t out) {
             return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 % _2)};
+        }
+
+        rule_t concat_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{
+                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                    return x.concat(y);
+                })
+            };
         }
 
         rule_t eq_rule(source_t a, source_t b, sink_t out) {

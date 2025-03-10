@@ -43,8 +43,9 @@ namespace hson {
 
         struct source_impl {
             const id_set dependencies;
+            const size_t len;
 
-            explicit source_impl(id_set dependencies) : dependencies(std::move(dependencies)) {
+            explicit source_impl(id_set dependencies, size_t len) : dependencies(std::move(dependencies)), len(len) {
             }
 
             virtual ~source_impl() = default;
@@ -54,8 +55,9 @@ namespace hson {
 
         struct sink_impl {
             const id_set outcomes;
+            const size_t len;
 
-            explicit sink_impl(id_set outcomes) : outcomes(std::move(outcomes)) {
+            explicit sink_impl(id_set outcomes, size_t len) : outcomes(std::move(outcomes)), len(len) {
             }
 
             virtual ~sink_impl() = default;
@@ -112,6 +114,10 @@ namespace hson {
             return shared_ptr::get()->dependencies;
         }
 
+        [[nodiscard]] size_t len() const {
+            return shared_ptr::get()->len;
+        }
+
         value_t get(value_storage &values) const {
             return shared_ptr::get()->get(values);
         }
@@ -127,6 +133,10 @@ namespace hson {
             return get()->outcomes;
         }
 
+        [[nodiscard]] size_t len() const {
+            return get()->len;
+        }
+
         bool put(value_storage &values, value_t v) const {
             return get()->put(values, std::move(v));
         }
@@ -135,9 +145,9 @@ namespace hson {
     namespace data_factory {
         [[nodiscard]] clock_t id_clock(id_t id, bool posEdge = true);
 
-        [[nodiscard]] source_t id_source(id_t id);
+        [[nodiscard]] source_t id_source(id_t id, size_t len);
 
-        [[nodiscard]] sink_t id_sink(id_t id);
+        [[nodiscard]] sink_t id_sink(id_t id, size_t len);
 
         [[nodiscard]] source_t select_source(id_t id, size_t from, size_t to);
 
@@ -168,6 +178,8 @@ namespace hson {
         [[nodiscard]] rule_t div_rule(source_t a, source_t b, sink_t out);
 
         [[nodiscard]] rule_t mod_rule(source_t a, source_t b, sink_t out);
+
+        [[nodiscard]] rule_t concat_rule(source_t a, source_t b, sink_t out);
 
         [[nodiscard]] rule_t eq_rule(source_t a, source_t b, sink_t out);
 
