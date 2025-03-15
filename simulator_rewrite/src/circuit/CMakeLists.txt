@@ -1,0 +1,1 @@
+target_sources(simulator_cpp_rewrite PRIVATE circuit_def.h rule.h rule.cpp circuit.h circuit_parser.cpp circuit_parser.h)
