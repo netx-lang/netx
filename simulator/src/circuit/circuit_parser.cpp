@@ -54,6 +54,13 @@ namespace hxon {
     }
 
     static void parse_binary(const nlohmann::json &inputs, const nlohmann::json &outputs, parse_context &context,
+                             rule_t (*cons)(source_t, source_t, sink_t)) {
+        if (inputs.size() != 2) throw std::invalid_argument("Need exactly two inputs");
+        if (outputs.size() != 1) throw std::invalid_argument("Need exactly one output");
+        context.circuit.add_rule(cons(parse_source(inputs.at(0), context), parse_source(inputs.at(1), context), parse_sink(outputs.at(0), context)));
+    }
+
+    static void parse_variadic_binary(const nlohmann::json &inputs, const nlohmann::json &outputs, parse_context &context,
                              rule_t (*cons)(source_t, source_t, sink_t), const bool assoc = true,
                              const bool len_sum = false) {
         if (outputs.size() != 1) throw std::invalid_argument("Need exactly one output");
@@ -88,7 +95,7 @@ namespace hxon {
     }
 
     enum class builtin_type {
-        NOT, AND, OR, XOR, ADD, SUB, MUL, DIV, MOD, CONCAT, EQ, CAST, REGISTER
+        NOT, AND, OR, XOR, SHL, LSHR, ASHR, ADD, SUB, MUL, DIV, MOD, CONCAT, EQ, CAST, REGISTER
     };
 
     static const std::map<std::string, builtin_type> builtin_type_map{
@@ -96,6 +103,9 @@ namespace hxon {
         {"AND", builtin_type::AND},
         {"OR", builtin_type::OR},
         {"XOR", builtin_type::XOR},
+        {"SHL", builtin_type::SHL},
+        {"LSHR", builtin_type::LSHR},
+        {"ASHR", builtin_type::ASHR},
         {"ADD", builtin_type::ADD},
         {"SUB", builtin_type::SUB},
         {"MUL", builtin_type::MUL},
@@ -119,39 +129,51 @@ namespace hxon {
                 break;
             }
             case builtin_type::AND: {
-                parse_binary(input, output, context, rule_factory::and_rule);
+                parse_variadic_binary(input, output, context, rule_factory::and_rule);
                 break;
             }
             case builtin_type::OR: {
-                parse_binary(input, output, context, rule_factory::or_rule);
+                parse_variadic_binary(input, output, context, rule_factory::or_rule);
                 break;
             }
             case builtin_type::XOR: {
-                parse_binary(input, output, context, rule_factory::xor_rule);
+                parse_variadic_binary(input, output, context, rule_factory::xor_rule);
+                break;
+            }
+            case builtin_type::SHL: {
+                parse_binary(input, output, context, rule_factory::shl_rule);
+                break;
+            }
+            case builtin_type::LSHR: {
+                parse_binary(input, output, context, rule_factory::lshr_rule);
+                break;
+            }
+            case builtin_type::ASHR: {
+                parse_binary(input, output, context, rule_factory::ashr_rule);
                 break;
             }
             case builtin_type::ADD: {
-                parse_binary(input, output, context, rule_factory::add_rule);
+                parse_variadic_binary(input, output, context, rule_factory::add_rule);
                 break;
             }
             case builtin_type::SUB: {
-                parse_binary(input, output, context, rule_factory::sub_rule, false);
+                parse_variadic_binary(input, output, context, rule_factory::sub_rule, false);
                 break;
             }
             case builtin_type::MUL: {
-                parse_binary(input, output, context, rule_factory::mul_rule);
+                parse_variadic_binary(input, output, context, rule_factory::mul_rule);
                 break;
             }
             case builtin_type::DIV: {
-                parse_binary(input, output, context, rule_factory::div_rule, false);
+                parse_variadic_binary(input, output, context, rule_factory::div_rule, false);
                 break;
             }
             case builtin_type::MOD: {
-                parse_binary(input, output, context, rule_factory::mod_rule, false);
+                parse_variadic_binary(input, output, context, rule_factory::mod_rule, false);
                 break;
             }
             case builtin_type::CONCAT: {
-                parse_binary(input, output, context, rule_factory::concat_rule, true, true);
+                parse_variadic_binary(input, output, context, rule_factory::concat_rule, true, true);
                 break;
             }
             case builtin_type::EQ: {

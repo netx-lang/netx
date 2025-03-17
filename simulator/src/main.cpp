@@ -8,7 +8,9 @@
 #include "circuit/circuit_parser.h"
 
 int main() {
-    auto [members_total, circuit, size_map] = hxon::parse_circuit(nlohmann::json::parse(std::ifstream("test.json")));
+    std::string path;
+    std::cin >> path;
+    auto [members_total, circuit, size_map] = hxon::parse_circuit(nlohmann::json::parse(std::ifstream(path)));
     std::cout << circuit.get_value(2) << std::endl;
     for (unsigned i = 1; i <= 100; ++i) {
         circuit.flip_clocks();

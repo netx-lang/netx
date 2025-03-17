@@ -51,12 +51,7 @@ namespace hxon::impl {
 
     public:
         friend std::ostream &operator<<(std::ostream &out, const sized_mpint &self) {
-            sized_mpint tmp = self;
-            const bool flag = tmp.sign();
-            if (flag) tmp.negate();
-            auto v = tmp.convert_to<long long>();
-            if (flag) v = -v;
-            out << "sized_mpint(" << self.size() << "," << v << ")";
+            out << "sized_mpint(" << self.size() << "," << static_cast<long long>(self) << ")";
             return out;
         }
 
@@ -116,7 +111,20 @@ namespace hxon::impl {
             return base_t::operator bool();
         }
 
-        std::strong_ordering operator<=>(const sized_mpint &other) const {
+        [[nodiscard]] explicit operator long long() const {
+            sized_mpint tmp = *this;
+            const bool flag = tmp.sign();
+            if (flag) tmp.negate();
+            auto v = tmp.convert_to<long long>();
+            if (flag) v = -v;
+            return v;
+        }
+
+        [[nodiscard]] explicit operator size_t() const {
+            return this->convert_to<size_t>();
+        }
+
+        [[nodiscard]] std::strong_ordering operator<=>(const sized_mpint &other) const {
             if (_size != other._size) throw std::runtime_error("Sizes don't match");
             const auto &super = dynamic_cast<const base_t &>(*this);
             if (super < other) return std::strong_ordering::less;
@@ -124,7 +132,7 @@ namespace hxon::impl {
             return std::strong_ordering::greater;
         }
 
-        bool operator==(const sized_mpint &other) const = default;
+        [[nodiscard]] bool operator==(const sized_mpint &other) const = default;
 
         [[nodiscard]] auto slice(size_t from, size_t to);
 
@@ -149,7 +157,7 @@ namespace hxon::impl {
             return *this;
         }
 
-        sized_mpint operator~() const {
+        [[nodiscard]] sized_mpint operator~() const {
             sized_mpint result = *this;
             result.flip();
             return result;
@@ -178,37 +186,56 @@ namespace hxon::impl {
             return *this;
         }
 
+        sized_mpint &ashr_eq(const size_t cnt) {
+            const bool flag = sign();
+            operator>>=(cnt);
+            if (flag) {
+                const auto mask_tail = size() - std::min(cnt, size());
+                auto mask_head = mask;
+                mask_head >>= mask_tail;
+                mask_head <<= mask_tail;
+                base_t::operator|=(mask_head);
+            }
+            return *this;
+        }
+
         sized_mpint &operator<<=(const size_t cnt) {
             base_t::operator<<=(cnt);
             and_mask();
             return *this;
         }
 
-        sized_mpint operator|(const sized_mpint &other) const {
+        [[nodiscard]] sized_mpint operator|(const sized_mpint &other) const {
             sized_mpint result = *this;
             result |= other;
             return result;
         }
 
-        sized_mpint operator&(const sized_mpint &other) const {
+        [[nodiscard]] sized_mpint operator&(const sized_mpint &other) const {
             sized_mpint result = *this;
             result &= other;
             return result;
         }
 
-        sized_mpint operator^(const sized_mpint &other) const {
+        [[nodiscard]] sized_mpint operator^(const sized_mpint &other) const {
             sized_mpint result = *this;
             result ^= other;
             return result;
         }
 
-        sized_mpint operator>>(const size_t cnt) const {
+        [[nodiscard]] sized_mpint operator>>(const size_t cnt) const {
             sized_mpint result = *this;
             result >>= cnt;
             return result;
         }
 
-        sized_mpint operator<<(const size_t cnt) const {
+        [[nodiscard]] sized_mpint ashr(const size_t cnt) const {
+            sized_mpint result = *this;
+            result.ashr_eq(cnt);
+            return result;
+        }
+
+        [[nodiscard]] sized_mpint operator<<(const size_t cnt) const {
             sized_mpint result = *this;
             result <<= cnt;
             return result;
@@ -220,7 +247,7 @@ namespace hxon::impl {
             return *this;
         }
 
-        sized_mpint operator-() const {
+        [[nodiscard]] sized_mpint operator-() const {
             sized_mpint result = *this;
             result.negate();
             return result;
@@ -270,31 +297,31 @@ namespace hxon::impl {
             return *this;
         }
 
-        sized_mpint operator+(const sized_mpint &other) const {
+        [[nodiscard]] sized_mpint operator+(const sized_mpint &other) const {
             sized_mpint result = *this;
             result += other;
             return result;
         }
 
-        sized_mpint operator-(const sized_mpint &other) const {
+        [[nodiscard]] sized_mpint operator-(const sized_mpint &other) const {
             sized_mpint result = *this;
             result -= other;
             return result;
         }
 
-        sized_mpint operator*(const sized_mpint &other) const {
+        [[nodiscard]] sized_mpint operator*(const sized_mpint &other) const {
             sized_mpint result = *this;
             result *= other;
             return result;
         }
 
-        sized_mpint operator/(const sized_mpint &other) const {
+        [[nodiscard]] sized_mpint operator/(const sized_mpint &other) const {
             sized_mpint result = *this;
             result /= other;
             return result;
         }
 
-        sized_mpint operator%(const sized_mpint &other) const {
+        [[nodiscard]] sized_mpint operator%(const sized_mpint &other) const {
             sized_mpint result = *this;
             result %= other;
             return result;

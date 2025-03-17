@@ -233,6 +233,30 @@ namespace hxon {
             return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 ^ _2)};
         }
 
+        rule_t shl_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{
+                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                    return x << static_cast<size_t>(y);
+                })
+            };
+        }
+
+        rule_t lshr_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{
+                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                    return x >> static_cast<size_t>(y);
+                })
+            };
+        }
+
+        rule_t ashr_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{
+                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                    return x.ashr(static_cast<size_t>(y));
+                })
+            };
+        }
+
         rule_t add_rule(source_t a, source_t b, sink_t out) {
             return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 + _2)};
         }
