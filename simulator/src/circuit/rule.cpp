@@ -55,12 +55,14 @@ namespace hxon {
                 : sink_impl({id}, len), id(id) {
             }
 
-            bool put(value_storage &values, value_t v) const override {
+            [[nodiscard]] bool check(const value_storage &values, const value_t& v) const override {
                 assert(len == v.size());
-                auto &out = values[id];
-                if (out == v) return false;
-                out = std::move(v);
-                return true;
+                return values.at(id) != v;
+            }
+
+            void put(value_storage &values, value_t v) const override {
+                assert(len == v.size());
+                values[id] = std::move(v);
             }
         };
 
@@ -103,12 +105,15 @@ namespace hxon {
                   from((assert(from <= to), from)), to(to), len(to - from + 1) {
             }
 
-            bool put(value_storage &values, value_t v) const override {
+            [[nodiscard]] bool check(const value_storage &values, const value_t& v) const override {
                 assert(len == v.size());
-                auto out = values[id].slice(from, to);
-                if (out.from_slice() == v) return false;
-                out = std::move(v);
-                return true;
+                auto out = values.at(id).slice(from, to);
+                return out.from_slice() != v;
+            }
+
+            void put(value_storage &values, value_t v) const override {
+                assert(len == v.size());
+                values[id].slice(from, to) = std::move(v);
             }
         };
 
@@ -119,8 +124,12 @@ namespace hxon {
                 : sink_impl(underlying.outcomes(), underlying.len()), underlying(std::move(underlying)) {
             }
 
-            bool put(value_storage &values, const value_t v) const override {
-                return underlying.put(values, v.signed_resize(len));
+            [[nodiscard]] bool check(const value_storage &values, const value_t& v) const override {
+                return underlying.check(values, v.signed_resize(len));
+            }
+
+            void put(value_storage &values, const value_t v) const override {
+                underlying.put(values, v.signed_resize(len));
             }
         };
     }
@@ -169,8 +178,10 @@ namespace hxon {
             }
 
             id_set perform(value_storage &values) const override {
-                if (out.put(values, op(a.get(values), b.get(values))))
+                if (auto value = op(a.get(values), b.get(values)); out.check(values, value)) {
+                    out.put(values, std::move(value));
                     return out.outcomes();
+                }
                 return {};
             }
         };
@@ -187,8 +198,10 @@ namespace hxon {
             }
 
             id_set perform(value_storage &values) const override {
-                if (out.put(values, op(in.get(values))))
+                if (auto value = op(in.get(values)); out.check(values, value)) {
+                    out.put(values, std::move(value));
                     return out.outcomes();
+                }
                 return {};
             }
         };
@@ -205,8 +218,12 @@ namespace hxon {
             }
 
             id_set perform(value_storage &values) const override {
-                if (clk.triggered(values) && out.put(values, in.get(values)))
+                if (auto value = in.get(values); clk.triggered(values) && out.check(values, value)) {
+                    values.delay([value = std::move(value), out = out] (auto& cur_values) {
+                        out.put(cur_values, std::move(value));
+                    });
                     return out.outcomes();
+                }
                 return {};
             }
         };

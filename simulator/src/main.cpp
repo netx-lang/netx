@@ -10,11 +10,13 @@
 int main() {
     std::string path;
     std::cin >> path;
-    auto [members_total, circuit, size_map] = hxon::parse_circuit(nlohmann::json::parse(std::ifstream(path)));
+    auto [members_total, circuit, circuit_input, circuit_output, size_map] = hxon::parse_circuit(nlohmann::json::parse(std::ifstream(path)));
     std::cout << circuit.get_value(2) << std::endl;
     for (unsigned i = 1; i <= 100; ++i) {
-        circuit.flip_clocks();
-        circuit.flip_clocks();
+        for (unsigned j = 1; j <= 500000; ++j) {
+            circuit.flip_clocks();
+            circuit.flip_clocks();
+        }
         std::cout << circuit.get_value(2) << std::endl;
     }
 }

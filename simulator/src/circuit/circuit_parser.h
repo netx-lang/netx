@@ -12,6 +12,7 @@ namespace hxon {
     struct parse_context {
         id_t members_total;
         hxon::circuit circuit;
+        id_set circuit_input, circuit_output;
         std::map<id_t, size_t> size_map;
     };
 
