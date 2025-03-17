@@ -8,10 +8,10 @@
 
 #include "circuit.h"
 
-namespace hson {
+namespace hxon {
     struct parse_context {
         id_t members_total;
-        hson::circuit circuit;
+        hxon::circuit circuit;
         std::map<id_t, size_t> size_map;
     };
 
