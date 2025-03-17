@@ -69,6 +69,14 @@ public abstract class ComponentModelAnalysis extends ModelAnalysis {
             });
             scope.getSignature().inputs().replaceAll(repOf::apply);
             scope.getSignature().outputs().replaceAll(repOf::apply);
+
+            if (scope.hasAttributes()) {
+                for (var entry : scope.getAttributes().entrySet()) {
+                    if (entry.getValue() instanceof Variable variable) {
+                        entry.setValue(repOf.apply(variable));
+                    }
+                }
+            }
         }
     }
 }

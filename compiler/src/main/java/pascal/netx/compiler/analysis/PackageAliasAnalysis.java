@@ -19,6 +19,9 @@ public final class PackageAliasAnalysis extends ModelAnalysis {
             scope.getBinding().releaseIf(Predicate.not(manager::needDump));
             scope.getInputs().replaceAll(manager::repOf);
             scope.getOutputs().replaceAll(manager::repOf);
+            if (scope.hasAttributes()) {
+                scope.getAttributes().replaceAllVariable(manager::repOf);
+            }
         });
     }
 }
