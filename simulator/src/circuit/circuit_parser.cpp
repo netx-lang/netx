@@ -57,12 +57,14 @@ namespace hxon {
                              rule_t (*cons)(source_t, source_t, sink_t)) {
         if (inputs.size() != 2) throw std::invalid_argument("Need exactly two inputs");
         if (outputs.size() != 1) throw std::invalid_argument("Need exactly one output");
-        context.circuit.add_rule(cons(parse_source(inputs.at(0), context), parse_source(inputs.at(1), context), parse_sink(outputs.at(0), context)));
+        context.circuit.add_rule(cons(parse_source(inputs.at(0), context), parse_source(inputs.at(1), context),
+                                      parse_sink(outputs.at(0), context)));
     }
 
-    static void parse_variadic_binary(const nlohmann::json &inputs, const nlohmann::json &outputs, parse_context &context,
-                             rule_t (*cons)(source_t, source_t, sink_t), const bool assoc = true,
-                             const bool len_sum = false) {
+    static void parse_variadic_binary(const nlohmann::json &inputs, const nlohmann::json &outputs,
+                                      parse_context &context,
+                                      rule_t (*cons)(source_t, source_t, sink_t), const bool assoc = true,
+                                      const bool len_sum = false) {
         if (outputs.size() != 1) throw std::invalid_argument("Need exactly one output");
         sink_t output = parse_sink(outputs.at(0), context);
 
@@ -210,7 +212,7 @@ namespace hxon {
         {"builtin", member_type::BUILTIN}
     };
 
-    static void parse_member(const nlohmann::json &json, parse_context &context) {
+    static void parse_member(const nlohmann::json &json, parse_context &context) { // NOLINT(*-no-recursion)
         const std::string member_type = json["type"];
         if (!member_type_map.contains(member_type)) throw std::runtime_error("Unknown member type " + member_type);
         if (json.contains("members"))
@@ -230,7 +232,7 @@ namespace hxon {
         }
     }
 
-    static void parse_size(const nlohmann::json &json, parse_context &context) {
+    static void parse_size(const nlohmann::json &json, parse_context &context) { // NOLINT(*-no-recursion)
         const std::string member_type = json["type"];
         if (!member_type_map.contains(member_type)) throw std::runtime_error("Unknown member type " + member_type);
         if (json.contains("members"))
@@ -247,7 +249,7 @@ namespace hxon {
                 auto [id, selection] = parse_id(json["id"]);
                 if (selection) throw std::runtime_error("Clock member cannot be selected");
                 context.size_map[id] = 1;
-                context.circuit.add_clock(id);
+                if (context.circuit_input.contains(id)) context.circuit.add_clock(id);
                 break;
             }
             case member_type::COMPONENT:
@@ -258,10 +260,25 @@ namespace hxon {
         }
     }
 
+    static void parse_circuit_io(const nlohmann::json &json, parse_context &context) {
+        for (auto &input: json.at("input")) {
+            auto [id, selection] = parse_id(input);
+            if (selection) throw std::runtime_error("Design input cannot be selected");
+            context.circuit_input.insert(id);
+        }
+
+        for (auto &output: json.at("output")) {
+            auto [id, selection] = parse_id(output);
+            if (selection) throw std::runtime_error("Design output cannot be selected");
+            context.circuit_output.insert(id);
+        }
+    }
+
     parse_context parse_circuit(const nlohmann::json &json) {
         parse_context context;
         context.members_total = json["totalData"];
         auto &design = json["design"];
+        parse_circuit_io(design, context);
         parse_size(design, context);
         parse_member(design, context);
 

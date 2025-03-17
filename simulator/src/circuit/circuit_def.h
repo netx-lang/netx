@@ -31,7 +31,21 @@ namespace hxon {
 
     using id_set = impl::id_set_impl;
 
-    using value_storage = std::map<id_t, value_t>;
+    class value_storage : public std::map<id_t, value_t> {
+        using base_t = std::map<id_t, value_t>;
+        std::vector<std::function<void(value_storage&)>> delayed;
+    public:
+        using base_t::base_t;
+
+        void delay(std::function<void(value_storage&)> func) {
+            delayed.emplace_back(std::move(func));
+        }
+
+        void perform_delayed() {
+            for (auto& func : delayed) func(*this);
+            delayed.clear();
+        }
+    };
 }
 
 #endif //COMMON_H

@@ -45,7 +45,7 @@ namespace hxon {
             const id_set dependencies;
             const size_t len;
 
-            explicit source_impl(id_set dependencies, size_t len) : dependencies(std::move(dependencies)), len(len) {
+            explicit source_impl(id_set dependencies, const size_t len) : dependencies(std::move(dependencies)), len(len) {
             }
 
             virtual ~source_impl() = default;
@@ -57,12 +57,14 @@ namespace hxon {
             const id_set outcomes;
             const size_t len;
 
-            explicit sink_impl(id_set outcomes, size_t len) : outcomes(std::move(outcomes)), len(len) {
+            explicit sink_impl(id_set outcomes, const size_t len) : outcomes(std::move(outcomes)), len(len) {
             }
 
             virtual ~sink_impl() = default;
 
-            virtual bool put(value_storage &values, value_t v) const = 0;
+            [[nodiscard]] virtual bool check(const value_storage &values, const value_t& v) const = 0;
+
+            virtual void put(value_storage &values, value_t v) const = 0;
         };
     }
 
@@ -137,8 +139,12 @@ namespace hxon {
             return get()->len;
         }
 
-        bool put(value_storage &values, value_t v) const {
-            return get()->put(values, std::move(v));
+        [[nodiscard]] bool check(const value_storage &values, const value_t& v) const {
+            return get()->check(values, v);
+        }
+
+        void put(value_storage &values, value_t v) const {
+            get()->put(values, std::move(v));
         }
     };
 
@@ -218,6 +224,7 @@ namespace hxon {
                     toConsiderSwap.insert(ruleChanged.begin(), ruleChanged.end());
                     changed.insert(ruleChanged.begin(), ruleChanged.end());
                 }
+                values.perform_delayed();
 
                 toConsider.clear();
                 toConsider.swap(toConsiderSwap);
