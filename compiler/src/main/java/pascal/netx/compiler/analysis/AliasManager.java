@@ -9,14 +9,12 @@ import pascal.netx.compiler.model.variable.Access;
 import pascal.netx.compiler.model.variable.Mutable;
 import pascal.netx.compiler.model.variable.Value;
 import pascal.netx.compiler.model.variable.Variable;
+import pascal.netx.compiler.model.variable.type.BitType;
 import pascal.netx.util.collection.UnionFind;
 import pascal.netx.util.exception.ShallNotReachHereError;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class AliasManager {
     private static final Logger log = LoggerFactory.getLogger(AliasManager.class);
@@ -24,9 +22,28 @@ public class AliasManager {
     private final Map<Variable, Variable> sourceRep = new HashMap<>();
 
     void addAlias(Collection<ComponentScope.Alias> aliases) {
+        List<Access> selfAlias = new ArrayList<>();
         for (var alias : aliases) {
+            if (isSelfAlias(alias.lhs())) {
+                selfAlias.add((Access) alias.lhs());
+            }
+            if (isSelfAlias(alias.rhs())) {
+                selfAlias.add((Access) alias.rhs());
+            }
             set.union(alias.lhs(), alias.rhs());
         }
+        for (var access : selfAlias) {
+            set.union(access, access.base());
+        }
+    }
+
+    static boolean isSelfAlias(Variable variable) {
+        if (variable instanceof Access(var base, var selector)) {
+            if (base.getType() instanceof BitType(int width)) {
+                return width == selector.getWidth();
+            }
+        }
+        return false;
     }
 
     void resolveRepresentatives() {
