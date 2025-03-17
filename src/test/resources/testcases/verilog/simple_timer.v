@@ -199,8 +199,8 @@ module DECODER_1(
   output [1:0] out; // @(71:9)
   input code; // @(70:9)
   wire \$i1_2 ;
-  assign \$i1_2  = ~code[0];
+  assign \$i1_2  = ~code;
   assign out[0] = \$i1_2 ;
-  assign out[1] = code[0];
+  assign out[1] = code;
 endmodule
 

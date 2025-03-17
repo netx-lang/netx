@@ -50,6 +50,11 @@ public class AccessChecker extends ModelAnalysis {
         scope.getInputs().forEach(AccessChecker::check);
         scope.getOutputs().forEach(AccessChecker::check);
         scope.getBinding().forEachEntity(AccessChecker::check);
+        if (scope.hasAttributes()) {
+            for (var entry : scope.getAttributes().entrySet()) {
+                check(entry.getValue());
+            }
+        }
         scope.getAliases().forEach(alias -> {
             check(alias.lhs());
             check(alias.rhs());

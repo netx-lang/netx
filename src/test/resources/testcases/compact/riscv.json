@@ -2407,7 +2407,7 @@
       {"type": "wire", "width": 2, "id": "output", "loc": "216:9"},
       {
         "type": "builtin", "id": "NOT@1", "loc": "220:52",
-        "input": ["code@0[0]"],
+        "input": ["code@0"],
         "output": ["$i1@2"]
       },
       {
@@ -2420,7 +2420,7 @@
       },
       {
         "type": "builtin", "id": "AND@3", "loc": "218:21",
-        "input": ["code@0[0]"],
+        "input": ["code@0"],
         "output": ["output@0[1]"]
       }
     ]
