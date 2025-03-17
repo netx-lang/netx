@@ -35,6 +35,7 @@ public class DuplicatedManager {
                 for (int j = i + 1; j < idGroup.size(); j++) {
                     ComponentScope a = idGroup.get(i), b = idGroup.get(j);
                     if (isDuplicated(a, b)) {
+                        // TODO: Check whether the components is combinational
                         var iterator = b.getOutputs().iterator();
                         for (var rep : a.getOutputs()) {
                             set.union(iterator.next(), rep);

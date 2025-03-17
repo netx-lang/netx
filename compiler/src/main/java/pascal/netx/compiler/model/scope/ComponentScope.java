@@ -110,6 +110,10 @@ public final class ComponentScope extends Scope {
         this.signature = signature;
     }
 
+    public boolean hasAttributes() {
+        return attributes != null && !attributes.isEmpty();
+    }
+
     public Attributes getAttributes() {
         return attributes;
     }

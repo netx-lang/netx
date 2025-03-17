@@ -21,5 +21,8 @@ public final class PackageDuplicatedElimination extends ModelAnalysis {
         scope.getBinding().releaseIf(manager::needRemove);
         scope.getInputs().replaceAll(manager::repOf);
         scope.getOutputs().replaceAll(manager::repOf);
+        if (scope.hasAttributes()) {
+            scope.getAttributes().replaceAllVariable(manager::repOf);
+        }
     }
 }
