@@ -9,7 +9,7 @@
 #include <memory>
 #include <utility>
 
-namespace hson {
+namespace hxon {
     namespace impl {
         struct rule_impl {
             const id_set triggers;

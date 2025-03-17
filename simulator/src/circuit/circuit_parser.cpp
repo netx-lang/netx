@@ -8,7 +8,7 @@
 #include <queue>
 #include <utility>
 
-namespace hson {
+namespace hxon {
     struct id_info {
         id_t id{};
         std::optional<std::pair<size_t, size_t> > selection;

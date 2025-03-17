@@ -10,7 +10,7 @@
 #include "circuit_def.h"
 #include "rule.h"
 
-namespace hson {
+namespace hxon {
     class circuit {
         rule_set rules;
         value_storage values;
