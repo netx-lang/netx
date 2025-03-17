@@ -43,7 +43,7 @@ namespace hxon {
             explicit constant_source(value_t value) : source_impl({}, value.size()), value(std::move(value)) {
             }
 
-            value_t get(value_storage &values) const override {
+            value_t get(value_storage &) const override {
                 return value;
             }
         };
