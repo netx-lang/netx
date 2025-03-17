@@ -112,15 +112,15 @@ namespace hxon {
             }
         };
 
-        struct sign_extend_sink_adapter final : sink_impl {
+        struct signed_resize_sink_adapter final : sink_impl {
             const sink_t underlying;
 
-            explicit sign_extend_sink_adapter(sink_t underlying)
+            explicit signed_resize_sink_adapter(sink_t underlying)
                 : sink_impl(underlying.outcomes(), underlying.len()), underlying(std::move(underlying)) {
             }
 
             bool put(value_storage &values, const value_t v) const override {
-                return underlying.put(values, v.signed_widen(len));
+                return underlying.put(values, v.signed_resize(len));
             }
         };
     }
@@ -150,8 +150,8 @@ namespace hxon {
             return source_t{new impl::constant_source(std::move(value))};
         }
 
-        sink_t sign_extend_sink_adapter(sink_t sink) {
-            return sink_t{new impl::sign_extend_sink_adapter(std::move(sink))};
+        sink_t signed_resize_sink_adapter(sink_t sink) {
+            return sink_t{new impl::signed_resize_sink_adapter(std::move(sink))};
         }
     }
 

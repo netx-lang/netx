@@ -14,6 +14,7 @@ int main() {
     std::cout << circuit.get_value(2) << std::endl;
     for (unsigned i = 1; i <= 100; ++i) {
         circuit.flip_clocks();
+        circuit.flip_clocks();
         std::cout << circuit.get_value(2) << std::endl;
     }
 }
