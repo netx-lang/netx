@@ -144,12 +144,19 @@ namespace hxon::impl {
             return operator>>(size() - 1).operator bool();
         }
 
-        [[nodiscard]] sized_mpint signed_widen(const size_t new_size) const {
-            assert(new_size >= size());
-            sized_mpint result(new_size);
-            result.base_t::operator|=(*this);
-            if (sign()) result.base_t::operator|=(result.mask ^ mask);
-            return result;
+        [[nodiscard]] sized_mpint signed_resize(const size_t new_size) const {
+            const auto comp = new_size <=> size();
+            if (comp == std::strong_ordering::equal) return *this;
+            if (comp == std::strong_ordering::greater) {
+                sized_mpint result(new_size);
+                result.base_t::operator|=(*this);
+                if (sign()) result.base_t::operator|=(result.mask ^ mask);
+                return result;
+            }
+            if (comp == std::strong_ordering::less) {
+                return {new_size, dynamic_cast<const base_t &>(*this)};
+            }
+            std::abort();
         }
 
         sized_mpint &flip() {

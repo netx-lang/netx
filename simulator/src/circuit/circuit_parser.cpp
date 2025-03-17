@@ -184,7 +184,7 @@ namespace hxon {
             }
             case builtin_type::CAST: {
                 context.circuit.add_rule(rule_factory::id_rule(parse_source(input[0], context),
-                                                               data_factory::sign_extend_sink_adapter(
+                                                               data_factory::signed_resize_sink_adapter(
                                                                    parse_sink(output[0], context))));
                 break;
             }
