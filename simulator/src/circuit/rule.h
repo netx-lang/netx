@@ -169,6 +169,12 @@ namespace hxon {
 
         [[nodiscard]] rule_t xor_rule(source_t a, source_t b, sink_t out);
 
+        [[nodiscard]] rule_t shl_rule(source_t a, source_t b, sink_t out);
+
+        [[nodiscard]] rule_t lshr_rule(source_t a, source_t b, sink_t out);
+
+        [[nodiscard]] rule_t ashr_rule(source_t a, source_t b, sink_t out);
+
         [[nodiscard]] rule_t add_rule(source_t a, source_t b, sink_t out);
 
         [[nodiscard]] rule_t sub_rule(source_t a, source_t b, sink_t out);
