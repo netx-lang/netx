@@ -258,7 +258,7 @@ namespace hxon {
             };
         }
 
-        rule_t lshr_rule(source_t a, source_t b, sink_t out) {
+        rule_t logical_shr_rule(source_t a, source_t b, sink_t out) {
             return rule_t{
                 new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
                     return x >> static_cast<size_t>(y);
@@ -266,10 +266,10 @@ namespace hxon {
             };
         }
 
-        rule_t ashr_rule(source_t a, source_t b, sink_t out) {
+        rule_t arithmetic_shr_rule(source_t a, source_t b, sink_t out) {
             return rule_t{
                 new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
-                    return x.ashr(static_cast<size_t>(y));
+                    return x.arithmetic_shr(static_cast<size_t>(y));
                 })
             };
         }
@@ -302,9 +302,65 @@ namespace hxon {
             };
         }
 
+        rule_t unsigned_lt_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
+                return value_t{1, x < y};
+            })};
+        }
+
+        rule_t unsigned_gt_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
+                return value_t{1, x > y};
+            })};
+        }
+
+        rule_t unsigned_le_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
+                return value_t{1, x <= y};
+            })};
+        }
+
+        rule_t unsigned_ge_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
+                return value_t{1, x >= y};
+            })};
+        }
+
+        rule_t signed_lt_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
+                return value_t{1, x.signed_compare(y) == std::strong_ordering::less};
+            })};
+        }
+
+        rule_t signed_gt_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
+                return value_t{1, x.signed_compare(y) == std::strong_ordering::greater};
+            })};
+        }
+
+        rule_t signed_le_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
+                auto compared = x.signed_compare(y);
+                return value_t{1, compared == std::strong_ordering::less || compared == std::strong_ordering::equal};
+            })};
+        }
+
+        rule_t signed_ge_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
+                auto compared = x.signed_compare(y);
+                return value_t{1, compared == std::strong_ordering::greater || compared == std::strong_ordering::equal};
+            })};
+        }
+
         rule_t eq_rule(source_t a, source_t b, sink_t out) {
             return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
                 return value_t{1, x == y};
+            })};
+        }
+
+        rule_t neq_rule(source_t a, source_t b, sink_t out) {
+            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
+                return value_t{1, x != y};
             })};
         }
 

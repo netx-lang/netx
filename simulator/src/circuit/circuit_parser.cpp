@@ -97,7 +97,8 @@ namespace hxon {
     }
 
     enum class builtin_type {
-        NOT, AND, OR, XOR, SHL, LSHR, ASHR, ADD, SUB, MUL, DIV, MOD, CONCAT, EQ, CAST, REGISTER
+        NOT, AND, OR, XOR, SHL, LSHR, ASHR, ADD, SUB, MUL, DIV, MOD, CONCAT, ULT, UGT, ULE, UGE, SLT, SGT, SLE, SGE, EQ,
+        NEQ, CAST, REGISTER
     };
 
     static const std::map<std::string, builtin_type> builtin_type_map{
@@ -114,7 +115,16 @@ namespace hxon {
         {"DIV", builtin_type::DIV},
         {"MOD", builtin_type::MOD},
         {"CONCAT", builtin_type::CONCAT},
+        {"ULT", builtin_type::ULT},
+        {"UGT", builtin_type::UGT},
+        {"ULE", builtin_type::ULE},
+        {"UGE", builtin_type::UGE},
+        {"SLT", builtin_type::SLT},
+        {"SGT", builtin_type::SGT},
+        {"SLE", builtin_type::SLE},
+        {"SGE", builtin_type::SGE},
         {"EQ", builtin_type::EQ},
+        {"NEQ", builtin_type::NEQ},
         {"CAST", builtin_type::CAST},
         {"REGISTER", builtin_type::REGISTER}
     };
@@ -147,11 +157,11 @@ namespace hxon {
                 break;
             }
             case builtin_type::LSHR: {
-                parse_binary(input, output, context, rule_factory::lshr_rule);
+                parse_binary(input, output, context, rule_factory::logical_shr_rule);
                 break;
             }
             case builtin_type::ASHR: {
-                parse_binary(input, output, context, rule_factory::ashr_rule);
+                parse_binary(input, output, context, rule_factory::arithmetic_shr_rule);
                 break;
             }
             case builtin_type::ADD: {
@@ -178,10 +188,44 @@ namespace hxon {
                 parse_variadic_binary(input, output, context, rule_factory::concat_rule, true, true);
                 break;
             }
+            case builtin_type::ULT: {
+                parse_binary(input, output, context, rule_factory::unsigned_lt_rule);
+                break;
+            }
+            case builtin_type::UGT: {
+                parse_binary(input, output, context, rule_factory::unsigned_gt_rule);
+                break;
+            }
+            case builtin_type::ULE: {
+                parse_binary(input, output, context, rule_factory::unsigned_le_rule);
+                break;
+            }
+            case builtin_type::UGE: {
+                parse_binary(input, output, context, rule_factory::unsigned_ge_rule);
+                break;
+            }
+            case builtin_type::SLT: {
+                parse_binary(input, output, context, rule_factory::signed_lt_rule);
+                break;
+            }
+            case builtin_type::SGT: {
+                parse_binary(input, output, context, rule_factory::signed_gt_rule);
+                break;
+            }
+            case builtin_type::SLE: {
+                parse_binary(input, output, context, rule_factory::signed_le_rule);
+                break;
+            }
+            case builtin_type::SGE: {
+                parse_binary(input, output, context, rule_factory::signed_ge_rule);
+                break;
+            }
             case builtin_type::EQ: {
-                context.circuit.add_rule(rule_factory::eq_rule(parse_source(input[0], context),
-                                                               parse_source(input[1], context),
-                                                               parse_sink(output[0], context)));
+                parse_binary(input, output, context, rule_factory::eq_rule);
+                break;
+            }
+            case builtin_type::NEQ: {
+                parse_binary(input, output, context, rule_factory::neq_rule);
                 break;
             }
             case builtin_type::CAST: {
@@ -212,7 +256,8 @@ namespace hxon {
         {"builtin", member_type::BUILTIN}
     };
 
-    static void parse_member(const nlohmann::json &json, parse_context &context) { // NOLINT(*-no-recursion)
+    static void parse_member(const nlohmann::json &json, parse_context &context) {
+        // NOLINT(*-no-recursion)
         const std::string member_type = json["type"];
         if (!member_type_map.contains(member_type)) throw std::runtime_error("Unknown member type " + member_type);
         if (json.contains("members"))
@@ -232,7 +277,8 @@ namespace hxon {
         }
     }
 
-    static void parse_size(const nlohmann::json &json, parse_context &context) { // NOLINT(*-no-recursion)
+    static void parse_size(const nlohmann::json &json, parse_context &context) {
+        // NOLINT(*-no-recursion)
         const std::string member_type = json["type"];
         if (!member_type_map.contains(member_type)) throw std::runtime_error("Unknown member type " + member_type);
         if (json.contains("members"))

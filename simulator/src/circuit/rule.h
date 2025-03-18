@@ -45,7 +45,8 @@ namespace hxon {
             const id_set dependencies;
             const size_t len;
 
-            explicit source_impl(id_set dependencies, const size_t len) : dependencies(std::move(dependencies)), len(len) {
+            explicit source_impl(id_set dependencies, const size_t len) : dependencies(std::move(dependencies)),
+                                                                          len(len) {
             }
 
             virtual ~source_impl() = default;
@@ -62,7 +63,7 @@ namespace hxon {
 
             virtual ~sink_impl() = default;
 
-            [[nodiscard]] virtual bool check(const value_storage &values, const value_t& v) const = 0;
+            [[nodiscard]] virtual bool check(const value_storage &values, const value_t &v) const = 0;
 
             virtual void put(value_storage &values, value_t v) const = 0;
         };
@@ -139,7 +140,7 @@ namespace hxon {
             return get()->len;
         }
 
-        [[nodiscard]] bool check(const value_storage &values, const value_t& v) const {
+        [[nodiscard]] bool check(const value_storage &values, const value_t &v) const {
             return get()->check(values, v);
         }
 
@@ -177,9 +178,9 @@ namespace hxon {
 
         [[nodiscard]] rule_t shl_rule(source_t a, source_t b, sink_t out);
 
-        [[nodiscard]] rule_t lshr_rule(source_t a, source_t b, sink_t out);
+        [[nodiscard]] rule_t logical_shr_rule(source_t a, source_t b, sink_t out);
 
-        [[nodiscard]] rule_t ashr_rule(source_t a, source_t b, sink_t out);
+        [[nodiscard]] rule_t arithmetic_shr_rule(source_t a, source_t b, sink_t out);
 
         [[nodiscard]] rule_t add_rule(source_t a, source_t b, sink_t out);
 
@@ -193,7 +194,25 @@ namespace hxon {
 
         [[nodiscard]] rule_t concat_rule(source_t a, source_t b, sink_t out);
 
+        [[nodiscard]] rule_t unsigned_lt_rule(source_t a, source_t b, sink_t out);
+
+        [[nodiscard]] rule_t unsigned_gt_rule(source_t a, source_t b, sink_t out);
+
+        [[nodiscard]] rule_t unsigned_le_rule(source_t a, source_t b, sink_t out);
+
+        [[nodiscard]] rule_t unsigned_ge_rule(source_t a, source_t b, sink_t out);
+
+        [[nodiscard]] rule_t signed_lt_rule(source_t a, source_t b, sink_t out);
+
+        [[nodiscard]] rule_t signed_gt_rule(source_t a, source_t b, sink_t out);
+
+        [[nodiscard]] rule_t signed_le_rule(source_t a, source_t b, sink_t out);
+
+        [[nodiscard]] rule_t signed_ge_rule(source_t a, source_t b, sink_t out);
+
         [[nodiscard]] rule_t eq_rule(source_t a, source_t b, sink_t out);
+
+        [[nodiscard]] rule_t neq_rule(source_t a, source_t b, sink_t out);
 
         [[nodiscard]] rule_t register_rule(clock_t clk, source_t in, sink_t out);
     }
