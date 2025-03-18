@@ -125,11 +125,20 @@ namespace hxon::impl {
         }
 
         [[nodiscard]] std::strong_ordering operator<=>(const sized_mpint &other) const {
-            if (_size != other._size) throw std::runtime_error("Sizes don't match");
+            if (size() != other.size()) throw std::runtime_error("Sizes don't match");
             const auto &super = dynamic_cast<const base_t &>(*this);
             if (super < other) return std::strong_ordering::less;
             if (super == other) return std::strong_ordering::equal;
             return std::strong_ordering::greater;
+        }
+
+        [[nodiscard]] std::strong_ordering signed_compare(const sized_mpint &other) const {
+            if (size() != other.size()) throw std::runtime_error("Sizes don't match");
+            const bool this_sign = sign(), other_sign = other.sign();
+            if (this_sign && other_sign) return -other <=> -*this;
+            if (this_sign) return std::strong_ordering::less;
+            if (other_sign) return std::strong_ordering::greater;
+            return operator<=>(other);
         }
 
         [[nodiscard]] bool operator==(const sized_mpint &other) const = default;
@@ -236,7 +245,7 @@ namespace hxon::impl {
             return result;
         }
 
-        [[nodiscard]] sized_mpint ashr(const size_t cnt) const {
+        [[nodiscard]] sized_mpint arithmetic_shr(const size_t cnt) const {
             sized_mpint result = *this;
             result.ashr_eq(cnt);
             return result;
