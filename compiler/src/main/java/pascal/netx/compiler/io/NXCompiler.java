@@ -10,6 +10,7 @@ import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.ProjectScope;
 import pascal.netx.util.lang.Identifier;
+import pascal.netx.util.print.NotepadWriter;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -81,6 +82,17 @@ public final class NXCompiler {
                     .forEach(ModelAnalysis::analyze);
             return new CompactDumper(design.getTop()).dump();
         }
+    }
+
+    public void visualize(NotepadWriter notepad) {
+        ProjectScope design = elaborate();
+        design.packages()
+                .map(ComponentAliasAnalysis::new)
+                .forEach(ModelAnalysis::analyze);
+        design.packages()
+                .map(ComponentDuplicatedElimination::new)
+                .forEach(ModelAnalysis::analyze);
+        new NXVisualizer(design.getTop(), 10, notepad).visualize();
     }
 
     public PackageManager getPackManager() {
