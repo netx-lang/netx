@@ -33,7 +33,7 @@ public class NXVisualizer {
     public void visualize() {
         writer.println("digraph {");
         writer.incIndent();
-        writer.println("compound=true;");
+        writer.println("graph [splines=spline nodesep=0.2]");
         writer.println("rankdir=\"LR\"");
         printFullComponent(design.getTop(), depth - 1);
         writer.decIndent();
@@ -69,13 +69,13 @@ public class NXVisualizer {
         for (int i = 0; i < scope.getInputs().size(); i++) {
             var input = scope.getInputs().get(i);
             if (defs.contains(input)) {
-                nodeMap.put(input, nodeName + ":in_" + i + ":w");
+                nodeMap.put(input, nodeName + ":in_" + i);
             }
         }
         for (int i = 0; i < scope.getOutputs().size(); i++) {
             var output = scope.getOutputs().get(i);
             if (defs.contains(output)) {
-                nodeMap.put(output, nodeName + ":out_" + i + ":e");
+                nodeMap.put(output, nodeName + ":out_" + i);
             }
         }
     }
@@ -96,13 +96,13 @@ public class NXVisualizer {
 
     private void printCellComponent(ComponentScope scope) {
         StringBuilder html = new StringBuilder();
-        html.append("<table>").append("<tr>").append("<td><table>");
+        html.append("<table bgcolor=\"SeaShell\">").append("<tr>").append("<td bgcolor=\"Bisque\"><table>");
         for (int i = 0; i < scope.getInputs().size(); i++) {
             html.append("<tr><td port=\"in_").append(i).append("\">•</td></tr>");
         }
         html.append("</table></td>");
         html.append("<td>").append(scope.getIdentifier().name()).append("</td>");
-        html.append("<td><table>");
+        html.append("<td bgcolor=\"Bisque\"><table>");
         for (int i = 0; i < scope.getOutputs().size(); i++) {
             html.append("<tr><td port=\"out_").append(i).append("\">•</td></tr>");
         }
@@ -113,16 +113,16 @@ public class NXVisualizer {
         writer.print(nodeName);
         writer.print("[");
         writer.print("label=<" + html + ">");
-        writer.print("margin=0 shape=none");
+        writer.print("margin=\"0,0.2\" shape=none");
         writer.println("]");
 
         maintainNodeMapForCell(scope, nodeName);
     }
 
     private void printPortList(String nodeName, List<Variable> portList) {
-        for (var port : portList) {
+        for (var port : portList.reversed()) {
             var portName = quote(nodeName + getPortName(port));
-            writer.println(portName + " [color=black shape=record label=\"" + port + "\"]");
+            writer.println(portName + " [style=filled fillcolor=\"SeaShell\" shape=box label=\"" + port + "\"]");
         }
     }
 
@@ -146,6 +146,8 @@ public class NXVisualizer {
         writer.println("label=" + scope.getIdentifier().name());
         writer.println("labeljust = c");
         writer.println("labelloc = t");
+        writer.println("pencolor = seagreen");
+        writer.println("penwidth = 2");
         printIOPorts(scope, depth, nodeName);
 
         maintainNodeMapForFull(scope, nodeName);
@@ -178,38 +180,35 @@ public class NXVisualizer {
         writer.print(nodeName);
         writer.print("[");
         writer.print("label=" + quote(value.toString()));
-        writer.print("shape=record");
+        writer.print("shape=cds style=filled fillcolor=\"SeaShell\"");
         writer.println("]");
         return nodeName;
+    }
+
+    private void addEdge(String src, String dst) {
+        writer.println(src + ":e -> " + dst + ":w [arrowsize=0.5 color=\"Navy\" penwidth=1.5]");
     }
 
     private void connectForFull(ComponentScope childScope, String nodeName, String childName) {
         var inputIter = childScope.getInputs().iterator();
         for (var input : childScope.getSignature().inputs()) {
             var arg = inputIter.next();
+            var childNode = quote(childName + getPortName(input));
             if (arg instanceof Value) {
                 var argNode = newConstant((Value) arg);
-                var childNode = quote(childName + getPortName(input));
-                writer.println(argNode + "->" + childNode);
-            } else {
-                if (!getPortName(input).equals(getPortName(arg))) {
-                    var argNode = quote(nodeName + getPortName(arg));
-                    var childNode = quote(childName + getPortName(input));
-                    writer.println(argNode + "->" + childNode);
-                }
+                addEdge(argNode, childNode);
+            } else if (!getPortName(input).equals(getPortName(arg))) {
+                addEdge(quote(nodeName + getPortName(arg)), childNode);
             }
         }
         var outputIter = childScope.getOutputs().iterator();
         for (var output : childScope.getSignature().outputs()) {
             var arg = outputIter.next();
+            var childNode = quote(nodeName + getPortName(arg));
             if (arg instanceof Value) {
                 log.warn("{} constant output: {}", childScope.getSourceLoc(), arg);
-            } else {
-                if (!getPortName(output).equals(getPortName(arg))) {
-                    var argNode = quote(childName + getPortName(output));
-                    var childNode = quote(nodeName + getPortName(arg));
-                    writer.println(argNode + "->" + childNode);
-                }
+            } else if (!getPortName(output).equals(getPortName(arg))) {
+                addEdge(childNode, quote(childName + getPortName(output)));
             }
         }
     }
@@ -217,26 +216,20 @@ public class NXVisualizer {
     private void connectForCell(ComponentScope childScope, String childName) {
         for (int i = 0; i < childScope.getInputs().size(); i++) {
             var input = childScope.getInputs().get(i);
+            var connectName = quote(childName) + ":in_" + i;
             if (input instanceof Value) {
-                var argNode = newConstant((Value) input);
-                var connectName = quote(childName) + ":in_" + i + ":w";
-                writer.println(argNode + "->" + connectName);
-            } else {
-                var connectName = quote(childName) + ":in_" + i + ":w";
-                if (nodeMap.containsKey(input) && !nodeMap.get(input).equals(connectName)) {
-                    writer.println(nodeMap.get(input) + "->" + connectName);
-                }
+                addEdge(newConstant((Value) input), connectName);
+            } else if (nodeMap.containsKey(input) && !nodeMap.get(input).equals(connectName)) {
+                addEdge(nodeMap.get(input), connectName);
             }
         }
         for (int i = 0; i < childScope.getOutputs().size(); i++) {
             var output = childScope.getOutputs().get(i);
+            var connectName = quote(childName) + ":out_" + i;
             if (output instanceof Value) {
                 log.warn("{} constant output: {}", childScope.getSourceLoc(), output);
-            } else {
-                var connectName = quote(childName) + ":out_" + i + ":e";
-                if (nodeMap.containsKey(output) && !nodeMap.get(output).equals(connectName)) {
-                    writer.println(connectName + "->" + nodeMap.get(output));
-                }
+            } else if (nodeMap.containsKey(output) && !nodeMap.get(output).equals(connectName)) {
+                addEdge(connectName, nodeMap.get(output));
             }
         }
     }
