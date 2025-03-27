@@ -16,8 +16,8 @@ class NXVisualizerTest {
     void testCounter() throws IOException {
         var compiler = Builder.forCompact().loadPath(TEST_DIR.resolve("counter.nx"));
         var notepad = NotepadWriter.pathOut(Path.of("a.out"));
-        compiler.visualize(notepad);
+        compiler.visualize(notepad, 2);
         var runtime = Runtime.getRuntime();
-        runtime.exec("dot -T pdf a.out -o a.pdf");
+        runtime.exec(new String[]{"dot", "-T", "pdf", "a.out", "-o", "a.pdf"});
     }
 }

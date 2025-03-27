@@ -17,6 +17,7 @@ public class Main {
         int exitCode = new CommandLine(new NetXApp())
                 .addSubcommand("compile", new CompileCommand())
                 .addSubcommand("dump", new DumpCommand())
+                .addSubcommand("visualize", new VisualizeCommand())
                 .execute(args);
         System.exit(exitCode);
     }
@@ -128,6 +129,50 @@ public class Main {
                         notepadWriterFor(output),
                         HFrontend.load(node).parse()
                 ).dump();
+                return 0;
+            } catch (Exception e) {
+                return 1;
+            }
+        }
+    }
+
+    @CommandLine.Command(
+            name = "visualize",
+            description = "Visualize the NetX source code"
+    )
+    static class VisualizeCommand implements Callable<Integer> {
+        @CommandLine.Parameters(
+                paramLabel = "SOURCE",
+                description = "The source file to compile"
+        )
+        private Path source;
+
+        @CommandLine.Option(
+                names = {"-t", "--top"},
+                description = "name of the top component",
+                defaultValue = "top"
+        )
+        private String top;
+
+        @CommandLine.Option(
+                names = {"-d", "--depth"},
+                description = "depth of visualization",
+                defaultValue = "1"
+        )
+        private int depth;
+
+        @CommandLine.Option(
+                names = {"-o", "--output"},
+                description = "output file"
+        )
+        private Path output;
+
+        @Override
+        public Integer call() {
+            try {
+                var builder = Builder.from(Configuration.of(false, top));
+                var compiler = builder.loadPath(source);
+                compiler.visualize(notepadWriterFor(output), depth);
                 return 0;
             } catch (Exception e) {
                 return 1;

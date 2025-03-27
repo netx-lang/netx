@@ -35,7 +35,7 @@ public class NXVisualizer {
         writer.incIndent();
         writer.println("graph [splines=spline nodesep=0.2]");
         writer.println("rankdir=\"LR\"");
-        printFullComponent(design.getTop(), depth - 1);
+        printFullComponent(design.getTop(), depth);
         writer.decIndent();
         writer.println("}");
         writer.flush();
@@ -155,7 +155,7 @@ public class NXVisualizer {
             var childScope = (ComponentScope) child;
             if (needDump(childScope)) {
                 var childName = String.valueOf(allocateComponentId(childScope));
-                if (childScope.isBuiltin() || depth <= 0) {
+                if (childScope.isBuiltin() || depth <= 1) {
                     connectForCell(childScope, childName);
                 } else {
                     connectForFull(childScope, nodeName, childName);
