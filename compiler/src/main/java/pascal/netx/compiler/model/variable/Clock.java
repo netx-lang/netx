@@ -13,6 +13,11 @@ public final class Clock extends Data {
     }
 
     @Override
+    public String toString() {
+        return id.toStringWithLoc();
+    }
+
+    @Override
     public Type getType() {
         return BitType.forClock();
     }
