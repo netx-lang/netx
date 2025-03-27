@@ -93,13 +93,13 @@ public final class NXCompiler {
         }
     }
 
-    public void visualize(NotepadWriter notepad) {
+    public void visualize(NotepadWriter notepad, int depth) {
         if (config.fullyExpand()) {
             throw new ShallNotReachHereError();
         }
         ProjectScope design = elaborate();
         analyzeCompact(design);
-        new NXVisualizer(design.getTop(), 10, notepad).visualize();
+        new NXVisualizer(design.getTop(), depth, notepad).visualize();
     }
 
     public PackageManager getPackManager() {
