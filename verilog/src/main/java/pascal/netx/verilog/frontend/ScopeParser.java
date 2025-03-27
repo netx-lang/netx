@@ -2,13 +2,13 @@ package pascal.netx.verilog.frontend;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import pascal.netx.util.exception.ShallNotReachHereError;
+import pascal.netx.util.lang.BitVector;
+import pascal.netx.util.lang.BuiltinComponent;
+import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.nxon.NxonType;
 import pascal.netx.util.nxon.selector.BitSelector;
 import pascal.netx.util.nxon.selector.PartSelector;
 import pascal.netx.util.nxon.selector.Selector;
-import pascal.netx.util.lang.BitVector;
-import pascal.netx.util.lang.BuiltinComponent;
-import pascal.netx.util.lang.Identifier;
 import pascal.netx.verilog.model.*;
 import pascal.netx.verilog.model.ref.Constant;
 import pascal.netx.verilog.model.ref.DataRef;
@@ -96,9 +96,9 @@ public final class ScopeParser {
             var attrNode = node.get("attribute");
             var register = Register.of(Boolean.parseBoolean(attrNode.get("isPosTrigger").textValue()));
             module.add(register);
-            register.setIn(refParser.resolveDataRefList(node, "input").getFirst());
+            register.setIn(refParser.resolveDataRefList(node, "input").get(0));
+            register.setClock(refParser.resolveDataRefList(node, "input").get(1));
             register.setOut(refParser.resolveDataRefList(node, "output").getFirst());
-            register.setClock(refParser.resolveDataRef(attrNode.get("clock").textValue()));
         } else {
             var assign = Assign.of(ref.builtin());
             module.add(ref.index(), assign);

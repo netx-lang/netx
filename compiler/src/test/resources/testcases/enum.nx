@@ -3,9 +3,11 @@ enum State {
 }
 
 component REG(rst, clk) : [i] -> [o] {
-    auto o <> REGISTER(clk, true) <> OR <> [
-        AND <> [CAST <> rst, CAST <> 1'b0],
-        AND <> [NOT <> CAST <> rst, i]
+    auto o <> REGISTER(true) <> [
+        OR <> [
+            AND <> [CAST <> rst, CAST <> 1'b0],
+            AND <> [NOT <> CAST <> rst, i]
+        ], clk
     ];
 }
 

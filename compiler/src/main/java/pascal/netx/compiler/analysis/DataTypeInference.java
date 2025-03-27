@@ -14,7 +14,6 @@ import pascal.netx.compiler.model.variable.type.PolyType;
 import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
-import pascal.netx.util.lang.Identifier;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -71,7 +70,7 @@ public final class DataTypeInference extends ModelAnalysis {
     private void addContainsForRegister(ComponentScope component) {
         Variable input = component.getInputs().getFirst(), output = component.getOutputs().getFirst();
         addConstraint(EqualTypeConstraint.of(input, output));
-        addConstraint(ClockConstraint.of((Variable) component.getAttributes().get(Identifier.of("clock"))));
+        addConstraint(ClockConstraint.of(component.getInputs().get(1)));
     }
 
     private void addConstraint(DataConstraint constraint) {

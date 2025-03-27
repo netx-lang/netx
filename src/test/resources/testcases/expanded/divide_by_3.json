@@ -33,24 +33,24 @@
       },
       {
         "type": "builtin", "id": "REGISTER", "loc": "5:29",
-        "input": ["$i@7"],
+        "input": ["$i@7", "clk@0"],
         "output": ["a@2"],
-        "attribute": {"isPosTrigger": "true", "clock": "clk@0"},
+        "attribute": {"isPosTrigger": "true"},
         "members": [
           {"type": "wire", "width": 1, "id": "$i@7", "loc": "5:29"}
         ]
       },
       {
         "type": "builtin", "id": "REGISTER", "loc": "5:29",
-        "input": ["a@2"],
+        "input": ["a@2", "clk@0"],
         "output": ["b@3"],
-        "attribute": {"isPosTrigger": "true", "clock": "clk@0"}
+        "attribute": {"isPosTrigger": "true"}
       },
       {
         "type": "builtin", "id": "REGISTER", "loc": "5:29",
-        "input": ["b@3"],
+        "input": ["b@3", "clk@0"],
         "output": ["c@4"],
-        "attribute": {"isPosTrigger": "false", "clock": "clk@0"}
+        "attribute": {"isPosTrigger": "false"}
       },
       {
         "type": "builtin", "id": "OR", "loc": "11:13",

@@ -2,7 +2,8 @@ component counter : [clk, rst] -> [count] {
     wire count of bit(32);
     wire rst of bit(1);
     wire clk of clock();
-    count <> REGISTER(clk, true) <> MUX <> [rst, ADD <> [count, 1], 0];
+    let REG = REGISTER(true) <> [TO, clk#];
+    count <> REG <> MUX <> [rst, ADD <> [count, 1], 0];
 }
 
 component MUX : [ctl, i0, i1] -> [output] {

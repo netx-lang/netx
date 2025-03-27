@@ -32,8 +32,8 @@ namespace hxon {
         return result;
     }
 
-    static clock_t parse_clock(const nlohmann::json &attribute) {
-        auto [id, selection] = parse_id(attribute["clock"]);
+    static clock_t parse_clock(const std::string &source, const nlohmann::json &attribute) {
+        auto [id, selection] = parse_id(source);
         if (selection) throw std::invalid_argument("Clock cannot be selected");
         return data_factory::id_clock(id, attribute["isPosTrigger"] == "true");
     }
@@ -235,7 +235,7 @@ namespace hxon {
                 break;
             }
             case builtin_type::REGISTER: {
-                context.circuit.add_rule(rule_factory::register_rule(parse_clock(json["attribute"]),
+                context.circuit.add_rule(rule_factory::register_rule(parse_clock(input[1], json["attribute"]),
                                                                      parse_source(input[0], context),
                                                                      parse_sink(output[0], context)));
                 break;

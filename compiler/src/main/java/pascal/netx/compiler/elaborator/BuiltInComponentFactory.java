@@ -6,6 +6,7 @@ import pascal.netx.compiler.model.expr.BuiltinRef;
 import pascal.netx.compiler.model.scope.Attributes;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.Scope;
+import pascal.netx.compiler.model.variable.Clock;
 import pascal.netx.compiler.model.variable.Wire;
 import pascal.netx.compiler.model.variable.type.BitType;
 import pascal.netx.compiler.model.variable.type.PolyType;
@@ -59,13 +60,14 @@ public class BuiltInComponentFactory {
     }
 
     private ComponentScope createREGISTERComponent(Scope parent, BuiltinRef type) {
-        Utils.requiresMatchedSize(type.getSourceLoc(), 2, type.getParameters());
+        Utils.requiresMatchedSize(type.getSourceLoc(), 1, type.getParameters());
         var result = instantiate(parent, type);
         var attributes = new Attributes();
-        var isPosTrigger = requiresBooleanValue(type.getSourceLoc(), type.getParameters().get(1));
+        var isPosTrigger = requiresBooleanValue(type.getSourceLoc(), type.getParameters().getFirst());
         attributes.addAttribute(Identifier.of("isPosTrigger"), isPosTrigger);
         result.setAttributes(attributes);
         result.addInput(newWire(result, "i"));
+        result.addInput(newClock(result));
         result.addOutput(newWire(result, "o"));
         return result;
     }
@@ -135,6 +137,13 @@ public class BuiltInComponentFactory {
 
     private Wire newWire(ComponentScope result, String name) {
         return newWire(result, name, PolyType.getInstance());
+    }
+
+    private Clock newClock(ComponentScope result) {
+        var id = Identifier.of("$clk").setSourceLoc(result.getSourceLoc());
+        var clock = new Clock.Factory(compiler).create(result, id);
+        result.bind(clock.getIdentifier(), clock);
+        return clock;
     }
 
     private Wire newWire(ComponentScope result, String name, Type type) {
