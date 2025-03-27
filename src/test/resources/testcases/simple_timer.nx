@@ -2,7 +2,7 @@ component top: [clk_50] -> [hex] {
 	wire clk_50 of clock();
 	wire hex[8] of bit(7);
 
-	let REG(clk) = REGISTER(clk, true);
+	let REG(clk) = REGISTER(true) <> [TO, clk#];
 
 	wire ms_clk, s_clk, m_clk, h_clk of clock();
 	wire ms of bit(32);
@@ -24,7 +24,7 @@ component clock_divider(max): [clk_50] -> [clk] {
 	wire clk_50, clk of clock();
 	wire count       of bit(32);
 
-	let REG = REGISTER(clk_50, true);
+	let REG = REGISTER(true) <> [TO, clk_50#];
 	let ctl = EQ <> [count, max / 2 - 1];
 	count <> REG <> MUX(1) <> [ctl, ADD <> [count, 1], 0];
 	clk   <> REG <> MUX(1) <> [ctl, clk, NOT <> clk];

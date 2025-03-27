@@ -21,13 +21,11 @@ import pascal.netx.compiler.model.variable.type.ArrayType;
 import pascal.netx.compiler.model.variable.type.InterfaceType;
 import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.exception.ShallNotReachHereError;
-import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
 
 import java.util.*;
 
-import static pascal.netx.compiler.model.Entities.requiresInstantiateExpr;
 import static pascal.netx.compiler.model.Utils.*;
 
 final class ComponentElaborator {
@@ -281,11 +279,11 @@ final class ComponentElaborator {
 
         private ComponentPort instantiateBuiltinRef(BuiltinRef ref) {
             var component = factory.createBuiltInComponent(scope, ref);
-            if (ref.getBuiltin() == BuiltinComponent.REGISTER) {
-                var clock = doInstantiate(requiresInstantiateExpr(sourceLoc, ref.getParameters().getFirst()));
-                requiresMatchedSize(sourceLoc, 1, clock.target);
-                component.getAttributes().addAttribute(Identifier.of("clock"), clock.target.getFirst());
-            }
+//            if (ref.getBuiltin() == BuiltinComponent.REGISTER) {
+//                var clock = doInstantiate(requiresInstantiateExpr(sourceLoc, ref.getParameters().getFirst()));
+//                requiresMatchedSize(sourceLoc, 1, clock.target);
+//                component.getAttributes().addAttribute(Identifier.of("clock"), clock.target.getFirst());
+//            }
             return ComponentPort.of(component.getOutputs(), component.getInputs());
         }
 

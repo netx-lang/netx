@@ -30,7 +30,7 @@ component riscv : [clk, rst, imemDataOut, dmemDataOut] -> [imemAddr, dmemAddr, d
         MUX(1) <> [PC, Ra, PCBsrc]
     ];
 
-    PC <> REGISTER(clk, false) <> MUX(1) <> [nextPC, 32'b0, rst];
+    PC <> REGISTER(false) <> [MUX(1) <> [nextPC, 32'b0, rst], clk];
 
     auto imemAddr <> MUX(1) <> [nextPC, 32'b0, rst];
     auto dmemAddr   <> result;
@@ -188,8 +188,9 @@ component RegFile : [clk, RaAddr, RbAddr, WrAddr, WrValue] -> [Ra, Rb] {
     wire mask of bit(32);
     mask <> DECODER(5) <> WrAddr;
     for (i in [0..32]) {
-        regFile[i] <> REGISTER(clk, true)
-            <> MUX(1) <> [regFile[i], WrValue, mask[i]];
+        regFile[i] <> REGISTER(true) <> [
+            MUX(1) <> [regFile[i], WrValue, mask[i]], clk
+        ];
     }
 
     let INDEX_ACCESS = MUX(5) <> [regFile[i]# | i in [0..32]] :: [TO];

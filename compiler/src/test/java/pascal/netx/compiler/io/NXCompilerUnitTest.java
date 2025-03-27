@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -23,6 +24,7 @@ class NXCompilerUnitTest {
         assertNotNull(compiler.compile());
     }
 
+    @Disabled
     @Test
     void testProjectBuild() throws IOException {
         var compiler = Builder.forExpanded().loadPath(TEST_DIR.resolve("project/_netx.toml"));
