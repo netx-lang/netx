@@ -9,6 +9,7 @@ import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.ProjectScope;
+import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.print.NotepadWriter;
 
@@ -49,6 +50,24 @@ public final class NXCompiler {
         new IOAnalysis(design).analyze();
     }
 
+    private static void analyzeCompact(ProjectScope design) {
+        design.packages()
+                .map(ComponentAliasAnalysis::new)
+                .forEach(ModelAnalysis::analyze);
+        design.packages()
+                .map(ComponentDuplicatedElimination::new)
+                .forEach(ModelAnalysis::analyze);
+    }
+
+    private static void analyzeExpanded(ProjectScope design) {
+        design.packages()
+                .map(PackageAliasAnalysis::new)
+                .forEach(ModelAnalysis::analyze);
+        design.packages()
+                .map(PackageDuplicatedElimination::new)
+                .forEach(ModelAnalysis::analyze);
+    }
+
     public ProjectScope elaborate() {
         var scope = new PackageElaborator(project, manager.findApplicationPack(), config).elaborate();
         project.setTop(scope);
@@ -66,32 +85,20 @@ public final class NXCompiler {
         ProjectScope design = elaborate();
         design.forEachPackage(NXCompiler::checkType);
         if (config.fullyExpand()) {
-            design.packages()
-                    .map(PackageAliasAnalysis::new)
-                    .forEach(ModelAnalysis::analyze);
-            design.packages()
-                    .map(PackageDuplicatedElimination::new)
-                    .forEach(ModelAnalysis::analyze);
+            analyzeExpanded(design);
             return new ExpandedDumper(design.getTop()).dump();
         } else {
-            design.packages()
-                    .map(ComponentAliasAnalysis::new)
-                    .forEach(ModelAnalysis::analyze);
-            design.packages()
-                    .map(ComponentDuplicatedElimination::new)
-                    .forEach(ModelAnalysis::analyze);
+            analyzeCompact(design);
             return new CompactDumper(design.getTop()).dump();
         }
     }
 
     public void visualize(NotepadWriter notepad) {
+        if (config.fullyExpand()) {
+            throw new ShallNotReachHereError();
+        }
         ProjectScope design = elaborate();
-        design.packages()
-                .map(ComponentAliasAnalysis::new)
-                .forEach(ModelAnalysis::analyze);
-        design.packages()
-                .map(ComponentDuplicatedElimination::new)
-                .forEach(ModelAnalysis::analyze);
+        analyzeCompact(design);
         new NXVisualizer(design.getTop(), 10, notepad).visualize();
     }
 
