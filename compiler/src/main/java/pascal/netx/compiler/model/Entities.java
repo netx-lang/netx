@@ -98,7 +98,7 @@ public final class Entities {
         }
     }
 
-    public static Expr castToInstantiateExpr(Entity entity, SourceLoc loc) {
+    public static Expr castToInstantiateExpr(SourceLoc loc, Entity entity) {
         return switch (entity) {
             case EntityList list -> makeParallelTypeFromList(list, loc);
             case Expr expr -> expr;
@@ -112,7 +112,7 @@ public final class Entities {
 
     private static ParallelExpr makeParallelTypeFromList(EntityList list, SourceLoc sourceLoc) {
         List<Expr> result = new LinkedList<>();
-        list.forEach(entity -> result.add(castToInstantiateExpr(entity, sourceLoc)));
+        list.forEach(entity -> result.add(castToInstantiateExpr(sourceLoc, entity)));
         return ParallelExpr.from(result);
     }
 }

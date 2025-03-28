@@ -1,10 +1,8 @@
 package pascal.netx.compiler.io;
 
-import pascal.netx.compiler.model.Entity;
+import pascal.netx.compiler.model.scope.binding.ArgBindList;
 
-import java.util.List;
-
-public record Configuration(boolean fullyExpand, String topName, List<Entity> parameters) {
+public record Configuration(boolean fullyExpand, String topName, ArgBindList arguments) {
 
     public static Configuration of(boolean fullyExpand, String topName) {
         return new Configuration(fullyExpand, topName, null);
@@ -19,10 +17,10 @@ public record Configuration(boolean fullyExpand, String topName, List<Entity> pa
     }
 
     public Configuration forAnotherTop(String topName) {
-        return new Configuration(fullyExpand, topName, parameters);
+        return new Configuration(fullyExpand, topName, arguments);
     }
 
-    public Configuration withBindings(List<Entity> parameters) {
-        return new Configuration(fullyExpand, topName, parameters);
+    public Configuration withBindings(ArgBindList arguments) {
+        return new Configuration(fullyExpand, topName, arguments);
     }
 }

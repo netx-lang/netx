@@ -1,17 +1,22 @@
 package pascal.netx.compiler.model.expr;
 
 import pascal.netx.compiler.model.Entity;
+import pascal.netx.compiler.model.scope.binding.ArgBindList;
 
 import java.util.List;
 
 public sealed abstract class PrimaryExpr implements Expr permits BuiltinRef, ComponentRef, ImportRef, VariableRef {
-    protected List<Entity> parameters;
+    protected ArgBindList argBindList;
 
-    public List<Entity> getParameters() {
-        return parameters;
+    public ArgBindList getArgList() {
+        return argBindList;
     }
 
-    public void setParameters(List<Entity> parameters) {
-        this.parameters = parameters;
+    public List<Entity> getArguments() {
+        return argBindList.getArguments();
+    }
+
+    public void setArgList(ArgBindList binding) {
+        this.argBindList = binding;
     }
 }

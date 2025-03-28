@@ -23,6 +23,7 @@ import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
+import pascal.netx.util.type.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -261,7 +262,7 @@ public final class TreeParser {
     static SymbolExpr parseSymbolExpr(SymbolContext ctx) {
         return switch (ctx) {
             case PrimarySymbolContext sub -> parsePrimarySymbol(sub);
-            case ParamSymbolContext sub -> parseParamSymbolExpr(sub);
+            case CallSymbolContext sub -> parseParamSymbolExpr(sub);
             default -> throw new ShallNotReachHereError();
         };
     }
@@ -366,11 +367,22 @@ public final class TreeParser {
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static ParamSymbolExpr parseParamSymbolExpr(ParamSymbolContext ctx) {
-        return ParamSymbolExpr.of(
-                parseIdentifier(ctx.ID()),
-                parseExprList(ctx.expression())
-        ).setSourceLoc(locationOf(ctx.getStart()));
+    static CallSymbolExpr parseParamSymbolExpr(CallSymbolContext ctx) {
+        CallSymbolExpr result;
+        var head = parseIdentifier(ctx.ID());
+        if (!ctx.expression().isEmpty()) {
+            result = CallSymbolExpr.fromOrder(head, parseExprList(ctx.expression()));
+        } else if (!ctx.attribute_assign().isEmpty()) {
+            var parameters = ctx.attribute_assign().stream()
+                    .map(assign -> Pair.of(
+                            parseIdentifier(assign.ID()),
+                            parseExpr(assign.expression())))
+                    .toList();
+            result = CallSymbolExpr.fromAssign(head, parameters);
+        } else {
+            result = CallSymbolExpr.ofEmpty(head);
+        }
+        return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
     static ExprNode parseConditionalExpr(ConditionalExprContext ctx) {

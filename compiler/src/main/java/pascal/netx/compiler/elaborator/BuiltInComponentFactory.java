@@ -23,47 +23,47 @@ public class BuiltInComponentFactory {
         this.compiler = compiler;
     }
 
-    public ComponentScope createBuiltInComponent(Scope parent, BuiltinRef type) {
-        return switch (type.getBuiltin()) {
-            case REGISTER -> createREGISTERComponent(parent, type);
-            case IGNORE -> createIGNOREComponent(parent, type);
-            case SPLIT -> createSPLITComponent(parent, type);
-            case TO -> createTOComponent(parent, type);
-            case CAST -> createCASTComponent(parent, type);
-            case NOT -> createNOTComponent(parent, type);
+    public ComponentScope createBuiltInComponent(Scope parent, BuiltinRef ref) {
+        return switch (ref.getBuiltin()) {
+            case REGISTER -> createREGISTERComponent(parent, ref);
+            case IGNORE -> createIGNOREComponent(parent, ref);
+            case SPLIT -> createSPLITComponent(parent, ref);
+            case TO -> createTOComponent(parent, ref);
+            case CAST -> createCASTComponent(parent, ref);
+            case NOT -> createNOTComponent(parent, ref);
             case OR, AND, XOR, NOR, NAND, XNOR, CONCAT, ADD, SUB, MUL, DIV, MOD ->
-                    createMultiInputComponent(parent, type);
-            case EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE -> createRelationalOpComponent(parent, type);
-            case SHL, ASHR, LSHR -> createShiftComponent(parent, type);
+                    createMultiInputComponent(parent, ref);
+            case EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE -> createRelationalOpComponent(parent, ref);
+            case SHL, ASHR, LSHR -> createShiftComponent(parent, ref);
         };
     }
 
-    public ComponentScope createIGNOREComponent(Scope parent, BuiltinRef type) {
-        var result = instantiate(parent, type);
+    public ComponentScope createIGNOREComponent(Scope parent, BuiltinRef ref) {
+        var result = instantiate(parent, ref);
         result.addInput(newWire(result, "i"));
         return result;
     }
 
-    private ComponentScope createNOTComponent(Scope parent, BuiltinRef type) {
-        var result = instantiate(parent, type);
+    private ComponentScope createNOTComponent(Scope parent, BuiltinRef ref) {
+        var result = instantiate(parent, ref);
         result.addInput(newWire(result, "i"));
         result.addOutput(newWire(result, "o"));
         return result;
     }
 
-    private ComponentScope createTOComponent(Scope parent, BuiltinRef type) {
-        var result = instantiate(parent, type);
+    private ComponentScope createTOComponent(Scope parent, BuiltinRef ref) {
+        var result = instantiate(parent, ref);
         var entity = newWire(result, "t");
         result.addInput(entity);
         result.addOutput(entity);
         return result;
     }
 
-    private ComponentScope createREGISTERComponent(Scope parent, BuiltinRef type) {
-        Utils.requiresMatchedSize(type.getSourceLoc(), 1, type.getParameters());
-        var result = instantiate(parent, type);
+    private ComponentScope createREGISTERComponent(Scope parent, BuiltinRef ref) {
+        Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArguments());
+        var result = instantiate(parent, ref);
         var attributes = new Attributes();
-        var isPosTrigger = requiresBooleanValue(type.getSourceLoc(), type.getParameters().getFirst());
+        var isPosTrigger = requiresBooleanValue(ref.getSourceLoc(), ref.getArguments().getFirst());
         attributes.addAttribute(Identifier.of("isPosTrigger"), isPosTrigger);
         result.setAttributes(attributes);
         result.addInput(newWire(result, "i"));
@@ -72,11 +72,11 @@ public class BuiltInComponentFactory {
         return result;
     }
 
-    private ComponentScope createSPLITComponent(Scope parent, BuiltinRef type) {
-        Utils.requiresMatchedSize(type.getSourceLoc(), 1, type.getParameters());
-        int split = requiresIntegerValue(type.getSourceLoc(), type.getParameters().getFirst()).toInt();
+    private ComponentScope createSPLITComponent(Scope parent, BuiltinRef ref) {
+        Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArguments());
+        int split = requiresIntegerValue(ref.getSourceLoc(), ref.getArguments().getFirst()).toInt();
 
-        var Component = instantiate(parent, type);
+        var Component = instantiate(parent, ref);
         var entity = newWire(Component, "entity");
         Component.addInput(entity);
         for (int i = 0; i < split; ++i) {
@@ -85,44 +85,44 @@ public class BuiltInComponentFactory {
         return Component;
     }
 
-    private ComponentScope createCASTComponent(Scope parent, BuiltinRef type) {
-        var result = instantiate(parent, type);
-        if (type.getParameters().isEmpty()) {
+    private ComponentScope createCASTComponent(Scope parent, BuiltinRef ref) {
+        var result = instantiate(parent, ref);
+        if (ref.getArguments().isEmpty()) {
             result.addInput(newWire(result, "i"));
             result.addOutput(newWire(result, "o"));
         } else {
-            Utils.requiresMatchedSize(type.getSourceLoc(), 1, type.getParameters());
-            int width = requiresIntegerValue(type.getSourceLoc(), type.getParameters().getFirst()).toInt();
+            Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArguments());
+            int width = requiresIntegerValue(ref.getSourceLoc(), ref.getArguments().getFirst()).toInt();
             result.addInput(newWire(result, "i"));
             result.addOutput(newWire(result, "o", BitType.of(width)));
         }
         return result;
     }
 
-    private ComponentScope createRelationalOpComponent(Scope parent, BuiltinRef type) {
-        Utils.requiresMatchedSize(type.getSourceLoc(), 0, type.getParameters());
-        var result = instantiate(parent, type);
+    private ComponentScope createRelationalOpComponent(Scope parent, BuiltinRef ref) {
+        Utils.requiresMatchedSize(ref.getSourceLoc(), 0, ref.getArguments());
+        var result = instantiate(parent, ref);
         result.addInput(newWire(result, "i1"), newWire(result, "i2"));
         result.addOutput(newWire(result, "o", BitType.forBoolean()));
         return result;
     }
 
-    private ComponentScope createShiftComponent(Scope parent, BuiltinRef type) {
-        Utils.requiresMatchedSize(type.getSourceLoc(), 0, type.getParameters());
-        var result = instantiate(parent, type);
+    private ComponentScope createShiftComponent(Scope parent, BuiltinRef ref) {
+        Utils.requiresMatchedSize(ref.getSourceLoc(), 0, ref.getArguments());
+        var result = instantiate(parent, ref);
         result.addInput(newWire(result, "i"), newWire(result, "off"));
         result.addOutput(newWire(result, "o"));
         return result;
     }
 
-    private ComponentScope createMultiInputComponent(Scope parent, BuiltinRef type) {
+    private ComponentScope createMultiInputComponent(Scope parent, BuiltinRef ref) {
         int ports = 2;
-        if (!type.getParameters().isEmpty()) {
-            Utils.requiresMatchedSize(type.getSourceLoc(), 1, type.getParameters());
-            ports = requiresIntegerValue(type.getSourceLoc(), type.getParameters().getFirst()).toInt();
+        if (!ref.getArguments().isEmpty()) {
+            Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArguments());
+            ports = requiresIntegerValue(ref.getSourceLoc(), ref.getArguments().getFirst()).toInt();
         }
 
-        var result = instantiate(parent, type);
+        var result = instantiate(parent, ref);
         for (int i = 1; i <= ports; i++) {
             result.addInput(newWire(result, "i" + i));
         }
@@ -130,9 +130,9 @@ public class BuiltInComponentFactory {
         return result;
     }
 
-    private ComponentScope instantiate(Scope parent, BuiltinRef type) {
+    private ComponentScope instantiate(Scope parent, BuiltinRef ref) {
         return ComponentScope.newComponent(parent,
-                Identifier.of(type.getBuiltin().name()).setSourceLoc(type.getSourceLoc()));
+                Identifier.of(ref.getBuiltin().name()).setSourceLoc(ref.getSourceLoc()));
     }
 
     private Wire newWire(ComponentScope result, String name) {

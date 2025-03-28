@@ -5,14 +5,11 @@ import pascal.netx.util.lang.Identifier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public final class MultiBinding implements Binding {
+public final class MultiBinding implements Binding, ArgBindList {
     private final LinkedHashMap<Identifier, Entity> bindings = new LinkedHashMap<>();
 
     private MultiBinding() {
@@ -35,6 +32,16 @@ public final class MultiBinding implements Binding {
             binding.bind(entry.getKey(), entry.getValue());
         }
         return binding;
+    }
+
+    public MultiBinding copyOf() {
+        var binding = new MultiBinding();
+        binding.bindings.putAll(bindings);
+        return binding;
+    }
+
+    public void forEach(Consumer<Map.Entry<Identifier, Entity>> consumer) {
+        bindings.entrySet().forEach(consumer);
     }
 
     @Override
@@ -65,6 +72,16 @@ public final class MultiBinding implements Binding {
     @Nonnull
     public Entity resolve(Identifier identifier) {
         return Objects.requireNonNull(bindings.get(identifier));
+    }
+
+    @Override
+    public List<Entity> getArguments() {
+        return new ArrayList<>(bindings.values());
+    }
+
+    @Override
+    public int size() {
+        return bindings.size();
     }
 
     @Override
