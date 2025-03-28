@@ -5,15 +5,14 @@ import pascal.netx.compiler.analysis.*;
 import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.elaborator.BuiltInComponentFactory;
 import pascal.netx.compiler.elaborator.PackageElaborator;
-import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.ProjectScope;
+import pascal.netx.compiler.model.scope.binding.ArgBindList;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.print.NotepadWriter;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
@@ -75,7 +74,7 @@ public final class NXCompiler {
         return project;
     }
 
-    public ComponentScope elaborate(PackageNode pack, Identifier top, List<Entity> parameters) {
+    public ComponentScope elaborate(PackageNode pack, Identifier top, ArgBindList parameters) {
         var newConfig = config.forAnotherTop(top.name()).withBindings(parameters);
         var scope = new PackageElaborator(project, pack, newConfig).elaborate();
         return scope.getTop();

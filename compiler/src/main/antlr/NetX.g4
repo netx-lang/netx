@@ -127,9 +127,14 @@ binding
     ;
 
 symbol
-    : ID '(' expression (',' expression)* ')' # ParamSymbol
-    | ID '(' ')'                              # ParamSymbol
-    | ID                                      # PrimarySymbol
+    : ID '(' expression (',' expression)* ')'             # CallSymbol
+    | ID '(' attribute_assign (',' attribute_assign)* ')' # CallSymbol
+    | ID '(' ')'                                          # CallSymbol
+    | ID                                                  # PrimarySymbol
+    ;
+
+attribute_assign
+    : ID '=' expression
     ;
 
 number

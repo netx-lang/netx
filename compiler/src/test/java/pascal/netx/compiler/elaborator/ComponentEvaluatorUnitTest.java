@@ -45,7 +45,7 @@ class ComponentEvaluatorUnitTest {
     @Test
     void testInstantiation() {
         var code = """
-                component test : [a] -> [b] {
+                component top : [a] -> [b] {
                     wire a of bit(4);
                     wire b of bit(1);
                     b <> AND <> [gate |
@@ -55,5 +55,41 @@ class ComponentEvaluatorUnitTest {
                 }
                 """;
         assertDoesNotThrow(() -> loadSingleComponent(code));
+    }
+
+    @Test
+    void testNamedCall() {
+        var expected = """
+                component parametric_comp(a, b, c) : i -> o {
+                    auto i, o;
+                    o <> AND <> [ AND <> [ AND <> [i, c], b], a];
+                }
+                component top : i -> o {
+                    wire i, o of bit(32);
+                    let parametric_marco(a, b) = parametric_comp(a, b, 1);
+                    o <> parametric_marco(1, 2) <>
+                         parametric_comp(3, 4, 5) <> i;
+                }
+                """;
+        var actual = """
+                component parametric_comp(a, b, c) : i -> o {
+                    auto i, o;
+                    o <> AND <> [ AND <> [ AND <> [i, c], b], a];
+                }
+                component top : i -> o {
+                    wire i, o of bit(32);
+                    let parametric_marco(a, b) = parametric_comp(c=1, a=a, b=b);
+                    o <> parametric_marco(b =2, a=1) <>
+                         parametric_comp(b=4, a=3, c = 5) <> i;
+                }
+                """;
+        assertEquals(
+                Builder.forCompact().load(expected).compile(),
+                Builder.forCompact().load(actual).compile()
+        );
+        assertEquals(
+                Builder.forExpanded().load(expected).compile(),
+                Builder.forExpanded().load(actual).compile()
+        );
     }
 }

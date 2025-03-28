@@ -30,14 +30,14 @@ public final class Signature {
         if (o == null || getClass() != o.getClass()) return false;
         Signature signature = (Signature) o;
         return Objects.equals(caller.getDefinition(), signature.caller.getDefinition())
-                && Objects.equals(caller.getParameters(), signature.caller.getParameters())
+                && Objects.equals(caller.getArgList(), signature.caller.getArgList())
                 && Objects.equals(getInType(), signature.getInType())
                 && Objects.equals(getOutType(), signature.getOutType());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(caller.getDefinition(), caller.getParameters(), getInType(), getOutType());
+        return Objects.hash(caller.getDefinition(), caller.getArgList(), getInType(), getOutType());
     }
 
     public ComponentRef caller() {

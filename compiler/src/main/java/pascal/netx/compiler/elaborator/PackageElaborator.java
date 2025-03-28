@@ -14,6 +14,8 @@ import pascal.netx.compiler.model.expr.ComponentRef;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.ProjectScope;
+import pascal.netx.compiler.model.scope.binding.MultiBinding;
+import pascal.netx.compiler.model.scope.binding.OrderedArgBindList;
 
 import static pascal.netx.compiler.model.Utils.requiresMatchedSize;
 
@@ -48,11 +50,16 @@ public final class PackageElaborator {
     }
 
     private void bindConfigParameters(ComponentNode topNode, ComponentScope topScope) {
-        if (config.parameters() != null) {
-            var iterator = config.parameters().iterator();
-            requiresMatchedSize(topNode.getSourceLoc(), topNode.getAttributes(), config.parameters());
-            for (var id : topNode.getAttributes()) {
-                topScope.bind(id, iterator.next());
+        if (config.arguments() != null) {
+            switch (config.arguments()) {
+                case OrderedArgBindList(var args) -> {
+                    int size = requiresMatchedSize(topNode.getSourceLoc(), topNode.getAttributes(), args);
+                    for (int i = 0; i < size; i++) {
+                        topScope.bind(topNode.getAttributes().get(i), args.get(i));
+                    }
+                }
+                case MultiBinding binding -> binding.forEach(
+                        entry -> topScope.bind(entry.getKey(), entry.getValue()));
             }
         }
     }

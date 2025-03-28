@@ -16,8 +16,10 @@ import pascal.netx.compiler.model.Utils;
 import pascal.netx.compiler.model.expr.*;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
+import pascal.netx.compiler.model.scope.binding.ArgBindList;
 import pascal.netx.compiler.model.scope.binding.MonoBinding;
 import pascal.netx.compiler.model.scope.binding.MultiBinding;
+import pascal.netx.compiler.model.scope.binding.OrderedArgBindList;
 import pascal.netx.compiler.model.variable.*;
 import pascal.netx.compiler.model.variable.selector.BitSelector;
 import pascal.netx.compiler.model.variable.selector.PartSelector;
@@ -29,7 +31,10 @@ import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.stream.IntStream;
@@ -74,9 +79,9 @@ public final class ComponentEvaluator {
 
     public Expr evaluateToComponentExpr(ExprNode expr, boolean needDeclareInPlace) {
         if (needDeclareInPlace) {
-            return castToInstantiateExpr(evaluateAndDeclInPlace(expr), expr.getSourceLoc());
+            return castToInstantiateExpr(expr.getSourceLoc(), evaluateAndDeclInPlace(expr));
         }
-        return castToInstantiateExpr(evaluate(expr), expr.getSourceLoc());
+        return castToInstantiateExpr(expr.getSourceLoc(), evaluate(expr));
     }
 
     public EntityList evaluateToList(ExprNode expr) {
@@ -103,7 +108,7 @@ public final class ComponentEvaluator {
         Identifier id;
         List<Identifier> freeVariables;
         switch (binding.getHead()) {
-            case ParamSymbolExpr param -> {
+            case CallSymbolExpr param -> {
                 id = param.getHead();
                 freeVariables = param.getArguments().stream()
                         .map(IdentifierExpr.class::cast)
@@ -338,7 +343,7 @@ public final class ComponentEvaluator {
     private Entity evaluateSequentialExpr(BinaryExpr expr, boolean isTied) {
         var leftLoc = expr.getLhs().getSourceLoc();
         var rightLoc = expr.getRhs().getSourceLoc();
-        Expr lhs, rhs = castToInstantiateExpr(evaluate(expr.getRhs()), rightLoc);
+        Expr lhs, rhs = castToInstantiateExpr(rightLoc, evaluate(expr.getRhs()));
         if (isTied) {
             var lhsEntity = evaluate(expr.getLhs());
             if (lhsEntity instanceof EntityList(var list)) {
@@ -351,7 +356,7 @@ public final class ComponentEvaluator {
             }
             return SequentialExpr.ofTied(lhs, rhs);
         } else {
-            lhs = castToInstantiateExpr(evaluate(expr.getLhs()), leftLoc);
+            lhs = castToInstantiateExpr(leftLoc, evaluate(expr.getLhs()));
         }
         return SequentialExpr.ofSplit(lhs, rhs);
     }
@@ -359,7 +364,7 @@ public final class ComponentEvaluator {
     private Entity evaluateSymbolExpr(SymbolExpr expr) {
         return switch (expr) {
             case IdentifierExpr sub -> evaluatePrimarySymbolExpr(sub);
-            case ParamSymbolExpr sub -> evaluateParamSymbolExpr(sub);
+            case CallSymbolExpr sub -> evaluateParamSymbolExpr(sub);
         };
     }
 
@@ -378,13 +383,13 @@ public final class ComponentEvaluator {
         } else {
             Entity entity = resolveIdentifier(id);
             if (entity instanceof Macro macro) {
-                return evaluateMacroExpr(expr.getSourceLoc(), macro, List.of());
+                return evaluateMacroExpr(expr.getSourceLoc(), macro, ArgBindList.ofEmpty());
             }
             return entity;
         }
     }
 
-    private Entity evaluateParamSymbolExpr(ParamSymbolExpr expr) {
+    private Entity evaluateParamSymbolExpr(CallSymbolExpr expr) {
         if (mode == EvaluationMode.FACTORY) {
             return evaluateVariableFactory(expr);
         } else {
@@ -392,13 +397,19 @@ public final class ComponentEvaluator {
         }
     }
 
-    public Entity evaluateMacroExpr(SourceLoc sourceLoc, Macro marco, List<Entity> parameters) {
-        int size = Utils.requiresMatchedSize(sourceLoc, marco.identifiers(), parameters);
-        var bindings = MultiBinding.ofEmpty();
-        for (int i = 0; i < size; i++) {
-            bindings.bind(marco.identifiers().get(i), parameters.get(i));
-        }
-        scope.overrideBindings(bindings);
+    public Entity evaluateMacroExpr(SourceLoc sourceLoc, Macro marco, ArgBindList parameters) {
+        var override = switch (parameters) {
+            case MultiBinding binding -> binding.copyOf();
+            case OrderedArgBindList(var args) -> {
+                int size = Utils.requiresMatchedSize(sourceLoc, marco.identifiers(), args);
+                var bindings = MultiBinding.ofEmpty();
+                for (int i = 0; i < size; i++) {
+                    bindings.bind(marco.identifiers().get(i), args.get(i));
+                }
+                yield bindings;
+            }
+        };
+        scope.overrideBindings(override);
         var result = evaluate(marco.expr());
         scope.restoreBindings();
         return result;
@@ -438,13 +449,13 @@ public final class ComponentEvaluator {
         return data;
     }
 
-    private Entity evaluateInstantiateExpr(ParamSymbolExpr expr) {
+    private Entity evaluateInstantiateExpr(CallSymbolExpr expr) {
         Entity prototype = resolveIdentifier(expr.getHead());
-        List<Entity> parameters = evaluateParameters(expr);
+        ArgBindList arguments = evaluateArguments(expr);
         if (prototype instanceof Macro macro) {
-            return evaluateMacroExpr(expr.getSourceLoc(), macro, parameters);
+            return evaluateMacroExpr(expr.getSourceLoc(), macro, arguments);
         } else if (prototype instanceof PrimaryExpr atom) {
-            atom.setParameters(parameters);
+            atom.setArgList(arguments);
             return atom;
         } else {
             log.error("{}: Expected component type but got {}", expr.getSourceLoc(), prototype);
@@ -452,22 +463,33 @@ public final class ComponentEvaluator {
         }
     }
 
-    private List<Entity> evaluateParameters(ParamSymbolExpr expr) {
-        List<Entity> result = new ArrayList<>();
-        for (var arg : expr.getArguments()) {
-            var entity = evaluate(arg);
-            var param = switch (entity) {
-                case Expr type -> type;
-                case Data ignored -> castToInstantiateExpr(entity, arg.getSourceLoc());
-                case Access ignored -> castToInstantiateExpr(entity, arg.getSourceLoc());
-                default -> requiresValue(arg.getSourceLoc(), entity);
-            };
-            result.add(param);
+    private ArgBindList evaluateArguments(CallSymbolExpr expr) {
+        if (expr.getAssigns().isEmpty() || expr.getAssigns().getFirst().first() == null) {
+            var result = OrderedArgBindList.ofEmpty();
+            for (var argument : expr.getArguments()) {
+                result.add(castArgument(argument.getSourceLoc(), evaluate(argument)));
+            }
+            return result;
+        } else {
+            var result = MultiBinding.ofEmpty();
+            for (var assign : expr.getAssigns()) {
+                var argument = castArgument(assign.second().getSourceLoc(), evaluate(assign.second()));
+                result.bind(assign.first(), argument);
+            }
+            return result;
         }
-        return result;
     }
 
-    private Mutable.Factory<?> evaluateVariableFactory(ParamSymbolExpr expr) {
+    private static Entity castArgument(SourceLoc loc, Entity entity) {
+        return switch (entity) {
+            case Expr type -> type;
+            case Data ignored -> castToInstantiateExpr(loc, entity);
+            case Access ignored -> castToInstantiateExpr(loc, entity);
+            default -> requiresValue(loc, entity);
+        };
+    }
+
+    private Mutable.Factory<?> evaluateVariableFactory(CallSymbolExpr expr) {
         var sourceLoc = expr.getSourceLoc();
         return switch (expr.getHead().name()) {
             case "bit" -> evaluateWireFactory(sourceLoc, expr.getArguments());

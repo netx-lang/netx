@@ -13,6 +13,8 @@ import pascal.netx.compiler.model.expr.*;
 import pascal.netx.compiler.model.scope.Attributes;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.binding.MonoBinding;
+import pascal.netx.compiler.model.scope.binding.MultiBinding;
+import pascal.netx.compiler.model.scope.binding.OrderedArgBindList;
 import pascal.netx.compiler.model.variable.Array;
 import pascal.netx.compiler.model.variable.Bundle;
 import pascal.netx.compiler.model.variable.Composition;
@@ -251,6 +253,10 @@ final class ComponentElaborator {
 
         private ComponentPort instantiateInstanceRef(VariableRef ref) {
             var inst = List.of(ref.getInstance());
+            if (ref.getArgList() != null) {
+                log.error("{}: Unexpected arguments in instance reference {}", sourceLoc, ref.getInstance());
+                throw new CompileCancellationException();
+            }
             return ComponentPort.of(inst, inst);
         }
 
@@ -262,11 +268,11 @@ final class ComponentElaborator {
             var component = switch (reference.size()) {
                 case 2 -> {
                     var pack = compiler.getPackManager().resolvePackage(sourceLoc, reference.get(0));
-                    yield compiler.elaborate(pack, reference.get(1), ref.getParameters());
+                    yield compiler.elaborate(pack, reference.get(1), ref.getArgList());
                 }
                 case 3 -> {
                     var pack = compiler.getPackManager().resolvePackage(sourceLoc, reference.get(1));
-                    yield compiler.elaborate(pack, reference.get(2), ref.getParameters());
+                    yield compiler.elaborate(pack, reference.get(2), ref.getArgList());
                 }
                 default -> throw new ShallNotReachHereError();
             };
@@ -279,11 +285,6 @@ final class ComponentElaborator {
 
         private ComponentPort instantiateBuiltinRef(BuiltinRef ref) {
             var component = factory.createBuiltInComponent(scope, ref);
-//            if (ref.getBuiltin() == BuiltinComponent.REGISTER) {
-//                var clock = doInstantiate(requiresInstantiateExpr(sourceLoc, ref.getParameters().getFirst()));
-//                requiresMatchedSize(sourceLoc, 1, clock.target);
-//                component.getAttributes().addAttribute(Identifier.of("clock"), clock.target.getFirst());
-//            }
             return ComponentPort.of(component.getOutputs(), component.getInputs());
         }
 
@@ -313,11 +314,15 @@ final class ComponentElaborator {
 
         private Attributes extractAttributes(ComponentRef ref, ComponentNode node) {
             Attributes attributes = new Attributes();
-            int size = requiresMatchedSize(sourceLoc, node.getAttributes(), ref.getParameters());
-            for (int i = 0; i < size; i++) {
-                var id = node.getAttributes().get(i);
-                var entity = ref.getParameters().get(i);
-                attributes.addAttribute(id, entity);
+            switch (ref.getArgList()) {
+                case OrderedArgBindList(var args) -> {
+                    int size = requiresMatchedSize(sourceLoc, node.getAttributes(), args);
+                    for (int i = 0; i < size; i++) {
+                        attributes.addAttribute(node.getAttributes().get(i), args.get(i));
+                    }
+                }
+                case MultiBinding binding -> binding.forEach(
+                        entry -> attributes.addAttribute(entry.getKey(), entry.getValue()));
             }
             return attributes;
         }
