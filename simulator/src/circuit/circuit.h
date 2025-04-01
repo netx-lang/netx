@@ -12,6 +12,8 @@
 
 namespace hxon {
     class circuit {
+        friend void partition(const circuit& circuit);
+
         rule_set rules;
         value_storage values;
         id_set clocks;
