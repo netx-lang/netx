@@ -278,7 +278,6 @@ namespace hxon {
     }
 
     static void parse_size(const nlohmann::json &json, parse_context &context) {
-        // NOLINT(*-no-recursion)
         const std::string member_type = json["type"];
         if (!member_type_map.contains(member_type)) throw std::runtime_error("Unknown member type " + member_type);
         if (json.contains("members"))
