@@ -1,19 +1,24 @@
 """
 Usage:
-    hs compile <source>
+    nx compile <source>
         [--compact] [--minimal]
         [--top=<top>] 
         [--output=<filename>]
-    hs dump <source>
+    nx dump <source>
         [--top=<top>] 
         [--output=<filename>]
-    hs run <source> 
+    nx visualize <source>
+        [--top=<top>]
+        [--depth=<depth>]
+        [--output=<filename>]
+    nx run <source>
         [--top=<top>]
 
 Commands:
-    compile  Compile the NetX source code into JSON.
-    dump     Dump the NetX source code to Verilog.
-    run      Compile and start an interactive session with the simulator.
+    compile   Compile the NetX source code into JSON.
+    dump      Dump the NetX source code to Verilog.
+    visualize Generate a DOT visualization of the NetX source code.
+    run       Compile and start an interactive session with the simulator.
 
 Arguments:
     SOURCE   The source file to compile, dump, or run.
@@ -23,8 +28,10 @@ Options:
     -c, --compact                 Compile the source code to compact JSON representation  (for compile only).
     -m, --minimal                 Print the minimal version of the JSON output (for compile only).
     -t, --top=<top>               Name of the top component
+    -d, --depth=<depth>           Depth of the visualization (for visualize only).
 """
 from docopt import docopt
+import sys
 import subprocess
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import NestedCompleter
@@ -35,6 +42,8 @@ def build_command(args):
         command.append('compile')
     elif args['dump']:
         command.append('dump')
+    elif args['visualize']:
+        command.append('visualize')
     elif args['run']:
         command.append('compile')
         command.extend(['--minimal'])
@@ -48,6 +57,8 @@ def build_command(args):
         command.extend(['--top', args['--top']])
     if args['--output']:
         command.extend(['--output', args['--output']])
+    if args['--depth']:
+        command.extend(['--depth', args['--depth']])
     
     return command
 
@@ -103,7 +114,7 @@ def main():
     result = subprocess.run(command, capture_output=True, text=True, check=True)
     
     if result.stderr:
-        print(result.stderr)
+        print(result.stderr, file=sys.stderr)
 
     if args['run']:
         REPL(result.stdout)
