@@ -217,10 +217,9 @@ namespace hxon {
         [[nodiscard]] rule_t register_rule(clock_t clk, source_t in, sink_t out);
     }
 
-    class rule_set {
+    struct rule_set {
         std::multimap<id_t, rule_t> triggerRules;
 
-    public:
         void add(const rule_t &newRule) {
             for (id_t trigger: newRule.triggers())
                 triggerRules.emplace(trigger, newRule);
