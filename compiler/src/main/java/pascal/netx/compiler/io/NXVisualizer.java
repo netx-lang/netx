@@ -8,6 +8,8 @@ import pascal.netx.compiler.model.variable.Access;
 import pascal.netx.compiler.model.variable.Data;
 import pascal.netx.compiler.model.variable.Value;
 import pascal.netx.compiler.model.variable.Variable;
+import pascal.netx.compiler.model.variable.selector.BitSelector;
+import pascal.netx.compiler.model.variable.selector.PartSelector;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.print.NotepadWriter;
@@ -22,6 +24,7 @@ public class NXVisualizer {
 
     private final Map<ComponentScope, Integer> componentMap = new HashMap<>();
     private final Map<Variable, String> nodeMap = new HashMap<>();
+    private final Set<String> accessNode = new HashSet<>();
     private int constantIndex = 0;
 
     public NXVisualizer(PackageScope design, int depth, NotepadWriter writer) {
@@ -51,10 +54,33 @@ public class NXVisualizer {
         return defs;
     }
 
-    private static String getPortName(Variable input) {
-        return "port" + switch (input) {
-            case Data data -> String.valueOf(data.getIndex());
-            case Access access -> String.valueOf(access.getIndex()) + access.selector(); // TODO:
+    private String getPortName(Variable input) {
+        return switch (input) {
+            case Data data -> "port" +allocateComponentId(data.getParent()) + "_" + data.getIndex();
+            case Access access -> {
+                var baseName = "port" +allocateComponentId(access.getParent()) + "_" + access.getIndex();
+                var name = switch (access.selector()) {
+                    case BitSelector(var index) -> baseName + "_" + index.toInt();
+                    case PartSelector(var from, var to) -> baseName + "_" + from.toInt() + "_" + to.toInt();
+                };
+                if (!accessNode.contains(name)) {
+                    if (nodeMap.containsKey(access.base())) {
+                        baseName = nodeMap.get(access.base());
+                    } else {
+                        baseName = quote(baseName);
+                    }
+                    writer.print(name);
+                    writer.print("[");
+                    writer.print("label=\"" + access.base() + access.selector() + "\" ");
+                    writer.print("shape=plain style=filled fillcolor=\"Bisque\"");
+                    writer.print(" group = "+ baseName);
+                    writer.println("]");
+                    accessNode.add(name);
+                    writer.println(baseName + " -> " + name + "[dir=none style=dotted]");
+                    writer.println(name + " -> " + baseName + "[style=invis]");
+                }
+                yield name;
+            }
             case Value value -> value.toString();
             default -> throw new ShallNotReachHereError();
         };
@@ -80,16 +106,16 @@ public class NXVisualizer {
         }
     }
 
-    private void maintainNodeMapForFull(ComponentScope scope, String nodeName) {
+    private void maintainNodeMapForFull(ComponentScope scope) {
         var defs = getDefs(scope);
         for (var input : scope.getSignature().inputs()) {
             if (defs.contains(input)) {
-                nodeMap.put(input, quote(nodeName + getPortName(input)));
+                nodeMap.put(input, quote(getPortName(input)));
             }
         }
         for (var output : scope.getSignature().outputs()) {
             if (defs.contains(output)) {
-                nodeMap.put(output, quote(nodeName + getPortName(output)));
+                nodeMap.put(output, quote(getPortName(output)));
             }
         }
     }
@@ -119,22 +145,25 @@ public class NXVisualizer {
         maintainNodeMapForCell(scope, nodeName);
     }
 
-    private void printPortList(String nodeName, List<Variable> portList) {
+    private void printPortList(List<Variable> portList, String nodeName) {
         for (var port : portList.reversed()) {
-            var portName = quote(nodeName + getPortName(port));
-            writer.println(portName + " [style=filled fillcolor=\"SeaShell\" shape=box label=\"" + port + "\"]");
+            var portName = quote(getPortName(port));
+            writer.print(portName);
+            writer.print("[");
+            writer.print("label=\"" + port + "\"");
+            writer.print("style=filled fillcolor=\"SeaShell\" shape=box");
+            writer.print(" group=\"" + nodeName + "\"");
+            writer.print("]");
+            writer.newLine();
         }
     }
 
-    private void printIOPorts(ComponentScope scope, int depth, String nodeName) {
+    private void printIOPorts(ComponentScope scope, String nodeName) {
         writer.println("{ rank=same");
-        printPortList(nodeName, scope.getSignature().inputs());
+        printPortList(scope.getSignature().inputs(), nodeName);
         writer.println("}");
-        for (var child : scope.getChildren()) {
-            printComponent((ComponentScope) child, depth - 1);
-        }
         writer.println("{ rank=same");
-        printPortList(nodeName, scope.getSignature().outputs());
+        printPortList(scope.getSignature().outputs(), nodeName);
         writer.println("}");
     }
 
@@ -148,9 +177,11 @@ public class NXVisualizer {
         writer.println("labelloc = t");
         writer.println("pencolor = seagreen");
         writer.println("penwidth = 2");
-        printIOPorts(scope, depth, nodeName);
-
-        maintainNodeMapForFull(scope, nodeName);
+        printIOPorts(scope, nodeName);
+        for (var child : scope.getChildren()) {
+            printComponent((ComponentScope) child, depth - 1);
+        }
+        maintainNodeMapForFull(scope);
         for (var child : scope.getChildren()) {
             var childScope = (ComponentScope) child;
             if (needDump(childScope)) {
@@ -158,7 +189,7 @@ public class NXVisualizer {
                 if (childScope.isBuiltin() || depth <= 1) {
                     connectForCell(childScope, childName);
                 } else {
-                    connectForFull(childScope, nodeName, childName);
+                    connectForFull(childScope);
                 }
             }
         }
@@ -189,26 +220,23 @@ public class NXVisualizer {
         writer.println(src + ":e -> " + dst + ":w [arrowsize=0.5 color=\"Navy\" penwidth=1.5]");
     }
 
-    private void connectForFull(ComponentScope childScope, String nodeName, String childName) {
+    private void connectForFull(ComponentScope childScope) {
         var inputIter = childScope.getInputs().iterator();
         for (var input : childScope.getSignature().inputs()) {
             var arg = inputIter.next();
-            var childNode = quote(childName + getPortName(input));
             if (arg instanceof Value) {
-                var argNode = newConstant((Value) arg);
-                addEdge(argNode, childNode);
+                addEdge(newConstant((Value) arg), quote(getPortName(input)));
             } else if (!getPortName(input).equals(getPortName(arg))) {
-                addEdge(quote(nodeName + getPortName(arg)), childNode);
+                addEdge(quote(getPortName(arg)), quote(getPortName(input)));
             }
         }
         var outputIter = childScope.getOutputs().iterator();
         for (var output : childScope.getSignature().outputs()) {
             var arg = outputIter.next();
-            var childNode = quote(nodeName + getPortName(arg));
             if (arg instanceof Value) {
                 log.warn("{} constant output: {}", childScope.getSourceLoc(), arg);
             } else if (!getPortName(output).equals(getPortName(arg))) {
-                addEdge(childNode, quote(childName + getPortName(output)));
+                addEdge(quote(getPortName(output)), quote(getPortName(arg)));
             }
         }
     }
@@ -221,6 +249,8 @@ public class NXVisualizer {
                 addEdge(newConstant((Value) input), connectName);
             } else if (nodeMap.containsKey(input) && !nodeMap.get(input).equals(connectName)) {
                 addEdge(nodeMap.get(input), connectName);
+            } else if (input instanceof Access && !connectName.equals(getPortName(input))) {
+                addEdge(quote(getPortName(input)), connectName);
             }
         }
         for (int i = 0; i < childScope.getOutputs().size(); i++) {
@@ -230,13 +260,15 @@ public class NXVisualizer {
                 log.warn("{} constant output: {}", childScope.getSourceLoc(), output);
             } else if (nodeMap.containsKey(output) && !nodeMap.get(output).equals(connectName)) {
                 addEdge(connectName, nodeMap.get(output));
+            } else if (output instanceof Access && !connectName.equals(getPortName(output))) {
+                addEdge(connectName, quote(getPortName(output)));
             }
         }
     }
 
     private void printComponent(ComponentScope scope, int depth) {
         if (depth > 0 && !scope.isBuiltin()) {
-            printFullComponent(scope, depth - 1);
+            printFullComponent(scope, depth);
         } else {
             if (needDump(scope)) {
                 printCellComponent(scope);
