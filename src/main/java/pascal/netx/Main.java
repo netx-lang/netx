@@ -29,9 +29,12 @@ public class Main {
             version = "NetX CLI 1.0"
     )
     static class NetXApp implements Callable<Integer> {
+        @CommandLine.Spec
+        CommandLine.Model.CommandSpec spec;
+
         @Override
         public Integer call() {
-            System.out.println("Use subcommands like 'compile' or 'dump'.");
+            spec.commandLine().usage(System.out);
             return 0;
         }
     }
