@@ -84,7 +84,7 @@ public final class NXCompiler {
     }
 
     public ComponentScope elaborateComponent(PackageNode pack, Identifier top, ArgBindList parameters) {
-        var newConfig = config.withTop(top.name()).withBindings(parameters);
+        var newConfig = config.withTop(top.name()).withArgs(parameters);
         var scope = new PackageElaborator(repo, pack, newConfig).elaborate();
         return scope.getTop();
     }

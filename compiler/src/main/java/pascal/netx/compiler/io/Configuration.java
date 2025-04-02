@@ -16,7 +16,7 @@ public record Configuration(boolean fullyExpand, String topName, ArgBindList arg
         return new Configuration(fullyExpand, topName, arguments);
     }
 
-    public Configuration withBindings(ArgBindList arguments) {
+    public Configuration withArgs(ArgBindList arguments) {
         return new Configuration(fullyExpand, topName, arguments);
     }
 }

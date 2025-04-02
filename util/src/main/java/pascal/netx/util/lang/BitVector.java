@@ -1,5 +1,7 @@
 package pascal.netx.util.lang;
 
+import pascal.netx.util.exception.ShallNotReachHereError;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -20,6 +22,19 @@ public final class BitVector {
         int length = Math.min(data.length, array.length);
         System.arraycopy(array, array.length - length, data, data.length - length, length);
         normalize();
+    }
+
+    public static BitVector parse(String literal) {
+        var parts = literal.toLowerCase().split("'");
+        int size = Integer.parseInt(parts[0]);
+        int radix = switch (parts[1].charAt(0)) {
+            case 'b' -> 2;
+            case 'o' -> 8;
+            case 'd' -> 10;
+            case 'h' -> 16;
+            default -> throw new ShallNotReachHereError();
+        };
+        return BitVector.parse(parts[1].substring(1), size, radix);
     }
 
     public static BitVector parse(String rep, int size, int radix) {
