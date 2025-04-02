@@ -1,8 +1,17 @@
 package pascal.netx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.io.Builder;
 import pascal.netx.compiler.io.Configuration;
+import pascal.netx.compiler.model.scope.binding.MultiBinding;
+import pascal.netx.compiler.model.variable.BitVectorValue;
+import pascal.netx.compiler.model.variable.BooleanValue;
+import pascal.netx.compiler.model.variable.Int32Value;
+import pascal.netx.compiler.model.variable.Value;
+import pascal.netx.util.lang.BitVector;
+import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.print.NotepadWriter;
 import pascal.netx.verilog.VerilogDumper;
 import pascal.netx.verilog.frontend.HFrontend;
@@ -10,9 +19,12 @@ import picocli.CommandLine;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 public class Main {
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
+
     public static void main(String[] args) {
         int exitCode = new CommandLine(new NetXApp())
                 .addSubcommand("compile", new CompileCommand())
@@ -77,15 +89,18 @@ public class Main {
         )
         private Path output;
 
+        @CommandLine.Option(
+                names = {"-a", "--args"},
+                arity = "1..*",
+                description = "arguments to pass to the top component, " +
+                        "in the form of --args a=true b=2 c=2'b01"
+        )
+        private List<String> args;
+
         @Override
         public Integer call() {
             try {
-                Configuration config = (compact
-                        ? Configuration.forCompact()
-                        : Configuration.forExpanded()
-                ).withTop(top);
-                
-                var builder = Builder.from(config);
+                var builder = Builder.from(setupConfiguration());
                 var node = builder.loadPath(source).compileAndDump();
                 if (minimal) {
                     var mapper = new ObjectMapper();
@@ -100,6 +115,51 @@ public class Main {
                 return 0;
             } catch (Exception e) {
                 return 1;
+            }
+        }
+
+        private Configuration setupConfiguration() {
+            Configuration config;
+            if (compact) {
+                config = Configuration.forCompact();
+            } else {
+                config = Configuration.forExpanded();
+            }
+            config = config.withTop(top);
+            if (args != null) {
+                config = config.withArgs(parseArgBindings());
+            }
+            return config;
+        }
+
+        private MultiBinding parseArgBindings() {
+            var bindings = MultiBinding.ofEmpty();
+            for (String arg : args) {
+                String[] parts = arg.split("=");
+                if (parts.length == 2) {
+                    bindings.bind(Identifier.of(parts[0]), parseValue(parts[1]));
+                } else {
+                    log.error("Invalid argument format: {}", arg);
+                    throw new IllegalArgumentException("Invalid argument format: " + arg);
+                }
+            }
+            return bindings;
+        }
+
+        private Value parseValue(String value) {
+            if ("true".equals(value) || "false".equals(value)) {
+                return BooleanValue.of(Boolean.parseBoolean(value));
+            } else {
+                try {
+                    return Int32Value.of(Integer.parseInt(value));
+                } catch (NumberFormatException e) {
+                    try {
+                        return BitVectorValue.of(BitVector.parse(value));
+                    } catch (Exception ignored) {
+                        log.error("Invalid argument value: {}", value);
+                        throw new IllegalArgumentException("Invalid argument value: " + value);
+                    }
+                }
             }
         }
     }
