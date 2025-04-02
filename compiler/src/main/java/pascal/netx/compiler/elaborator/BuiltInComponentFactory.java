@@ -23,6 +23,10 @@ public class BuiltInComponentFactory {
         this.compiler = compiler;
     }
 
+    public static BuiltInComponentFactory create(NXCompiler compiler) {
+        return new BuiltInComponentFactory(compiler);
+    }
+
     public ComponentScope createBuiltInComponent(Scope parent, BuiltinRef ref) {
         return switch (ref.getBuiltin()) {
             case REGISTER -> createREGISTERComponent(parent, ref);

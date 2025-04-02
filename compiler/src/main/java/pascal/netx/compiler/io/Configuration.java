@@ -4,19 +4,15 @@ import pascal.netx.compiler.model.scope.binding.ArgBindList;
 
 public record Configuration(boolean fullyExpand, String topName, ArgBindList arguments) {
 
-    public static Configuration of(boolean fullyExpand, String topName) {
-        return new Configuration(fullyExpand, topName, null);
-    }
-
     public static Configuration forCompact() {
-        return Configuration.of(false, "top");
+        return new Configuration(false, "top", null);
     }
 
     public static Configuration forExpanded() {
-        return Configuration.of(true, "top");
+        return new Configuration(true, "top", null);
     }
 
-    public Configuration forAnotherTop(String topName) {
+    public Configuration withTop(String topName) {
         return new Configuration(fullyExpand, topName, arguments);
     }
 

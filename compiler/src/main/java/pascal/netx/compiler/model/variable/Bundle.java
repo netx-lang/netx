@@ -73,7 +73,7 @@ public final class Bundle extends Composition {
 
         @Override
         public Bundle create(ComponentScope parent, Identifier id) {
-            var result = new Bundle(id, type, compiler.getDataIndexer().get());
+            var result = new Bundle(id, type, compiler.nextDataIndex());
 
             for (var entry : factories.entrySet()) {
                 Identifier fieldID = entry.getKey();
