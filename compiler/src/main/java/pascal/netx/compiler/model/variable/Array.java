@@ -58,7 +58,7 @@ public final class Array extends Composition {
 
         @Override
         public Array create(ComponentScope parent, Identifier id) {
-            var result = new Array(id, type, compiler.getDataIndexer().get());
+            var result = new Array(id, type, compiler.nextDataIndex());
             for (int i = 0; i < size; i++) {
                 var elementID = Identifier.of(String.format("%s[%d]", id.name(), i))
                         .setSourceLoc(id.getSourceLoc());

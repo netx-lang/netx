@@ -84,12 +84,12 @@ class ComponentEvaluatorUnitTest {
                 }
                 """;
         assertEquals(
-                Builder.forCompact().load(expected).compile(),
-                Builder.forCompact().load(actual).compile()
+                Builder.forCompact().load(expected).compileAndDump(),
+                Builder.forCompact().load(actual).compileAndDump()
         );
         assertEquals(
-                Builder.forExpanded().load(expected).compile(),
-                Builder.forExpanded().load(actual).compile()
+                Builder.forExpanded().load(expected).compileAndDump(),
+                Builder.forExpanded().load(actual).compileAndDump()
         );
     }
 }

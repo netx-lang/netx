@@ -145,8 +145,8 @@ public final class ComponentEvaluator {
     private Entity evaluateFieldExpr(FieldExpr expr) {
         if (expr.getBase() instanceof IdentifierExpr idExpr) {
             var id = idExpr.getIdentifier();
-            if (pack.hasComponent(id)) {
-                return pack.getEnum(id).fields().get(expr.getField());
+            if (pack.defs().hasEnum(id)) {
+                return pack.defs().getEnum(id).fields().get(expr.getField());
             }
         }
         var bundle = evaluateDataBundle(expr.getBase());
@@ -372,10 +372,10 @@ public final class ComponentEvaluator {
         var id = expr.getIdentifier();
         if (mode == EvaluationMode.FACTORY) {
             var pack = scope.getPackage();
-            if (pack.hasInterface(id)) {
-                return scope.getPackage().getInterface(id);
-            } else if (pack.hasEnum(id)) {
-                return new Wire.Factory(BitType.of(pack.getEnum(id).width()), Utils.compilerOf(pack));
+            if (pack.defs().hasInterface(id)) {
+                return pack.defs().getInterface(id);
+            } else if (pack.defs().hasEnum(id)) {
+                return new Wire.Factory(BitType.of(pack.defs().getEnum(id).width()), Utils.compilerOf(pack));
             } else {
                 log.error("{}: Unknown interface type {}", expr.getSourceLoc(), id);
                 throw new CompileCancellationException();
@@ -421,14 +421,14 @@ public final class ComponentEvaluator {
         if (entity == null) {
             entity = pack.lookup(id);
             if (entity == null) {
-                if (pack.hasComponent(id)) {
-                    entity = ComponentRef.of(pack.getComponent(id), id);
-                } else if (pack.hasImport(id)) {
-                    entity = ImportRef.of(pack.getImport(id), id.getSourceLoc());
+                if (pack.defs().hasComponent(id)) {
+                    entity = ComponentRef.of(pack.defs().getComponent(id), id);
+                } else if (pack.defs().hasImport(id)) {
+                    entity = pack.defs().getImport(id);
                 } else if (BuiltinComponent.isBuiltin(id)) {
                     entity = BuiltinRef.of(BuiltinComponent.of(id), id.getSourceLoc());
                 } else {
-                    entity = pack.lookupEnum(id);
+                    entity = pack.defs().lookupEnum(id);
                 }
             }
         }

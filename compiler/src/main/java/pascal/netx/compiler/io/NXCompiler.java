@@ -3,11 +3,10 @@ package pascal.netx.compiler.io;
 import com.fasterxml.jackson.databind.JsonNode;
 import pascal.netx.compiler.analysis.*;
 import pascal.netx.compiler.ast.PackageNode;
-import pascal.netx.compiler.elaborator.BuiltInComponentFactory;
 import pascal.netx.compiler.elaborator.PackageElaborator;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
-import pascal.netx.compiler.model.scope.ProjectScope;
+import pascal.netx.compiler.model.scope.RepoScope;
 import pascal.netx.compiler.model.scope.binding.ArgBindList;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
@@ -16,29 +15,35 @@ import pascal.netx.util.print.NotepadWriter;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
+/**
+ * The compiler is responsible for compiling a NetX repository
+ */
 public final class NXCompiler {
+    private final RepoScope repo;
     private final Configuration config;
     private final PackageManager manager;
 
-    private final ProjectScope project;
-
-    private final BuiltInComponentFactory factory;
+    /**
+     * A supplier that generates unique data index.
+     * During compilation, once a datum is instantiated,
+     * it will be assigned with a unique index, which distinguishes it from other data in the repo.
+     */
     private Supplier<Integer> dataIndexer;
 
-    public NXCompiler(ProjectScope.Info info, Configuration config, PackageManager manager) {
+    public NXCompiler(Configuration config, PackageManager manager) {
         this.config = config;
         this.manager = manager;
-        this.project = new ProjectScope(info, manager);
-        project.setCompiler(this);
-        manager.setProject(project);
+        this.repo = new RepoScope();
+        repo.setManager(manager);
+        repo.setCompiler(this);
+        manager.setRepo(repo);
         this.dataIndexer = newIndexer();
-        this.factory = new BuiltInComponentFactory(this);
     }
 
     public static NXCompiler forSinglePackage(PackageNode node, Configuration config) {
         var manager = PackageManager.ofEmpty();
         manager.addPackage(node);
-        return new NXCompiler(ProjectScope.Info.empty(), config, manager);
+        return new NXCompiler(config, manager);
     }
 
     private static void checkType(PackageScope design) {
@@ -49,7 +54,7 @@ public final class NXCompiler {
         new IOAnalysis(design).analyze();
     }
 
-    private static void analyzeCompact(ProjectScope design) {
+    private static void analyzeCompact(RepoScope design) {
         design.packages()
                 .map(ComponentAliasAnalysis::new)
                 .forEach(ModelAnalysis::analyze);
@@ -58,7 +63,7 @@ public final class NXCompiler {
                 .forEach(ModelAnalysis::analyze);
     }
 
-    private static void analyzeExpanded(ProjectScope design) {
+    private static void analyzeExpanded(RepoScope design) {
         design.packages()
                 .map(PackageAliasAnalysis::new)
                 .forEach(ModelAnalysis::analyze);
@@ -67,57 +72,68 @@ public final class NXCompiler {
                 .forEach(ModelAnalysis::analyze);
     }
 
-    public ProjectScope elaborate() {
-        var scope = new PackageElaborator(project, manager.findApplicationPack(), config).elaborate();
-        project.setTop(scope);
-        project.addChild(scope);
-        return project;
+    public static Supplier<Integer> newIndexer() {
+        return new AtomicInteger(0)::incrementAndGet;
     }
 
-    public ComponentScope elaborate(PackageNode pack, Identifier top, ArgBindList parameters) {
-        var newConfig = config.forAnotherTop(top.name()).withBindings(parameters);
-        var scope = new PackageElaborator(project, pack, newConfig).elaborate();
+    public RepoScope elaborate() {
+        var scope = new PackageElaborator(repo, manager.findApplicationPack(), config).elaborate();
+        repo.setTop(scope);
+        repo.addChild(scope);
+        return repo;
+    }
+
+    public ComponentScope elaborateComponent(PackageNode pack, Identifier top, ArgBindList parameters) {
+        var newConfig = config.withTop(top.name()).withBindings(parameters);
+        var scope = new PackageElaborator(repo, pack, newConfig).elaborate();
         return scope.getTop();
     }
 
-    public JsonNode compile() {
-        ProjectScope design = elaborate();
-        design.forEachPackage(NXCompiler::checkType);
+    public void compile() {
+        elaborate();
+        repo.forEachPackage(NXCompiler::checkType);
         if (config.fullyExpand()) {
-            analyzeExpanded(design);
-            return new ExpandedDumper(design.getTop()).dump();
+            analyzeExpanded(repo);
         } else {
-            analyzeCompact(design);
-            return new CompactDumper(design.getTop()).dump();
+            analyzeCompact(repo);
         }
     }
 
-    public void visualize(NotepadWriter notepad, int depth) {
+    private JsonNode dump(PackageScope scope) {
+        if (config.fullyExpand()) {
+            return new ExpandedDumper(scope).dump();
+        } else {
+            return new CompactDumper(scope).dump();
+        }
+    }
+
+    public JsonNode compileAndDump() {
+        compile();
+        return dump(repo.getTop());
+    }
+
+    public void compileAndVisualize(NotepadWriter notepad, int depth) {
         if (config.fullyExpand()) {
             throw new ShallNotReachHereError();
         }
-        ProjectScope design = elaborate();
-        analyzeCompact(design);
-        new NXVisualizer(design.getTop(), depth, notepad).visualize();
+        compile();
+        new NXVisualizer(repo.getTop(), depth, notepad).visualize();
     }
 
     public PackageManager getPackManager() {
         return manager;
     }
 
-    public static Supplier<Integer> newIndexer() {
-        return new AtomicInteger(0)::incrementAndGet;
+    public int nextDataIndex() {
+        return dataIndexer.get();
     }
 
-    public Supplier<Integer> getDataIndexer() {
-        return dataIndexer;
-    }
-
-    public void setDataIndexer(Supplier<Integer> indexer) {
-        dataIndexer = indexer;
-    }
-
-    public BuiltInComponentFactory getBuiltinFactory() {
-        return factory;
+    /**
+     * When the repo is imported in another repo, the compiler would serve as a sub-compiler of the parent repo,
+     * that is, it would inherit the data indexer from the parent compiler.
+     */
+    public NXCompiler asSubCompilerOf(NXCompiler parent) {
+        this.dataIndexer = parent.dataIndexer;
+        return this;
     }
 }

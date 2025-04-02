@@ -80,8 +80,13 @@ public class Main {
         @Override
         public Integer call() {
             try {
-                var builder = Builder.from(Configuration.of(!compact, top));
-                var node = builder.loadPath(source).compile();
+                Configuration config = (compact
+                        ? Configuration.forCompact()
+                        : Configuration.forExpanded()
+                ).withTop(top);
+                
+                var builder = Builder.from(config);
+                var node = builder.loadPath(source).compileAndDump();
                 if (minimal) {
                     var mapper = new ObjectMapper();
                     if (output == null) {
@@ -126,8 +131,8 @@ public class Main {
         @Override
         public Integer call() {
             try {
-                var builder = Builder.from(Configuration.of(false, top));
-                var node = builder.loadPath(source).compile();
+                var builder = Builder.from(Configuration.forCompact().withTop(top));
+                var node = builder.loadPath(source).compileAndDump();
                 new VerilogDumper(
                         notepadWriterFor(output),
                         HFrontend.load(node).parse()
@@ -173,9 +178,9 @@ public class Main {
         @Override
         public Integer call() {
             try {
-                var builder = Builder.from(Configuration.of(false, top));
+                var builder = Builder.from(Configuration.forCompact().withTop(top));
                 var compiler = builder.loadPath(source);
-                compiler.visualize(notepadWriterFor(output), depth);
+                compiler.compileAndVisualize(notepadWriterFor(output), depth);
                 return 0;
             } catch (Exception e) {
                 return 1;

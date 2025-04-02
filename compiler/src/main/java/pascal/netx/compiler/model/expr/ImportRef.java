@@ -1,5 +1,6 @@
 package pascal.netx.compiler.model.expr;
 
+import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
 
@@ -18,11 +19,40 @@ public final class ImportRef extends PrimaryExpr {
         return new ImportRef(references, sourceLoc);
     }
 
-    public List<Identifier> getReferences() {
-        return references;
-    }
-
     public SourceLoc getSourceLoc() {
         return sourceLoc;
+    }
+
+    public Identifier repoRef() {
+        return switch (sourceKind()) {
+            case REPO -> references.getFirst();
+            case PACKAGE -> throw new ShallNotReachHereError();
+        };
+    }
+
+    public Identifier packageRef() {
+        return switch (sourceKind()) {
+            case REPO -> references.get(1);
+            case PACKAGE -> references.get(0);
+        };
+    }
+
+    public Identifier componentRef() {
+        return switch (sourceKind()) {
+            case REPO -> references.get(2);
+            case PACKAGE -> references.get(1);
+        };
+    }
+
+    public SourceKind sourceKind() {
+        return switch (references.size()) {
+            case 3 -> SourceKind.REPO;
+            case 2 -> SourceKind.PACKAGE;
+            default -> throw new ShallNotReachHereError();
+        };
+    }
+
+    public enum SourceKind {
+        REPO, PACKAGE
     }
 }
