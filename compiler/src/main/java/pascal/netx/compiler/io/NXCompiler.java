@@ -77,7 +77,7 @@ public final class NXCompiler {
     }
 
     public RepoScope elaborate() {
-        var scope = new PackageElaborator(repo, manager.findApplicationPack(), config).elaborate();
+        var scope = new PackageElaborator(repo, manager.findTopPack(), config).elaborate();
         repo.setTop(scope);
         repo.addChild(scope);
         return repo;
