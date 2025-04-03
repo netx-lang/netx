@@ -35,7 +35,14 @@ public final class PackageManager {
         this.repo = repo;
     }
 
-    public PackageNode findApplicationPack() {
+    public PackageNode findTopPack() {
+        if (packs.size() == 1) {
+            return packs.values().iterator().next();
+        }
+        return findApplicationPack();
+    }
+
+    private PackageNode findApplicationPack() {
         var applications = packs.values().stream().filter(PackageNode::isApplication).toList();
         if (applications.size() != 1) {
             log.error("Cannot conclude the application package of the project");
@@ -45,12 +52,12 @@ public final class PackageManager {
     }
 
     public NXCompiler dispatchCompiler(SourceLoc sourceLoc, ImportRef ref) {
-       return switch (ref.sourceKind()) {
-           case PACKAGE -> Objects.requireNonNull(repo.getCompiler());
-           case REPO -> {
-               log.info("Start to resolve repo: {}", ref.repoRef());
-               yield resolveRepo(sourceLoc, ref.repoRef()).asSubCompilerOf(repo.getCompiler());
-           }
+        return switch (ref.sourceKind()) {
+            case PACKAGE -> Objects.requireNonNull(repo.getCompiler());
+            case REPO -> {
+                log.info("Start to resolve repo: {}", ref.repoRef());
+                yield resolveRepo(sourceLoc, ref.repoRef()).asSubCompilerOf(repo.getCompiler());
+            }
         };
     }
 
