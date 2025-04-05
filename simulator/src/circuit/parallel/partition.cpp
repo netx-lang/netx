@@ -11,21 +11,21 @@
 #include "partition.h"
 
 namespace hxon {
-    std::map<id_t, size_t> partition(const circuit& circuit) {
-        const auto& out_rules = circuit.rules.trigger_rules;
+    std::map<id_t, size_t> partition(const circuit &circuit) {
+        const auto &out_rules = circuit.rules.trigger_rules;
 
         std::vector<id_t> to_old;
         std::map<id_t, size_t> to_new;
-        for (const auto& old_id : std::views::keys(out_rules)) {
+        for (const auto &old_id: std::views::keys(out_rules)) {
             const auto new_id = to_old.size();
             to_old.push_back(old_id);
             to_new[old_id] = new_id;
         }
 
-        std::map<size_t, std::vector<size_t>> edges;
-        for (const auto&[old_id, rule] : out_rules) {
+        std::map<size_t, std::vector<size_t> > edges;
+        for (const auto &[old_id, rule]: out_rules) {
             auto new_id = to_new[old_id];
-            for (const auto& old_out_id : rule.outcomes()) {
+            for (const auto &old_out_id: rule.outcomes()) {
                 auto new_out_id = to_new[old_out_id];
                 edges[new_id].push_back(new_out_id);
                 edges[new_out_id].push_back(new_id);
@@ -33,7 +33,7 @@ namespace hxon {
         }
 
         size_t adj_size = 0;
-        for (auto&[id, out] : edges) {
+        for (auto &[id, out]: edges) {
             // Remove parallel edges and self-loops, if any
             std::ranges::sort(out);
             auto [l, r] = std::ranges::unique(out);
@@ -50,7 +50,7 @@ namespace hxon {
             int current = 0;
             for (int id = 0; id < n; ++id) {
                 xadj[id] = current;
-                for (const auto& out = edges[id]; const auto& out_id : out) adjncy[current++] = static_cast<int>(out_id);
+                for (const auto &out = edges[id]; const auto &out_id: out) adjncy[current++] = static_cast<int>(out_id);
             }
             xadj[n] = current;
         }
@@ -59,7 +59,8 @@ namespace hxon {
         const int seed = static_cast<int>(std::random_device{}());
         int edgecut;
         const auto part = std::make_unique<int[]>(n);
-        kaffpa(&n, nullptr, xadj.get(), nullptr, adjncy.get(), &nparts, &imbalance, false, seed, STRONG, &edgecut, part.get());
+        kaffpa(&n, nullptr, xadj.get(), nullptr, adjncy.get(), &nparts, &imbalance, false, seed, STRONG, &edgecut,
+               part.get());
 
         std::map<id_t, size_t> result;
         for (int id = 0; id < n; ++id) result[to_old[id]] = part[id];
