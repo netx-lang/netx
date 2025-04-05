@@ -6,7 +6,8 @@ import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.ComponentNode;
 import pascal.netx.compiler.ast.element.ImportNode;
 import pascal.netx.compiler.exception.CompileCancellationException;
-import pascal.netx.compiler.model.scope.ProjectScope;
+import pascal.netx.compiler.model.expr.ImportRef;
+import pascal.netx.compiler.model.scope.RepoScope;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
@@ -19,40 +20,43 @@ import java.util.Objects;
 public final class PackageManager {
     private static final Logger log = LoggerFactory.getLogger(PackageManager.class);
 
-    private final Map<Identifier, NXCompiler> repositories = new HashMap<>();
-    private final Map<Identifier, PackageNode> packages = new HashMap<>();
-    private ProjectScope project;
+    private RepoScope repo;
+    private final Map<Identifier, PackageNode> packs = new HashMap<>();
+    private final Map<Identifier, NXCompiler> extRepos = new HashMap<>();
 
     public static PackageManager ofEmpty() {
         return new PackageManager();
     }
 
-    public void addRepoDependency(Identifier name, NXCompiler compiler) {
-        repositories.put(name, compiler);
-    }
-
-    public void addPackage(PackageNode pack) {
-        packages.put(pack.getPackageInfo().getIdentifier(), pack);
-    }
-
-    public void setProject(ProjectScope project) {
-        if (this.project != null) {
+    public void setRepo(RepoScope repo) {
+        if (this.repo != null) {
             throw new ShallNotReachHereError();
         }
-        this.project = project;
+        this.repo = repo;
     }
 
-    public NXCompiler dispatchCompiler(SourceLoc sourceLoc, List<Identifier> reference) {
-       return switch (reference.size()) {
-            case 2 -> Objects.requireNonNull(project.getCompiler());
-            case 3 -> {
-                var result = resolveRepo(sourceLoc, reference.getFirst());
-                result.setDataIndexer(project.getCompiler().getDataIndexer());
-                yield result;
-            }
-            default -> {
-                log.error("{}: Invalid reference in import: {}", sourceLoc, reference);
-                throw new CompileCancellationException();
+    public PackageNode findTopPack() {
+        if (packs.size() == 1) {
+            return packs.values().iterator().next();
+        }
+        return findApplicationPack();
+    }
+
+    private PackageNode findApplicationPack() {
+        var applications = packs.values().stream().filter(PackageNode::isApplication).toList();
+        if (applications.size() != 1) {
+            log.error("Cannot conclude the application package of the project");
+            throw new CompileCancellationException();
+        }
+        return applications.getFirst();
+    }
+
+    public NXCompiler dispatchCompiler(SourceLoc sourceLoc, ImportRef ref) {
+        return switch (ref.sourceKind()) {
+            case PACKAGE -> Objects.requireNonNull(repo.getCompiler());
+            case REPO -> {
+                log.info("Start to resolve repo: {}", ref.repoRef());
+                yield resolveRepo(sourceLoc, ref.repoRef()).asSubCompilerOf(repo.getCompiler());
             }
         };
     }
@@ -84,29 +88,27 @@ public final class PackageManager {
                 .toList();
     }
 
-    public PackageNode resolvePackage(SourceLoc sourceLoc, Identifier identifier) {
-        if (!packages.containsKey(identifier)) {
-            log.error("{}: Cannot resolve package: {}", sourceLoc, identifier);
-            throw new CompileCancellationException();
-        }
-        return packages.get(identifier);
+    public void addExternalRepo(Identifier name, NXCompiler compiler) {
+        extRepos.put(name, compiler);
     }
 
     public NXCompiler resolveRepo(SourceLoc sourceLoc, Identifier identifier) {
-        if (!repositories.containsKey(identifier)) {
+        if (!extRepos.containsKey(identifier)) {
             log.error("{}: Cannot resolve repository: {}", sourceLoc, identifier);
             throw new CompileCancellationException();
         }
-        return repositories.get(identifier);
+        return extRepos.get(identifier);
     }
 
-    public PackageNode findApplicationPack() {
-        var applications = packages.values().stream().filter(PackageNode::isApplication).toList();
-        if (applications.size() != 1) {
-            // FIXME:
-            log.error("Cannot conclude the application package of the project");
+    public void addPackage(PackageNode pack) {
+        packs.put(pack.getPackageInfo().getIdentifier(), pack);
+    }
+
+    public PackageNode resolvePackage(SourceLoc sourceLoc, Identifier identifier) {
+        if (!packs.containsKey(identifier)) {
+            log.error("{}: Cannot resolve package: {}", sourceLoc, identifier);
             throw new CompileCancellationException();
         }
-        return applications.getFirst();
+        return packs.get(identifier);
     }
 }

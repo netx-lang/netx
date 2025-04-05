@@ -42,7 +42,7 @@ public final class Wire extends Data {
 
         @Override
         public Wire create(ComponentScope parent, Identifier id) {
-            return new Wire(id, parent, type, compiler.getDataIndexer().get());
+            return new Wire(id, parent, type, compiler.nextDataIndex());
         }
 
         @Override

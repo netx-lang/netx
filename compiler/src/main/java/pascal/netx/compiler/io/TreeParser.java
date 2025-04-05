@@ -332,16 +332,7 @@ public final class TreeParser {
     }
 
     static BitVectorNumber parseBitVectorNumber(BitVectorNumberContext ctx) {
-        var literal = ctx.getText().toLowerCase().split("'");
-        int size = Integer.parseInt(literal[0]);
-        int radix = switch (literal[1].charAt(0)) {
-            case 'b' -> 2;
-            case 'o' -> 8;
-            case 'd' -> 10;
-            case 'h' -> 16;
-            default -> throw new ShallNotReachHereError();
-        };
-        return BitVectorNumber.of(BitVector.parse(literal[1].substring(1), size, radix));
+        return BitVectorNumber.of(BitVector.parse(ctx.getText()));
     }
 
     static ExprNode parseFieldExpr(FieldExprContext ctx) {

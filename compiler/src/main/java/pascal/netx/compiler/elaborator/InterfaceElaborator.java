@@ -49,7 +49,7 @@ public class InterfaceElaborator {
                 }
                 yield new Wire.Factory(wire.getType(), Utils.compilerOf(pack));
             }
-            case Bundle bundle -> pack.getInterface(bundle.getType().getIdentifier());
+            case Bundle bundle -> pack.defs().getInterface(bundle.getType().getIdentifier());
             case Array array -> {
                 var elementFactory = getFactoryFrom(node, array.getElements().getFirst());
                 yield new Array.Factory(Utils.compilerOf(pack), array.getElements().size(), elementFactory);

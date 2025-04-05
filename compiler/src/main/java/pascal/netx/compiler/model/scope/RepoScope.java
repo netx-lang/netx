@@ -10,23 +10,20 @@ import pascal.netx.util.exception.ShallNotReachHereError;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public final class ProjectScope extends Scope {
-    private static final Logger log = LoggerFactory.getLogger(ProjectScope.class);
-
-    private final Info info;
-    private final PackageManager manager;
+/**
+ * A RepoScope corresponds to a NetX repository that contains an application package and multiple library packages.
+ * In a RepoScope, the unique application package becomes the top-level package,
+ * and the top-level component in that package becomes the entry point of the whole project.
+ */
+public final class RepoScope extends Scope {
+    private static final Logger log = LoggerFactory.getLogger(RepoScope.class);
 
     private PackageScope top;
     private NXCompiler compiler;
+    private PackageManager manager;
 
-    public ProjectScope(Info info, PackageManager manager) {
+    public RepoScope() {
         super(null);
-        this.info = info;
-        this.manager = manager;
-    }
-
-    public Info getInfo() {
-        return info;
     }
 
     public PackageManager getManager() {
@@ -42,6 +39,13 @@ public final class ProjectScope extends Scope {
             throw new ShallNotReachHereError();
         }
         this.compiler = compiler;
+    }
+
+    public void setManager(PackageManager manager) {
+        if (this.manager != null) {
+            throw new ShallNotReachHereError();
+        }
+        this.manager = manager;
     }
 
     public PackageScope getTop() {
@@ -65,15 +69,6 @@ public final class ProjectScope extends Scope {
     }
 
     public record Info(String name, Version version) {
-        private static final Info EMPTY = new Info(null, null);
-
-        public static Info empty() {
-            return EMPTY;
-        }
-
-        public boolean isEmpty() {
-            return this == EMPTY;
-        }
     }
 
     public record Version(int major, int minor, int patch) implements Comparable<Version> {

@@ -11,7 +11,7 @@ import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.ImportNode;
 import pascal.netx.compiler.ast.element.PackageElement;
 import pascal.netx.compiler.exception.CompileCancellationException;
-import pascal.netx.compiler.model.scope.ProjectScope;
+import pascal.netx.compiler.model.scope.RepoScope;
 import pascal.netx.util.lang.Identifier;
 
 import java.io.FileInputStream;
@@ -38,7 +38,7 @@ public final class ProjectConfigReader {
     private final Path dir;
     private final Path buildDir;
 
-    private final ProjectScope.Info info;
+    private final RepoScope.Info info;
     private NXCompiler compiler;
 
     public ProjectConfigReader(Configuration config, Path path) throws IOException {
@@ -48,16 +48,16 @@ public final class ProjectConfigReader {
         this.buildDir = dir.resolve("build");
 
         var projectInfo = toml.get("project");
-        this.info = new ProjectScope.Info(
+        this.info = new RepoScope.Info(
                 projectInfo.get("name").textValue(),
-                ProjectScope.Version.of(projectInfo.get("version").textValue()));
+                RepoScope.Version.of(projectInfo.get("version").textValue()));
     }
 
     public void buildCompiler() throws IOException {
         parse();
         packages.forEach(manager::addPackage);
         packages.forEach(this::resolveWildcardImportIn);
-        this.compiler = new NXCompiler(info, config, manager);
+        this.compiler = new NXCompiler(config, manager);
     }
 
     public NXCompiler getCompiler() {
@@ -134,7 +134,7 @@ public final class ProjectConfigReader {
             }
             var projConfReader = resolveDependency(path, spec);
             projConfReader.buildCompiler();
-            manager.addRepoDependency(Identifier.of(entry.getKey()), projConfReader.compiler);
+            manager.addExternalRepo(Identifier.of(entry.getKey()), projConfReader.compiler);
         }
     }
 
@@ -190,8 +190,7 @@ public final class ProjectConfigReader {
         for (var element : node.getElements()) {
             if (element instanceof ImportNode importNode) {
                 if (importNode.isWildcard()) {
-                    var components = manager.resolveWildcard(importNode);
-                    for (var id : components) {
+                    for (var id : manager.resolveWildcard(importNode)) {
                         var reference = new LinkedList<>(importNode.getReference()) {{ add(id); }};
                         newElements.add(ImportNode.of(reference));
                     }
@@ -203,23 +202,23 @@ public final class ProjectConfigReader {
         node.setElements(newElements);
     }
 
-    record VersionSpec(Kind kind, ProjectScope.Version base) {
+    record VersionSpec(Kind kind, RepoScope.Version base) {
         public static VersionSpec of(String spec) {
             spec = spec.replace(" ", "");
             if (spec.startsWith(">=")) {
-                return new VersionSpec(Kind.GE, ProjectScope.Version.of(spec.substring(2)));
+                return new VersionSpec(Kind.GE, RepoScope.Version.of(spec.substring(2)));
             } else if (spec.startsWith("<=")) {
-                return new VersionSpec(Kind.LE, ProjectScope.Version.of(spec.substring(2)));
+                return new VersionSpec(Kind.LE, RepoScope.Version.of(spec.substring(2)));
             } else if (spec.startsWith(">")) {
-                return new VersionSpec(Kind.GT, ProjectScope.Version.of(spec.substring(1)));
+                return new VersionSpec(Kind.GT, RepoScope.Version.of(spec.substring(1)));
             } else if (spec.startsWith("<")) {
-                return new VersionSpec(Kind.LT, ProjectScope.Version.of(spec.substring(1)));
+                return new VersionSpec(Kind.LT, RepoScope.Version.of(spec.substring(1)));
             } else {
-                return new VersionSpec(Kind.EXACT, ProjectScope.Version.of(spec));
+                return new VersionSpec(Kind.EXACT, RepoScope.Version.of(spec));
             }
         }
 
-        boolean isCompatibleWith(ProjectScope.Version version) {
+        boolean isCompatibleWith(RepoScope.Version version) {
             return switch (kind) {
                 case EXACT -> base.equals(version);
                 case GT -> base.compareTo(version) < 0;
