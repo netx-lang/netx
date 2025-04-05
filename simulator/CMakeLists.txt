@@ -12,14 +12,4 @@ endif ()
 find_package(Boost 1.70 REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
-include(FetchContent)
-FetchContent_Declare(
-        libcoro
-        GIT_REPOSITORY "https://github.com/jbaldwin/libcoro.git"
-        GIT_TAG "v0.14.1"
-)
-set(LIBCORO_FEATURE_NETWORKING OFF)
-set(LIBCORO_FEATURE_TLS OFF)
-FetchContent_MakeAvailable(libcoro)
-
 add_subdirectory(src)
