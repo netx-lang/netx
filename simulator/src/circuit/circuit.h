@@ -12,15 +12,13 @@
 
 namespace hxon {
     class circuit {
-        friend void partition(const circuit& circuit);
-
+    public:
         rule_set rules;
         value_storage values;
         id_set clocks;
 
-    public:
-        void add_rule(const rule_t &newRule) {
-            rules.add(newRule);
+        void add_rule(const rule_t &new_rule) {
+            rules.add(new_rule);
         }
 
         void add_clock(const id_t id) {
@@ -32,14 +30,14 @@ namespace hxon {
             return rules.update(values, clocks);
         }
 
-        id_set update(id_t id, value_t newValue) {
-            values[id] = std::move(newValue);
+        id_set update(id_t id, value_t new_value) {
+            values[id] = std::move(new_value);
             return rules.update(values, {{id}});
         }
 
-        id_set update_batch(const value_storage &toUpdate) {
+        id_set update_batch(const value_storage &to_update) {
             id_set hint;
-            for (const auto &[id, value]: toUpdate) {
+            for (const auto &[id, value]: to_update) {
                 hint.insert(id);
                 values[id] = value;
             }

@@ -218,21 +218,21 @@ namespace hxon {
     }
 
     struct rule_set {
-        std::multimap<id_t, rule_t> triggerRules;
+        std::multimap<id_t, rule_t> trigger_rules;
 
         void add(const rule_t &newRule) {
             for (id_t trigger: newRule.triggers())
-                triggerRules.emplace(trigger, newRule);
+                trigger_rules.emplace(trigger, newRule);
         }
 
-        id_set update(value_storage &values, const id_set &hint, const bool toFixed = true) const {
+        id_set update(value_storage &values, const id_set &hint, const bool to_fixed = true) const {
             id_set changed;
 
             id_set toConsider = hint, toConsiderSwap;
             std::set<rule_t> toPerform;
             do {
                 for (id_t id: toConsider) {
-                    auto [beg, end] = triggerRules.equal_range(id);
+                    auto [beg, end] = trigger_rules.equal_range(id);
                     for (auto iter = beg; iter != end; ++iter)
                         toPerform.emplace(iter->second);
                 }
@@ -247,7 +247,7 @@ namespace hxon {
                 toConsider.clear();
                 toConsider.swap(toConsiderSwap);
                 toPerform.clear();
-            } while (toFixed && !toConsider.empty());
+            } while (to_fixed && !toConsider.empty());
 
             return changed;
         }
