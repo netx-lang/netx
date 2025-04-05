@@ -6,7 +6,7 @@ import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
-import pascal.netx.compiler.model.scope.ProjectScope;
+import pascal.netx.compiler.model.scope.RepoScope;
 import pascal.netx.util.lang.SourceLoc;
 
 import java.util.List;
@@ -30,12 +30,12 @@ public final class Utils {
         }
     }
 
-    public static ProjectScope projectOf(PackageScope pack) {
+    public static RepoScope repoOf(PackageScope pack) {
         return pack.getProject();
     }
 
-    public static ProjectScope projectOf(ComponentScope component) {
-        return projectOf(component.getPackage());
+    public static RepoScope repoOf(ComponentScope component) {
+        return repoOf(component.getPackage());
     }
 
     public static NXCompiler compilerOf(ComponentScope component) {

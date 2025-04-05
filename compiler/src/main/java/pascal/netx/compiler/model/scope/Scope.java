@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract sealed class Scope permits ComponentScope, PackageScope, ProjectScope {
+public abstract sealed class Scope permits ComponentScope, PackageScope, RepoScope {
     private final LinkedList<Binding> bindings;
     private final List<Scope> children;
     private Scope parent;

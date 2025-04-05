@@ -35,7 +35,7 @@ public final class Clock extends Data {
 
         @Override
         public Clock create(ComponentScope parent, Identifier id) {
-            return new Clock(id, parent, compiler.getDataIndexer().get());
+            return new Clock(id, parent, compiler.nextDataIndex());
         }
 
         @Override

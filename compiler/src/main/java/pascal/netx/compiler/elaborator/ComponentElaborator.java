@@ -22,8 +22,6 @@ import pascal.netx.compiler.model.variable.Variable;
 import pascal.netx.compiler.model.variable.type.ArrayType;
 import pascal.netx.compiler.model.variable.type.InterfaceType;
 import pascal.netx.compiler.model.variable.type.Type;
-import pascal.netx.util.exception.ShallNotReachHereError;
-import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
 
 import java.util.*;
@@ -41,7 +39,7 @@ final class ComponentElaborator {
     ComponentElaborator(Configuration config, ComponentScope scope) {
         this.config = config;
         this.scope = scope;
-        this.factory = compilerOf(scope).getBuiltinFactory();
+        this.factory = BuiltInComponentFactory.create(compilerOf(scope));
         this.evaluator = scope.getEvaluator();
     }
 
@@ -262,20 +260,10 @@ final class ComponentElaborator {
 
         private ComponentPort instantiateImportRef(ImportRef ref) {
             SourceLoc sourceLoc = ref.getSourceLoc();
-            List<Identifier> reference = ref.getReferences();
 
-            var compiler = projectOf(scope).getManager().dispatchCompiler(sourceLoc, reference);
-            var component = switch (reference.size()) {
-                case 2 -> {
-                    var pack = compiler.getPackManager().resolvePackage(sourceLoc, reference.get(0));
-                    yield compiler.elaborate(pack, reference.get(1), ref.getArgList());
-                }
-                case 3 -> {
-                    var pack = compiler.getPackManager().resolvePackage(sourceLoc, reference.get(1));
-                    yield compiler.elaborate(pack, reference.get(2), ref.getArgList());
-                }
-                default -> throw new ShallNotReachHereError();
-            };
+            var compiler = repoOf(scope).getManager().dispatchCompiler(sourceLoc, ref);
+            var pack = compiler.getPackManager().resolvePackage(sourceLoc, ref.packageRef());
+            var component = compiler.elaborateComponent(pack, ref.componentRef(), ref.getArgList());
 
             component.setParent(scope);
             component.setPackage(scope.getPackage());

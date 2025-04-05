@@ -7,13 +7,11 @@ import pascal.netx.compiler.ast.element.ComponentNode;
 import pascal.netx.compiler.ast.element.EnumNode;
 import pascal.netx.compiler.ast.element.ImportNode;
 import pascal.netx.compiler.io.Configuration;
-import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.model.Signature;
-import pascal.netx.compiler.model.Utils;
 import pascal.netx.compiler.model.expr.ComponentRef;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
-import pascal.netx.compiler.model.scope.ProjectScope;
+import pascal.netx.compiler.model.scope.RepoScope;
 import pascal.netx.compiler.model.scope.binding.MultiBinding;
 import pascal.netx.compiler.model.scope.binding.OrderedArgBindList;
 
@@ -26,25 +24,25 @@ public final class PackageElaborator {
     private final PackageScope pack;
     private final Configuration config;
 
-    public PackageElaborator(ProjectScope parent, PackageNode node, Configuration config) {
+    public PackageElaborator(RepoScope parent, PackageNode node, Configuration config) {
         this.node = node;
         this.config = config;
         this.pack = PackageScope.newPackage(parent);
     }
 
-    private static void setDesignSignature(ComponentScope topScope, ComponentNode topNode) {
+    private static void setSignature(ComponentScope topScope, ComponentNode topNode) {
         var atom = ComponentRef.of(topNode, topNode.getIdentifier());
         topScope.setSignature(Signature.of(atom, topScope.getInputs(), topScope.getOutputs()));
     }
 
     public PackageScope elaborate() {
-        addPackageInformation();
+        initializePackageDefs();
         var topNode = findTopNode();
         var topScope = pack.instantiateTop(topNode.getIdentifier());
         bindConfigParameters(topNode, topScope);
         new ComponentElaborator(config, topScope).build(topNode);
         if (!config.fullyExpand()) {
-            setDesignSignature(topScope, topNode);
+            setSignature(topScope, topNode);
         }
         return pack;
     }
@@ -79,24 +77,18 @@ public final class PackageElaborator {
         return result;
     }
 
-    private void addPackageInformation() {
-        var compiler = Utils.compilerOf(pack);
-        var indexer = compiler.getDataIndexer();
-        compiler.setDataIndexer(NXCompiler.newIndexer());
+    private void initializePackageDefs() {
         for (var element : node.getElements()) {
             switch (element) {
-                case ComponentNode component -> addComponentInfo(component);
-                case ImportNode import_ -> pack.addImport(import_);
-                case EnumNode enum_ -> pack.addEnum(enum_);
+                case EnumNode _enum -> pack.defs().addEnum(_enum);
+                case ImportNode _import -> pack.defs().addImport(_import);
+                case ComponentNode component -> {
+                    switch (component.getKind()) {
+                        case COMPONENT -> pack.defs().addComponent(component);
+                        case INTERFACE -> pack.defs().addInterface(component);
+                    }
+                }
             }
-        }
-        compiler.setDataIndexer(indexer);
-    }
-
-    private void addComponentInfo(ComponentNode node) {
-        switch (node.getKind()) {
-            case COMPONENT -> pack.addComponent(node);
-            case INTERFACE -> pack.addInterface(node);
         }
     }
 }

@@ -51,8 +51,8 @@ class AnalysisTest {
                 }
                 """;
         assertEquals(
-                Builder.forExpanded().load(expected).compile(),
-                Builder.forExpanded().load(actual).compile());
+                Builder.forExpanded().load(expected).compileAndDump(),
+                Builder.forExpanded().load(actual).compileAndDump());
     }
 
     @Test
@@ -74,7 +74,7 @@ class AnalysisTest {
                     ];
                 }
                 """;
-        assertDoesNotThrow(() -> Builder.forExpanded().load(code).compile());
+        assertDoesNotThrow(() -> Builder.forExpanded().load(code).compileAndDump());
     }
 
     @Test
@@ -95,8 +95,8 @@ class AnalysisTest {
                 }
                 """;
         assertEquals(
-                Builder.forExpanded().load(expected).compile(),
-                Builder.forExpanded().load(actual).compile());
+                Builder.forExpanded().load(expected).compileAndDump(),
+                Builder.forExpanded().load(actual).compileAndDump());
     }
 
     @Test
@@ -124,8 +124,8 @@ class AnalysisTest {
                 }
                 """;
         assertEquals(
-                Builder.forExpanded().load(expected).compile(),
-                Builder.forExpanded().load(actual).compile());
+                Builder.forExpanded().load(expected).compileAndDump(),
+                Builder.forExpanded().load(actual).compileAndDump());
     }
 
     @Test
@@ -142,7 +142,7 @@ class AnalysisTest {
                     a[1:0] <> AND <> [b[5:4], b[3:2]];
                 }
                 """;
-        assertThrows(TypeCheckingException.class, () -> Builder.forExpanded().load(a).compile());
-        assertThrows(TypeCheckingException.class, () -> Builder.forExpanded().load(b).compile());
+        assertThrows(TypeCheckingException.class, () -> Builder.forExpanded().load(a).compileAndDump());
+        assertThrows(TypeCheckingException.class, () -> Builder.forExpanded().load(b).compileAndDump());
     }
 }

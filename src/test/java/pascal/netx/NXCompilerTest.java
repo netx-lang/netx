@@ -68,7 +68,7 @@ class NXCompilerTest {
     }
 
     private static void testHelper(Builder builder, Path testcase, Path expected) throws IOException {
-        var json = builder.loadPath(testcase).compile();
+        var json = builder.loadPath(testcase).compileAndDump();
         if (GENERATE_EXPECTED) {
             var notepad = NotepadWriter.pathOut(expected);
             builder.printer(notepad).print(json);

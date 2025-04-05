@@ -23,6 +23,11 @@ public record BooleanValue(boolean value) implements Value {
     }
 
     @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+    @Override
     public Type getType() {
         return BitType.forBoolean();
     }

@@ -21,7 +21,7 @@ class NXCompilerUnitTest {
         String content = new String(Files.readAllBytes(TEST_DIR.resolve(fileName)));
         CharStream charStream = CharStreams.fromString(content);
         NXCompiler compiler = Builder.forExpanded().load(charStream);
-        assertNotNull(compiler.compile());
+        assertNotNull(compiler.compileAndDump());
     }
 
     @Disabled
@@ -30,12 +30,12 @@ class NXCompilerUnitTest {
         var compiler = Builder.forExpanded().loadPath(TEST_DIR.resolve("project/_netx.toml"));
         var expected = MAPPER.reader().readTree(
                 Files.readString(TEST_DIR.resolve("expected/project_e.json")));
-        assertEquals(expected, compiler.compile());
+        assertEquals(expected, compiler.compileAndDump());
 
         compiler = Builder.forCompact().loadPath(TEST_DIR.resolve("project/_netx.toml"));
         expected = MAPPER.reader().readTree(
                 Files.readString(TEST_DIR.resolve("expected/project_c.json")));
-        assertEquals(expected, compiler.compile());
+        assertEquals(expected, compiler.compileAndDump());
     }
 
     @Test
@@ -43,7 +43,7 @@ class NXCompilerUnitTest {
         var compiler = Builder.forCompact().loadPath(TEST_DIR.resolve("enum.nx"));
         var expected = MAPPER.reader().readTree(
                 Files.readString(TEST_DIR.resolve("expected/enum.json")));
-        assertEquals(expected, compiler.compile());
+        assertEquals(expected, compiler.compileAndDump());
     }
 
     @Test
