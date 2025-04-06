@@ -294,7 +294,8 @@ namespace hxon {
                 auto [id, selection] = parse_id(json["id"]);
                 if (selection) throw std::runtime_error("Clock member cannot be selected");
                 context.size_map[id] = 1;
-                if (context.circuit_input.contains(id)) context.circuit.add_clock(id);
+                context.circuit.add_clock(id);
+                if (context.circuit_input.contains(id)) context.circuit_input_clocks.insert(id);
                 break;
             }
             case member_type::COMPONENT:

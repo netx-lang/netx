@@ -25,9 +25,9 @@ namespace hxon {
             clocks.insert(id);
         }
 
-        id_set flip_clocks() {
-            for (const auto &clock: clocks) values[clock].flip();
-            return rules.update(values, clocks);
+        id_set flip(const id_set &ids) {
+            for (const auto &id: ids) values[id].flip();
+            return rules.update(values, ids);
         }
 
         id_set update(id_t id, value_t new_value) {
