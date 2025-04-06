@@ -21,9 +21,14 @@ namespace hxon {
         public:
             using base_t::base_t;
 
-            id_set_impl operator+(const id_set_impl &other) const {
+            auto& operator+=(const id_set_impl &other) {
+                insert(other.begin(), other.end());
+                return *this;
+            }
+
+            auto operator+(const id_set_impl &other) const {
                 id_set_impl result = *this;
-                result.insert(other.begin(), other.end());
+                result += other;
                 return result;
             }
         };
