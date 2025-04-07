@@ -12,11 +12,10 @@
 
 namespace hxon {
     class circuit {
-    public:
         rule_set rules;
         value_storage values;
         id_set clocks;
-
+    public:
         void add_rule(const rule_t &new_rule) {
             rules.add(new_rule);
         }
@@ -44,8 +43,25 @@ namespace hxon {
             return rules.update(values, hint);
         }
 
+        void put(const id_t id, value_t new_value) {
+            values[id] = std::move(new_value);
+        }
+
+        void put_batch(const value_storage &to_update) {
+            for (const auto &[id, value]: to_update)
+                values[id] = value;
+        }
+
         [[nodiscard]] value_t get_value(const id_t id) const {
             return values.at(id);
+        }
+
+        [[nodiscard]] std::set<rule_t> all_rules() const {
+            return rules.rules();
+        }
+
+        [[nodiscard]] id_set all_clocks() const {
+            return clocks;
         }
     };
 }

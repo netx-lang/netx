@@ -8,6 +8,7 @@
 #include "circuit_def.h"
 #include <memory>
 #include <utility>
+#include <ranges>
 
 namespace hxon {
     namespace impl {
@@ -217,9 +218,10 @@ namespace hxon {
         [[nodiscard]] rule_t register_rule(clock_t clk, source_t in, sink_t out);
     }
 
-    struct rule_set {
+    class rule_set {
         std::multimap<id_t, rule_t> trigger_rules;
 
+    public:
         void add(const rule_t &newRule) {
             for (id_t trigger: newRule.triggers())
                 trigger_rules.emplace(trigger, newRule);
@@ -250,6 +252,12 @@ namespace hxon {
             } while (to_fixed && !toConsider.empty());
 
             return changed;
+        }
+
+        [[nodiscard]] std::set<rule_t> rules() const {
+            std::set<rule_t> rules;
+            for (const auto &rule: trigger_rules | std::views::values) rules.insert(rule);
+            return rules;
         }
     };
 }
