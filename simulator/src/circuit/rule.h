@@ -240,7 +240,7 @@ namespace hxon {
                 for (const auto &rule: toPerform) {
                     auto ruleChanged = rule.perform(values);
                     toConsiderSwap.insert(ruleChanged.begin(), ruleChanged.end());
-                    changed.insert(ruleChanged.begin(), ruleChanged.end());
+                    changed += ruleChanged;
                 }
                 values.perform_delayed();
 
