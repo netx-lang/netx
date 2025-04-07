@@ -77,13 +77,23 @@ final class ComponentElaborator {
 
     private void buildComponentElements(List<ComponentElement> list) {
         for (var element : list) {
-            switch (element) {
-                case LoopNode loop -> buildLoop(loop);
-                case BindingNode binding -> buildBinding(binding);
-                case DataInstantiationNode data -> buildData(data);
-                case ComponentInstantiationNode instantiation -> buildSubComponent(instantiation);
-            }
+            buildComponentElement(element);
         }
+    }
+
+    private void buildComponentElement(ComponentElement element) {
+        switch (element) {
+            case LoopNode loop -> buildLoop(loop);
+            case BlockNode block -> buildBlock(block);
+            case BranchNode branch -> buildBranch(branch);
+            case BindingNode binding -> buildBinding(binding);
+            case DataInstantiationNode data -> buildData(data);
+            case ComponentInstantiationNode instantiation -> buildSubComponent(instantiation);
+        }
+    }
+
+    private void buildBlock(BlockNode block) {
+        buildComponentElements(block.getElements());
     }
 
     private void buildLoop(LoopNode loop) {
@@ -91,8 +101,17 @@ final class ComponentElaborator {
         var id = generator.getHead();
         for (var entity : evaluator.evaluateToList(generator.getFrom()).entities()) {
             scope.overrideBindings(MonoBinding.of(id, entity));
-            buildComponentElements(loop.getElements());
+            buildComponentElement(loop.getElement());
             scope.restoreBindings();
+        }
+    }
+
+    private void buildBranch(BranchNode branch) {
+        var condition = evaluator.evaluateToBoolean(branch.getCondition());
+        if (condition.value()) {
+            buildComponentElement(branch.getThenBranch());
+        } else {
+            buildComponentElement(branch.getElseBranch());
         }
     }
 

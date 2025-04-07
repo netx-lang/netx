@@ -4,27 +4,26 @@ import pascal.netx.compiler.ast.ASTListener;
 import pascal.netx.compiler.ast.ASTNode;
 import pascal.netx.compiler.ast.expr.qualifier.GeneratorQualifier;
 
-import java.util.List;
 import java.util.Objects;
 
 public final class LoopNode extends ASTNode implements ComponentElement {
     private final GeneratorQualifier generator;
-    private final List<ComponentElement> elements;
+    private final ComponentElement element;
 
-    private LoopNode(GeneratorQualifier generator, List<ComponentElement> elements) {
+    private LoopNode(GeneratorQualifier generator, ComponentElement element) {
         this.generator = generator;
-        this.elements = elements;
+        this.element = element;
     }
 
-    public static LoopNode of(GeneratorQualifier iterators, List<ComponentElement> elements) {
-        return new LoopNode(iterators, elements);
+    public static LoopNode of(GeneratorQualifier iterators, ComponentElement element) {
+        return new LoopNode(iterators, element);
     }
 
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);
         generator.walk(listener);
-        elements.forEach(element -> element.walk(listener));
+        element.walk(listener);
         listener.exit(this);
     }
 
@@ -32,8 +31,8 @@ public final class LoopNode extends ASTNode implements ComponentElement {
         return generator;
     }
 
-    public List<ComponentElement> getElements() {
-        return elements;
+    public ComponentElement getElement() {
+        return element;
     }
 
     @Override
@@ -42,24 +41,16 @@ public final class LoopNode extends ASTNode implements ComponentElement {
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (LoopNode) obj;
         return Objects.equals(this.generator, that.generator) &&
-                Objects.equals(this.elements, that.elements);
+                Objects.equals(this.element, that.element);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(generator, elements);
+        return Objects.hash(generator, element);
     }
 
     @Override
     public String toString() {
-        var sb = new StringBuilder();
-        sb.append("for (");
-        sb.append(generator);
-        sb.append(") {\n");
-        for (var element : elements) {
-            sb.append(element).append('\n');
-        }
-        sb.append("}");
-        return sb.toString();
+        return String.format("for (%s) {\n%s\n}", generator, element);
     }
 }
