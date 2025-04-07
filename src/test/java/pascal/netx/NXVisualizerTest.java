@@ -2,7 +2,8 @@ package pascal.netx;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import pascal.netx.compiler.io.Builder;
+import pascal.netx.compiler.io.Configuration;
+import pascal.netx.compiler.io.NXBuilder;
 import pascal.netx.util.print.NotepadWriter;
 
 import java.io.IOException;
@@ -14,7 +15,8 @@ class NXVisualizerTest {
     @Disabled
     @Test
     void testCounter() throws IOException {
-        var compiler = Builder.forCompact().loadPath(TEST_DIR.resolve("counter.nx"));
+        var compiler = NXBuilder.from(Configuration.forCompactTest())
+                .loadPath(TEST_DIR.resolve("counter.nx"));
         var notepad = NotepadWriter.pathOut(Path.of("a.out"));
         compiler.compileAndVisualize(notepad, 2);
         var runtime = Runtime.getRuntime();

@@ -66,7 +66,7 @@ public final class PackageElaborator {
         ComponentNode result = null;
         for (var element : node.getElements()) {
             if (element instanceof ComponentNode component) {
-                if (config.topName().equals(component.getIdentifier().name())) {
+                if (config.topName().equals(component.getIdentifier())) {
                     return component;
                 } else if (result == null) {
                     result = component;

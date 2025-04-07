@@ -2,7 +2,8 @@ package pascal.netx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import pascal.netx.compiler.io.Builder;
+import pascal.netx.compiler.io.Configuration;
+import pascal.netx.compiler.io.NXBuilder;
 import pascal.netx.util.print.NotepadWriter;
 
 import java.io.IOException;
@@ -67,7 +68,7 @@ class NXCompilerTest {
         test("simple_timer");
     }
 
-    private static void testHelper(Builder builder, Path testcase, Path expected) throws IOException {
+    private static void testHelper(NXBuilder builder, Path testcase, Path expected) throws IOException {
         var json = builder.loadPath(testcase).compileAndDump();
         if (GENERATE_EXPECTED) {
             var notepad = NotepadWriter.pathOut(expected);
@@ -80,8 +81,8 @@ class NXCompilerTest {
     public void test(String fileName) throws IOException {
         Path testcase = TEST_DIR.resolve(fileName + ".nx");
         Path expected = TEST_DIR.resolve("expanded").resolve(fileName + ".json");
-        testHelper(Builder.forExpanded(), testcase, expected);
+        testHelper(NXBuilder.from(Configuration.forExpandedTest()), testcase, expected);
         expected = TEST_DIR.resolve("compact").resolve(fileName + ".json");
-        testHelper(Builder.forCompact(), testcase, expected);
+        testHelper(NXBuilder.from(Configuration.forCompactTest()), testcase, expected);
     }
 }

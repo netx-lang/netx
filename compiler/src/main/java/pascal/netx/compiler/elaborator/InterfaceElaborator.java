@@ -25,7 +25,8 @@ public class InterfaceElaborator {
 
     public Bundle.Factory elaborate(ComponentNode node) {
         var scope = ComponentScope.newInterface(pack, node.getIdentifier());
-        new ComponentElaborator(Configuration.forExpanded(), scope).build(node);
+        // FIXME: currently, using expanded configuration to avoid signatures.
+        new ComponentElaborator(Configuration.builder().forExpanded().build(), scope).build(node);
 
         LinkedHashMap<Identifier, Mutable.Factory<?>> factories = new LinkedHashMap<>();
         for (var inst : scope.getOutputs()) {

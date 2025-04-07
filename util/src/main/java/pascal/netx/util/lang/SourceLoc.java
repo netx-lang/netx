@@ -2,6 +2,10 @@ package pascal.netx.util.lang;
 
 public record SourceLoc(int line, int column) implements Comparable<SourceLoc> {
 
+    public static SourceLoc none() {
+        return new SourceLoc(0, 0);
+    }
+
     public static SourceLoc of(int line, int column) {
         return new SourceLoc(line, column);
     }

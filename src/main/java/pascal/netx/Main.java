@@ -3,8 +3,8 @@ package pascal.netx;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pascal.netx.compiler.io.Builder;
 import pascal.netx.compiler.io.Configuration;
+import pascal.netx.compiler.io.NXBuilder;
 import pascal.netx.compiler.model.scope.binding.MultiBinding;
 import pascal.netx.compiler.model.variable.BitVectorValue;
 import pascal.netx.compiler.model.variable.BooleanValue;
@@ -100,7 +100,7 @@ public class Main {
         @Override
         public Integer call() {
             try {
-                var builder = Builder.from(setupConfiguration());
+                var builder = NXBuilder.from(setupConfiguration());
                 var node = builder.loadPath(source).compileAndDump();
                 if (minimal) {
                     var mapper = new ObjectMapper();
@@ -119,17 +119,17 @@ public class Main {
         }
 
         private Configuration setupConfiguration() {
-            Configuration config;
+            var builder = Configuration.builder();
             if (compact) {
-                config = Configuration.forCompact();
+                builder.forCompact();
             } else {
-                config = Configuration.forExpanded();
+                builder.forExpanded();
             }
-            config = config.withTop(top);
+            builder.withTop(top);
             if (args != null) {
-                config = config.withArgs(parseArgBindings());
+                builder.withArgs(parseArgBindings());
             }
-            return config;
+            return builder.build();
         }
 
         private MultiBinding parseArgBindings() {
@@ -191,7 +191,7 @@ public class Main {
         @Override
         public Integer call() {
             try {
-                var builder = Builder.from(Configuration.forCompact().withTop(top));
+                var builder = NXBuilder.from(Configuration.builder().forCompact().withTop(top).build());
                 var node = builder.loadPath(source).compileAndDump();
                 new VerilogDumper(
                         notepadWriterFor(output),
@@ -238,7 +238,7 @@ public class Main {
         @Override
         public Integer call() {
             try {
-                var builder = Builder.from(Configuration.forCompact().withTop(top));
+                var builder = NXBuilder.from(Configuration.builder().forCompact().withTop(top).build());
                 var compiler = builder.loadPath(source);
                 compiler.compileAndVisualize(notepadWriterFor(output), depth);
                 return 0;

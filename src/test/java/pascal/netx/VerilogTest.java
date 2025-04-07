@@ -1,7 +1,8 @@
 package pascal.netx;
 
 import org.junit.jupiter.api.Test;
-import pascal.netx.compiler.io.Builder;
+import pascal.netx.compiler.io.Configuration;
+import pascal.netx.compiler.io.NXBuilder;
 import pascal.netx.util.print.NotepadWriter;
 import pascal.netx.verilog.VerilogDumper;
 import pascal.netx.verilog.frontend.HFrontend;
@@ -38,7 +39,8 @@ public class VerilogTest {
     }
 
     private static void test(String other) throws IOException {
-        var design = Builder.forCompact().loadPath(TEST_DIR.resolve(other + ".nx")).compileAndDump();
+        var design = NXBuilder.from(Configuration.forCompactTest())
+                .loadPath(TEST_DIR.resolve(other + ".nx")).compileAndDump();
         var vModules = HFrontend.load(design).parse();
         if (GENERATE_EXPECTED) {
             var notepad = NotepadWriter.pathOut(EXPECTED_DIR.resolve(other + ".v"));
