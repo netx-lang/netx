@@ -13,12 +13,12 @@ import pascal.netx.util.lang.Identifier;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-class ComponentEvaluatorUnitTest {
+class ElaboratorUnitTest {
     private static PackageScope loadDesign(String code) {
         return NXBuilder.from(Configuration.forExpandedTest())
                 .load(CharStreams.fromString(code)).elaborate().getTop();
@@ -108,5 +108,23 @@ class ComponentEvaluatorUnitTest {
                 }
                 """;
         assertDoesNotThrow(() -> loadSingleComponent(code));
+    }
+
+    @Test
+    void testBranch() {
+        var code = """
+                component top(cond) : i -> o {
+                    auto i, o;
+                    if (cond)
+                    then o <> AND <> [i, 1];
+                    else o <> OR <> [i, 1];
+                }
+                """;
+        var thenConf = Configuration.builder().forExpanded().withArgs(List.of("cond=true")).build();
+        var elseConf = Configuration.builder().forExpanded().withArgs(List.of("cond=false")).build();
+        assertNotEquals(
+                NXBuilder.from(thenConf).load(code).compileAndDump(),
+                NXBuilder.from(elseConf).load(code).compileAndDump()
+        );
     }
 }

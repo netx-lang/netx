@@ -58,6 +58,22 @@ public interface ASTListener {
         exitDefault(node);
     }
 
+    default void enter(BranchNode node) {
+        enterDefault(node);
+    }
+
+    default void exit(BranchNode node) {
+        exitDefault(node);
+    }
+
+    default void enter(BlockNode node) {
+        enterDefault(node);
+    }
+
+    default void exit(BlockNode node) {
+        exitDefault(node);
+    }
+
     default void enter(BindingNode node) {
         enterDefault(node);
     }

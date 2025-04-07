@@ -187,6 +187,8 @@ public final class TreeParser {
             case DataDeclarationContext sub -> parseDataInstantiation(sub);
             case ComponentInstantiationContext sub -> parseComponentInstantiation(sub);
             case LoopContext sub -> parseLoop(sub);
+            case BranchContext sub -> parseBranch(sub);
+            case BlockContext sub -> BlockNode.of(parseElements(sub.element()));
             default -> throw new ShallNotReachHereError();
         };
         return result.setSourceLoc(locationOf(ctx.getStart()));
@@ -201,7 +203,15 @@ public final class TreeParser {
     }
 
     static LoopNode parseLoop(LoopContext ctx) {
-        return LoopNode.of(parseGeneratorQualifier(ctx.iterator()), parseElements(ctx.element()));
+        return LoopNode.of(parseGeneratorQualifier(ctx.iterator()), parseElement(ctx.element()));
+    }
+
+    static BranchNode parseBranch(BranchContext ctx) {
+        var result = BranchNode.of(parseExpr(ctx.cond), parseElement(ctx.thenBranch), null);
+        if (ctx.elseBranch != null) {
+            result.setElseBranch(parseElement(ctx.elseBranch));
+        }
+        return result;
     }
 
     static DataInstantiationNode parseDataInstantiation(DataDeclarationContext ctx) {
