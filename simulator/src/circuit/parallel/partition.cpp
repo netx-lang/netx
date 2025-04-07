@@ -101,7 +101,7 @@ namespace hxon {
         return result;
     }
 
-    void worker_part(std::stop_token stop_token, partitioned_circuit &partition, const size_t part_id) {
+    void worker_part(const std::stop_token &stop_token, partitioned_circuit &partition, const size_t part_id) {
         auto &[updates, part] = *partition.circuit_parts[part_id];
         auto &[q, mutex, condition] = updates;
         while (!stop_token.stop_requested()) {
