@@ -12,12 +12,8 @@
 #include "partition.h"
 
 namespace hxon {
-    partitioned_circuit partition(const circuit &circuit) {
-        std::vector<rule_t> out_rules;
-        for (const auto& rule: circuit.rules.trigger_rules | std::views::values) out_rules.emplace_back(rule);
-        std::ranges::sort(out_rules);
-        auto [rl, rr] = std::ranges::unique(out_rules);
-        out_rules.erase(rl, rr);
+    partitioned_circuit::partitioned_circuit(const circuit &circuit) {
+        auto out_rules = circuit.all_rules();
 
         std::vector<id_t> to_old;
         std::map<id_t, size_t> to_new;
@@ -69,7 +65,8 @@ namespace hxon {
                           &edgecut,
                           part.get());
 
-        partitioned_circuit result;
+        auto result_ptr = new impl::partitioned_circuit_context();
+        auto &result = *result_ptr;
         result.num_parts = nparts;
         for (int id = 0; id < n; ++id) {
             auto old_id = to_old[id];
@@ -81,43 +78,49 @@ namespace hxon {
             for (const auto &old_id: rule.dependencies())
                 for (const auto &old_out_id: rule.outcomes())
                     result.relate[old_id].insert(result.belongs[old_out_id]);
-        result.clocks = circuit.clocks;
+        result.clocks = circuit.all_clocks();
         for (size_t i = 0; i < result.num_parts; ++i)
             result.circuit_parts.emplace_back(
-                std::make_unique<circuit_part_context>());
+                std::make_unique<impl::circuit_part_context>());
         for (const auto &[id, part_id]: result.belongs)
-            result.circuit_parts[part_id]->part.values[id] = circuit.get_value(id);
+            result.circuit_parts[part_id]->part.put(id, circuit.get_value(id));
         for (const auto &rule: out_rules) {
             std::set<size_t> out_parts;
             for (const auto &outcome: rule.outcomes()) out_parts.insert(result.belongs[outcome]);
             for (const auto &part_id: out_parts) {
                 auto &circuit_part = result.circuit_parts[part_id]->part;
-                for (const auto &dep: rule.dependencies()) circuit_part.values[dep] = circuit.get_value(dep);
-                for (const auto &out: rule.outcomes()) circuit_part.values[out] = circuit.get_value(out);
+                for (const auto &dep: rule.dependencies()) circuit_part.put(dep, circuit.get_value(dep));
+                for (const auto &out: rule.outcomes()) circuit_part.put(out, circuit.get_value(out));
                 circuit_part.add_rule(rule);
             }
         }
 
-        return result;
+        context = decltype(context){result_ptr};
     }
 
-    void worker_part(const std::stop_token &stop_token, partitioned_circuit &partition, const size_t part_id) {
-        auto &[updates, part] = *partition.circuit_parts[part_id];
-        auto &[q, mutex, condition] = updates;
+    void partitioned_circuit::worker_part(const std::stop_token &stop_token,
+                                          impl::partitioned_circuit_context &partition,
+                                          const size_t part_id) {
+        auto &[updates, part, mutex] = *partition.circuit_parts[part_id];
+        auto &[q, condition] = updates;
         while (!stop_token.stop_requested()) {
             std::unique_lock lock(mutex);
-            if (!condition.wait_for(lock, std::chrono::milliseconds(200), [&q] {
+            const bool wait_result = condition.wait_for(lock, std::chrono::milliseconds(200), [&q] {
                 return !q.empty();
-            }))
-                continue;
+            });
+            if (!wait_result) continue;
 
             value_storage to_update;
             std::shared_ptr<std::latch> latch_to_wait;
             while (!(q.empty() || latch_to_wait)) {
                 auto &[id, value, latch] = q.front();
-                if (part.get_value(id) != value) to_update[id] = value;
+                to_update[id] = value;
                 if (latch) latch_to_wait = latch;
                 q.pop();
+            }
+            for (auto iter = to_update.begin(); iter != to_update.end();) {
+                if (part.get_value(iter->first) == iter->second) to_update.erase(iter++);
+                else ++iter;
             }
 
             id_set changed = part.update_batch(to_update);
@@ -131,12 +134,5 @@ namespace hxon {
             }
             partition.broadcast_batch(changed_values, true);
         }
-    }
-
-    std::vector<std::jthread> work_on_partition(partitioned_circuit &partition) {
-        std::vector<std::jthread> result;
-        for (size_t i = 0; i < partition.num_parts; ++i)
-            result.emplace_back(worker_part, std::ref(partition), i);
-        return result;
     }
 }
