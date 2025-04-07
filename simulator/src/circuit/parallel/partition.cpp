@@ -119,9 +119,9 @@ namespace hxon {
                 if (latch) latch_to_wait = latch;
                 q.pop();
             }
-            lock.unlock();
 
             id_set changed = part.update_batch(to_update);
+            lock.unlock();
             to_update.clear();
             if (latch_to_wait) latch_to_wait->arrive_and_wait();
             value_storage changed_values;

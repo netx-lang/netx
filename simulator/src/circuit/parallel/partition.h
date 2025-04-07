@@ -39,7 +39,7 @@ namespace hxon {
         std::map<id_t, size_t> belongs;
         std::map<id_t, std::set<size_t> > relate;
         id_set clocks;
-        std::vector<std::unique_ptr<circuit_part_context>> circuit_parts;
+        std::vector<std::unique_ptr<circuit_part_context> > circuit_parts;
 
         void broadcast(const id_t id, const value_t &value, const bool exclude_belong = false) {
             broadcast_impl(id, value, exclude_belong);
@@ -59,8 +59,28 @@ namespace hxon {
         }
 
         [[nodiscard]] auto get_value(const id_t id) const {
-            return circuit_parts[belongs.at(id)]->part.get_value(id);
+            const auto belong = belongs.at(id);
+            std::lock_guard lock(circuit_parts[belong]->updates.mutex);
+            return circuit_parts[belong]->part.get_value(id);
         }
+
+        void wait_until_fixed() {
+            while (true) {
+                bool flag = true;
+                for (const auto &part_ptr: circuit_parts)
+                    part_ptr->updates.mutex.lock();
+                for (const auto &part_ptr: circuit_parts)
+                    if (!part_ptr->updates.queue.empty()) {
+                        flag = false;
+                        break;
+                    }
+                for (const auto &part_ptr: circuit_parts)
+                    part_ptr->updates.mutex.unlock();
+                if (flag) break;
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+        }
+
     private:
         void broadcast_impl(const id_t id, const value_t &value, const bool exclude_belong = false,
                             const bool notify = true) {
@@ -80,6 +100,7 @@ namespace hxon {
     };
 
     partitioned_circuit partition(const circuit &circuit);
+
     std::vector<std::jthread> work_on_partition(partitioned_circuit &partition);
 }
 
