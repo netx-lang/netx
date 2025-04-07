@@ -2,7 +2,8 @@ package pascal.netx.compiler.elaborator;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
-import pascal.netx.compiler.io.Builder;
+import pascal.netx.compiler.io.Configuration;
+import pascal.netx.compiler.io.NXBuilder;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.variable.Int32Value;
@@ -19,7 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ComponentEvaluatorUnitTest {
     private static PackageScope loadDesign(String code) {
-        return Builder.forExpanded().load(CharStreams.fromString(code)).elaborate().getTop();
+        return NXBuilder.from(Configuration.forExpandedTest())
+                .load(CharStreams.fromString(code)).elaborate().getTop();
     }
 
     private static ComponentScope loadSingleComponent(String code) {
@@ -83,13 +85,15 @@ class ComponentEvaluatorUnitTest {
                          parametric_comp(b=4, a=3, c = 5) <> i;
                 }
                 """;
+        var cBuilder = NXBuilder.from(Configuration.forCompactTest());
+        var eBuilder = NXBuilder.from(Configuration.forExpandedTest());
         assertEquals(
-                Builder.forCompact().load(expected).compileAndDump(),
-                Builder.forCompact().load(actual).compileAndDump()
+                cBuilder.load(expected).compileAndDump(),
+                cBuilder.load(actual).compileAndDump()
         );
         assertEquals(
-                Builder.forExpanded().load(expected).compileAndDump(),
-                Builder.forExpanded().load(actual).compileAndDump()
+                eBuilder.load(expected).compileAndDump(),
+                eBuilder.load(actual).compileAndDump()
         );
     }
 }

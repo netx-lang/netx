@@ -3,7 +3,8 @@ package pascal.netx.compiler.analysis;
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
 import pascal.netx.compiler.exception.TypeCheckingException;
-import pascal.netx.compiler.io.Builder;
+import pascal.netx.compiler.io.Configuration;
+import pascal.netx.compiler.io.NXBuilder;
 import pascal.netx.compiler.io.NXParser;
 import pascal.netx.util.TestUtils;
 
@@ -50,9 +51,11 @@ class AnalysisTest {
                     c <> NOT <> REGISTER(true) <> [AND <> [a[1:0], b[1:0]], clk];
                 }
                 """;
+        var builder = NXBuilder.from(Configuration.forExpandedTest());
         assertEquals(
-                Builder.forExpanded().load(expected).compileAndDump(),
-                Builder.forExpanded().load(actual).compileAndDump());
+                builder.load(expected).compileAndDump(),
+                builder.load(actual).compileAndDump()
+        );
     }
 
     @Test
@@ -74,7 +77,7 @@ class AnalysisTest {
                     ];
                 }
                 """;
-        assertDoesNotThrow(() -> Builder.forExpanded().load(code).compileAndDump());
+        assertDoesNotThrow(() -> NXBuilder.from(Configuration.forExpandedTest()).load(code).compileAndDump());
     }
 
     @Test
@@ -94,9 +97,10 @@ class AnalysisTest {
                     d <> AND <> [a, b];
                 }
                 """;
+        var builder = NXBuilder.from(Configuration.forExpandedTest());
         assertEquals(
-                Builder.forExpanded().load(expected).compileAndDump(),
-                Builder.forExpanded().load(actual).compileAndDump());
+                builder.load(expected).compileAndDump(),
+                builder.load(actual).compileAndDump());
     }
 
     @Test
@@ -123,9 +127,10 @@ class AnalysisTest {
                     f <> a;
                 }
                 """;
+        var builder = NXBuilder.from(Configuration.forExpandedTest());
         assertEquals(
-                Builder.forExpanded().load(expected).compileAndDump(),
-                Builder.forExpanded().load(actual).compileAndDump());
+                builder.load(expected).compileAndDump(),
+                builder.load(actual).compileAndDump());
     }
 
     @Test
@@ -142,7 +147,8 @@ class AnalysisTest {
                     a[1:0] <> AND <> [b[5:4], b[3:2]];
                 }
                 """;
-        assertThrows(TypeCheckingException.class, () -> Builder.forExpanded().load(a).compileAndDump());
-        assertThrows(TypeCheckingException.class, () -> Builder.forExpanded().load(b).compileAndDump());
+        var builder = NXBuilder.from(Configuration.forExpandedTest());
+        assertThrows(TypeCheckingException.class, () -> builder.load(a).compileAndDump());
+        assertThrows(TypeCheckingException.class, () -> builder.load(b).compileAndDump());
     }
 }

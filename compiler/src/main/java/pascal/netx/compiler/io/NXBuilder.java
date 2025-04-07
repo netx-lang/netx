@@ -7,23 +7,15 @@ import pascal.netx.util.print.NotepadWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public final class Builder {
+public final class NXBuilder {
     private final Configuration config;
 
-    private Builder(Configuration config) {
+    private NXBuilder(Configuration config) {
         this.config = config;
     }
 
-    public static Builder forCompact() {
-        return new Builder(Configuration.forCompact());
-    }
-
-    public static Builder forExpanded() {
-        return new Builder(Configuration.forExpanded());
-    }
-
-    public static Builder from(Configuration config) {
-        return new Builder(config);
+    public static NXBuilder from(Configuration config) {
+        return new NXBuilder(config);
     }
 
     public NXCompiler load(CharStream charStream) {

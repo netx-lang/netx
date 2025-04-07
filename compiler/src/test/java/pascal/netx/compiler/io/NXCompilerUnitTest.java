@@ -20,19 +20,21 @@ class NXCompilerUnitTest {
     private static void test(String fileName) throws IOException {
         String content = new String(Files.readAllBytes(TEST_DIR.resolve(fileName)));
         CharStream charStream = CharStreams.fromString(content);
-        NXCompiler compiler = Builder.forExpanded().load(charStream);
+        NXCompiler compiler = NXBuilder.from(Configuration.forExpandedTest()).load(charStream);
         assertNotNull(compiler.compileAndDump());
     }
 
     @Disabled
     @Test
     void testProjectBuild() throws IOException {
-        var compiler = Builder.forExpanded().loadPath(TEST_DIR.resolve("project/_netx.toml"));
+        var compiler = NXBuilder.from(Configuration.forExpandedTest())
+                .loadPath(TEST_DIR.resolve("project/_netx.toml"));
         var expected = MAPPER.reader().readTree(
                 Files.readString(TEST_DIR.resolve("expected/project_e.json")));
         assertEquals(expected, compiler.compileAndDump());
 
-        compiler = Builder.forCompact().loadPath(TEST_DIR.resolve("project/_netx.toml"));
+        compiler = NXBuilder.from(Configuration.forCompactTest())
+                .loadPath(TEST_DIR.resolve("project/_netx.toml"));
         expected = MAPPER.reader().readTree(
                 Files.readString(TEST_DIR.resolve("expected/project_c.json")));
         assertEquals(expected, compiler.compileAndDump());
@@ -40,7 +42,7 @@ class NXCompilerUnitTest {
 
     @Test
     void testEnum() throws IOException {
-        var compiler = Builder.forCompact().loadPath(TEST_DIR.resolve("enum.nx"));
+        var compiler = NXBuilder.from(Configuration.forCompactTest()).loadPath(TEST_DIR.resolve("enum.nx"));
         var expected = MAPPER.reader().readTree(
                 Files.readString(TEST_DIR.resolve("expected/enum.json")));
         assertEquals(expected, compiler.compileAndDump());
@@ -50,20 +52,21 @@ class NXCompilerUnitTest {
     void loadWithValidCharStream() throws IOException {
         var string = Files.readString(TEST_DIR.resolve("bind_1.nx"));
         CharStream charStream = CharStreams.fromString(string);
-        NXCompiler compiler = Builder.forExpanded().load(charStream);
+        NXCompiler compiler = NXBuilder.from(Configuration.forExpandedTest()).load(charStream);
         assertNotNull(compiler);
     }
 
     @Test
     void loadPathWithValidPath() throws IOException {
-        NXCompiler compiler = Builder.forExpanded().loadPath(TEST_DIR.resolve("bind_1.nx"));
+        NXCompiler compiler = NXBuilder.from(Configuration.forExpandedTest())
+                .loadPath(TEST_DIR.resolve("bind_1.nx"));
         assertNotNull(compiler);
     }
 
     @Test
     void loadPathWithInvalidPath() {
         Path path = Path.of("invalid/path/to/file.nx");
-        assertThrows(IOException.class, () -> Builder.forExpanded().loadPath(path));
+        assertThrows(IOException.class, () -> NXBuilder.from(Configuration.forExpandedTest()).loadPath(path));
     }
 
     @Test
@@ -83,6 +86,7 @@ class NXCompilerUnitTest {
     @Test
     void testInvalidInput() {
         CharStream charStream = CharStreams.fromString("invalid input");
-        assertThrows(ParseCancellationException.class, () -> Builder.forExpanded().load(charStream));
+        assertThrows(ParseCancellationException.class,
+                () -> NXBuilder.from(Configuration.forExpandedTest()).load(charStream));
     }
 }

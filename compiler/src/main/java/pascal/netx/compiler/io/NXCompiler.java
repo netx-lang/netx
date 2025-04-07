@@ -10,6 +10,7 @@ import pascal.netx.compiler.model.scope.RepoScope;
 import pascal.netx.compiler.model.scope.binding.ArgBindList;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
+import pascal.netx.util.lang.SourceLoc;
 import pascal.netx.util.print.NotepadWriter;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -77,14 +78,20 @@ public final class NXCompiler {
     }
 
     public RepoScope elaborate() {
-        var scope = new PackageElaborator(repo, manager.findTopPack(), config).elaborate();
+        PackageNode topPack;
+        if (config.topPack() != null) {
+            topPack = manager.resolvePackage(SourceLoc.none(), config.topPack());
+        } else {
+            topPack = manager.inferTopPack();
+        }
+        var scope = new PackageElaborator(repo, topPack, config).elaborate();
         repo.setTop(scope);
         repo.addChild(scope);
         return repo;
     }
 
     public ComponentScope elaborateComponent(PackageNode pack, Identifier top, ArgBindList parameters) {
-        var newConfig = config.withTop(top.name()).withArgs(parameters);
+        var newConfig = Configuration.builder().basedOn(config).withTop(top.name()).withArgs(parameters).build();
         var scope = new PackageElaborator(repo, pack, newConfig).elaborate();
         return scope.getTop();
     }

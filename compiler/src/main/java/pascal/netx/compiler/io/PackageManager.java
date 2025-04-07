@@ -35,17 +35,14 @@ public final class PackageManager {
         this.repo = repo;
     }
 
-    public PackageNode findTopPack() {
+    public PackageNode inferTopPack() {
         if (packs.size() == 1) {
             return packs.values().iterator().next();
         }
-        return findApplicationPack();
-    }
-
-    private PackageNode findApplicationPack() {
         var applications = packs.values().stream().filter(PackageNode::isApplication).toList();
         if (applications.size() != 1) {
-            log.error("Cannot conclude the application package of the project");
+            log.error("Cannot infer the top package of the project.");
+            log.error("There are multiple applications: {}", applications);
             throw new CompileCancellationException();
         }
         return applications.getFirst();
