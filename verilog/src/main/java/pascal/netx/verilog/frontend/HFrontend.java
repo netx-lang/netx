@@ -36,7 +36,7 @@ public class HFrontend extends AbstractHFrontend<List<VModule>> {
     }
 
     public static HFrontend loadPath(Path path) throws IOException {
-        return new HFrontend(mapper.readTree(path.toFile()));
+        return new HFrontend(mapper.readTree(path.toAbsolutePath().normalize().toFile()));
     }
 
     @Override

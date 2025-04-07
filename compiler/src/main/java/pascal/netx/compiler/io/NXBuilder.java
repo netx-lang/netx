@@ -2,12 +2,15 @@ package pascal.netx.compiler.io;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pascal.netx.util.print.NotepadWriter;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
 public final class NXBuilder {
+    private static final Logger log = LoggerFactory.getLogger(NXBuilder.class);
     private final Configuration config;
 
     private NXBuilder(Configuration config) {
@@ -29,6 +32,7 @@ public final class NXBuilder {
     }
 
     public NXCompiler loadPath(Path path) throws IOException {
+        path = path.toAbsolutePath().normalize();
         var fileName = path.getFileName().toString();
         var extension = fileName.substring(fileName.lastIndexOf('.') + 1);
         return switch (extension) {
@@ -41,8 +45,10 @@ public final class NXBuilder {
                 projConfReader.buildCompiler();
                 yield projConfReader.getCompiler();
             }
-            default ->
-                throw new IOException("Invalid file extension: " + extension);
+            default -> {
+                log.error("Unrecognized extension {}", extension);
+                throw new IOException();
+            }
         };
     }
 

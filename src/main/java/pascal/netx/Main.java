@@ -1,6 +1,8 @@
 package pascal.netx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXBuilder;
 import pascal.netx.util.print.NotepadWriter;
@@ -14,6 +16,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 public class Main {
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
+
     public static void main(String[] args) {
         int exitCode = new CommandLine(new NetXApp())
                 .addSubcommand("compile", new CompileCommand())
@@ -103,6 +107,7 @@ public class Main {
                 }
                 return 0;
             } catch (Exception e) {
+                log.error("Compilation failed", e);
                 return 1;
             }
         }
@@ -159,6 +164,7 @@ public class Main {
                 ).dump();
                 return 0;
             } catch (Exception e) {
+                log.error("Dumping failed", e);
                 return 1;
             }
         }
@@ -203,6 +209,7 @@ public class Main {
                 compiler.compileAndVisualize(notepadWriterFor(output), depth);
                 return 0;
             } catch (Exception e) {
+                log.error("Visualization failed", e);
                 return 1;
             }
         }
@@ -213,7 +220,7 @@ public class Main {
         if (output == null) {
             writer = NotepadWriter.stdOut();
         } else {
-            writer = NotepadWriter.pathOut(output);
+            writer = NotepadWriter.pathOut(output.toAbsolutePath().normalize());
         }
         return writer;
     }
