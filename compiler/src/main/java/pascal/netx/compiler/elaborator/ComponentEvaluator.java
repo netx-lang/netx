@@ -84,8 +84,13 @@ public final class ComponentEvaluator {
         return castToInstantiateExpr(expr.getSourceLoc(), evaluate(expr));
     }
 
-    public EntityList evaluateToList(ExprNode expr) {
-        return requiresList(expr.getSourceLoc(), evaluate(expr));
+    public EntityList castToList(ExprNode expr) {
+        var entity = evaluate(expr);
+        if (entity instanceof EntityList list) {
+            return list;
+        } else {
+            return EntityList.of(List.of(entity));
+        }
     }
 
     public IntegerValue evaluateToIntegerValue(ExprNode expr) {
@@ -222,7 +227,7 @@ public final class ComponentEvaluator {
                 case GeneratorQualifier generator -> {
                     result = new LinkedList<>();
                     var id = generator.getHead();
-                    var list = evaluateToList(generator.getFrom());
+                    var list = castToList(generator.getFrom());
                     for (var entity : list.entities()) {
                         scope.overrideBindings(MonoBinding.of(id, entity));
                         result.addAll(doListComprehension(head, new LinkedList<>(qualifiers)));
@@ -333,8 +338,8 @@ public final class ComponentEvaluator {
 
     private EntityList evaluateListConcat(BinaryExpr expr) {
         List<Entity> result = new LinkedList<>();
-        var lhs = evaluateToList(expr.getLhs());
-        var rhs = evaluateToList(expr.getRhs());
+        var lhs = castToList(expr.getLhs());
+        var rhs = castToList(expr.getRhs());
         result.addAll(lhs.entities());
         result.addAll(rhs.entities());
         return EntityList.of(result);

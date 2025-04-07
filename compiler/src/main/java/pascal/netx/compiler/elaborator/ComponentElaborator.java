@@ -99,7 +99,7 @@ final class ComponentElaborator {
     private void buildLoop(LoopNode loop) {
         var generator = loop.getGenerator();
         var id = generator.getHead();
-        for (var entity : evaluator.evaluateToList(generator.getFrom()).entities()) {
+        for (var entity : evaluator.castToList(generator.getFrom()).entities()) {
             scope.overrideBindings(MonoBinding.of(id, entity));
             buildComponentElement(loop.getElement());
             scope.restoreBindings();

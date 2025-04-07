@@ -17,11 +17,7 @@
         </File>
     </Appenders>
     <Loggers>
-        <Logger name="pascal.netx" level="debug" additivity="false">
-            <AppenderRef ref="stderr"/>
-            <AppenderRef ref="logFile"/>
-        </Logger>
-        <Root level="warn">
+        <Root level="all">
             <AppenderRef ref="stderr"/>
         </Root>
     </Loggers>
