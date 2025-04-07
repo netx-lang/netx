@@ -73,7 +73,7 @@ public final class PackageElaborator {
                 }
             }
         }
-        log.warn("No component named '{}' found, using the first component as top", config.topName());
+        log.warn("No component named '{}' found, using the first component as top", config.topName().name());
         return result;
     }
 
