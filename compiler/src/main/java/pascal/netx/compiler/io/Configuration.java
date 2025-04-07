@@ -2,6 +2,7 @@ package pascal.netx.compiler.io;
 
 import pascal.netx.compiler.model.scope.binding.ArgBindList;
 import pascal.netx.util.lang.Identifier;
+import pascal.netx.util.lang.SourceLoc;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

@@ -104,13 +104,19 @@ public final class ProjectConfigReader {
             var path = dir.resolve(sourceIter.next().textValue());
             if (Files.isDirectory(path)) {
                 try (var stream = Files.walk(path)) {
-                    stream.filter(Files::isRegularFile).forEach(result::add);
+                    stream.filter(Files::isRegularFile)
+                            .filter(ProjectConfigReader::isNetXFile)
+                            .forEach(result::add);
                 }
             } else {
                 result.add(path);
             }
         }
         return result;
+    }
+
+    private static boolean isNetXFile(Path file) {
+        return file.getFileName().toString().endsWith(".nx");
     }
 
     void resolveRepoDependencies() throws IOException {

@@ -96,4 +96,17 @@ class ComponentEvaluatorUnitTest {
                 eBuilder.load(actual).compileAndDump()
         );
     }
+
+    @Test
+    void testConstant() {
+        var code = """
+                component top : [] -> o {
+                    auto o <> NOT <> 1;
+                }
+                component infer : i -> o {
+                    auto o <> NOT <> i;
+                }
+                """;
+        assertDoesNotThrow(() -> loadSingleComponent(code));
+    }
 }
