@@ -24,6 +24,17 @@ public final class Entities {
         }
     }
 
+    public static Entity requiresValueOrList(SourceLoc loc, Entity entity) {
+        if (entity instanceof EntityList(var list)) {
+            for (var element : list) {
+                requiresValueOrList(loc, element);
+            }
+            return entity;
+        } else {
+            return requiresValue(loc, entity);
+        }
+    }
+
     public static Value requiresValue(SourceLoc loc, Entity entity) {
         if (entity instanceof Value value) {
             return value;
