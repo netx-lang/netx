@@ -22,6 +22,10 @@ public record BooleanValue(boolean value) implements Value {
         return BooleanValue.of(value || other.value);
     }
 
+    public BooleanValue eq(BooleanValue other) {
+        return BooleanValue.of(value == other.value);
+    }
+
     @Override
     public String toString() {
         return String.valueOf(value);
