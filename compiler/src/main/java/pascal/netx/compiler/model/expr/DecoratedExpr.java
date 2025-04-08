@@ -9,4 +9,13 @@ public record DecoratedExpr(Decorator decorator, Expr operand) implements Expr {
     public enum Decorator {
         SOURCE, SINK, BIDI
     }
+
+    @Override
+    public String toString() {
+        return switch (decorator) {
+            case SOURCE -> "#" + operand;
+            case SINK -> operand + "#";
+            case BIDI -> operand.toString();
+        };
+    }
 }

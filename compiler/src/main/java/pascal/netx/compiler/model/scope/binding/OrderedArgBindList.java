@@ -23,4 +23,9 @@ public record OrderedArgBindList(List<Entity> args) implements ArgBindList {
     public int size() {
         return args.size();
     }
+
+    @Override
+    public String toString() {
+        return "(" + String.join(", ", args.stream().map(Entity::toString).toList()) + ")";
+    }
 }

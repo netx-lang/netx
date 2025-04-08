@@ -25,4 +25,12 @@ public final class BuiltinRef extends PrimaryExpr {
     public SourceLoc getSourceLoc() {
         return sourceLoc;
     }
+
+    @Override
+    public String toString() {
+        if (argBindList != null) {
+            return builtin.toString() + argBindList.toString();
+        }
+        return builtin.toString();
+    }
 }

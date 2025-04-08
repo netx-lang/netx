@@ -25,4 +25,12 @@ public final class ComponentRef extends PrimaryExpr {
     public ComponentNode getDefinition() {
         return definition;
     }
+
+    @Override
+    public String toString() {
+        if (argBindList != null) {
+            return identifier.toString() + argBindList;
+        }
+        return identifier.toString();
+    }
 }

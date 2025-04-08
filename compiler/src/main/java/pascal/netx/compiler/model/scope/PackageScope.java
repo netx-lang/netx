@@ -116,7 +116,7 @@ public final class PackageScope extends Scope {
         }
 
         public ImportRef getImport(Identifier id) {
-            return importDef.get(id);
+            return importDef.get(id).copy();
         }
 
         public void addImport(ImportNode node) {
