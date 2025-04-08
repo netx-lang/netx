@@ -28,6 +28,19 @@ class ElaboratorUnitTest {
         return loadDesign(code).getTop();
     }
 
+    private static void testBothCompactAndExpanded(String expected, String actual) {
+        var cBuilder = NXBuilder.from(Configuration.forCompactTest());
+        var eBuilder = NXBuilder.from(Configuration.forExpandedTest());
+        assertEquals(
+                cBuilder.load(expected).compileAndDump(),
+                cBuilder.load(actual).compileAndDump()
+        );
+        assertEquals(
+                eBuilder.load(expected).compileAndDump(),
+                eBuilder.load(actual).compileAndDump()
+        );
+    }
+
     @Test
     void testListComprehension() {
         var component = loadSingleComponent("""
@@ -85,16 +98,7 @@ class ElaboratorUnitTest {
                          parametric_comp(b=4, a=3, c = 5) <> i;
                 }
                 """;
-        var cBuilder = NXBuilder.from(Configuration.forCompactTest());
-        var eBuilder = NXBuilder.from(Configuration.forExpandedTest());
-        assertEquals(
-                cBuilder.load(expected).compileAndDump(),
-                cBuilder.load(actual).compileAndDump()
-        );
-        assertEquals(
-                eBuilder.load(expected).compileAndDump(),
-                eBuilder.load(actual).compileAndDump()
-        );
+        testBothCompactAndExpanded(expected, actual);
     }
 
     @Test
@@ -126,5 +130,45 @@ class ElaboratorUnitTest {
                 NXBuilder.from(thenConf).load(code).compileAndDump(),
                 NXBuilder.from(elseConf).load(code).compileAndDump()
         );
+    }
+
+    @Test
+    void testInferArg() {
+        var actual = """
+                component top : [a, b, c, d] -> [e] {
+                    wire a, b, c, d, e of bit(4);
+                    e <> AND <> [a, b, c, d];
+                }
+                """;
+        var expected = """
+                component top : [a, b, c, d] -> [e] {
+                    wire a, b, c, d, e of bit(4);
+                    e <> AND(4) <> [a, b, c, d];
+                }
+                """;
+        testBothCompactAndExpanded(expected, actual);
+    }
+
+    @Test
+    void testNotInferArg() {
+        var actual = """
+                component top : [a, b, c, d] -> [e] {
+                    wire a, b, c, d, e of bit(4);
+                    e <> AND <> [
+                      AND,
+                      AND
+                    ] <> [a, b, c, d];
+                }
+                """;
+        var expected = """
+                component top : [a, b, c, d] -> [e] {
+                    wire a, b, c, d, e of bit(4);
+                    e <> AND <> [
+                      AND <> [a, b],
+                      AND <> [c, d]
+                    ];
+                }
+                """;
+        testBothCompactAndExpanded(expected, actual);
     }
 }

@@ -11,6 +11,7 @@ import pascal.netx.compiler.model.variable.Wire;
 import pascal.netx.compiler.model.variable.type.BitType;
 import pascal.netx.compiler.model.variable.type.PolyType;
 import pascal.netx.compiler.model.variable.type.Type;
+import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
 
 import static pascal.netx.compiler.model.Entities.requiresBooleanValue;
@@ -27,6 +28,14 @@ public class BuiltInComponentFactory {
         return new BuiltInComponentFactory(compiler);
     }
 
+    public ComponentScope createBuiltInComponent(Scope parent, BuiltinRef ref, int argNumHint) {
+        if (BuiltinComponent.MULTI_INPUT.contains(ref.getBuiltin())) {
+            return createMultiInputComponent(parent, ref, argNumHint);
+        } else {
+            return createBuiltInComponent(parent, ref);
+        }
+    }
+
     public ComponentScope createBuiltInComponent(Scope parent, BuiltinRef ref) {
         return switch (ref.getBuiltin()) {
             case REGISTER -> createREGISTERComponent(parent, ref);
@@ -36,7 +45,7 @@ public class BuiltInComponentFactory {
             case CAST -> createCASTComponent(parent, ref);
             case NOT -> createNOTComponent(parent, ref);
             case OR, AND, XOR, NOR, NAND, XNOR, CONCAT, ADD, SUB, MUL, DIV, MOD ->
-                    createMultiInputComponent(parent, ref);
+                    createMultiInputComponent(parent, ref, 2);
             case EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE -> createRelationalOpComponent(parent, ref);
             case SHL, ASHR, LSHR -> createShiftComponent(parent, ref);
         };
@@ -119,11 +128,13 @@ public class BuiltInComponentFactory {
         return result;
     }
 
-    private ComponentScope createMultiInputComponent(Scope parent, BuiltinRef ref) {
-        int ports = 2;
+    private ComponentScope createMultiInputComponent(Scope parent, BuiltinRef ref, int argNumHint) {
+        int ports;
         if (!ref.getArguments().isEmpty()) {
             Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArguments());
             ports = requiresIntegerValue(ref.getSourceLoc(), ref.getArguments().getFirst()).toInt();
+        } else {
+            ports = argNumHint;
         }
 
         var result = instantiate(parent, ref);

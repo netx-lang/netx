@@ -166,8 +166,22 @@ final class ComponentElaborator {
     private class Instantiator {
         private final SourceLoc sourceLoc;
 
+        /**
+         * Used to infer the number of inputs for builtin components in certain pattern (needHintForContinuationOf)
+         * argsHint is set to -1 to indicate that the hint is not needed.
+         */
+        private int argsHint = -1;
+
         private Instantiator(SourceLoc sourceLoc) {
             this.sourceLoc = sourceLoc;
+        }
+
+        private static boolean needHintForContinuationOf(Expr expr) {
+            return switch (expr) {
+                case BuiltinRef _ -> true;
+                case SequentialExpr e -> needHintForContinuationOf(e.rhs());
+                default -> false;
+            };
         }
 
         private static List<PrimaryExpr> leftMostAtomsOf(Expr expr) {
@@ -239,8 +253,12 @@ final class ComponentElaborator {
 
         private ComponentPort instantiateSequentialExpr(SequentialExpr sequentialExpr) {
             // right-hand-side goes first
-            var rhs = doInstantiate(sequentialExpr.rhs());
-            var lhs = doInstantiate(sequentialExpr.lhs());
+            ComponentPort lhs, rhs;
+            rhs = doInstantiate(sequentialExpr.rhs());
+            if (needHintForContinuationOf(sequentialExpr.lhs())) {
+                argsHint = rhs.target().size();
+            }
+            lhs = doInstantiate(sequentialExpr.lhs());
 
             List<? extends Variable> receiver;
             if (sequentialExpr.isTied()) {
@@ -291,7 +309,13 @@ final class ComponentElaborator {
         }
 
         private ComponentPort instantiateBuiltinRef(BuiltinRef ref) {
-            var component = factory.createBuiltInComponent(scope, ref);
+            ComponentScope component;
+            if (argsHint != -1) {
+                component = factory.createBuiltInComponent(scope, ref, argsHint);
+                argsHint = -1;
+            } else {
+                component = factory.createBuiltInComponent(scope, ref);
+            }
             return ComponentPort.of(component.getOutputs(), component.getInputs());
         }
 
@@ -340,5 +364,4 @@ final class ComponentElaborator {
             }
         }
     }
-
 }
