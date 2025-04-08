@@ -24,10 +24,10 @@ public final class Entities {
         }
     }
 
-    public static Entity requiresValueOrList(SourceLoc loc, Entity entity) {
+    public static Entity requiresListedValue(SourceLoc loc, Entity entity) {
         if (entity instanceof EntityList(var list)) {
             for (var element : list) {
-                requiresValueOrList(loc, element);
+                requiresListedValue(loc, element);
             }
             return entity;
         } else {
@@ -89,24 +89,6 @@ public final class Entities {
                 throw new CompileCancellationException();
             }
         };
-    }
-
-    public static EntityList requiresList(SourceLoc loc, Entity entity) {
-        if (entity instanceof EntityList list) {
-            return list;
-        } else {
-            log.error("{}: Expected list but got {}", loc, entity);
-            throw new CompileCancellationException();
-        }
-    }
-
-    public static Expr requiresInstantiateExpr(SourceLoc loc, Entity entity) {
-        if (entity instanceof Expr expr) {
-            return expr;
-        } else {
-            log.error("{}: Expected component type but got {}", loc, entity);
-            throw new CompileCancellationException();
-        }
     }
 
     public static Expr castToInstantiateExpr(SourceLoc loc, Entity entity) {

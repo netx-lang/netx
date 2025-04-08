@@ -26,6 +26,7 @@ import pascal.netx.compiler.model.variable.selector.PartSelector;
 import pascal.netx.compiler.model.variable.selector.Selector;
 import pascal.netx.compiler.model.variable.type.BitType;
 import pascal.netx.compiler.model.variable.type.PolyType;
+import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
@@ -75,6 +76,40 @@ public final class ComponentEvaluator {
     public ComponentEvaluator(ComponentScope component) {
         this.scope = component;
         this.pack = component.getPackage();
+    }
+
+    private static boolean compareListedValue(Entity lhs, Entity rhs) {
+        switch (lhs) {
+            case EntityList(var lhsList) -> {
+                if (rhs instanceof EntityList(var rhsList)) {
+                    if (lhsList.size() == rhsList.size()) {
+                        return IntStream.range(0, lhsList.size())
+                                .allMatch(i -> compareListedValue(lhsList.get(i), rhsList.get(i)));
+                    }
+                }
+            }
+            case IntegerValue lhsInt -> {
+                if (rhs instanceof IntegerValue rhsInt) {
+                    return lhsInt.eq(rhsInt).value();
+                }
+            }
+            case BooleanValue lhsBool -> {
+                if (rhs instanceof BooleanValue rhsBool) {
+                    return lhsBool.eq(rhsBool).value();
+                }
+            }
+            default -> throw new ShallNotReachHereError();
+        }
+        return false;
+    }
+
+    private static Entity castArgument(SourceLoc loc, Entity entity) {
+        return switch (entity) {
+            case Expr type -> type;
+            case Data ignored -> castToInstantiateExpr(loc, entity);
+            case Access ignored -> castToInstantiateExpr(loc, entity);
+            default -> requiresListedValue(loc, entity);
+        };
     }
 
     public Expr evaluateToComponentExpr(ExprNode expr, boolean needDeclareInPlace) {
@@ -297,7 +332,7 @@ public final class ComponentEvaluator {
             case Mutable mutable -> DecoratedExpr.of(decorator, VariableRef.of(mutable, base.getSourceLoc()));
             default -> {
                 log.error("{}: Expected instantiate expr(s) but got {}", base.getSourceLoc(), operand);
-                throw  new CompileCancellationException();
+                throw new CompileCancellationException();
             }
         };
     }
@@ -319,8 +354,9 @@ public final class ComponentEvaluator {
             case COMBINE -> evaluateSequentialExpr(expr, false);
             case TIE -> evaluateSequentialExpr(expr, true);
             case CONCAT -> evaluateListConcat(expr);
+            case EQ, NE -> evaluateEqualityExpr(expr);
             case ADD, SUB, MUL, DIV, MOD, POW, AND, OR, XOR, XNOR,
-                 EQ, NE, LT, LE, GT, GE, ARITH_SHR, ARITH_SHL, LOGIC_SHR, LOGIC_SHL ->
+                 LT, LE, GT, GE, ARITH_SHR, ARITH_SHL, LOGIC_SHR, LOGIC_SHL ->
                     evaluateBinaryExpr(expr, BINARY_OPERATOR_MAP.get(expr.getOp()));
             case LOGIC_OR -> evaluateBinaryExpr(expr, BooleanValue::or);
             case LOGIC_AND -> evaluateBinaryExpr(expr, BooleanValue::and);
@@ -334,6 +370,14 @@ public final class ComponentEvaluator {
 
     private Value evaluateBinaryExpr(BinaryExpr expr, BinaryOperator<BooleanValue> op) {
         return op.apply(evaluateToBoolean(expr.getLhs()), evaluateToBoolean(expr.getRhs()));
+    }
+
+    private Value evaluateEqualityExpr(BinaryExpr expr) {
+        var lhs = requiresListedValue(expr.getLhs().getSourceLoc(), evaluate(expr.getLhs()));
+        var rhs = requiresListedValue(expr.getRhs().getSourceLoc(), evaluate(expr.getRhs()));
+        boolean isEqual = compareListedValue(lhs, rhs);
+        boolean needEqual = expr.getOp() == BinaryExpr.Operator.EQ;
+        return BooleanValue.of(needEqual == isEqual);
     }
 
     private EntityList evaluateListConcat(BinaryExpr expr) {
@@ -356,8 +400,7 @@ public final class ComponentEvaluator {
                         .map(element -> requiresDataBundle(leftLoc, element))
                         .map(Expr.class::cast).toList());
             } else {
-                lhs = VariableRef.of(
-                        requiresMutable(leftLoc, lhsEntity), leftLoc);
+                lhs = VariableRef.of(requiresMutable(leftLoc, lhsEntity), leftLoc);
             }
             return SequentialExpr.ofTied(lhs, rhs);
         } else {
@@ -483,15 +526,6 @@ public final class ComponentEvaluator {
             }
             return result;
         }
-    }
-
-    private static Entity castArgument(SourceLoc loc, Entity entity) {
-        return switch (entity) {
-            case Expr type -> type;
-            case Data ignored -> castToInstantiateExpr(loc, entity);
-            case Access ignored -> castToInstantiateExpr(loc, entity);
-            default -> requiresValueOrList(loc, entity);
-        };
     }
 
     private Mutable.Factory<?> evaluateVariableFactory(CallSymbolExpr expr) {
