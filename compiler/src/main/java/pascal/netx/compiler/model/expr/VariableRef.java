@@ -24,5 +24,11 @@ public final class VariableRef extends PrimaryExpr {
         return sourceLoc;
     }
 
-
+    @Override
+    public String toString() {
+        if (argBindList != null) {
+            return variable.toString() + argBindList.toString();
+        }
+        return variable.toString();
+    }
 }

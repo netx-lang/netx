@@ -23,6 +23,21 @@ public final class ImportRef extends PrimaryExpr {
         return sourceLoc;
     }
 
+    public ImportRef copy() {
+        var result = new ImportRef(references, sourceLoc);
+        result.setArgList(getArgList());
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        var base = String.join(".", references.stream().map(Identifier::name).toList());
+        if (argBindList != null) {
+            return base + argBindList;
+        }
+        return base;
+    }
+
     public Identifier repoRef() {
         return switch (sourceKind()) {
             case REPO -> references.getFirst();
@@ -51,8 +66,8 @@ public final class ImportRef extends PrimaryExpr {
             default -> throw new ShallNotReachHereError();
         };
     }
-
     public enum SourceKind {
         REPO, PACKAGE
+
     }
 }
