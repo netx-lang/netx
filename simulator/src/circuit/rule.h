@@ -219,45 +219,62 @@ namespace hxon {
     }
 
     class rule_set {
+        std::set<rule_t> all_rules;
         std::multimap<id_t, rule_t> trigger_rules;
 
-    public:
-        void add(const rule_t &newRule) {
-            for (id_t trigger: newRule.triggers())
-                trigger_rules.emplace(trigger, newRule);
-        }
-
-        id_set update(value_storage &values, const id_set &hint, const bool to_fixed = true) const {
+        id_set perform_rules(value_storage &values, std::set<rule_t> to_perform, const bool to_fixed = true) const {
             id_set changed;
 
-            id_set toConsider = hint, toConsiderSwap;
-            std::set<rule_t> toPerform;
+            id_set toConsider, toConsiderSwap;
             do {
                 for (id_t id: toConsider) {
                     auto [beg, end] = trigger_rules.equal_range(id);
                     for (auto iter = beg; iter != end; ++iter)
-                        toPerform.emplace(iter->second);
+                        to_perform.emplace(iter->second);
                 }
 
-                for (const auto &rule: toPerform) {
-                    auto ruleChanged = rule.perform(values);
-                    toConsiderSwap.insert(ruleChanged.begin(), ruleChanged.end());
+                for (const auto &rule: to_perform) {
+                    const auto ruleChanged = rule.perform(values);
+                    toConsiderSwap += ruleChanged;
                     changed += ruleChanged;
                 }
                 values.perform_delayed();
 
                 toConsider.clear();
                 toConsider.swap(toConsiderSwap);
-                toPerform.clear();
+                to_perform.clear();
             } while (to_fixed && !toConsider.empty());
 
             return changed;
         }
 
+    public:
+        void add(const rule_t &newRule) {
+            all_rules.insert(newRule);
+            for (id_t trigger: newRule.triggers())
+                trigger_rules.emplace(trigger, newRule);
+        }
+
+        id_set update(value_storage &values, const id_set &hint, const bool to_fixed = true) const {
+            std::set<rule_t> toPerform;
+            for (id_t id: hint) {
+                auto [beg, end] = trigger_rules.equal_range(id);
+                for (auto iter = beg; iter != end; ++iter)
+                    toPerform.emplace(iter->second);
+            }
+            return perform_rules(values, std::move(toPerform), to_fixed);
+        }
+
+        id_set refresh_rules(value_storage &values, std::set<rule_t> to_update, const bool to_fixed = true) const {
+            return perform_rules(values, std::move(to_update), to_fixed);
+        }
+
+        id_set refresh_all_rules(value_storage &values, const bool to_fixed = true) const {
+            return perform_rules(values, rules(), to_fixed);
+        }
+
         [[nodiscard]] std::set<rule_t> rules() const {
-            std::set<rule_t> rules;
-            for (const auto &rule: trigger_rules | std::views::values) rules.insert(rule);
-            return rules;
+            return all_rules;
         }
     };
 }

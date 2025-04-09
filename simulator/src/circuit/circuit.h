@@ -43,6 +43,10 @@ namespace hxon {
             return rules.update(values, hint);
         }
 
+        id_set refresh_all() {
+            return rules.refresh_all_rules(values);
+        }
+
         void put(const id_t id, value_t new_value) {
             values[id] = std::move(new_value);
         }
