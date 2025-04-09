@@ -15,37 +15,53 @@ namespace hxon {
         rule_set rules;
         value_storage values;
         id_set clocks;
-
     public:
-        void add_rule(const rule_t &newRule) {
-            rules.add(newRule);
+        void add_rule(const rule_t &new_rule) {
+            rules.add(new_rule);
         }
 
         void add_clock(const id_t id) {
             clocks.insert(id);
         }
 
-        id_set flip_clocks() {
-            for (const auto &clock: clocks) values[clock].flip();
-            return rules.update(values, clocks);
+        id_set flip(const id_set &ids) {
+            for (const auto &id: ids) values[id].flip();
+            return rules.update(values, ids);
         }
 
-        id_set update(id_t id, value_t newValue) {
-            values[id] = std::move(newValue);
+        id_set update(id_t id, value_t new_value) {
+            values[id] = std::move(new_value);
             return rules.update(values, {{id}});
         }
 
-        id_set update_batch(const value_storage &toUpdate) {
+        id_set update_batch(const value_storage &to_update) {
             id_set hint;
-            for (const auto &[id, value]: toUpdate) {
+            for (const auto &[id, value]: to_update) {
                 hint.insert(id);
                 values[id] = value;
             }
             return rules.update(values, hint);
         }
 
+        void put(const id_t id, value_t new_value) {
+            values[id] = std::move(new_value);
+        }
+
+        void put_batch(const value_storage &to_update) {
+            for (const auto &[id, value]: to_update)
+                values[id] = value;
+        }
+
         [[nodiscard]] value_t get_value(const id_t id) const {
             return values.at(id);
+        }
+
+        [[nodiscard]] std::set<rule_t> all_rules() const {
+            return rules.rules();
+        }
+
+        [[nodiscard]] id_set all_clocks() const {
+            return clocks;
         }
     };
 }
