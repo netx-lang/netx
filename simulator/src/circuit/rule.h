@@ -8,6 +8,7 @@
 #include "circuit_def.h"
 #include <memory>
 #include <utility>
+#include <ranges>
 
 namespace hxon {
     namespace impl {
@@ -218,22 +219,22 @@ namespace hxon {
     }
 
     class rule_set {
-        std::multimap<id_t, rule_t> triggerRules;
+        std::multimap<id_t, rule_t> trigger_rules;
 
     public:
         void add(const rule_t &newRule) {
             for (id_t trigger: newRule.triggers())
-                triggerRules.emplace(trigger, newRule);
+                trigger_rules.emplace(trigger, newRule);
         }
 
-        id_set update(value_storage &values, const id_set &hint, const bool toFixed = true) const {
+        id_set update(value_storage &values, const id_set &hint, const bool to_fixed = true) const {
             id_set changed;
 
             id_set toConsider = hint, toConsiderSwap;
             std::set<rule_t> toPerform;
             do {
                 for (id_t id: toConsider) {
-                    auto [beg, end] = triggerRules.equal_range(id);
+                    auto [beg, end] = trigger_rules.equal_range(id);
                     for (auto iter = beg; iter != end; ++iter)
                         toPerform.emplace(iter->second);
                 }
@@ -241,16 +242,22 @@ namespace hxon {
                 for (const auto &rule: toPerform) {
                     auto ruleChanged = rule.perform(values);
                     toConsiderSwap.insert(ruleChanged.begin(), ruleChanged.end());
-                    changed.insert(ruleChanged.begin(), ruleChanged.end());
+                    changed += ruleChanged;
                 }
                 values.perform_delayed();
 
                 toConsider.clear();
                 toConsider.swap(toConsiderSwap);
                 toPerform.clear();
-            } while (toFixed && !toConsider.empty());
+            } while (to_fixed && !toConsider.empty());
 
             return changed;
+        }
+
+        [[nodiscard]] std::set<rule_t> rules() const {
+            std::set<rule_t> rules;
+            for (const auto &rule: trigger_rules | std::views::values) rules.insert(rule);
+            return rules;
         }
     };
 }

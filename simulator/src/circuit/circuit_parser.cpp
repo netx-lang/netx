@@ -278,7 +278,6 @@ namespace hxon {
     }
 
     static void parse_size(const nlohmann::json &json, parse_context &context) {
-        // NOLINT(*-no-recursion)
         const std::string member_type = json["type"];
         if (!member_type_map.contains(member_type)) throw std::runtime_error("Unknown member type " + member_type);
         if (json.contains("members"))
@@ -295,7 +294,8 @@ namespace hxon {
                 auto [id, selection] = parse_id(json["id"]);
                 if (selection) throw std::runtime_error("Clock member cannot be selected");
                 context.size_map[id] = 1;
-                if (context.circuit_input.contains(id)) context.circuit.add_clock(id);
+                context.circuit.add_clock(id);
+                if (context.circuit_input.contains(id)) context.circuit_input_clocks.insert(id);
                 break;
             }
             case member_type::COMPONENT:

@@ -11,16 +11,16 @@ namespace hxon {
     namespace impl {
         struct id_clock final : clock_impl {
             const id_t id;
-            const bool posEdge;
+            const bool pos_edge;
 
-            explicit id_clock(id_t id, const bool posEdge)
-                : clock_impl({id}), id(id), posEdge(posEdge) {
+            explicit id_clock(id_t id, const bool pos_edge)
+                : clock_impl({id}), id(id), pos_edge(pos_edge) {
             }
 
             bool triggered(value_storage &values) const override {
                 const auto &clk = values[id];
                 assert(!clk.empty());
-                if (posEdge) return static_cast<bool>(clk);
+                if (pos_edge) return static_cast<bool>(clk);
                 return !static_cast<bool>(clk);
             }
         };
