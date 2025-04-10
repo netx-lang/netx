@@ -194,4 +194,27 @@ class ElaboratorUnitTest {
                 """;
         testBothCompactAndExpanded(expected, actual);
     }
+
+    @Test
+    void testAccessPortConnection() {
+        var actual = """
+                component top : [] -> [o] {
+                    auto o <> sub <+> { a[0]=1'b1, b=4'b1101, a[1]=1'b0, a[2]=1'b1, a[3]=1'b0 };
+                }
+                component sub : [b] :: [a[i] | i in [0..4]] -> [c] {
+                    wire a, b, c of bit(4);
+                    c <> AND <> [a, b];
+                }
+                """;
+        var expected = """
+                component top : [] -> [o] {
+                    auto o <> sub <> [4'b1101, 1'b1, 1'b0, 1'b1, 1'b0];
+                }
+                component sub : [b] :: [a[i] | i in [0..4]] -> [c] {
+                    wire a, b, c of bit(4);
+                    c <> AND <> [a, b];
+                }
+                """;
+        testBothCompactAndExpanded(expected, actual);
+    }
 }
