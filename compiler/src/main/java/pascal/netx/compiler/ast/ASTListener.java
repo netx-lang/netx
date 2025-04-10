@@ -194,6 +194,14 @@ public interface ASTListener {
         exitDefault(node);
     }
 
+    default void enter(NamedSequentialExpr node) {
+        enterDefault(node);
+    }
+
+    default void exit(NamedSequentialExpr node) {
+        exitDefault(node);
+    }
+
     default void enter(RangeList node) {
         enterDefault(node);
     }

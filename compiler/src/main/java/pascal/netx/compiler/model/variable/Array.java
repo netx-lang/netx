@@ -35,13 +35,14 @@ public final class Array extends Composition {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         Array array = (Array) o;
         return Objects.equals(elements, array.elements);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(elements);
+        return Objects.hash(super.hashCode(), elements);
     }
 
     public static class Factory extends Mutable.Factory<Array> {

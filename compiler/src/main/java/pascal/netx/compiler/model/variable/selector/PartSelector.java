@@ -4,6 +4,8 @@ import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.variable.Int32Value;
 import pascal.netx.compiler.model.variable.IntegerValue;
 
+import java.util.Objects;
+
 public record PartSelector(IntegerValue start, IntegerValue end) implements Selector {
 
     public static PartSelector of(IntegerValue start, IntegerValue end) {
@@ -48,5 +50,17 @@ public record PartSelector(IntegerValue start, IntegerValue end) implements Sele
             throw new CompileCancellationException();
         }
         return PartSelector.of(Int32Value.of(resF), Int32Value.of(resT));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        PartSelector that = (PartSelector) o;
+        return Objects.equals(end, that.end) && Objects.equals(start, that.start);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(start, end);
     }
 }

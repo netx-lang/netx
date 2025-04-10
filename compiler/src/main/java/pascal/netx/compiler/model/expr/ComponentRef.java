@@ -6,7 +6,7 @@ import pascal.netx.compiler.model.scope.binding.ArgBindList;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 
-public final class ComponentRef extends PrimaryExpr {
+public final class ComponentRef extends PrimaryExpr implements InstantiationRef {
     private final AbstractComponentNode definition;
 
     private final Identifier identifier;

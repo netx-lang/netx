@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.expr.Expr;
+import pascal.netx.compiler.model.expr.InstantiationRef;
 import pascal.netx.compiler.model.expr.ParallelExpr;
 import pascal.netx.compiler.model.expr.VariableRef;
 import pascal.netx.compiler.model.variable.*;
@@ -39,7 +40,16 @@ public final class Entities {
         if (entity instanceof Value value) {
             return value;
         } else {
-            log.error("{}: Expected value but got {}", loc, entity);
+            log.error("{}: Expected rhs but got {}", loc, entity);
+            throw new CompileCancellationException();
+        }
+    }
+
+    public static InstantiationRef requiresInstantiationRef(SourceLoc loc, Entity entity) {
+        if (entity instanceof InstantiationRef instantiationRef) {
+            return instantiationRef;
+        } else {
+            log.error("{}: Expected instantiation ref but got {}", loc, entity);
             throw new CompileCancellationException();
         }
     }
@@ -66,7 +76,7 @@ public final class Entities {
         if (entity instanceof IntegerValue integerValue) {
             return integerValue;
         } else {
-            log.error("{}: Expected integer value but got {}", loc, entity);
+            log.error("{}: Expected integer rhs but got {}", loc, entity);
             throw new CompileCancellationException();
         }
     }
@@ -75,7 +85,7 @@ public final class Entities {
         if (entity instanceof BooleanValue booleanValue) {
             return booleanValue;
         } else {
-            log.error("{}: Expected boolean value but got {}", loc, entity);
+            log.error("{}: Expected boolean rhs but got {}", loc, entity);
             throw new CompileCancellationException();
         }
     }

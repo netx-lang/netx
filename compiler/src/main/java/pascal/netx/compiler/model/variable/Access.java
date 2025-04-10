@@ -10,6 +10,8 @@ import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 
+import java.util.Objects;
+
 public record Access(Data base, Selector selector) implements Mutable {
     private static final Logger log = LoggerFactory.getLogger(Access.class);
 
@@ -42,5 +44,17 @@ public record Access(Data base, Selector selector) implements Mutable {
     @Override
     public ComponentScope getParent() {
         return base.getParent();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Access access = (Access) o;
+        return Objects.equals(base, access.base) && Objects.equals(selector, access.selector);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(base, selector);
     }
 }

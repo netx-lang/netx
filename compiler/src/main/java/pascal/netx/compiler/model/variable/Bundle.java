@@ -45,13 +45,14 @@ public final class Bundle extends Composition {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        Bundle that = (Bundle) o;
-        return map.values().equals(that.map.values());
+        if (!super.equals(o)) return false;
+        Bundle bundle = (Bundle) o;
+        return Objects.equals(map, bundle.map);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(map.values());
+        return Objects.hash(super.hashCode(), map);
     }
 
     @Override

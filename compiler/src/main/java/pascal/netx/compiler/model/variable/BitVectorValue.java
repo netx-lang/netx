@@ -22,7 +22,7 @@ public record BitVectorValue(BitVector value) implements IntegerValue {
     @Override
     public int toInt() {
         if (value.size() > 32) {
-            log.warn("Truncating bit vector value {} to 32 bits", value);
+            log.warn("Truncating bit vector rhs {} to 32 bits", value);
         }
         return value.toInt();
     }

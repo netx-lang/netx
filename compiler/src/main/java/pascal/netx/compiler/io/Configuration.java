@@ -87,8 +87,8 @@ public record Configuration(boolean fullyExpand,
                     try {
                         return BitVectorValue.of(BitVector.parse(value));
                     } catch (Exception ignored) {
-                        log.error("Invalid argument value: {}", value);
-                        throw new IllegalArgumentException("Invalid argument value: " + value);
+                        log.error("Invalid argument rhs: {}", value);
+                        throw new IllegalArgumentException("Invalid argument rhs: " + value);
                     }
                 }
             }
