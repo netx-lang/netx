@@ -2,10 +2,8 @@ package pascal.netx.compiler.model.scope;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pascal.netx.compiler.ast.element.ComponentNode;
-import pascal.netx.compiler.ast.element.EnumNode;
-import pascal.netx.compiler.ast.element.ImportNode;
-import pascal.netx.compiler.elaborator.InterfaceElaborator;
+import pascal.netx.compiler.ast.element.*;
+import pascal.netx.compiler.elaborator.InterfaceRegister;
 import pascal.netx.compiler.model.expr.ImportRef;
 import pascal.netx.compiler.model.variable.BitVectorValue;
 import pascal.netx.compiler.model.variable.Bundle;
@@ -73,7 +71,7 @@ public final class PackageScope extends Scope {
 
     public class PackageDefManager {
         private final Map<Identifier, Bundle.Factory> interfaceDef = new HashMap<>();
-        private final Map<Identifier, ComponentNode> componentDef = new HashMap<>();
+        private final Map<Identifier, AbstractComponentNode> componentDef = new HashMap<>();
         private final Map<Identifier, ImportRef> importDef = new HashMap<>();
         private final Map<Identifier, Enum> enumDef = new HashMap<>();
 
@@ -131,7 +129,7 @@ public final class PackageScope extends Scope {
             return componentDef.containsKey(id);
         }
 
-        public ComponentNode getComponent(Identifier id) {
+        public AbstractComponentNode getComponent(Identifier id) {
             return Objects.requireNonNull(componentDef.get(id));
         }
 
@@ -149,9 +147,10 @@ public final class PackageScope extends Scope {
             return interfaceDef.get(id);
         }
 
-        public void addInterface(ComponentNode node) {
-            addComponent(node);
-            interfaceDef.put(node.getIdentifier(), new InterfaceElaborator(PackageScope.this).elaborate(node));
+        public void addInterface(InterfaceNode node) {
+            var factory = new InterfaceRegister(PackageScope.this).register(node);
+            interfaceDef.put(node.getIdentifier(), factory);
+            componentDef.put(node.getIdentifier(), node);
         }
     }
 }

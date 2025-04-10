@@ -6,6 +6,7 @@ import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.ComponentNode;
 import pascal.netx.compiler.ast.element.EnumNode;
 import pascal.netx.compiler.ast.element.ImportNode;
+import pascal.netx.compiler.ast.element.InterfaceNode;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.model.Signature;
 import pascal.netx.compiler.model.expr.ComponentRef;
@@ -82,12 +83,8 @@ public final class PackageElaborator {
             switch (element) {
                 case EnumNode _enum -> pack.defs().addEnum(_enum);
                 case ImportNode _import -> pack.defs().addImport(_import);
-                case ComponentNode component -> {
-                    switch (component.getKind()) {
-                        case COMPONENT -> pack.defs().addComponent(component);
-                        case INTERFACE -> pack.defs().addInterface(component);
-                    }
-                }
+                case ComponentNode component -> pack.defs().addComponent(component);
+                case InterfaceNode _interface -> pack.defs().addInterface(_interface);
             }
         }
     }

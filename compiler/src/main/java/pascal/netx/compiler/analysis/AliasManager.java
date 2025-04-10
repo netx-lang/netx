@@ -11,7 +11,6 @@ import pascal.netx.compiler.model.variable.Value;
 import pascal.netx.compiler.model.variable.Variable;
 import pascal.netx.compiler.model.variable.type.BitType;
 import pascal.netx.util.collection.UnionFind;
-import pascal.netx.util.exception.ShallNotReachHereError;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -60,9 +59,6 @@ public class AliasManager {
     }
 
     void setAsSourceRep(Signature sign, Variable inst) {
-        if (!inst.isUserDefined()) {
-            throw new ShallNotReachHereError("Cannot set a non-user-defined instance as a source representative");
-        }
         if (set.contains(inst)) {
             var root = set.find(inst);
             if (sourceRep.get(root) instanceof Value) {

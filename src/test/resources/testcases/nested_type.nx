@@ -16,10 +16,10 @@ component top: [d] -> [b] {
     wire c, d of bit(1);
     c <> NOT <> d;
     for (i in [0..4]) {
-        aa[i] <+> A <> [
+        aa[i] <> A <> [
             ADD <> [CAST <> i, CAST <> c],
             ADD <> [CAST <> i, CAST <> d]];
     }
-    a <+> A <> [2'b00, 2'b11];
-    b <+> B <> [a, aa, CAST <> c];
+    a <> A <> [2'b00, 2'b11];
+    b <> B <> [a, aa, CAST <> c];
 }

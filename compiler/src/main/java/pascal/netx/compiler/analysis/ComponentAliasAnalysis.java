@@ -20,7 +20,7 @@ public final class ComponentAliasAnalysis extends ComponentModelAnalysis {
 
         public void analyze() {
             exploreAnalysisScopes(scope);
-            anaScope.stream()
+            dominated.stream()
                     .map(ComponentScope::getAliases)
                     .forEach(manager::addAlias);
             manager.resolveRepresentatives();

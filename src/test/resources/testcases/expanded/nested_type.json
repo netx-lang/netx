@@ -110,7 +110,7 @@
         "output": ["b.b[3].right@8"]
       },
       {
-        "type": "builtin", "id": "CAST", "loc": "24:23",
+        "type": "builtin", "id": "CAST", "loc": "24:22",
         "input": ["c@10"],
         "output": ["b.c@9"]
       }

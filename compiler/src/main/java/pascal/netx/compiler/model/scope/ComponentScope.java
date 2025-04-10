@@ -30,7 +30,7 @@ public final class ComponentScope extends Scope {
      */
     private Signature signature;
 
-    ComponentScope(Scope parent, boolean isInterface, Identifier identifier) {
+    public ComponentScope(Scope parent, boolean isInterface, Identifier identifier) {
         super(parent);
         this.pack = switch (parent) {
             case PackageScope scope -> scope;

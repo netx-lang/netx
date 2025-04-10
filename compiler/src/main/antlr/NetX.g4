@@ -1,7 +1,7 @@
 grammar NetX;
 
 design
-    : header? (import_statement | component | enum)+
+    : header? (import_statement | component | interface | enum)+
     ;
 
 header
@@ -28,8 +28,11 @@ lib_alias
     ;
 
 component
-    : kind='component' ID attributes? (':' component_type)? component_body
-    | kind='interface' ID attributes? ':' type=expression component_body
+    : 'component' ID attributes? (':' component_type)? component_body
+    ;
+
+interface
+    : 'interface' ID attributes? ':' type=expression component_body
     ;
 
 enum
@@ -97,7 +100,6 @@ expression
     | lhs=expression op='||' rhs=expression                         # BinaryExpr
     | lhs=expression op='::' rhs=expression                         # BinaryExpr
     | lhs=expression op='<>' rhs=expression                         # BinaryExpr
-    | lhs=expression op='<+>' rhs=expression                        # BinaryExpr
     | 'if' cond=expression
       'then' thenBranch=expression
       'else' elseBranch=expression                                  # ConditionalExpr

@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.ASTListener;
 import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.ComponentInstantiationNode;
-import pascal.netx.compiler.ast.element.ComponentNode;
+import pascal.netx.compiler.ast.element.InterfaceNode;
 import pascal.netx.compiler.exception.TypeCheckingException;
 
 public final class InterfaceChecker extends ASTAnalysis implements ASTListener {
@@ -22,14 +22,8 @@ public final class InterfaceChecker extends ASTAnalysis implements ASTListener {
     }
 
     @Override
-    public void enter(ComponentNode node) {
-        if (node.getKind() == ComponentNode.Kind.INTERFACE) {
-            insideInterface = true;
-            if (!node.getAttributes().isEmpty()) {
-                log.error("{}: Interface cannot have attributes", node.getSourceLoc());
-                throw new TypeCheckingException();
-            }
-        }
+    public void enter(InterfaceNode node) {
+        insideInterface = true;
     }
 
     @Override
@@ -41,9 +35,7 @@ public final class InterfaceChecker extends ASTAnalysis implements ASTListener {
     }
 
     @Override
-    public void exit(ComponentNode node) {
-        if (node.getKind() == ComponentNode.Kind.INTERFACE) {
-            insideInterface = false;
-        }
+    public void exit(InterfaceNode node) {
+        insideInterface = false;
     }
 }
