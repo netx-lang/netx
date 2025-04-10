@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.element.*;
 import pascal.netx.compiler.ast.expr.ExprNode;
 import pascal.netx.compiler.exception.CompileCancellationException;
-import pascal.netx.compiler.exception.TypeCheckingException;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.model.EntityList;
 import pascal.netx.compiler.model.Signature;
@@ -16,15 +15,16 @@ import pascal.netx.compiler.model.scope.binding.MonoBinding;
 import pascal.netx.compiler.model.scope.binding.MultiBinding;
 import pascal.netx.compiler.model.scope.binding.OrderedArgBindList;
 import pascal.netx.compiler.model.variable.Array;
-import pascal.netx.compiler.model.variable.Bundle;
-import pascal.netx.compiler.model.variable.Composition;
 import pascal.netx.compiler.model.variable.Variable;
 import pascal.netx.compiler.model.variable.type.ArrayType;
 import pascal.netx.compiler.model.variable.type.InterfaceType;
 import pascal.netx.compiler.model.variable.type.Type;
+import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import static pascal.netx.compiler.model.Utils.*;
 
@@ -43,19 +43,44 @@ final class ComponentElaborator {
         this.evaluator = scope.getEvaluator();
     }
 
-    public void build(ComponentNode node) {
-        buildComponentElements(node.getElements());
+    public void build(AbstractComponentNode def) {
+        switch (def) {
+            case ComponentNode node -> buildComponent(node);
+            case InterfaceNode node -> buildInterface(node);
+        }
+    }
+
+    public void buildComponent(ComponentNode node) {
+        buildElements(node.getElements());
         buildComponentIO(node);
     }
 
-    private void buildComponentIO(ComponentNode node) {
+    public void buildInterface(InterfaceNode node) {
+        buildElements(node.getElements());
+        buildInterfaceIO(node);
+    }
+
+    void buildComponentIO(ComponentNode node) {
         var sourceLoc = node.getSourceLoc();
         var type = node.getType();
         extractIOList(sourceLoc, type.getInput()).forEach(scope::addInput);
         extractIOList(sourceLoc, type.getOutput()).forEach(scope::addOutput);
     }
 
-    private List<Variable> extractIOList(SourceLoc sourceLoc, ExprNode node) {
+    void buildInterfaceIO(InterfaceNode node) {
+        var loc = node.getSourceLoc();
+        var identifier = node.getIdentifier();
+        var factory = scope.getPackage().defs().getInterface(identifier);
+        extractIOList(loc, node.getType()).forEach(scope::addInput);
+        var product = factory.create(scope, Identifier.of(InterfaceNode.OUTPUT_NAME).setSourceLoc(loc));
+        var productIter = product.getElements().iterator();
+        for (var input : scope.getInputs()) {
+            scope.getManager().assign(loc, productIter.next(), input);
+        }
+        scope.addOutput(product);
+    }
+
+    List<Variable> extractIOList(SourceLoc sourceLoc, ExprNode node) {
         var entity = evaluator.evaluate(node);
         if (entity instanceof EntityList(var list)) {
             List<Variable> result = new ArrayList<>();
@@ -75,13 +100,13 @@ final class ComponentElaborator {
         throw new CompileCancellationException();
     }
 
-    private void buildComponentElements(List<ComponentElement> list) {
+    void buildElements(List<ComponentElement> list) {
         for (var element : list) {
-            buildComponentElement(element);
+            buildElement(element);
         }
     }
 
-    private void buildComponentElement(ComponentElement element) {
+    private void buildElement(ComponentElement element) {
         switch (element) {
             case LoopNode loop -> buildLoop(loop);
             case BlockNode block -> buildBlock(block);
@@ -93,7 +118,7 @@ final class ComponentElaborator {
     }
 
     private void buildBlock(BlockNode block) {
-        buildComponentElements(block.getElements());
+        buildElements(block.getElements());
     }
 
     private void buildLoop(LoopNode loop) {
@@ -101,7 +126,7 @@ final class ComponentElaborator {
         var id = generator.getHead();
         for (var entity : evaluator.castToList(generator.getFrom()).entities()) {
             scope.overrideBindings(MonoBinding.of(id, entity));
-            buildComponentElement(loop.getElement());
+            buildElement(loop.getElement());
             scope.restoreBindings();
         }
     }
@@ -109,9 +134,9 @@ final class ComponentElaborator {
     private void buildBranch(BranchNode branch) {
         var condition = evaluator.evaluateToBoolean(branch.getCondition());
         if (condition.value()) {
-            buildComponentElement(branch.getThenBranch());
+            buildElement(branch.getThenBranch());
         } else {
-            buildComponentElement(branch.getElseBranch());
+            buildElement(branch.getElseBranch());
         }
     }
 
@@ -184,42 +209,6 @@ final class ComponentElaborator {
             };
         }
 
-        private static List<PrimaryExpr> leftMostAtomsOf(Expr expr) {
-            List<PrimaryExpr> result = new ArrayList<>();
-            switch (expr) {
-                case PrimaryExpr e -> result.add(e);
-                case SequentialExpr e -> result.addAll(leftMostAtomsOf(e.lhs()));
-                case ParallelExpr e -> e.exprs().forEach(sub -> result.addAll(leftMostAtomsOf(sub)));
-                case DecoratedExpr e -> {
-                    if (Objects.requireNonNull(e.decorator()) != DecoratedExpr.Decorator.SINK) {
-                        result.addAll(leftMostAtomsOf(e.operand()));
-                    }
-                }
-            }
-            return result;
-        }
-
-        /**
-         * Check whether the type of e_1 and e_2 matches in e_1 <+> e_2
-         */
-        private static void checkTiedType(SourceLoc sourceLoc, List<Bundle> to, List<PrimaryExpr> from) {
-            int size = requiresMatchedSize(sourceLoc, from, to);
-            for (int i = 0; i < size; i++) {
-                if (from.get(i) instanceof ComponentRef fi
-                        && fi.getDefinition().getKind() == ComponentNode.Kind.INTERFACE) {
-                    var lhsID = to.get(i).getType().getIdentifier();
-                    var rhsID = fi.getDefinition().getIdentifier();
-                    if (lhsID.equals(rhsID)) {
-                        continue;
-                    }
-                    log.error("{}: Unmatched type in isTied expression {} and {}", sourceLoc, lhsID, rhsID);
-                } else {
-                    log.error("{}: Expected interface but got {}", sourceLoc, from.get(i));
-                }
-                throw new TypeCheckingException();
-            }
-        }
-
         public void instantiate(Expr type) {
             doInstantiate(type);
         }
@@ -260,18 +249,9 @@ final class ComponentElaborator {
             }
             lhs = doInstantiate(sequentialExpr.lhs());
 
-            List<? extends Variable> receiver;
-            if (sequentialExpr.isTied()) {
-                var bundles = lhs.source().stream().map(Bundle.class::cast).toList();
-                checkTiedType(sourceLoc, bundles, leftMostAtomsOf(sequentialExpr.rhs()));
-                receiver = bundles.stream().map(Composition::getElements).flatMap(Collection::stream).toList();
-            } else {
-                receiver = lhs.source();
-            }
-
-            int size = requiresMatchedSize(sourceLoc, receiver, rhs.target());
+            int size = requiresMatchedSize(sourceLoc, lhs.source(), rhs.target());
             for (int i = 0; i < size; ++i) {
-                scope.getManager().assign(sourceLoc, receiver.get(i), rhs.target().get(i));
+                scope.getManager().assign(sourceLoc, lhs.source().get(i), rhs.target().get(i));
             }
             return ComponentPort.of(lhs.target(), rhs.source());
         }
@@ -321,21 +301,20 @@ final class ComponentElaborator {
 
         private ComponentPort instantiateComponentRef(ComponentRef ref) {
             var node = ref.getDefinition();
-            ComponentScope component = switch (ref.getDefinition().getKind()) {
-                case COMPONENT -> ComponentScope.newComponent(scope, ref.getIdentifier());
-                case INTERFACE -> ComponentScope.newInterface(scope, ref.getIdentifier());
-            };
+            var child = ref.isInterface()
+                    ? ComponentScope.newInterface(scope, ref.getIdentifier())
+                    : ComponentScope.newComponent(scope, ref.getIdentifier());
 
             var attributes = extractAttributes(ref, node);
             for (var entry : attributes.entrySet()) {
-                component.bind(entry.getKey(), entry.getValue());
+                child.bind(entry.getKey(), entry.getValue());
             }
-            component.setAttributes(attributes);
-            new ComponentElaborator(config, component).build(node);
+            child.setAttributes(attributes);
+            new ComponentElaborator(config, child).build(node);
             if (!config.fullyExpand()) {
-                setSignatureFor(ref, component);
+                setSignatureFor(ref, child);
             }
-            return ComponentPort.of(component.getOutputs(), component.getInputs());
+            return ComponentPort.of(child.getOutputs(), child.getInputs());
         }
 
         private void setSignatureFor(ComponentRef ref, ComponentScope scope) {
@@ -343,7 +322,7 @@ final class ComponentElaborator {
             scope.setSignature(signature);
         }
 
-        private Attributes extractAttributes(ComponentRef ref, ComponentNode node) {
+        private Attributes extractAttributes(ComponentRef ref, AbstractComponentNode node) {
             Attributes attributes = new Attributes();
             switch (ref.getArgList()) {
                 case OrderedArgBindList(var args) -> {

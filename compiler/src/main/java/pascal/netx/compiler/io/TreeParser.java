@@ -38,6 +38,7 @@ public final class TreeParser {
             switch (child) {
                 case Import_statementContext sub -> parseImportInto(sub, result);
                 case ComponentContext sub -> parseComponentInto(sub, result);
+                case InterfaceContext sub -> parseInterfaceInto(sub, result);
                 case EnumContext sub -> parseEnumInto(sub, result);
                 case HeaderContext _ -> {
                     // do nothing
@@ -54,6 +55,10 @@ public final class TreeParser {
 
     static void parseComponentInto(ComponentContext ctx, PackageNode design) {
         design.addDefinition(parseComponent(ctx));
+    }
+
+    static  void parseInterfaceInto(InterfaceContext ctx, PackageNode design) {
+        design.addDefinition(parseInterface(ctx));
     }
 
     static void parseEnumInto(EnumContext ctx, PackageNode design) {
@@ -80,29 +85,28 @@ public final class TreeParser {
     }
 
     static ComponentNode parseComponent(ComponentContext ctx) {
-        ComponentNode.Kind kind = switch (ctx.kind.getText()) {
-            case "component" -> ComponentNode.Kind.COMPONENT;
-            case "interface" -> ComponentNode.Kind.INTERFACE;
-            default -> throw new ShallNotReachHereError();
-        };
-
-        ComponentTypeNode type = switch (kind) {
-            case COMPONENT -> parseComponentType(ctx.component_type(), locationOf(ctx.getStart()));
-            case INTERFACE -> {
-                var port = parseExpr(ctx.type);
-                yield ComponentTypeNode.of(port, port).setSourceLoc(locationOf(ctx.type.getStart()));
-            }
-        };
-
         var identifier = parseIdentifier(ctx.ID());
         var attributes = parseComponentAttributes(ctx);
-        var result= switch (ctx.component_body()) {
+        var type = parseComponentType(ctx.component_type(), locationOf(ctx.getStart()));
+        var result = switch (ctx.component_body()) {
             case ImplementedContext body ->
-                    ComponentNode.of(kind, identifier, type, attributes, parseElements(body.element()));
+                    ComponentNode.of(identifier, type, attributes, parseElements(body.element()));
             case PassedContext _ ->
-                    ComponentNode.ofPassed(kind, identifier, type, attributes);
+                    ComponentNode.ofPassed(identifier, type, attributes);
             default -> throw new ShallNotReachHereError();
         };
+        return result.setSourceLoc(locationOf(ctx.getStart()));
+    }
+
+    static InterfaceNode parseInterface(InterfaceContext ctx) {
+        if (!(ctx.component_body() instanceof ImplementedContext body)) {
+            log.error("{}: Expected an implemented interface", locationOf(ctx.getStart()));
+            throw new CompileCancellationException();
+        }
+        var type = parseExpr(ctx.expression());
+        var identifier = parseIdentifier(ctx.ID());
+        var attributes = parseInterfaceAttributes(ctx);
+        var result = InterfaceNode.of(identifier, type, attributes, parseElements(body.element()));
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
@@ -116,8 +120,10 @@ public final class TreeParser {
 
     private static List<ImportNode> parseWildcardImport(Import_statementContext ctx, WildcardLibRefContext refCtx) {
         return List.of(
-                ImportNode.ofWildcard(refCtx.ID().stream().map(TreeParser::parseIdentifier).toList()
-                ).setSourceLoc(locationOf(ctx.getStart())));
+                ImportNode.ofWildcard(
+                        refCtx.ID().stream().map(TreeParser::parseIdentifier).toList()
+                ).setSourceLoc(locationOf(ctx.getStart()))
+        );
     }
 
     private static List<ImportNode> parseCommonImport(Import_statementContext ctx, CommonLibRefContext refCtx) {
@@ -154,6 +160,14 @@ public final class TreeParser {
         }
         var iter = aliasID.iterator();
         results.forEach(stmt -> stmt.setAlias(iter.next()));
+    }
+
+    static List<Identifier> parseInterfaceAttributes(InterfaceContext ctx) {
+        if (ctx.attributes() == null) {
+            return List.of();
+        }
+        return ctx.attributes().ID().stream()
+                .map(TreeParser::parseIdentifier).toList();
     }
 
     static List<Identifier> parseComponentAttributes(ComponentContext ctx) {

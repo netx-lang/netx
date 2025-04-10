@@ -6,7 +6,7 @@ interface Package: [valid, load] {
 component top: [pin] -> [pout] {
     bundle pin[4] of Package;
     bundle pout of Package;
-    pout <+> Package <> [
+    pout <> Package <> [
         AND(4) <> [pin[i].valid | i in [0..4]],
         ADD(4) <> [pin[i].load  | i in [0..4]]
     ];

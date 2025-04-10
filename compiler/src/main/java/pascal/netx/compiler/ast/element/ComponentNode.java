@@ -1,38 +1,29 @@
 package pascal.netx.compiler.ast.element;
 
 import pascal.netx.compiler.ast.ASTListener;
-import pascal.netx.compiler.ast.ASTNode;
 import pascal.netx.util.lang.Identifier;
 
 import java.util.List;
 import java.util.Objects;
 
-public final class ComponentNode extends ASTNode implements PackageElement {
-    private Kind kind;
-    private Identifier identifier;
-    private List<Identifier> attributes;
+public final class ComponentNode extends AbstractComponentNode implements PackageElement {
     private ComponentTypeNode type;
     private boolean passed;
-    private List<ComponentElement> elements;
 
-    private ComponentNode(Kind kind, Identifier identifier, ComponentTypeNode type,
+    private ComponentNode(Identifier identifier, ComponentTypeNode type,
                           List<Identifier> attributes, boolean passed, List<ComponentElement> elements) {
-        this.identifier = identifier;
+        super(identifier, attributes, elements);
         this.type = type;
-        this.attributes = attributes;
-        this.elements = elements;
-        this.kind = kind;
         this.passed = passed;
     }
 
-    public static ComponentNode of(Kind kind, Identifier id, ComponentTypeNode type,
+    public static ComponentNode of(Identifier id, ComponentTypeNode type,
                                    List<Identifier> arguments, List<ComponentElement> elements) {
-        return new ComponentNode(kind, id, type, arguments, false, elements);
+        return new ComponentNode(id, type, arguments, false, elements);
     }
 
-    public static ComponentNode ofPassed(Kind kind, Identifier id, ComponentTypeNode type,
-                                   List<Identifier> arguments) {
-        return new ComponentNode(kind, id, type, arguments, true, List.of());
+    public static ComponentNode ofPassed(Identifier id, ComponentTypeNode type, List<Identifier> arguments) {
+        return new ComponentNode(id, type, arguments, true, List.of());
     }
 
     @Override
@@ -45,44 +36,12 @@ public final class ComponentNode extends ASTNode implements PackageElement {
         listener.exit(this);
     }
 
-    public Identifier getIdentifier() {
-        return identifier;
-    }
-
-    public void setIdentifier(Identifier identifier) {
-        this.identifier = identifier;
-    }
-
     public ComponentTypeNode getType() {
         return type;
     }
 
     public void setType(ComponentTypeNode type) {
         this.type = type;
-    }
-
-    public List<ComponentElement> getElements() {
-        return elements;
-    }
-
-    public void setElements(List<ComponentElement> elements) {
-        this.elements = elements;
-    }
-
-    public List<Identifier> getAttributes() {
-        return attributes;
-    }
-
-    public void setAttributes(List<Identifier> attributes) {
-        this.attributes = attributes;
-    }
-
-    public void setKind(Kind kind) {
-        this.kind = kind;
-    }
-
-    public Kind getKind() {
-        return kind;
     }
 
     public boolean isPassed() {
@@ -120,9 +79,5 @@ public final class ComponentNode extends ASTNode implements PackageElement {
         elements.forEach(stmt -> sb.append("\n").append(stmt));
         sb.append("\n}");
         return sb.toString();
-    }
-
-    public enum Kind {
-        COMPONENT, INTERFACE,
     }
 }

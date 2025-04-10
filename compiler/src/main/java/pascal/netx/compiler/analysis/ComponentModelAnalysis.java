@@ -32,38 +32,40 @@ public abstract class ComponentModelAnalysis extends ModelAnalysis {
         protected final ComponentScope scope;
 
         /**
-         * Analysis scopes including the scope itself and its sub-scopes standing for builtin components;
+         * Dominated scopes are those fully influenced by the aliases in current scope,
+         * including the scope itself, instantiated builtin components, and interfaces.
          */
-        protected final List<ComponentScope> anaScope = new LinkedList<>();
+        protected final List<ComponentScope> dominated = new LinkedList<>();
 
         /**
-         * User defined sub-scopes.
+         * IO related scopes are those whose inputs and outputs are influenced by the aliases in current scope,
+         * including the instantiated user-defined components.
          */
-        protected final List<ComponentScope> subUserDef = new LinkedList<>();
+        protected final List<ComponentScope> ioRelated = new LinkedList<>();
 
         protected Analyzer(ComponentScope scope) {
             this.scope = scope;
         }
 
         protected void exploreAnalysisScopes(ComponentScope scope) {
-            anaScope.add(scope);
+            dominated.add(scope);
             for (var kid : scope.getChildren()) {
                 var child = (ComponentScope) kid;
-                if (child.isBuiltin()) {
-                    anaScope.add(child);
+                if (child.isBuiltin() || child.isInterface()) {
+                    dominated.add(child);
                 } else {
-                    subUserDef.add(child);
+                    ioRelated.add(child);
                 }
             }
         }
 
         public void eliminateDuplicatedData(Predicate<Entity> needRemove, Function<Variable, Variable> repOf) {
-            anaScope.forEach(scope -> {
+            dominated.forEach(scope -> {
                 scope.getBinding().releaseIf(needRemove);
                 scope.getInputs().replaceAll(repOf::apply);
                 scope.getOutputs().replaceAll(repOf::apply);
             });
-            subUserDef.forEach(scope -> {
+            ioRelated.forEach(scope -> {
                 scope.getInputs().replaceAll(repOf::apply);
                 scope.getOutputs().replaceAll(repOf::apply);
             });

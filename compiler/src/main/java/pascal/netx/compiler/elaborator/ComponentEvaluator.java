@@ -351,8 +351,7 @@ public final class ComponentEvaluator {
 
     private Entity evaluateBinaryExpr(BinaryExpr expr) {
         return switch (expr.getOp()) {
-            case COMBINE -> evaluateSequentialExpr(expr, false);
-            case TIE -> evaluateSequentialExpr(expr, true);
+            case COMBINE -> evaluateSequentialExpr(expr);
             case CONCAT -> evaluateListConcat(expr);
             case EQ, NE -> evaluateEqualityExpr(expr);
             case ADD, SUB, MUL, DIV, MOD, POW, AND, OR, XOR, XNOR,
@@ -389,24 +388,12 @@ public final class ComponentEvaluator {
         return EntityList.of(result);
     }
 
-    private Entity evaluateSequentialExpr(BinaryExpr expr, boolean isTied) {
+    private Entity evaluateSequentialExpr(BinaryExpr expr) {
         var leftLoc = expr.getLhs().getSourceLoc();
         var rightLoc = expr.getRhs().getSourceLoc();
-        Expr lhs, rhs = castToInstantiateExpr(rightLoc, evaluate(expr.getRhs()));
-        if (isTied) {
-            var lhsEntity = evaluate(expr.getLhs());
-            if (lhsEntity instanceof EntityList(var list)) {
-                return ParallelExpr.from(list.stream()
-                        .map(element -> requiresDataBundle(leftLoc, element))
-                        .map(Expr.class::cast).toList());
-            } else {
-                lhs = VariableRef.of(requiresMutable(leftLoc, lhsEntity), leftLoc);
-            }
-            return SequentialExpr.ofTied(lhs, rhs);
-        } else {
-            lhs = castToInstantiateExpr(leftLoc, evaluate(expr.getLhs()));
-        }
-        return SequentialExpr.ofSplit(lhs, rhs);
+        var rhs = castToInstantiateExpr(rightLoc, evaluate(expr.getRhs()));
+        var lhs = castToInstantiateExpr(leftLoc, evaluate(expr.getLhs()));
+        return SequentialExpr.of(lhs, rhs);
     }
 
     private Entity evaluateSymbolExpr(SymbolExpr expr) {

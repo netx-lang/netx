@@ -62,6 +62,10 @@ public record Configuration(boolean fullyExpand,
             return this;
         }
 
+        public Builder forInterface() {
+            return forExpanded();
+        }
+
         public Builder withTop(String literal) {
             var parts = literal.split("\\.");
             if (parts.length == 1) {
