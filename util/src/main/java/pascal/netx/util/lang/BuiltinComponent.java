@@ -38,7 +38,7 @@ public enum BuiltinComponent {
     }
 
     public static BuiltinComponent of(String name) {
-        return BuiltinComponent.valueOf(name.toUpperCase());
+        return BuiltinComponent.valueOf(name);
     }
 
 
@@ -47,7 +47,7 @@ public enum BuiltinComponent {
     }
 
     public static boolean isBuiltin(String name) {
-        return VALUES.contains(name.toUpperCase());
+        return VALUES.contains(name);
     }
 
     public static boolean isBuiltin(Identifier id) {
