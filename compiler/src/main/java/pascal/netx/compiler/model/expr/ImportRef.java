@@ -6,7 +6,7 @@ import pascal.netx.util.lang.SourceLoc;
 
 import java.util.List;
 
-public final class ImportRef extends PrimaryExpr {
+public final class ImportRef extends PrimaryExpr implements InstantiationRef {
     private final List<Identifier> references;
     private final SourceLoc sourceLoc;
 

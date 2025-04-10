@@ -56,9 +56,9 @@ public class NXVisualizer {
 
     private String getPortName(Variable input) {
         return switch (input) {
-            case Data data -> "port" +allocateComponentId(data.getParent()) + "_" + data.getIndex();
+            case Data data -> "lhs" + allocateComponentId(data.getParent()) + "_" + data.getIndex();
             case Access access -> {
-                var baseName = "port" +allocateComponentId(access.getParent()) + "_" + access.getIndex();
+                var baseName = "lhs" + allocateComponentId(access.getParent()) + "_" + access.getIndex();
                 var name = switch (access.selector()) {
                     case BitSelector(var index) -> baseName + "_" + index.toInt();
                     case PartSelector(var from, var to) -> baseName + "_" + from.toInt() + "_" + to.toInt();
@@ -124,13 +124,13 @@ public class NXVisualizer {
         StringBuilder html = new StringBuilder();
         html.append("<table bgcolor=\"SeaShell\">").append("<tr>").append("<td bgcolor=\"Bisque\"><table>");
         for (int i = 0; i < scope.getInputs().size(); i++) {
-            html.append("<tr><td port=\"in_").append(i).append("\">•</td></tr>");
+            html.append("<tr><td lhs=\"in_").append(i).append("\">•</td></tr>");
         }
         html.append("</table></td>");
         html.append("<td>").append(scope.getIdentifier().name()).append("</td>");
         html.append("<td bgcolor=\"Bisque\"><table>");
         for (int i = 0; i < scope.getOutputs().size(); i++) {
-            html.append("<tr><td port=\"out_").append(i).append("\">•</td></tr>");
+            html.append("<tr><td lhs=\"out_").append(i).append("\">•</td></tr>");
         }
         html.append("</table></td>");
         html.append("</tr></table>");

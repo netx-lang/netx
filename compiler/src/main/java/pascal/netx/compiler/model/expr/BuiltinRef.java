@@ -4,7 +4,7 @@ import pascal.netx.compiler.model.scope.binding.ArgBindList;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.SourceLoc;
 
-public final class BuiltinRef extends PrimaryExpr {
+public final class BuiltinRef extends PrimaryExpr implements InstantiationRef {
     private final BuiltinComponent builtin;
     private final SourceLoc sourceLoc;
 

@@ -26,14 +26,6 @@ public final class MultiBinding implements Binding, ArgBindList {
         return binding;
     }
 
-    public static MultiBinding of(List<Map.Entry<Identifier, Entity>> entries) {
-        var binding = new MultiBinding();
-        for (var entry : entries) {
-            binding.bind(entry.getKey(), entry.getValue());
-        }
-        return binding;
-    }
-
     public MultiBinding copyOf() {
         var binding = new MultiBinding();
         binding.bindings.putAll(bindings);

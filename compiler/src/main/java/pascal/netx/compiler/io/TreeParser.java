@@ -272,6 +272,7 @@ public final class TreeParser {
             case NumberExprContext sub -> parseNumberExpr(sub);
             case AccessExprContext sub -> parseAccessExpr(sub);
             case BinaryExprContext sub -> parseBinaryExpr(sub);
+            case SymbolWithPortExprContext sub -> parsePortExpr(sub);
             case ConditionalExprContext sub -> parseConditionalExpr(sub);
             case ParenExprContext sub -> parseExpr(sub.expression());
             default -> throw new ShallNotReachHereError();
@@ -327,6 +328,16 @@ public final class TreeParser {
     static BindingNode parseBinding(BindingContext ctx) {
         return BindingNode.of(parseSymbolExpr(ctx.symbol()), parseExpr(ctx.expression()))
                 .setSourceLoc(locationOf(ctx.getStart()));
+    }
+
+    static ExprNode parsePortExpr(SymbolWithPortExprContext ctx) {
+        List<NamedSequentialExpr.PortAssign> ports = new ArrayList<>();
+        for (var assign : ctx.port_assign()) {
+            var lhs = parseExpr(assign.lhs);
+            var rhs = parseExpr(assign.rhs);
+            ports.add(new NamedSequentialExpr.PortAssign(lhs, rhs));
+        }
+        return NamedSequentialExpr.of(parseSymbolExpr(ctx.symbol()), ports);
     }
 
     static ExprNode parseUnaryExpr(UnaryExprContext ctx) {
@@ -388,16 +399,21 @@ public final class TreeParser {
         if (!ctx.expression().isEmpty()) {
             result = CallSymbolExpr.fromOrder(head, parseExprList(ctx.expression()));
         } else if (!ctx.attribute_assign().isEmpty()) {
-            var parameters = ctx.attribute_assign().stream()
-                    .map(assign -> Pair.of(
-                            parseIdentifier(assign.ID()),
-                            parseExpr(assign.expression())))
-                    .toList();
-            result = CallSymbolExpr.fromAssign(head, parameters);
+            result = CallSymbolExpr.fromAssign(head, parseAttrAssigns(ctx.attribute_assign()));
         } else {
             result = CallSymbolExpr.ofEmpty(head);
         }
         return result.setSourceLoc(locationOf(ctx.getStart()));
+    }
+
+    static List<Pair<Identifier, ExprNode>> parseAttrAssigns(List<Attribute_assignContext> list) {
+        List<Pair<Identifier, ExprNode>> result = new ArrayList<>();
+        for (var assign : list) {
+            var id = parseIdentifier(assign.ID());
+            var expr = parseExpr(assign.expression());
+            result.add(Pair.of(id, expr));
+        }
+        return result;
     }
 
     static ExprNode parseConditionalExpr(ConditionalExprContext ctx) {

@@ -15,6 +15,7 @@ import pascal.netx.compiler.model.scope.binding.MonoBinding;
 import pascal.netx.compiler.model.scope.binding.MultiBinding;
 import pascal.netx.compiler.model.scope.binding.OrderedArgBindList;
 import pascal.netx.compiler.model.variable.Array;
+import pascal.netx.compiler.model.variable.Mutable;
 import pascal.netx.compiler.model.variable.Variable;
 import pascal.netx.compiler.model.variable.type.ArrayType;
 import pascal.netx.compiler.model.variable.type.InterfaceType;
@@ -22,10 +23,9 @@ import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
+import static pascal.netx.compiler.model.Entities.requiresMutable;
 import static pascal.netx.compiler.model.Utils.*;
 
 final class ComponentElaborator {
@@ -215,10 +215,11 @@ final class ComponentElaborator {
 
         ComponentPort doInstantiate(Expr expr) {
             return switch (expr) {
-                case SequentialExpr sequential -> instantiateSequentialExpr(sequential);
-                case ParallelExpr parallel -> instantiateParallelExpr(parallel);
                 case PrimaryExpr primary -> instantiatePrimaryExpr(primary);
+                case ParallelExpr parallel -> instantiateParallelExpr(parallel);
                 case DecoratedExpr decorated -> instantiateDecoratedExpr(decorated);
+                case SequentialExpr sequential -> instantiateSequentialExpr(sequential);
+                case PortConnectionExpr connection -> instantiatePortConnectionExpr(connection);
             };
         }
 
@@ -233,10 +234,10 @@ final class ComponentElaborator {
 
         private ComponentPort instantiatePrimaryExpr(PrimaryExpr expr) {
             return switch (expr) {
-                case ComponentRef ref -> instantiateComponentRef(ref);
+                case ComponentRef ref -> ComponentPort.of(instantiateComponentRef(ref));
+                case BuiltinRef ref -> ComponentPort.of(instantiateBuiltinRef(ref));
+                case ImportRef ref -> ComponentPort.of(instantiateImportRef(ref));
                 case VariableRef ref -> instantiateInstanceRef(ref);
-                case BuiltinRef ref -> instantiateBuiltinRef(ref);
-                case ImportRef ref -> instantiateImportRef(ref);
             };
         }
 
@@ -254,6 +255,41 @@ final class ComponentElaborator {
                 scope.getManager().assign(sourceLoc, lhs.source().get(i), rhs.target().get(i));
             }
             return ComponentPort.of(lhs.target(), rhs.source());
+        }
+
+        private ComponentPort instantiatePortConnectionExpr(PortConnectionExpr connection) {
+            var loc = connection.loc();
+            var lhsScope = switch (connection.instance()) {
+                case ComponentRef componentRef -> instantiateComponentRef(componentRef);
+                case BuiltinRef builtinRef -> instantiateBuiltinRef(builtinRef);
+                case ImportRef importRef -> instantiateImportRef(importRef);
+            };
+
+            var lhs = ComponentPort.of(lhsScope);
+            Map<Mutable, ComponentPort> assigns = new HashMap<>();
+            for (var entry : connection.ports()) {
+                var port = doInstantiate(entry.rhs());
+                if (!(port.target().size() == 1)) {
+                    log.error("{}: Expect exactly one output of {} but got {}", loc, entry.rhs(), port.target());
+                    throw new CompileCancellationException();
+                }
+                var receiver = requiresMutable(loc, lhsScope.getEvaluator().evaluate(entry.lhs()));
+                assigns.put(receiver, port);
+            }
+
+            requiresMatchedSize(connection.loc(), assigns.size(), lhs.source());
+            for (var variable : lhs.source()) {
+                if (!(variable instanceof Mutable mutable)) {
+                    log.error("{}: Expected mutable variable but got {}", connection.loc(), variable);
+                    throw new CompileCancellationException();
+                }
+                if (!assigns.containsKey(mutable)) {
+                    log.error("{}: Missing assignment for {}", connection.loc(), variable);
+                    throw new CompileCancellationException();
+                }
+                scope.getManager().assign(connection.loc(), mutable, assigns.get(mutable).target().getFirst());
+            }
+            return ComponentPort.of(lhs.target, List.of());
         }
 
         private ComponentPort instantiateParallelExpr(ParallelExpr parallelExpr) {
@@ -275,7 +311,7 @@ final class ComponentElaborator {
             return ComponentPort.of(inst, inst);
         }
 
-        private ComponentPort instantiateImportRef(ImportRef ref) {
+        private ComponentScope instantiateImportRef(ImportRef ref) {
             SourceLoc sourceLoc = ref.getSourceLoc();
 
             var compiler = repoOf(scope).getManager().dispatchCompiler(sourceLoc, ref);
@@ -284,11 +320,10 @@ final class ComponentElaborator {
 
             component.setParent(scope);
             component.setPackage(scope.getPackage());
-
-            return ComponentPort.of(component.getOutputs(), component.getInputs());
+            return component;
         }
 
-        private ComponentPort instantiateBuiltinRef(BuiltinRef ref) {
+        private ComponentScope instantiateBuiltinRef(BuiltinRef ref) {
             ComponentScope component;
             if (argsHint != -1) {
                 component = factory.createBuiltInComponent(scope, ref, argsHint);
@@ -296,25 +331,25 @@ final class ComponentElaborator {
             } else {
                 component = factory.createBuiltInComponent(scope, ref);
             }
-            return ComponentPort.of(component.getOutputs(), component.getInputs());
+            return component;
         }
 
-        private ComponentPort instantiateComponentRef(ComponentRef ref) {
+        private ComponentScope instantiateComponentRef(ComponentRef ref) {
             var node = ref.getDefinition();
-            var child = ref.isInterface()
+            var component = ref.isInterface()
                     ? ComponentScope.newInterface(scope, ref.getIdentifier())
                     : ComponentScope.newComponent(scope, ref.getIdentifier());
 
             var attributes = extractAttributes(ref, node);
             for (var entry : attributes.entrySet()) {
-                child.bind(entry.getKey(), entry.getValue());
+                component.bind(entry.getKey(), entry.getValue());
             }
-            child.setAttributes(attributes);
-            new ComponentElaborator(config, child).build(node);
+            component.setAttributes(attributes);
+            new ComponentElaborator(config, component).build(node);
             if (!config.fullyExpand()) {
-                setSignatureFor(ref, child);
+                setSignatureFor(ref, component);
             }
-            return ComponentPort.of(child.getOutputs(), child.getInputs());
+            return component;
         }
 
         private void setSignatureFor(ComponentRef ref, ComponentScope scope) {
@@ -340,6 +375,10 @@ final class ComponentElaborator {
         private record ComponentPort(List<Variable> target, List<Variable> source) {
             public static ComponentPort of(List<Variable> target, List<Variable> source) {
                 return new ComponentPort(target, source);
+            }
+
+            public static ComponentPort of(ComponentScope scope) {
+                return new ComponentPort(scope.getOutputs(), scope.getInputs());
             }
         }
     }

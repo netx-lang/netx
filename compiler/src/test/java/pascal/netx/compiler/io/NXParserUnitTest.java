@@ -44,15 +44,15 @@ class NXParserUnitTest {
 
     @Test
     void testParseListExpr() {
-        var context = makeParser("[port | i in [0..5], let port = [1, x[i]]]").expression();
+        var context = makeParser("[lhs | i in [0..5], let lhs = [1, x[i]]]").expression();
         var listExpr = TreeParser.parseExpr(context);
         assertEquals(ListComprehension.of(
-                IdentifierExpr.of(Identifier.of("port")), List.of(
+                IdentifierExpr.of(Identifier.of("lhs")), List.of(
                         GeneratorQualifier.of(
                                 Identifier.of("i"),
                                 RangeList.of(IntNumber.of(0), IntNumber.of(5))),
                         BindingQualifier.of(BindingNode.of(
-                                IdentifierExpr.of(Identifier.of("port")),
+                                IdentifierExpr.of(Identifier.of("lhs")),
                                 CommonList.of(List.of(
                                         IntNumber.of(1),
                                         AccessExpr.of(

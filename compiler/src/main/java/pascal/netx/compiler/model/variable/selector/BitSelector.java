@@ -3,6 +3,8 @@ package pascal.netx.compiler.model.variable.selector;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.variable.IntegerValue;
 
+import java.util.Objects;
+
 public record BitSelector(IntegerValue index) implements Selector {
 
     public static BitSelector of(IntegerValue index) {
@@ -34,5 +36,17 @@ public record BitSelector(IntegerValue index) implements Selector {
             }
         }
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        BitSelector that = (BitSelector) o;
+        return Objects.equals(index, that.index);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(index);
     }
 }

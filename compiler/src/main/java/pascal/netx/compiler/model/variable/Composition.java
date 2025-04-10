@@ -7,6 +7,7 @@ import pascal.netx.util.lang.Identifier;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public abstract sealed class Composition implements Mutable permits Array, Bundle {
     protected final Type type;
@@ -61,5 +62,17 @@ public abstract sealed class Composition implements Mutable permits Array, Bundl
     @Override
     public String toString() {
         return id.toStringWithLoc();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Composition that = (Composition) o;
+        return index == that.index && Objects.equals(type, that.type) && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, id, index);
     }
 }
