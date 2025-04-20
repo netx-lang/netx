@@ -10,6 +10,7 @@
 
 namespace hxon {
     struct id_info {
+        std::string name;
         id_t id{};
         std::optional<std::pair<size_t, size_t> > selection;
     };
@@ -18,6 +19,7 @@ namespace hxon {
         id_info result;
         const auto pos_at = id.find('@');
         if (pos_at == std::string::npos) throw std::invalid_argument("Invalid ID");
+        result.name = id.substr(0, pos_at);
         if (const auto pos_l = id.find('[', pos_at + 1); pos_l != std::string::npos) {
             result.id = std::stoull(id.substr(pos_at + 1, pos_l - pos_at - 1));
             if (const auto pos_c = id.find(':', pos_l + 1); pos_c != std::string::npos) {
@@ -33,14 +35,14 @@ namespace hxon {
     }
 
     static clock_t parse_clock(const std::string &source, const nlohmann::json &attribute) {
-        auto [id, selection] = parse_id(source);
+        auto [name, id, selection] = parse_id(source);
         if (selection) throw std::invalid_argument("Clock cannot be selected");
         return data_factory::id_clock(id, attribute["isPosTrigger"] == "true");
     }
 
     static source_t parse_source(const std::string &source, const parse_context &context) {
         if (source.find('@') != std::string::npos) {
-            auto [id, selection] = parse_id(source);
+            auto [name, id, selection] = parse_id(source);
             if (selection) return data_factory::select_source(id, selection->first, selection->second);
             return data_factory::id_source(id, context.size_map.at(id));
         }
@@ -48,7 +50,7 @@ namespace hxon {
     }
 
     static sink_t parse_sink(const std::string &sink, const parse_context &context) {
-        auto [id, selection] = parse_id(sink);
+        auto [name, id, selection] = parse_id(sink);
         if (selection) return data_factory::select_sink(id, selection->first, selection->second);
         return data_factory::id_sink(id, context.size_map.at(id));
     }
@@ -277,22 +279,24 @@ namespace hxon {
         }
     }
 
-    static void parse_size(const nlohmann::json &json, parse_context &context) {
+    static void parse_name_size(const nlohmann::json &json, parse_context &context) {
         const std::string member_type = json["type"];
         if (!member_type_map.contains(member_type)) throw std::runtime_error("Unknown member type " + member_type);
         if (json.contains("members"))
             for (const auto &member: json["members"])
-                parse_size(member, context);
+                parse_name_size(member, context);
         switch (member_type_map.at(member_type)) {
             case member_type::WIRE: {
-                auto [id, selection] = parse_id(json["id"]);
+                auto [name, id, selection] = parse_id(json["id"]);
                 if (selection) throw std::runtime_error("Wire member cannot be selected");
+                context.name_map[name] = id;
                 context.size_map[id] = json["width"];
                 break;
             }
             case member_type::CLOCK: {
-                auto [id, selection] = parse_id(json["id"]);
+                auto [name, id, selection] = parse_id(json["id"]);
                 if (selection) throw std::runtime_error("Clock member cannot be selected");
+                context.name_map[name] = id;
                 context.size_map[id] = 1;
                 context.circuit.add_clock(id);
                 if (context.circuit_input.contains(id)) context.circuit_input_clocks.insert(id);
@@ -308,13 +312,13 @@ namespace hxon {
 
     static void parse_circuit_io(const nlohmann::json &json, parse_context &context) {
         for (auto &input: json.at("input")) {
-            auto [id, selection] = parse_id(input);
+            auto [name, id, selection] = parse_id(input);
             if (selection) throw std::runtime_error("Design input cannot be selected");
             context.circuit_input.insert(id);
         }
 
         for (auto &output: json.at("output")) {
-            auto [id, selection] = parse_id(output);
+            auto [name, id, selection] = parse_id(output);
             if (selection) throw std::runtime_error("Design output cannot be selected");
             context.circuit_output.insert(id);
         }
@@ -325,7 +329,7 @@ namespace hxon {
         context.members_total = json["totalData"];
         auto &design = json["design"];
         parse_circuit_io(design, context);
-        parse_size(design, context);
+        parse_name_size(design, context);
         parse_member(design, context);
 
         value_storage initial_values;
