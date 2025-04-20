@@ -5,6 +5,7 @@
 #ifndef SIZED_MPINT_H
 #define SIZED_MPINT_H
 
+#include <bitset>
 #include <boost/multiprecision/cpp_int.hpp>
 
 namespace hxon::impl {
@@ -51,7 +52,11 @@ namespace hxon::impl {
 
     public:
         friend std::ostream &operator<<(std::ostream &out, const sized_mpint &self) {
-            out << "sized_mpint(" << self.size() << "," << static_cast<long long>(self) << ")";
+            const auto num = static_cast<size_t>(self);
+            const auto size = self.size();
+            out << size << "'b";
+            for (size_t i = 1; i <= size; i++) out << ((num & 1ull << (size - i)) != 0);
+            out << " (" << static_cast<long long>(self) << ')';
             return out;
         }
 
