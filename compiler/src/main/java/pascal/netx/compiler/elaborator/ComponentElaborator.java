@@ -308,7 +308,11 @@ final class ComponentElaborator {
                 log.error("{}: Unexpected arguments in instance reference {}", sourceLoc, ref.getInstance());
                 throw new CompileCancellationException();
             }
-            return ComponentPort.of(inst, inst);
+            if (ref.getInstance() instanceof Mutable) {
+                return ComponentPort.of(inst, inst);
+            } else {
+                return ComponentPort.of(inst, List.of());
+            }
         }
 
         private ComponentScope instantiateImportRef(ImportRef ref) {

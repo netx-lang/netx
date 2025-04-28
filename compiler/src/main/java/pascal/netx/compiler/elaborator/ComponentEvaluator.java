@@ -330,7 +330,7 @@ public final class ComponentEvaluator {
                 yield ParallelExpr.from(result);
             }
             case Expr expr -> DecoratedExpr.of(decorator, expr);
-            case Mutable mutable -> DecoratedExpr.of(decorator, VariableRef.of(mutable, base.getSourceLoc()));
+            case Variable variable -> DecoratedExpr.of(decorator, VariableRef.of(variable, base.getSourceLoc()));
             default -> {
                 log.error("{}: Expected instantiate expr(s) but got {}", base.getSourceLoc(), operand);
                 throw new CompileCancellationException();
