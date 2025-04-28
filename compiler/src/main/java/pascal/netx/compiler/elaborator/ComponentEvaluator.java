@@ -32,10 +32,7 @@ import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
 
 import javax.annotation.Nonnull;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.stream.IntStream;
@@ -244,10 +241,15 @@ public final class ComponentEvaluator {
     private EntityList evaluateRangeList(RangeList list) {
         var from = evaluateToInt(list.getFrom());
         var to = evaluateToInt(list.getTo());
-        return EntityList.of(
+        var result = new ArrayList<>(
                 IntStream.range(Integer.min(from, to), Integer.max(from, to))
                         .mapToObj(Int32Value::of)
-                        .map(Entity.class::cast).toList());
+                        .map(Entity.class::cast)
+                        .toList());
+        if (from > to) {
+            Collections.reverse(result);
+        }
+        return EntityList.of(result);
     }
 
     private EntityList evaluateListComprehension(ListComprehension list) {
