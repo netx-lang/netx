@@ -21,13 +21,12 @@ int main() {
     parsed.advance_input_clocks();
     parsed.flip_by_name("rst");
     for (unsigned i = 0; i < 65536; ++i) {
-        parsed.update_by_name("D", hxon::value_t{32, i});
+        parsed.update_by_name("D", hxon::value_t{32, i * i});
         parsed.flip_by_name("rst");
         parsed.advance_input_clocks();
         parsed.flip_by_name("rst");
         for (auto j = 0; j < 16; ++j) parsed.advance_input_clocks();
-        const auto res = static_cast<unsigned>(parsed.get_by_name("Q"));
-        if (const auto expected = static_cast<unsigned>(std::sqrt(i)); res != expected)
+        if (const auto res = static_cast<unsigned>(parsed.get_by_name("Q")); res != i)
             std::cout << "ERROR on " << i << '\n';
     }
 
