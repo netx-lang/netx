@@ -15,6 +15,7 @@ namespace hxon {
         rule_set rules;
         value_storage values;
         id_set clocks;
+
     public:
         void add_rule(const rule_t &new_rule) {
             rules.add(new_rule);
@@ -24,14 +25,19 @@ namespace hxon {
             clocks.insert(id);
         }
 
-        id_set flip(const id_set &ids) {
+        id_set flip(id_t id) {
+            values[id].flip();
+            return rules.update(values, {id});
+        }
+
+        id_set flip_batch(const id_set &ids) {
             for (const auto &id: ids) values[id].flip();
             return rules.update(values, ids);
         }
 
         id_set update(id_t id, value_t new_value) {
             values[id] = std::move(new_value);
-            return rules.update(values, {{id}});
+            return rules.update(values, {id});
         }
 
         id_set update_batch(const value_storage &to_update) {
