@@ -10,6 +10,7 @@
 
 namespace hxon {
     struct id_info {
+        std::string name;
         id_t id{};
         std::optional<std::pair<size_t, size_t> > selection;
     };
@@ -18,6 +19,7 @@ namespace hxon {
         id_info result;
         const auto pos_at = id.find('@');
         if (pos_at == std::string::npos) throw std::invalid_argument("Invalid ID");
+        result.name = id.substr(0, pos_at);
         if (const auto pos_l = id.find('[', pos_at + 1); pos_l != std::string::npos) {
             result.id = std::stoull(id.substr(pos_at + 1, pos_l - pos_at - 1));
             if (const auto pos_c = id.find(':', pos_l + 1); pos_c != std::string::npos) {
@@ -33,14 +35,14 @@ namespace hxon {
     }
 
     static clock_t parse_clock(const std::string &source, const nlohmann::json &attribute) {
-        auto [id, selection] = parse_id(source);
+        auto [name, id, selection] = parse_id(source);
         if (selection) throw std::invalid_argument("Clock cannot be selected");
         return data_factory::id_clock(id, attribute["isPosTrigger"] == "true");
     }
 
     static source_t parse_source(const std::string &source, const parse_context &context) {
         if (source.find('@') != std::string::npos) {
-            auto [id, selection] = parse_id(source);
+            auto [name, id, selection] = parse_id(source);
             if (selection) return data_factory::select_source(id, selection->first, selection->second);
             return data_factory::id_source(id, context.size_map.at(id));
         }
@@ -48,7 +50,7 @@ namespace hxon {
     }
 
     static sink_t parse_sink(const std::string &sink, const parse_context &context) {
-        auto [id, selection] = parse_id(sink);
+        auto [name, id, selection] = parse_id(sink);
         if (selection) return data_factory::select_sink(id, selection->first, selection->second);
         return data_factory::id_sink(id, context.size_map.at(id));
     }
@@ -59,6 +61,16 @@ namespace hxon {
         if (outputs.size() != 1) throw std::invalid_argument("Need exactly one output");
         context.circuit.add_rule(cons(parse_source(inputs.at(0), context), parse_source(inputs.at(1), context),
                                       parse_sink(outputs.at(0), context)));
+    }
+
+    static source_t binary_combine(rule_t (*cons)(source_t, source_t, sink_t), source_t a, source_t b, parse_context &context, const bool len_sum) {
+        const auto new_id = context.members_total;
+        const auto new_len = len_sum ? a.len() + b.len() : a.len();
+        ++context.members_total;
+        context.size_map[new_id] = new_len;
+        context.circuit.add_rule(cons(std::move(a), std::move(b), data_factory::id_sink(new_id, new_len)));
+
+        return data_factory::id_source(new_id, new_len);
     }
 
     static void parse_variadic_binary(const nlohmann::json &inputs, const nlohmann::json &outputs,
@@ -75,19 +87,38 @@ namespace hxon {
             context.circuit.add_rule(rule_factory::id_rule(sources.front(), std::move(output)));
             return;
         }
-        while (sources.size() > 2) {
-            auto src1 = sources.front();
-            sources.pop_front();
-            auto src2 = sources.front();
-            sources.pop_front();
-            const auto new_id = context.members_total;
-            const auto new_len = len_sum ? src1.len() + src2.len() : src1.len();
-            ++context.members_total;
-            context.size_map[new_id] = new_len;
-            context.circuit.add_rule(cons(std::move(src1), std::move(src2), data_factory::id_sink(new_id, new_len)));
 
-            if (assoc) sources.push_back(data_factory::id_source(new_id, new_len));
-            else sources.push_front(data_factory::id_source(new_id, new_len));
+        if (assoc) {
+            std::deque<source_t> nextSources;
+            for (size_t left = sources.size(); left > 2; --left) {
+                if (sources.size() < 2) {
+                    while (!sources.empty()) {
+                        nextSources.push_back(sources.front());
+                        sources.pop_front();
+                    }
+                    sources.swap(nextSources);
+                }
+
+                auto src1 = sources.front();
+                sources.pop_front();
+                auto src2 = sources.front();
+                sources.pop_front();
+                nextSources.push_back(binary_combine(cons, std::move(src1), std::move(src2), context, len_sum));
+            }
+
+            while (!sources.empty()) {
+                nextSources.push_back(sources.front());
+                sources.pop_front();
+            }
+            sources.swap(nextSources);
+        } else {
+            while (sources.size() > 2) {
+                auto src1 = sources.front();
+                sources.pop_front();
+                auto src2 = sources.front();
+                sources.pop_front();
+                sources.push_front(binary_combine(cons, std::move(src1), std::move(src2), context, len_sum));
+            }
         }
         auto src1 = sources.front();
         sources.pop_front();
@@ -277,22 +308,24 @@ namespace hxon {
         }
     }
 
-    static void parse_size(const nlohmann::json &json, parse_context &context) {
+    static void parse_name_size(const nlohmann::json &json, parse_context &context) {
         const std::string member_type = json["type"];
         if (!member_type_map.contains(member_type)) throw std::runtime_error("Unknown member type " + member_type);
         if (json.contains("members"))
             for (const auto &member: json["members"])
-                parse_size(member, context);
+                parse_name_size(member, context);
         switch (member_type_map.at(member_type)) {
             case member_type::WIRE: {
-                auto [id, selection] = parse_id(json["id"]);
+                auto [name, id, selection] = parse_id(json["id"]);
                 if (selection) throw std::runtime_error("Wire member cannot be selected");
+                context.name_map[name] = id;
                 context.size_map[id] = json["width"];
                 break;
             }
             case member_type::CLOCK: {
-                auto [id, selection] = parse_id(json["id"]);
+                auto [name, id, selection] = parse_id(json["id"]);
                 if (selection) throw std::runtime_error("Clock member cannot be selected");
+                context.name_map[name] = id;
                 context.size_map[id] = 1;
                 context.circuit.add_clock(id);
                 if (context.circuit_input.contains(id)) context.circuit_input_clocks.insert(id);
@@ -308,13 +341,13 @@ namespace hxon {
 
     static void parse_circuit_io(const nlohmann::json &json, parse_context &context) {
         for (auto &input: json.at("input")) {
-            auto [id, selection] = parse_id(input);
+            auto [name, id, selection] = parse_id(input);
             if (selection) throw std::runtime_error("Design input cannot be selected");
             context.circuit_input.insert(id);
         }
 
         for (auto &output: json.at("output")) {
-            auto [id, selection] = parse_id(output);
+            auto [name, id, selection] = parse_id(output);
             if (selection) throw std::runtime_error("Design output cannot be selected");
             context.circuit_output.insert(id);
         }
@@ -325,7 +358,7 @@ namespace hxon {
         context.members_total = json["totalData"];
         auto &design = json["design"];
         parse_circuit_io(design, context);
-        parse_size(design, context);
+        parse_name_size(design, context);
         parse_member(design, context);
 
         value_storage initial_values;
