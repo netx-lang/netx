@@ -63,6 +63,16 @@ namespace hxon {
                                       parse_sink(outputs.at(0), context)));
     }
 
+    static source_t binary_combine(rule_t (*cons)(source_t, source_t, sink_t), source_t a, source_t b, parse_context &context, const bool len_sum) {
+        const auto new_id = context.members_total;
+        const auto new_len = len_sum ? a.len() + b.len() : a.len();
+        ++context.members_total;
+        context.size_map[new_id] = new_len;
+        context.circuit.add_rule(cons(std::move(a), std::move(b), data_factory::id_sink(new_id, new_len)));
+
+        return data_factory::id_source(new_id, new_len);
+    }
+
     static void parse_variadic_binary(const nlohmann::json &inputs, const nlohmann::json &outputs,
                                       parse_context &context,
                                       rule_t (*cons)(source_t, source_t, sink_t), const bool assoc = true,
@@ -77,19 +87,38 @@ namespace hxon {
             context.circuit.add_rule(rule_factory::id_rule(sources.front(), std::move(output)));
             return;
         }
-        while (sources.size() > 2) {
-            auto src1 = sources.front();
-            sources.pop_front();
-            auto src2 = sources.front();
-            sources.pop_front();
-            const auto new_id = context.members_total;
-            const auto new_len = len_sum ? src1.len() + src2.len() : src1.len();
-            ++context.members_total;
-            context.size_map[new_id] = new_len;
-            context.circuit.add_rule(cons(std::move(src1), std::move(src2), data_factory::id_sink(new_id, new_len)));
 
-            if (assoc) sources.push_back(data_factory::id_source(new_id, new_len));
-            else sources.push_front(data_factory::id_source(new_id, new_len));
+        if (assoc) {
+            std::deque<source_t> nextSources;
+            for (size_t left = sources.size(); left > 2; --left) {
+                if (sources.size() < 2) {
+                    while (!sources.empty()) {
+                        nextSources.push_back(sources.front());
+                        sources.pop_front();
+                    }
+                    sources.swap(nextSources);
+                }
+
+                auto src1 = sources.front();
+                sources.pop_front();
+                auto src2 = sources.front();
+                sources.pop_front();
+                nextSources.push_back(binary_combine(cons, std::move(src1), std::move(src2), context, len_sum));
+            }
+
+            while (!sources.empty()) {
+                nextSources.push_back(sources.front());
+                sources.pop_front();
+            }
+            sources.swap(nextSources);
+        } else {
+            while (sources.size() > 2) {
+                auto src1 = sources.front();
+                sources.pop_front();
+                auto src2 = sources.front();
+                sources.pop_front();
+                sources.push_front(binary_combine(cons, std::move(src1), std::move(src2), context, len_sum));
+            }
         }
         auto src1 = sources.front();
         sources.pop_front();
