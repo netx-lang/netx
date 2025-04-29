@@ -5,4 +5,4 @@ include = ["top.nx", "src/"]
 
 [dependencies]
 my_lib = { path = "lib", version = ">=0.1.0" }
-std = { version = "0.1.0", git = "git@github.com:pascal-lab/NetXStdLib.git", commit="b06f9b0" }
+std = { version = "0.1.0", git = "git@github.com:pascal-lab/NetX_std.git", commit = "b06f9b0" }

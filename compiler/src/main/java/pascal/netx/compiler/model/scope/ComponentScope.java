@@ -48,9 +48,11 @@ public final class ComponentScope extends Scope {
         return result;
     }
 
-    public static ComponentScope newInterface(Scope parent, Identifier identifier) {
+    public static ComponentScope newInterface(Scope parent, Identifier identifier, boolean asChild) {
         var result = new ComponentScope(parent, true, identifier);
-        parent.addChild(result);
+        if (asChild) {
+            parent.addChild(result);
+        }
         return result;
     }
 

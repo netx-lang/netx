@@ -9,11 +9,8 @@ import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.model.EntityList;
 import pascal.netx.compiler.model.Signature;
 import pascal.netx.compiler.model.expr.*;
-import pascal.netx.compiler.model.scope.Attributes;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.binding.MonoBinding;
-import pascal.netx.compiler.model.scope.binding.MultiBinding;
-import pascal.netx.compiler.model.scope.binding.OrderedArgBindList;
 import pascal.netx.compiler.model.variable.Array;
 import pascal.netx.compiler.model.variable.Mutable;
 import pascal.netx.compiler.model.variable.Variable;
@@ -27,6 +24,7 @@ import java.util.*;
 
 import static pascal.netx.compiler.model.Entities.requiresMutable;
 import static pascal.netx.compiler.model.Utils.*;
+import static pascal.netx.compiler.model.scope.Attributes.from;
 
 final class ComponentElaborator {
     private static final Logger log = LoggerFactory.getLogger(ComponentElaborator.class);
@@ -69,8 +67,8 @@ final class ComponentElaborator {
 
     void buildInterfaceIO(InterfaceNode node) {
         var loc = node.getSourceLoc();
-        var identifier = node.getIdentifier();
-        var factory = scope.getPackage().defs().getInterface(identifier);
+        var def = scope.getPackage().defs().getInterface(node.getIdentifier());
+        var factory = new InterfaceFactoryMaker(scope).make(def);
         extractIOList(loc, node.getType()).forEach(scope::addInput);
         var product = factory.create(scope, Identifier.of(InterfaceNode.OUTPUT_NAME).setSourceLoc(loc));
         var productIter = product.getElements().iterator();
@@ -341,10 +339,10 @@ final class ComponentElaborator {
         private ComponentScope instantiateComponentRef(ComponentRef ref) {
             var node = ref.getDefinition();
             var component = ref.isInterface()
-                    ? ComponentScope.newInterface(scope, ref.getIdentifier())
+                    ? ComponentScope.newInterface(scope, ref.getIdentifier(), true)
                     : ComponentScope.newComponent(scope, ref.getIdentifier());
 
-            var attributes = extractAttributes(ref, node);
+            var attributes = from(sourceLoc, node, ref.getArgList());
             for (var entry : attributes.entrySet()) {
                 component.bind(entry.getKey(), entry.getValue());
             }
@@ -361,20 +359,6 @@ final class ComponentElaborator {
             scope.setSignature(signature);
         }
 
-        private Attributes extractAttributes(ComponentRef ref, AbstractComponentNode node) {
-            Attributes attributes = new Attributes();
-            switch (ref.getArgList()) {
-                case OrderedArgBindList(var args) -> {
-                    int size = requiresMatchedSize(sourceLoc, node.getAttributes(), args);
-                    for (int i = 0; i < size; i++) {
-                        attributes.addAttribute(node.getAttributes().get(i), args.get(i));
-                    }
-                }
-                case MultiBinding binding -> binding.forEach(
-                        entry -> attributes.addAttribute(entry.getKey(), entry.getValue()));
-            }
-            return attributes;
-        }
 
         private record ComponentPort(List<Variable> target, List<Variable> source) {
             public static ComponentPort of(List<Variable> target, List<Variable> source) {

@@ -60,6 +60,10 @@ public final class Bundle extends Composition {
         return map.values();
     }
 
+    public LinkedHashMap<Identifier, Mutable> getFields() {
+        return map;
+    }
+
     public static class Factory extends Mutable.Factory<Bundle> {
         private final LinkedHashMap<Identifier, Mutable.Factory<?>> factories;
         private final InterfaceType type;

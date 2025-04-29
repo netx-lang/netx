@@ -3,10 +3,8 @@ package pascal.netx.compiler.model.scope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.element.*;
-import pascal.netx.compiler.elaborator.InterfaceRegister;
 import pascal.netx.compiler.model.expr.ImportRef;
 import pascal.netx.compiler.model.variable.BitVectorValue;
-import pascal.netx.compiler.model.variable.Bundle;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.lang.Identifier;
@@ -69,9 +67,9 @@ public final class PackageScope extends Scope {
         return defs;
     }
 
-    public class PackageDefManager {
-        private final Map<Identifier, Bundle.Factory> interfaceDef = new HashMap<>();
+    public static class PackageDefManager {
         private final Map<Identifier, AbstractComponentNode> componentDef = new HashMap<>();
+        private final Map<Identifier, InterfaceNode> interfaceDef = new HashMap<>();
         private final Map<Identifier, ImportRef> importDef = new HashMap<>();
         private final Map<Identifier, Enum> enumDef = new HashMap<>();
 
@@ -143,13 +141,12 @@ public final class PackageScope extends Scope {
             return interfaceDef.containsKey(id);
         }
 
-        public Bundle.Factory getInterface(Identifier id) {
+        public InterfaceNode getInterface(Identifier id) {
             return interfaceDef.get(id);
         }
 
         public void addInterface(InterfaceNode node) {
-            var factory = new InterfaceRegister(PackageScope.this).register(node);
-            interfaceDef.put(node.getIdentifier(), factory);
+            interfaceDef.put(node.getIdentifier(), node);
             componentDef.put(node.getIdentifier(), node);
         }
     }

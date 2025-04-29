@@ -17,8 +17,10 @@
         </File>
     </Appenders>
     <Loggers>
-        <Root level="all">
+        <Root level="info">
             <AppenderRef ref="stderr"/>
         </Root>
+        <Logger name="org.pascal" level="all"/>
+        <Logger name="org.eclipse.jgit" level="warn" additivity="false"/>
     </Loggers>
 </Configuration>

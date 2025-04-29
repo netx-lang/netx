@@ -3,6 +3,7 @@ package pascal.netx.compiler.elaborator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.element.BindingNode;
+import pascal.netx.compiler.ast.element.InterfaceNode;
 import pascal.netx.compiler.ast.expr.*;
 import pascal.netx.compiler.ast.expr.qualifier.BindingQualifier;
 import pascal.netx.compiler.ast.expr.qualifier.FilterQualifier;
@@ -14,6 +15,7 @@ import pascal.netx.compiler.model.EntityList;
 import pascal.netx.compiler.model.Macro;
 import pascal.netx.compiler.model.Utils;
 import pascal.netx.compiler.model.expr.*;
+import pascal.netx.compiler.model.scope.Attributes;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.binding.ArgBindList;
@@ -422,7 +424,8 @@ public final class ComponentEvaluator {
         if (mode == EvaluationMode.FACTORY) {
             var pack = scope.getPackage();
             if (pack.defs().hasInterface(id)) {
-                return pack.defs().getInterface(id);
+                return evaluateInterfacrFactory(expr.getSourceLoc(),
+                        pack.defs().getInterface(id), ArgBindList.ofEmpty());
             } else if (pack.defs().hasEnum(id)) {
                 return new Wire.Factory(BitType.of(pack.defs().getEnum(id).width()), Utils.compilerOf(pack));
             } else {
@@ -535,10 +538,23 @@ public final class ComponentEvaluator {
             case "bit" -> evaluateWireFactory(sourceLoc, expr.getArguments());
             case "clock" -> evaluateClockFactory(sourceLoc, expr.getArguments());
             default -> {
+                if (pack.defs().hasInterface(expr.getHead())) {
+                    var def = pack.defs().getInterface(expr.getHead());
+                    yield evaluateInterfacrFactory(expr.getSourceLoc(), def, evaluateArguments(expr));
+                }
                 log.error("{}: Unknown component type {}", expr.getSourceLoc(), expr);
                 throw new CompileCancellationException();
             }
         };
+    }
+
+    private Bundle.Factory evaluateInterfacrFactory(SourceLoc sourceLoc, InterfaceNode node, ArgBindList arguments) {
+        var component = ComponentScope.newInterface(scope, node.getIdentifier(), false);
+        var attributes = Attributes.from(sourceLoc, node, arguments);
+        for (var bind : attributes.entrySet()) {
+            component.bind(bind.getKey(), bind.getValue());
+        }
+        return new InterfaceFactoryMaker(component).make(node);
     }
 
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
