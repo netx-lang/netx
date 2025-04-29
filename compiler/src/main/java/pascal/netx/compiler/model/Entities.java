@@ -40,7 +40,7 @@ public final class Entities {
         if (entity instanceof Value value) {
             return value;
         } else {
-            log.error("{}: Expected rhs but got {}", loc, entity);
+            log.error("{}: Expected value but got {}", loc, entity);
             throw new CompileCancellationException();
         }
     }

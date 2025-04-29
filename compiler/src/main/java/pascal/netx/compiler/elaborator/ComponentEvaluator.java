@@ -107,7 +107,7 @@ public final class ComponentEvaluator {
             case Expr type -> type;
             case Data ignored -> castToInstantiateExpr(loc, entity);
             case Access ignored -> castToInstantiateExpr(loc, entity);
-            default -> requiresListedValue(loc, entity);
+            default -> entity;
         };
     }
 
