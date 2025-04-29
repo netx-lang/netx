@@ -17,10 +17,17 @@ int main() {
     using namespace std::chrono;
     const auto start = high_resolution_clock::now();
 
-    std::cout << parsed.get_by_name("hex[0]") << '\n';
-    for (auto i = 0; i < 50000; ++i) {
-        for (auto j = 0; j < 500000; ++j) parsed.flip_input_clocks();
-        std::cout << parsed.get_by_name("hex[0]") << '\n';
+    parsed.flip_by_name("rst");
+    parsed.advance_input_clocks();
+    parsed.flip_by_name("rst");
+    for (unsigned i = 0; i < 65536; ++i) {
+        parsed.update_by_name("D", nxon::value_t{32, i * i});
+        parsed.flip_by_name("rst");
+        parsed.advance_input_clocks();
+        parsed.flip_by_name("rst");
+        for (auto j = 0; j < 16; ++j) parsed.advance_input_clocks();
+        if (const auto res = static_cast<unsigned>(parsed.get_by_name("Q")); res != i)
+            std::cout << "ERROR on " << i << '\n';
     }
 
     const auto end = high_resolution_clock::now();
