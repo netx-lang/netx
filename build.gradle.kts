@@ -37,7 +37,7 @@ tasks.jar {
     }
 }
 
-val cppBuildDir = file("$projectDir/simulator/cpp-build")
+val cppBuildDir = file("$projectDir/build/nxsim")
 val cmakeSourceDir = file("$projectDir/simulator")
 
 tasks.register("configureCMake", Exec::class) {

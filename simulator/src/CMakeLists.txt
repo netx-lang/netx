@@ -1,10 +1,22 @@
 cmake_minimum_required(VERSION 3.28)
-project(simulator_cpp_src VERSION 1.0 LANGUAGES CXX)
+project(nxsim_src VERSION 1.0 LANGUAGES CXX)
 
-add_library(simulator_cpp)
-target_link_libraries(simulator_cpp PRIVATE nlohmann_json::nlohmann_json kahip)
+add_library(nxsim)
+target_link_libraries(nxsim PRIVATE nlohmann_json::nlohmann_json kahip)
 
 add_subdirectory(circuit)
 
-add_executable(simulator_cpp_exe main.cpp cli.cpp)
-target_link_libraries(simulator_cpp_exe PRIVATE simulator_cpp)
+add_executable(nxsim_exe main.cpp cli.cpp)
+target_link_libraries(nxsim_exe PRIVATE nxsim)
+
+install(TARGETS nxsim nxsim_exe
+        EXPORT nxsimTargets
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+)
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/circuit/
+        DESTINATION include/nxsim
+        FILES_MATCHING PATTERN "*.h"
+)

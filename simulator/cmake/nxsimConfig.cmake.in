@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(Boost 1.70 REQUIRED)
+find_dependency(nlohmann_json REQUIRED)
+
+include("${CMAKE_CURRENT_LIST_DIR}/nxsimTargets.cmake")
