@@ -51,10 +51,7 @@ public final class PackageManager {
     public NXCompiler dispatchCompiler(SourceLoc sourceLoc, ImportRef ref) {
         return switch (ref.sourceKind()) {
             case PACKAGE -> Objects.requireNonNull(repo.getCompiler());
-            case REPO -> {
-                log.info("Start to resolve repo: {}", ref.repoRef());
-                yield resolveRepo(sourceLoc, ref.repoRef()).asSubCompilerOf(repo.getCompiler());
-            }
+            case REPO -> resolveRepo(sourceLoc, ref.repoRef()).asSubCompilerOf(repo.getCompiler());
         };
     }
 

@@ -5,6 +5,7 @@ import pascal.netx.util.lang.Identifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public final class InterfaceType implements Type {
     private final List<Type> types = new ArrayList<>();
@@ -26,5 +27,17 @@ public final class InterfaceType implements Type {
 
     public Identifier getIdentifier() {
         return id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        InterfaceType that = (InterfaceType) o;
+        return Objects.equals(types, that.types) && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(types, id);
     }
 }
