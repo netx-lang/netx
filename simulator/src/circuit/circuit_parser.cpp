@@ -8,7 +8,7 @@
 #include <queue>
 #include <utility>
 
-namespace hxon {
+namespace nxon {
     struct id_info {
         std::string name;
         id_t id{};

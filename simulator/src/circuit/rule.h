@@ -10,7 +10,7 @@
 #include <utility>
 #include <ranges>
 
-namespace hxon {
+namespace nxon {
     namespace impl {
         struct rule_impl {
             const id_set triggers;

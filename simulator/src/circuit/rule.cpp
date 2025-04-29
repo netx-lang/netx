@@ -7,7 +7,7 @@
 
 using namespace boost::lambda2;
 
-namespace hxon {
+namespace nxon {
     namespace impl {
         struct id_clock final : clock_impl {
             const id_t id;

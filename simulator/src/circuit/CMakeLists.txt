@@ -1,3 +1,6 @@
 add_subdirectory(parallel)
-target_sources(simulator_cpp PRIVATE rule.cpp circuit_parser.cpp)
-target_sources(simulator_cpp PUBLIC circuit_def.h rule.h circuit.h circuit_parser.h)
+target_sources(nxsim PRIVATE rule.cpp circuit_parser.cpp)
+target_include_directories(nxsim PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:include/nxsim/circuit>
+)

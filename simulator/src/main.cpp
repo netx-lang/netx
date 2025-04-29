@@ -12,7 +12,7 @@
 int main() {
     std::string path;
     std::cin >> path;
-    auto parsed = hxon::parse_circuit(nlohmann::json::parse(std::ifstream(path)));
+    auto parsed = nxon::parse_circuit(nlohmann::json::parse(std::ifstream(path)));
 
     using namespace std::chrono;
     const auto start = high_resolution_clock::now();

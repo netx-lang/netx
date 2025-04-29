@@ -17,7 +17,7 @@
 #include <atomic>
 #include "../circuit.h"
 
-namespace hxon {
+namespace nxon {
     namespace impl {
         struct update_info {
             id_t id;

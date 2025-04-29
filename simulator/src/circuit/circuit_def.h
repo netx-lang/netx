@@ -9,7 +9,7 @@
 #include <set>
 #include "sized_mpint.h"
 
-namespace hxon {
+namespace nxon {
     using id_t = unsigned;
 
     using value_t = impl::sized_mpint;

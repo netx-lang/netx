@@ -11,7 +11,7 @@
 #include <random>
 #include "partition.h"
 
-namespace hxon {
+namespace nxon {
     partitioned_circuit::partitioned_circuit(const circuit &circuit) {
         auto out_rules = circuit.all_rules();
 

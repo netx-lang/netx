@@ -8,7 +8,7 @@
 #include <bitset>
 #include <boost/multiprecision/cpp_int.hpp>
 
-namespace hxon::impl {
+namespace nxon::impl {
     class sized_mpint final : boost::multiprecision::cpp_int {
         using base_t = boost::multiprecision::cpp_int;
         friend class const_sized_mpint_slice;

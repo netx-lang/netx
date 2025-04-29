@@ -1,2 +1,5 @@
-target_sources(simulator_cpp PRIVATE partition.cpp)
-target_sources(simulator_cpp PUBLIC partition.h)
+target_sources(nxsim PRIVATE partition.cpp)
+target_include_directories(nxsim PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:include/nxsim/circuit>
+)

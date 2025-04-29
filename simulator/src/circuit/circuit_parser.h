@@ -8,10 +8,10 @@
 
 #include "circuit.h"
 
-namespace hxon {
+namespace nxon {
     struct parse_context {
         id_t members_total;
-        hxon::circuit circuit;
+        nxon::circuit circuit;
         id_set circuit_input, circuit_output, circuit_input_clocks;
         std::map<id_t, size_t> size_map;
         std::map<std::string, id_t> name_map;
