@@ -123,9 +123,12 @@ final class ComponentElaborator {
         var generator = loop.getGenerator();
         var id = generator.getHead();
         for (var entity : evaluator.castToList(generator.getFrom()).entities()) {
+            int count = scope.getBindingCount();
             scope.overrideBindings(MonoBinding.of(id, entity));
             buildElement(loop.getElement());
-            scope.restoreBindings();
+            while (scope.getBindingCount() > count) {
+                scope.restoreBindings();
+            }
         }
     }
 
@@ -139,7 +142,7 @@ final class ComponentElaborator {
     }
 
     private void buildBinding(BindingNode binding) {
-        scope.bind(evaluator.evaluateBinding(binding));
+        scope.overrideBindings(evaluator.evaluateBinding(binding));
     }
 
     private void buildData(DataInstantiationNode node) {

@@ -2,9 +2,7 @@ package pascal.netx.compiler.model.scope;
 
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.scope.binding.Binding;
-import pascal.netx.compiler.model.scope.binding.MonoBinding;
 import pascal.netx.compiler.model.scope.binding.MultiBinding;
-import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 
 import javax.annotation.Nullable;
@@ -43,14 +41,7 @@ public abstract sealed class Scope permits ComponentScope, PackageScope, RepoSco
     }
 
     public Binding getBinding() {
-        if (bindings.size() != 1) {
-            throw new ShallNotReachHereError("Scope has overridden bindings");
-        }
-        return bindings.getFirst();
-    }
-
-    public void bind(MonoBinding single) {
-        getBinding().bind(single);
+        return bindings.getLast();
     }
 
     public void bind(Identifier identifier, Entity entity) {
@@ -63,6 +54,10 @@ public abstract sealed class Scope permits ComponentScope, PackageScope, RepoSco
 
     public void restoreBindings() {
         bindings.removeFirst();
+    }
+
+    public int getBindingCount() {
+        return bindings.size();
     }
 
     @Nullable
