@@ -151,7 +151,9 @@ final class ComponentElaborator {
         for (var rest : node.getDataRests()) {
             var factory = baseFactory;
             if (!rest.getDimensions().isEmpty()) {
-                for (ExprNode dimension : rest.getDimensions()) {
+                var dimensions = new ArrayList<>(rest.getDimensions());
+                Collections.reverse(dimensions);
+                for (ExprNode dimension : dimensions) {
                     var size = evaluator.evaluateToInt(dimension);
                     factory = new Array.Factory(compilerOf(scope), size, factory);
                 }
