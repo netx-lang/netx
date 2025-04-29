@@ -5,15 +5,18 @@
 #ifndef SIZED_MPINT_H
 #define SIZED_MPINT_H
 
-#include <bitset>
+#include <concepts>
+#include <string>
+#include <algorithm>
 #include <boost/multiprecision/cpp_int.hpp>
 
 namespace nxon::impl {
-    class sized_mpint final : boost::multiprecision::cpp_int {
+    class sized_mpint {
         using base_t = boost::multiprecision::cpp_int;
         friend class const_sized_mpint_slice;
         friend class sized_mpint_slice;
 
+        base_t content;
         size_t _size;
         base_t mask;
 
@@ -24,7 +27,7 @@ namespace nxon::impl {
             and_mask();
         }
 
-        sized_mpint(const size_t size, base_t value) : base_t(std::move(value)), _size(size) {
+        sized_mpint(const size_t size, base_t value) : content(std::move(value)), _size(size) {
             init_mask();
         }
 
@@ -34,7 +37,7 @@ namespace nxon::impl {
         }
 
         void and_mask() {
-            base_t::operator&=(mask);
+            content &= mask;
         }
 
         bool normalize_sign(sized_mpint &other) {
@@ -52,10 +55,16 @@ namespace nxon::impl {
 
     public:
         friend std::ostream &operator<<(std::ostream &out, const sized_mpint &self) {
-            const auto num = static_cast<size_t>(self);
+            auto num = self.content;
+            std::string res;
             const auto size = self.size();
             out << size << "'b";
-            for (size_t i = 1; i <= size; i++) out << ((num & 1ull << (size - i)) != 0);
+            for (size_t i = 0; i < size; ++i) {
+                res += num & 1u ? '1' : '0';
+                num >>= 1u;
+            }
+            std::ranges::reverse(res);
+            out << res;
             out << " (" << static_cast<long long>(self) << ')';
             return out;
         }
@@ -92,7 +101,7 @@ namespace nxon::impl {
             init_mask();
         }
 
-        sized_mpint(const size_t size, const unsigned long long value) : base_t(value), _size(size) {
+        sized_mpint(const size_t size, const unsigned long long value) : content(value), _size(size) {
             init_mask();
         }
 
@@ -113,27 +122,28 @@ namespace nxon::impl {
         }
 
         [[nodiscard]] explicit operator bool() const {
-            return base_t::operator bool();
+            return content.operator bool();
         }
 
-        [[nodiscard]] explicit operator long long() const {
+        template<std::unsigned_integral T>
+        [[nodiscard]] explicit operator T() const {
+            return content.convert_to<T>();
+        }
+
+        template<std::signed_integral T>
+        [[nodiscard]] explicit operator T() const {
             sized_mpint tmp = *this;
             const bool flag = tmp.sign();
             if (flag) tmp.negate();
-            auto v = tmp.convert_to<long long>();
+            auto v = tmp.content.convert_to<T>();
             if (flag) v = -v;
             return v;
         }
 
-        [[nodiscard]] explicit operator size_t() const {
-            return this->convert_to<size_t>();
-        }
-
         [[nodiscard]] std::strong_ordering operator<=>(const sized_mpint &other) const {
             if (size() != other.size()) throw std::runtime_error("Sizes don't match");
-            const auto &super = dynamic_cast<const base_t &>(*this);
-            if (super < other) return std::strong_ordering::less;
-            if (super == other) return std::strong_ordering::equal;
+            if (content < other.content) return std::strong_ordering::less;
+            if (content == other.content) return std::strong_ordering::equal;
             return std::strong_ordering::greater;
         }
 
@@ -163,18 +173,17 @@ namespace nxon::impl {
             if (comp == std::strong_ordering::equal) return *this;
             if (comp == std::strong_ordering::greater) {
                 sized_mpint result(new_size);
-                result.base_t::operator|=(*this);
-                if (sign()) result.base_t::operator|=(result.mask ^ mask);
+                result.content |= content;
+                if (sign()) result.content |= result.mask ^ mask;
                 return result;
             }
-            if (comp == std::strong_ordering::less) {
-                return {new_size, dynamic_cast<const base_t &>(*this)};
-            }
+            if (comp == std::strong_ordering::less)
+                return {new_size, content};
             std::abort();
         }
 
         sized_mpint &flip() {
-            base_t::operator^=(mask);
+            content ^= mask;
             return *this;
         }
 
@@ -186,24 +195,24 @@ namespace nxon::impl {
 
         sized_mpint &operator|=(const sized_mpint &other) {
             if (size() != other.size()) throw std::invalid_argument("Sizes don't match");
-            base_t::operator|=(other);
+            content |= other.content;
             return *this;
         }
 
         sized_mpint &operator&=(const sized_mpint &other) {
             if (size() != other.size()) throw std::invalid_argument("Sizes don't match");
-            base_t::operator&=(other);
+            content &= other.content;
             return *this;
         }
 
         sized_mpint &operator^=(const sized_mpint &other) {
             if (size() != other.size()) throw std::invalid_argument("Sizes don't match");
-            base_t::operator^=(other);
+            content ^= other.content;
             return *this;
         }
 
         sized_mpint &operator>>=(const size_t cnt) {
-            base_t::operator>>=(cnt);
+            content >>= cnt;
             return *this;
         }
 
@@ -215,13 +224,13 @@ namespace nxon::impl {
                 auto mask_head = mask;
                 mask_head >>= mask_tail;
                 mask_head <<= mask_tail;
-                base_t::operator|=(mask_head);
+                content |= mask_head;
             }
             return *this;
         }
 
         sized_mpint &operator<<=(const size_t cnt) {
-            base_t::operator<<=(cnt);
+            content <<= cnt;
             and_mask();
             return *this;
         }
@@ -275,14 +284,14 @@ namespace nxon::impl {
         }
 
         sized_mpint &operator+=(const unsigned long long v) {
-            base_t::operator+=(v);
+            content += v;
             and_mask();
             return *this;
         }
 
         sized_mpint &operator+=(const sized_mpint &other) {
             if (size() != other.size()) throw std::invalid_argument("Sizes don't match");
-            base_t::operator+=(other);
+            content += other.content;
             and_mask();
             return *this;
         }
@@ -295,7 +304,7 @@ namespace nxon::impl {
 
         sized_mpint &operator*=(const sized_mpint &other) {
             if (size() != other.size()) throw std::invalid_argument("Sizes don't match");
-            base_t::operator*=(other);
+            content *= other.content;
             and_mask();
             return *this;
         }
@@ -304,7 +313,7 @@ namespace nxon::impl {
             if (size() != other.size()) throw std::invalid_argument("Sizes don't match");
             sized_mpint b = other;
             const bool result_sign = normalize_sign(b);
-            base_t::operator/=(b);
+            content /= b.content;
             if (result_sign) negate();
             return *this;
         }
@@ -313,7 +322,7 @@ namespace nxon::impl {
             if (size() != other.size()) throw std::invalid_argument("Sizes don't match");
             sized_mpint b = other;
             const bool result_sign = normalize_sign(b);
-            base_t::operator%=(b);
+            content %= b.content;
             if (result_sign) negate();
             return *this;
         }
@@ -349,9 +358,9 @@ namespace nxon::impl {
         }
 
         [[nodiscard]] sized_mpint concat(const sized_mpint &other) const {
-            auto tmp = dynamic_cast<const base_t &>(*this);
+            base_t tmp = content;
             tmp <<= other.size();
-            tmp |= other;
+            tmp |= other.content;
             return {size() + other.size(), std::move(tmp)};
         }
     };
@@ -382,7 +391,7 @@ namespace nxon::impl {
         const_sized_mpint_slice &operator=(const_sized_mpint_slice &&) = delete;
 
         [[nodiscard]] sized_mpint from_slice() const {
-            auto tmp = dynamic_cast<const sized_mpint::base_t &>(ref);
+            sized_mpint::base_t tmp = ref.content;
             tmp >>= from;
             tmp ^= tmp >> len << len;
             return {len, std::move(tmp)};
@@ -422,9 +431,9 @@ namespace nxon::impl {
 
         sized_mpint_slice &operator=(sized_mpint other) {
             if (length() != other.size()) throw std::runtime_error("Sizes don't match");
-            auto &otherRef = dynamic_cast<sized_mpint::base_t &>(other);
+            auto &otherRef = other.content;
             otherRef <<= from;
-            auto &thisRef = dynamic_cast<sized_mpint::base_t &>(ref);
+            auto &thisRef = ref.content;
             thisRef &= mask_n;
             thisRef |= otherRef;
             return *this;
