@@ -175,7 +175,11 @@ public final class ProjectConfigReader {
         try {
             if (Files.exists(repoDir)) {
                 repo = Git.open(repoDir.toFile());
-                repo.fetch().call();
+                try {
+                    checkoutGitRepo(spec, repo);
+                } catch (GitAPIException e) {
+                    repo.fetch().call();
+                }
             } else {
                 repo = Git.cloneRepository()
                         .setURI(spec.get("git").textValue())
