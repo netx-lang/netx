@@ -10,6 +10,7 @@ public final class Assign {
     private final BuiltinComponent builtin;
     private List<DataRef> inputs;
     private List<DataRef> outputs;
+    private Attributes attributes;
 
     public Assign(BuiltinComponent builtin) {
         this.builtin = builtin;
@@ -37,5 +38,16 @@ public final class Assign {
 
     public void setOutputs(List<DataRef> outputs) {
         this.outputs = new ArrayList<>(outputs);
+    }
+
+    public Attributes getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Attributes attributes) {
+        this.attributes = attributes;
+    }
+
+    public record Attributes(int msb, int lsb) {
     }
 }

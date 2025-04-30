@@ -11,6 +11,7 @@ import pascal.netx.util.lang.SourceLoc;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 
@@ -18,6 +19,10 @@ import static pascal.netx.compiler.model.Utils.requiresMatchedSize;
 
 public final class Attributes {
     private final Map<Identifier, Entity> attributes = new HashMap<>();
+
+    public static Attributes ofEmpty() {
+        return new Attributes();
+    }
 
     public static Attributes from(SourceLoc sourceLoc, AbstractComponentNode node, ArgBindList arguments) {
         Attributes attributes = new Attributes();
@@ -56,5 +61,17 @@ public final class Attributes {
                 entry.setValue(operator.apply(variable));
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Attributes that = (Attributes) o;
+        return Objects.equals(attributes, that.attributes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(attributes);
     }
 }

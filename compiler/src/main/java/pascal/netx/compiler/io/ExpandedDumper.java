@@ -12,8 +12,12 @@ import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
+import static pascal.netx.util.lang.BuiltinComponent.ATTRIBUTED;
 import static pascal.netx.util.lang.BuiltinComponent.NO_DUMP;
 
 final class ExpandedDumper {
@@ -105,7 +109,7 @@ final class ExpandedDumper {
             setBuiltinID(builtin, instID);
             dumpInstIO(builtin, "input", sub.getInputs());
             dumpInstIO(builtin, "output", sub.getOutputs());
-            if (Objects.requireNonNull(BuiltinComponent.of(instID)) == BuiltinComponent.REGISTER) {
+            if (ATTRIBUTED.contains(BuiltinComponent.of(instID))) {
                 var attributes = createObjectNode();
                 for (var entry : sub.getAttributes().entrySet()) {
                     attributes.put(entry.getKey().name(), dumpVariable((Variable) entry.getValue()));

@@ -242,6 +242,16 @@ public class VerilogDumper {
                 notepad.print(rhsList.getFirst());
                 notepad.print(")");
             }
+            case SELECT -> {
+                notepad.print(rhsList.getFirst());
+                var attributes = assign.getAttributes();
+                int msb = attributes.msb(), lsb = attributes.lsb();
+                if (msb != lsb) {
+                    notepad.print(String.format("[%d:%d]", attributes.msb(), attributes.lsb()));
+                } else {
+                    notepad.print("[" + attributes.msb() + "]");
+                }
+            }
             default -> {
                 var delimiter = " " + BuiltinComponent.VERILOG_OP.get(assign.builtin()) + " ";
                 notepad.print(String.join(delimiter, rhsList));

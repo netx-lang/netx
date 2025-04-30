@@ -68,42 +68,59 @@ module MUX_3(
   input [3:0] code; // @(59:9)
   input [6:0] \input[0] , \input[1] , \input[2] , \input[3] , \input[4] , \input[5] , \input[6] , \input[7] ; // @(61:9), @(61:9), @(61:9), @(61:9), @(61:9), @(61:9), @(61:9), @(61:9)
   input [6:0] \input[8] , \input[9] , \input[10] , \input[11] , \input[12] , \input[13] , \input[14] , \input[15] ; // @(61:9), @(61:9), @(61:9), @(61:9), @(61:9), @(61:9), @(61:9), @(61:9)
+  wire \$i_2 , \$i_5 , \$i_8 , \$i_11 , \$i_14 , \$i_17 , \$i_20 , \$i_23 , \$i_26 , \$i_29 , \$i_32 , \$i_35 , \$i_38 , \$i_41 , \$i_44 , \$i_47 ;
   wire [15:0] mask; // @(60:9)
-  wire [6:0] \$i2_3 , \$i2_5 , \$i2_7 , \$i2_9 , \$i2_11 , \$i2_13 , \$i2_15 , \$i2_17 , \$i2_19 , \$i2_21 , \$i2_23 , \$i2_25 , \$i2_27 , \$i2_29 , \$i2_31 , \$i2_33 , \$i1_34 , \$i2_34 , \$i3_34 , \$i4_34 , \$i5_34 , \$i6_34 , \$i7_34 , \$i8_34 , \$i9_34 , \$i10_34 , \$i11_34 , \$i12_34 , \$i13_34 , \$i14_34 , \$i15_34 , \$i16_34 ;
+  wire [6:0] \$i2_4 , \$i2_7 , \$i2_10 , \$i2_13 , \$i2_16 , \$i2_19 , \$i2_22 , \$i2_25 , \$i2_28 , \$i2_31 , \$i2_34 , \$i2_37 , \$i2_40 , \$i2_43 , \$i2_46 , \$i2_49 , \$i1_50 , \$i2_50 , \$i3_50 , \$i4_50 , \$i5_50 , \$i6_50 , \$i7_50 , \$i8_50 , \$i9_50 , \$i10_50 , \$i11_50 , \$i12_50 , \$i13_50 , \$i14_50 , \$i15_50 , \$i16_50 ;
   DECODER_2 \$inst_1 (code, mask);
-  assign \$i2_3  = $signed(mask[0]);
-  assign \$i1_34  = \input[0]  & \$i2_3 ;
-  assign \$i2_5  = $signed(mask[1]);
-  assign \$i2_34  = \input[1]  & \$i2_5 ;
-  assign \$i2_7  = $signed(mask[2]);
-  assign \$i3_34  = \input[2]  & \$i2_7 ;
-  assign \$i2_9  = $signed(mask[3]);
-  assign \$i4_34  = \input[3]  & \$i2_9 ;
-  assign \$i2_11  = $signed(mask[4]);
-  assign \$i5_34  = \input[4]  & \$i2_11 ;
-  assign \$i2_13  = $signed(mask[5]);
-  assign \$i6_34  = \input[5]  & \$i2_13 ;
-  assign \$i2_15  = $signed(mask[6]);
-  assign \$i7_34  = \input[6]  & \$i2_15 ;
-  assign \$i2_17  = $signed(mask[7]);
-  assign \$i8_34  = \input[7]  & \$i2_17 ;
-  assign \$i2_19  = $signed(mask[8]);
-  assign \$i9_34  = \input[8]  & \$i2_19 ;
-  assign \$i2_21  = $signed(mask[9]);
-  assign \$i10_34  = \input[9]  & \$i2_21 ;
-  assign \$i2_23  = $signed(mask[10]);
-  assign \$i11_34  = \input[10]  & \$i2_23 ;
-  assign \$i2_25  = $signed(mask[11]);
-  assign \$i12_34  = \input[11]  & \$i2_25 ;
-  assign \$i2_27  = $signed(mask[12]);
-  assign \$i13_34  = \input[12]  & \$i2_27 ;
-  assign \$i2_29  = $signed(mask[13]);
-  assign \$i14_34  = \input[13]  & \$i2_29 ;
-  assign \$i2_31  = $signed(mask[14]);
-  assign \$i15_34  = \input[14]  & \$i2_31 ;
-  assign \$i2_33  = $signed(mask[15]);
-  assign \$i16_34  = \input[15]  & \$i2_33 ;
-  assign out = \$i1_34  | \$i2_34  | \$i3_34  | \$i4_34  | \$i5_34  | \$i6_34  | \$i7_34  | \$i8_34  | \$i9_34  | \$i10_34  | \$i11_34  | \$i12_34  | \$i13_34  | \$i14_34  | \$i15_34  | \$i16_34 ;
+  assign \$i2_4  = $signed(\$i_2 );
+  assign \$i_2  = mask[0];
+  assign \$i1_50  = \input[0]  & \$i2_4 ;
+  assign \$i2_7  = $signed(\$i_5 );
+  assign \$i_5  = mask[1];
+  assign \$i2_50  = \input[1]  & \$i2_7 ;
+  assign \$i2_10  = $signed(\$i_8 );
+  assign \$i_8  = mask[2];
+  assign \$i3_50  = \input[2]  & \$i2_10 ;
+  assign \$i2_13  = $signed(\$i_11 );
+  assign \$i_11  = mask[3];
+  assign \$i4_50  = \input[3]  & \$i2_13 ;
+  assign \$i2_16  = $signed(\$i_14 );
+  assign \$i_14  = mask[4];
+  assign \$i5_50  = \input[4]  & \$i2_16 ;
+  assign \$i2_19  = $signed(\$i_17 );
+  assign \$i_17  = mask[5];
+  assign \$i6_50  = \input[5]  & \$i2_19 ;
+  assign \$i2_22  = $signed(\$i_20 );
+  assign \$i_20  = mask[6];
+  assign \$i7_50  = \input[6]  & \$i2_22 ;
+  assign \$i2_25  = $signed(\$i_23 );
+  assign \$i_23  = mask[7];
+  assign \$i8_50  = \input[7]  & \$i2_25 ;
+  assign \$i2_28  = $signed(\$i_26 );
+  assign \$i_26  = mask[8];
+  assign \$i9_50  = \input[8]  & \$i2_28 ;
+  assign \$i2_31  = $signed(\$i_29 );
+  assign \$i_29  = mask[9];
+  assign \$i10_50  = \input[9]  & \$i2_31 ;
+  assign \$i2_34  = $signed(\$i_32 );
+  assign \$i_32  = mask[10];
+  assign \$i11_50  = \input[10]  & \$i2_34 ;
+  assign \$i2_37  = $signed(\$i_35 );
+  assign \$i_35  = mask[11];
+  assign \$i12_50  = \input[11]  & \$i2_37 ;
+  assign \$i2_40  = $signed(\$i_38 );
+  assign \$i_38  = mask[12];
+  assign \$i13_50  = \input[12]  & \$i2_40 ;
+  assign \$i2_43  = $signed(\$i_41 );
+  assign \$i_41  = mask[13];
+  assign \$i14_50  = \input[13]  & \$i2_43 ;
+  assign \$i2_46  = $signed(\$i_44 );
+  assign \$i_44  = mask[14];
+  assign \$i15_50  = \input[14]  & \$i2_46 ;
+  assign \$i2_49  = $signed(\$i_47 );
+  assign \$i_47  = mask[15];
+  assign \$i16_50  = \input[15]  & \$i2_49 ;
+  assign out = \$i1_50  | \$i2_50  | \$i3_50  | \$i4_50  | \$i5_50  | \$i6_50  | \$i7_50  | \$i8_50  | \$i9_50  | \$i10_50  | \$i11_50  | \$i12_50  | \$i13_50  | \$i14_50  | \$i15_50  | \$i16_50 ;
 endmodule
 
 // @(68:10)
@@ -112,27 +129,59 @@ module DECODER_2(
 );
   output [15:0] out; // @(71:9)
   input [3:0] code; // @(70:9)
-  wire \$i1_5 , \$i2_5 , \$i3_5 , \$i4_5 ;
-  assign \$i1_5  = ~code[0];
-  assign \$i2_5  = ~code[1];
-  assign \$i3_5  = ~code[2];
-  assign \$i4_5  = ~code[3];
+  wire \$i_1 , \$i_2 , \$i_3 , \$i_4 , \$i1_5 , \$i2_5 , \$i3_5 , \$i4_5 , \$i2_13 , \$i3_13 , \$i4_13 , \$i1_17 , \$i3_17 , \$i4_17 , \$i3_20 , \$i4_20 , \$i1_24 , \$i2_24 , \$i4_24 , \$i2_27 , \$i4_27 , \$i1_30 , \$i4_30 , \$i4_32 , \$i1_36 , \$i2_36 , \$i3_36 , \$i2_39 , \$i3_39 , \$i1_42 , \$i3_42 , \$i3_44 , \$i1_47 , \$i2_47 , \$i2_49 , \$i1_51 ;
+  assign \$i1_5  = ~\$i_1 ;
+  assign \$i2_5  = ~\$i_2 ;
+  assign \$i3_5  = ~\$i_3 ;
+  assign \$i4_5  = ~\$i_4 ;
   assign out[0] = \$i1_5  & \$i2_5  & \$i3_5  & \$i4_5 ;
-  assign out[1] = code[0] & \$i2_5  & \$i3_5  & \$i4_5 ;
-  assign out[2] = \$i1_5  & code[1] & \$i3_5  & \$i4_5 ;
-  assign out[3] = code[0] & code[1] & \$i3_5  & \$i4_5 ;
-  assign out[4] = \$i1_5  & \$i2_5  & code[2] & \$i4_5 ;
-  assign out[5] = code[0] & \$i2_5  & code[2] & \$i4_5 ;
-  assign out[6] = \$i1_5  & code[1] & code[2] & \$i4_5 ;
-  assign out[7] = code[0] & code[1] & code[2] & \$i4_5 ;
-  assign out[8] = \$i1_5  & \$i2_5  & \$i3_5  & code[3];
-  assign out[9] = code[0] & \$i2_5  & \$i3_5  & code[3];
-  assign out[10] = \$i1_5  & code[1] & \$i3_5  & code[3];
-  assign out[11] = code[0] & code[1] & \$i3_5  & code[3];
-  assign out[12] = \$i1_5  & \$i2_5  & code[2] & code[3];
-  assign out[13] = code[0] & \$i2_5  & code[2] & code[3];
-  assign out[14] = \$i1_5  & code[1] & code[2] & code[3];
-  assign out[15] = code[0] & code[1] & code[2] & code[3];
+  assign \$i_1  = code[0];
+  assign \$i_2  = code[1];
+  assign \$i_3  = code[2];
+  assign \$i_4  = code[3];
+  assign \$i2_13  = ~\$i_2 ;
+  assign \$i3_13  = ~\$i_3 ;
+  assign \$i4_13  = ~\$i_4 ;
+  assign out[1] = \$i_1  & \$i2_13  & \$i3_13  & \$i4_13 ;
+  assign \$i1_17  = ~\$i_1 ;
+  assign \$i3_17  = ~\$i_3 ;
+  assign \$i4_17  = ~\$i_4 ;
+  assign out[2] = \$i1_17  & \$i_2  & \$i3_17  & \$i4_17 ;
+  assign \$i3_20  = ~\$i_3 ;
+  assign \$i4_20  = ~\$i_4 ;
+  assign out[3] = \$i_1  & \$i_2  & \$i3_20  & \$i4_20 ;
+  assign \$i1_24  = ~\$i_1 ;
+  assign \$i2_24  = ~\$i_2 ;
+  assign \$i4_24  = ~\$i_4 ;
+  assign out[4] = \$i1_24  & \$i2_24  & \$i_3  & \$i4_24 ;
+  assign \$i2_27  = ~\$i_2 ;
+  assign \$i4_27  = ~\$i_4 ;
+  assign out[5] = \$i_1  & \$i2_27  & \$i_3  & \$i4_27 ;
+  assign \$i1_30  = ~\$i_1 ;
+  assign \$i4_30  = ~\$i_4 ;
+  assign out[6] = \$i1_30  & \$i_2  & \$i_3  & \$i4_30 ;
+  assign \$i4_32  = ~\$i_4 ;
+  assign out[7] = \$i_1  & \$i_2  & \$i_3  & \$i4_32 ;
+  assign \$i1_36  = ~\$i_1 ;
+  assign \$i2_36  = ~\$i_2 ;
+  assign \$i3_36  = ~\$i_3 ;
+  assign out[8] = \$i1_36  & \$i2_36  & \$i3_36  & \$i_4 ;
+  assign \$i2_39  = ~\$i_2 ;
+  assign \$i3_39  = ~\$i_3 ;
+  assign out[9] = \$i_1  & \$i2_39  & \$i3_39  & \$i_4 ;
+  assign \$i1_42  = ~\$i_1 ;
+  assign \$i3_42  = ~\$i_3 ;
+  assign out[10] = \$i1_42  & \$i_2  & \$i3_42  & \$i_4 ;
+  assign \$i3_44  = ~\$i_3 ;
+  assign out[11] = \$i_1  & \$i_2  & \$i3_44  & \$i_4 ;
+  assign \$i1_47  = ~\$i_1 ;
+  assign \$i2_47  = ~\$i_2 ;
+  assign out[12] = \$i1_47  & \$i2_47  & \$i_3  & \$i_4 ;
+  assign \$i2_49  = ~\$i_2 ;
+  assign out[13] = \$i_1  & \$i2_49  & \$i_3  & \$i_4 ;
+  assign \$i1_51  = ~\$i_1 ;
+  assign out[14] = \$i1_51  & \$i_2  & \$i_3  & \$i_4 ;
+  assign out[15] = \$i_1  & \$i_2  & \$i_3  & \$i_4 ;
 endmodule
 
 // @(23:10)
@@ -165,14 +214,16 @@ module MUX_2(
 );
   output out; // @(61:19)
   input code, \input[0] , \input[1] ; // @(59:9), @(61:9), @(61:9)
-  wire \$i2_3 , \$i2_5 , \$i1_6 , \$i2_6 ;
+  wire \$i_2 , \$i2_4 , \$i_5 , \$i2_7 , \$i1_8 , \$i2_8 ;
   wire [1:0] mask; // @(60:9)
   DECODER_1 \$inst_1 (code, mask);
-  assign \$i2_3  = $signed(mask[0]);
-  assign \$i1_6  = \input[0]  & \$i2_3 ;
-  assign \$i2_5  = $signed(mask[1]);
-  assign \$i2_6  = \input[1]  & \$i2_5 ;
-  assign out = \$i1_6  | \$i2_6 ;
+  assign \$i2_4  = $signed(\$i_2 );
+  assign \$i_2  = mask[0];
+  assign \$i1_8  = \input[0]  & \$i2_4 ;
+  assign \$i2_7  = $signed(\$i_5 );
+  assign \$i_5  = mask[1];
+  assign \$i2_8  = \input[1]  & \$i2_7 ;
+  assign out = \$i1_8  | \$i2_8 ;
 endmodule
 
 // @(57:10)
@@ -182,14 +233,17 @@ module MUX_1(
   output [31:0] out; // @(61:19)
   input code; // @(59:9)
   input [31:0] \input[0] , \input[1] ; // @(61:9), @(61:9)
-  wire [31:0] \$i2_3 , \$i2_5 , \$i1_6 , \$i2_6 ;
+  wire \$i_2 , \$i_5 ;
+  wire [31:0] \$i2_4 , \$i2_7 , \$i1_8 , \$i2_8 ;
   wire [1:0] mask; // @(60:9)
   DECODER_1 \$inst_1 (code, mask);
-  assign \$i2_3  = $signed(mask[0]);
-  assign \$i1_6  = \input[0]  & \$i2_3 ;
-  assign \$i2_5  = $signed(mask[1]);
-  assign \$i2_6  = \input[1]  & \$i2_5 ;
-  assign out = \$i1_6  | \$i2_6 ;
+  assign \$i2_4  = $signed(\$i_2 );
+  assign \$i_2  = mask[0];
+  assign \$i1_8  = \input[0]  & \$i2_4 ;
+  assign \$i2_7  = $signed(\$i_5 );
+  assign \$i_5  = mask[1];
+  assign \$i2_8  = \input[1]  & \$i2_7 ;
+  assign out = \$i1_8  | \$i2_8 ;
 endmodule
 
 // @(68:10)
@@ -198,9 +252,10 @@ module DECODER_1(
 );
   output [1:0] out; // @(71:9)
   input code; // @(70:9)
-  wire \$i1_2 ;
-  assign \$i1_2  = ~code;
+  wire \$i_1 , \$i1_2 ;
+  assign \$i1_2  = ~\$i_1 ;
   assign out[0] = \$i1_2 ;
-  assign out[1] = code;
+  assign \$i_1  = code[0];
+  assign out[1] = \$i_1 ;
 endmodule
 

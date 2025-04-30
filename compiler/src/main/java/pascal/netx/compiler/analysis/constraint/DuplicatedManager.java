@@ -50,18 +50,28 @@ public class DuplicatedManager {
 
     boolean isDuplicated(ComponentScope a, ComponentScope b) {
         if (a.getIdentifier().equals(b.getIdentifier())) {
-            if (a.getInputs().equals(b.getInputs())) {
-                var aoIter = a.getOutputs().iterator();
-                var boIter = b.getOutputs().iterator();
-                while (aoIter.hasNext() && boIter.hasNext()) {
-                    if (!aoIter.next().getType().equals(boIter.next().getType())) {
-                        return false;
+            if (hasSameAttribute(a, b)) {
+                if (a.getInputs().equals(b.getInputs())) {
+                    var aoIter = a.getOutputs().iterator();
+                    var boIter = b.getOutputs().iterator();
+                    while (aoIter.hasNext() && boIter.hasNext()) {
+                        if (!aoIter.next().getType().equals(boIter.next().getType())) {
+                            return false;
+                        }
                     }
+                    return !(aoIter.hasNext() || boIter.hasNext());
                 }
-                return !(aoIter.hasNext() || boIter.hasNext());
             }
         }
         return false;
+    }
+
+    boolean hasSameAttribute(ComponentScope a, ComponentScope b) {
+        if (a.hasAttributes()) {
+            return a.getAttributes().equals(b.getAttributes());
+        } else {
+            return !b.hasAttributes();
+        }
     }
 
     public boolean needRemove(Entity entity) {
