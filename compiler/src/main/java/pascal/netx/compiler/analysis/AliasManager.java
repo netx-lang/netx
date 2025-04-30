@@ -87,6 +87,10 @@ public class AliasManager {
             return false;
         } else if (now instanceof Value) {
             return true;
+        } else if (((Mutable) old).getParent().isInterface()) {
+            return true;
+        } else if (((Mutable) now).getParent().isInterface()) {
+            return false;
         } else {
             return ((Mutable) now).getIndex() < ((Mutable) old).getIndex();
         }
