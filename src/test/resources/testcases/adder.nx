@@ -6,7 +6,7 @@ component adder(WIDTH) : [a, b] -> [c] {
     wire a, b, c of bit(WIDTH);
     let ADDER(i) = [#c[i], TO] <> full_adder <> [a[i]#, b[i]#, TO];
     let RES(i)   = if i == -1 then 1'b0 else ADDER(i) <> RES(i-1);
-    IGNORE <> RES(WIDTH - 1);
+    RES(WIDTH - 1);
 }
 
 component full_adder: [a, b, cin] -> [out, cout] {

@@ -13,12 +13,14 @@ import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static pascal.netx.util.lang.BuiltinComponent.NO_DUMP;
-import static pascal.netx.util.lang.BuiltinComponent.isBuiltin;
+import static pascal.netx.util.lang.BuiltinComponent.*;
 
 final class CompactDumper {
     private final PackageScope packageScope;
@@ -182,7 +184,7 @@ final class CompactDumper {
             dumpInstIO(builtin, "input", sub.getInputs());
             dumpInstIO(builtin, "output", sub.getOutputs());
 
-            if (Objects.requireNonNull(BuiltinComponent.of(instID)) == BuiltinComponent.REGISTER) {
+            if (ATTRIBUTED.contains(BuiltinComponent.of(instID))) {
                 var attributes = createObjectNode();
                 for (var entry : sub.getAttributes().entrySet()) {
                     attributes.put(entry.getKey().name(), dumpVariableRef((Variable) entry.getValue()));

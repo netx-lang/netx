@@ -23,6 +23,16 @@ public record PartSelector(IntegerValue start, IntegerValue end) implements Sele
     }
 
     @Override
+    public IntegerValue msb() {
+        return start;
+    }
+
+    @Override
+    public IntegerValue lsb() {
+        return end;
+    }
+
+    @Override
     public Selector refine(Selector selector) {
         return switch (selector) {
             case BitSelector(var value) -> refineBitSelector(value.toInt());

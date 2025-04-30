@@ -22,6 +22,16 @@ public record BitSelector(IntegerValue index) implements Selector {
     }
 
     @Override
+    public IntegerValue msb() {
+        return index;
+    }
+
+    @Override
+    public IntegerValue lsb() {
+        return index;
+    }
+
+    @Override
     public Selector refine(Selector selector) {
         switch (selector) {
             case BitSelector(var value) -> {

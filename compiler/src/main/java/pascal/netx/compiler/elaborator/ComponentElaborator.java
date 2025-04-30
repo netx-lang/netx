@@ -11,6 +11,7 @@ import pascal.netx.compiler.model.Signature;
 import pascal.netx.compiler.model.expr.*;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.binding.MonoBinding;
+import pascal.netx.compiler.model.variable.Access;
 import pascal.netx.compiler.model.variable.Array;
 import pascal.netx.compiler.model.variable.Mutable;
 import pascal.netx.compiler.model.variable.Variable;
@@ -255,7 +256,14 @@ final class ComponentElaborator {
 
             int size = requiresMatchedSize(sourceLoc, lhs.source(), rhs.target());
             for (int i = 0; i < size; ++i) {
-                scope.getManager().assign(sourceLoc, lhs.source().get(i), rhs.target().get(i));
+                var source = rhs.target.get(i);
+                if (source instanceof Access acc) {
+                    var selector = factory.createSelectComponent(scope, acc);
+                    var port = ComponentPort.of(selector);
+                    scope.getManager().assign(sourceLoc, port.source.getFirst(), acc.base());
+                    source = port.target.getFirst();
+                }
+                scope.getManager().assign(sourceLoc, lhs.source().get(i), source);
             }
             return ComponentPort.of(lhs.target(), rhs.source());
         }

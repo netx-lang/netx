@@ -1,5 +1,5 @@
 {
-  "totalData": 2,
+  "totalData": 9,
   "design": {
     "type": "component",
     "id": "top",
@@ -16,18 +16,73 @@
         "members": [
           {
             "type": "builtin", "id": "OR", "loc": "12:21",
-            "input": ["input@0[1]", "input@0[3]", "input@0[5]", "input@0[7]"],
-            "output": ["output@1[0]"]
+            "input": ["$i1@2", "$i2@3", "$i3@4", "$i4@5"],
+            "output": ["output@1[0]"],
+            "members": [
+              {"type": "wire", "width": 1, "id": "$i1@2", "loc": "12:21"},
+              {"type": "wire", "width": 1, "id": "$i2@3", "loc": "12:21"},
+              {"type": "wire", "width": 1, "id": "$i3@4", "loc": "12:21"},
+              {"type": "wire", "width": 1, "id": "$i4@5", "loc": "12:21"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "SELECT", "loc": "8:9",
+            "input": ["input@0"],
+            "output": ["$i1@2"],
+            "attribute": {"msb": "1", "lsb": "1"}
+          },
+          {
+            "type": "builtin", "id": "SELECT", "loc": "8:9",
+            "input": ["input@0"],
+            "output": ["$i2@3"],
+            "attribute": {"msb": "3", "lsb": "3"}
+          },
+          {
+            "type": "builtin", "id": "SELECT", "loc": "8:9",
+            "input": ["input@0"],
+            "output": ["$i3@4"],
+            "attribute": {"msb": "5", "lsb": "5"}
+          },
+          {
+            "type": "builtin", "id": "SELECT", "loc": "8:9",
+            "input": ["input@0"],
+            "output": ["$i4@5"],
+            "attribute": {"msb": "7", "lsb": "7"}
           },
           {
             "type": "builtin", "id": "OR", "loc": "12:21",
-            "input": ["input@0[2]", "input@0[3]", "input@0[6]", "input@0[7]"],
-            "output": ["output@1[1]"]
+            "input": ["$i1@6", "$i2@3", "$i3@7", "$i4@5"],
+            "output": ["output@1[1]"],
+            "members": [
+              {"type": "wire", "width": 1, "id": "$i1@6", "loc": "12:21"},
+              {"type": "wire", "width": 1, "id": "$i3@7", "loc": "12:21"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "SELECT", "loc": "8:9",
+            "input": ["input@0"],
+            "output": ["$i1@6"],
+            "attribute": {"msb": "2", "lsb": "2"}
+          },
+          {
+            "type": "builtin", "id": "SELECT", "loc": "8:9",
+            "input": ["input@0"],
+            "output": ["$i3@7"],
+            "attribute": {"msb": "6", "lsb": "6"}
           },
           {
             "type": "builtin", "id": "OR", "loc": "12:21",
-            "input": ["input@0[4]", "input@0[5]", "input@0[6]", "input@0[7]"],
-            "output": ["output@1[2]"]
+            "input": ["$i1@8", "$i3@4", "$i3@7", "$i4@5"],
+            "output": ["output@1[2]"],
+            "members": [
+              {"type": "wire", "width": 1, "id": "$i1@8", "loc": "12:21"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "SELECT", "loc": "8:9",
+            "input": ["input@0"],
+            "output": ["$i1@8"],
+            "attribute": {"msb": "4", "lsb": "4"}
           }
         ]
       }

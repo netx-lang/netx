@@ -44,7 +44,7 @@ class AnalysisTest {
                 component top {
                     wire clk of clock();
                     wire a of bit(4);
-                    auto b;
+                    wire b of bit(4);
                     auto x;
                     auto c;
                     x <> OR <> [a, b];

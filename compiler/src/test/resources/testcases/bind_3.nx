@@ -6,7 +6,7 @@ component top {
     let B(a, b) = A(a, b, data[2]);
     let C(a) = B(a, data[1]);
     let D = C(data[0]);
-    [IGNORE | i in [0..4]] <> D;
+    D;
 }
 
 component many_ports : [input[i] | i in [0..4]] -> [output[i] | i in [0..4]] {
