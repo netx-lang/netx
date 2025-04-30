@@ -7,6 +7,8 @@ import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.RepoScope;
+import pascal.netx.compiler.model.variable.Access;
+import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.SourceLoc;
 
 import java.util.List;
@@ -44,5 +46,14 @@ public final class Utils {
 
     public static NXCompiler compilerOf(PackageScope pack) {
         return pack.getProject().getCompiler();
+    }
+
+    public static boolean isIdenticalComponent(ComponentScope component) {
+        if (BuiltinComponent.of(component.getIdentifier()) == BuiltinComponent.SELECT) {
+            var input = component.getInputs().getFirst();
+            var output = component.getOutputs().getFirst();
+            return output == input || output instanceof Access acc && acc.base() == input;
+        }
+        return false;
     }
 }

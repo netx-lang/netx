@@ -17,6 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static pascal.netx.compiler.model.Utils.isIdenticalComponent;
 import static pascal.netx.util.lang.BuiltinComponent.ATTRIBUTED;
 import static pascal.netx.util.lang.BuiltinComponent.NO_DUMP;
 
@@ -89,7 +90,8 @@ final class ExpandedDumper {
                 var child = (ComponentScope) kid;
                 var instID = child.getIdentifier();
                 if (BuiltinComponent.isBuiltin(instID)) {
-                    if (!NO_DUMP.contains(BuiltinComponent.of(instID))) {
+                    var ref = BuiltinComponent.of(instID);
+                    if (!NO_DUMP.contains(ref) && !(isIdenticalComponent(child))) {
                         needDump.add(instantiateBuiltin(child, instID));
                     }
                 } else if (!child.isInterface()) {
