@@ -24,139 +24,43 @@
       {"type": "wire", "width": 8, "id": "c", "loc": "6:15"},
       {
         "type": "instantiate", "id": "full_adder@1", "defIndex": 1, "loc": "7:34",
-        "input": ["a@1", "b@1", "1'h00"],
+        "input": ["a@0[0]", "b@0[0]", "1'h00"],
         "output": ["c@0[0]", "cout@1"]
       },
       {
-        "type": "builtin", "id": "SELECT@2", "loc": "6:9",
-        "input": ["a@0"],
-        "output": ["a@1"],
-        "attribute": {"msb": "0", "lsb": "0"}
-      },
-      {
-        "type": "builtin", "id": "SELECT@3", "loc": "6:12",
-        "input": ["b@0"],
-        "output": ["b@1"],
-        "attribute": {"msb": "0", "lsb": "0"}
-      },
-      {
         "type": "instantiate", "id": "full_adder@4", "defIndex": 1, "loc": "7:34",
-        "input": ["a@4", "b@4", "cout@1"],
+        "input": ["a@0[1]", "b@0[1]", "cout@1"],
         "output": ["c@0[1]", "cout@4"]
       },
       {
-        "type": "builtin", "id": "SELECT@5", "loc": "6:9",
-        "input": ["a@0"],
-        "output": ["a@4"],
-        "attribute": {"msb": "1", "lsb": "1"}
-      },
-      {
-        "type": "builtin", "id": "SELECT@6", "loc": "6:12",
-        "input": ["b@0"],
-        "output": ["b@4"],
-        "attribute": {"msb": "1", "lsb": "1"}
-      },
-      {
         "type": "instantiate", "id": "full_adder@7", "defIndex": 1, "loc": "7:34",
-        "input": ["a@7", "b@7", "cout@4"],
+        "input": ["a@0[2]", "b@0[2]", "cout@4"],
         "output": ["c@0[2]", "cout@7"]
       },
       {
-        "type": "builtin", "id": "SELECT@8", "loc": "6:9",
-        "input": ["a@0"],
-        "output": ["a@7"],
-        "attribute": {"msb": "2", "lsb": "2"}
-      },
-      {
-        "type": "builtin", "id": "SELECT@9", "loc": "6:12",
-        "input": ["b@0"],
-        "output": ["b@7"],
-        "attribute": {"msb": "2", "lsb": "2"}
-      },
-      {
         "type": "instantiate", "id": "full_adder@10", "defIndex": 1, "loc": "7:34",
-        "input": ["a@10", "b@10", "cout@7"],
+        "input": ["a@0[3]", "b@0[3]", "cout@7"],
         "output": ["c@0[3]", "cout@10"]
       },
       {
-        "type": "builtin", "id": "SELECT@11", "loc": "6:9",
-        "input": ["a@0"],
-        "output": ["a@10"],
-        "attribute": {"msb": "3", "lsb": "3"}
-      },
-      {
-        "type": "builtin", "id": "SELECT@12", "loc": "6:12",
-        "input": ["b@0"],
-        "output": ["b@10"],
-        "attribute": {"msb": "3", "lsb": "3"}
-      },
-      {
         "type": "instantiate", "id": "full_adder@13", "defIndex": 1, "loc": "7:34",
-        "input": ["a@13", "b@13", "cout@10"],
+        "input": ["a@0[4]", "b@0[4]", "cout@10"],
         "output": ["c@0[4]", "cout@13"]
       },
       {
-        "type": "builtin", "id": "SELECT@14", "loc": "6:9",
-        "input": ["a@0"],
-        "output": ["a@13"],
-        "attribute": {"msb": "4", "lsb": "4"}
-      },
-      {
-        "type": "builtin", "id": "SELECT@15", "loc": "6:12",
-        "input": ["b@0"],
-        "output": ["b@13"],
-        "attribute": {"msb": "4", "lsb": "4"}
-      },
-      {
         "type": "instantiate", "id": "full_adder@16", "defIndex": 1, "loc": "7:34",
-        "input": ["a@16", "b@16", "cout@13"],
+        "input": ["a@0[5]", "b@0[5]", "cout@13"],
         "output": ["c@0[5]", "cout@16"]
       },
       {
-        "type": "builtin", "id": "SELECT@17", "loc": "6:9",
-        "input": ["a@0"],
-        "output": ["a@16"],
-        "attribute": {"msb": "5", "lsb": "5"}
-      },
-      {
-        "type": "builtin", "id": "SELECT@18", "loc": "6:12",
-        "input": ["b@0"],
-        "output": ["b@16"],
-        "attribute": {"msb": "5", "lsb": "5"}
-      },
-      {
         "type": "instantiate", "id": "full_adder@19", "defIndex": 1, "loc": "7:34",
-        "input": ["a@19", "b@19", "cout@16"],
+        "input": ["a@0[6]", "b@0[6]", "cout@16"],
         "output": ["c@0[6]", "cout@19"]
       },
       {
-        "type": "builtin", "id": "SELECT@20", "loc": "6:9",
-        "input": ["a@0"],
-        "output": ["a@19"],
-        "attribute": {"msb": "6", "lsb": "6"}
-      },
-      {
-        "type": "builtin", "id": "SELECT@21", "loc": "6:12",
-        "input": ["b@0"],
-        "output": ["b@19"],
-        "attribute": {"msb": "6", "lsb": "6"}
-      },
-      {
         "type": "instantiate", "id": "full_adder@22", "defIndex": 1, "loc": "7:34",
-        "input": ["a@22", "b@22", "cout@19"],
+        "input": ["a@0[7]", "b@0[7]", "cout@19"],
         "output": ["c@0[7]", "cout@22"]
-      },
-      {
-        "type": "builtin", "id": "SELECT@23", "loc": "6:9",
-        "input": ["a@0"],
-        "output": ["a@22"],
-        "attribute": {"msb": "7", "lsb": "7"}
-      },
-      {
-        "type": "builtin", "id": "SELECT@24", "loc": "6:12",
-        "input": ["b@0"],
-        "output": ["b@22"],
-        "attribute": {"msb": "7", "lsb": "7"}
       }
     ]
   },

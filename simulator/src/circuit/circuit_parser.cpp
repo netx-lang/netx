@@ -41,14 +41,15 @@ namespace nxon {
     }
 
     static source_t parse_source(const std::string &source, const parse_context &context) {
-        if (source.find('@') != std::string::npos) {
-            auto [name, id, _] = parse_id(source);
-            return data_factory::id_source(id, context.size_map.at(id));
-        }
-        return data_factory::constant_source(value_t::parse(source));
-    }
+         if (source.find('@') != std::string::npos) {
+             auto [name, id, selection] = parse_id(source);
+             if (selection) return data_factory::select_source(id, selection->first, selection->second);
+             return data_factory::id_source(id, context.size_map.at(id));
+         }
+         return data_factory::constant_source(value_t::parse(source));
+     }
 
-    static source_t parse_select_source(const std::string &source, const nlohmann::json &attribute) {
+    static source_t parse_select_attr_source(const std::string &source, const nlohmann::json &attribute) {
         auto [name, id, _] = parse_id(source);
         return data_factory::select_source(id,
             std::stoull(std::string(attribute["lsb"])),
@@ -273,7 +274,7 @@ namespace nxon {
                 break;
             }
             case builtin_type::SELECT: {
-                context.circuit.add_rule(rule_factory::id_rule(parse_select_source(input[0], json["attribute"]),
+                context.circuit.add_rule(rule_factory::id_rule(parse_select_attr_source(input[0], json["attribute"]),
                                                                parse_sink(output[0], context)));
                 break;
             }
