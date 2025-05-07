@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static pascal.netx.compiler.model.Utils.isIdenticalComponent;
 import static pascal.netx.util.lang.BuiltinComponent.*;
 
 final class CompactDumper {
@@ -134,7 +133,7 @@ final class CompactDumper {
                 var instID = child.getIdentifier();
                 if (BuiltinComponent.isBuiltin(instID)) {
                     var ref = BuiltinComponent.of(instID);
-                    if (!NO_DUMP.contains(ref) && !isIdenticalComponent(child)) {
+                    if (!NO_DUMP.contains(ref)) {
                         needDump.add(instantiateBuiltin(child, instID));
                     }
                 } else if (!child.isInterface()) {

@@ -262,7 +262,7 @@ final class ComponentElaborator {
                     var port = ComponentPort.of(selector);
                     scope.getManager().assign(sourceLoc, port.source.getFirst(), acc.base());
                     source = port.target.getFirst();
-                    scope.getManager().assign(sourceLoc, source, acc);
+                    scope.getAliases().add(ComponentScope.Alias.of(acc, source));
                 }
                 scope.getManager().assign(sourceLoc, lhs.source().get(i), source);
             }

@@ -26,12 +26,12 @@
         "output": ["output@0[0]"]
       },
       {
-        "type": "builtin", "id": "OR@6", "loc": "12:21",
+        "type": "builtin", "id": "OR@2", "loc": "12:21",
         "input": ["code@0[2]", "code@0[3]", "code@0[6]", "code@0[7]"],
         "output": ["output@0[1]"]
       },
       {
-        "type": "builtin", "id": "OR@9", "loc": "12:21",
+        "type": "builtin", "id": "OR@3", "loc": "12:21",
         "input": ["code@0[4]", "code@0[5]", "code@0[6]", "code@0[7]"],
         "output": ["output@0[2]"]
       }

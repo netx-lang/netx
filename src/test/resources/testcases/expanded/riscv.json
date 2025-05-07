@@ -7414,6 +7414,12 @@
                     ]
                   },
                   {
+                    "type": "builtin", "id": "SELECT", "loc": "216:9",
+                    "input": ["ctl@17[3]"],
+                    "output": ["ctl@17[3]"],
+                    "attribute": {"msb": "0", "lsb": "0"}
+                  },
+                  {
                     "type": "builtin", "id": "AND", "loc": "219:21",
                     "input": ["ctl@17[3]"],
                     "output": ["mask@756[1]"]
@@ -7643,6 +7649,12 @@
                     "members": [
                       {"type": "wire", "width": 1, "id": "$i1@782", "loc": "219:21"}
                     ]
+                  },
+                  {
+                    "type": "builtin", "id": "SELECT", "loc": "216:9",
+                    "input": ["ctl@17[3]"],
+                    "output": ["ctl@17[3]"],
+                    "attribute": {"msb": "0", "lsb": "0"}
                   },
                   {
                     "type": "builtin", "id": "AND", "loc": "219:21",
@@ -7943,6 +7955,12 @@
                     "members": [
                       {"type": "wire", "width": 1, "id": "$i1@814", "loc": "219:21"}
                     ]
+                  },
+                  {
+                    "type": "builtin", "id": "SELECT", "loc": "216:9",
+                    "input": ["ctl@17[3]"],
+                    "output": ["ctl@17[3]"],
+                    "attribute": {"msb": "0", "lsb": "0"}
                   },
                   {
                     "type": "builtin", "id": "AND", "loc": "219:21",

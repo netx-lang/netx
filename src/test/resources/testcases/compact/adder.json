@@ -28,39 +28,39 @@
         "output": ["c@0[0]", "cout@1"]
       },
       {
-        "type": "instantiate", "id": "full_adder@4", "defIndex": 1, "loc": "7:34",
+        "type": "instantiate", "id": "full_adder@2", "defIndex": 1, "loc": "7:34",
         "input": ["a@0[1]", "b@0[1]", "cout@1"],
-        "output": ["c@0[1]", "cout@4"]
+        "output": ["c@0[1]", "cout@2"]
+      },
+      {
+        "type": "instantiate", "id": "full_adder@3", "defIndex": 1, "loc": "7:34",
+        "input": ["a@0[2]", "b@0[2]", "cout@2"],
+        "output": ["c@0[2]", "cout@3"]
+      },
+      {
+        "type": "instantiate", "id": "full_adder@4", "defIndex": 1, "loc": "7:34",
+        "input": ["a@0[3]", "b@0[3]", "cout@3"],
+        "output": ["c@0[3]", "cout@4"]
+      },
+      {
+        "type": "instantiate", "id": "full_adder@5", "defIndex": 1, "loc": "7:34",
+        "input": ["a@0[4]", "b@0[4]", "cout@4"],
+        "output": ["c@0[4]", "cout@5"]
+      },
+      {
+        "type": "instantiate", "id": "full_adder@6", "defIndex": 1, "loc": "7:34",
+        "input": ["a@0[5]", "b@0[5]", "cout@5"],
+        "output": ["c@0[5]", "cout@6"]
       },
       {
         "type": "instantiate", "id": "full_adder@7", "defIndex": 1, "loc": "7:34",
-        "input": ["a@0[2]", "b@0[2]", "cout@4"],
-        "output": ["c@0[2]", "cout@7"]
+        "input": ["a@0[6]", "b@0[6]", "cout@6"],
+        "output": ["c@0[6]", "cout@7"]
       },
       {
-        "type": "instantiate", "id": "full_adder@10", "defIndex": 1, "loc": "7:34",
-        "input": ["a@0[3]", "b@0[3]", "cout@7"],
-        "output": ["c@0[3]", "cout@10"]
-      },
-      {
-        "type": "instantiate", "id": "full_adder@13", "defIndex": 1, "loc": "7:34",
-        "input": ["a@0[4]", "b@0[4]", "cout@10"],
-        "output": ["c@0[4]", "cout@13"]
-      },
-      {
-        "type": "instantiate", "id": "full_adder@16", "defIndex": 1, "loc": "7:34",
-        "input": ["a@0[5]", "b@0[5]", "cout@13"],
-        "output": ["c@0[5]", "cout@16"]
-      },
-      {
-        "type": "instantiate", "id": "full_adder@19", "defIndex": 1, "loc": "7:34",
-        "input": ["a@0[6]", "b@0[6]", "cout@16"],
-        "output": ["c@0[6]", "cout@19"]
-      },
-      {
-        "type": "instantiate", "id": "full_adder@22", "defIndex": 1, "loc": "7:34",
-        "input": ["a@0[7]", "b@0[7]", "cout@19"],
-        "output": ["c@0[7]", "cout@22"]
+        "type": "instantiate", "id": "full_adder@8", "defIndex": 1, "loc": "7:34",
+        "input": ["a@0[7]", "b@0[7]", "cout@7"],
+        "output": ["c@0[7]", "cout@8"]
       }
     ]
   },

@@ -23,5 +23,6 @@ public final class PackageAliasAnalysis extends ModelAnalysis {
                 scope.getAttributes().replaceAllVariable(manager::repOf);
             }
         });
+        pack.forEachSubComponent(scope -> scope.getChildren().removeIf(manager::isAliasSelect));
     }
 }

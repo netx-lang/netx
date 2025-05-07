@@ -2,17 +2,18 @@ package pascal.netx.compiler.analysis.constraint;
 
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.scope.ComponentScope;
+import pascal.netx.compiler.model.variable.Value;
 import pascal.netx.compiler.model.variable.Variable;
 import pascal.netx.util.collection.UnionFind;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static pascal.netx.util.lang.BuiltinComponent.NO_DUMP;
+import static pascal.netx.util.lang.BuiltinComponent.*;
 
 public class DuplicatedManager {
     private final UnionFind<Variable> set = new UnionFind<>();
@@ -22,7 +23,7 @@ public class DuplicatedManager {
                 .map(ComponentScope.class::cast)
                 .collect(Collectors.groupingBy(ComponentScope::getIdentifier));
 
-        List<ComponentScope> toRemove = new LinkedList<>();
+        List<ComponentScope> toRemove = collectDuplicatedSelect(scope);
         for (var entry : idGroups.entrySet()) {
             var identifier = entry.getKey();
             if (BuiltinComponent.isBuiltin(identifier)
@@ -46,6 +47,23 @@ public class DuplicatedManager {
             }
         }
         scope.getChildren().removeAll(toRemove);
+    }
+
+    List<ComponentScope> collectDuplicatedSelect(ComponentScope scope) {
+        List<ComponentScope> result = new ArrayList<>();
+        for (var child : scope.getChildren()) {
+            var component = (ComponentScope) child;
+            if (isBuiltin(component.getIdentifier())) {
+                if (BuiltinComponent.of(component.getIdentifier()) == SELECT) {
+                    var input = component.getInputs().getFirst();
+                    var output = component.getOutputs().getFirst();
+                    if (input instanceof Value || output instanceof Value || input == output) {
+                        result.add(component);
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     boolean isDuplicated(ComponentScope a, ComponentScope b) {
