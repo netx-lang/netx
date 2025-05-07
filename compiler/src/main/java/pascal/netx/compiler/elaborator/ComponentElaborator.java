@@ -22,6 +22,7 @@ import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static pascal.netx.compiler.model.Entities.requiresMutable;
 import static pascal.netx.compiler.model.Utils.*;
@@ -223,7 +224,10 @@ final class ComponentElaborator {
                 case ParallelExpr parallel -> instantiateParallelExpr(parallel);
                 case DecoratedExpr decorated -> instantiateDecoratedExpr(decorated);
                 case SequentialExpr sequential -> instantiateSequentialExpr(sequential);
-                case PortConnectionExpr connection -> instantiatePortConnectionExpr(connection);
+                case PortExpr connection -> {
+                    log.error("{}: Unexpected Port Connect Expression {}", connection.loc(), connection);
+                    throw new CompileCancellationException();
+                }
             };
         }
 
@@ -245,14 +249,28 @@ final class ComponentElaborator {
             };
         }
 
-        private ComponentPort instantiateSequentialExpr(SequentialExpr sequentialExpr) {
+        private ComponentPort instantiateSequentialExpr(SequentialExpr expr) {
+            if (expr.rhs() instanceof PortExpr port) {
+                return doPortConnection(instantiateScope(expr.lhs()), port, true);
+            }
+            if (expr.lhs() instanceof PortExpr lhs) {
+                if (expr.rhs() instanceof SequentialExpr(Expr mid, PortExpr rhs)) {
+                    var scope = instantiateScope(mid);
+                    doPortConnection(scope, rhs, true);
+                    doPortConnection(scope, lhs, false);
+                    return ComponentPort.ofEmpty();
+                } else {
+                    return doPortConnection(instantiateScope(expr.rhs()), lhs, false);
+                }
+            }
+
             // right-hand-side goes first
             ComponentPort lhs, rhs;
-            rhs = doInstantiate(sequentialExpr.rhs());
-            if (needHintForContinuationOf(sequentialExpr.lhs())) {
+            rhs = doInstantiate(expr.rhs());
+            if (needHintForContinuationOf(expr.lhs())) {
                 argsHint = rhs.target().size();
             }
-            lhs = doInstantiate(sequentialExpr.lhs());
+            lhs = doInstantiate(expr.lhs());
 
             int size = requiresMatchedSize(sourceLoc, lhs.source(), rhs.target());
             for (int i = 0; i < size; ++i) {
@@ -269,28 +287,25 @@ final class ComponentElaborator {
             return ComponentPort.of(lhs.target(), rhs.source());
         }
 
-        private ComponentPort instantiatePortConnectionExpr(PortConnectionExpr connection) {
+        private ComponentPort doPortConnection(ComponentScope inst, PortExpr connection, boolean isInput) {
             var loc = connection.loc();
-            var lhsScope = switch (connection.instance()) {
-                case ComponentRef componentRef -> instantiateComponentRef(componentRef);
-                case BuiltinRef builtinRef -> instantiateBuiltinRef(builtinRef);
-                case ImportRef importRef -> instantiateImportRef(importRef);
-            };
-
-            var lhs = ComponentPort.of(lhsScope);
+            var instPort = ComponentPort.of(inst);
             Map<Mutable, ComponentPort> assigns = new HashMap<>();
+            Function<ComponentPort, List<Variable>> getter =
+                    (ComponentPort port) -> (isInput ? port.target : port.source);
+
             for (var entry : connection.ports()) {
-                var port = doInstantiate(entry.rhs());
-                if (!(port.target().size() == 1)) {
-                    log.error("{}: Expect exactly one output of {} but got {}", loc, entry.rhs(), port.target());
+                var conn = doInstantiate(entry.expr());
+                if (!(getter.apply(conn).size() == 1)) {
+                    log.error("{}: Expect exactly one output of {} but got {}", loc, entry.expr(), conn.target());
                     throw new CompileCancellationException();
                 }
-                var receiver = requiresMutable(loc, lhsScope.getEvaluator().evaluate(entry.lhs()));
-                assigns.put(receiver, port);
+                var port = inst.getEvaluator().evaluate(entry.port());
+                assigns.put(requiresMutable(loc, port), conn);
             }
-
-            requiresMatchedSize(connection.loc(), assigns.size(), lhs.source());
-            for (var variable : lhs.source()) {
+            var port = isInput ? instPort.source() : instPort.target();
+            requiresMatchedSize(connection.loc(), assigns.size(), port);
+            for (var variable : port) {
                 if (!(variable instanceof Mutable mutable)) {
                     log.error("{}: Expected mutable variable but got {}", connection.loc(), variable);
                     throw new CompileCancellationException();
@@ -299,9 +314,21 @@ final class ComponentElaborator {
                     log.error("{}: Missing assignment for {}", connection.loc(), variable);
                     throw new CompileCancellationException();
                 }
-                scope.getManager().assign(connection.loc(), mutable, assigns.get(mutable).target().getFirst());
+
+                var expr = assigns.get(mutable);
+                if (isInput) {
+                    scope.getManager().assign(connection.loc(),
+                            mutable, getter.apply(expr).getFirst());
+                } else {
+                    scope.getManager().assign(connection.loc(),
+                            getter.apply(expr).getFirst(), mutable);
+                }
             }
-            return ComponentPort.of(lhs.target, List.of());
+            if (isInput) {
+                return ComponentPort.of(instPort.target, List.of());
+            } else {
+                return ComponentPort.of(List.of(), instPort.source);
+            }
         }
 
         private ComponentPort instantiateParallelExpr(ParallelExpr parallelExpr) {
@@ -325,6 +352,18 @@ final class ComponentElaborator {
             } else {
                 return ComponentPort.of(inst, List.of());
             }
+        }
+
+        private ComponentScope instantiateScope(Expr expr) {
+            return switch (expr) {
+                case ImportRef ref -> instantiateImportRef(ref);
+                case BuiltinRef ref -> instantiateBuiltinRef(ref);
+                case ComponentRef ref -> instantiateComponentRef(ref);
+                default -> {
+                    log.error("{}: Unexpected expression type {}", sourceLoc, expr);
+                   throw new CompileCancellationException();
+                }
+            };
         }
 
         private ComponentScope instantiateImportRef(ImportRef ref) {
@@ -373,7 +412,6 @@ final class ComponentElaborator {
             scope.setSignature(signature);
         }
 
-
         private record ComponentPort(List<Variable> target, List<Variable> source) {
             public static ComponentPort of(List<Variable> target, List<Variable> source) {
                 return new ComponentPort(target, source);
@@ -381,6 +419,10 @@ final class ComponentElaborator {
 
             public static ComponentPort of(ComponentScope scope) {
                 return new ComponentPort(scope.getOutputs(), scope.getInputs());
+            }
+
+            public static ComponentPort ofEmpty() {
+                return new ComponentPort(List.of(), List.of());
             }
         }
     }

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.analysis.BindingLhsAnalysis;
 import pascal.netx.compiler.analysis.InterfaceChecker;
+import pascal.netx.compiler.analysis.PortExprRotation;
 import pascal.netx.compiler.analysis.SourceLocChecker;
 import pascal.netx.compiler.antlr.NetXLexer;
 import pascal.netx.compiler.antlr.NetXParser;
@@ -22,6 +23,7 @@ public final class NXParser {
     public PackageNode parse() {
         var design = TreeParser.parseDesign(buildANTLRParser().design());
         new SourceLocChecker(design).analyze();
+        new PortExprRotation(design).analyze();
         new InterfaceChecker(design).analyze();
         new BindingLhsAnalysis(design).analyze();
         return design;

@@ -100,7 +100,7 @@ expression
     | lhs=expression op='||' rhs=expression                         # BinaryExpr
     | lhs=expression op='::' rhs=expression                         # BinaryExpr
     | lhs=expression op='<>' rhs=expression                         # BinaryExpr
-    | symbol '<+>' '{' port_assign (',' port_assign)* '}'           # SymbolWithPortExpr
+    | '{' port_assign (',' port_assign)* '}'                        # PortExpr
     | 'if' cond=expression
       'then' thenBranch=expression
       'else' elseBranch=expression                                  # ConditionalExpr

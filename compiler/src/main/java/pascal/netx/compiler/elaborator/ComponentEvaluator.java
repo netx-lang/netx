@@ -177,7 +177,7 @@ public final class ComponentEvaluator {
             case BinaryExpr sub -> evaluateBinaryExpr(sub);
             case NumberExpr sub -> evaluateNumberExpr(sub);
             case SymbolExpr sub -> evaluateSymbolExpr(sub);
-            case NamedSequentialExpr sub -> evaluatePortExpr(sub);
+            case PortConnectionExpr sub -> evaluatePortExpr(sub);
             case ConditionalExpr sub -> evaluateConditionalExpr(sub);
         };
     }
@@ -393,15 +393,13 @@ public final class ComponentEvaluator {
         return EntityList.of(result);
     }
 
-    private Entity evaluatePortExpr(NamedSequentialExpr expr) {
-        var instance = requiresInstantiationRef(expr.getSourceLoc(),
-                castToInstantiateExpr(expr.getSourceLoc(), evaluate(expr.getInstance())));
-        List<PortConnectionExpr.PortAssign> ports = new LinkedList<>();
+    private Entity evaluatePortExpr(PortConnectionExpr expr) {
+        List<PortExpr.PortAssign> ports = new LinkedList<>();
         for (var assign : expr.getPorts()) {
-            ports.add(PortConnectionExpr.PortAssign.of(
+            ports.add(PortExpr.PortAssign.of(
                     assign.lhs(), castToInstantiateExpr(assign.rhs().getSourceLoc(), evaluate(assign.rhs()))));
         }
-        return PortConnectionExpr.of(expr.getSourceLoc(), instance, ports);
+        return PortExpr.of(expr.getSourceLoc(), ports);
     }
 
     private Entity evaluateSequentialExpr(BinaryExpr expr) {

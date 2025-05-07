@@ -194,11 +194,11 @@ public interface ASTListener {
         exitDefault(node);
     }
 
-    default void enter(NamedSequentialExpr node) {
+    default void enter(PortConnectionExpr node) {
         enterDefault(node);
     }
 
-    default void exit(NamedSequentialExpr node) {
+    default void exit(PortConnectionExpr node) {
         exitDefault(node);
     }
 
