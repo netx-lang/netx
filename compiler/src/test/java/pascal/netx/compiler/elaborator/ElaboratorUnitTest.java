@@ -176,7 +176,7 @@ class ElaboratorUnitTest {
     void testNamedPortConnection() {
         var actual = """
                 component top : [] -> [o] {
-                    auto o <> sub <+> { c = 3, a = 1, d = 4, e = 5, b = 2 };
+                    auto o <> sub <> { c = 3, a = 1, d = 4, e = 5, b = 2 };
                 }
                 component sub : [a, b, c, d, e] -> [f] {
                     wire a, b, c, d, e, f of bit(32);
@@ -199,7 +199,7 @@ class ElaboratorUnitTest {
     void testAccessPortConnection() {
         var actual = """
                 component top : [] -> [o] {
-                    auto o <> sub <+> { a[0]=1'b1, b=4'b1101, a[1]=1'b0, a[2]=1'b1, a[3]=1'b0 };
+                    auto o <> sub <> { a[0]=1'b1, b=4'b1101, a[1]=1'b0, a[2]=1'b1, a[3]=1'b0 };
                 }
                 component sub : [b] :: [a[i] | i in [0..4]] -> [c] {
                     wire a, b, c of bit(4);

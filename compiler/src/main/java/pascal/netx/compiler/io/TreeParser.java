@@ -272,7 +272,7 @@ public final class TreeParser {
             case NumberExprContext sub -> parseNumberExpr(sub);
             case AccessExprContext sub -> parseAccessExpr(sub);
             case BinaryExprContext sub -> parseBinaryExpr(sub);
-            case SymbolWithPortExprContext sub -> parsePortExpr(sub);
+            case PortExprContext sub -> parsePortExpr(sub);
             case ConditionalExprContext sub -> parseConditionalExpr(sub);
             case ParenExprContext sub -> parseExpr(sub.expression());
             default -> throw new ShallNotReachHereError();
@@ -330,14 +330,14 @@ public final class TreeParser {
                 .setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static ExprNode parsePortExpr(SymbolWithPortExprContext ctx) {
-        List<NamedSequentialExpr.PortAssign> ports = new ArrayList<>();
+    static ExprNode parsePortExpr(PortExprContext ctx) {
+        List<PortConnectionExpr.PortAssign> ports = new ArrayList<>();
         for (var assign : ctx.port_assign()) {
             var lhs = parseExpr(assign.lhs);
             var rhs = parseExpr(assign.rhs);
-            ports.add(new NamedSequentialExpr.PortAssign(lhs, rhs));
+            ports.add(new PortConnectionExpr.PortAssign(lhs, rhs));
         }
-        return NamedSequentialExpr.of(parseSymbolExpr(ctx.symbol()), ports);
+        return PortConnectionExpr.of(ports);
     }
 
     static ExprNode parseUnaryExpr(UnaryExprContext ctx) {
