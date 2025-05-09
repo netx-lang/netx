@@ -145,7 +145,7 @@ attribute_assign
     ;
 
 port_assign
-    : lhs=expression '=' rhs=expression
+    : lhs=expression ':' rhs=expression
     ;
 
 number

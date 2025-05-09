@@ -51,7 +51,7 @@ public final class PortConnectionExpr extends ExprNode {
     public record PortAssign(ExprNode lhs, ExprNode rhs) {
         @Override
         public String toString() {
-            return lhs + " = " + rhs;
+            return lhs + " : " + rhs;
         }
     }
 }
