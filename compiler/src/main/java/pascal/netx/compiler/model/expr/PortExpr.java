@@ -23,7 +23,7 @@ public record PortExpr(SourceLoc loc, List<PortAssign> ports) implements Expr {
 
         @Override
         public String toString() {
-            return port + " = " + expr;
+            return port + " : " + expr;
         }
     }
 }
