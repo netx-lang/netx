@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static pascal.netx.util.lang.BuiltinComponent.*;
+import static pascal.netx.util.lang.BuiltinComponent.ATTRIBUTED;
 
 final class CompactDumper {
     private final PackageScope packageScope;
@@ -128,18 +128,19 @@ final class CompactDumper {
 
             List<ObjectNode> needDump = new LinkedList<>();
             component.getBinding().forEachData(data -> needDump.add(defineData(data)));
-            for (var kid : component.getChildren()) {
-                var child = (ComponentScope) kid;
-                var instID = child.getIdentifier();
-                if (BuiltinComponent.isBuiltin(instID)) {
-                    var ref = BuiltinComponent.of(instID);
-                    if (!NO_DUMP.contains(ref)) {
-                        needDump.add(instantiateBuiltin(child, instID));
-                    }
-                } else if (!child.isInterface()) {
-                    needDump.add(instantiate(child));
-                }
-            }
+            component.getChildren().stream()
+                    .map(ComponentScope.class::cast)
+                    .forEach(child -> {
+                        var instID = child.getIdentifier();
+                        if (BuiltinComponent.isBuiltin(instID)) {
+                            needDump.add(instantiateBuiltin(child, instID));
+                        } else if (!child.isInterface()) {
+                            needDump.add(instantiate(child));
+                        }
+                    });
+            component.getAliases().stream()
+                    .map(this::dumpAlias)
+                    .forEach(needDump::add);
             if (!needDump.isEmpty()) {
                 var members = makeMembersIn(definition);
                 needDump.forEach(members::add);
@@ -147,14 +148,20 @@ final class CompactDumper {
             return definition;
         }
 
+        private ObjectNode dumpAlias(ComponentScope.Alias alias) {
+            var result = createObjectNode();
+            setType(result, "builtin");
+            result.put("id", String.format("TO@%d", indexer.get()));
+            result.put("defIndex", manager.getCount(signature));
+            dumpInstIO(result, "input", List.of(alias.rhs()));
+            dumpInstIO(result, "output", List.of(alias.lhs()));
+            return result;
+        }
+
         private void indexAllInstances() {
             allocateIndex(component);
             for (var child : component.getChildren()) {
                 if (child instanceof ComponentScope childComponent) {
-                    var id = childComponent.getIdentifier();
-                    if (isBuiltin(id) && NO_DUMP.contains(BuiltinComponent.of(id))) {
-                        continue;
-                    }
                     allocateIndex(childComponent);
                 }
             }

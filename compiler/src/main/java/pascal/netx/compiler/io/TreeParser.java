@@ -343,9 +343,9 @@ public final class TreeParser {
     static ExprNode parseUnaryExpr(UnaryExprContext ctx) {
         UnaryExpr.Operator op;
         if (ctx.prev != null) {
-            op = UnaryExpr.Operator.SINK;
+            op = UnaryExpr.Operator.BLOCK_OUT;
         } else if (ctx.post != null) {
-            op = UnaryExpr.Operator.SOURCE;
+            op = UnaryExpr.Operator.BLOCK_IN;
         } else {
             op = UnaryExpr.Operator.fromString(ctx.op.getText());
         }

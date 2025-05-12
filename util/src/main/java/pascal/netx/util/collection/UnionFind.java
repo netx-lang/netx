@@ -76,11 +76,11 @@ public class UnionFind<E> {
     }
 
     public boolean isEmpty() {
-        return parent.keySet().isEmpty();
+        return parent.isEmpty();
     }
 
     public int elementSize() {
-        return parent.keySet().size();
+        return parent.size();
     }
 
     public Collection<E> elements() {

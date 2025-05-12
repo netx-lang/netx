@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 import static pascal.netx.util.lang.BuiltinComponent.ATTRIBUTED;
-import static pascal.netx.util.lang.BuiltinComponent.NO_DUMP;
 
 final class ExpandedDumper {
     private final PackageScope design;
@@ -85,22 +84,32 @@ final class ExpandedDumper {
 
             List<ObjectNode> needDump = new LinkedList<>();
             component.getBinding().forEachData(data -> needDump.add(defineData(data)));
-            for (var kid : component.getChildren()) {
-                var child = (ComponentScope) kid;
-                var instID = child.getIdentifier();
-                if (BuiltinComponent.isBuiltin(instID)) {
-                    var ref = BuiltinComponent.of(instID);
-                    if (!NO_DUMP.contains(ref)) {
-                        needDump.add(instantiateBuiltin(child, instID));
-                    }
-                } else if (!child.isInterface()) {
-                    needDump.add(dumperOf(child).dump());
-                }
-            }
+            component.getChildren().stream()
+                    .map(ComponentScope.class::cast)
+                    .forEach(child -> {
+                        var instID = child.getIdentifier();
+                        if (BuiltinComponent.isBuiltin(instID)) {
+                            needDump.add(instantiateBuiltin(child, instID));
+                        } else if (!child.isInterface()) {
+                            needDump.add(dumperOf(child).dump());
+                        }
+                    });
+            component.getAliases().stream()
+                    .map(this::dumpAlias)
+                    .forEach(needDump::add);
             if (!needDump.isEmpty()) {
                 var members = makeMembersIn(result);
                 needDump.forEach(members::add);
             }
+            return result;
+        }
+
+        private ObjectNode dumpAlias(ComponentScope.Alias alias) {
+            var result = createObjectNode();
+            setType(result, "component");
+            setDefID(result, Identifier.of("TO"));
+            dumpInstIO(result, "input", List.of(alias.rhs()));
+            dumpInstIO(result, "output", List.of(alias.lhs()));
             return result;
         }
 

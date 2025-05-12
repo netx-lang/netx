@@ -6,16 +6,16 @@ public record DecoratedExpr(Decorator decorator, Expr operand) implements Expr {
         return new DecoratedExpr(decorator, operand);
     }
 
-    public enum Decorator {
-        SOURCE, SINK, BIDI
-    }
-
     @Override
     public String toString() {
         return switch (decorator) {
-            case SOURCE -> "#" + operand;
-            case SINK -> operand + "#";
-            case BIDI -> operand.toString();
+            case BLOCK_IN -> operand + "#";
+            case BLOCK_OUT -> "#" + operand;
+            case NON_BLOCK -> operand.toString();
         };
+    }
+
+    public enum Decorator {
+        BLOCK_IN, BLOCK_OUT, NON_BLOCK
     }
 }

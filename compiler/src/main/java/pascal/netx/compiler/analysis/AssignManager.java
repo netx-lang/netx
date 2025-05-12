@@ -30,10 +30,10 @@ public final class AssignManager {
             for (int i = 0; i < size; i++) {
                 define(lhsFlatten.get(i));
                 use(rhsFlatten.get(i));
-                scope.getAliases().add(ComponentScope.Alias.of(rhsFlatten.get(i), lhsFlatten.get(i)));
+                scope.getAliases().add(new ComponentScope.Alias(lhsFlatten.get(i), rhsFlatten.get(i)));
             }
         } else {
-            scope.getAliases().add(ComponentScope.Alias.of(rhs, lhs));
+            scope.getAliases().add(new ComponentScope.Alias(lhs, rhs));
         }
     }
 

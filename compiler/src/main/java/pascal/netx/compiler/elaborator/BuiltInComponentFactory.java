@@ -6,13 +6,11 @@ import pascal.netx.compiler.model.expr.BuiltinRef;
 import pascal.netx.compiler.model.scope.Attributes;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.Scope;
-import pascal.netx.compiler.model.variable.Access;
 import pascal.netx.compiler.model.variable.Clock;
 import pascal.netx.compiler.model.variable.Wire;
 import pascal.netx.compiler.model.variable.type.BitType;
 import pascal.netx.compiler.model.variable.type.PolyType;
 import pascal.netx.compiler.model.variable.type.Type;
-import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
 
@@ -38,20 +36,6 @@ public class BuiltInComponentFactory {
         }
     }
 
-    public ComponentScope createSelectComponent(Scope parent, Access access) {
-        var sourceLoc = access.base().getSourceLoc();
-        var id = Identifier.of("SELECT").setSourceLoc(sourceLoc);
-        var scope = ComponentScope.newComponent(parent, id);
-        var attribute = Attributes.ofEmpty();
-        var selector = access.selector();
-        attribute.addAttribute(Identifier.of("msb"), selector.msb());
-        attribute.addAttribute(Identifier.of("lsb"), selector.lsb());
-        scope.setAttributes(attribute);
-        scope.addInput(newWire(scope, "i", access.base().getType()));
-        scope.addOutput(newWire(scope, "o", access.getType()));
-        return scope;
-    }
-
     public ComponentScope createBuiltInComponent(Scope parent, BuiltinRef ref) {
         return switch (ref.getBuiltin()) {
             case REGISTER -> createREGISTERComponent(parent, ref);
@@ -63,7 +47,6 @@ public class BuiltInComponentFactory {
                     createMultiInputComponent(parent, ref, 2);
             case EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE -> createRelationalOpComponent(parent, ref);
             case SHL, ASHR, LSHR -> createShiftComponent(parent, ref);
-            case SELECT -> throw new ShallNotReachHereError();
         };
     }
 

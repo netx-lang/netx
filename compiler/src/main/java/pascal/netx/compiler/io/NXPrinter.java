@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.NumericNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import pascal.netx.util.exception.ShallNotReachHereError;
+import pascal.netx.util.nxon.NxonType;
 import pascal.netx.util.print.NotepadWriter;
 
 import java.util.Map;
@@ -56,7 +57,6 @@ public final class NXPrinter {
     private void printMember(JsonNode node) {
         switch (NxonType.typeOf(node)) {
             case WIRE, CLOCK -> printData(node);
-            case REGISTER -> printObject(node);
             case BUILTIN -> printObject(node, 3);
             case INSTANTIATE, COMPONENT -> printObject(node, componentHead);
         }
@@ -178,14 +178,6 @@ public final class NXPrinter {
     private void printKey(String str) {
         printStr(str);
         writer.print(": ");
-    }
-
-    public enum NxonType {
-        COMPONENT, REGISTER, BUILTIN, INSTANTIATE, CLOCK, WIRE;
-
-        public static NxonType typeOf(JsonNode node) {
-            return valueOf(node.get("type").textValue().toUpperCase());
-        }
     }
 }
 

@@ -59,9 +59,9 @@ public final class UnaryExpr extends ExprNode {
 
     @Override
     public String toString() {
-        if (op == SOURCE) {
+        if (op == BLOCK_IN) {
             return operand + "#";
-        } else if (op == SINK) {
+        } else if (op == BLOCK_OUT) {
             return "#" + operand;
         } else {
             return OP_MAP.getKey(op) + operand;
@@ -69,7 +69,7 @@ public final class UnaryExpr extends ExprNode {
     }
 
     public enum Operator {
-        ADD, SUB, NOT, BITWISE_NOT, SINK, SOURCE;
+        ADD, SUB, NOT, BITWISE_NOT, BLOCK_OUT, BLOCK_IN;
 
         public static final BiMap<String, Operator> OP_MAP = new BiMap<>();
 

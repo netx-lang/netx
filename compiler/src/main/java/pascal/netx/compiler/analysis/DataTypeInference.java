@@ -9,13 +9,11 @@ import pascal.netx.compiler.exception.TypeCheckingException;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.variable.Data;
-import pascal.netx.compiler.model.variable.IntegerValue;
 import pascal.netx.compiler.model.variable.Variable;
 import pascal.netx.compiler.model.variable.type.PolyType;
 import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
-import pascal.netx.util.lang.Identifier;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -53,7 +51,6 @@ public final class DataTypeInference extends ModelAnalysis {
     private void collectConstraintsInBuiltin(ComponentScope component) {
         switch (BuiltinComponent.of(component.getIdentifier())) {
             case OR, NOT, AND, XOR, NOR, NAND, XNOR, ADD, SUB, MUL, DIV, MOD -> addAllEqualConstraints(component);
-            case SELECT -> addConstraintsForSelector(component);
             case REGISTER -> addContainsForRegister(component);
             case SPLIT -> {
                 // do nothing
@@ -70,13 +67,6 @@ public final class DataTypeInference extends ModelAnalysis {
         }
     }
 
-    private void addConstraintsForSelector(ComponentScope component) {
-        var input = component.getInputs().getFirst();
-        var msb = (IntegerValue) component.getAttributes().get(Identifier.of("msb"));
-        var lsb = (IntegerValue) component.getAttributes().get(Identifier.of("lsb"));
-        addConstraint(SelectConstraint.of(input, msb.toInt(), lsb.toInt()));
-    }
-
     private void addContainsForRegister(ComponentScope component) {
         Variable input = component.getInputs().getFirst(), output = component.getOutputs().getFirst();
         addConstraint(EqualTypeConstraint.of(input, output));
@@ -86,7 +76,6 @@ public final class DataTypeInference extends ModelAnalysis {
     private void addConstraint(DataConstraint constraint) {
         switch (constraint) {
             case UnaryConstraint unary -> constraints.add(unary);
-            case SelectConstraint select -> constraints.add(select);
             case BinaryConstraint binary -> addBinaryConstraint(binary);
         }
     }

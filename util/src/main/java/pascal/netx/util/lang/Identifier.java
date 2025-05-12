@@ -11,7 +11,7 @@ public final class Identifier {
     }
 
     public static Identifier of(String id) {
-        return new Identifier(id);
+        return new Identifier(id).setSourceLoc(SourceLoc.none());
     }
 
     public String name() {

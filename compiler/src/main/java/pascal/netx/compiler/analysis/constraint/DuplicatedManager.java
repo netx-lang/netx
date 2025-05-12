@@ -2,7 +2,6 @@ package pascal.netx.compiler.analysis.constraint;
 
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.variable.Value;
 import pascal.netx.compiler.model.variable.Variable;
 import pascal.netx.util.collection.UnionFind;
 import pascal.netx.util.lang.BuiltinComponent;
@@ -13,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static pascal.netx.util.lang.BuiltinComponent.*;
+import static pascal.netx.util.lang.BuiltinComponent.TO;
 
 public class DuplicatedManager {
     private final UnionFind<Variable> set = new UnionFind<>();
@@ -23,13 +22,8 @@ public class DuplicatedManager {
                 .map(ComponentScope.class::cast)
                 .collect(Collectors.groupingBy(ComponentScope::getIdentifier));
 
-        List<ComponentScope> toRemove = collectDuplicatedSelect(scope);
+        List<ComponentScope> toRemove = collectDuplicatedTo(scope);
         for (var entry : idGroups.entrySet()) {
-            var identifier = entry.getKey();
-            if (BuiltinComponent.isBuiltin(identifier)
-                    && NO_DUMP.contains(BuiltinComponent.of(identifier.name()))) {
-                continue;
-            }
 
             var idGroup = entry.getValue();
             for (int i = 0; i < idGroup.size(); i++) {
@@ -49,21 +43,19 @@ public class DuplicatedManager {
         scope.getChildren().removeAll(toRemove);
     }
 
-    List<ComponentScope> collectDuplicatedSelect(ComponentScope scope) {
-        List<ComponentScope> result = new ArrayList<>();
+    List<ComponentScope> collectDuplicatedTo(ComponentScope scope) {
+        List<ComponentScope> toRemove = new ArrayList<>();
         for (var child : scope.getChildren()) {
             var component = (ComponentScope) child;
-            if (isBuiltin(component.getIdentifier())) {
-                if (BuiltinComponent.of(component.getIdentifier()) == SELECT) {
-                    var input = component.getInputs().getFirst();
-                    var output = component.getOutputs().getFirst();
-                    if (input instanceof Value || output instanceof Value || input == output) {
-                        result.add(component);
-                    }
+            if (component.isBuiltin() && BuiltinComponent.of(component.getIdentifier()) == TO) {
+                var input = component.getInputs().getFirst();
+                var output = component.getOutputs().getFirst();
+                if (input.equals(output)) {
+                    toRemove.add(component);
                 }
             }
         }
-        return result;
+        return toRemove;
     }
 
     boolean isDuplicated(ComponentScope a, ComponentScope b) {
