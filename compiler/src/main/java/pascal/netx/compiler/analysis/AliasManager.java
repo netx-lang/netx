@@ -5,17 +5,16 @@ import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.Signature;
 import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.Scope;
-import pascal.netx.compiler.model.variable.*;
+import pascal.netx.compiler.model.variable.Access;
+import pascal.netx.compiler.model.variable.Mutable;
+import pascal.netx.compiler.model.variable.Value;
+import pascal.netx.compiler.model.variable.Variable;
 import pascal.netx.compiler.model.variable.type.BitType;
 import pascal.netx.util.collection.UnionFind;
-import pascal.netx.util.lang.BuiltinComponent;
 
 import javax.annotation.Nonnull;
 import java.util.*;
 
-import static pascal.netx.util.lang.BuiltinComponent.SELECT;
-import static pascal.netx.util.lang.BuiltinComponent.isBuiltin;
 
 public class AliasManager {
     private static final Logger log = LoggerFactory.getLogger(AliasManager.class);
@@ -38,21 +37,22 @@ public class AliasManager {
         }
     }
 
-    boolean isAliasSelect(Scope scope) {
-        if (scope instanceof ComponentScope component) {
-            if (isBuiltin(component.getIdentifier())) {
-                if (BuiltinComponent.of(component.getIdentifier()) == SELECT) {
-                    var input = component.getInputs().getFirst();
-                    var output = component.getOutputs().getFirst();
-                    if (output instanceof Access(_, var selector)) {
-                        if (input instanceof Data data) {
-                            return repOf(new Access(data, selector)).equals(repOf(output));
-                        }
-                    }
-                }
+    void clearIn(ComponentScope scope) {
+        Set<ComponentScope.Alias> newAlias = new HashSet<>();
+        for (var alias : scope.getAliases()) {
+            var lhs = repOf(alias.lhs());
+            if (alias.rhs() instanceof Access access
+                    && needDump(access.base()) && !needDump(access)
+                    && !isEqualAccess(lhs, access)) {
+                newAlias.add(new ComponentScope.Alias(lhs, access));
             }
         }
-        return false;
+        scope.getAliases().clear();
+        scope.getAliases().addAll(newAlias);
+    }
+
+    private boolean isEqualAccess(Variable lhs, Access rhs) {
+        return lhs.equals(rhs) || (isSelfAlias(rhs) && rhs.base().equals(lhs));
     }
 
     static boolean isSelfAlias(Variable variable) {

@@ -31,7 +31,7 @@ public final class ComponentAliasAnalysis extends ComponentModelAnalysis {
                 scope.getAttributes().replaceAllVariable(manager::repOf);
             }
             eliminateDuplicatedData(Predicate.not(manager::needDump), manager::repOf);
-            scope.getChildren().removeIf(manager::isAliasSelect);
+            manager.clearIn(scope);
         }
     }
 }

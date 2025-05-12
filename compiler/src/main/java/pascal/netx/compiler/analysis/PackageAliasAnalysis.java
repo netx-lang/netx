@@ -22,7 +22,7 @@ public final class PackageAliasAnalysis extends ModelAnalysis {
             if (scope.hasAttributes()) {
                 scope.getAttributes().replaceAllVariable(manager::repOf);
             }
+            manager.clearIn(scope);
         });
-        pack.forEachSubComponent(scope -> scope.getChildren().removeIf(manager::isAliasSelect));
     }
 }

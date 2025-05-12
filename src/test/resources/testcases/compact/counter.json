@@ -37,45 +37,47 @@
       {
         "type": "builtin", "id": "NOT@1", "loc": "12:28",
         "input": ["ctl@0"],
-        "output": ["$i@2"]
+        "output": ["$o@1"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o", "loc": "12:28"}
+        ]
       },
       {
         "type": "builtin", "id": "CAST@2", "loc": "12:20",
-        "input": ["$i@2"],
-        "output": ["$i2@3"],
+        "input": ["$o@1"],
+        "output": ["$o@2"],
         "members": [
-          {"type": "wire", "width": 1, "id": "$i", "loc": "12:20"}
+          {"type": "wire", "width": 32, "id": "$o", "loc": "12:20"}
         ]
       },
       {
         "type": "builtin", "id": "AND@3", "loc": "12:8",
-        "input": ["i0@0", "$i2@3"],
-        "output": ["$i1@6"],
+        "input": ["i0@0", "$o@2"],
+        "output": ["$o@3"],
         "members": [
-          {"type": "wire", "width": 32, "id": "$i2", "loc": "12:8"}
+          {"type": "wire", "width": 32, "id": "$o", "loc": "12:8"}
         ]
       },
       {
         "type": "builtin", "id": "CAST@4", "loc": "13:20",
         "input": ["ctl@0"],
-        "output": ["$i2@5"]
+        "output": ["$o@4"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o", "loc": "13:20"}
+        ]
       },
       {
         "type": "builtin", "id": "AND@5", "loc": "13:8",
-        "input": ["i1@0", "$i2@5"],
-        "output": ["$i2@6"],
+        "input": ["i1@0", "$o@4"],
+        "output": ["$o@5"],
         "members": [
-          {"type": "wire", "width": 32, "id": "$i2", "loc": "13:8"}
+          {"type": "wire", "width": 32, "id": "$o", "loc": "13:8"}
         ]
       },
       {
         "type": "builtin", "id": "OR@6", "loc": "11:14",
-        "input": ["$i1@6", "$i2@6"],
-        "output": ["output@0"],
-        "members": [
-          {"type": "wire", "width": 32, "id": "$i1", "loc": "11:14"},
-          {"type": "wire", "width": 32, "id": "$i2", "loc": "11:14"}
-        ]
+        "input": ["$o@3", "$o@5"],
+        "output": ["output@0"]
       }
     ]
   }

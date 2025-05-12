@@ -104,12 +104,6 @@ public final class ScopeParser {
             module.add(ref.index(), assign);
             assign.setInputs(refParser.resolveDataRefList(node, "input"));
             assign.setOutputs(refParser.resolveDataRefList(node, "output"));
-            if (ref.builtin() == BuiltinComponent.SELECT) {
-                var attributeNode = node.get("attribute");
-                int msb = Integer.parseUnsignedInt(attributeNode.get("msb").textValue());
-                int lsb = Integer.parseUnsignedInt(attributeNode.get("lsb").textValue());
-                assign.setAttributes(new Assign.Attributes(msb, lsb));
-            }
         }
     }
 

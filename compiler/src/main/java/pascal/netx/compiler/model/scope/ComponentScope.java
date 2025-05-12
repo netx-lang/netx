@@ -137,8 +137,5 @@ public final class ComponentScope extends Scope {
     }
 
     public record Alias(Variable lhs, Variable rhs) {
-        public static Alias of(Variable lhs, Variable rhs) {
-            return new Alias(lhs, rhs);
-        }
     }
 }

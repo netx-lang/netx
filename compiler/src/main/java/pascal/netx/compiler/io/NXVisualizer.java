@@ -11,7 +11,6 @@ import pascal.netx.compiler.model.variable.Variable;
 import pascal.netx.compiler.model.variable.selector.BitSelector;
 import pascal.netx.compiler.model.variable.selector.PartSelector;
 import pascal.netx.util.exception.ShallNotReachHereError;
-import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.print.NotepadWriter;
 
 import java.util.*;
@@ -184,26 +183,16 @@ public class NXVisualizer {
         maintainNodeMapForFull(scope);
         for (var child : scope.getChildren()) {
             var childScope = (ComponentScope) child;
-            if (needDump(childScope)) {
-                var childName = String.valueOf(allocateComponentId(childScope));
-                if (childScope.isBuiltin() || depth <= 1) {
-                    connectForCell(childScope, childName);
-                } else {
-                    connectForFull(childScope);
-                }
+            var childName = String.valueOf(allocateComponentId(childScope));
+            if (childScope.isBuiltin() || depth <= 1) {
+                connectForCell(childScope, childName);
+            } else {
+                connectForFull(childScope);
             }
         }
 
         writer.decIndent();
         writer.println("}");
-    }
-
-    private static boolean needDump(ComponentScope childScope) {
-        if (childScope.isBuiltin()) {
-            var builtin = BuiltinComponent.of(childScope.getIdentifier());
-            return !BuiltinComponent.NO_DUMP.contains(builtin);
-        }
-        return true;
     }
 
     private String newConstant(Value value) {
@@ -270,9 +259,7 @@ public class NXVisualizer {
         if (depth > 0 && !scope.isBuiltin()) {
             printFullComponent(scope, depth);
         } else {
-            if (needDump(scope)) {
-                printCellComponent(scope);
-            }
+            printCellComponent(scope);
         }
     }
 }

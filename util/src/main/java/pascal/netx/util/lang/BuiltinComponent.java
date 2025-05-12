@@ -7,13 +7,12 @@ import java.util.Set;
 
 public enum BuiltinComponent {
     REGISTER, SPLIT, TO,
-    CAST, CONCAT, SELECT,
+    CAST, CONCAT,
     OR, NOT, AND, XOR, NOR, NAND, XNOR,
     EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE,
     ADD, SUB, SHL, MUL, DIV, MOD, ASHR, LSHR;
 
-    public static final Set<BuiltinComponent> NO_DUMP = Set.of(SPLIT, TO);
-    public static final Set<BuiltinComponent> ATTRIBUTED = Set.of(REGISTER, SELECT);
+    public static final Set<BuiltinComponent> ATTRIBUTED = Set.of(REGISTER);
     public static final Set<BuiltinComponent> MULTI_INPUT = Set.of(OR, AND, XOR, NOR, NAND, XNOR, CONCAT, ADD, SUB, MUL, DIV, MOD);
     public static final Map<BuiltinComponent, String> VERILOG_OP;
     public static final Set<String> VALUES;

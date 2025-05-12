@@ -314,8 +314,8 @@ public final class ComponentEvaluator {
             case SUB -> evaluateToIntegerValue(expr.getOperand()).neg();
             case NOT -> evaluateToBoolean(expr.getOperand()).not();
             case BITWISE_NOT -> evaluateToIntegerValue(expr.getOperand()).bitwiseNot();
-            case SINK -> evaluateDecoratedExpr(DecoratedExpr.Decorator.SINK, expr.getOperand());
-            case SOURCE -> evaluateDecoratedExpr(DecoratedExpr.Decorator.SOURCE, expr.getOperand());
+            case BLOCK_OUT -> evaluateDecoratedExpr(DecoratedExpr.Decorator.BLOCK_OUT, expr.getOperand());
+            case BLOCK_IN -> evaluateDecoratedExpr(DecoratedExpr.Decorator.BLOCK_IN, expr.getOperand());
         };
     }
 
