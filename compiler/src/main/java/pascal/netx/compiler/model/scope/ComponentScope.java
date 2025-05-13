@@ -17,7 +17,7 @@ public final class ComponentScope extends Scope {
     private PackageScope pack;
 
     private final ComponentEvaluator evaluator;
-    private final Set<Alias> aliases = new HashSet<>();
+    private final Set<Alias> aliases = new LinkedHashSet<>();
     private final AssignManager manager = new AssignManager(this);
 
     private Attributes attributes;
@@ -137,5 +137,8 @@ public final class ComponentScope extends Scope {
     }
 
     public record Alias(Variable lhs, Variable rhs) {
+        public Alias flip() {
+            return new Alias(rhs, lhs);
+        }
     }
 }

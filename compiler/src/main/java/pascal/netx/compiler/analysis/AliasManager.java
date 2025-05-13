@@ -14,6 +14,7 @@ import pascal.netx.util.collection.UnionFind;
 
 import javax.annotation.Nonnull;
 import java.util.*;
+import java.util.function.Consumer;
 
 
 public class AliasManager {
@@ -38,21 +39,36 @@ public class AliasManager {
     }
 
     void clearIn(ComponentScope scope) {
-        Set<ComponentScope.Alias> newAlias = new HashSet<>();
+        Set<ComponentScope.Alias> newAlias = new LinkedHashSet<>();
+        Consumer<ComponentScope.Alias> addNew = (alias) -> {
+            if (!newAlias.contains(alias) && !newAlias.contains(alias.flip())) {
+                newAlias.add(alias);
+            }
+        };
         for (var alias : scope.getAliases()) {
-            var lhs = repOf(alias.lhs());
-            if (alias.rhs() instanceof Access access
-                    && needDump(access.base()) && !needDump(access)
-                    && !isEqualAccess(lhs, access)) {
-                newAlias.add(new ComponentScope.Alias(lhs, access));
+            if (alias.lhs() instanceof Access access && needDump(access.base())) {
+                if (isValidDump(alias.rhs())) {
+                    addNew.accept(new ComponentScope.Alias(access, alias.rhs()));
+                } else if (!isEqualAccess(repOf(alias.rhs()), access)) {
+                    addNew.accept(new ComponentScope.Alias(access, repOf(alias.rhs())));
+                }
+            } else if (alias.rhs() instanceof Access access){
+                var lhs = repOf(alias.lhs());
+                if (isValidDump(alias.rhs()) && !isEqualAccess(lhs, access)) {
+                    addNew.accept(new ComponentScope.Alias(lhs, alias.rhs()));
+                }
             }
         }
         scope.getAliases().clear();
         scope.getAliases().addAll(newAlias);
     }
 
-    private boolean isEqualAccess(Variable lhs, Access rhs) {
-        return lhs.equals(rhs) || (isSelfAlias(rhs) && rhs.base().equals(lhs));
+    boolean isValidDump(Variable variable) {
+        return needDump(variable) || (variable instanceof Access access && needDump(access.base()));
+    }
+
+    private boolean isEqualAccess(Variable variable, Access access) {
+        return variable.equals(access) || (isSelfAlias(access) && access.base().equals(variable));
     }
 
     static boolean isSelfAlias(Variable variable) {

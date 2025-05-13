@@ -1,5 +1,6 @@
 package pascal.netx.compiler.analysis;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
 import pascal.netx.compiler.exception.TypeCheckingException;
@@ -9,6 +10,7 @@ import pascal.netx.compiler.io.NXParser;
 import pascal.netx.util.TestUtils;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AnalysisTest {
     private static final Path TEST_DIR = Path.of("src/test/resources/testcases");
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Test
     void testSourceLocChecker() throws IOException {
@@ -150,5 +153,73 @@ class AnalysisTest {
         var builder = NXBuilder.from(Configuration.forExpandedTest());
         assertThrows(TypeCheckingException.class, () -> builder.load(a).compileAndDump());
         assertThrows(TypeCheckingException.class, () -> builder.load(b).compileAndDump());
+    }
+
+    @Test
+    void testDirectAliasA() throws IOException {
+        var code = """
+                component top : i -> o {
+                  wire i of bit(1);
+                  wire o of bit(5);
+                  for (index in [0..5]) {
+                    o[index] <> i;
+                  }
+                }
+                """;
+        var builder = NXBuilder.from(Configuration.forExpandedTest());
+        var expected = MAPPER.reader().readTree(
+                Files.readString(TEST_DIR.resolve("expected/direct_alias_a.json")));
+        assertEquals(expected, builder.load(code).compileAndDump());
+    }
+
+    @Test
+    void testDirectAliasB() throws IOException {
+        var code = """
+                component top : i -> o {
+                  wire i of bit(5);
+                  wire o of bit(5);
+                  for (index in [0..5]) {
+                    o[4 - index] <> i[index];
+                  }
+                }
+                """;
+        var builder = NXBuilder.from(Configuration.forExpandedTest());
+        var expected = MAPPER.reader().readTree(
+                Files.readString(TEST_DIR.resolve("expected/direct_alias_b.json")));
+        assertEquals(expected, builder.load(code).compileAndDump());
+    }
+
+    @Test
+    void testDirectAliasC() throws IOException {
+        var code = """
+                component top : i -> o {
+                  wire i of bit(5);
+                  wire o of bit(1);
+                  o <> i[4];
+                }
+                """;
+        var builder = NXBuilder.from(Configuration.forExpandedTest());
+        var expected = MAPPER.reader().readTree(
+                Files.readString(TEST_DIR.resolve("expected/direct_alias_c.json")));
+        assertEquals(expected, builder.load(code).compileAndDump());
+    }
+
+    @Test
+    void testDirectAliasD() throws IOException {
+        var code = """
+                component top : a -> [b, c] {
+                  wire a, b of bit(5);
+                  wire c of bit(2);
+                  c[0] <> b[0];
+                  c[1] <> b[1];
+                  for (index in [0..5]) {
+                    b[index] <> a[index];
+                  }
+                }
+                """;
+        var builder = NXBuilder.from(Configuration.forExpandedTest());
+        var expected = MAPPER.reader().readTree(
+                Files.readString(TEST_DIR.resolve("expected/direct_alias_d.json")));
+        assertEquals(expected, builder.load(code).compileAndDump());
     }
 }
