@@ -106,7 +106,7 @@ final class ExpandedDumper {
 
         private ObjectNode dumpAlias(ComponentScope.Alias alias) {
             var result = createObjectNode();
-            setType(result, "component");
+            setType(result, "builtin");
             setDefID(result, Identifier.of("TO"));
             dumpInstIO(result, "input", List.of(alias.rhs()));
             dumpInstIO(result, "output", List.of(alias.lhs()));

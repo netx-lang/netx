@@ -9037,12 +9037,12 @@
             "output": ["result@843"]
           },
           {
-            "type": "component", "id": "TO", "loc": "0:0",
+            "type": "builtin", "id": "TO", "loc": "0:0",
             "input": ["result@843[1]"],
             "output": ["PCAsrc@22"]
           },
           {
-            "type": "component", "id": "TO", "loc": "0:0",
+            "type": "builtin", "id": "TO", "loc": "0:0",
             "input": ["result@843[0]"],
             "output": ["PCBsrc@23"]
           }
