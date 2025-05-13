@@ -1,10 +1,10 @@
-package pascal.netx.compiler.analysis;
+package pascal.netx.compiler.analysis.model;
 
 import org.jgrapht.Graph;
 import org.jgrapht.graph.SimpleGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pascal.netx.compiler.analysis.constraint.*;
+import pascal.netx.compiler.analysis.model.constraint.*;
 import pascal.netx.compiler.exception.TypeCheckingException;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;

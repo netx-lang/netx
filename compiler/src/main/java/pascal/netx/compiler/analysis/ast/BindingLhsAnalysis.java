@@ -1,4 +1,4 @@
-package pascal.netx.compiler.analysis;
+package pascal.netx.compiler.analysis.ast;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

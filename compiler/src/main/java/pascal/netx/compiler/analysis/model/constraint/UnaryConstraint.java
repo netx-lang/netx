@@ -1,4 +1,4 @@
-package pascal.netx.compiler.analysis.constraint;
+package pascal.netx.compiler.analysis.model.constraint;
 
 import pascal.netx.compiler.model.variable.Variable;
 

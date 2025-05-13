@@ -1,5 +1,6 @@
-package pascal.netx.compiler.analysis;
+package pascal.netx.compiler.analysis.model;
 
+import pascal.netx.compiler.analysis.Analysis;
 import pascal.netx.compiler.model.scope.PackageScope;
 
 public abstract class ModelAnalysis implements Analysis {

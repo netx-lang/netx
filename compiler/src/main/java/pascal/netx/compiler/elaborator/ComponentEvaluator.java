@@ -356,7 +356,8 @@ public final class ComponentEvaluator {
 
     private Entity evaluateBinaryExpr(BinaryExpr expr) {
         return switch (expr.getOp()) {
-            case COMBINE -> evaluateSequentialExpr(expr);
+            case SEQ -> evaluateSequentialExpr(expr);
+            case PAR -> evaluateListExpr(CommonList.of(List.of(expr.getLhs(), expr.getRhs())));
             case CONCAT -> evaluateListConcat(expr);
             case EQ, NE -> evaluateEqualityExpr(expr);
             case ADD, SUB, MUL, DIV, MOD, POW, AND, OR, XOR, XNOR,

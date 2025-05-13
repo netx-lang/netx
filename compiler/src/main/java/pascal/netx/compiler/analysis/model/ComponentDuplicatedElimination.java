@@ -1,6 +1,6 @@
-package pascal.netx.compiler.analysis;
+package pascal.netx.compiler.analysis.model;
 
-import pascal.netx.compiler.analysis.constraint.DuplicatedManager;
+import pascal.netx.compiler.analysis.model.constraint.DuplicatedManager;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 

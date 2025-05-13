@@ -1,4 +1,4 @@
-package pascal.netx.compiler.analysis;
+package pascal.netx.compiler.analysis.ast;
 
 import pascal.netx.compiler.ast.ASTListener;
 import pascal.netx.compiler.ast.PackageNode;
@@ -18,11 +18,11 @@ public class PortExprRotation extends ASTAnalysis implements ASTListener {
 
     @Override
     public void enter(BinaryExpr node) {
-        if (node.getOp() == BinaryExpr.Operator.COMBINE) {
+        if (node.getOp() == BinaryExpr.Operator.SEQ) {
             if (node.getLhs() instanceof BinaryExpr tail &&
                     node.getRhs() instanceof PortConnectionExpr) {
                 node.setLhs(tail.getLhs());
-                node.setRhs(BinaryExpr.of(BinaryExpr.Operator.COMBINE, tail.getRhs(), node.getRhs()));
+                node.setRhs(BinaryExpr.of(BinaryExpr.Operator.SEQ, tail.getRhs(), node.getRhs()));
             }
         }
     }

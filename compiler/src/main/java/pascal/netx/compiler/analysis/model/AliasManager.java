@@ -1,4 +1,4 @@
-package pascal.netx.compiler.analysis;
+package pascal.netx.compiler.analysis.model;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,12 +49,12 @@ public class AliasManager {
             if (alias.lhs() instanceof Access access && needDump(access.base())) {
                 if (isValidDump(alias.rhs())) {
                     addNew.accept(new ComponentScope.Alias(access, alias.rhs()));
-                } else if (!isEqualAccess(repOf(alias.rhs()), access)) {
+                } else if (isNotIdentity(repOf(alias.rhs()), access)) {
                     addNew.accept(new ComponentScope.Alias(access, repOf(alias.rhs())));
                 }
             } else if (alias.rhs() instanceof Access access){
                 var lhs = repOf(alias.lhs());
-                if (isValidDump(alias.rhs()) && !isEqualAccess(lhs, access)) {
+                if (isValidDump(alias.rhs()) && isNotIdentity(lhs, access)) {
                     addNew.accept(new ComponentScope.Alias(lhs, alias.rhs()));
                 }
             }
@@ -67,8 +67,8 @@ public class AliasManager {
         return needDump(variable) || (variable instanceof Access access && needDump(access.base()));
     }
 
-    private boolean isEqualAccess(Variable variable, Access access) {
-        return variable.equals(access) || (isSelfAlias(access) && access.base().equals(variable));
+    private boolean isNotIdentity(Variable variable, Access access) {
+        return !variable.equals(access) && (!isSelfAlias(access) || !access.base().equals(variable));
     }
 
     static boolean isSelfAlias(Variable variable) {

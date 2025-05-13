@@ -73,7 +73,8 @@ public final class BinaryExpr extends ExprNode {
     }
 
     public enum Operator {
-        COMBINE, CONCAT,
+        SEQ, PAR,
+        CONCAT,
         POW, MUL, DIV, MOD, ADD, SUB,
         ARITH_SHL, ARITH_SHR, LOGIC_SHR, LOGIC_SHL,
         EQ, NE, LT, LE, GT, GE,
@@ -82,7 +83,8 @@ public final class BinaryExpr extends ExprNode {
         public static final BiMap<String, Operator> OP_MAP = new BiMap<>();
 
         static {
-            OP_MAP.put("<>", COMBINE);
+            OP_MAP.put("<>", SEQ);
+            OP_MAP.put("||", PAR);
             OP_MAP.put("::", CONCAT);
             OP_MAP.put("**", POW);
             OP_MAP.put("+", ADD);
@@ -96,8 +98,8 @@ public final class BinaryExpr extends ExprNode {
             OP_MAP.put(">", GT);
             OP_MAP.put("<=", LE);
             OP_MAP.put(">=", GE);
-            OP_MAP.put("&&", LOGIC_AND);
-            OP_MAP.put("||", LOGIC_OR);
+            OP_MAP.put("and", LOGIC_AND);
+            OP_MAP.put("or", LOGIC_OR);
             OP_MAP.put("&", AND);
             OP_MAP.put("|", OR);
             OP_MAP.put("^", XOR);

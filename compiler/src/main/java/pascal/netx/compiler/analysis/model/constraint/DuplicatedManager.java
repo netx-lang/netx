@@ -1,4 +1,4 @@
-package pascal.netx.compiler.analysis.constraint;
+package pascal.netx.compiler.analysis.model.constraint;
 
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.scope.ComponentScope;

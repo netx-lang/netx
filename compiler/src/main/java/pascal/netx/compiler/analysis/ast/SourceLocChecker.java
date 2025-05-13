@@ -1,4 +1,4 @@
-package pascal.netx.compiler.analysis;
+package pascal.netx.compiler.analysis.ast;
 
 import pascal.netx.compiler.ast.ASTListener;
 import pascal.netx.compiler.ast.ASTNode;
