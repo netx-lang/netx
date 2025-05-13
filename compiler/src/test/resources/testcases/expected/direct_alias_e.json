@@ -21,22 +21,22 @@
                 "output": ["b@1[0]"]
             },
             {
-                "type": "component", "id": "TO", "loc": "0:0",
+                "type": "builtin", "id": "TO", "loc": "0:0",
                 "input": ["a@0"],
                 "output": ["tmp@2[1:0]"]
             },
             {
-                "type": "component", "id": "TO", "loc": "0:0",
+                "type": "builtin", "id": "TO", "loc": "0:0",
                 "input": ["1'h01"],
                 "output": ["tmp@2[3]"]
             },
             {
-                "type": "component", "id": "TO", "loc": "0:0",
+                "type": "builtin", "id": "TO", "loc": "0:0",
                 "input": ["b@1[1]"],
                 "output": ["tmp@2[2]"]
             },
             {
-                "type": "component", "id": "TO", "loc": "0:0",
+                "type": "builtin", "id": "TO", "loc": "0:0",
                 "input": ["b@1[0]"],
                 "output": ["tmp@2[4]"]
             }
