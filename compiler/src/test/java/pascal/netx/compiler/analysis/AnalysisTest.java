@@ -222,4 +222,26 @@ class AnalysisTest {
                 Files.readString(TEST_DIR.resolve("expected/direct_alias_d.json")));
         assertEquals(expected, builder.load(code).compileAndDump());
     }
+
+    @Test
+    void testDirectAliasE() throws IOException {
+        var code = """
+                component top : a -> [b, c] {
+                  wire a, b of bit(2);
+                  wire c of bit(1);
+                  wire tmp of bit(5);
+                  tmp[1:0] <> a;
+                  tmp[3] <> 1'b1;
+                  tmp[2] <> XOR <> [a[0], a[1]];
+                  tmp[4] <> AND <> [a[0], a[1]];
+                  b[0] <> tmp[4];
+                  b[1] <> tmp[2];
+                  c <> tmp[3];
+                }
+                """;
+        var builder = NXBuilder.from(Configuration.forExpandedTest());
+        var expected = MAPPER.reader().readTree(
+                Files.readString(TEST_DIR.resolve("expected/direct_alias_e.json")));
+        assertEquals(expected, builder.load(code).compileAndDump());
+    }
 }
