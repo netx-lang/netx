@@ -195,13 +195,13 @@
       },
       {
         "type": "builtin", "id": "TO@17", "defIndex": 1,
-        "input": ["result@0[0]"],
-        "output": ["PCBsrc@0"]
+        "input": ["result@0[1]"],
+        "output": ["PCAsrc@0"]
       },
       {
         "type": "builtin", "id": "TO@18", "defIndex": 1,
-        "input": ["result@0[1]"],
-        "output": ["PCAsrc@0"]
+        "input": ["result@0[0]"],
+        "output": ["PCBsrc@0"]
       }
     ]
   },

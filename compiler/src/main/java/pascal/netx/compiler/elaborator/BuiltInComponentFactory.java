@@ -38,11 +38,11 @@ public class BuiltInComponentFactory {
 
     public ComponentScope createBuiltInComponent(Scope parent, BuiltinRef ref) {
         return switch (ref.getBuiltin()) {
-            case REGISTER -> createREGISTERComponent(parent, ref);
-            case SPLIT -> createSPLITComponent(parent, ref);
-            case TO -> createTOComponent(parent, ref);
-            case CAST -> createCASTComponent(parent, ref);
-            case NOT -> createNOTComponent(parent, ref);
+            case REGISTER -> createRegisterComponent(parent, ref);
+            case SPLIT -> createSplitComponent(parent, ref);
+            case TO -> createIdentityComponent(parent, ref);
+            case CAST -> createCastComponent(parent, ref);
+            case NOT -> createNotComponent(parent, ref);
             case OR, AND, XOR, NOR, NAND, XNOR, CONCAT, ADD, SUB, MUL, DIV, MOD ->
                     createMultiInputComponent(parent, ref, 2);
             case EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE -> createRelationalOpComponent(parent, ref);
@@ -50,14 +50,14 @@ public class BuiltInComponentFactory {
         };
     }
 
-    private ComponentScope createNOTComponent(Scope parent, BuiltinRef ref) {
+    private ComponentScope createNotComponent(Scope parent, BuiltinRef ref) {
         var result = instantiate(parent, ref);
         result.addInput(newWire(result, "i"));
         result.addOutput(newWire(result, "o"));
         return result;
     }
 
-    private ComponentScope createTOComponent(Scope parent, BuiltinRef ref) {
+    private ComponentScope createIdentityComponent(Scope parent, BuiltinRef ref) {
         var result = instantiate(parent, ref);
         var entity = newWire(result, "t");
         result.addInput(entity);
@@ -65,7 +65,7 @@ public class BuiltInComponentFactory {
         return result;
     }
 
-    private ComponentScope createREGISTERComponent(Scope parent, BuiltinRef ref) {
+    private ComponentScope createRegisterComponent(Scope parent, BuiltinRef ref) {
         Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArguments());
         var result = instantiate(parent, ref);
         var attributes = new Attributes();
@@ -78,7 +78,7 @@ public class BuiltInComponentFactory {
         return result;
     }
 
-    private ComponentScope createSPLITComponent(Scope parent, BuiltinRef ref) {
+    private ComponentScope createSplitComponent(Scope parent, BuiltinRef ref) {
         Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArguments());
         int split = requiresIntegerValue(ref.getSourceLoc(), ref.getArguments().getFirst()).toInt();
 
@@ -91,7 +91,7 @@ public class BuiltInComponentFactory {
         return Component;
     }
 
-    private ComponentScope createCASTComponent(Scope parent, BuiltinRef ref) {
+    private ComponentScope createCastComponent(Scope parent, BuiltinRef ref) {
         var result = instantiate(parent, ref);
         if (ref.getArguments().isEmpty()) {
             result.addInput(newWire(result, "i"));
