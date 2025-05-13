@@ -1,4 +1,4 @@
-package pascal.netx.compiler.analysis;
+package pascal.netx.compiler.analysis.model;
 
 import pascal.netx.compiler.model.Utils;
 import pascal.netx.compiler.model.scope.ComponentScope;

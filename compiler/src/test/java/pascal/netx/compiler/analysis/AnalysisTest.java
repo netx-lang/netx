@@ -3,6 +3,7 @@ package pascal.netx.compiler.analysis;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
+import pascal.netx.compiler.analysis.ast.SourceLocChecker;
 import pascal.netx.compiler.exception.TypeCheckingException;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXBuilder;

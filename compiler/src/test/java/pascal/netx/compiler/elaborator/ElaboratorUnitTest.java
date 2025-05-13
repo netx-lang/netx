@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static pascal.netx.compiler.TestUtils.testBothCompactAndExpanded;
 
 class ElaboratorUnitTest {
     private static PackageScope loadDesign(String code) {
@@ -26,19 +27,6 @@ class ElaboratorUnitTest {
 
     private static ComponentScope loadSingleComponent(String code) {
         return loadDesign(code).getTop();
-    }
-
-    private static void testBothCompactAndExpanded(String expected, String actual) {
-        var cBuilder = NXBuilder.from(Configuration.forCompactTest());
-        var eBuilder = NXBuilder.from(Configuration.forExpandedTest());
-        assertEquals(
-                cBuilder.load(expected).compileAndDump(),
-                cBuilder.load(actual).compileAndDump()
-        );
-        assertEquals(
-                eBuilder.load(expected).compileAndDump(),
-                eBuilder.load(actual).compileAndDump()
-        );
     }
 
     @Test
@@ -55,6 +43,23 @@ class ElaboratorUnitTest {
         assertEquals(expected, component.getInputs());
         Collections.reverse(expected);
         assertEquals(expected, component.getOutputs());
+    }
+
+    @Test
+    void testParallelExpr() {
+        var expected = """
+                component top : [a, b] -> [c] {
+                    wire a, b, c of bit(4);
+                    c <> AND <> [a, b];
+                }
+                """;
+        var actual = """
+                component top : [a, b] -> [c] {
+                    wire a, b, c of bit(4);
+                    c <> AND <> (a || b);
+                }
+                """;
+        testBothCompactAndExpanded(expected, actual);
     }
 
     @Test
@@ -154,10 +159,7 @@ class ElaboratorUnitTest {
         var actual = """
                 component top : [a, b, c, d] -> [e] {
                     wire a, b, c, d, e of bit(4);
-                    e <> AND <> [
-                      AND,
-                      AND
-                    ] <> [a, b, c, d];
+                    e <> AND <> [AND, AND] <> [a, b, c, d];
                 }
                 """;
         var expected = """

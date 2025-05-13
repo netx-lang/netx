@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -24,7 +23,6 @@ class NXCompilerUnitTest {
         assertNotNull(compiler.compileAndDump());
     }
 
-    @Disabled
     @Test
     void testProjectBuild() throws IOException {
         var compiler = NXBuilder.from(Configuration.forExpandedTest())

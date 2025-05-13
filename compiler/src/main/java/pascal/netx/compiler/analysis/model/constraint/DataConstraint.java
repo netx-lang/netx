@@ -1,4 +1,4 @@
-package pascal.netx.compiler.analysis.constraint;
+package pascal.netx.compiler.analysis.model.constraint;
 
 public sealed interface DataConstraint permits BinaryConstraint, UnaryConstraint {
 

@@ -1,6 +1,6 @@
 package pascal.netx.compiler.model.scope;
 
-import pascal.netx.compiler.analysis.AssignManager;
+import pascal.netx.compiler.analysis.model.AssignManager;
 import pascal.netx.compiler.elaborator.ComponentEvaluator;
 import pascal.netx.compiler.model.Signature;
 import pascal.netx.compiler.model.variable.Variable;
