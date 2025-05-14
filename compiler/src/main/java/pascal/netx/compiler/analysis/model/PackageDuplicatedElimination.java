@@ -14,6 +14,7 @@ public final class PackageDuplicatedElimination extends ModelAnalysis {
     @Override
     public void analyze() {
         pack.forEachSubComponent(manager::collectDuplicatedComponents);
+        manager.resolveRepresentatives();
         pack.forEachSubComponent(this::replaceDuplicatedInstances);
     }
 

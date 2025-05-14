@@ -5,12 +5,14 @@
     "id": "riscv",
     "loc": "1:10",
     "input": ["clk@0", "rst@1", "imemDataOut@2", "dmemDataOut@3"],
-    "output": ["output@4", "result@5", "Rb@6", "dmemOp@7", "dmemWe@8"],
+    "output": ["imemAddr@4", "dmemAddr@5", "Rb@6", "dmemOp@7", "dmemWe@8"],
     "members": [
       {"type": "clock", "id": "clk@0", "loc": "2:9"},
       {"type": "wire", "width": 1, "id": "rst@1", "loc": "3:9"},
-      {"type": "wire", "width": 32, "id": "imemDataOut@2", "loc": "4:9"},
-      {"type": "wire", "width": 32, "id": "dmemDataOut@3", "loc": "5:9"},
+      {"type": "wire", "width": 32, "id": "imemAddr@4", "loc": "4:9"},
+      {"type": "wire", "width": 32, "id": "imemDataOut@2", "loc": "4:19"},
+      {"type": "wire", "width": 32, "id": "dmemAddr@5", "loc": "5:9"},
+      {"type": "wire", "width": 32, "id": "dmemDataOut@3", "loc": "5:19"},
       {"type": "wire", "width": 32, "id": "PC@9", "loc": "6:9"},
       {"type": "wire", "width": 32, "id": "nextPC@10", "loc": "6:13"},
       {"type": "wire", "width": 3, "id": "extOP@11", "loc": "16:10"},
@@ -25,7 +27,6 @@
       {"type": "wire", "width": 32, "id": "imm@18", "loc": "17:9"},
       {"type": "wire", "width": 32, "id": "Ra@19", "loc": "19:10"},
       {"type": "wire", "width": 32, "id": "Rb@6", "loc": "19:14"},
-      {"type": "wire", "width": 32, "id": "result@5", "loc": "21:10"},
       {"type": "wire", "width": 1, "id": "zero@20", "loc": "21:18"},
       {"type": "wire", "width": 1, "id": "less@21", "loc": "21:24"},
       {"type": "wire", "width": 1, "id": "PCAsrc@22", "loc": "26:10"},
@@ -7455,7 +7456,7 @@
       {
         "type": "component", "id": "ALU", "loc": "21:33",
         "input": ["output@729", "output@736", "ctl@17"],
-        "output": ["result@5", "zero@20", "less@21"],
+        "output": ["dmemAddr@5", "zero@20", "less@21"],
         "members": [
           {"type": "wire", "width": 8, "id": "mask@748", "loc": "140:9"},
           {
@@ -8393,11 +8394,11 @@
           {
             "type": "builtin", "id": "OR", "loc": "144:14",
             "input": ["output@762", "output@770", "$o@794", "output@795", "output@803", "output@819", "output@827", "output@835"],
-            "output": ["result@5"]
+            "output": ["dmemAddr@5"]
           },
           {
             "type": "builtin", "id": "OR", "loc": "155:19",
-            "input": ["less@21", "result@5[1]", "result@5[2]", "result@5[3]", "result@5[4]", "result@5[5]", "result@5[6]", "result@5[7]", "result@5[8]", "result@5[9]", "result@5[10]", "result@5[11]", "result@5[12]", "result@5[13]", "result@5[14]", "result@5[15]", "result@5[16]", "result@5[17]", "result@5[18]", "result@5[19]", "result@5[20]", "result@5[21]", "result@5[22]", "result@5[23]", "result@5[24]", "result@5[25]", "result@5[26]", "result@5[27]", "result@5[28]", "result@5[29]", "result@5[30]", "result@5[31]"],
+            "input": ["less@21", "dmemAddr@5[1]", "dmemAddr@5[2]", "dmemAddr@5[3]", "dmemAddr@5[4]", "dmemAddr@5[5]", "dmemAddr@5[6]", "dmemAddr@5[7]", "dmemAddr@5[8]", "dmemAddr@5[9]", "dmemAddr@5[10]", "dmemAddr@5[11]", "dmemAddr@5[12]", "dmemAddr@5[13]", "dmemAddr@5[14]", "dmemAddr@5[15]", "dmemAddr@5[16]", "dmemAddr@5[17]", "dmemAddr@5[18]", "dmemAddr@5[19]", "dmemAddr@5[20]", "dmemAddr@5[21]", "dmemAddr@5[22]", "dmemAddr@5[23]", "dmemAddr@5[24]", "dmemAddr@5[25]", "dmemAddr@5[26]", "dmemAddr@5[27]", "dmemAddr@5[28]", "dmemAddr@5[29]", "dmemAddr@5[30]", "dmemAddr@5[31]"],
             "output": ["$o@842"],
             "members": [
               {"type": "wire", "width": 1, "id": "$o@842", "loc": "155:19"}
@@ -9198,10 +9199,9 @@
       {
         "type": "component", "id": "MUX", "loc": "33:30",
         "input": ["nextPC@10", "32'h00000000", "rst@1"],
-        "output": ["output@4"],
+        "output": ["imemAddr@4"],
         "members": [
           {"type": "wire", "width": 2, "id": "mask@918", "loc": "205:9"},
-          {"type": "wire", "width": 32, "id": "output@4", "loc": "206:9"},
           {
             "type": "component", "id": "DECODER", "loc": "207:12",
             "input": ["rst@1"],
@@ -9262,13 +9262,13 @@
           {
             "type": "builtin", "id": "OR", "loc": "209:14",
             "input": ["$o@921", "$o@923"],
-            "output": ["output@4"]
+            "output": ["imemAddr@4"]
           }
         ]
       },
       {
         "type": "builtin", "id": "REGISTER", "loc": "33:10",
-        "input": ["output@4", "clk@0"],
+        "input": ["imemAddr@4", "clk@0"],
         "output": ["PC@9"],
         "attribute": {"isPosTrigger": "false"}
       }
