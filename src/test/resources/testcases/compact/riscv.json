@@ -2,12 +2,14 @@
   {
     "type": "component", "id": "riscv", "defIndex": 1, "loc": "1:10",
     "input": ["clk@0", "rst@0", "imemDataOut@0", "dmemDataOut@0"],
-    "output": ["output@12", "dmemAddr@0", "dmemDataIn@0", "dmemOp@0", "dmemWe@0"],
+    "output": ["imemAddr@0", "dmemAddr@0", "dmemDataIn@0", "dmemOp@0", "dmemWe@0"],
     "members": [
       {"type": "clock", "id": "clk", "loc": "2:9"},
       {"type": "wire", "width": 1, "id": "rst", "loc": "3:9"},
-      {"type": "wire", "width": 32, "id": "imemDataOut", "loc": "4:9"},
-      {"type": "wire", "width": 32, "id": "dmemDataOut", "loc": "5:9"},
+      {"type": "wire", "width": 32, "id": "imemAddr", "loc": "4:9"},
+      {"type": "wire", "width": 32, "id": "imemDataOut", "loc": "4:19"},
+      {"type": "wire", "width": 32, "id": "dmemAddr", "loc": "5:9"},
+      {"type": "wire", "width": 32, "id": "dmemDataOut", "loc": "5:19"},
       {"type": "wire", "width": 32, "id": "PC", "loc": "6:9"},
       {"type": "wire", "width": 32, "id": "nextPC", "loc": "6:13"},
       {"type": "wire", "width": 3, "id": "extOP", "loc": "16:10"},
@@ -25,7 +27,6 @@
       {"type": "wire", "width": 1, "id": "less", "loc": "21:24"},
       {"type": "wire", "width": 1, "id": "PCAsrc", "loc": "26:10"},
       {"type": "wire", "width": 1, "id": "PCBsrc", "loc": "26:18"},
-      {"type": "wire", "width": 32, "id": "dmemAddr", "loc": "36:9"},
       {"type": "wire", "width": 32, "id": "dmemDataIn", "loc": "37:9"},
       {
         "type": "instantiate", "id": "InstrDecoder@1", "defIndex": 1, "loc": "16:82",
@@ -85,11 +86,11 @@
       {
         "type": "instantiate", "id": "MUX@12", "defIndex": 4, "loc": "33:30",
         "input": ["nextPC@0", "32'h00000000", "rst@0"],
-        "output": ["output@12"]
+        "output": ["imemAddr@0"]
       },
       {
         "type": "builtin", "id": "REGISTER@13", "loc": "33:10",
-        "input": ["output@12", "clk@0"],
+        "input": ["imemAddr@0", "clk@0"],
         "output": ["PC@0"],
         "attribute": {"isPosTrigger": "false"}
       }

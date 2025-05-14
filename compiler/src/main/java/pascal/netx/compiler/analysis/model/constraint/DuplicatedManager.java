@@ -2,12 +2,15 @@ package pascal.netx.compiler.analysis.model.constraint;
 
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.scope.ComponentScope;
+import pascal.netx.compiler.model.variable.Mutable;
+import pascal.netx.compiler.model.variable.Value;
 import pascal.netx.compiler.model.variable.Variable;
 import pascal.netx.util.collection.UnionFind;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,6 +19,7 @@ import static pascal.netx.util.lang.BuiltinComponent.TO;
 
 public class DuplicatedManager {
     private final UnionFind<Variable> set = new UnionFind<>();
+    private final Map<Variable, Variable> rep = new HashMap<>();
 
     public void collectDuplicatedComponents(ComponentScope scope) {
         Map<Identifier, List<ComponentScope>> idGroups = scope.getChildren().stream()
@@ -41,6 +45,26 @@ public class DuplicatedManager {
             }
         }
         scope.getChildren().removeAll(toRemove);
+    }
+
+    public void resolveRepresentatives() {
+        for (var element : set.elements()) {
+            var root = set.find(element);
+            if (!rep.containsKey(root) || needUpdate(element, rep.get(root))) {
+                rep.put(root, element);
+            }
+        }
+    }
+
+    // FIXME: duplicated to AliasManager::needUpdate
+    boolean needUpdate(Variable now, Variable old) {
+        if (old instanceof Value) {
+            return false;
+        } else if (now instanceof Value) {
+            return true;
+        } else {
+            return ((Mutable) now).getIndex() < ((Mutable) old).getIndex();
+        }
     }
 
     List<ComponentScope> collectDuplicatedTo(ComponentScope scope) {
@@ -87,7 +111,7 @@ public class DuplicatedManager {
     public boolean needRemove(Entity entity) {
         if (entity instanceof Variable variable) {
             if (set.contains(variable)) {
-                return set.find(variable) != variable;
+                return rep.get(set.find(variable)) != variable;
             }
         }
         return false;
@@ -95,7 +119,7 @@ public class DuplicatedManager {
 
     public Variable repOf(Variable variable) {
         if (set.contains(variable)) {
-            return set.find(variable);
+            return rep.get(set.find(variable));
         }
         return variable;
     }

@@ -1,8 +1,8 @@
 component riscv : [clk, rst, imemDataOut, dmemDataOut] -> [imemAddr, dmemAddr, dmemDataIn, dmemOp, dmemWe] {
     wire clk of clock();
     wire rst of bit(1);
-    wire imemDataOut of bit(32);
-    wire dmemDataOut of bit(32);
+    wire imemAddr, imemDataOut of bit(32);
+    wire dmemAddr, dmemDataOut of bit(32);
     wire PC, nextPC  of bit(32);
 
     auto instr <> imemDataOut;
@@ -32,8 +32,8 @@ component riscv : [clk, rst, imemDataOut, dmemDataOut] -> [imemAddr, dmemAddr, d
 
     PC <> REGISTER(false) <> [MUX(1) <> [nextPC, 32'b0, rst], clk];
 
-    auto imemAddr <> MUX(1) <> [nextPC, 32'b0, rst];
-    auto dmemAddr   <> result;
+    imemAddr <> MUX(1) <> [nextPC, 32'b0, rst];
+    dmemAddr   <> result;
     auto dmemDataIn <> Rb;
 }
 

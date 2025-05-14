@@ -20,6 +20,7 @@ public final class ComponentDuplicatedElimination extends ComponentModelAnalysis
         public void analyze(ComponentScope scope) {
             exploreAnalysisScopes(scope);
             dominated.forEach(manager::collectDuplicatedComponents);
+            manager.resolveRepresentatives();
             if (scope.hasAttributes()) {
                 scope.getAttributes().replaceAllVariable(manager::repOf);
             }
