@@ -56,6 +56,11 @@ public class AliasManager {
                 var lhs = repOf(alias.lhs());
                 if (isValidDump(alias.rhs()) && isNotIdentity(lhs, access)) {
                     addNew.accept(new ComponentScope.Alias(lhs, alias.rhs()));
+                } else {
+                    var rhs = repOf(alias.rhs());
+                    if (isValidDump(rhs) && isNotIdentity(lhs, rhs)) {
+                        addNew.accept(new ComponentScope.Alias(lhs, rhs));
+                    }
                 }
             }
         }
@@ -67,8 +72,10 @@ public class AliasManager {
         return needDump(variable) || (variable instanceof Access access && needDump(access.base()));
     }
 
-    private boolean isNotIdentity(Variable variable, Access access) {
-        return !variable.equals(access) && (!isSelfAlias(access) || !access.base().equals(variable));
+    private boolean isNotIdentity(Variable lhs, Variable rhs) {
+        return !lhs.equals(rhs)
+                && (!(rhs instanceof Access access)
+                        || (!isSelfAlias(access) || !access.base().equals(lhs)));
     }
 
     static boolean isSelfAlias(Variable variable) {

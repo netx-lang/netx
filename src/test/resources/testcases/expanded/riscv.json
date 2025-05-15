@@ -8408,6 +8408,11 @@
             "type": "builtin", "id": "NOT", "loc": "155:12",
             "input": ["$o@842"],
             "output": ["zero@20"]
+          },
+          {
+            "type": "builtin", "id": "TO", "loc": "0:0",
+            "input": ["dmemAddr@5[0]"],
+            "output": ["less@21"]
           }
         ]
       },
