@@ -4,12 +4,8 @@ import pascal.netx.compiler.model.variable.Variable;
 import pascal.netx.compiler.model.variable.type.Type;
 
 public final class EqualTypeConstraint extends BinaryConstraint {
-    private EqualTypeConstraint(Variable lhs, Variable rhs) {
+    public EqualTypeConstraint(Variable lhs, Variable rhs) {
         super(lhs, rhs);
-    }
-
-    public static EqualTypeConstraint of(Variable lhs, Variable rhs) {
-        return new EqualTypeConstraint(lhs, rhs);
     }
 
     @Override

@@ -10,6 +10,7 @@ import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.variable.Data;
 import pascal.netx.compiler.model.variable.Variable;
+import pascal.netx.compiler.model.variable.type.BitType;
 import pascal.netx.compiler.model.variable.type.PolyType;
 import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.exception.ShallNotReachHereError;
@@ -33,14 +34,14 @@ public final class DataTypeInference extends ModelAnalysis {
     @Override
     public void analyze() {
         collectTypeConstraints();
-        doBinaryTypeInference();
+        doTypeInference();
         checkAllTyped();
     }
 
     public void collectTypeConstraints() {
         pack.forEachSubComponent(scope -> {
             for (var alias : scope.getAliases()) {
-                addBinaryConstraint(EqualTypeConstraint.of(alias.lhs(), alias.rhs()));
+                addBinaryConstraint(new EqualTypeConstraint(alias.lhs(), alias.rhs()));
             }
             if (scope.isBuiltin()) {
                 collectConstraintsInBuiltin(scope);
@@ -51,6 +52,7 @@ public final class DataTypeInference extends ModelAnalysis {
     private void collectConstraintsInBuiltin(ComponentScope component) {
         switch (BuiltinComponent.of(component.getIdentifier())) {
             case OR, NOT, AND, XOR, NOR, NAND, XNOR, ADD, SUB, MUL, DIV, MOD -> addAllEqualConstraints(component);
+            case CONCAT -> addConstraintForConcat(component);
             case REGISTER -> addContainsForRegister(component);
             case SPLIT -> {
                 // do nothing
@@ -62,20 +64,27 @@ public final class DataTypeInference extends ModelAnalysis {
         var dataList = Stream.concat(component.getInputs().stream(), component.getOutputs().stream()).toList();
         for (int i = 0; i < dataList.size(); i++) {
             for (int j = i + 1; j < dataList.size(); j++) {
-                addConstraint(EqualTypeConstraint.of(dataList.get(i), dataList.get(j)));
+                addConstraint(new EqualTypeConstraint(dataList.get(i), dataList.get(j)));
             }
         }
     }
 
     private void addContainsForRegister(ComponentScope component) {
         Variable input = component.getInputs().getFirst(), output = component.getOutputs().getFirst();
-        addConstraint(EqualTypeConstraint.of(input, output));
-        addConstraint(ClockConstraint.of(component.getInputs().get(1)));
+        addConstraint(new EqualTypeConstraint(input, output));
+        addConstraint(new ClockConstraint(component.getInputs().get(1)));
+    }
+
+    private void addConstraintForConcat(ComponentScope component) {
+        var input = component.getInputs();
+        var output = component.getOutputs().getFirst();
+        addConstraint(new ConcatConstraint(output, input));
     }
 
     private void addConstraint(DataConstraint constraint) {
         switch (constraint) {
             case UnaryConstraint unary -> constraints.add(unary);
+            case ConcatConstraint concat -> addConcatConstraint(concat);
             case BinaryConstraint binary -> addBinaryConstraint(binary);
         }
     }
@@ -102,7 +111,24 @@ public final class DataTypeInference extends ModelAnalysis {
         }
     }
 
-    private void doBinaryTypeInference() {
+    private void addConcatConstraint(ConcatConstraint concat) {
+        boolean lhsHasType = !(concat.lhs().hasImplicitType());
+        boolean rhsHasType = concat.rhs().stream().noneMatch(Variable::hasImplicitType);
+        if (lhsHasType && rhsHasType) {
+            throwIfConstraintNotHolds(concat);
+        } else if (rhsHasType) {
+            setTypeFor(concat.lhs(), BitType.of(
+                    concat.rhs().stream()
+                            .map(Variable::getType)
+                            .map(BitType.class::cast)
+                            .map(BitType::width)
+                            .reduce(0, Integer::sum)));
+        } else {
+            constraints.add(concat);
+        }
+    }
+
+    private void doTypeInference() {
         while (!workList.isEmpty()) {
             var data = workList.poll();
             if (graph.containsVertex(data)) {
