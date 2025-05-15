@@ -5,12 +5,8 @@ import pascal.netx.compiler.model.variable.Variable;
 
 public final class ClockConstraint extends UnaryConstraint {
 
-    private ClockConstraint(Variable inst) {
+    public ClockConstraint(Variable inst) {
         super(inst);
-    }
-
-    public static ClockConstraint of(Variable inst) {
-        return new ClockConstraint(inst);
     }
 
     @Override
