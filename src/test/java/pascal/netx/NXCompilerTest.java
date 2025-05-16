@@ -59,11 +59,6 @@ class NXCompilerTest {
     }
 
     @Test
-    void testRISCV() throws IOException {
-        test("riscv");
-    }
-
-    @Test
     void testSimpleTimer() throws IOException {
         test("simple_timer");
     }

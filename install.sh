@@ -5,7 +5,7 @@ SIM_BUILD_DIR="build/nxsim"
 INSTALL_DIR="/usr/local/bin"
 SCRIPT_FILE="$INSTALL_DIR/nx"
 
-echo "Please ensure you have the necessary permissions install file into $INSTALL_DIR."
+echo "Please ensure you have the necessary permissions to install file into $INSTALL_DIR."
 
 echo "Installing $JAR_FILE to $INSTALL_DIR"
 cp "$JAR_FILE" "$INSTALL_DIR/nx.jar"
