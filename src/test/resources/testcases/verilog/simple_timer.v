@@ -1,204 +1,254 @@
-// @(1:10)
-module top_1(
-  clk_50, \hex[0] , \hex[1] , \hex[2] , \hex[3] , \hex[4] , \hex[5] , \hex[6] , \hex[7] 
+// @(1:10) top@(1:10)
+module mod_0 (
+  t_0, t_1, t_2, t_3, t_4, t_5, t_6, t_7, t_8
 );
-  output [6:0] \hex[0] , \hex[1] , \hex[2] , \hex[3] , \hex[4] , \hex[5] , \hex[6] , \hex[7] ; // @(3:6), @(3:6), @(3:6), @(3:6), @(3:6), @(3:6), @(3:6), @(3:6)
-  input clk_50; // @(2:6)
-  wire ms_clk, s_clk, m_clk, h_clk; // @(7:6), @(7:14), @(7:21), @(7:28)
-  wire \$p_0 ;
-  wire [3:0] \$p_3 , \$p_4 , \$p_5 , \$p_6 , \$p_7 , \$p_8 , \$p_9 , \$p_10 ;
-  wire [31:0] ms; // @(8:6)
-  wire [31:0] \$o_6 , \$o_9 , \$o_10 , \$o_13 , \$o_14 , \$o_17 , \$o_18 , \$o_21 , \$o_22 , \$o_25 , \$o_26 , \$o_29 , \$o_30 , \$o_33 , \$o_34 , \$p_1 , \$p_2 ;
-  reg [31:0] \$p_11 ;
-  clock_divider_1 \$inst_1 (clk_50, ms_clk);
-  MUX_1 \$inst_4 (\$p_0 , \$p_1 , 32'h00000000, \$p_2 );
-  hex_trigger_1 \$inst_8 (\$p_3 , \hex[0] );
-  hex_trigger_1 \$inst_12 (\$p_4 , \hex[1] );
-  hex_trigger_1 \$inst_16 (\$p_5 , \hex[2] );
-  hex_trigger_1 \$inst_20 (\$p_6 , \hex[3] );
-  hex_trigger_1 \$inst_24 (\$p_7 , \hex[4] );
-  hex_trigger_1 \$inst_28 (\$p_8 , \hex[5] );
-  hex_trigger_1 \$inst_32 (\$p_9 , \hex[6] );
-  hex_trigger_1 \$inst_36 (\$p_10 , \hex[7] );
-  assign \$p_0  = ms == 32'h0083D5FF;
-  assign \$p_1  = ms + 32'h00000001;
-  assign \$o_6  = ms % 32'h0000000A;
-  assign \$p_3  = $signed(\$o_6 );
-  assign \$o_9  = ms % 32'h00000064;
-  assign \$o_10  = \$o_9  / 32'h0000000A;
-  assign \$p_4  = $signed(\$o_10 );
-  assign \$o_13  = ms % 32'h000003E8;
-  assign \$o_14  = \$o_13  / 32'h00000064;
-  assign \$p_5  = $signed(\$o_14 );
-  assign \$o_17  = ms % 32'h00001770;
-  assign \$o_18  = \$o_17  / 32'h000003E8;
-  assign \$p_6  = $signed(\$o_18 );
-  assign \$o_21  = ms % 32'h0000EA60;
-  assign \$o_22  = \$o_21  / 32'h00001770;
-  assign \$p_7  = $signed(\$o_22 );
-  assign \$o_25  = ms % 32'h00057E40;
-  assign \$o_26  = \$o_25  / 32'h0000EA60;
-  assign \$p_8  = $signed(\$o_26 );
-  assign \$o_29  = ms % 32'h0036EE80;
-  assign \$o_30  = \$o_29  / 32'h00057E40;
-  assign \$p_9  = $signed(\$o_30 );
-  assign \$o_33  = ms % 32'h05265C00;
-  assign \$o_34  = \$o_33  / 32'h0036EE80;
-  assign \$p_10  = $signed(\$o_34 );
-  assign ms = \$p_11 ;
-  always @(posedge ms_clk) begin
-    \$p_11  <= \$p_2 ;
+  // hex[0]@(3:6), hex[1]@(3:6), hex[2]@(3:6), hex[3]@(3:6), hex[4]@(3:6), hex[5]@(3:6), hex[6]@(3:6), hex[7]@(3:6)
+  output [6:0] t_1, t_2, t_3, t_4, t_5, t_6, t_7, t_8;
+
+  // clk_50@(2:6)
+  input t_0;
+
+  // ms_clk@(7:6), s_clk@(7:14), m_clk@(7:21), h_clk@(7:28)
+  wire t_9, t_10, t_11, t_12;
+
+  wire t_29;
+  wire [3:0] t_32, t_33, t_34, t_35, t_36, t_37, t_38, t_39;
+  // ms@(8:6)
+  wire [31:0] t_13;
+
+  wire [31:0] t_14, t_15, t_16, t_17, t_18, t_19, t_20, t_21, t_22, t_23, t_24, t_25, t_26, t_27, t_28, t_30, t_31;
+  reg [31:0]  r_0; // $p_11@(0:0)
+  mod_4 inst_0 (t_0, t_9);
+  mod_6 inst_1 (t_29, t_30, 32'h00000000, t_31);
+  mod_1 inst_2 (t_32, t_1);
+  mod_1 inst_3 (t_33, t_2);
+  mod_1 inst_4 (t_34, t_3);
+  mod_1 inst_5 (t_35, t_4);
+  mod_1 inst_6 (t_36, t_5);
+  mod_1 inst_7 (t_37, t_6);
+  mod_1 inst_8 (t_38, t_7);
+  mod_1 inst_9 (t_39, t_8);
+  assign t_29 = t_13 == 32'h0083D5FF;
+  assign t_30 = t_13 + 32'h00000001;
+  assign t_14 = t_13 % 32'h0000000A;
+  assign t_32 = $signed(t_14);
+  assign t_15 = t_13 % 32'h00000064;
+  assign t_16 = t_15 / 32'h0000000A;
+  assign t_33 = $signed(t_16);
+  assign t_17 = t_13 % 32'h000003E8;
+  assign t_18 = t_17 / 32'h00000064;
+  assign t_34 = $signed(t_18);
+  assign t_19 = t_13 % 32'h00001770;
+  assign t_20 = t_19 / 32'h000003E8;
+  assign t_35 = $signed(t_20);
+  assign t_21 = t_13 % 32'h0000EA60;
+  assign t_22 = t_21 / 32'h00001770;
+  assign t_36 = $signed(t_22);
+  assign t_23 = t_13 % 32'h00057E40;
+  assign t_24 = t_23 / 32'h0000EA60;
+  assign t_37 = $signed(t_24);
+  assign t_25 = t_13 % 32'h0036EE80;
+  assign t_26 = t_25 / 32'h00057E40;
+  assign t_38 = $signed(t_26);
+  assign t_27 = t_13 % 32'h05265C00;
+  assign t_28 = t_27 / 32'h0036EE80;
+  assign t_39 = $signed(t_28);
+  assign t_13 = r_0;
+  always @(posedge t_9) begin
+    r_0 <= t_31;
   end
 endmodule
 
-// @(33:10)
-module hex_trigger_1(
-  num, code
+// @(33:10) hex_trigger@(33:10)
+module mod_1 (
+  t_0, t_1
 );
-  output [6:0] code; // @(35:6)
-  input [3:0] num; // @(34:6)
-  MUX_3 \$inst_1 (num, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h02, 7'h78, 7'h00, 7'h10, 7'h08, 7'h03, 7'h46, 7'h21, 7'h06, 7'h0E, code);
+  // code@(35:6)
+  output [6:0] t_1;
+
+  // num@(34:6)
+  input [3:0] t_0;
+
+  mod_2 inst_0 (t_0, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h02, 7'h78, 7'h00, 7'h10, 7'h08, 7'h03, 7'h46, 7'h21, 7'h06, 7'h0E, t_1);
 endmodule
 
-// @(57:10)
-module MUX_3(
-  code, \input[0] , \input[1] , \input[2] , \input[3] , \input[4] , \input[5] , \input[6] , \input[7] , \input[8] , \input[9] , \input[10] , \input[11] , \input[12] , \input[13] , \input[14] , \input[15] , out
+// @(57:10) MUX@(57:10)
+module mod_2 (
+  t_0, t_2, t_3, t_4, t_5, t_6, t_7, t_8, t_9, t_10, t_11, t_12, t_13, t_14, t_15, t_16, t_17, t_18
 );
-  output [6:0] out; // @(61:19)
-  input [3:0] code; // @(59:9)
-  input [6:0] \input[0] , \input[1] , \input[2] , \input[3] , \input[4] , \input[5] , \input[6] , \input[7] ; // @(61:9), @(61:9), @(61:9), @(61:9), @(61:9), @(61:9), @(61:9), @(61:9)
-  input [6:0] \input[8] , \input[9] , \input[10] , \input[11] , \input[12] , \input[13] , \input[14] , \input[15] ; // @(61:9), @(61:9), @(61:9), @(61:9), @(61:9), @(61:9), @(61:9), @(61:9)
-  wire [15:0] mask; // @(60:9)
-  wire [6:0] \$o_2 , \$o_3 , \$o_4 , \$o_5 , \$o_6 , \$o_7 , \$o_8 , \$o_9 , \$o_10 , \$o_11 , \$o_12 , \$o_13 , \$o_14 , \$o_15 , \$o_16 , \$o_17 , \$o_18 , \$o_19 , \$o_20 , \$o_21 , \$o_22 , \$o_23 , \$o_24 , \$o_25 , \$o_26 , \$o_27 , \$o_28 , \$o_29 , \$o_30 , \$o_31 , \$o_32 , \$o_33 ;
-  DECODER_2 \$inst_1 (code, mask);
-  assign \$o_2  = $signed(mask[0]);
-  assign \$o_3  = \input[0]  & \$o_2 ;
-  assign \$o_4  = $signed(mask[1]);
-  assign \$o_5  = \input[1]  & \$o_4 ;
-  assign \$o_6  = $signed(mask[2]);
-  assign \$o_7  = \input[2]  & \$o_6 ;
-  assign \$o_8  = $signed(mask[3]);
-  assign \$o_9  = \input[3]  & \$o_8 ;
-  assign \$o_10  = $signed(mask[4]);
-  assign \$o_11  = \input[4]  & \$o_10 ;
-  assign \$o_12  = $signed(mask[5]);
-  assign \$o_13  = \input[5]  & \$o_12 ;
-  assign \$o_14  = $signed(mask[6]);
-  assign \$o_15  = \input[6]  & \$o_14 ;
-  assign \$o_16  = $signed(mask[7]);
-  assign \$o_17  = \input[7]  & \$o_16 ;
-  assign \$o_18  = $signed(mask[8]);
-  assign \$o_19  = \input[8]  & \$o_18 ;
-  assign \$o_20  = $signed(mask[9]);
-  assign \$o_21  = \input[9]  & \$o_20 ;
-  assign \$o_22  = $signed(mask[10]);
-  assign \$o_23  = \input[10]  & \$o_22 ;
-  assign \$o_24  = $signed(mask[11]);
-  assign \$o_25  = \input[11]  & \$o_24 ;
-  assign \$o_26  = $signed(mask[12]);
-  assign \$o_27  = \input[12]  & \$o_26 ;
-  assign \$o_28  = $signed(mask[13]);
-  assign \$o_29  = \input[13]  & \$o_28 ;
-  assign \$o_30  = $signed(mask[14]);
-  assign \$o_31  = \input[14]  & \$o_30 ;
-  assign \$o_32  = $signed(mask[15]);
-  assign \$o_33  = \input[15]  & \$o_32 ;
-  assign out = \$o_3  | \$o_5  | \$o_7  | \$o_9  | \$o_11  | \$o_13  | \$o_15  | \$o_17  | \$o_19  | \$o_21  | \$o_23  | \$o_25  | \$o_27  | \$o_29  | \$o_31  | \$o_33 ;
+  // out@(61:19)
+  output [6:0] t_18;
+
+  // code@(59:9)
+  input [3:0] t_0;
+
+  // input[0]@(61:9), input[1]@(61:9), input[2]@(61:9), input[3]@(61:9), input[4]@(61:9), input[5]@(61:9), input[6]@(61:9), input[7]@(61:9)
+  input [6:0] t_2, t_3, t_4, t_5, t_6, t_7, t_8, t_9;
+
+  // input[8]@(61:9), input[9]@(61:9), input[10]@(61:9), input[11]@(61:9), input[12]@(61:9), input[13]@(61:9), input[14]@(61:9), input[15]@(61:9)
+  input [6:0] t_10, t_11, t_12, t_13, t_14, t_15, t_16, t_17;
+
+  // mask@(60:9)
+  wire [15:0] t_1;
+
+  wire [6:0] t_19, t_20, t_21, t_22, t_23, t_24, t_25, t_26, t_27, t_28, t_29, t_30, t_31, t_32, t_33, t_34, t_35, t_36, t_37, t_38, t_39, t_40, t_41, t_42, t_43, t_44, t_45, t_46, t_47, t_48, t_49, t_50;
+  mod_3 inst_0 (t_0, t_1);
+  assign t_19 = $signed(t_1[0]);
+  assign t_20 = t_2 & t_19;
+  assign t_21 = $signed(t_1[1]);
+  assign t_22 = t_3 & t_21;
+  assign t_23 = $signed(t_1[2]);
+  assign t_24 = t_4 & t_23;
+  assign t_25 = $signed(t_1[3]);
+  assign t_26 = t_5 & t_25;
+  assign t_27 = $signed(t_1[4]);
+  assign t_28 = t_6 & t_27;
+  assign t_29 = $signed(t_1[5]);
+  assign t_30 = t_7 & t_29;
+  assign t_31 = $signed(t_1[6]);
+  assign t_32 = t_8 & t_31;
+  assign t_33 = $signed(t_1[7]);
+  assign t_34 = t_9 & t_33;
+  assign t_35 = $signed(t_1[8]);
+  assign t_36 = t_10 & t_35;
+  assign t_37 = $signed(t_1[9]);
+  assign t_38 = t_11 & t_37;
+  assign t_39 = $signed(t_1[10]);
+  assign t_40 = t_12 & t_39;
+  assign t_41 = $signed(t_1[11]);
+  assign t_42 = t_13 & t_41;
+  assign t_43 = $signed(t_1[12]);
+  assign t_44 = t_14 & t_43;
+  assign t_45 = $signed(t_1[13]);
+  assign t_46 = t_15 & t_45;
+  assign t_47 = $signed(t_1[14]);
+  assign t_48 = t_16 & t_47;
+  assign t_49 = $signed(t_1[15]);
+  assign t_50 = t_17 & t_49;
+  assign t_18 = t_20 | t_22 | t_24 | t_26 | t_28 | t_30 | t_32 | t_34 | t_36 | t_38 | t_40 | t_42 | t_44 | t_46 | t_48 | t_50;
 endmodule
 
-// @(68:10)
-module DECODER_2(
-  code, out
+// @(68:10) DECODER@(68:10)
+module mod_3 (
+  t_0, t_1
 );
-  output [15:0] out; // @(71:9)
-  input [3:0] code; // @(70:9)
-  wire \$o_1 , \$o_2 , \$o_3 , \$o_4 ;
-  assign \$o_1  = ~code[0];
-  assign \$o_2  = ~code[1];
-  assign \$o_3  = ~code[2];
-  assign \$o_4  = ~code[3];
-  assign out[0] = \$o_1  & \$o_2  & \$o_3  & \$o_4 ;
-  assign out[1] = code[0] & \$o_2  & \$o_3  & \$o_4 ;
-  assign out[2] = \$o_1  & code[1] & \$o_3  & \$o_4 ;
-  assign out[3] = code[0] & code[1] & \$o_3  & \$o_4 ;
-  assign out[4] = \$o_1  & \$o_2  & code[2] & \$o_4 ;
-  assign out[5] = code[0] & \$o_2  & code[2] & \$o_4 ;
-  assign out[6] = \$o_1  & code[1] & code[2] & \$o_4 ;
-  assign out[7] = code[0] & code[1] & code[2] & \$o_4 ;
-  assign out[8] = \$o_1  & \$o_2  & \$o_3  & code[3];
-  assign out[9] = code[0] & \$o_2  & \$o_3  & code[3];
-  assign out[10] = \$o_1  & code[1] & \$o_3  & code[3];
-  assign out[11] = code[0] & code[1] & \$o_3  & code[3];
-  assign out[12] = \$o_1  & \$o_2  & code[2] & code[3];
-  assign out[13] = code[0] & \$o_2  & code[2] & code[3];
-  assign out[14] = \$o_1  & code[1] & code[2] & code[3];
-  assign out[15] = code[0] & code[1] & code[2] & code[3];
+  // out@(71:9)
+  output [15:0] t_1;
+
+  // code@(70:9)
+  input [3:0] t_0;
+
+  wire t_2, t_3, t_4, t_5;
+  assign t_2 = ~t_0[0];
+  assign t_3 = ~t_0[1];
+  assign t_4 = ~t_0[2];
+  assign t_5 = ~t_0[3];
+  assign t_1[0] = t_2 & t_3 & t_4 & t_5;
+  assign t_1[1] = t_0[0] & t_3 & t_4 & t_5;
+  assign t_1[2] = t_2 & t_0[1] & t_4 & t_5;
+  assign t_1[3] = t_0[0] & t_0[1] & t_4 & t_5;
+  assign t_1[4] = t_2 & t_3 & t_0[2] & t_5;
+  assign t_1[5] = t_0[0] & t_3 & t_0[2] & t_5;
+  assign t_1[6] = t_2 & t_0[1] & t_0[2] & t_5;
+  assign t_1[7] = t_0[0] & t_0[1] & t_0[2] & t_5;
+  assign t_1[8] = t_2 & t_3 & t_4 & t_0[3];
+  assign t_1[9] = t_0[0] & t_3 & t_4 & t_0[3];
+  assign t_1[10] = t_2 & t_0[1] & t_4 & t_0[3];
+  assign t_1[11] = t_0[0] & t_0[1] & t_4 & t_0[3];
+  assign t_1[12] = t_2 & t_3 & t_0[2] & t_0[3];
+  assign t_1[13] = t_0[0] & t_3 & t_0[2] & t_0[3];
+  assign t_1[14] = t_2 & t_0[1] & t_0[2] & t_0[3];
+  assign t_1[15] = t_0[0] & t_0[1] & t_0[2] & t_0[3];
 endmodule
 
-// @(23:10)
-module clock_divider_1(
-  clk_50, clk
+// @(23:10) clock_divider@(23:10)
+module mod_4 (
+  t_0, t_1
 );
-  output clk; // @(24:14)
-  input clk_50; // @(24:6)
-  wire \$p_0 , \$p_3 , \$p_4 ;
-  wire [31:0] count; // @(25:6)
-  wire [31:0] \$p_1 , \$p_2 ;
-  reg [31:0] \$p_5 ;
-  reg \$p_6 ;
-  MUX_1 \$inst_3 (\$p_0 , \$p_1 , 32'h00000000, \$p_2 );
-  MUX_2 \$inst_6 (\$p_0 , clk, \$p_3 , \$p_4 );
-  assign \$p_0  = count == 32'h0003D08F;
-  assign \$p_1  = count + 32'h00000001;
-  assign \$p_3  = ~clk;
-  assign count = \$p_5 ;
-  assign clk = \$p_6 ;
-  always @(posedge clk_50) begin
-    \$p_5  <= \$p_2 ;
-    \$p_6  <= \$p_4 ;
+  // clk@(24:14)
+  output t_1;
+
+  // clk_50@(24:6)
+  input t_0;
+
+  wire t_3, t_6, t_7;
+  // count@(25:6)
+  wire [31:0] t_2;
+
+  wire [31:0] t_4, t_5;
+  reg [31:0]  r_0; // $p_5@(0:0)
+  reg  r_1; // $p_6@(0:0)
+  mod_6 inst_0 (t_3, t_4, 32'h00000000, t_5);
+  mod_5 inst_1 (t_3, t_1, t_6, t_7);
+  assign t_3 = t_2 == 32'h0003D08F;
+  assign t_4 = t_2 + 32'h00000001;
+  assign t_6 = ~t_1;
+  assign t_2 = r_0;
+  assign t_1 = r_1;
+  always @(posedge t_0) begin
+    r_0 <= t_5;
+    r_1 <= t_7;
   end
 endmodule
 
-// @(57:10)
-module MUX_2(
-  code, \input[0] , \input[1] , out
+// @(57:10) MUX@(57:10)
+module mod_5 (
+  t_0, t_2, t_3, t_4
 );
-  output out; // @(61:19)
-  input code, \input[0] , \input[1] ; // @(59:9), @(61:9), @(61:9)
-  wire \$o_2 , \$o_3 ;
-  wire [1:0] mask; // @(60:9)
-  DECODER_1 \$inst_1 (code, mask);
-  assign \$o_2  = \input[0]  & mask[0];
-  assign \$o_3  = \input[1]  & mask[1];
-  assign out = \$o_2  | \$o_3 ;
+  // out@(61:19)
+  output t_4;
+
+  // code@(59:9), input[0]@(61:9), input[1]@(61:9)
+  input t_0, t_2, t_3;
+
+  wire t_5, t_6;
+  // mask@(60:9)
+  wire [1:0] t_1;
+
+  mod_7 inst_0 (t_0, t_1);
+  assign t_5 = t_2 & t_1[0];
+  assign t_6 = t_3 & t_1[1];
+  assign t_4 = t_5 | t_6;
 endmodule
 
-// @(57:10)
-module MUX_1(
-  code, \input[0] , \input[1] , out
+// @(57:10) MUX@(57:10)
+module mod_6 (
+  t_0, t_2, t_3, t_4
 );
-  output [31:0] out; // @(61:19)
-  input code; // @(59:9)
-  input [31:0] \input[0] , \input[1] ; // @(61:9), @(61:9)
-  wire [31:0] \$o_2 , \$o_3 , \$o_4 , \$o_5 ;
-  wire [1:0] mask; // @(60:9)
-  DECODER_1 \$inst_1 (code, mask);
-  assign \$o_2  = $signed(mask[0]);
-  assign \$o_3  = \input[0]  & \$o_2 ;
-  assign \$o_4  = $signed(mask[1]);
-  assign \$o_5  = \input[1]  & \$o_4 ;
-  assign out = \$o_3  | \$o_5 ;
+  // out@(61:19)
+  output [31:0] t_4;
+
+  // code@(59:9)
+  input t_0;
+
+  // input[0]@(61:9), input[1]@(61:9)
+  input [31:0] t_2, t_3;
+
+  wire [31:0] t_5, t_6, t_7, t_8;
+  // mask@(60:9)
+  wire [1:0] t_1;
+
+  mod_7 inst_0 (t_0, t_1);
+  assign t_5 = $signed(t_1[0]);
+  assign t_6 = t_2 & t_5;
+  assign t_7 = $signed(t_1[1]);
+  assign t_8 = t_3 & t_7;
+  assign t_4 = t_6 | t_8;
 endmodule
 
-// @(68:10)
-module DECODER_1(
-  code, out
+// @(68:10) DECODER@(68:10)
+module mod_7 (
+  t_0, t_1
 );
-  output [1:0] out; // @(71:9)
-  input code; // @(70:9)
-  wire \$o_1 ;
-  assign \$o_1  = ~code;
-  assign out[0] = \$o_1 ;
-  assign out[1] = code;
+  // out@(71:9)
+  output [1:0] t_1;
+
+  // code@(70:9)
+  input t_0;
+
+  wire t_2;
+  assign t_2 = ~t_0;
+  assign t_1[0] = t_2;
+  assign t_1[1] = t_0;
 endmodule
 

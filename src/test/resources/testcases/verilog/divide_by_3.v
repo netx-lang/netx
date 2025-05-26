@@ -1,27 +1,33 @@
-// @(1:10)
-module Divide_by_3_1(
-  clk, clk_3
+// @(1:10) Divide_by_3@(1:10)
+module mod_0 (
+  t_0, t_1
 );
-  output clk_3; // @(2:14)
-  input clk; // @(2:9)
-  wire a, b, c; // @(3:9), @(3:12), @(3:15)
-  wire \$o_1 , \$o_2 , \$o_3 ;
-  reg \$p_0 ;
-  reg \$p_1 ;
-  reg \$p_2 ;
-  assign \$o_1  = ~a;
-  assign \$o_2  = ~b;
-  assign \$o_3  = \$o_1  & \$o_2 ;
-  assign clk_3 = b | c;
-  assign c = \$p_2 ;
-  always @(negedge clk) begin
-    \$p_2  <= b;
+  // clk_3@(2:14)
+  output t_1;
+
+  // clk@(2:9)
+  input t_0;
+
+  // a@(3:9), b@(3:12), c@(3:15)
+  wire t_2, t_3, t_4;
+
+  wire t_5, t_6, t_7;
+  reg  r_0; // $p_0@(0:0)
+  reg  r_1; // $p_1@(0:0)
+  reg  r_2; // $p_2@(0:0)
+  assign t_5 = ~t_2;
+  assign t_6 = ~t_3;
+  assign t_7 = t_5 & t_6;
+  assign t_1 = t_3 | t_4;
+  assign t_4 = r_2;
+  always @(negedge t_0) begin
+    r_2 <= t_3;
   end
-  assign a = \$p_0 ;
-  assign b = \$p_1 ;
-  always @(posedge clk) begin
-    \$p_0  <= \$o_3 ;
-    \$p_1  <= a;
+  assign t_2 = r_0;
+  assign t_3 = r_1;
+  always @(posedge t_0) begin
+    r_0 <= t_7;
+    r_1 <= t_2;
   end
 endmodule
 
