@@ -236,7 +236,6 @@ class BitVectorUnitTest {
         var literal = "110101001101101011";
         BitVector bv = BitVector.parse(literal, 18, 2);
         for (int i = 0; i < literal.length(); i++) {
-            System.out.printf("get(%d) = %b%n", i, bv.get(i));
             assertEquals(literal.charAt(18 - i - 1) == '1', bv.get(i));
         }
     }
