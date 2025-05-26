@@ -130,7 +130,7 @@ public class VerilogDumper {
             for (var wireEntry : wires.entrySet()) {
                 List<WireDeclaration> located = new LinkedList<>(), nonLocated = new LinkedList<>();
                 for (var wire : wireEntry.getValue()) {
-                    if (wire.loc != null) {
+                    if (!wire.loc.isNone()) {
                         located.add(wire);
                     } else {
                         nonLocated.add(wire);
