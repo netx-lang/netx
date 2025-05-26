@@ -59,15 +59,15 @@ public final class BitVector {
     }
 
     public void set(int index) {
-        data[index >> 3] |= (byte) (1 << (index & 7));
+        data[data.length - (index >> 3) - 1] |= (byte) (1 << (index & 7));
     }
 
     public void clear(int index) {
-        data[index >> 3] &= (byte) ~(1 << (index & 7));
+        data[data.length - (index >> 3) - 1] &= (byte) ~(1 << (index & 7));
     }
 
     public boolean get(int index) {
-        return (data[index >> 3] & (1 << (index & 7))) != 0;
+        return (data[data.length - (index >> 3) - 1] & (1 << (index & 7))) != 0;
     }
 
     public boolean msb() {

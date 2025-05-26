@@ -4,6 +4,8 @@ import pascal.netx.compiler.model.variable.type.BitType;
 import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.lang.BitVector;
 
+import javax.annotation.Nonnull;
+
 public record Int32Value(int value) implements IntegerValue {
     public static Int32Value of(int value) {
         return new Int32Value(value);
@@ -130,6 +132,7 @@ public record Int32Value(int value) implements IntegerValue {
     }
 
     @Override
+    @Nonnull
     public String toString() {
         return String.valueOf(value);
     }
