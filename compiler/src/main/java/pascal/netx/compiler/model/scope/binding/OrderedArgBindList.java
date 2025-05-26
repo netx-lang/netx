@@ -2,6 +2,7 @@ package pascal.netx.compiler.model.scope.binding;
 
 import pascal.netx.compiler.model.Entity;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +26,12 @@ public record OrderedArgBindList(List<Entity> args) implements ArgBindList {
     }
 
     @Override
+    public boolean isEmpty() {
+        return args.isEmpty();
+    }
+
+    @Override
+    @Nonnull
     public String toString() {
         return "(" + String.join(", ", args.stream().map(Entity::toString).toList()) + ")";
     }

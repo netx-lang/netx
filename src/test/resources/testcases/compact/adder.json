@@ -16,6 +16,7 @@
   },
   {
     "type": "component", "id": "adder", "defIndex": 1, "loc": "5:10",
+    "attribute": {"WIDTH": "8"},
     "input": ["a@0", "b@0"],
     "output": ["c@0"],
     "members": [

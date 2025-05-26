@@ -9,12 +9,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestUtils {
     public static void testBothCompactAndExpanded(String expected, String actual) {
+        testCompact(expected, actual);
+        testExpanded(expected, actual);
+    }
+
+    public static void testCompact(String expected, String actual) {
         var cBuilder = NXBuilder.from(Configuration.forCompactTest());
-        var eBuilder = NXBuilder.from(Configuration.forExpandedTest());
         assertEquals(
                 eliminateSource(cBuilder.load(expected).compileAndDump()),
                 eliminateSource(cBuilder.load(actual).compileAndDump())
         );
+    }
+
+    public static void testExpanded(String expected, String actual) {
+        var eBuilder = NXBuilder.from(Configuration.forExpandedTest());
         assertEquals(
                 eliminateSource(eBuilder.load(expected).compileAndDump()),
                 eliminateSource(eBuilder.load(actual).compileAndDump())

@@ -31,8 +31,9 @@ public final class PackageElaborator {
         this.pack = PackageScope.newPackage(parent);
     }
 
-    private static void setSignature(ComponentScope topScope, ComponentNode topNode) {
+    private void setSignature(ComponentScope topScope, ComponentNode topNode) {
         var atom = ComponentRef.of(topNode, topNode.getIdentifier());
+        atom.setArgList(config.arguments());
         topScope.setSignature(Signature.of(atom, topScope.getInputs(), topScope.getOutputs()));
     }
 

@@ -54,6 +54,7 @@
   },
   {
     "type": "component", "id": "REG", "defIndex": 1, "loc": "5:10",
+    "attribute": {"rst": "rst@(15:11)", "clk": "clk@(16:8)"},
     "input": ["i@0"],
     "output": ["o@0"],
     "members": [
