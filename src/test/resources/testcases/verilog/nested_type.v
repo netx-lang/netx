@@ -1,25 +1,33 @@
-// @(12:10)
-module top_1(
-  d, \$c_0 , \$c_1 , \b.b[0].left , \b.b[0].right , \b.b[1].left , \b.b[1].right , \b.b[2].left , \b.b[2].right , \b.b[3].left , \b.b[3].right , \b.c 
+// @(12:10) top@(12:10)
+module mod_0 (
+  t_10, t_13, t_14, t_0, t_1, t_2, t_3, t_4, t_5, t_6, t_7, t_8
 );
-  output [2:0] \b.c ; // @(14:11)
-  output [1:0] \b.b[0].left , \b.b[0].right , \b.b[1].left , \b.b[1].right , \b.b[2].left , \b.b[2].right , \b.b[3].left , \b.b[3].right ; // @(14:11), @(14:11), @(14:11), @(14:11), @(14:11), @(14:11), @(14:11), @(14:11)
-  output [1:0] \$c_0 , \$c_1 ;
-  input d; // @(16:12)
-  wire c; // @(16:9)
-  wire [1:0] \$o_2 , \$o_4 ;
-  assign c = ~d;
-  assign \$o_2  = $signed(c);
-  assign \b.b[0].left  = 2'h00 + \$o_2 ;
-  assign \$o_4  = $signed(d);
-  assign \b.b[0].right  = 2'h00 + \$o_4 ;
-  assign \b.b[1].left  = 2'h01 + \$o_2 ;
-  assign \b.b[1].right  = 2'h01 + \$o_4 ;
-  assign \b.b[2].left  = 2'h02 + \$o_2 ;
-  assign \b.b[2].right  = 2'h02 + \$o_4 ;
-  assign \b.b[3].left  = 2'h03 + \$o_2 ;
-  assign \b.b[3].right  = 2'h03 + \$o_4 ;
-  assign \b.c  = $signed(c);
-  assign \$c_1  = 2'h03;
+  // b.c@(14:11)
+  output [2:0] t_8;
+
+  // b.b[0].left@(14:11), b.b[0].right@(14:11), b.b[1].left@(14:11), b.b[1].right@(14:11), b.b[2].left@(14:11), b.b[2].right@(14:11), b.b[3].left@(14:11), b.b[3].right@(14:11)
+  output [1:0] t_0, t_1, t_2, t_3, t_4, t_5, t_6, t_7;
+
+  output [1:0] t_13, t_14;
+  // d@(16:12)
+  input t_10;
+
+  // c@(16:9)
+  wire t_9;
+
+  wire [1:0] t_11, t_12;
+  assign t_9 = ~t_10;
+  assign t_11 = $signed(t_9);
+  assign t_0 = 2'h00 + t_11;
+  assign t_12 = $signed(t_10);
+  assign t_1 = 2'h00 + t_12;
+  assign t_2 = 2'h01 + t_11;
+  assign t_3 = 2'h01 + t_12;
+  assign t_4 = 2'h02 + t_11;
+  assign t_5 = 2'h02 + t_12;
+  assign t_6 = 2'h03 + t_11;
+  assign t_7 = 2'h03 + t_12;
+  assign t_8 = $signed(t_9);
+  assign t_14 = 2'h03;
 endmodule
 
