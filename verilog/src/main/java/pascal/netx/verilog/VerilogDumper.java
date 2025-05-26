@@ -73,7 +73,7 @@ public class VerilogDumper {
         }
 
         private void dump(VModule module, int index) {
-            notepad.println(String.format("// @(%s) %s", module.getId().getSourceLoc(), module.getId()));
+            notepad.println(String.format("// @(%s) %s", module.getId().getSourceLoc(), module.getId() + module.getAttribute()));
             notepad.println(String.format("module mod_%d (", index));
             notepad.incIndent();
             registerWires(module);

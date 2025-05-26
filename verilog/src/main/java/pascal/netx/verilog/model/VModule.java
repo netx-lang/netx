@@ -11,6 +11,7 @@ import java.util.List;
 public final class VModule {
     private final Identifier id;
     private final int defIndex;
+    private String attribute;
 
     private final LinkedHashMap<Integer, Assign> assignments = new LinkedHashMap<>();
     private final LinkedHashMap<Integer, Instantiation> instantiations = new LinkedHashMap<>();
@@ -89,5 +90,13 @@ public final class VModule {
 
     public void setOutputs(List<DataRef> outputs) {
         this.outputs = outputs;
+    }
+
+    public String getAttribute() {
+        return attribute;
+    }
+
+    public void setAttribute(String attribute) {
+        this.attribute = attribute;
     }
 }

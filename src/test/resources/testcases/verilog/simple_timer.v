@@ -72,7 +72,7 @@ module mod_1 (
   mod_2 inst_0 (t_0, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h02, 7'h78, 7'h00, 7'h10, 7'h08, 7'h03, 7'h46, 7'h21, 7'h06, 7'h0E, t_1);
 endmodule
 
-// @(57:10) MUX@(57:10)
+// @(57:10) MUX@(57:10)(width=4)
 module mod_2 (
   t_0, t_2, t_3, t_4, t_5, t_6, t_7, t_8, t_9, t_10, t_11, t_12, t_13, t_14, t_15, t_16, t_17, t_18
 );
@@ -128,7 +128,7 @@ module mod_2 (
   assign t_18 = t_20 | t_22 | t_24 | t_26 | t_28 | t_30 | t_32 | t_34 | t_36 | t_38 | t_40 | t_42 | t_44 | t_46 | t_48 | t_50;
 endmodule
 
-// @(68:10) DECODER@(68:10)
+// @(68:10) DECODER@(68:10)(width=4)
 module mod_3 (
   t_0, t_1
 );
@@ -161,7 +161,7 @@ module mod_3 (
   assign t_1[15] = t_0[0] & t_0[1] & t_0[2] & t_0[3];
 endmodule
 
-// @(23:10) clock_divider@(23:10)
+// @(23:10) clock_divider@(23:10)(max=500000)
 module mod_4 (
   t_0, t_1
 );
@@ -191,7 +191,7 @@ module mod_4 (
   end
 endmodule
 
-// @(57:10) MUX@(57:10)
+// @(57:10) MUX@(57:10)(width=1)
 module mod_5 (
   t_0, t_2, t_3, t_4
 );
@@ -211,7 +211,7 @@ module mod_5 (
   assign t_4 = t_5 | t_6;
 endmodule
 
-// @(57:10) MUX@(57:10)
+// @(57:10) MUX@(57:10)(width=1)
 module mod_6 (
   t_0, t_2, t_3, t_4
 );
@@ -236,7 +236,7 @@ module mod_6 (
   assign t_4 = t_6 | t_8;
 endmodule
 
-// @(68:10) DECODER@(68:10)
+// @(68:10) DECODER@(68:10)(width=1)
 module mod_7 (
   t_0, t_1
 );

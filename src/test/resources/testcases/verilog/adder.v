@@ -11,7 +11,7 @@ module mod_0 (
   mod_1 inst_0 (t_0, t_1, t_2);
 endmodule
 
-// @(5:10) adder@(5:10)
+// @(5:10) adder@(5:10)(WIDTH=8)
 module mod_1 (
   t_0, t_1, t_2
 );

@@ -39,9 +39,31 @@ public final class ScopeParser {
 
     public void parse() {
         parseDataMembers();
+        parseAttribute();
         module.setInputs(refParser.resolveDataRefList(json, "input"));
         module.setOutputs(refParser.resolveDataRefList(json, "output"));
         parseComponentMembers();
+    }
+
+    private void parseAttribute() {
+        if (json.has("attribute")) {
+            var attrNode = json.get("attribute");
+            var iter = attrNode.fieldNames();
+            var sb = new StringBuilder();
+            sb.append("(");
+            while (iter.hasNext()) {
+                var field = iter.next();
+                var value = attrNode.get(field).asText();
+                sb.append(field).append("=").append(value);
+                if (iter.hasNext()) {
+                    sb.append(", ");
+                }
+            }
+            sb.append(")");
+            module.setAttribute(sb.toString());
+        } else {
+            module.setAttribute("");
+        }
     }
 
     private void parseDataMembers() {
