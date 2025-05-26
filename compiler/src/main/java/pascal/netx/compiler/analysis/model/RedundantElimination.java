@@ -38,14 +38,28 @@ public final class RedundantElimination extends ModelAnalysis {
     private boolean isRedundantCast(ComponentScope scope) {
         var lhs = scope.getOutputs().getFirst();
         var rhs = scope.getInputs().getFirst();
-        return lhs.equals(rhs) || lhs instanceof Value;
+        boolean isRedundant = lhs.equals(rhs) || lhs instanceof Value;
+        if (isRedundant) {
+            return true;
+        } else {
+            if (lhs.getType().equals(rhs.getType())) {
+                scope.setIdentifier(BuiltinComponent.TO.asID());
+            }
+            return false;
+        }
     }
 
     private boolean isRedundantConcat(ComponentScope scope) {
         if (scope.getInputs().size() == 1) {
             var lhs = scope.getOutputs().getFirst();
             var rhs = scope.getInputs().getFirst();
-            return lhs.equals(rhs) || lhs instanceof Value;
+            boolean isRedundant = lhs.equals(rhs) || lhs instanceof Value;
+            if (isRedundant) {
+                return true;
+            } else {
+                scope.setIdentifier(BuiltinComponent.TO.asID());
+                return false;
+            }
         }
         return false;
     }

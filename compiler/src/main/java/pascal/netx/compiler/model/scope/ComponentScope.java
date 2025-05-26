@@ -13,7 +13,7 @@ import java.util.*;
 
 public final class ComponentScope extends Scope {
     private final boolean isInterface;
-    private final Identifier identifier;
+    private Identifier identifier;
     private PackageScope pack;
 
     private final ComponentEvaluator evaluator;
@@ -66,6 +66,10 @@ public final class ComponentScope extends Scope {
 
     public Identifier getIdentifier() {
         return identifier;
+    }
+
+    public void setIdentifier(Identifier identifier) {
+        this.identifier = identifier;
     }
 
     public PackageScope getPackage() {

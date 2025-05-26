@@ -139,8 +139,7 @@ public class BuiltInComponentFactory {
     }
 
     private ComponentScope instantiate(Scope parent, BuiltinRef ref) {
-        return ComponentScope.newComponent(parent,
-                Identifier.of(ref.getBuiltin().name()).setSourceLoc(ref.getSourceLoc()));
+        return ComponentScope.newComponent(parent, ref.getBuiltin().asID().setSourceLoc(ref.getSourceLoc()));
     }
 
     private Wire newWire(ComponentScope result, String name) {
