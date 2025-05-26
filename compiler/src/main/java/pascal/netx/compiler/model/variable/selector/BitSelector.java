@@ -3,15 +3,13 @@ package pascal.netx.compiler.model.variable.selector;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.variable.IntegerValue;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 public record BitSelector(IntegerValue index) implements Selector {
 
-    public static BitSelector of(IntegerValue index) {
-        return new BitSelector(index);
-    }
-
     @Override
+    @Nonnull
     public String toString() {
         return String.format("[%d]", index.toInt());
     }

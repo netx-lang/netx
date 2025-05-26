@@ -4,6 +4,8 @@ public sealed interface IntegerValue extends Value permits BitVectorValue, Int32
 
     int toInt();
 
+    IntegerValue ZERO = Int32Value.of(0);
+
     IntegerValue add(IntegerValue other);
 
     IntegerValue sub(IntegerValue other);

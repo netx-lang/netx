@@ -230,4 +230,22 @@ class BitVectorUnitTest {
         assertEquals(bv3, bv1.shl(bv2.toInt()));
         assertEquals(bv6, bv4.shl(bv5.toInt()));
     }
+
+    @Test
+    void testGet() {
+        var literal = "110101001101101011";
+        BitVector bv = BitVector.parse(literal, 18, 2);
+        for (int i = 0; i < literal.length(); i++) {
+            System.out.printf("get(%d) = %b%n", i, bv.get(i));
+            assertEquals(literal.charAt(18 - i - 1) == '1', bv.get(i));
+        }
+    }
+
+    @Test
+    void testSelect() {
+        BitVector bv = BitVector.parse("110101001101101011", 18, 2);
+        assertEquals(BitVector.parse("101101011", 9, 2), bv.select(8, 0));
+        assertEquals(BitVector.parse("110101001", 9, 2), bv.select(17, 9));
+        assertEquals(BitVector.parse("110101001101101011", 18, 2), bv.select(17, 0));
+    }
 }
