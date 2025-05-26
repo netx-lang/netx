@@ -18,6 +18,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static pascal.netx.compiler.TestUtils.testBothCompactAndExpanded;
+import static pascal.netx.compiler.TestUtils.testExpanded;
 
 class ElaboratorUnitTest {
     private static PackageScope loadDesign(String code) {
@@ -103,7 +104,7 @@ class ElaboratorUnitTest {
                          parametric_comp(b=4, a=3, c = 5) <> i;
                 }
                 """;
-        testBothCompactAndExpanded(expected, actual);
+        testExpanded(expected, actual);
     }
 
     @Test

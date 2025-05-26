@@ -15,6 +15,7 @@
   },
   {
     "type": "component", "id": "encoder", "defIndex": 1, "loc": "7:10",
+    "attribute": {"width": "3"},
     "input": ["code@0"],
     "output": ["output@0"],
     "members": [

@@ -123,6 +123,17 @@ final class CompactDumper {
             setType(definition, "component");
             setDefID(definition, signature.caller().getDefinition().getIdentifier(), index);
 
+            var attributes = signature.caller().getArgList();
+            if (attributes != null && !attributes.isEmpty()) {
+                var parameters = signature.caller().getDefinition().getAttributes();
+                var arguments = attributes.getArguments();
+                ObjectNode binding = createObjectNode();
+                for (int i = 0; i < parameters.size(); i++) {
+                    binding.put(parameters.get(i).name(), arguments.get(i).toString());
+                }
+                definition.set("attribute", binding);
+            }
+
             dumpInstIO(definition, "input", signature.inputs());
             dumpInstIO(definition, "output", signature.outputs());
 

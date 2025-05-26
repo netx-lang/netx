@@ -77,6 +77,11 @@ public final class MultiBinding implements Binding, ArgBindList {
     }
 
     @Override
+    public boolean isEmpty() {
+        return bindings.isEmpty();
+    }
+
+    @Override
     public void forEachEntity(Consumer<Entity> consumer) {
         bindings.values().forEach(consumer);
     }

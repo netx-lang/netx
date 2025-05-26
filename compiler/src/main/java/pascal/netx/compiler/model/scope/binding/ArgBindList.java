@@ -12,4 +12,6 @@ public sealed interface ArgBindList permits OrderedArgBindList, MultiBinding {
     List<Entity> getArguments();
 
     int size();
+
+    boolean isEmpty();
 }

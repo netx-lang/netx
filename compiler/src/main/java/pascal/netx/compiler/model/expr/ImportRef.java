@@ -25,7 +25,9 @@ public final class ImportRef extends PrimaryExpr implements InstantiationRef {
 
     public ImportRef copy() {
         var result = new ImportRef(references, sourceLoc);
-        result.setArgList(getArgList());
+        if (argBindList != null) {
+            result.argBindList = argBindList;
+        }
         return result;
     }
 
