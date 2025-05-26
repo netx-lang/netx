@@ -5,7 +5,7 @@ import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.expr.BinaryExpr;
 import pascal.netx.compiler.ast.expr.PortConnectionExpr;
 
-public class PortExprRotation extends ASTAnalysis implements ASTListener {
+public final class PortExprRotation extends ASTAnalysis implements ASTListener {
 
     public PortExprRotation(PackageNode design) {
         super(design);

@@ -194,11 +194,7 @@ final class ComponentElaborator {
     private class Instantiator {
         private final SourceLoc sourceLoc;
 
-        /**
-         * Used to infer the number of inputs for builtin components in certain pattern (needHintForContinuationOf)
-         * argsHint is set to -1 to indicate that the hint is not needed.
-         */
-        private int argsHint = -1;
+        private Integer argNumHint = null;
 
         private Instantiator(SourceLoc sourceLoc) {
             this.sourceLoc = sourceLoc;
@@ -266,7 +262,7 @@ final class ComponentElaborator {
             ComponentPort lhs, rhs;
             rhs = doInstantiate(expr.rhs());
             if (needHintForContinuationOf(expr.lhs())) {
-                argsHint = rhs.output().size();
+                argNumHint = rhs.output().size();
             }
             lhs = doInstantiate(expr.lhs());
 
@@ -370,9 +366,9 @@ final class ComponentElaborator {
 
         private ComponentScope instantiateBuiltinRef(BuiltinRef ref) {
             ComponentScope component;
-            if (argsHint != -1) {
-                component = factory.createBuiltInComponent(scope, ref, argsHint);
-                argsHint = -1;
+            if (argNumHint != null) {
+                component = factory.createBuiltInComponent(scope, ref, argNumHint);
+                argNumHint = null;
             } else {
                 component = factory.createBuiltInComponent(scope, ref);
             }

@@ -4,15 +4,13 @@ import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.variable.Int32Value;
 import pascal.netx.compiler.model.variable.IntegerValue;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 public record PartSelector(IntegerValue start, IntegerValue end) implements Selector {
 
-    public static PartSelector of(IntegerValue start, IntegerValue end) {
-        return new PartSelector(start, end);
-    }
-
     @Override
+    @Nonnull
     public String toString() {
         return String.format("[%d:%d]", start.toInt(), end.toInt());
     }
@@ -46,7 +44,7 @@ public record PartSelector(IntegerValue start, IntegerValue end) implements Sele
         if (lsb + index > msb) {
             throw new CompileCancellationException();
         }
-        return BitSelector.of(Int32Value.of(index + lsb));
+        return new BitSelector(Int32Value.of(index + lsb));
     }
 
     private PartSelector refinePartSelector(int f, int t) {
@@ -59,7 +57,8 @@ public record PartSelector(IntegerValue start, IntegerValue end) implements Sele
         if ((s > e && resF > s) || (s <= e && resT > e)) {
             throw new CompileCancellationException();
         }
-        return PartSelector.of(Int32Value.of(resF), Int32Value.of(resT));
+        IntegerValue start1 = Int32Value.of(resF);
+        return new PartSelector(start1, Int32Value.of(resT));
     }
 
     @Override

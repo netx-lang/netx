@@ -21,95 +21,63 @@
         "output": ["c@0"]
       },
       {
-        "type": "builtin", "id": "CAST@2", "loc": "20:20",
-        "input": ["0"],
-        "output": ["$o@2"],
-        "members": [
-          {"type": "wire", "width": 2, "id": "$o", "loc": "20:20"}
-        ]
-      },
-      {
-        "type": "builtin", "id": "CAST@3", "loc": "20:31",
+        "type": "builtin", "id": "CAST@2", "loc": "20:31",
         "input": ["c@0"],
-        "output": ["$o@3"],
+        "output": ["$o@2"],
         "members": [
           {"type": "wire", "width": 2, "id": "$o", "loc": "20:31"}
         ]
       },
       {
-        "type": "builtin", "id": "ADD@4", "loc": "20:12",
-        "input": ["$o@2", "$o@3"],
+        "type": "builtin", "id": "ADD@3", "loc": "20:12",
+        "input": ["2'h00", "$o@2"],
         "output": ["b.b[0].left@0"]
       },
       {
-        "type": "builtin", "id": "CAST@5", "loc": "21:31",
+        "type": "builtin", "id": "CAST@4", "loc": "21:31",
         "input": ["d@0"],
-        "output": ["$o@5"],
+        "output": ["$o@4"],
         "members": [
           {"type": "wire", "width": 2, "id": "$o", "loc": "21:31"}
         ]
       },
       {
-        "type": "builtin", "id": "ADD@6", "loc": "21:12",
-        "input": ["$o@2", "$o@5"],
+        "type": "builtin", "id": "ADD@5", "loc": "21:12",
+        "input": ["2'h00", "$o@4"],
         "output": ["b.b[0].right@0"]
       },
       {
-        "type": "builtin", "id": "CAST@8", "loc": "20:20",
-        "input": ["1"],
-        "output": ["$o@8"],
-        "members": [
-          {"type": "wire", "width": 2, "id": "$o", "loc": "20:20"}
-        ]
-      },
-      {
-        "type": "builtin", "id": "ADD@9", "loc": "20:12",
-        "input": ["$o@8", "$o@3"],
+        "type": "builtin", "id": "ADD@7", "loc": "20:12",
+        "input": ["2'h01", "$o@2"],
         "output": ["b.b[1].left@0"]
       },
       {
-        "type": "builtin", "id": "ADD@10", "loc": "21:12",
-        "input": ["$o@8", "$o@5"],
+        "type": "builtin", "id": "ADD@8", "loc": "21:12",
+        "input": ["2'h01", "$o@4"],
         "output": ["b.b[1].right@0"]
       },
       {
-        "type": "builtin", "id": "CAST@12", "loc": "20:20",
-        "input": ["2"],
-        "output": ["$o@12"],
-        "members": [
-          {"type": "wire", "width": 2, "id": "$o", "loc": "20:20"}
-        ]
-      },
-      {
-        "type": "builtin", "id": "ADD@13", "loc": "20:12",
-        "input": ["$o@12", "$o@3"],
+        "type": "builtin", "id": "ADD@10", "loc": "20:12",
+        "input": ["2'h02", "$o@2"],
         "output": ["b.b[2].left@0"]
       },
       {
-        "type": "builtin", "id": "ADD@14", "loc": "21:12",
-        "input": ["$o@12", "$o@5"],
+        "type": "builtin", "id": "ADD@11", "loc": "21:12",
+        "input": ["2'h02", "$o@4"],
         "output": ["b.b[2].right@0"]
       },
       {
-        "type": "builtin", "id": "CAST@16", "loc": "20:20",
-        "input": ["3"],
-        "output": ["$o@16"],
-        "members": [
-          {"type": "wire", "width": 2, "id": "$o", "loc": "20:20"}
-        ]
-      },
-      {
-        "type": "builtin", "id": "ADD@17", "loc": "20:12",
-        "input": ["$o@16", "$o@3"],
+        "type": "builtin", "id": "ADD@13", "loc": "20:12",
+        "input": ["2'h03", "$o@2"],
         "output": ["b.b[3].left@0"]
       },
       {
-        "type": "builtin", "id": "ADD@18", "loc": "21:12",
-        "input": ["$o@16", "$o@5"],
+        "type": "builtin", "id": "ADD@14", "loc": "21:12",
+        "input": ["2'h03", "$o@4"],
         "output": ["b.b[3].right@0"]
       },
       {
-        "type": "builtin", "id": "CAST@21", "loc": "24:22",
+        "type": "builtin", "id": "CAST@17", "loc": "24:22",
         "input": ["c@0"],
         "output": ["b.c@0"]
       }

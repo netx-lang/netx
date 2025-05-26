@@ -4,10 +4,7 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pascal.netx.compiler.analysis.ast.BindingLhsAnalysis;
-import pascal.netx.compiler.analysis.ast.InterfaceChecker;
-import pascal.netx.compiler.analysis.ast.PortExprRotation;
-import pascal.netx.compiler.analysis.ast.SourceLocChecker;
+import pascal.netx.compiler.analysis.ast.*;
 import pascal.netx.compiler.antlr.NetXLexer;
 import pascal.netx.compiler.antlr.NetXParser;
 import pascal.netx.compiler.ast.PackageNode;
@@ -22,10 +19,11 @@ public final class NXParser {
 
     public PackageNode parse() {
         var design = TreeParser.parseDesign(buildANTLRParser().design());
-        new SourceLocChecker(design).analyze();
-        new PortExprRotation(design).analyze();
-        new InterfaceChecker(design).analyze();
-        new BindingLhsAnalysis(design).analyze();
+        var manager = new ASTAnalysisManager(design);
+        manager.analyze(SourceLocChecker.class);
+        manager.analyze(PortExprRotation.class);
+        manager.analyze(InterfaceChecker.class);
+        manager.analyze(BindingLhsAnalysis.class);
         return design;
     }
 

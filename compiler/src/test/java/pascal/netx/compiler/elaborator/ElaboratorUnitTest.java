@@ -38,7 +38,7 @@ class ElaboratorUnitTest {
                 """);
         var data = (Variable) component.getBinding().resolve(Identifier.of("x"));
         var expected = new ArrayList<>(IntStream.range(0, 4)
-                .mapToObj(Int32Value::of).map(BitSelector::of)
+                .mapToObj(Int32Value::of).map(BitSelector::new)
                 .map(selector -> Variable.accessOf(data, selector)).toList());
         assertEquals(expected, component.getInputs());
         Collections.reverse(expected);

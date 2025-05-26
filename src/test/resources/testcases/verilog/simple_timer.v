@@ -165,14 +165,12 @@ module MUX_2(
 );
   output out; // @(61:19)
   input code, \input[0] , \input[1] ; // @(59:9), @(61:9), @(61:9)
-  wire \$o_2 , \$o_3 , \$o_4 , \$o_5 ;
+  wire \$o_2 , \$o_3 ;
   wire [1:0] mask; // @(60:9)
   DECODER_1 \$inst_1 (code, mask);
-  assign \$o_2  = $signed(mask[0]);
-  assign \$o_3  = \input[0]  & \$o_2 ;
-  assign \$o_4  = $signed(mask[1]);
-  assign \$o_5  = \input[1]  & \$o_4 ;
-  assign out = \$o_3  | \$o_5 ;
+  assign \$o_2  = \input[0]  & mask[0];
+  assign \$o_3  = \input[1]  & mask[1];
+  assign out = \$o_2  | \$o_3 ;
 endmodule
 
 // @(57:10)
