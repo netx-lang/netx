@@ -17,14 +17,14 @@ import java.util.*;
 import java.util.function.Consumer;
 
 
-public class AliasManager {
+public final class AliasManager {
     private static final Logger log = LoggerFactory.getLogger(AliasManager.class);
     private final UnionFind<Variable> set = new UnionFind<>();
     private final Map<Variable, Variable> sourceRep = new HashMap<>();
 
-    void addAlias(Collection<ComponentScope.Alias> aliases) {
+    void addAliasForScope(ComponentScope scope) {
         List<Access> selfAlias = new ArrayList<>();
-        for (var alias : aliases) {
+        for (var alias : scope.getAliases()) {
             if (isSelfAlias(alias.lhs())) {
                 selfAlias.add((Access) alias.lhs());
             }
@@ -38,6 +38,11 @@ public class AliasManager {
         }
     }
 
+    /**
+     * Clear the alias relations in the given scope, only keep the necessary ones,
+     * i.e., multiple variables in the equivalence class of both sides need to be dumped.
+     * This happens only when selections are involved in the alias relations.
+     */
     void clearIn(ComponentScope scope) {
         Set<ComponentScope.Alias> newAlias = new LinkedHashSet<>();
         Consumer<ComponentScope.Alias> addNew = (alias) -> {
@@ -158,8 +163,9 @@ public class AliasManager {
     Variable getNextRep(Variable inst) {
         // If the inst is a DataAccess, find the alias of its base
         if (inst instanceof Access(var base, var selector)) {
-            if (hasSourceAlias(base) && repOf(base) != base) {
-                return Variable.accessOf(repOf(base), selector);
+            var baseRep = repOf(base);
+            if (hasSourceAlias(base) && baseRep != base) {
+                return Variable.accessOf(baseRep, selector);
             }
         }
         // Otherwise find the alias of the inst itself

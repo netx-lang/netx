@@ -217,10 +217,10 @@ public final class ComponentEvaluator {
     private Selector evaluateSelector(pascal.netx.compiler.ast.expr.selector.Selector selector) {
         return switch (selector) {
             case pascal.netx.compiler.ast.expr.selector.BitSelector bitSelector ->
-                    BitSelector.of(evaluateToIntegerValue(bitSelector.getIndex()));
-            case pascal.netx.compiler.ast.expr.selector.PartSelector partSelector -> PartSelector.of(
-                    evaluateToIntegerValue(partSelector.getStart()),
-                    evaluateToIntegerValue(partSelector.getEnd()));
+                    new BitSelector(evaluateToIntegerValue(bitSelector.getIndex()));
+            case pascal.netx.compiler.ast.expr.selector.PartSelector partSelector -> new PartSelector(
+                            evaluateToIntegerValue(partSelector.getStart()),
+                            evaluateToIntegerValue(partSelector.getEnd()));
         };
     }
 

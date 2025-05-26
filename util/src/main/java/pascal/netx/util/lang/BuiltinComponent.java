@@ -13,7 +13,7 @@ public enum BuiltinComponent {
     ADD, SUB, SHL, MUL, DIV, MOD, ASHR, LSHR;
 
     public static final Set<BuiltinComponent> ATTRIBUTED = Set.of(REGISTER);
-    public static final Set<BuiltinComponent> MULTI_INPUT = Set.of(OR, AND, XOR, NOR, NAND, XNOR, CONCAT, ADD, SUB, MUL, DIV, MOD);
+    public static final Set<BuiltinComponent> MULTI_INPUT = Set.of(OR, AND, XOR, NOR, NAND, XNOR, CONCAT, ADD, MUL);
     public static final Map<BuiltinComponent, String> VERILOG_OP;
     public static final Set<String> VALUES;
 

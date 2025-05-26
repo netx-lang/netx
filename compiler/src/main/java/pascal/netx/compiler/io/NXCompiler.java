@@ -47,32 +47,6 @@ public final class NXCompiler {
         return new NXCompiler(config, manager);
     }
 
-    private static void checkType(PackageScope design) {
-        new MetaElimination(design).analyze();
-        new DataTypeInference(design).analyze();
-        new AccessChecker(design).analyze();
-        new CompositeDataBlaster(design).analyze();
-        new IOAnalysis(design).analyze();
-    }
-
-    private static void analyzeCompact(RepoScope design) {
-        design.packages()
-                .map(ComponentAliasAnalysis::new)
-                .forEach(ModelAnalysis::analyze);
-        design.packages()
-                .map(ComponentDuplicatedElimination::new)
-                .forEach(ModelAnalysis::analyze);
-    }
-
-    private static void analyzeExpanded(RepoScope design) {
-        design.packages()
-                .map(PackageAliasAnalysis::new)
-                .forEach(ModelAnalysis::analyze);
-        design.packages()
-                .map(PackageDuplicatedElimination::new)
-                .forEach(ModelAnalysis::analyze);
-    }
-
     public static Supplier<Integer> newIndexer() {
         return new AtomicInteger(0)::incrementAndGet;
     }
@@ -98,12 +72,21 @@ public final class NXCompiler {
 
     public void compile() {
         elaborate();
-        repo.forEachPackage(NXCompiler::checkType);
+        var manager = new ModelAnalysisManager(repo);
+        manager.analyze(MetaElimination.class);
+        manager.analyze(DataTypeInference.class);
+        manager.analyze(AccessChecker.class);
+        manager.analyze(CompositeDataBlaster.class);
+        manager.analyze(IOAnalysis.class);
+        manager.analyze(BuiltinAliasAnalysis.class);
         if (config.fullyExpand()) {
-            analyzeExpanded(repo);
+            manager.analyze(PackageAliasAnalysis.class);
+            manager.analyze(PackageDuplicatedElimination.class);
         } else {
-            analyzeCompact(repo);
+            manager.analyze(ComponentAliasAnalysis.class);
+            manager.analyze(ComponentDuplicatedElimination.class);
         }
+        manager.analyze(RedundantElimination.class);
     }
 
     private JsonNode dump(PackageScope scope) {

@@ -13,7 +13,7 @@ public final class PackageAliasAnalysis extends ModelAnalysis {
 
     @Override
     public void analyze() {
-        pack.forEachSubComponent(scope -> manager.addAlias(scope.getAliases()));
+        pack.forEachSubComponent(manager::addAliasForScope);
         manager.resolveRepresentatives();
         pack.forEachSubComponent(scope -> {
             scope.getBinding().releaseIf(Predicate.not(manager::needDump));

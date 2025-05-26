@@ -7,8 +7,7 @@ import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.io.PackageManager;
 import pascal.netx.util.exception.ShallNotReachHereError;
 
-import java.util.function.Consumer;
-import java.util.stream.Stream;
+import java.util.List;
 
 /**
  * A RepoScope corresponds to a NetX repository that contains an application package and multiple library packages.
@@ -60,12 +59,8 @@ public final class RepoScope extends Scope {
         this.top = pack;
     }
 
-    public void forEachPackage(Consumer<PackageScope> consumer) {
-        getChildren().forEach(child -> consumer.accept((PackageScope) child));
-    }
-
-    public Stream<PackageScope> packages() {
-        return getChildren().stream().map(PackageScope.class::cast);
+    public List<PackageScope> packages() {
+        return getChildren().stream().map(PackageScope.class::cast).toList();
     }
 
     public record Info(String name, Version version) {

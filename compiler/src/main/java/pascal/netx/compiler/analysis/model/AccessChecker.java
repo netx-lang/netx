@@ -12,7 +12,7 @@ import pascal.netx.compiler.model.variable.selector.BitSelector;
 import pascal.netx.compiler.model.variable.selector.PartSelector;
 import pascal.netx.compiler.model.variable.type.BitType;
 
-public class AccessChecker extends ModelAnalysis {
+public final class AccessChecker extends ModelAnalysis {
 
     private static final Logger log = LoggerFactory.getLogger(AccessChecker.class);
 
