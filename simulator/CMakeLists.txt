@@ -10,7 +10,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
 if (POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)
 endif ()
-find_package(Boost 1.70 REQUIRED)
+find_package(Boost 1.80 REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
 add_subdirectory(src)
