@@ -10,6 +10,7 @@
 #include <utility>
 #include <unordered_map>
 #include <set>
+#include <vector>
 
 namespace nxon {
     namespace impl {
