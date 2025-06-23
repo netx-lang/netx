@@ -17,17 +17,18 @@ namespace nxon {
     namespace impl {
         class id_set_impl : public std::unordered_set<id_t> {
             using base_t = unordered_set;
+            using self_t = id_set_impl;
 
         public:
             using base_t::base_t;
 
-            auto& operator+=(const id_set_impl &other) {
+            auto &operator+=(const self_t &other) {
                 insert(other.begin(), other.end());
                 return *this;
             }
 
-            auto operator+(const id_set_impl &other) const {
-                id_set_impl result = *this;
+            auto operator+(const self_t &other) const {
+                auto result = *this;
                 result += other;
                 return result;
             }
@@ -36,18 +37,44 @@ namespace nxon {
 
     using id_set = impl::id_set_impl;
 
-    class value_storage : public std::unordered_map<id_t, value_t> {
-        using base_t = unordered_map;
-        std::vector<std::function<void(value_storage&)>> delayed;
-    public:
-        using base_t::base_t;
+    using value_batch = std::unordered_map<id_t, value_t>;
 
-        void delay(std::function<void(value_storage&)> func) {
+    class value_storage {
+    public:
+        using key_type = id_t;
+        using mapped_type = value_t;
+        using size_type = size_t;
+
+    private:
+        std::vector<value_t> content;
+        std::vector<std::function<void(value_storage &)> > delayed;
+
+    public:
+        mapped_type &operator[](const key_type id) {
+            if (content.size() <= id) content.resize(id + 1, mapped_type{});
+            return content[id];
+        }
+
+        [[nodiscard]] const mapped_type &operator[](const key_type id) const {
+            return content[id];
+        }
+
+        [[nodiscard]] mapped_type &at(const key_type id) {
+            if (content.size() <= id) throw std::out_of_range("id does not exist");
+            return content[id];
+        }
+
+        [[nodiscard]] const mapped_type &at(const key_type id) const {
+            if (content.size() <= id) throw std::out_of_range("id does not exist");
+            return content[id];
+        }
+
+        void delay(std::function<void(value_storage &)> func) {
             delayed.emplace_back(std::move(func));
         }
 
         void perform_delayed() {
-            for (auto& func : delayed) func(*this);
+            for (auto &func: delayed) func(*this);
             delayed.clear();
         }
     };

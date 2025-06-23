@@ -110,7 +110,7 @@ namespace nxon {
             });
             if (!wait_result) continue;
 
-            value_storage to_update;
+            value_batch to_update;
             std::shared_ptr<std::latch> latch_to_wait;
             while (!(q.empty() || latch_to_wait)) {
                 auto &[id, value, latch] = q.front();
@@ -127,8 +127,8 @@ namespace nxon {
             lock.unlock();
             to_update.clear();
             if (latch_to_wait) latch_to_wait->arrive_and_wait();
-            value_storage changed_values;
-            for (auto &id: changed) {
+            value_batch changed_values;
+            for (auto id: changed) {
                 if (partition.belongs[id] != part_id) continue;
                 changed_values[id] = part.get_value(id);
             }

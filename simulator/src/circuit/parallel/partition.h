@@ -48,7 +48,7 @@ namespace nxon {
                 broadcast_impl(id, value, exclude_belong);
             }
 
-            void broadcast_batch(const value_storage &to_update, const bool exclude_belong = false) {
+            void broadcast_batch(const value_batch &to_update, const bool exclude_belong = false) {
                 std::set<size_t> to_notify;
                 for (auto &[id, value]: to_update) {
                     broadcast_impl(id, value, exclude_belong, false);
@@ -98,7 +98,7 @@ namespace nxon {
             context->broadcast(id, value, exclude_belong);
         }
 
-        void broadcast_batch(const value_storage &to_update, const bool exclude_belong = false) {
+        void broadcast_batch(const value_batch &to_update, const bool exclude_belong = false) {
             context->broadcast_batch(to_update, exclude_belong);
         }
 
