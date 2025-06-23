@@ -5,7 +5,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <set>
+#include <unordered_set>
 #include <unordered_map>
 #include "sized_mpint.h"
 
@@ -15,8 +15,8 @@ namespace nxon {
     using value_t = impl::sized_mpint;
 
     namespace impl {
-        class id_set_impl : public std::set<id_t> {
-            using base_t = std::set<id_t>;
+        class id_set_impl : public std::unordered_set<id_t> {
+            using base_t = unordered_set;
 
         public:
             using base_t::base_t;
