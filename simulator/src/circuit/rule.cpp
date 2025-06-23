@@ -116,7 +116,7 @@ namespace nxon {
 
             [[nodiscard]] bool check(const value_storage &values, const value_t &v) const override {
                 assert(len == v.size());
-                auto out = values.at(id).slice(from, to);
+                const auto out = values.at(id).slice(from, to);
                 return out.from_slice() != v;
             }
 
@@ -144,8 +144,8 @@ namespace nxon {
     }
 
     namespace data_factory {
-        clock_t id_clock(const id_t id, const bool posEdge) {
-            return clock_t{new impl::id_clock(id, posEdge)};
+        clock_t id_clock(const id_t id, const bool pos_edge) {
+            return clock_t{new impl::id_clock(id, pos_edge)};
         }
 
         source_t id_source(const id_t id, const size_t len) {

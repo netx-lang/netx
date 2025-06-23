@@ -11,7 +11,7 @@
 
 namespace nxon {
     struct parse_context {
-        id_t members_total;
+        id_t members_total = 0;
         nxon::circuit circuit;
         id_set circuit_input, circuit_output, circuit_input_clocks;
         std::unordered_map<id_t, size_t> size_map;

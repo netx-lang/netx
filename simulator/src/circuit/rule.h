@@ -155,7 +155,7 @@ namespace nxon {
     };
 
     namespace data_factory {
-        [[nodiscard]] clock_t id_clock(id_t id, bool posEdge = true);
+        [[nodiscard]] clock_t id_clock(id_t id, bool pos_edge = true);
 
         [[nodiscard]] source_t id_source(id_t id, size_t len);
 
@@ -231,36 +231,36 @@ namespace nxon {
         id_set perform_rules(value_storage &values, std::vector<rule_t> to_perform, const bool to_fixed = true) const {
             std::vector<id_t> changed;
 
-            std::vector<id_t> toConsider, toConsiderSwap;
+            std::vector<id_t> to_consider, to_consider_swap;
             do {
-                std::ranges::sort(toConsider);
-                auto [last, end] = std::ranges::unique(toConsider);
-                toConsider.erase(last, end);
+                std::ranges::sort(to_consider);
+                auto [last, end] = std::ranges::unique(to_consider);
+                to_consider.erase(last, end);
 
-                for (const id_t id: toConsider)
+                for (const id_t id: to_consider)
                     for (auto &rule: trigger_rules[id])
                         to_perform.emplace_back(rule);
 
                 for (const auto &rule: to_perform) {
-                    const auto ruleChanged = rule.perform(values);
-                    toConsiderSwap.append_range(ruleChanged);
-                    changed.append_range(ruleChanged);
+                    const auto rule_changed = rule.perform(values);
+                    to_consider_swap.append_range(rule_changed);
+                    changed.append_range(rule_changed);
                 }
                 values.perform_delayed();
 
-                toConsider.clear();
-                toConsider.swap(toConsiderSwap);
+                to_consider.clear();
+                to_consider.swap(to_consider_swap);
                 to_perform.clear();
-            } while (to_fixed && !toConsider.empty());
+            } while (to_fixed && !to_consider.empty());
 
             return id_set{changed.begin(), changed.end()};
         }
 
     public:
-        void add(const rule_t &newRule) {
-            all_rules.insert(newRule);
-            for (const id_t trigger: newRule.triggers())
-                trigger_rules[trigger].emplace_back(newRule);
+        void add(const rule_t &new_rule) {
+            all_rules.insert(new_rule);
+            for (const id_t trigger: new_rule.triggers())
+                trigger_rules[trigger].emplace_back(new_rule);
         }
 
         id_set update(value_storage &values, const id_set &hint, const bool to_fixed = true) const {
