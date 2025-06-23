@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -fno-rtti")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Ofast")
 set(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Og -ggdb")
 
 # Disable FindBoost module
 if (POLICY CMP0167)

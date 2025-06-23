@@ -9,6 +9,7 @@
 #include <memory>
 #include <utility>
 #include <unordered_map>
+#include <set>
 
 namespace nxon {
     namespace impl {
@@ -222,7 +223,7 @@ namespace nxon {
         std::set<rule_t> all_rules;
         std::unordered_multimap<id_t, rule_t> trigger_rules;
 
-        id_set perform_rules(value_storage &values, std::set<rule_t> to_perform, const bool to_fixed = true) const {
+        id_set perform_rules(value_storage &values, std::vector<rule_t> to_perform, const bool to_fixed = true) const {
             id_set changed;
 
             id_set toConsider, toConsiderSwap;
@@ -230,7 +231,7 @@ namespace nxon {
                 for (id_t id: toConsider) {
                     auto [beg, end] = trigger_rules.equal_range(id);
                     for (auto iter = beg; iter != end; ++iter)
-                        to_perform.emplace(iter->second);
+                        to_perform.emplace_back(iter->second);
                 }
 
                 for (const auto &rule: to_perform) {
@@ -256,21 +257,21 @@ namespace nxon {
         }
 
         id_set update(value_storage &values, const id_set &hint, const bool to_fixed = true) const {
-            std::set<rule_t> toPerform;
+            std::vector<rule_t> toPerform;
             for (id_t id: hint) {
                 auto [beg, end] = trigger_rules.equal_range(id);
                 for (auto iter = beg; iter != end; ++iter)
-                    toPerform.emplace(iter->second);
+                    toPerform.emplace_back(iter->second);
             }
             return perform_rules(values, std::move(toPerform), to_fixed);
         }
 
-        id_set refresh_rules(value_storage &values, std::set<rule_t> to_update, const bool to_fixed = true) const {
-            return perform_rules(values, std::move(to_update), to_fixed);
+        id_set refresh_rules(value_storage &values, const std::set<rule_t>& to_update, const bool to_fixed = true) const {
+            return perform_rules(values, std::vector(to_update.begin(), to_update.end()), to_fixed);
         }
 
         id_set refresh_all_rules(value_storage &values, const bool to_fixed = true) const {
-            return perform_rules(values, rules(), to_fixed);
+            return refresh_rules(values, all_rules, to_fixed);
         }
 
         [[nodiscard]] std::set<rule_t> rules() const {
