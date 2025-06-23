@@ -5,8 +5,9 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <unordered_set>
+#include <flat_set>
 #include <unordered_map>
+
 #include "sized_mpint.h"
 
 namespace nxon {
@@ -15,15 +16,15 @@ namespace nxon {
     using value_t = impl::sized_mpint;
 
     namespace impl {
-        class id_set_impl : public std::unordered_set<id_t> {
-            using base_t = unordered_set;
+        class id_set_impl : public std::flat_set<id_t> {
+            using base_t = flat_set;
             using self_t = id_set_impl;
 
         public:
             using base_t::base_t;
 
             auto &operator+=(const self_t &other) {
-                insert(other.begin(), other.end());
+                insert(std::sorted_unique, other.begin(), other.end());
                 return *this;
             }
 
@@ -39,15 +40,15 @@ namespace nxon {
 
     using value_batch = std::unordered_map<id_t, value_t>;
 
-    class value_storage {
+    template<typename V>
+    class id_based_map {
     public:
         using key_type = id_t;
-        using mapped_type = value_t;
+        using mapped_type = V;
         using size_type = size_t;
 
     private:
-        std::vector<value_t> content;
-        std::vector<std::function<void(value_storage &)> > delayed;
+        std::vector<mapped_type> content;
 
     public:
         mapped_type &operator[](const key_type id) {
@@ -68,7 +69,12 @@ namespace nxon {
             if (content.size() <= id) throw std::out_of_range("id does not exist");
             return content[id];
         }
+    };
 
+    class value_storage : public id_based_map<value_t> {
+        std::vector<std::function<void(value_storage &)> > delayed;
+
+    public:
         void delay(std::function<void(value_storage &)> func) {
             delayed.emplace_back(std::move(func));
         }

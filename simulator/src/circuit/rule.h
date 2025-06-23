@@ -8,7 +8,7 @@
 #include "circuit_def.h"
 #include <memory>
 #include <utility>
-#include <unordered_map>
+#include <algorithm>
 #include <set>
 #include <vector>
 
@@ -44,7 +44,8 @@ namespace nxon {
             virtual bool triggered(value_storage &values) const = 0;
         };
 
-        using indirect_const_value_t = std::unique_ptr<const value_t, void(*)(const value_t*)>;
+        using indirect_const_value_t = std::unique_ptr<const value_t, void(*)(const value_t *)>;
+
         struct source_impl {
             const id_set dependencies;
             const size_t len;
@@ -221,25 +222,29 @@ namespace nxon {
         [[nodiscard]] rule_t register_rule(clock_t clk, source_t in, sink_t out);
     }
 
+    using rule_storage = id_based_map<std::vector<rule_t> >;
+
     class rule_set {
         std::set<rule_t> all_rules;
-        std::unordered_multimap<id_t, rule_t> trigger_rules;
+        rule_storage trigger_rules;
 
         id_set perform_rules(value_storage &values, std::vector<rule_t> to_perform, const bool to_fixed = true) const {
-            id_set changed;
+            std::vector<id_t> changed;
 
-            id_set toConsider, toConsiderSwap;
+            std::vector<id_t> toConsider, toConsiderSwap;
             do {
-                for (id_t id: toConsider) {
-                    auto [beg, end] = trigger_rules.equal_range(id);
-                    for (auto iter = beg; iter != end; ++iter)
-                        to_perform.emplace_back(iter->second);
-                }
+                std::ranges::sort(toConsider);
+                auto [last, end] = std::ranges::unique(toConsider);
+                toConsider.erase(last, end);
+
+                for (const id_t id: toConsider)
+                    for (auto &rule: trigger_rules[id])
+                        to_perform.emplace_back(rule);
 
                 for (const auto &rule: to_perform) {
                     const auto ruleChanged = rule.perform(values);
-                    toConsiderSwap += ruleChanged;
-                    changed += ruleChanged;
+                    toConsiderSwap.append_range(ruleChanged);
+                    changed.append_range(ruleChanged);
                 }
                 values.perform_delayed();
 
@@ -248,27 +253,26 @@ namespace nxon {
                 to_perform.clear();
             } while (to_fixed && !toConsider.empty());
 
-            return changed;
+            return id_set{changed.begin(), changed.end()};
         }
 
     public:
         void add(const rule_t &newRule) {
             all_rules.insert(newRule);
-            for (id_t trigger: newRule.triggers())
-                trigger_rules.emplace(trigger, newRule);
+            for (const id_t trigger: newRule.triggers())
+                trigger_rules[trigger].emplace_back(newRule);
         }
 
         id_set update(value_storage &values, const id_set &hint, const bool to_fixed = true) const {
-            std::vector<rule_t> toPerform;
-            for (id_t id: hint) {
-                auto [beg, end] = trigger_rules.equal_range(id);
-                for (auto iter = beg; iter != end; ++iter)
-                    toPerform.emplace_back(iter->second);
-            }
-            return perform_rules(values, std::move(toPerform), to_fixed);
+            std::vector<rule_t> to_perform;
+            for (const id_t id: hint)
+                for (auto &rule: trigger_rules[id])
+                    to_perform.emplace_back(rule);
+            return perform_rules(values, std::move(to_perform), to_fixed);
         }
 
-        id_set refresh_rules(value_storage &values, const std::set<rule_t>& to_update, const bool to_fixed = true) const {
+        id_set refresh_rules(value_storage &values, const std::set<rule_t> &to_update,
+                             const bool to_fixed = true) const {
             return perform_rules(values, std::vector(to_update.begin(), to_update.end()), to_fixed);
         }
 
