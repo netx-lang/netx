@@ -43,6 +43,7 @@ namespace nxon {
             virtual bool triggered(value_storage &values) const = 0;
         };
 
+        using indirect_const_value_t = std::unique_ptr<const value_t, void(*)(const value_t*)>;
         struct source_impl {
             const id_set dependencies;
             const size_t len;
@@ -53,7 +54,7 @@ namespace nxon {
 
             virtual ~source_impl() = default;
 
-            virtual value_t get(value_storage &values) const = 0;
+            virtual indirect_const_value_t get(value_storage &values) const = 0;
         };
 
         struct sink_impl {
@@ -123,7 +124,7 @@ namespace nxon {
             return shared_ptr::get()->len;
         }
 
-        value_t get(value_storage &values) const {
+        auto get(value_storage &values) const {
             return shared_ptr::get()->get(values);
         }
     };

@@ -25,6 +25,13 @@ namespace nxon {
             }
         };
 
+        void noop_deleter(const value_t *) {
+        }
+
+        void delete_deleter(const value_t *ptr) {
+            delete ptr;
+        }
+
         struct id_source final : source_impl {
             const id_t id;
 
@@ -32,8 +39,8 @@ namespace nxon {
                 : source_impl({id}, len), id(id) {
             }
 
-            value_t get(value_storage &values) const override {
-                return values[id];
+            indirect_const_value_t get(value_storage &values) const override {
+                return {&values[id], noop_deleter};
             }
         };
 
@@ -43,8 +50,8 @@ namespace nxon {
             explicit constant_source(value_t value) : source_impl({}, value.size()), value(std::move(value)) {
             }
 
-            value_t get(value_storage &) const override {
-                return value;
+            indirect_const_value_t get(value_storage &) const override {
+                return {&value, noop_deleter};
             }
         };
 
@@ -55,7 +62,7 @@ namespace nxon {
                 : sink_impl({id}, len), id(id) {
             }
 
-            [[nodiscard]] bool check(const value_storage &values, const value_t& v) const override {
+            [[nodiscard]] bool check(const value_storage &values, const value_t &v) const override {
                 assert(len == v.size());
                 return values.at(id) != v;
             }
@@ -83,8 +90,9 @@ namespace nxon {
                   from((assert(from <= to), from)), to(to), len(to - from + 1) {
             }
 
-            value_t get(value_storage &values) const override {
-                return values[id].slice(from, to).from_slice();
+            indirect_const_value_t get(value_storage &values) const override {
+                auto ptr = new value_t(values[id].slice(from, to).from_slice());
+                return {ptr, delete_deleter};
             }
         };
 
@@ -105,7 +113,7 @@ namespace nxon {
                   from((assert(from <= to), from)), to(to), len(to - from + 1) {
             }
 
-            [[nodiscard]] bool check(const value_storage &values, const value_t& v) const override {
+            [[nodiscard]] bool check(const value_storage &values, const value_t &v) const override {
                 assert(len == v.size());
                 auto out = values.at(id).slice(from, to);
                 return out.from_slice() != v;
@@ -124,7 +132,7 @@ namespace nxon {
                 : sink_impl(underlying.outcomes(), underlying.len()), underlying(std::move(underlying)) {
             }
 
-            [[nodiscard]] bool check(const value_storage &values, const value_t& v) const override {
+            [[nodiscard]] bool check(const value_storage &values, const value_t &v) const override {
                 return underlying.check(values, v.signed_resize(len));
             }
 
@@ -178,7 +186,9 @@ namespace nxon {
             }
 
             id_set perform(value_storage &values) const override {
-                if (auto value = op(a.get(values), b.get(values)); out.check(values, value)) {
+                const auto x = a.get(values);
+                const auto y = b.get(values);
+                if (auto value = op(*x, *y); out.check(values, value)) {
                     out.put(values, std::move(value));
                     return out.outcomes();
                 }
@@ -198,7 +208,8 @@ namespace nxon {
             }
 
             id_set perform(value_storage &values) const override {
-                if (auto value = op(in.get(values)); out.check(values, value)) {
+                const auto x = in.get(values);
+                if (auto value = op(*x); out.check(values, value)) {
                     out.put(values, std::move(value));
                     return out.outcomes();
                 }
@@ -218,8 +229,8 @@ namespace nxon {
             }
 
             id_set perform(value_storage &values) const override {
-                if (auto value = in.get(values); clk.triggered(values) && out.check(values, value)) {
-                    values.delay([value = std::move(value), out = out] (auto& cur_values) {
+                if (auto value = in.get(values); clk.triggered(values) && out.check(values, *value)) {
+                    values.delay([value = value_t(*value), out = out](auto &cur_values) {
                         out.put(cur_values, std::move(value));
                     });
                     return out.outcomes();
@@ -303,65 +314,89 @@ namespace nxon {
         }
 
         rule_t unsigned_lt_rule(source_t a, source_t b, sink_t out) {
-            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
-                return value_t{1, x < y};
-            })};
+            return rule_t{
+                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                    return value_t{1, x < y};
+                })
+            };
         }
 
         rule_t unsigned_gt_rule(source_t a, source_t b, sink_t out) {
-            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
-                return value_t{1, x > y};
-            })};
+            return rule_t{
+                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                    return value_t{1, x > y};
+                })
+            };
         }
 
         rule_t unsigned_le_rule(source_t a, source_t b, sink_t out) {
-            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
-                return value_t{1, x <= y};
-            })};
+            return rule_t{
+                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                    return value_t{1, x <= y};
+                })
+            };
         }
 
         rule_t unsigned_ge_rule(source_t a, source_t b, sink_t out) {
-            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
-                return value_t{1, x >= y};
-            })};
+            return rule_t{
+                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                    return value_t{1, x >= y};
+                })
+            };
         }
 
         rule_t signed_lt_rule(source_t a, source_t b, sink_t out) {
-            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
-                return value_t{1, x.signed_compare(y) == std::strong_ordering::less};
-            })};
+            return rule_t{
+                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                    return value_t{1, x.signed_compare(y) == std::strong_ordering::less};
+                })
+            };
         }
 
         rule_t signed_gt_rule(source_t a, source_t b, sink_t out) {
-            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
-                return value_t{1, x.signed_compare(y) == std::strong_ordering::greater};
-            })};
+            return rule_t{
+                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                    return value_t{1, x.signed_compare(y) == std::strong_ordering::greater};
+                })
+            };
         }
 
         rule_t signed_le_rule(source_t a, source_t b, sink_t out) {
-            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
-                auto compared = x.signed_compare(y);
-                return value_t{1, compared == std::strong_ordering::less || compared == std::strong_ordering::equal};
-            })};
+            return rule_t{
+                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                    auto compared = x.signed_compare(y);
+                    return value_t{
+                        1, compared == std::strong_ordering::less || compared == std::strong_ordering::equal
+                    };
+                })
+            };
         }
 
         rule_t signed_ge_rule(source_t a, source_t b, sink_t out) {
-            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
-                auto compared = x.signed_compare(y);
-                return value_t{1, compared == std::strong_ordering::greater || compared == std::strong_ordering::equal};
-            })};
+            return rule_t{
+                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                    auto compared = x.signed_compare(y);
+                    return value_t{
+                        1, compared == std::strong_ordering::greater || compared == std::strong_ordering::equal
+                    };
+                })
+            };
         }
 
         rule_t eq_rule(source_t a, source_t b, sink_t out) {
-            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
-                return value_t{1, x == y};
-            })};
+            return rule_t{
+                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                    return value_t{1, x == y};
+                })
+            };
         }
 
         rule_t neq_rule(source_t a, source_t b, sink_t out) {
-            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto& x, auto& y) {
-                return value_t{1, x != y};
-            })};
+            return rule_t{
+                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                    return value_t{1, x != y};
+                })
+            };
         }
 
         rule_t register_rule(clock_t clk, source_t in, sink_t out) {
