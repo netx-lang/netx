@@ -4,6 +4,7 @@
 #include "rule.h"
 #include <boost/lambda2.hpp>
 #include <utility>
+#include <functional>
 
 using namespace boost::lambda2;
 

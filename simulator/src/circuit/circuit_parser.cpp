@@ -3,10 +3,13 @@
 //
 
 #include "circuit_parser.h"
-
+#include "rule.h"
 #include <nlohmann/json.hpp>
-#include <queue>
+#include <map>
 #include <utility>
+#include <algorithm>
+#include <deque>
+#include <optional>
 
 namespace nxon {
     struct id_info {

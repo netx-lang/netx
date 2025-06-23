@@ -6,6 +6,7 @@
 #define PARSER_H
 #include <nlohmann/json.hpp>
 #include <unordered_map>
+#include <string>
 #include "circuit.h"
 
 namespace nxon {
