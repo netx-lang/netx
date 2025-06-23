@@ -370,7 +370,7 @@ namespace nxon {
         parse_name_size(design, context);
         parse_member(design, context);
 
-        value_storage initial_values;
+        value_batch initial_values;
         for (id_t id = 0; id < context.members_total; ++id)
             initial_values[id] = value_t(context.size_map.at(id), 0ul);
         context.circuit.put_batch(initial_values);
