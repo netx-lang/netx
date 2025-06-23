@@ -6,7 +6,7 @@
 #define COMMON_H
 
 #include <set>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include "sized_mpint.h"
 
 namespace nxon {
@@ -36,7 +36,7 @@ namespace nxon {
 
     using id_set = impl::id_set_impl;
 
-    class value_storage : public boost::unordered_map<id_t, value_t> {
+    class value_storage : public std::unordered_map<id_t, value_t> {
         using base_t = unordered_map;
         std::vector<std::function<void(value_storage&)>> delayed;
     public:

@@ -8,8 +8,7 @@
 #include "circuit_def.h"
 #include <memory>
 #include <utility>
-#include <map>
-#include <ranges>
+#include <unordered_map>
 
 namespace nxon {
     namespace impl {
@@ -221,7 +220,7 @@ namespace nxon {
 
     class rule_set {
         std::set<rule_t> all_rules;
-        boost::unordered_multimap<id_t, rule_t> trigger_rules;
+        std::unordered_multimap<id_t, rule_t> trigger_rules;
 
         id_set perform_rules(value_storage &values, std::set<rule_t> to_perform, const bool to_fixed = true) const {
             id_set changed;
