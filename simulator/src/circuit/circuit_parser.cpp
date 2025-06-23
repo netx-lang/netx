@@ -92,28 +92,28 @@ namespace nxon {
         }
 
         if (assoc) {
-            std::deque<source_t> nextSources;
+            std::deque<source_t> next_sources;
             for (size_t left = sources.size(); left > 2; --left) {
                 if (sources.size() < 2) {
                     while (!sources.empty()) {
-                        nextSources.push_back(sources.front());
+                        next_sources.push_back(sources.front());
                         sources.pop_front();
                     }
-                    sources.swap(nextSources);
+                    sources.swap(next_sources);
                 }
 
                 auto src1 = sources.front();
                 sources.pop_front();
                 auto src2 = sources.front();
                 sources.pop_front();
-                nextSources.push_back(binary_combine(cons, std::move(src1), std::move(src2), context, len_sum));
+                next_sources.push_back(binary_combine(cons, std::move(src1), std::move(src2), context, len_sum));
             }
 
             while (!sources.empty()) {
-                nextSources.push_back(sources.front());
+                next_sources.push_back(sources.front());
                 sources.pop_front();
             }
-            sources.swap(nextSources);
+            sources.swap(next_sources);
         } else {
             while (sources.size() > 2) {
                 auto src1 = sources.front();
