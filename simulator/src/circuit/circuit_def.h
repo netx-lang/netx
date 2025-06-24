@@ -65,7 +65,7 @@ namespace nxon {
 
     public:
         mapped_type &operator[](const key_type id) {
-            if (content.size() <= id) content.resize(id + 1, mapped_type{});
+            if (content.size() <= id) content.resize(id + 1);
             return content[id];
         }
 
