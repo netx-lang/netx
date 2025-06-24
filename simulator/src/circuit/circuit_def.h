@@ -5,8 +5,17 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <flat_set>
+#include <version>
 #include <unordered_map>
+#ifdef __cpp_lib_flat_set
+#include <flat_set>
+template<typename T>
+using compatible_flat_set = std::flat_set<T>;
+#else
+#include <boost/container/flat_set.hpp>
+template<typename T>
+using compatible_flat_set = boost::container::flat_set<T>;
+#endif
 
 #include "sized_mpint.h"
 
@@ -16,15 +25,19 @@ namespace nxon {
     using value_t = impl::sized_mpint;
 
     namespace impl {
-        class id_set_impl : public std::flat_set<id_t> {
-            using base_t = flat_set;
+        class id_set_impl : public compatible_flat_set<id_t> {
+            using base_t = compatible_flat_set<id_t>;
             using self_t = id_set_impl;
 
         public:
             using base_t::base_t;
 
             auto &operator+=(const self_t &other) {
+#ifdef __cpp_lib_flat_set
                 insert(std::sorted_unique, other.begin(), other.end());
+#else
+                insert(boost::container::ordered_unique_range, other.begin(), other.end());
+#endif
                 return *this;
             }
 
