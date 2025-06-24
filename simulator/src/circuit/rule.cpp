@@ -26,13 +26,6 @@ namespace nxon {
             }
         };
 
-        void noop_deleter(const value_t *) {
-        }
-
-        void delete_deleter(const value_t *ptr) {
-            delete ptr;
-        }
-
         struct id_source final : source_impl {
             const id_t id;
 
@@ -40,8 +33,8 @@ namespace nxon {
                 : source_impl({id}, len), id(id) {
             }
 
-            indirect_const_value_t get(value_storage &values) const override {
-                return {&values[id], noop_deleter};
+            indirect_value_t get(value_storage &values) const override {
+                return indirect_value_t(values[id]);
             }
         };
 
@@ -51,8 +44,8 @@ namespace nxon {
             explicit constant_source(value_t value) : source_impl({}, value.size()), value(std::move(value)) {
             }
 
-            indirect_const_value_t get(value_storage &) const override {
-                return {&value, noop_deleter};
+            indirect_value_t get(value_storage &) const override {
+                return indirect_value_t{value};
             }
         };
 
@@ -91,9 +84,8 @@ namespace nxon {
                   from((assert(from <= to), from)), to(to), len(to - from + 1) {
             }
 
-            indirect_const_value_t get(value_storage &values) const override {
-                auto ptr = new value_t(values[id].slice(from, to).from_slice());
-                return {ptr, delete_deleter};
+            indirect_value_t get(value_storage &values) const override {
+                return indirect_value_t(values[id].slice(from, to).from_slice());
             }
         };
 
@@ -174,6 +166,8 @@ namespace nxon {
     }
 
     namespace impl {
+        const id_set EMPTY_ID_SET;
+
         struct binary_rule final : rule_impl {
             const source_t a;
             const source_t b;
@@ -186,14 +180,14 @@ namespace nxon {
                   out(std::move(out)), op(std::move(op)) {
             }
 
-            id_set perform(value_storage &values) const override {
+            indirect_id_set perform(value_storage &values) const override {
                 const auto x = a.get(values);
                 const auto y = b.get(values);
                 if (auto value = op(*x, *y); out.check(values, value)) {
                     out.put(values, std::move(value));
-                    return out.outcomes();
+                    return indirect_id_set(out.outcomes());
                 }
-                return {};
+                return indirect_id_set(EMPTY_ID_SET);
             }
         };
 
@@ -208,13 +202,13 @@ namespace nxon {
                   op(std::move(op)) {
             }
 
-            id_set perform(value_storage &values) const override {
+            indirect_id_set perform(value_storage &values) const override {
                 const auto x = in.get(values);
                 if (auto value = op(*x); out.check(values, value)) {
                     out.put(values, std::move(value));
-                    return out.outcomes();
+                    return indirect_id_set(out.outcomes());
                 }
-                return {};
+                return indirect_id_set(EMPTY_ID_SET);
             }
         };
 
@@ -229,14 +223,14 @@ namespace nxon {
                   in(std::move(in)), out(std::move(out)) {
             }
 
-            id_set perform(value_storage &values) const override {
+            indirect_id_set perform(value_storage &values) const override {
                 if (auto value = in.get(values); clk.triggered(values) && out.check(values, *value)) {
-                    values.delay([value = value_t(*value), out = out](auto &cur_values) {
+                    values.delay([value = value.release(), out = out](auto &cur_values) {
                         out.put(cur_values, std::move(value));
                     });
-                    return out.outcomes();
+                    return indirect_id_set(out.outcomes());
                 }
-                return {};
+                return indirect_id_set(EMPTY_ID_SET);
             }
         };
     }
