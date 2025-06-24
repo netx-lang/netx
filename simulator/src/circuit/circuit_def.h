@@ -74,13 +74,15 @@ namespace nxon {
         }
 
         [[nodiscard]] mapped_type &at(const key_type id) {
-            if (content.size() <= id) throw std::out_of_range("id does not exist");
-            return content[id];
+            return content.at(id);
         }
 
         [[nodiscard]] const mapped_type &at(const key_type id) const {
-            if (content.size() <= id) throw std::out_of_range("id does not exist");
-            return content[id];
+            return content.at(id);
+        }
+
+        [[nodiscard]] bool contains(const key_type id) const {
+            return id < content.size();
         }
     };
 

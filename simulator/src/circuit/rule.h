@@ -295,6 +295,12 @@ namespace nxon {
         std::set<rule_t> all_rules;
         rule_storage trigger_rules;
 
+        void collect_rules(std::vector<rule_t> &to_perform, const id_t id) const {
+            if (!trigger_rules.contains(id)) return;
+            for (auto &rule: trigger_rules[id])
+                to_perform.emplace_back(rule);
+        }
+
         id_set perform_rules(value_storage &values, std::vector<rule_t> to_perform, const bool to_fixed = true) const {
             std::vector<id_t> changed;
 
@@ -304,9 +310,7 @@ namespace nxon {
                 auto [last, end] = std::ranges::unique(to_consider);
                 to_consider.erase(last, end);
 
-                for (const id_t id: to_consider)
-                    for (auto &rule: trigger_rules[id])
-                        to_perform.emplace_back(rule);
+                for (const id_t id: to_consider) collect_rules(to_perform, id);
 
                 for (const auto &rule: to_perform) {
                     const auto rule_changed = rule.perform(values);
@@ -337,9 +341,7 @@ namespace nxon {
 
         id_set update(value_storage &values, const id_set &hint, const bool to_fixed = true) const {
             std::vector<rule_t> to_perform;
-            for (const id_t id: hint)
-                for (auto &rule: trigger_rules[id])
-                    to_perform.emplace_back(rule);
+            for (const id_t id: hint) collect_rules(to_perform, id);
             return perform_rules(values, std::move(to_perform), to_fixed);
         }
 
