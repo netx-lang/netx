@@ -69,7 +69,7 @@ namespace nxon {
             }
 
             decltype(auto) operator->() const {
-                return operator*();
+                return &operator*();
             }
 
             T release() {
@@ -310,8 +310,13 @@ namespace nxon {
 
                 for (const auto &rule: to_perform) {
                     const auto rule_changed = rule.perform(values);
+#ifdef __cpp_lib_containers_ranges
                     to_consider_swap.append_range(*rule_changed);
                     changed.append_range(*rule_changed);
+#else
+                    to_consider_swap.insert(to_consider_swap.end(), rule_changed->begin(), rule_changed->end());
+                    changed.insert(changed.end(), rule_changed->begin(), rule_changed->end());
+#endif
                 }
                 values.perform_delayed();
 
