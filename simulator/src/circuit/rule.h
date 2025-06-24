@@ -10,10 +10,77 @@
 #include <utility>
 #include <algorithm>
 #include <set>
+#include <variant>
 #include <vector>
 
 namespace nxon {
     namespace impl {
+        template<typename T>
+        class potential_holder {
+            using const_reference = const T &;
+
+            std::variant<const T *, T, std::monostate> value;
+
+            [[no_unique_address]] struct {
+                const_reference operator()(const T *ptr) const {
+                    return *ptr;
+                }
+
+                const_reference operator()(const T &ref) const {
+                    return ref;
+                }
+
+                [[noreturn]] const_reference operator()(std::monostate) const {
+                    throw std::runtime_error("potential_holder does not have a value");
+                }
+            } get_ref_visitor;
+
+            [[no_unique_address]] struct {
+                T operator()(T &ref) const {
+                    return std::move(ref);
+                }
+
+                T operator()(const T *ptr) const {
+                    return *ptr;
+                }
+
+                [[noreturn]] T operator()(std::monostate) const {
+                    throw std::runtime_error("potential_holder does not have a value");
+                }
+            } move_out_visitor;
+
+        public:
+            explicit potential_holder(const T &v) : value(&v) {
+            }
+
+            explicit potential_holder(T &&v) : value(std::in_place_type<T>, std::move(v)) {
+            }
+
+            potential_holder(const potential_holder &) = delete;
+
+            potential_holder &operator=(const potential_holder &) = delete;
+
+            potential_holder(potential_holder &&) = default;
+
+            potential_holder &operator=(potential_holder &&) = default;
+
+            decltype(auto) operator*() const {
+                return std::visit(get_ref_visitor, value);
+            }
+
+            decltype(auto) operator->() const {
+                return operator*();
+            }
+
+            T release() {
+                auto result = std::visit(move_out_visitor, value);
+                value = std::monostate{};
+                return result;
+            }
+        };
+
+        using indirect_id_set = potential_holder<id_set>;
+
         struct rule_impl {
             const id_set triggers;
             const id_set dependencies;
@@ -30,7 +97,7 @@ namespace nxon {
 
             virtual ~rule_impl() = default;
 
-            virtual id_set perform(value_storage &values) const = 0;
+            virtual indirect_id_set perform(value_storage &values) const = 0;
         };
 
         struct clock_impl {
@@ -44,7 +111,7 @@ namespace nxon {
             virtual bool triggered(value_storage &values) const = 0;
         };
 
-        using indirect_const_value_t = std::unique_ptr<const value_t, void(*)(const value_t *)>;
+        using indirect_value_t = potential_holder<value_t>;
 
         struct source_impl {
             const id_set dependencies;
@@ -56,7 +123,7 @@ namespace nxon {
 
             virtual ~source_impl() = default;
 
-            virtual indirect_const_value_t get(value_storage &values) const = 0;
+            virtual indirect_value_t get(value_storage &values) const = 0;
         };
 
         struct sink_impl {
@@ -243,8 +310,8 @@ namespace nxon {
 
                 for (const auto &rule: to_perform) {
                     const auto rule_changed = rule.perform(values);
-                    to_consider_swap.append_range(rule_changed);
-                    changed.append_range(rule_changed);
+                    to_consider_swap.append_range(*rule_changed);
+                    changed.append_range(*rule_changed);
                 }
                 values.perform_delayed();
 
