@@ -1,6 +1,6 @@
 plugins {
-    id("shared-build-conventions")
-    id("java-library")
+    `shared-build-conventions`
+    `java-library`
 }
 
 dependencies {
