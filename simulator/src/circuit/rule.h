@@ -6,6 +6,7 @@
 #define RULE_H
 
 #include "circuit_def.h"
+#include <version>
 #include <memory>
 #include <utility>
 #include <algorithm>
