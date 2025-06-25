@@ -14,6 +14,7 @@
         "type": "component", "id": "adder", "loc": "2:14",
         "input": ["a@0", "b@1"],
         "output": ["c@2"],
+        "attribute": {"WIDTH": "8"},
         "members": [
           {
             "type": "component", "id": "full_adder", "loc": "7:34",

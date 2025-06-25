@@ -38,7 +38,17 @@ namespace nxon {
         }
     };
 
-    parse_context parse_circuit(const nlohmann::json &json);
+    using native_factory = std::function<rule_t(const parse_context &ctx, const nlohmann::json &json)>;
+
+    using native_map = std::map<std::string, native_factory>;
+
+    clock_t parse_clock(const std::string &source, bool is_pos_trigger);
+
+    source_t parse_source(const std::string &source, const parse_context &context);
+
+    sink_t parse_sink(const std::string &sink, const parse_context &context);
+
+    parse_context parse_circuit(const nlohmann::json &json, const native_map &native_map = {});
 }
 
 #endif //PARSER_H

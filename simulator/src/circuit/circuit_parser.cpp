@@ -35,12 +35,16 @@ namespace nxon {
     }
 
     static clock_t parse_clock(const std::string &source, const nlohmann::json &attribute) {
-        auto [name, id, selection] = parse_id(source);
-        if (selection) throw std::invalid_argument("Clock cannot be selected");
-        return data_factory::id_clock(id, attribute["isPosTrigger"] == "true");
+        return parse_clock(source, attribute["isPosTrigger"] == "true");
     }
 
-    static source_t parse_source(const std::string &source, const parse_context &context) {
+    clock_t parse_clock(const std::string &source, const bool is_pos_trigger) {
+        auto [name, id, selection] = parse_id(source);
+        if (selection) throw std::invalid_argument("Clock cannot be selected");
+        return data_factory::id_clock(id, is_pos_trigger);
+    }
+
+    source_t parse_source(const std::string &source, const parse_context &context) {
          if (source.find('@') != std::string::npos) {
              auto [name, id, selection] = parse_id(source);
              if (selection) return data_factory::select_source(id, selection->first, selection->second);
@@ -49,7 +53,7 @@ namespace nxon {
          return data_factory::constant_source(value_t::parse(source));
      }
 
-    static sink_t parse_sink(const std::string &sink, const parse_context &context) {
+    sink_t parse_sink(const std::string &sink, const parse_context &context) {
         auto [name, id, selection] = parse_id(sink);
         if (selection) return data_factory::select_sink(id, selection->first, selection->second);
         return data_factory::id_sink(id, context.size_map.at(id));
@@ -293,18 +297,26 @@ namespace nxon {
         {"builtin", member_type::BUILTIN}
     };
 
-    static void parse_member(const nlohmann::json &json, parse_context &context) {
-        // NOLINT(*-no-recursion)
-        const std::string member_type = json["type"];
-        if (!member_type_map.contains(member_type)) throw std::runtime_error("Unknown member type " + member_type);
-        if (json.contains("members"))
-            for (const auto &member: json["members"])
-                parse_member(member, context);
-        switch (member_type_map.at(member_type)) {
+    static void parse_member(const nlohmann::json &json, parse_context &context, const native_map &native_map) { // NOLINT(*-no-recursion)
+        const std::string type = json["type"];
+        if (!member_type_map.contains(type)) throw std::runtime_error("Unknown member type " + type);
+
+        switch (member_type_map.at(type)) {
             case member_type::WIRE:
-            case member_type::CLOCK:
-            case member_type::COMPONENT:
+            case member_type::CLOCK: break;
+            case member_type::COMPONENT: {
+                if (native_map.contains(json["id"])) {
+                    const auto &factory = native_map.at(json["id"]);
+                    context.circuit.add_rule(factory(context, json));
+                } else {
+                    if (json.contains("members")) {
+                        for (const auto &member: json["members"]) {
+                            parse_member(member, context, native_map);
+                        }
+                    }
+                }
                 break;
+            }
             case member_type::BUILTIN: {
                 parse_builtin(json, context);
                 break;
@@ -314,7 +326,7 @@ namespace nxon {
         }
     }
 
-    static void parse_name_size(const nlohmann::json &json, parse_context &context) {
+    static void parse_name_size(const nlohmann::json &json, parse_context &context) { // NOLINT(*-no-recursion)
         const std::string member_type = json["type"];
         if (!member_type_map.contains(member_type)) throw std::runtime_error("Unknown member type " + member_type);
         if (json.contains("members"))
@@ -359,13 +371,13 @@ namespace nxon {
         }
     }
 
-    parse_context parse_circuit(const nlohmann::json &json) {
+    parse_context parse_circuit(const nlohmann::json &json, const native_map &native_map) {
         parse_context context;
         context.members_total = json["totalData"];
         auto &design = json["design"];
         parse_circuit_io(design, context);
         parse_name_size(design, context);
-        parse_member(design, context);
+        parse_member(design, context, native_map);
 
         value_storage initial_values;
         for (id_t id = 0; id < context.members_total; ++id)
