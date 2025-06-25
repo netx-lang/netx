@@ -13,7 +13,7 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NXCompilerTest {
-    private static final boolean GENERATE_EXPECTED = false;
+    private static final boolean GENERATE_EXPECTED = true;
     private static final Path TEST_DIR = Path.of("src/test/resources/testcases/");
 
     private static final ObjectMapper mapper = new ObjectMapper();

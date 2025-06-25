@@ -13,6 +13,7 @@
         "type": "component", "id": "decoder", "loc": "4:14",
         "input": ["input@0"],
         "output": ["output@1"],
+        "attribute": {"width": "3"},
         "members": [
           {
             "type": "builtin", "id": "NOT", "loc": "14:52",

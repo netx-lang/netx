@@ -3,6 +3,7 @@ package pascal.netx.compiler.io;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import pascal.netx.compiler.model.scope.Attributes;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.variable.*;
@@ -81,6 +82,9 @@ final class ExpandedDumper {
 
             dumpInstIO(result, "input", component.getInputs());
             dumpInstIO(result, "output", component.getOutputs());
+            if (component.hasAttributes()) {
+                dumpInstAttr(result, component.getAttributes());
+            }
 
             List<ObjectNode> needDump = new LinkedList<>();
             component.getBinding().forEachData(data -> needDump.add(defineData(data)));
@@ -120,11 +124,7 @@ final class ExpandedDumper {
             dumpInstIO(builtin, "input", sub.getInputs());
             dumpInstIO(builtin, "output", sub.getOutputs());
             if (ATTRIBUTED.contains(BuiltinComponent.of(instID))) {
-                var attributes = createObjectNode();
-                for (var entry : sub.getAttributes().entrySet()) {
-                    attributes.put(entry.getKey().name(), dumpVariable((Variable) entry.getValue()));
-                }
-                builtin.putIfAbsent("attribute", attributes);
+                dumpInstAttr(builtin, sub.getAttributes());
             }
             List<Data> needDump = new LinkedList<>();
             sub.getBinding().forEachData(needDump::add);
@@ -133,6 +133,18 @@ final class ExpandedDumper {
                 needDump.forEach(c -> subarray.add(defineData(c)));
             }
             return builtin;
+        }
+
+        private void dumpInstAttr(ObjectNode node, Attributes attributes) {
+            var result = createObjectNode();
+            for (var entry : attributes.entrySet()) {
+                if (entry.getValue() instanceof Variable variable) {
+                    result.put(entry.getKey().name(), dumpVariable(variable));
+                } else {
+                    result.put(entry.getKey().name(), entry.getValue().toString());
+                }
+            }
+            node.putIfAbsent("attribute", result);
         }
 
         private ObjectNode defineData(Data data) {

@@ -103,6 +103,7 @@
             "type": "component", "id": "DECODER", "loc": "9:12",
             "input": ["1'h01"],
             "output": ["mask@10"],
+            "attribute": {"width": "1"},
             "members": [
               {
                 "type": "builtin", "id": "NOT", "loc": "35:52",
