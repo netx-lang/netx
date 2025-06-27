@@ -3,10 +3,13 @@
 //
 
 #include "circuit_parser.h"
-
+#include "rule.h"
 #include <nlohmann/json.hpp>
-#include <queue>
+#include <map>
 #include <utility>
+#include <algorithm>
+#include <deque>
+#include <optional>
 
 namespace nxon {
     struct id_info {
@@ -93,28 +96,28 @@ namespace nxon {
         }
 
         if (assoc) {
-            std::deque<source_t> nextSources;
+            std::deque<source_t> next_sources;
             for (size_t left = sources.size(); left > 2; --left) {
                 if (sources.size() < 2) {
                     while (!sources.empty()) {
-                        nextSources.push_back(sources.front());
+                        next_sources.push_back(sources.front());
                         sources.pop_front();
                     }
-                    sources.swap(nextSources);
+                    sources.swap(next_sources);
                 }
 
                 auto src1 = sources.front();
                 sources.pop_front();
                 auto src2 = sources.front();
                 sources.pop_front();
-                nextSources.push_back(binary_combine(cons, std::move(src1), std::move(src2), context, len_sum));
+                next_sources.push_back(binary_combine(cons, std::move(src1), std::move(src2), context, len_sum));
             }
 
             while (!sources.empty()) {
-                nextSources.push_back(sources.front());
+                next_sources.push_back(sources.front());
                 sources.pop_front();
             }
-            sources.swap(nextSources);
+            sources.swap(next_sources);
         } else {
             while (sources.size() > 2) {
                 auto src1 = sources.front();
@@ -379,7 +382,7 @@ namespace nxon {
         parse_name_size(design, context);
         parse_member(design, context, native_map);
 
-        value_storage initial_values;
+        value_batch initial_values;
         for (id_t id = 0; id < context.members_total; ++id)
             initial_values[id] = value_t(context.size_map.at(id), 0ul);
         context.circuit.put_batch(initial_values);

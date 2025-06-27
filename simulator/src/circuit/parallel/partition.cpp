@@ -50,12 +50,12 @@ namespace nxon {
         int n = static_cast<int>(to_old.size());
         const auto xadj = std::make_unique<int[]>(n + 1);
         const auto adjncy = std::make_unique<int[]>(adj_size);
-        int currentPtr = 0;
+        int current_ptr = 0;
         for (int id = 0; id < n; ++id) {
-            xadj[id] = currentPtr;
-            for (const auto &out = edges[id]; const auto &out_id: out) adjncy[currentPtr++] = static_cast<int>(out_id);
+            xadj[id] = current_ptr;
+            for (const auto &out = edges[id]; const auto &out_id: out) adjncy[current_ptr++] = static_cast<int>(out_id);
         }
-        xadj[n] = currentPtr;
+        xadj[n] = current_ptr;
         int nparts = static_cast<int>(std::thread::hardware_concurrency());
         double imbalance = 0.02;
         const int seed = static_cast<int>(std::random_device{}());
@@ -65,7 +65,7 @@ namespace nxon {
                           &edgecut,
                           part.get());
 
-        auto result_ptr = new impl::partitioned_circuit_context();
+        auto result_ptr = std::make_unique<impl::partitioned_circuit_context>();
         auto &result = *result_ptr;
         result.num_parts = nparts;
         for (int id = 0; id < n; ++id) {
@@ -95,7 +95,7 @@ namespace nxon {
             }
         }
 
-        context = decltype(context){result_ptr};
+        context = std::move(result_ptr);
     }
 
     void partitioned_circuit::worker_part(const std::stop_token &stop_token,
@@ -110,7 +110,7 @@ namespace nxon {
             });
             if (!wait_result) continue;
 
-            value_storage to_update;
+            value_batch to_update;
             std::shared_ptr<std::latch> latch_to_wait;
             while (!(q.empty() || latch_to_wait)) {
                 auto &[id, value, latch] = q.front();
@@ -127,8 +127,8 @@ namespace nxon {
             lock.unlock();
             to_update.clear();
             if (latch_to_wait) latch_to_wait->arrive_and_wait();
-            value_storage changed_values;
-            for (auto &id: changed) {
+            value_batch changed_values;
+            for (auto id: changed) {
                 if (partition.belongs[id] != part_id) continue;
                 changed_values[id] = part.get_value(id);
             }
