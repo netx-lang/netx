@@ -44,7 +44,7 @@ namespace nxon::impl {
             bool result_sign = false;
             if (sign()) {
                 negate();
-                result_sign = !result_sign;
+                result_sign = true;
             }
             if (other.sign()) {
                 other.negate();
@@ -431,11 +431,11 @@ namespace nxon::impl {
 
         sized_mpint_slice &operator=(sized_mpint other) {
             if (length() != other.size()) throw std::runtime_error("Sizes don't match");
-            auto &otherRef = other.content;
-            otherRef <<= from;
-            auto &thisRef = ref.content;
-            thisRef &= mask_n;
-            thisRef |= otherRef;
+            auto &other_ref = other.content;
+            other_ref <<= from;
+            auto &this_ref = ref.content;
+            this_ref &= mask_n;
+            this_ref |= other_ref;
             return *this;
         }
 

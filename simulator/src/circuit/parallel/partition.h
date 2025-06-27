@@ -38,7 +38,7 @@ namespace nxon {
 
         struct partitioned_circuit_context {
             std::atomic_ullong wait_cnt;
-            size_t num_parts;
+            size_t num_parts = 0;
             std::map<id_t, size_t> belongs;
             std::map<id_t, std::set<size_t> > relate;
             id_set clocks;
@@ -48,7 +48,7 @@ namespace nxon {
                 broadcast_impl(id, value, exclude_belong);
             }
 
-            void broadcast_batch(const value_storage &to_update, const bool exclude_belong = false) {
+            void broadcast_batch(const value_batch &to_update, const bool exclude_belong = false) {
                 std::set<size_t> to_notify;
                 for (auto &[id, value]: to_update) {
                     broadcast_impl(id, value, exclude_belong, false);
@@ -94,11 +94,11 @@ namespace nxon {
     public:
         explicit partitioned_circuit(const circuit &circuit);
 
-        void broadcast(const id_t id, const value_t &value, const bool exclude_belong = false) {
+        void broadcast(const id_t id, const value_t &value, const bool exclude_belong = false) const {
             context->broadcast(id, value, exclude_belong);
         }
 
-        void broadcast_batch(const value_storage &to_update, const bool exclude_belong = false) {
+        void broadcast_batch(const value_batch &to_update, const bool exclude_belong = false) const {
             context->broadcast_batch(to_update, exclude_belong);
         }
 

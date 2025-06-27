@@ -40,7 +40,7 @@ namespace nxon {
             return rules.update(values, {id});
         }
 
-        id_set update_batch(const value_storage &to_update) {
+        id_set update_batch(const value_batch &to_update) {
             id_set hint;
             for (const auto &[id, value]: to_update) {
                 hint.insert(id);
@@ -57,7 +57,7 @@ namespace nxon {
             values[id] = std::move(new_value);
         }
 
-        void put_batch(const value_storage &to_update) {
+        void put_batch(const value_batch &to_update) {
             for (const auto &[id, value]: to_update)
                 values[id] = value;
         }

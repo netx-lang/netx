@@ -5,16 +5,17 @@
 #ifndef PARSER_H
 #define PARSER_H
 #include <nlohmann/json.hpp>
-
+#include <unordered_map>
+#include <string>
 #include "circuit.h"
 
 namespace nxon {
     struct parse_context {
-        id_t members_total;
+        id_t members_total = 0;
         nxon::circuit circuit;
         id_set circuit_input, circuit_output, circuit_input_clocks;
-        std::map<id_t, size_t> size_map;
-        std::map<std::string, id_t> name_map;
+        std::unordered_map<id_t, size_t> size_map;
+        std::unordered_map<std::string, id_t> name_map;
 
         void flip_input_clocks() {
             circuit.flip_batch(circuit_input_clocks);

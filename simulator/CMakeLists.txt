@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.28)
 project(nxsim VERSION 1.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -fno-rtti")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Ofast")
-set(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ffast-math")
+set(CMAKE_CXX_FLAGS_DEBUG "-ggdb -fsanitize=address,undefined -fno-omit-frame-pointer -fsanitize-trap=all -O0")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Og -ggdb")
 
 # Disable FindBoost module
 if (POLICY CMP0167)
