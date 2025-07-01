@@ -55,18 +55,21 @@ namespace nxon::impl {
 
     public:
         friend std::ostream &operator<<(std::ostream &out, const sized_mpint &self) {
-            auto num = self.content;
+            out << self.size() << "'b";
+            out << self.to_binary_string();
+            out << " (" << static_cast<long long>(self) << ')';
+            return out;
+        }
+
+        [[nodiscard]] std::string to_binary_string() const {
+            auto num = content;
             std::string res;
-            const auto size = self.size();
-            out << size << "'b";
-            for (size_t i = 0; i < size; ++i) {
+            for (size_t i = 0, bound = size(); i < bound; ++i) {
                 res += num & 1u ? '1' : '0';
                 num >>= 1u;
             }
             std::ranges::reverse(res);
-            out << res;
-            out << " (" << static_cast<long long>(self) << ')';
-            return out;
+            return res;
         }
 
         static sized_mpint parse(const std::string &str) {

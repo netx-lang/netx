@@ -7,23 +7,41 @@
 #include <nlohmann/json.hpp>
 #include <unordered_map>
 #include <string>
+#include <format>
 #include "circuit.h"
 
 namespace nxon {
-    struct parse_context {
+    struct parse_context_common {
+        void advance_input_clocks(this auto &&self) {
+            self.flip_input_clocks();
+            self.flip_input_clocks();
+        }
+    };
+
+    struct parse_context : parse_context_common {
         id_t members_total = 0;
         nxon::circuit circuit;
         id_set circuit_input, circuit_output, circuit_input_clocks;
         std::unordered_map<id_t, size_t> size_map;
+        std::unordered_map<id_t, std::string> name_of_map;
         std::unordered_map<std::string, id_t> name_map;
+
+        void new_wire(const id_t id, const size_t size, std::string org_name) {
+            size_map.emplace(id, size);
+            if (name_map.contains(org_name)) {
+                static constexpr char DELIMITER = '#';
+                size_t suffix = 1;
+                while (name_map.contains(std::format("{}{}{}", org_name, DELIMITER, suffix)))
+                    ++suffix;
+                org_name += DELIMITER;
+                org_name += std::to_string(suffix);
+            }
+            name_of_map.emplace(id, org_name);
+            name_map.emplace(org_name, id);
+        }
 
         void flip_input_clocks() {
             circuit.flip_batch(circuit_input_clocks);
-        }
-
-        void advance_input_clocks() {
-            flip_input_clocks();
-            flip_input_clocks();
         }
 
         [[nodiscard]] value_t get_by_name(const std::string &name) const {
@@ -49,7 +67,7 @@ namespace nxon {
 
     sink_t parse_sink(const std::string &sink, const parse_context &context);
 
-    parse_context parse_circuit(const nlohmann::json &json, const native_map &native_map = {});
+    void parse_circuit(parse_context &context, const nlohmann::json &json, const native_map &native_map = {});
 }
 
 #endif //PARSER_H
