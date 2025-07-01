@@ -48,13 +48,13 @@ namespace nxon {
     }
 
     source_t parse_source(const std::string &source, const parse_context &context) {
-         if (source.find('@') != std::string::npos) {
-             auto [name, id, selection] = parse_id(source);
-             if (selection) return data_factory::select_source(id, selection->first, selection->second);
-             return data_factory::id_source(id, context.size_map.at(id));
-         }
-         return data_factory::constant_source(value_t::parse(source));
-     }
+        if (source.find('@') != std::string::npos) {
+            auto [name, id, selection] = parse_id(source);
+            if (selection) return data_factory::select_source(id, selection->first, selection->second);
+            return data_factory::id_source(id, context.size_map.at(id));
+        }
+        return data_factory::constant_source(value_t::parse(source));
+    }
 
     sink_t parse_sink(const std::string &sink, const parse_context &context) {
         auto [name, id, selection] = parse_id(sink);
@@ -70,11 +70,12 @@ namespace nxon {
                                       parse_sink(outputs.at(0), context)));
     }
 
-    static source_t binary_combine(rule_t (*cons)(source_t, source_t, sink_t), source_t a, source_t b, parse_context &context, const bool len_sum) {
+    static source_t binary_combine(rule_t (*cons)(source_t, source_t, sink_t), source_t a, source_t b,
+                                   parse_context &context, const bool len_sum) {
         const auto new_id = context.members_total;
         const auto new_len = len_sum ? a.len() + b.len() : a.len();
         ++context.members_total;
-        context.size_map[new_id] = new_len;
+        context.new_wire(new_id, new_len, "binary_mid");
         context.circuit.add_rule(cons(std::move(a), std::move(b), data_factory::id_sink(new_id, new_len)));
 
         return data_factory::id_source(new_id, new_len);
@@ -339,15 +340,13 @@ namespace nxon {
             case member_type::WIRE: {
                 auto [name, id, selection] = parse_id(json["id"]);
                 if (selection) throw std::runtime_error("Wire member cannot be selected");
-                context.name_map[name] = id;
-                context.size_map[id] = json["width"];
+                context.new_wire(id, json["width"], name);
                 break;
             }
             case member_type::CLOCK: {
                 auto [name, id, selection] = parse_id(json["id"]);
                 if (selection) throw std::runtime_error("Clock member cannot be selected");
-                context.name_map[name] = id;
-                context.size_map[id] = 1;
+                context.new_wire(id, 1, name);
                 context.circuit.add_clock(id);
                 if (context.circuit_input.contains(id)) context.circuit_input_clocks.insert(id);
                 break;
@@ -374,8 +373,7 @@ namespace nxon {
         }
     }
 
-    parse_context parse_circuit(const nlohmann::json &json, const native_map &native_map) {
-        parse_context context;
+    void parse_circuit(parse_context &context, const nlohmann::json &json, const native_map &native_map) {
         context.members_total = json["totalData"];
         auto &design = json["design"];
         parse_circuit_io(design, context);
@@ -387,7 +385,5 @@ namespace nxon {
             initial_values[id] = value_t(context.size_map.at(id), 0ul);
         context.circuit.put_batch(initial_values);
         context.circuit.refresh_all();
-
-        return context;
     }
 }
