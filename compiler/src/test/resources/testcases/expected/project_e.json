@@ -1,5 +1,5 @@
 {
-  "totalData": 14,
+  "totalData": 13,
   "design": {
     "type": "component",
     "id": "top",
@@ -108,18 +108,10 @@
               {
                 "type": "builtin", "id": "NOT", "loc": "35:52",
                 "input": ["1'h01"],
-                "output": ["$o@11"],
-                "members": [
-                  {"type": "wire", "width": 1, "id": "$o@11", "loc": "35:52"}
-                ]
-              },
-              {
-                "type": "builtin", "id": "AND", "loc": "33:21",
-                "input": ["$o@11"],
                 "output": ["mask@10[0]"]
               },
               {
-                "type": "builtin", "id": "AND", "loc": "33:21",
+                "type": "builtin", "id": "TO", "loc": "0:0",
                 "input": ["1'h01"],
                 "output": ["mask@10[1]"]
               }
@@ -128,22 +120,22 @@
           {
             "type": "builtin", "id": "AND", "loc": "11:8",
             "input": ["c@3", "mask@10[0]"],
+            "output": ["$o@11"],
+            "members": [
+              {"type": "wire", "width": 1, "id": "$o@11", "loc": "11:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "11:8",
+            "input": ["1'h00", "mask@10[1]"],
             "output": ["$o@12"],
             "members": [
               {"type": "wire", "width": 1, "id": "$o@12", "loc": "11:8"}
             ]
           },
           {
-            "type": "builtin", "id": "AND", "loc": "11:8",
-            "input": ["1'h00", "mask@10[1]"],
-            "output": ["$o@13"],
-            "members": [
-              {"type": "wire", "width": 1, "id": "$o@13", "loc": "11:8"}
-            ]
-          },
-          {
             "type": "builtin", "id": "OR", "loc": "10:14",
-            "input": ["$o@12", "$o@13"],
+            "input": ["$o@11", "$o@12"],
             "output": ["c@2"]
           }
         ]
