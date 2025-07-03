@@ -1,9 +1,12 @@
 package pascal.netx.compiler.ast;
 
+import pascal.netx.compiler.ast.element.AbstractComponentNode;
 import pascal.netx.compiler.ast.element.PackageElement;
+import pascal.netx.util.lang.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 public final class PackageNode extends ASTNode {
@@ -31,6 +34,16 @@ public final class PackageNode extends ASTNode {
 
     public void setElements(List<PackageElement> elements) {
         this.elements = elements;
+    }
+
+    public AbstractComponentNode resolveComponent(Identifier identifier) {
+        for (var element : elements) {
+            if (element instanceof AbstractComponentNode componentNode &&
+                componentNode.getIdentifier().equals(identifier)) {
+                return componentNode;
+            }
+        }
+        throw new NoSuchElementException("Cannot resolve component: " + identifier);
     }
 
     public PackageInfoNode getPackageInfo() {

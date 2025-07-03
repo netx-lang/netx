@@ -359,6 +359,10 @@ final class ComponentElaborator {
             var pack = compiler.getPackManager().resolvePackage(sourceLoc, ref.packageRef());
             var component = compiler.elaborateComponent(pack, ref.componentRef(), ref.getArgList());
 
+            if (ref.getArgList() != null) {
+                var attributes = from(sourceLoc, pack.resolveComponent(ref.componentRef()), ref.getArgList());
+                component.setAttributes(attributes);
+            }
             component.setParent(scope);
             component.setPackage(scope.getPackage());
             return component;

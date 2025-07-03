@@ -97,6 +97,7 @@
         "type": "component", "id": "MUX", "loc": "3:10",
         "input": ["1'h01", "c@3", "1'h00"],
         "output": ["c@2"],
+        "attribute": {"width": "1"},
         "members": [
           {"type": "wire", "width": 2, "id": "mask@10", "loc": "6:9"},
           {
