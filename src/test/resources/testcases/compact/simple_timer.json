@@ -42,7 +42,7 @@
         "type": "builtin", "id": "REGISTER@5", "loc": "5:16",
         "input": ["out@4", "ms_clk@0"],
         "output": ["ms@0"],
-        "attribute": {"isPosTrigger": "true"}
+        "attribute": {"pos_edge": "true"}
       },
       {
         "type": "builtin", "id": "MOD@6", "loc": "13:34",
@@ -703,7 +703,7 @@
         "type": "builtin", "id": "REGISTER@4", "loc": "27:11",
         "input": ["out@3", "clk_50@0"],
         "output": ["count@0"],
-        "attribute": {"isPosTrigger": "true"}
+        "attribute": {"pos_edge": "true"}
       },
       {
         "type": "builtin", "id": "NOT@5", "loc": "30:38",
@@ -719,7 +719,7 @@
         "type": "builtin", "id": "REGISTER@7", "loc": "27:11",
         "input": ["out@6", "clk_50@0"],
         "output": ["clk@0"],
-        "attribute": {"isPosTrigger": "true"}
+        "attribute": {"pos_edge": "true"}
       }
     ]
   },
