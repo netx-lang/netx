@@ -68,6 +68,8 @@ namespace nxon {
     sink_t parse_sink(const std::string &sink, const parse_context &context);
 
     void parse_circuit(parse_context &context, const nlohmann::json &json, const native_map &native_map = {});
+
+    parse_context parse_circuit(const nlohmann::json &json, const native_map &native_map = {});
 }
 
 #endif //PARSER_H
