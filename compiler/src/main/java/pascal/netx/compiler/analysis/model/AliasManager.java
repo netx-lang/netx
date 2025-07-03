@@ -165,6 +165,11 @@ public final class AliasManager {
         if (inst instanceof Access(var base, var selector)) {
             var baseRep = repOf(base);
             if (hasSourceAlias(base) && baseRep != base) {
+                if (baseRep.getType() instanceof BitType(int width)) {
+                    if (selector.getWidth() == width) {
+                        return baseRep;
+                    }
+                }
                 return Variable.accessOf(baseRep, selector);
             }
         }

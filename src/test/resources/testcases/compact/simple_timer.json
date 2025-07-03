@@ -828,19 +828,16 @@
       {
         "type": "builtin", "id": "NOT@1", "loc": "75:52",
         "input": ["code@0"],
-        "output": ["$o@1"],
-        "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "75:52"}
-        ]
-      },
-      {
-        "type": "builtin", "id": "AND@2", "loc": "73:18",
-        "input": ["$o@1"],
         "output": ["out@0[0]"]
       },
       {
-        "type": "builtin", "id": "AND@3", "loc": "73:18",
+        "type": "builtin", "id": "TO@2", "defIndex": 1,
         "input": ["code@0"],
+        "output": ["out@0[1]"]
+      },
+      {
+        "type": "builtin", "id": "TO@3", "defIndex": 1,
+        "input": ["code@0[0]"],
         "output": ["out@0[1]"]
       }
     ]
