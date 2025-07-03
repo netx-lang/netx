@@ -28,7 +28,6 @@ public class DuplicatedManager {
 
         List<ComponentScope> toRemove = collectDuplicatedTo(scope);
         for (var entry : idGroups.entrySet()) {
-
             var idGroup = entry.getValue();
             for (int i = 0; i < idGroup.size(); i++) {
                 for (int j = i + 1; j < idGroup.size(); j++) {
