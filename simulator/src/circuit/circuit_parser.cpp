@@ -386,4 +386,10 @@ namespace nxon {
         context.circuit.put_batch(initial_values);
         context.circuit.refresh_all();
     }
+
+    parse_context parse_circuit(const nlohmann::json &json, const native_map &native_map) {
+        parse_context context;
+        parse_circuit(context, json, native_map);
+        return context;
+    }
 }
