@@ -12,7 +12,7 @@ import pascal.netx.compiler.exception.CompileCancellationException;
 /**
  * Since CallSymbolExpr can be used on both
  * the left-hand side (e.g., let foo(i) = i;), and
- * the right-hand side (e.g., let foo = REGISTER(isPosEdge=true);),
+ * the right-hand side (e.g., let foo = REGISTER(pos_edge=true);),
  * we need to ensure the CallSymbolExpr on the left-hand-side is legal.
  */
 public final class BindingLhsAnalysis extends ASTAnalysis implements ASTListener {

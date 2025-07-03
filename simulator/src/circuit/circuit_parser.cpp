@@ -38,7 +38,7 @@ namespace nxon {
     }
 
     static clock_t parse_clock(const std::string &source, const nlohmann::json &attribute) {
-        return parse_clock(source, attribute["isPosTrigger"] == "true");
+        return parse_clock(source, attribute["pos_edge"] == "true");
     }
 
     clock_t parse_clock(const std::string &source, const bool is_pos_trigger) {

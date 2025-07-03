@@ -16,6 +16,7 @@ import pascal.netx.util.lang.Identifier;
 
 import static pascal.netx.compiler.model.Entities.requiresBooleanValue;
 import static pascal.netx.compiler.model.Entities.requiresIntegerValue;
+import static pascal.netx.util.lang.BuiltinComponent.REGISTER_ATTRIBUTE;
 
 public class BuiltInComponentFactory {
     private final NXCompiler compiler;
@@ -70,7 +71,7 @@ public class BuiltInComponentFactory {
         var result = instantiate(parent, ref);
         var attributes = new Attributes();
         var isPosTrigger = requiresBooleanValue(ref.getSourceLoc(), ref.getArguments().getFirst());
-        attributes.addAttribute(Identifier.of("isPosTrigger"), isPosTrigger);
+        attributes.addAttribute(Identifier.of(REGISTER_ATTRIBUTE), isPosTrigger);
         result.setAttributes(attributes);
         result.addInput(newWire(result, "i"));
         result.addInput(newClock(result));
