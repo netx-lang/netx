@@ -1,0 +1,8 @@
+enum State {
+    BAD = 32'habcdabcd, GOOD = 5'b10101
+}
+
+component top : [] -> [a, b] {
+    auto a <> BAD;
+    auto b <> GOOD;
+}

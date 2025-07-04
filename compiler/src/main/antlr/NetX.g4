@@ -37,6 +37,7 @@ interface
 
 enum
     : 'enum' ID '{' ID (',' ID)* '}'
+    | 'enum' ID '{' ID '=' number ( ',' ID '=' number )* '}'
     ;
 
 component_type

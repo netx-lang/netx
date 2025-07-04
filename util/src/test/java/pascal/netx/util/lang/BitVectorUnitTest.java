@@ -22,6 +22,7 @@ class BitVectorUnitTest {
         BitVector bv2 = BitVector.parse("0", 1, 2);
         BitVector bv3 = BitVector.parse("1101010", 7, 2);
         BitVector bv4 = BitVector.parse("0010010", 7, 2);
+
         BitVector bv5 = BitVector.parse("11111111", 8, 2);
         BitVector bv6 = BitVector.parse("00000000", 8, 2);
         BitVector bv7 = BitVector.parse("111111111111101010", 18, 2);
@@ -30,6 +31,15 @@ class BitVectorUnitTest {
         assertEquals(bv6, bv2.ext(8));
         assertEquals(bv7, bv3.ext(18));
         assertEquals(bv8, bv4.ext(18));
+
+        BitVector bv9 = BitVector.parse("0000001", 8, 2);
+        BitVector bv10 = BitVector.parse("0000000", 8, 2);
+        BitVector bv11 = BitVector.parse("000000000001101010", 18, 2);
+        BitVector bv12 = BitVector.parse("000000000000010010", 18, 2);
+        assertEquals(bv9, bv1.unsigned_ext(8));
+        assertEquals(bv10, bv2.unsigned_ext(8));
+        assertEquals(bv11, bv3.unsigned_ext(18));
+        assertEquals(bv12, bv4.unsigned_ext(18));
     }
 
     @Test
