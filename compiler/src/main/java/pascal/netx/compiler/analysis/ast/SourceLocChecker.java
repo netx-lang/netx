@@ -7,6 +7,10 @@ import pascal.netx.compiler.ast.expr.IdentifierExpr;
 
 import java.util.Objects;
 
+/**
+ * Checks that all AST nodes have a source location.
+ * This is useful for debugging and error reporting.
+ */
 public final class SourceLocChecker extends ASTAnalysis implements ASTListener {
 
     public SourceLocChecker(PackageNode design) {

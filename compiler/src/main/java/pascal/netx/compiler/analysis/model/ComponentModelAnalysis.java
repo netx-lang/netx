@@ -11,6 +11,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/**
+ * Base class for intra-component analysis (e.g., {@link ComponentAliasAnalysis}, {@link ComponentDuplicatedElimination}).
+ * Provide an analyzer find the analysis scopes that contains a user-defined component
+ * and multiple builtin components instantiated in it, leaving other user-defined subcomponents out.
+ */
 public abstract class ComponentModelAnalysis extends ModelAnalysis {
     private final Consumer<ComponentScope> analysis;
 

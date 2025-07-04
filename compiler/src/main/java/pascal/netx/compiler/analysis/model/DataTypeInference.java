@@ -21,6 +21,11 @@ import java.util.List;
 import java.util.Queue;
 import java.util.stream.Stream;
 
+/**
+ * This class performs type inference for data variables in the design.
+ * It collects type constraints from the design and infers types for all data variables.
+ * If a variable cannot be inferred, it will throw a TypeCheckingException.
+ */
 public final class DataTypeInference extends ModelAnalysis {
     private static final Logger log = LoggerFactory.getLogger(DataTypeInference.class);
     private final Graph<Variable, BinaryConstraint> graph = new SimpleGraph<>(BinaryConstraint.class);

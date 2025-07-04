@@ -4,6 +4,10 @@ import pascal.netx.compiler.model.scope.PackageScope;
 
 import java.util.function.Predicate;
 
+/**
+ * Analyzes alias relations in a package, propagating the intra-component alias relations to other components.
+ * This is used for expanded dump of the design, where component instantiations are expanded.
+ */
 public final class PackageAliasAnalysis extends ModelAnalysis {
     private final AliasManager manager = new AliasManager();
 

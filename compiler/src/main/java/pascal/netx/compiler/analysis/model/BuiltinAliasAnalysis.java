@@ -16,6 +16,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * This analysis extracts alias relations from built-in components.
+ * There are three cases:
+ * <li> In {@code CAST} components, the input is truncated, extended, or directly passed to the output;
+ * we explicitly add the alias relation between the output and the input (or a truncated input).
+ * <li> In {@code CONCAT} components, if there is only one input,
+ * we add an alias relation between the output and the input since there is no concatenation actually happening.
+ * <li> In {@code TO} components, the elaborator introduces relations
+ * like {@code i <> $TO_DUMMY}. and {@code $TO_DUMMY <> o};
+ * we inline these relations to make them direct aliases {@code i <> o}.
+ */
 public class BuiltinAliasAnalysis extends ModelAnalysis {
     private static final Logger log = LoggerFactory.getLogger(BuiltinAliasAnalysis.class);
 

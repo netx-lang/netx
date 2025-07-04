@@ -1,4 +1,4 @@
-package pascal.netx.compiler.analysis.model.constraint;
+package pascal.netx.compiler.analysis.model;
 
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.scope.ComponentScope;
@@ -17,6 +17,11 @@ import java.util.stream.Collectors;
 
 import static pascal.netx.util.lang.BuiltinComponent.TO;
 
+/**
+ * Manages the detection and resolution of duplicated components in a design.
+ * Duplicated components are those have the same identifier, inputs, and attributes,
+ * by which we can infer their outputs are actually alias.
+ */
 public class DuplicatedManager {
     private final UnionFind<Variable> set = new UnionFind<>();
     private final Map<Variable, Variable> rep = new HashMap<>();

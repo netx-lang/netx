@@ -86,7 +86,7 @@ public final class IOAnalysis extends ModelAnalysis {
     }
 
     private void analyze(ComponentScope component) {
-        var manager = component.getManager();
+        var manager = component.assigns();
         for (var inst : manager.getDefCount()) {
             initialize(inst, def);
         }
