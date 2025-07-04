@@ -10,13 +10,11 @@ import pascal.netx.compiler.ast.expr.IdentifierExpr;
 import pascal.netx.compiler.exception.CompileCancellationException;
 
 /**
- * Since CallSymbolExpr can be used on both
- * the left-hand side (e.g., let foo(i) = i;), and
- * the right-hand side (e.g., let foo = REGISTER(pos_edge=true);),
- * we need to ensure the CallSymbolExpr on the left-hand-side is legal.
+ * Checking whether CallSymbolExpr on the left-hand side of a binding contains no named bindings, i.e.,
+ * though right-hand side named binding, e.g., {@code let foo = REGISTER(pos_edge=true)}, is legal,
+ * the left-hand side should appear only in the form of {@code let foo(i) = i} rather than {@code let foo(i = j) = i}.
  */
 public final class BindingLhsAnalysis extends ASTAnalysis implements ASTListener {
-
     private static final Logger log = LoggerFactory.getLogger(BindingLhsAnalysis.class);
 
     public BindingLhsAnalysis(PackageNode design) {

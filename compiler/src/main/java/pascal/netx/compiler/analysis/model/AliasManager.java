@@ -16,7 +16,16 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Consumer;
 
-
+/**
+ * Manage alias relations introduced by either named or anonymous wires.
+ * This class maintains equivalence classes of these relations,
+ * and heuristically resolves the representatives of each class (by{@link #needUpdate})
+ * for better readability of the dumped design.
+ * <p>
+ * After replacing the variables with their representatives
+ * (in {@link PackageAliasAnalysis} and {@link ComponentAliasAnalysis}),
+ * this class eliminates unnecessary alias relations in {@link #clearIn}.
+ */
 public final class AliasManager {
     private static final Logger log = LoggerFactory.getLogger(AliasManager.class);
     private final UnionFind<Variable> set = new UnionFind<>();
@@ -41,7 +50,10 @@ public final class AliasManager {
     /**
      * Clear the alias relations in the given scope, only keep the necessary ones,
      * i.e., multiple variables in the equivalence class of both sides need to be dumped.
-     * This happens only when selections are involved in the alias relations.
+     * <p>
+     * This happens only when selections are involved in the alias relations,
+     * e.g., there is a relation {@code Alias(a[3], b)}
+     * with both {@code a} of bit(4) and {@code b} of bit(1) need to be dumped.
      */
     void clearIn(ComponentScope scope) {
         Set<ComponentScope.Alias> newAlias = new LinkedHashSet<>();

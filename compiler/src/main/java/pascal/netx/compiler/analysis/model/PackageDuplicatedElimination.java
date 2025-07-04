@@ -1,9 +1,16 @@
 package pascal.netx.compiler.analysis.model;
 
-import pascal.netx.compiler.analysis.model.constraint.DuplicatedManager;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 
+/**
+ * This analysis eliminates duplicated components within a package.
+ * It identifies components that are structurally identical and replaces
+ * them with a single representative instance, reducing redundancy in the model.
+ * <p>
+ * Used for expanded dump of the design, where component instantiations are not expanded
+ * and duplication introduced by them is considered.
+ */
 public final class PackageDuplicatedElimination extends ModelAnalysis {
     private final DuplicatedManager manager = new DuplicatedManager();
 
