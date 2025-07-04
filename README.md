@@ -1,1 +1,91 @@
 # NetX
+
+NetX is a novel hardware description language (HDL) that employs a schematic programming model to intuitively ensure code-to-circuit consistency. In NetX, code is arranged to resemble circuit schematics, enabling a "what you design is what you get" paradigm that empowers designers to manipulate the exact structure of circuits without obscuration.
+
+The NetX toolchain includes a compiler, a package manager, a simulator, and a visualizer implemented in this repository.
+
+## Build and Installation
+
+### Prerequisites
+- Java Development Kit (JDK) 23 or later
+- CMake 3.28 or later
+- Boost 1.80 or later
+- A C++23 compatible compiler.
+
+Although g++-15 and clang++-21 are recommended for standard support for `flat_set` and container ranges, other compilers (e.g., g++-13) may work as well since we use [feature testing](https://en.cppreference.com/w/cpp/experimental/feature_test.html).
+
+#### Building Dependencies
+
+**nlohmann_json**
+
+You can download the single-header file `json.hpp` from the [nlohmann/json GitHub repository](https://github.com/nlohmann/json) and place it in your include path.
+
+Alternatively, you can install it using a package manager like vcpkg or your system's package manager (e.g., `apt-get install nlohmann-json3-dev` on Debian-based systems).
+
+**KaHiP**
+
+You can download KaHiP from its [GitHub repository](https://github.com/KaHIP/KaHIP) and follow the instructions to build it. Make sure to put the built library in your library path or use `cmake --install build/` to install it to the default location.
+
+### Build
+To build the project, run the following command from the root directory:
+```bash
+./gradlew build
+```
+This will build the Java components and the C++ simulator.
+
+### Installation
+After a successful build, you can install the `nx` command-line tool by running the installation script. This will install the tool to `/usr/local/bin`:
+```bash
+sudo ./install.sh
+```
+
+## Usage
+### Compilation
+The `nx` command-line tool is the main entry point for using NetX.
+
+```bash
+nx --help
+Usage: NetX [-hV] [COMMAND]
+Main CLI for the NetX tool
+  -h, --help      Show this help message and exit.
+  -V, --version   Print version information and exit.
+Commands:
+  compile    Compile the NetX source code into JSON
+  dump       Dump the NetX source code to Verilog
+  visualize  Visualize the NetX source code
+```
+
+Note that visualization requires [Graphviz](https://graphviz.gitlab.io/) for further rendering:
+```bash
+nx visualize my_design.nx -o output.dot
+dot -Tpng output.dot -o output.png
+```
+
+The package manager is built into the `nx` command, allowing you to manage NetX packages easily.
+For example, given a project with a `_next.toml` file:
+```toml
+[project]
+name = "std"
+version = "0.1.0"
+include = [ "src", "test" ]
+```
+You can compile the project with the following command:
+```bash
+nx compile _next.toml --top arith_test.sqrt32_test
+```
+This will compile the project with the specified top-level component `sqrt32_test` under the package `arith_test`.
+Moreover, you can import other packages by adding them to the `_next.toml` file, like:
+```toml
+[dependencies]
+std = { version = "0.1.0", git = "git@github.com:pascal-lab/NetX-std.git" }
+```
+The package manager will automatically download the package from the specified Git repository, resolve its dependencies, and make it available for compilation.
+
+### Simulation
+The NetX simulator supports interactive simulation using the `nxsim` command, given the compiled JSON hardware representation (NXON).
+
+```bash
+nx compile my_design.nx --minimal | nxsim
+```
+
+You can also use the nxsim library to build your own simulation testbench. Check the testbenches in the [NetX standard library](https://github.com/pascal-lab/NetX-std) for examples. More examples can be found in [NetX-FFT](https://github.com/naiiren/NetX-FFT) and [NetX-RISC-V](https://github.com/naiiren/NetX-RISC-V).
