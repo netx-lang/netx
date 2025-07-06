@@ -22,6 +22,7 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static pascal.netx.util.lang.BuiltinComponent.REGISTER_ATTRIBUTE;
 import static pascal.netx.util.nxon.FrontendUtils.*;
 
 public final class ScopeParser {
@@ -116,7 +117,7 @@ public final class ScopeParser {
         }
         if (ref.builtin() == BuiltinComponent.REGISTER) {
             var attrNode = node.get("attribute");
-            var register = Register.of(Boolean.parseBoolean(attrNode.get("isPosTrigger").textValue()));
+            var register = Register.of(Boolean.parseBoolean(attrNode.get(REGISTER_ATTRIBUTE).textValue()));
             module.add(register);
             register.setIn(refParser.resolveDataRefList(node, "input").get(0));
             register.setClock(refParser.resolveDataRefList(node, "input").get(1));

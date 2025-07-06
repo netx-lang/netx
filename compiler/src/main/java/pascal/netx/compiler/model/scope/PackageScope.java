@@ -85,9 +85,26 @@ public final class PackageScope extends Scope {
 
         public void addEnum(EnumNode node) {
             Map<Identifier, BitVectorValue> enumMap = new HashMap<>();
-            int width = BigInteger.valueOf(node.getFields().size() - 1).bitLength();
-            for (int i = 0; i < node.getFields().size(); i++) {
-                enumMap.put(node.getFields().get(i), BitVectorValue.of(BitVector.fromInt(i, width)));
+            int width;
+            if (node.getValues().isEmpty()) {
+                width = BigInteger.valueOf(node.getFields().size() - 1).bitLength();
+                for (int i = 0; i < node.getFields().size(); i++) {
+                    enumMap.put(node.getFields().get(i), BitVectorValue.of(BitVector.fromInt(i, width)));
+                }
+            } else {
+                width = 1;
+                for (var number : node.getValues()) {
+                    width = Math.max(width, number.getRepresentation().size());
+                }
+
+                for (int i = 0; i < node.getFields().size(); i++) {
+                    var field = node.getFields().get(i);
+                    var number = node.getValues().get(i).getRepresentation();
+                    if (number.size() != width) {
+                        number = number.unsigned_ext(width);
+                    }
+                    enumMap.put(field, BitVectorValue.of(number));
+                }
             }
             enumDef.put(node.getName(), new Enum(node.getName(), width, enumMap));
         }

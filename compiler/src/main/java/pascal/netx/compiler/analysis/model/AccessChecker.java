@@ -12,6 +12,10 @@ import pascal.netx.compiler.model.variable.selector.BitSelector;
 import pascal.netx.compiler.model.variable.selector.PartSelector;
 import pascal.netx.compiler.model.variable.type.BitType;
 
+/**
+ * Checks the validity of access operations in the design.
+ * This includes ensuring that indices and ranges used in access operations.
+ */
 public final class AccessChecker extends ModelAnalysis {
 
     private static final Logger log = LoggerFactory.getLogger(AccessChecker.class);

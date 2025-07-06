@@ -6,6 +6,9 @@ import pascal.netx.compiler.model.variable.Variable;
 
 import java.util.function.Predicate;
 
+/**
+ * MetaElimination is an analysis that removes meta variables from the design.
+ */
 public final class MetaElimination extends ModelAnalysis {
     public MetaElimination(PackageScope design) {
         super(design);

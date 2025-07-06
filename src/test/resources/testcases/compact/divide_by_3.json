@@ -37,19 +37,19 @@
         "type": "builtin", "id": "REGISTER@4", "loc": "5:29",
         "input": ["$o@3", "clk@0"],
         "output": ["a@0"],
-        "attribute": {"isPosTrigger": "true"}
+        "attribute": {"pos_edge": "true"}
       },
       {
         "type": "builtin", "id": "REGISTER@5", "loc": "5:29",
         "input": ["a@0", "clk@0"],
         "output": ["b@0"],
-        "attribute": {"isPosTrigger": "true"}
+        "attribute": {"pos_edge": "true"}
       },
       {
         "type": "builtin", "id": "REGISTER@6", "loc": "5:29",
         "input": ["b@0", "clk@0"],
         "output": ["c@0"],
-        "attribute": {"isPosTrigger": "false"}
+        "attribute": {"pos_edge": "false"}
       },
       {
         "type": "builtin", "id": "OR@7", "loc": "11:13",

@@ -128,7 +128,7 @@ public final class ComponentScope extends Scope {
         this.attributes = attributes;
     }
 
-    public AssignManager getManager() {
+    public AssignManager assigns() {
         return manager;
     }
 

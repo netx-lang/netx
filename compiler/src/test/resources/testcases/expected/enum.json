@@ -96,7 +96,7 @@
         "type": "builtin", "id": "REGISTER@5", "loc": "6:14",
         "input": ["$o@4", "clk@0"],
         "output": ["o@0"],
-        "attribute": {"isPosTrigger": "true"}
+        "attribute": {"pos_edge": "true"}
       }
     ]
   }

@@ -205,9 +205,17 @@ public final class ComponentEvaluator {
                     throw e;
                 }
             }
+            case VariableRef ref -> {
+                try {
+                    yield Variable.accessOf(ref.getInstance(), selector);
+                } catch (CompileCancellationException e) {
+                    log.error("{}: invalid selectors {}", expr.getSourceLoc(), expr);
+                    throw e;
+                }
+            }
             case EntityList list -> list.select(selector);
             default -> {
-                log.error("{}: Expected component or list but got {}",
+                log.error("{}: Expected variable or list but got {}",
                         expr.getBase().getSourceLoc(), base);
                 throw new CompileCancellationException();
             }

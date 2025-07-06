@@ -1,6 +1,7 @@
 package pascal.netx.compiler.io;
 
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +70,16 @@ public final class TreeParser {
         var iterator = ctx.ID().iterator();
         EnumNode result = EnumNode.of(parseIdentifier(iterator.next()));
         iterator.forEachRemaining(field -> result.addField(parseIdentifier(field)));
+        if (ctx.number() != null) {
+            for (var number : ctx.number()) {
+                if (!(number instanceof BitVectorNumberContext bitCtx)) {
+                    log.error("{}: Expected a bitvector number for enum", locationOf(number.getStart()));
+                    throw new ParseCancellationException();
+                }
+                var value = parseBitVectorNumber(bitCtx);
+                result.addValue(value.setSourceLoc(locationOf(number.getStart())));
+            }
+        }
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
@@ -358,7 +369,11 @@ public final class TreeParser {
     }
 
     static NumberExpr parseNumberExpr(NumberExprContext ctx) {
-        return switch (ctx.number()) {
+        return parseNumber(ctx.number());
+    }
+
+    private static NumberExpr parseNumber(NumberContext n) {
+        return switch (n) {
             case IntNumberContext sub -> IntNumber.of(Integer.parseUnsignedInt(sub.UNSIGNED_INTEGER().getText()));
             case BoolNumberContext sub -> BoolNumber.of(Boolean.parseBoolean(sub.BOOLEAN().getText()));
             case BitVectorNumberContext sub -> parseBitVectorNumber(sub);

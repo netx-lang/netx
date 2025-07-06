@@ -47,6 +47,7 @@ class NXCompilerUnitTest {
     @Test
     void testEnum() throws IOException {
         testEquals("enum.nx", "expected/enum.json", true);
+        testEquals("enum_2.nx", "expected/enum_2.json", false);
     }
 
     @Test

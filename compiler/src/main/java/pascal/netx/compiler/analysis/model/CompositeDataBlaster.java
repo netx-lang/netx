@@ -11,6 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * CompositeDataBlaster is an analysis that flattens composite data types
+ * (like Bundles and Arrays) in the inputs and outputs of components.
+ */
 public final class CompositeDataBlaster extends ModelAnalysis {
     public CompositeDataBlaster(PackageScope design) {
         super(design);
