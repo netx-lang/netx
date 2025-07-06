@@ -47,46 +47,46 @@ namespace nxon {
                 return result;
             }
         };
+
+        template<typename V>
+        class id_based_map {
+        public:
+            using key_type = id_t;
+            using mapped_type = V;
+            using size_type = size_t;
+
+        private:
+            std::vector<mapped_type> content;
+
+        public:
+            mapped_type &operator[](const key_type id) {
+                if (content.size() <= id) content.resize(id + 1);
+                return content[id];
+            }
+
+            [[nodiscard]] const mapped_type &operator[](const key_type id) const {
+                return content[id];
+            }
+
+            [[nodiscard]] mapped_type &at(const key_type id) {
+                return content.at(id);
+            }
+
+            [[nodiscard]] const mapped_type &at(const key_type id) const {
+                return content.at(id);
+            }
+
+            [[nodiscard]] bool contains(const key_type id) const {
+                return id < content.size();
+            }
+        };
     }
 
     using id_set = impl::id_set_impl;
 
     using value_batch = std::unordered_map<id_t, value_t>;
 
-    template<typename V>
-    class id_based_map {
-    public:
-        using key_type = id_t;
-        using mapped_type = V;
-        using size_type = size_t;
-
-    private:
-        std::vector<mapped_type> content;
-
-    public:
-        mapped_type &operator[](const key_type id) {
-            if (content.size() <= id) content.resize(id + 1);
-            return content[id];
-        }
-
-        [[nodiscard]] const mapped_type &operator[](const key_type id) const {
-            return content[id];
-        }
-
-        [[nodiscard]] mapped_type &at(const key_type id) {
-            return content.at(id);
-        }
-
-        [[nodiscard]] const mapped_type &at(const key_type id) const {
-            return content.at(id);
-        }
-
-        [[nodiscard]] bool contains(const key_type id) const {
-            return id < content.size();
-        }
-    };
-
-    class value_storage : public id_based_map<value_t> {
+    class value_storage : public impl::id_based_map<value_t> {
         std::vector<std::function<void(value_storage &)> > delayed;
 
     public:
