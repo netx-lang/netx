@@ -246,9 +246,8 @@ module mod_7 (
   // code@(70:9)
   input t_0;
 
-  wire t_2;
-  assign t_2 = ~t_0;
-  assign t_1[0] = t_2;
+  assign t_1[0] = ~t_0;
   assign t_1[1] = t_0;
+  assign t_1[1] = t_0[0];
 endmodule
 

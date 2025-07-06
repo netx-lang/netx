@@ -7,6 +7,10 @@ import pascal.netx.util.lang.BuiltinComponent;
 
 import java.util.Stack;
 
+/**
+ * RedundantElimination is an analysis that removes redundant components from the design.
+ * It specifically targets built-in components like CAST and CONCAT that can be simplified.
+ */
 public final class RedundantElimination extends ModelAnalysis {
     public RedundantElimination(PackageScope pack) {
         super(pack);

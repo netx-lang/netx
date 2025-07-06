@@ -21,7 +21,7 @@
         "type": "builtin", "id": "REGISTER@3", "loc": "5:14",
         "input": ["output@2", "clk@0"],
         "output": ["count@0"],
-        "attribute": {"isPosTrigger": "true"}
+        "attribute": {"pos_edge": "true"}
       }
     ]
   },

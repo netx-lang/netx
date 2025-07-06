@@ -5,6 +5,11 @@ import pascal.netx.compiler.model.scope.PackageScope;
 
 import java.util.function.Predicate;
 
+/**
+ * Analyzes alias relations component-locally,
+ * i.e., the intra-component alias relations won't be propagated to other components.
+ * This is used for compact dump of the design, where component instantiations are not expanded.
+ */
 public final class ComponentAliasAnalysis extends ComponentModelAnalysis {
 
     public ComponentAliasAnalysis(PackageScope design) {

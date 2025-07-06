@@ -21,7 +21,7 @@ public final class AssignManager {
         this.scope = scope;
     }
 
-    public void assign(SourceLoc sourceLoc, Variable lhs, Variable rhs) {
+    public void add(SourceLoc sourceLoc, Variable lhs, Variable rhs) {
         use(rhs);
         define(lhs);
         if (lhs instanceof Composition lhsComposite && rhs instanceof Composition rhsComposite) {

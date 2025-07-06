@@ -16,6 +16,8 @@ import pascal.netx.util.lang.Identifier;
 
 import static pascal.netx.compiler.model.Entities.requiresBooleanValue;
 import static pascal.netx.compiler.model.Entities.requiresIntegerValue;
+import static pascal.netx.util.lang.BuiltinComponent.REGISTER_ATTRIBUTE;
+import static pascal.netx.util.lang.BuiltinComponent.TO;
 
 public class BuiltInComponentFactory {
     private final NXCompiler compiler;
@@ -59,7 +61,7 @@ public class BuiltInComponentFactory {
 
     private ComponentScope createIdentityComponent(Scope parent, BuiltinRef ref) {
         var result = instantiate(parent, ref);
-        var entity = newWire(result, "t");
+        var entity = newWire(result, "TO_DUMMY");
         result.addInput(entity);
         result.addOutput(entity);
         return result;
@@ -70,7 +72,7 @@ public class BuiltInComponentFactory {
         var result = instantiate(parent, ref);
         var attributes = new Attributes();
         var isPosTrigger = requiresBooleanValue(ref.getSourceLoc(), ref.getArguments().getFirst());
-        attributes.addAttribute(Identifier.of("isPosTrigger"), isPosTrigger);
+        attributes.addAttribute(Identifier.of(REGISTER_ATTRIBUTE), isPosTrigger);
         result.setAttributes(attributes);
         result.addInput(newWire(result, "i"));
         result.addInput(newClock(result));
@@ -130,12 +132,16 @@ public class BuiltInComponentFactory {
             ports = argNumHint;
         }
 
-        var result = instantiate(parent, ref);
-        for (int i = 1; i <= ports; i++) {
-            result.addInput(newWire(result, "i" + i));
+        if (ports == 1) {
+            return createIdentityComponent(parent, BuiltinRef.of(TO, ref.getSourceLoc()));
+        } else {
+            var result = instantiate(parent, ref);
+            for (int i = 1; i <= ports; i++) {
+                result.addInput(newWire(result, "i" + i));
+            }
+            result.addOutput(newWire(result, "o"));
+            return result;
         }
-        result.addOutput(newWire(result, "o"));
-        return result;
     }
 
     private ComponentScope instantiate(Scope parent, BuiltinRef ref) {

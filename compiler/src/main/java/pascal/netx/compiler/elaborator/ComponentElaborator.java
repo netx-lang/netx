@@ -73,7 +73,7 @@ final class ComponentElaborator {
         var product = factory.create(scope, Identifier.of(InterfaceNode.OUTPUT_NAME).setSourceLoc(loc));
         var productIter = product.getElements().iterator();
         for (var input : scope.getInputs()) {
-            scope.getManager().assign(loc, productIter.next(), input);
+            scope.assigns().add(loc, productIter.next(), input);
         }
         scope.addOutput(product);
     }
@@ -268,7 +268,7 @@ final class ComponentElaborator {
 
             int size = requiresMatchedSize(sourceLoc, lhs.input(), rhs.output());
             for (int i = 0; i < size; ++i) {
-                scope.getManager().assign(sourceLoc, lhs.input().get(i), rhs.output().get(i));
+                scope.assigns().add(sourceLoc, lhs.input().get(i), rhs.output().get(i));
             }
             return new ComponentPort(rhs.input(), lhs.output());
         }
@@ -303,10 +303,10 @@ final class ComponentElaborator {
 
                 var expr = assigns.get(mutable);
                 if (isInput) {
-                    scope.getManager().assign(connection.loc(),
+                    scope.assigns().add(connection.loc(),
                             mutable, getter.apply(expr).getFirst());
                 } else {
-                    scope.getManager().assign(connection.loc(),
+                    scope.assigns().add(connection.loc(),
                             getter.apply(expr).getFirst(), mutable);
                 }
             }
@@ -359,6 +359,10 @@ final class ComponentElaborator {
             var pack = compiler.getPackManager().resolvePackage(sourceLoc, ref.packageRef());
             var component = compiler.elaborateComponent(pack, ref.componentRef(), ref.getArgList());
 
+            if (ref.getArgList() != null) {
+                var attributes = from(sourceLoc, pack.resolveComponent(ref.componentRef()), ref.getArgList());
+                component.setAttributes(attributes);
+            }
             component.setParent(scope);
             component.setPackage(scope.getPackage());
             return component;

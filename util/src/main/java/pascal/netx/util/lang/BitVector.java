@@ -78,6 +78,10 @@ public final class BitVector {
         return get(0);
     }
 
+    public BitVector unsigned_ext(int width) {
+        return new BitVector(width, data);
+    }
+
     public BitVector ext(int width) {
         if (msb()) {
             var high = BigInteger.ONE.shiftLeft(width - size + 1).subtract(BigInteger.ONE);
