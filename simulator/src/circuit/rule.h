@@ -290,7 +290,7 @@ namespace nxon {
         [[nodiscard]] rule_t register_rule(clock_t clk, source_t in, sink_t out);
     }
 
-    using rule_storage = id_based_map<std::vector<rule_t> >;
+    using rule_storage = impl::id_based_map<std::vector<rule_t> >;
 
     class rule_set {
         std::set<rule_t> all_rules;
