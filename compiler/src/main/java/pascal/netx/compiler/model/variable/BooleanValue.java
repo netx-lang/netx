@@ -4,6 +4,8 @@ import pascal.netx.compiler.model.variable.type.BitType;
 import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.lang.BitVector;
 
+import javax.annotation.Nonnull;
+
 public record BooleanValue(boolean value) implements Value {
 
     public static BooleanValue of(boolean value) {
@@ -26,6 +28,7 @@ public record BooleanValue(boolean value) implements Value {
         return BooleanValue.of(value == other.value);
     }
 
+    @Nonnull
     @Override
     public String toString() {
         return String.valueOf(value);

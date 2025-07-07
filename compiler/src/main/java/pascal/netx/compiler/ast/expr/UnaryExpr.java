@@ -76,7 +76,7 @@ public final class UnaryExpr extends ExprNode {
         static {
             OP_MAP.put("+", ADD);
             OP_MAP.put("-", SUB);
-            OP_MAP.put("!", NOT);
+            OP_MAP.put("not", NOT);
             OP_MAP.put("~", BITWISE_NOT);
         }
 
