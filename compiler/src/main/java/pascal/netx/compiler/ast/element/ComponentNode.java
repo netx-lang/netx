@@ -22,10 +22,6 @@ public final class ComponentNode extends AbstractComponentNode implements Packag
         return new ComponentNode(id, type, arguments, false, elements);
     }
 
-    public static ComponentNode ofPassed(Identifier id, ComponentTypeNode type, List<Identifier> arguments) {
-        return new ComponentNode(id, type, arguments, true, List.of());
-    }
-
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);

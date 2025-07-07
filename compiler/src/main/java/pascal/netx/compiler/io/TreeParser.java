@@ -37,7 +37,7 @@ public final class TreeParser {
         PackageNode result = PackageNode.of(parsePackageInfo(ctx.header())).setSourceLoc(locationOf(ctx.getStart()));
         for (var child : ctx.children) {
             switch (child) {
-                case Import_statementContext sub -> parseImportInto(sub, result);
+                case Import_Context sub -> parseImportInto(sub, result);
                 case ComponentContext sub -> parseComponentInto(sub, result);
                 case InterfaceContext sub -> parseInterfaceInto(sub, result);
                 case EnumContext sub -> parseEnumInto(sub, result);
@@ -50,7 +50,7 @@ public final class TreeParser {
         return result;
     }
 
-    static void parseImportInto(Import_statementContext ctx, PackageNode design) {
+    static void parseImportInto(Import_Context ctx, PackageNode design) {
         parseImport(ctx).forEach(design::addDefinition);
     }
 
@@ -99,37 +99,27 @@ public final class TreeParser {
         var identifier = parseIdentifier(ctx.ID());
         var attributes = parseComponentAttributes(ctx);
         var type = parseComponentType(ctx.component_type(), locationOf(ctx.getStart()));
-        var result = switch (ctx.component_body()) {
-            case ImplementedContext body ->
-                    ComponentNode.of(identifier, type, attributes, parseElements(body.element()));
-            case PassedContext _ ->
-                    ComponentNode.ofPassed(identifier, type, attributes);
-            default -> throw new ShallNotReachHereError();
-        };
+        var result = ComponentNode.of(identifier, type, attributes, parseElements(ctx.component_body().element()));
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
     static InterfaceNode parseInterface(InterfaceContext ctx) {
-        if (!(ctx.component_body() instanceof ImplementedContext body)) {
-            log.error("{}: Expected an implemented interface", locationOf(ctx.getStart()));
-            throw new CompileCancellationException();
-        }
         var type = parseExpr(ctx.expression());
         var identifier = parseIdentifier(ctx.ID());
         var attributes = parseInterfaceAttributes(ctx);
-        var result = InterfaceNode.of(identifier, type, attributes, parseElements(body.element()));
+        var result = InterfaceNode.of(identifier, type, attributes, parseElements(ctx.component_body().element()));
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static List<ImportNode> parseImport(Import_statementContext ctx) {
-        return switch (ctx.lib_reference()) {
-            case CommonLibRefContext refCtx -> parseCommonImport(ctx, refCtx);
-            case WildcardLibRefContext refCtx -> parseWildcardImport(ctx, refCtx);
+    static List<ImportNode> parseImport(Import_Context ctx) {
+        return switch (ctx.reference()) {
+            case CommonRefContext refCtx -> parseCommonImport(ctx, refCtx);
+            case WildcardRefContext refCtx -> parseWildcardImport(ctx, refCtx);
             default -> throw new ShallNotReachHereError();
         };
     }
 
-    private static List<ImportNode> parseWildcardImport(Import_statementContext ctx, WildcardLibRefContext refCtx) {
+    private static List<ImportNode> parseWildcardImport(Import_Context ctx, WildcardRefContext refCtx) {
         return List.of(
                 ImportNode.ofWildcard(
                         refCtx.ID().stream().map(TreeParser::parseIdentifier).toList()
@@ -137,11 +127,11 @@ public final class TreeParser {
         );
     }
 
-    private static List<ImportNode> parseCommonImport(Import_statementContext ctx, CommonLibRefContext refCtx) {
+    private static List<ImportNode> parseCommonImport(Import_Context ctx, CommonRefContext refCtx) {
         var prefix = refCtx.ID().stream().map(TreeParser::parseIdentifier).toList();
         List<ImportNode> results;
-        if (refCtx.lib_reference_set() != null) {
-            results = refCtx.lib_reference_set().ID().stream()
+        if (refCtx.reference_set() != null) {
+            results = refCtx.reference_set().ID().stream()
                     .map(TreeParser::parseIdentifier)
                     .map(id -> new ArrayList<>(prefix) {{
                         add(id);
@@ -151,19 +141,19 @@ public final class TreeParser {
         } else {
             results = List.of(ImportNode.of(prefix));
         }
-        if (ctx.lib_alias() != null) {
-            parseImportAlias(ctx.lib_alias(), results);
+        if (ctx.alias() != null) {
+            parseImportAlias(ctx.alias(), results);
         }
         results.forEach(stmt -> stmt.setSourceLoc(locationOf(ctx.getStart())));
         return results;
     }
 
-    private static void parseImportAlias(Lib_aliasContext ctx, List<ImportNode> results) {
+    private static void parseImportAlias(AliasContext ctx, List<ImportNode> results) {
         List<Identifier> aliasID;
         if (ctx.ID() != null) {
             aliasID = List.of(parseIdentifier(ctx.ID()));
         } else {
-            aliasID = ctx.lib_reference_set().ID().stream().map(TreeParser::parseIdentifier).toList();
+            aliasID = ctx.reference_set().ID().stream().map(TreeParser::parseIdentifier).toList();
         }
         if (aliasID.size() != results.size()) {
             log.error("{}: Unmatched number of import alias", locationOf(ctx.getStart()));

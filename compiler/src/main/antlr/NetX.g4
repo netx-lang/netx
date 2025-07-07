@@ -1,7 +1,7 @@
 grammar NetX;
 
 design
-    : header? (import_statement | component | interface | enum)+
+    : header? (import_ | component | interface | enum)+
     ;
 
 header
@@ -9,22 +9,22 @@ header
     | kind='library' ID ';'
     ;
 
-import_statement
-    : 'import' lib_reference ('as' lib_alias)? ';'
+import_
+    : 'import' reference ('as' alias)? ';'
     ;
 
-lib_reference
-    : ID ('.' ID)* ('.' lib_reference_set)? # CommonLibRef
-    | ID ('.' ID)* '.' '*'                  # WildcardLibRef
+reference
+    : ID ('.' ID)* ('.' reference_set)? # CommonRef
+    | ID ('.' ID)* '.' '*'              # WildcardRef
     ;
 
-lib_reference_set
+reference_set
     : '{' ID (',' ID)* '}'
     ;
 
-lib_alias
+alias
     : ID
-    | lib_reference_set
+    | reference_set
     ;
 
 component
@@ -45,8 +45,7 @@ component_type
     ;
 
 component_body
-    : '{' element* '}'  # Implemented
-    | 'pass' ';'        # Passed
+    : '{' element* '}'
     ;
 
 attributes
@@ -87,7 +86,7 @@ expression
     | expression '.' ID                                             # FieldExpr
     | prev='#' expression                                           # UnaryExpr
     | expression post='#'                                           # UnaryExpr
-    | op=('+' | '-' | '~' | '!') expression                         # UnaryExpr
+    | op=('+' | '-' | '~' | 'not') expression                       # UnaryExpr
     | lhs=expression op='**' rhs=expression                         # BinaryExpr
     | lhs=expression op=('*' | '/' | '%') rhs=expression            # BinaryExpr
     | lhs=expression op=('+' | '-') rhs=expression                  # BinaryExpr
