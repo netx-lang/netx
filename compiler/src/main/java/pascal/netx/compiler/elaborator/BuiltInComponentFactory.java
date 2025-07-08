@@ -45,8 +45,9 @@ public class BuiltInComponentFactory {
             case TO -> createIdentityComponent(parent, ref);
             case CAST -> createCastComponent(parent, ref);
             case NOT -> createNotComponent(parent, ref);
-            case OR, AND, XOR, NOR, NAND, XNOR, CONCAT, ADD, SUB, MUL, DIV, MOD ->
+            case OR, AND, XOR, NOR, NAND, XNOR, CONCAT, ADD, MUL ->
                     createMultiInputComponent(parent, ref, 2);
+            case SUB, DIV, MOD ->  createDualInputComponent(parent, ref);
             case EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE -> createRelationalOpComponent(parent, ref);
             case SHL, ASHR, LSHR -> createShiftComponent(parent, ref);
         };
@@ -119,6 +120,14 @@ public class BuiltInComponentFactory {
         Utils.requiresMatchedSize(ref.getSourceLoc(), 0, ref.getArguments());
         var result = instantiate(parent, ref);
         result.addInput(newWire(result, "i"), newWire(result, "off"));
+        result.addOutput(newWire(result, "o"));
+        return result;
+    }
+
+    private ComponentScope createDualInputComponent(Scope parent, BuiltinRef ref) {
+        Utils.requiresMatchedSize(ref.getSourceLoc(), 0, ref.getArguments());
+        var result = instantiate(parent, ref);
+        result.addInput(newWire(result, "i1"), newWire(result, "i2"));
         result.addOutput(newWire(result, "o"));
         return result;
     }

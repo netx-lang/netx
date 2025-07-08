@@ -87,7 +87,7 @@ expression
     | prev='#' expression                                           # UnaryExpr
     | expression post='#'                                           # UnaryExpr
     | op=('+' | '-' | '~' | 'not') expression                       # UnaryExpr
-    | lhs=expression op='**' rhs=expression                         # BinaryExpr
+    | <assoc=right> lhs=expression op='**' rhs=expression           # BinaryExpr
     | lhs=expression op=('*' | '/' | '%') rhs=expression            # BinaryExpr
     | lhs=expression op=('+' | '-') rhs=expression                  # BinaryExpr
     | lhs=expression op=('>>'| '<<' | '>>>' | '<<<') rhs=expression # BinaryExpr
