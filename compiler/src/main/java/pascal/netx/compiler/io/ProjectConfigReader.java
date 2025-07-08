@@ -145,11 +145,13 @@ public final class ProjectConfigReader {
     }
 
     private ProjectConfigReader resolveDependency(Path libRoot, JsonNode spec) throws IOException {
-        var versionSpec = VersionSpec.of(spec.get("version").textValue());
         var libCompiler = new ProjectConfigReader(config, libRoot.resolve(DEFAULT_CONFIG));
-        if (!versionSpec.isCompatibleWith(libCompiler.info.version())) {
-            log.error("Dependency {} version mismatch", libCompiler.info.name());
-            throw new CompileCancellationException();
+        if (spec.has("version")) {
+            var versionSpec = VersionSpec.of(spec.get("version").textValue());
+            if (!versionSpec.isCompatibleWith(libCompiler.info.version())) {
+                log.error("Dependency {} version mismatch", libCompiler.info.name());
+                throw new CompileCancellationException();
+            }
         }
         return libCompiler;
     }

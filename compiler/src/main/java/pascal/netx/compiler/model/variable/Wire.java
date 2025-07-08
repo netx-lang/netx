@@ -1,7 +1,9 @@
 package pascal.netx.compiler.model.variable;
 
+import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.model.scope.ComponentScope;
+import pascal.netx.compiler.model.variable.type.BitType;
 import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.lang.Identifier;
 
@@ -37,6 +39,10 @@ public final class Wire extends Data {
 
         public Factory(Type type, NXCompiler compiler) {
             super(compiler);
+            if (type instanceof BitType(int width) && width == 0) {
+                log.error("Cannot create a wire with zero width");
+                throw new CompileCancellationException();
+            }
             this.type = type;
         }
 
