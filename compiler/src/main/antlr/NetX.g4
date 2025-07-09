@@ -70,43 +70,43 @@ data_declaration
     | kind='auto'   declaration_list
     ;
 
-declaration_symbol
-    : ID ('[' expression ']')*
-    ;
-
 declaration_list
     : declaration_symbol (',' declaration_symbol)*
     ;
 
+declaration_symbol
+    : ID ('[' expression ']')*
+    ;
+
 expression
-    : symbol                                                        # SymbolExpr
-    | number                                                        # NumberExpr
-    | '[' list ']'                                                  # ListExpr
-    | expression (selector)+                                        # AccessExpr
-    | expression '.' ID                                             # FieldExpr
-    | prev='#' expression                                           # UnaryExpr
-    | expression post='#'                                           # UnaryExpr
-    | op=('+' | '-' | '~' | 'not') expression                       # UnaryExpr
-    | <assoc=right> lhs=expression op='**' rhs=expression           # BinaryExpr
-    | lhs=expression op=('*' | '/' | '%') rhs=expression            # BinaryExpr
-    | lhs=expression op=('+' | '-') rhs=expression                  # BinaryExpr
-    | lhs=expression op=('>>'| '<<' | '>>>' | '<<<') rhs=expression # BinaryExpr
-    | lhs=expression op=('<' | '<=' | '>'  | '>=') rhs=expression   # BinaryExpr
+    : symbol                                                          # SymbolExpr
+    | number                                                          # NumberExpr
+    | '[' list ']'                                                    # ListExpr
+    | expression (selector)+                                          # AccessExpr
+    | expression '.' ID                                               # FieldExpr
+    | <assoc=right> prev='#' expression                               # UnaryExpr
+    | <assoc=left> expression post='#'                                # UnaryExpr
+    | <assoc=right> op=('+' | '-' | '~' | 'not') expression           # UnaryExpr
+    | <assoc=right> lhs=expression op='**' rhs=expression             # BinaryExpr
+    | lhs=expression op=('*' | '/' | '%') rhs=expression              # BinaryExpr
+    | lhs=expression op=('+' | '-') rhs=expression                    # BinaryExpr
+    | lhs=expression op=('>>'| '<<' | '>>>' | '<<<') rhs=expression   # BinaryExpr
+    | lhs=expression op=('<' | '<=' | '>'  | '>=') rhs=expression     # BinaryExpr
     | lhs=expression op=('<*' | '<=*' | '>*'  | '>=*') rhs=expression # BinaryExpr
-    | lhs=expression op=('==' | '!=') rhs=expression                # BinaryExpr
-    | lhs=expression op='&' rhs=expression                          # BinaryExpr
-    | lhs=expression op=('^~' | '~^' | '^') rhs=expression          # BinaryExpr
-    | lhs=expression op='|' rhs=expression                          # BinaryExpr
-    | lhs=expression op='and' rhs=expression                        # BinaryExpr
-    | lhs=expression op='or' rhs=expression                         # BinaryExpr
-    | lhs=expression op='::' rhs=expression                         # BinaryExpr
-    | lhs=expression op='<>' rhs=expression                         # BinaryExpr
-    | lhs=expression op='||' rhs=expression                         # BinaryExpr
-    | '{' port_assign (',' port_assign)* '}'                        # PortExpr
+    | lhs=expression op=('==' | '!=') rhs=expression                  # BinaryExpr
+    | lhs=expression op='&' rhs=expression                            # BinaryExpr
+    | lhs=expression op=('^~' | '~^' | '^') rhs=expression            # BinaryExpr
+    | lhs=expression op='|' rhs=expression                            # BinaryExpr
+    | lhs=expression op='and' rhs=expression                          # BinaryExpr
+    | lhs=expression op='or' rhs=expression                           # BinaryExpr
+    | lhs=expression op='::' rhs=expression                           # BinaryExpr
+    | lhs=expression op='<>' rhs=expression                           # BinaryExpr
+    | lhs=expression op='||' rhs=expression                           # BinaryExpr
+    | '{' port_assign (',' port_assign)* '}'                          # PortExpr
     | 'if' cond=expression
       'then' thenBranch=expression
-      'else' elseBranch=expression                                  # ConditionalExpr
-    | '(' expression ')'                                            # ParenExpr
+      'else' elseBranch=expression                                    # ConditionalExpr
+    | '(' expression ')'                                              # ParenExpr
     ;
 
 selector
@@ -122,9 +122,9 @@ list
     ;
 
 qualifier
-    : iterator                    # Generator
-    | 'when' expression           # Filter
-    | binding                     # LocalBinding
+    : iterator          # Generator
+    | 'when' expression # Filter
+    | binding           # LocalBinding
     ;
 
 iterator
