@@ -8,6 +8,12 @@ set(CMAKE_CXX_FLAGS_DEBUG "-ggdb -fsanitize=address,undefined -fno-omit-frame-po
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Og -ggdb")
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-stdlib=libc++" HAS_LIBCXX)
+if (HAS_LIBCXX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+endif ()
+
 # Disable FindBoost module
 if (POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)

@@ -133,6 +133,22 @@ namespace nxon {
                 underlying.put(values, v.signed_resize(len));
             }
         };
+
+        struct unsigned_resize_sink_adapter final : sink_impl {
+            const sink_t underlying;
+
+            explicit unsigned_resize_sink_adapter(sink_t underlying)
+                : sink_impl(underlying.outcomes(), underlying.len()), underlying(std::move(underlying)) {
+            }
+
+            [[nodiscard]] bool check(const value_storage &values, const value_t &v) const override {
+                return underlying.check(values, v.unsigned_resize(len));
+            }
+
+            void put(value_storage &values, const value_t v) const override {
+                underlying.put(values, v.unsigned_resize(len));
+            }
+        };
     }
 
     namespace data_factory {
@@ -162,6 +178,10 @@ namespace nxon {
 
         sink_t signed_resize_sink_adapter(sink_t sink) {
             return sink_t{new impl::signed_resize_sink_adapter(std::move(sink))};
+        }
+
+        sink_t unsigned_resize_sink_adapter(sink_t sink) {
+            return sink_t{new impl::unsigned_resize_sink_adapter(std::move(sink))};
         }
     }
 

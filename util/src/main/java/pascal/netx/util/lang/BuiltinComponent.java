@@ -7,7 +7,7 @@ import java.util.Set;
 
 public enum BuiltinComponent {
     REGISTER, SPLIT, TO,
-    CAST, CONCAT,
+    UCAST, CAST, CONCAT,
     OR, NOT, AND, XOR, NOR, NAND, XNOR,
     EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE,
     ADD, SUB, SHL, MUL, DIV, MOD, ASHR, LSHR;

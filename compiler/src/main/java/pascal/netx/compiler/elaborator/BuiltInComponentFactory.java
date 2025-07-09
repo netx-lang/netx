@@ -43,7 +43,7 @@ public class BuiltInComponentFactory {
             case REGISTER -> createRegisterComponent(parent, ref);
             case SPLIT -> createSplitComponent(parent, ref);
             case TO -> createIdentityComponent(parent, ref);
-            case CAST -> createCastComponent(parent, ref);
+            case UCAST, CAST -> createCastComponent(parent, ref);
             case NOT -> createNotComponent(parent, ref);
             case OR, AND, XOR, NOR, NAND, XNOR, CONCAT, ADD, MUL ->
                     createMultiInputComponent(parent, ref, 2);

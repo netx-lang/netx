@@ -236,6 +236,8 @@ namespace nxon {
         [[nodiscard]] source_t constant_source(value_t value);
 
         [[nodiscard]] sink_t signed_resize_sink_adapter(sink_t sink);
+
+        [[nodiscard]] sink_t unsigned_resize_sink_adapter(sink_t sink);
     }
 
     namespace rule_factory {
