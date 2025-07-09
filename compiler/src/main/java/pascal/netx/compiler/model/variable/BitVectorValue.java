@@ -6,6 +6,8 @@ import pascal.netx.compiler.model.variable.type.BitType;
 import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.lang.BitVector;
 
+import javax.annotation.Nonnull;
+
 public record BitVectorValue(BitVector value) implements IntegerValue {
 
     private static final Logger log = LoggerFactory.getLogger(BitVectorValue.class);
@@ -14,6 +16,7 @@ public record BitVectorValue(BitVector value) implements IntegerValue {
         return new BitVectorValue(value);
     }
 
+    @Nonnull
     @Override
     public String toString() {
         return value.toString();
@@ -108,23 +111,43 @@ public record BitVectorValue(BitVector value) implements IntegerValue {
     }
 
     @Override
-    public BooleanValue gt(IntegerValue other) {
+    public BooleanValue sgt(IntegerValue other) {
         return BooleanValue.of(value.sgt(other.toBitVector()));
     }
 
     @Override
-    public BooleanValue ge(IntegerValue other) {
+    public BooleanValue sge(IntegerValue other) {
         return BooleanValue.of(value.sge(other.toBitVector()));
     }
 
     @Override
-    public BooleanValue lt(IntegerValue other) {
+    public BooleanValue slt(IntegerValue other) {
         return BooleanValue.of(value.slt(other.toBitVector()));
     }
 
     @Override
-    public BooleanValue le(IntegerValue other) {
+    public BooleanValue sle(IntegerValue other) {
         return BooleanValue.of(value.sle(other.toBitVector()));
+    }
+
+    @Override
+    public BooleanValue ugt(IntegerValue other) {
+        return BooleanValue.of(value.ugt(other.toBitVector()));
+    }
+
+    @Override
+    public BooleanValue uge(IntegerValue other) {
+        return BooleanValue.of(value.uge(other.toBitVector()));
+    }
+
+    @Override
+    public BooleanValue ult(IntegerValue other) {
+        return BooleanValue.of(value.ult(other.toBitVector()));
+    }
+
+    @Override
+    public BooleanValue ule(IntegerValue other) {
+        return BooleanValue.of(value.ule(other.toBitVector()));
     }
 
     @Override

@@ -92,6 +92,7 @@ expression
     | lhs=expression op=('+' | '-') rhs=expression                  # BinaryExpr
     | lhs=expression op=('>>'| '<<' | '>>>' | '<<<') rhs=expression # BinaryExpr
     | lhs=expression op=('<' | '<=' | '>'  | '>=') rhs=expression   # BinaryExpr
+    | lhs=expression op=('<*' | '<=*' | '>*'  | '>=*') rhs=expression # BinaryExpr
     | lhs=expression op=('==' | '!=') rhs=expression                # BinaryExpr
     | lhs=expression op='&' rhs=expression                          # BinaryExpr
     | lhs=expression op=('^~' | '~^' | '^') rhs=expression          # BinaryExpr
