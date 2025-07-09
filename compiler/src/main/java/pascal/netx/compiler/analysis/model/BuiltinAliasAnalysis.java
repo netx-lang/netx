@@ -40,7 +40,7 @@ public class BuiltinAliasAnalysis extends ModelAnalysis {
             if (scope.isBuiltin()) {
                 var builtinRef = BuiltinComponent.of(scope.getIdentifier());
                 switch (builtinRef) {
-                    case CAST -> extractFromCast(scope);
+                    case CAST, UCAST -> extractFromCast(scope);
                     case CONCAT -> extractFromConcat(scope);
                 }
             }

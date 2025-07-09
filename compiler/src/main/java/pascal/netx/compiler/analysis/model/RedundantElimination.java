@@ -31,7 +31,7 @@ public final class RedundantElimination extends ModelAnalysis {
         if (scope.isBuiltin()) {
             var builtinRef = BuiltinComponent.of(scope.getIdentifier());
             return switch (builtinRef) {
-                case CAST -> isRedundantCast(scope);
+                case UCAST, CAST -> isRedundantCast(scope);
                 case CONCAT -> isRedundantConcat(scope);
                 default -> false;
             };

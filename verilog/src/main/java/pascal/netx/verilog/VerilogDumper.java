@@ -223,7 +223,7 @@ public class VerilogDumper {
                     notepad.print(rhsList.getFirst());
                     notepad.print(")");
                 }
-                case TO -> notepad.print(rhsList.getFirst());
+                case UCAST, TO -> notepad.print(rhsList.getFirst());
                 default -> {
                     var delimiter = " " + BuiltinComponent.VERILOG_OP.get(assign.builtin()) + " ";
                     notepad.print(String.join(delimiter, rhsList));

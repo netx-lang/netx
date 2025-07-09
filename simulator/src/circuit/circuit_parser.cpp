@@ -137,7 +137,7 @@ namespace nxon {
 
     enum class builtin_type {
         NOT, AND, OR, XOR, SHL, LSHR, ASHR, ADD, SUB, MUL, DIV, MOD, CONCAT, ULT, UGT, ULE, UGE, SLT, SGT, SLE, SGE, EQ,
-        NEQ, CAST, REGISTER, TO
+        NEQ, UCAST, CAST, REGISTER, TO
     };
 
     static const std::map<std::string, builtin_type> builtin_type_map{
@@ -165,6 +165,7 @@ namespace nxon {
         {"EQ", builtin_type::EQ},
         {"NEQ", builtin_type::NEQ},
         {"CAST", builtin_type::CAST},
+        {"UCAST", builtin_type::UCAST},
         {"TO", builtin_type::TO},
         {"REGISTER", builtin_type::REGISTER}
     };
@@ -269,20 +270,31 @@ namespace nxon {
                 break;
             }
             case builtin_type::CAST: {
-                context.circuit.add_rule(rule_factory::id_rule(parse_source(input[0], context),
-                                                               data_factory::signed_resize_sink_adapter(
-                                                                   parse_sink(output[0], context))));
+                context.circuit.add_rule(rule_factory::id_rule(
+                    parse_source(input[0], context),
+                    data_factory::signed_resize_sink_adapter(parse_sink(output[0], context)))
+                );
+                break;
+            }
+            case builtin_type::UCAST: {
+                context.circuit.add_rule(rule_factory::id_rule(
+                    parse_source(input[0], context),
+                    data_factory::unsigned_resize_sink_adapter(parse_sink(output[0], context)))
+                );
                 break;
             }
             case builtin_type::TO: {
-                context.circuit.add_rule(rule_factory::id_rule(parse_source(input[0], context),
-                                                               parse_sink(output[0], context)));
+                context.circuit.add_rule(rule_factory::id_rule(
+                    parse_source(input[0], context),
+                    parse_sink(output[0], context))
+                );
                 break;
             }
             case builtin_type::REGISTER: {
-                context.circuit.add_rule(rule_factory::register_rule(parse_clock(input[1], json["attribute"]),
-                                                                     parse_source(input[0], context),
-                                                                     parse_sink(output[0], context)));
+                context.circuit.add_rule(rule_factory::register_rule(
+                    parse_clock(input[1], json["attribute"]),
+                    parse_source(input[0], context),
+                    parse_sink(output[0], context)));
                 break;
             }
             default:

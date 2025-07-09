@@ -182,7 +182,21 @@ namespace nxon::impl {
             }
             if (comp == std::strong_ordering::less)
                 return {new_size, content};
-            std::abort();
+            std::unreachable();
+        }
+
+        [[nodiscard]] sized_mpint unsigned_resize(const size_t new_size) const {
+            const auto comp = new_size <=> size();
+            if (comp == std::strong_ordering::equal) return *this;
+            if (comp == std::strong_ordering::greater) {
+                sized_mpint result(new_size);
+                result.content |= content;
+                return result;
+            }
+            if (comp == std::strong_ordering::less) {
+                return {new_size, content};
+            }
+            std::unreachable();
         }
 
         sized_mpint &flip() {
