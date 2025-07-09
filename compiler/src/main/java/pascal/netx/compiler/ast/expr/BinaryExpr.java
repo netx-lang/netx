@@ -77,7 +77,7 @@ public final class BinaryExpr extends ExprNode {
         CONCAT,
         POW, MUL, DIV, MOD, ADD, SUB,
         ARITH_SHL, ARITH_SHR, LOGIC_SHR, LOGIC_SHL,
-        EQ, NE, LT, LE, GT, GE,
+        EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE,
         AND, OR, XOR, XNOR, LOGIC_AND, LOGIC_OR;
 
         public static final BiMap<String, Operator> OP_MAP = new BiMap<>();
@@ -94,10 +94,14 @@ public final class BinaryExpr extends ExprNode {
             OP_MAP.put("%", MOD);
             OP_MAP.put("==", EQ);
             OP_MAP.put("!=", NE);
-            OP_MAP.put("<", LT);
-            OP_MAP.put(">", GT);
-            OP_MAP.put("<=", LE);
-            OP_MAP.put(">=", GE);
+            OP_MAP.put("<*", SLT);
+            OP_MAP.put(">*", SGT);
+            OP_MAP.put("<=*", SLE);
+            OP_MAP.put(">=*", SGE);
+            OP_MAP.put("<", ULT);
+            OP_MAP.put(">", UGT);
+            OP_MAP.put("<=", ULE);
+            OP_MAP.put(">=", UGE);
             OP_MAP.put("and", LOGIC_AND);
             OP_MAP.put("or", LOGIC_OR);
             OP_MAP.put("&", AND);

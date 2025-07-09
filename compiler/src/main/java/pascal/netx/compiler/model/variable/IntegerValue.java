@@ -36,13 +36,21 @@ public sealed interface IntegerValue extends Value permits BitVectorValue, Int32
 
     BooleanValue ne(IntegerValue other);
 
-    BooleanValue gt(IntegerValue other);
+    BooleanValue sgt(IntegerValue other);
 
-    BooleanValue ge(IntegerValue other);
+    BooleanValue sge(IntegerValue other);
 
-    BooleanValue lt(IntegerValue other);
+    BooleanValue slt(IntegerValue other);
 
-    BooleanValue le(IntegerValue other);
+    BooleanValue sle(IntegerValue other);
+
+    BooleanValue ugt(IntegerValue other);
+
+    BooleanValue uge(IntegerValue other);
+
+    BooleanValue ult(IntegerValue other);
+
+    BooleanValue ule(IntegerValue other);
 
     IntegerValue neg();
 

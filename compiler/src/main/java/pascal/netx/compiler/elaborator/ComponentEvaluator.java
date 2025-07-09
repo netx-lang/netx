@@ -61,10 +61,14 @@ public final class ComponentEvaluator {
             Map.entry(BinaryExpr.Operator.LOGIC_SHL, IntegerValue::shl),
             Map.entry(BinaryExpr.Operator.EQ, IntegerValue::eq),
             Map.entry(BinaryExpr.Operator.NE, IntegerValue::ne),
-            Map.entry(BinaryExpr.Operator.LT, IntegerValue::lt),
-            Map.entry(BinaryExpr.Operator.LE, IntegerValue::le),
-            Map.entry(BinaryExpr.Operator.GT, IntegerValue::gt),
-            Map.entry(BinaryExpr.Operator.GE, IntegerValue::ge)
+            Map.entry(BinaryExpr.Operator.SLT, IntegerValue::slt),
+            Map.entry(BinaryExpr.Operator.SLE, IntegerValue::sle),
+            Map.entry(BinaryExpr.Operator.SGT, IntegerValue::sgt),
+            Map.entry(BinaryExpr.Operator.SGE, IntegerValue::sge),
+            Map.entry(BinaryExpr.Operator.ULT, IntegerValue::ult),
+            Map.entry(BinaryExpr.Operator.ULE, IntegerValue::ule),
+            Map.entry(BinaryExpr.Operator.UGT, IntegerValue::ugt),
+            Map.entry(BinaryExpr.Operator.UGE, IntegerValue::uge)
     );
 
     private final PackageScope pack;
@@ -369,7 +373,8 @@ public final class ComponentEvaluator {
             case CONCAT -> evaluateListConcat(expr);
             case EQ, NE -> evaluateEqualityExpr(expr);
             case ADD, SUB, MUL, DIV, MOD, POW, AND, OR, XOR, XNOR,
-                 LT, LE, GT, GE, ARITH_SHR, ARITH_SHL, LOGIC_SHR, LOGIC_SHL ->
+                 ULT, ULE, UGT, UGE, SLT, SLE, SGT, SGE,
+                 ARITH_SHR, ARITH_SHL, LOGIC_SHR, LOGIC_SHL ->
                     evaluateBinaryExpr(expr, BINARY_OPERATOR_MAP.get(expr.getOp()));
             case LOGIC_OR -> evaluateBinaryExpr(expr, BooleanValue::or);
             case LOGIC_AND -> evaluateBinaryExpr(expr, BooleanValue::and);

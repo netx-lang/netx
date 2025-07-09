@@ -97,23 +97,43 @@ public record Int32Value(int value) implements IntegerValue {
     }
 
     @Override
-    public BooleanValue gt(IntegerValue other) {
+    public BooleanValue sgt(IntegerValue other) {
         return BooleanValue.of(value > other.toInt());
     }
 
     @Override
-    public BooleanValue ge(IntegerValue other) {
+    public BooleanValue sge(IntegerValue other) {
         return BooleanValue.of(value >= other.toInt());
     }
 
     @Override
-    public BooleanValue lt(IntegerValue other) {
+    public BooleanValue slt(IntegerValue other) {
         return BooleanValue.of(value < other.toInt());
     }
 
     @Override
-    public BooleanValue le(IntegerValue other) {
+    public BooleanValue sle(IntegerValue other) {
         return BooleanValue.of(value <= other.toInt());
+    }
+
+    @Override
+    public BooleanValue ugt(IntegerValue other) {
+        return BooleanValue.of(Integer.compareUnsigned(value, other.toInt()) > 0);
+    }
+
+    @Override
+    public BooleanValue uge(IntegerValue other) {
+        return BooleanValue.of(Integer.compareUnsigned(value, other.toInt()) >= 0);
+    }
+
+    @Override
+    public BooleanValue ult(IntegerValue other) {
+        return BooleanValue.of(Integer.compareUnsigned(value, other.toInt()) < 0);
+    }
+
+    @Override
+    public BooleanValue ule(IntegerValue other) {
+        return BooleanValue.of(Integer.compareUnsigned(value, other.toInt()) <= 0);
     }
 
     @Override
