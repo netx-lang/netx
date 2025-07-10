@@ -3,6 +3,7 @@ package pascal.netx.compiler.model.scope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.element.*;
+import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.expr.ImportRef;
 import pascal.netx.compiler.model.variable.BitVectorValue;
 import pascal.netx.util.exception.ShallNotReachHereError;
@@ -10,10 +11,7 @@ import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.lang.Identifier;
 
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Stack;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -83,16 +81,32 @@ public final class PackageScope extends Scope {
             return enumDef.get(id);
         }
 
+        static private void checkUniqueEnumFields(EnumNode node) {
+            if (node.getFields().size() != new HashSet<>(node.getFields()).size()) {
+                log.error("{}: Enum fields must be unique, but found duplicates in '{}'",
+                        node.getSourceLoc(), node.getName());
+                throw new CompileCancellationException();
+            }
+        }
+
+        static private void checkUniqueEnumValues(EnumNode node, Collection<BitVectorValue> values) {
+            if (values.size() != new HashSet<>(values).size()) {
+                log.error("{}: Enum values must be unique, but found duplicates in '{}'",
+                        node.getSourceLoc(), node.getName());
+                throw new CompileCancellationException();
+            }
+        }
+
         public void addEnum(EnumNode node) {
+            checkUniqueEnumFields(node);
             Map<Identifier, BitVectorValue> enumMap = new HashMap<>();
-            int width;
+            int width = 1;
             if (node.getValues().isEmpty()) {
                 width = BigInteger.valueOf(node.getFields().size() - 1).bitLength();
                 for (int i = 0; i < node.getFields().size(); i++) {
                     enumMap.put(node.getFields().get(i), BitVectorValue.of(BitVector.fromInt(i, width)));
                 }
             } else {
-                width = 1;
                 for (var number : node.getValues()) {
                     width = Math.max(width, number.getRepresentation().size());
                 }
@@ -105,6 +119,7 @@ public final class PackageScope extends Scope {
                     }
                     enumMap.put(field, BitVectorValue.of(number));
                 }
+                checkUniqueEnumValues(node, enumMap.values());
             }
             enumDef.put(node.getName(), new Enum(node.getName(), width, enumMap));
         }
