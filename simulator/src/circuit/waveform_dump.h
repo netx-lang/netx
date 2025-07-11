@@ -77,18 +77,20 @@ $scope module TOP $end
             }
         }
 
-        void flip_input_clocks() {
-            circuit.flip_batch(circuit_input_clocks);
-            for (auto &id: circuit_input_clocks)
-                advance_and_dump(id);
-        }
-
-        void flip_by_name(const std::string &name) {
-            const auto id = name_map.at(name);
+        void flip(const id_t id) {
             circuit.flip(id);
 
             if (!circuit_input_clocks.contains(id)) return;
             advance_and_dump(id);
+        }
+
+        void flip_batch(const id_set &ids) {
+            circuit.flip_batch(ids);
+
+            for (auto &id: ids) {
+                if (!circuit_input_clocks.contains(id)) continue;
+                advance_and_dump(id);
+            }
         }
     };
 }
