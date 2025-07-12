@@ -1,5 +1,7 @@
 {
   "totalData": 13,
+  "top_input": ["d"],
+  "top_output": ["b.a.left", "b.a.right", "b.b[0].left", "b.b[0].right", "b.b[1].left", "b.b[1].right", "b.b[2].left", "b.b[2].right", "b.b[3].left", "b.b[3].right", "b.c"],
   "design": {
     "type": "component",
     "id": "top",

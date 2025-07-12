@@ -9,6 +9,7 @@ import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXBuilder;
 import pascal.netx.compiler.io.NXParser;
 import pascal.netx.util.TestUtils;
+import pascal.netx.util.print.NotepadWriter;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AnalysisTest {
     private static final Path TEST_DIR = Path.of("src/test/resources/testcases");
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final boolean GENERATE_EXPECTED = false;
 
     @Test
     void testSourceLocChecker() throws IOException {
@@ -156,6 +158,19 @@ class AnalysisTest {
         assertThrows(TypeCheckingException.class, () -> builder.load(b).compileAndDump());
     }
 
+    private static void testEquals(String code, String output, boolean isCompact) throws IOException {
+        var config = isCompact ? Configuration.forCompactTest() : Configuration.forExpandedTest();
+        if (GENERATE_EXPECTED) {
+            var builder = NXBuilder.from(config);
+            var compiler = builder.load(code);
+            builder.printer(NotepadWriter.pathOut(TEST_DIR.resolve(output))).print(compiler.compileAndDump());
+        } else {
+            var compiler = NXBuilder.from(config).load(code);
+            var expected = MAPPER.reader().readTree(Files.readString(TEST_DIR.resolve(output)));
+            assertEquals(expected, compiler.compileAndDump());
+        }
+    }
+
     @Test
     void testDirectAliasA() throws IOException {
         var code = """
@@ -167,10 +182,7 @@ class AnalysisTest {
                   }
                 }
                 """;
-        var builder = NXBuilder.from(Configuration.forExpandedTest());
-        var expected = MAPPER.reader().readTree(
-                Files.readString(TEST_DIR.resolve("expected/direct_alias_a.json")));
-        assertEquals(expected, builder.load(code).compileAndDump());
+        testEquals(code, "expected/direct_alias_a.json", false);
     }
 
     @Test
@@ -184,10 +196,7 @@ class AnalysisTest {
                   }
                 }
                 """;
-        var builder = NXBuilder.from(Configuration.forExpandedTest());
-        var expected = MAPPER.reader().readTree(
-                Files.readString(TEST_DIR.resolve("expected/direct_alias_b.json")));
-        assertEquals(expected, builder.load(code).compileAndDump());
+        testEquals(code, "expected/direct_alias_b.json", false);
     }
 
     @Test
@@ -199,10 +208,7 @@ class AnalysisTest {
                   o <> i[4];
                 }
                 """;
-        var builder = NXBuilder.from(Configuration.forExpandedTest());
-        var expected = MAPPER.reader().readTree(
-                Files.readString(TEST_DIR.resolve("expected/direct_alias_c.json")));
-        assertEquals(expected, builder.load(code).compileAndDump());
+        testEquals(code, "expected/direct_alias_c.json", false);
     }
 
     @Test
@@ -218,10 +224,7 @@ class AnalysisTest {
                   }
                 }
                 """;
-        var builder = NXBuilder.from(Configuration.forExpandedTest());
-        var expected = MAPPER.reader().readTree(
-                Files.readString(TEST_DIR.resolve("expected/direct_alias_d.json")));
-        assertEquals(expected, builder.load(code).compileAndDump());
+        testEquals(code, "expected/direct_alias_d.json", false);
     }
 
     @Test
@@ -240,9 +243,6 @@ class AnalysisTest {
                   c <> tmp[3];
                 }
                 """;
-        var builder = NXBuilder.from(Configuration.forExpandedTest());
-        var expected = MAPPER.reader().readTree(
-                Files.readString(TEST_DIR.resolve("expected/direct_alias_e.json")));
-        assertEquals(expected, builder.load(code).compileAndDump());
+        testEquals(code, "expected/direct_alias_e.json", false);
     }
 }

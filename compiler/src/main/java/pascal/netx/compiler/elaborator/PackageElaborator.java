@@ -43,9 +43,7 @@ public final class PackageElaborator {
         var topScope = pack.instantiateTop(topNode.getIdentifier());
         bindConfigParameters(topNode, topScope);
         new ComponentElaborator(config, topScope).build(topNode);
-        if (!config.fullyExpand()) {
-            setSignature(topScope, topNode);
-        }
+        setSignature(topScope, topNode);
         return pack;
     }
 

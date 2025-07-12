@@ -1,5 +1,7 @@
 {
   "totalData": 35,
+  "top_input": ["a", "b"],
+  "top_output": ["c"],
   "design": {
     "type": "component",
     "id": "top",

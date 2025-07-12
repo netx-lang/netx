@@ -391,9 +391,7 @@ final class ComponentElaborator {
             }
             component.setAttributes(attributes);
             new ComponentElaborator(config, component).build(node);
-            if (!config.fullyExpand()) {
-                setSignatureFor(ref, component);
-            }
+            setSignatureFor(ref, component);
             return component;
         }
 

@@ -54,10 +54,25 @@ final class ExpandedDumper {
 
     public ObjectNode dump() {
         var result = createObjectNode();
-        var node = dumperOf(design.getTop()).dump();
+        var design_node = dumperOf(design.getTop()).dump();
+
         result.put("totalData", dataIndices.size());
-        result.putIfAbsent("design", node);
+        var input = makeArrayIn(result, "top_input");
+        var output = makeArrayIn(result, "top_output");
+        var signature = design.getTop().getSignature();
+        signature.inputs().stream().map(this::dumpTopPort).forEach(input::add);
+        signature.outputs().stream().map(this::dumpTopPort).forEach(output::add);
+        result.putIfAbsent("design", design_node);
         return result;
+    }
+
+    private String dumpTopPort(Variable variable) {
+        return switch (variable) {
+            case Data data -> data.getIdentifier().name();
+            case Value value -> value.toString();
+            case Access access -> dumpTopPort(access.base()) + access.selector();
+            default -> throw new ShallNotReachHereError("Should be eliminated by CompositeDataBlaster");
+        };
     }
 
     private ComponentDumper dumperOf(ComponentScope scope) {
