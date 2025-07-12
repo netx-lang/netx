@@ -1,5 +1,7 @@
 {
   "totalData": 10,
+  "top_input": ["clk", "rst"],
+  "top_output": ["count"],
   "design": {
     "type": "component",
     "id": "counter",

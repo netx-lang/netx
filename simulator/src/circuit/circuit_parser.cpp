@@ -360,7 +360,9 @@ namespace nxon {
                 if (selection) throw std::runtime_error("Clock member cannot be selected");
                 context.new_wire(id, 1, name);
                 context.circuit.add_clock(id);
-                if (context.circuit_input.contains(id)) context.circuit_input_clocks.insert(id);
+                if (std::ranges::contains(context.circuit_input, id)) {
+                    context.circuit_input_clocks.insert(id);
+                }
                 break;
             }
             case member_type::COMPONENT:
@@ -375,13 +377,24 @@ namespace nxon {
         for (auto &input: json.at("input")) {
             auto [name, id, selection] = parse_id(input);
             if (selection) throw std::runtime_error("Design input cannot be selected");
-            context.circuit_input.insert(id);
+            context.circuit_input.push_back(id);
         }
 
         for (auto &output: json.at("output")) {
             auto [name, id, selection] = parse_id(output);
             if (selection) throw std::runtime_error("Design output cannot be selected");
-            context.circuit_output.insert(id);
+            context.circuit_output.push_back(id);
+        }
+    }
+
+    static void parse_circuit_io_alias(parse_context &context, const nlohmann::json &json) {
+        auto input_iter = context.circuit_input.begin();
+        for (auto &top_input : json.at("top_input")) {
+            context.name_map.emplace(top_input, *input_iter++);
+        }
+        auto output_iter = context.circuit_output.begin();
+        for (auto &top_output : json.at("top_output")) {
+            context.name_map.emplace(top_output, *output_iter++);
         }
     }
 
@@ -389,6 +402,7 @@ namespace nxon {
         context.members_total = json["totalData"];
         auto &design = json["design"];
         parse_circuit_io(design, context);
+        parse_circuit_io_alias(context, json);
         parse_name_size(design, context);
         parse_member(design, context, native_map);
 

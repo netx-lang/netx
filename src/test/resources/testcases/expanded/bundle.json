@@ -1,5 +1,7 @@
 {
   "totalData": 10,
+  "top_input": ["pin[0].valid", "pin[0].load", "pin[1].valid", "pin[1].load", "pin[2].valid", "pin[2].load", "pin[3].valid", "pin[3].load"],
+  "top_output": ["pout.valid", "pout.load"],
   "design": {
     "type": "component",
     "id": "top",

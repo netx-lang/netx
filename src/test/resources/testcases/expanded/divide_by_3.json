@@ -1,5 +1,7 @@
 {
   "totalData": 8,
+  "top_input": ["clk"],
+  "top_output": ["clk_3"],
   "design": {
     "type": "component",
     "id": "Divide_by_3",

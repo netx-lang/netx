@@ -13,7 +13,7 @@ public final class Signature {
     private List<Variable> inputs, outputs;
     private List<Type> inTypeCache, outTypeCache;
 
-    public Signature(ComponentRef caller) {
+    private Signature(ComponentRef caller) {
         this.caller = caller;
     }
 
