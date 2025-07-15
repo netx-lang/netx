@@ -5,40 +5,40 @@
   "design": {
     "type": "component",
     "id": "top",
-    "loc": "1:10",
+    "loc": "test.nx:1:10",
     "input": ["a@0"],
     "output": ["b@1", "1'h01"],
     "members": [
-      {"type": "wire", "width": 2, "id": "a@0", "loc": "2:7"},
-      {"type": "wire", "width": 2, "id": "b@1", "loc": "2:10"},
-      {"type": "wire", "width": 5, "id": "tmp@2", "loc": "4:7"},
+      {"type": "wire", "width": 2, "id": "a@0", "loc": "test.nx:2:7"},
+      {"type": "wire", "width": 2, "id": "b@1", "loc": "test.nx:2:10"},
+      {"type": "wire", "width": 5, "id": "tmp@2", "loc": "test.nx:4:7"},
       {
-        "type": "builtin", "id": "XOR", "loc": "7:12",
+        "type": "builtin", "id": "XOR", "loc": "test.nx:7:12",
         "input": ["a@0[0]", "a@0[1]"],
         "output": ["b@1[1]"]
       },
       {
-        "type": "builtin", "id": "AND", "loc": "8:12",
+        "type": "builtin", "id": "AND", "loc": "test.nx:8:12",
         "input": ["a@0[0]", "a@0[1]"],
         "output": ["b@1[0]"]
       },
       {
-        "type": "builtin", "id": "TO", "loc": "0:0",
+        "type": "builtin", "id": "TO", "loc": ":0:0",
         "input": ["a@0"],
         "output": ["tmp@2[1:0]"]
       },
       {
-        "type": "builtin", "id": "TO", "loc": "0:0",
+        "type": "builtin", "id": "TO", "loc": ":0:0",
         "input": ["1'h01"],
         "output": ["tmp@2[3]"]
       },
       {
-        "type": "builtin", "id": "TO", "loc": "0:0",
+        "type": "builtin", "id": "TO", "loc": ":0:0",
         "input": ["b@1[1]"],
         "output": ["tmp@2[2]"]
       },
       {
-        "type": "builtin", "id": "TO", "loc": "0:0",
+        "type": "builtin", "id": "TO", "loc": ":0:0",
         "input": ["b@1[0]"],
         "output": ["tmp@2[4]"]
       }

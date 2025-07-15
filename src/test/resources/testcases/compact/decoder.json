@@ -1,87 +1,87 @@
 [
   {
-    "type": "component", "id": "top", "defIndex": 1, "loc": "1:10",
+    "type": "component", "id": "top", "defIndex": 1, "loc": "decoder.nx:1:10",
     "input": ["input@0"],
     "output": ["output@0"],
     "members": [
-      {"type": "wire", "width": 3, "id": "input", "loc": "2:9"},
-      {"type": "wire", "width": 8, "id": "output", "loc": "3:9"},
+      {"type": "wire", "width": 3, "id": "input", "loc": "decoder.nx:2:9"},
+      {"type": "wire", "width": 8, "id": "output", "loc": "decoder.nx:3:9"},
       {
-        "type": "instantiate", "id": "decoder@1", "defIndex": 1, "loc": "4:14",
+        "type": "instantiate", "id": "decoder@1", "defIndex": 1, "loc": "decoder.nx:4:14",
         "input": ["input@0"],
         "output": ["output@0"]
       }
     ]
   },
   {
-    "type": "component", "id": "decoder", "defIndex": 1, "loc": "7:10",
+    "type": "component", "id": "decoder", "defIndex": 1, "loc": "decoder.nx:7:10",
     "attribute": {"width": "3"},
     "input": ["code@0"],
     "output": ["output@0"],
     "members": [
-      {"type": "wire", "width": 3, "id": "code", "loc": "8:9"},
-      {"type": "wire", "width": 8, "id": "output", "loc": "9:9"},
+      {"type": "wire", "width": 3, "id": "code", "loc": "decoder.nx:8:9"},
+      {"type": "wire", "width": 8, "id": "output", "loc": "decoder.nx:9:9"},
       {
-        "type": "builtin", "id": "NOT@1", "loc": "14:52",
+        "type": "builtin", "id": "NOT@1", "loc": "decoder.nx:14:52",
         "input": ["code@0[0]"],
         "output": ["$o@1"],
         "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "14:52"}
+          {"type": "wire", "width": 1, "id": "$o", "loc": "decoder.nx:14:52"}
         ]
       },
       {
-        "type": "builtin", "id": "NOT@2", "loc": "14:52",
+        "type": "builtin", "id": "NOT@2", "loc": "decoder.nx:14:52",
         "input": ["code@0[1]"],
         "output": ["$o@2"],
         "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "14:52"}
+          {"type": "wire", "width": 1, "id": "$o", "loc": "decoder.nx:14:52"}
         ]
       },
       {
-        "type": "builtin", "id": "NOT@3", "loc": "14:52",
+        "type": "builtin", "id": "NOT@3", "loc": "decoder.nx:14:52",
         "input": ["code@0[2]"],
         "output": ["$o@3"],
         "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "14:52"}
+          {"type": "wire", "width": 1, "id": "$o", "loc": "decoder.nx:14:52"}
         ]
       },
       {
-        "type": "builtin", "id": "AND@4", "loc": "12:21",
+        "type": "builtin", "id": "AND@4", "loc": "decoder.nx:12:21",
         "input": ["$o@1", "$o@2", "$o@3"],
         "output": ["output@0[0]"]
       },
       {
-        "type": "builtin", "id": "AND@5", "loc": "12:21",
+        "type": "builtin", "id": "AND@5", "loc": "decoder.nx:12:21",
         "input": ["code@0[0]", "$o@2", "$o@3"],
         "output": ["output@0[1]"]
       },
       {
-        "type": "builtin", "id": "AND@6", "loc": "12:21",
+        "type": "builtin", "id": "AND@6", "loc": "decoder.nx:12:21",
         "input": ["$o@1", "code@0[1]", "$o@3"],
         "output": ["output@0[2]"]
       },
       {
-        "type": "builtin", "id": "AND@7", "loc": "12:21",
+        "type": "builtin", "id": "AND@7", "loc": "decoder.nx:12:21",
         "input": ["code@0[0]", "code@0[1]", "$o@3"],
         "output": ["output@0[3]"]
       },
       {
-        "type": "builtin", "id": "AND@8", "loc": "12:21",
+        "type": "builtin", "id": "AND@8", "loc": "decoder.nx:12:21",
         "input": ["$o@1", "$o@2", "code@0[2]"],
         "output": ["output@0[4]"]
       },
       {
-        "type": "builtin", "id": "AND@9", "loc": "12:21",
+        "type": "builtin", "id": "AND@9", "loc": "decoder.nx:12:21",
         "input": ["code@0[0]", "$o@2", "code@0[2]"],
         "output": ["output@0[5]"]
       },
       {
-        "type": "builtin", "id": "AND@10", "loc": "12:21",
+        "type": "builtin", "id": "AND@10", "loc": "decoder.nx:12:21",
         "input": ["$o@1", "code@0[1]", "code@0[2]"],
         "output": ["output@0[6]"]
       },
       {
-        "type": "builtin", "id": "AND@11", "loc": "12:21",
+        "type": "builtin", "id": "AND@11", "loc": "decoder.nx:12:21",
         "input": ["code@0[0]", "code@0[1]", "code@0[2]"],
         "output": ["output@0[7]"]
       }

@@ -27,7 +27,7 @@ class AnalysisTest {
     void testSourceLocChecker() throws IOException {
         for (var testcase : TestUtils.collectAllFilesUnder(TEST_DIR)) {
             if (testcase.getFileName().endsWith(".nx")) {
-                var node = new NXParser(CharStreams.fromPath(testcase)).parse();
+                var node = new NXParser(CharStreams.fromPath(testcase), "test").parse();
                 new SourceLocChecker(node).analyze();
             }
         }

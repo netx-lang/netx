@@ -1,24 +1,24 @@
 [
   {
-    "type": "component", "id": "counter", "defIndex": 1, "loc": "1:10",
+    "type": "component", "id": "counter", "defIndex": 1, "loc": "counter.nx:1:10",
     "input": ["clk@0", "rst@0"],
     "output": ["count@0"],
     "members": [
-      {"type": "wire", "width": 32, "id": "count", "loc": "2:9"},
-      {"type": "wire", "width": 1, "id": "rst", "loc": "3:9"},
-      {"type": "clock", "id": "clk", "loc": "4:9"},
+      {"type": "wire", "width": 32, "id": "count", "loc": "counter.nx:2:9"},
+      {"type": "wire", "width": 1, "id": "rst", "loc": "counter.nx:3:9"},
+      {"type": "clock", "id": "clk", "loc": "counter.nx:4:9"},
       {
-        "type": "builtin", "id": "ADD@1", "loc": "6:33",
+        "type": "builtin", "id": "ADD@1", "loc": "counter.nx:6:33",
         "input": ["count@0", "1"],
         "output": ["i0@2"]
       },
       {
-        "type": "instantiate", "id": "MUX@2", "defIndex": 1, "loc": "6:20",
+        "type": "instantiate", "id": "MUX@2", "defIndex": 1, "loc": "counter.nx:6:20",
         "input": ["rst@0", "i0@2", "0"],
         "output": ["output@2"]
       },
       {
-        "type": "builtin", "id": "REGISTER@3", "loc": "5:14",
+        "type": "builtin", "id": "REGISTER@3", "loc": "counter.nx:5:14",
         "input": ["output@2", "clk@0"],
         "output": ["count@0"],
         "attribute": {"pos_edge": "true"}
@@ -26,56 +26,56 @@
     ]
   },
   {
-    "type": "component", "id": "MUX", "defIndex": 1, "loc": "9:10",
+    "type": "component", "id": "MUX", "defIndex": 1, "loc": "counter.nx:9:10",
     "input": ["ctl@0", "i0@0", "i1@0"],
     "output": ["output@0"],
     "members": [
-      {"type": "wire", "width": 1, "id": "ctl", "loc": "10:9"},
-      {"type": "wire", "width": 32, "id": "i0", "loc": "10:14"},
-      {"type": "wire", "width": 32, "id": "i1", "loc": "10:18"},
-      {"type": "wire", "width": 32, "id": "output", "loc": "10:22"},
+      {"type": "wire", "width": 1, "id": "ctl", "loc": "counter.nx:10:9"},
+      {"type": "wire", "width": 32, "id": "i0", "loc": "counter.nx:10:14"},
+      {"type": "wire", "width": 32, "id": "i1", "loc": "counter.nx:10:18"},
+      {"type": "wire", "width": 32, "id": "output", "loc": "counter.nx:10:22"},
       {
-        "type": "builtin", "id": "NOT@1", "loc": "12:28",
+        "type": "builtin", "id": "NOT@1", "loc": "counter.nx:12:28",
         "input": ["ctl@0"],
         "output": ["$o@1"],
         "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "12:28"}
+          {"type": "wire", "width": 1, "id": "$o", "loc": "counter.nx:12:28"}
         ]
       },
       {
-        "type": "builtin", "id": "CAST@2", "loc": "12:20",
+        "type": "builtin", "id": "CAST@2", "loc": "counter.nx:12:20",
         "input": ["$o@1"],
         "output": ["$o@2"],
         "members": [
-          {"type": "wire", "width": 32, "id": "$o", "loc": "12:20"}
+          {"type": "wire", "width": 32, "id": "$o", "loc": "counter.nx:12:20"}
         ]
       },
       {
-        "type": "builtin", "id": "AND@3", "loc": "12:8",
+        "type": "builtin", "id": "AND@3", "loc": "counter.nx:12:8",
         "input": ["i0@0", "$o@2"],
         "output": ["$o@3"],
         "members": [
-          {"type": "wire", "width": 32, "id": "$o", "loc": "12:8"}
+          {"type": "wire", "width": 32, "id": "$o", "loc": "counter.nx:12:8"}
         ]
       },
       {
-        "type": "builtin", "id": "CAST@4", "loc": "13:20",
+        "type": "builtin", "id": "CAST@4", "loc": "counter.nx:13:20",
         "input": ["ctl@0"],
         "output": ["$o@4"],
         "members": [
-          {"type": "wire", "width": 32, "id": "$o", "loc": "13:20"}
+          {"type": "wire", "width": 32, "id": "$o", "loc": "counter.nx:13:20"}
         ]
       },
       {
-        "type": "builtin", "id": "AND@5", "loc": "13:8",
+        "type": "builtin", "id": "AND@5", "loc": "counter.nx:13:8",
         "input": ["i1@0", "$o@4"],
         "output": ["$o@5"],
         "members": [
-          {"type": "wire", "width": 32, "id": "$o", "loc": "13:8"}
+          {"type": "wire", "width": 32, "id": "$o", "loc": "counter.nx:13:8"}
         ]
       },
       {
-        "type": "builtin", "id": "OR@6", "loc": "11:14",
+        "type": "builtin", "id": "OR@6", "loc": "counter.nx:11:14",
         "input": ["$o@3", "$o@5"],
         "output": ["output@0"]
       }

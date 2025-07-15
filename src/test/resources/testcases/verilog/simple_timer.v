@@ -1,23 +1,23 @@
-// @(1:10) top@(1:10)
+// @(simple_timer.nx:1:10) top@(simple_timer.nx:1:10)
 module mod_0 (
   t_0, t_1, t_2, t_3, t_4, t_5, t_6, t_7, t_8
 );
-  // hex[0]@(3:6), hex[1]@(3:6), hex[2]@(3:6), hex[3]@(3:6), hex[4]@(3:6), hex[5]@(3:6), hex[6]@(3:6), hex[7]@(3:6)
+  // hex[0]@(simple_timer.nx:3:6), hex[1]@(simple_timer.nx:3:6), hex[2]@(simple_timer.nx:3:6), hex[3]@(simple_timer.nx:3:6), hex[4]@(simple_timer.nx:3:6), hex[5]@(simple_timer.nx:3:6), hex[6]@(simple_timer.nx:3:6), hex[7]@(simple_timer.nx:3:6)
   output [6:0] t_1, t_2, t_3, t_4, t_5, t_6, t_7, t_8;
 
-  // clk_50@(2:6)
+  // clk_50@(simple_timer.nx:2:6)
   input t_0;
 
-  // ms_clk@(7:6), s_clk@(7:14), m_clk@(7:21), h_clk@(7:28)
+  // ms_clk@(simple_timer.nx:7:6), s_clk@(simple_timer.nx:7:14), m_clk@(simple_timer.nx:7:21), h_clk@(simple_timer.nx:7:28)
   wire t_9, t_10, t_11, t_12;
 
   wire t_29;
   wire [3:0] t_32, t_33, t_34, t_35, t_36, t_37, t_38, t_39;
-  // ms@(8:6)
+  // ms@(simple_timer.nx:8:6)
   wire [31:0] t_13;
 
   wire [31:0] t_14, t_15, t_16, t_17, t_18, t_19, t_20, t_21, t_22, t_23, t_24, t_25, t_26, t_27, t_28, t_30, t_31;
-  reg [31:0]  r_0; // $p_11@(0:0)
+  reg [31:0]  r_0; // $p_11@(:0:0)
   mod_4 inst_0 (t_0, t_9);
   mod_6 inst_1 (t_29, t_30, 32'h00000000, t_31);
   mod_1 inst_2 (t_32, t_1);
@@ -59,36 +59,36 @@ module mod_0 (
   end
 endmodule
 
-// @(33:10) hex_trigger@(33:10)
+// @(simple_timer.nx:33:10) hex_trigger@(simple_timer.nx:33:10)
 module mod_1 (
   t_0, t_1
 );
-  // code@(35:6)
+  // code@(simple_timer.nx:35:6)
   output [6:0] t_1;
 
-  // num@(34:6)
+  // num@(simple_timer.nx:34:6)
   input [3:0] t_0;
 
   mod_2 inst_0 (t_0, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h02, 7'h78, 7'h00, 7'h10, 7'h08, 7'h03, 7'h46, 7'h21, 7'h06, 7'h0E, t_1);
 endmodule
 
-// @(57:10) MUX@(57:10)(width=4)
+// @(simple_timer.nx:57:10) MUX@(simple_timer.nx:57:10)(width=4)
 module mod_2 (
   t_0, t_2, t_3, t_4, t_5, t_6, t_7, t_8, t_9, t_10, t_11, t_12, t_13, t_14, t_15, t_16, t_17, t_18
 );
-  // out@(61:19)
+  // out@(simple_timer.nx:61:19)
   output [6:0] t_18;
 
-  // code@(59:9)
+  // code@(simple_timer.nx:59:9)
   input [3:0] t_0;
 
-  // input[0]@(61:9), input[1]@(61:9), input[2]@(61:9), input[3]@(61:9), input[4]@(61:9), input[5]@(61:9), input[6]@(61:9), input[7]@(61:9)
+  // input[0]@(simple_timer.nx:61:9), input[1]@(simple_timer.nx:61:9), input[2]@(simple_timer.nx:61:9), input[3]@(simple_timer.nx:61:9), input[4]@(simple_timer.nx:61:9), input[5]@(simple_timer.nx:61:9), input[6]@(simple_timer.nx:61:9), input[7]@(simple_timer.nx:61:9)
   input [6:0] t_2, t_3, t_4, t_5, t_6, t_7, t_8, t_9;
 
-  // input[8]@(61:9), input[9]@(61:9), input[10]@(61:9), input[11]@(61:9), input[12]@(61:9), input[13]@(61:9), input[14]@(61:9), input[15]@(61:9)
+  // input[8]@(simple_timer.nx:61:9), input[9]@(simple_timer.nx:61:9), input[10]@(simple_timer.nx:61:9), input[11]@(simple_timer.nx:61:9), input[12]@(simple_timer.nx:61:9), input[13]@(simple_timer.nx:61:9), input[14]@(simple_timer.nx:61:9), input[15]@(simple_timer.nx:61:9)
   input [6:0] t_10, t_11, t_12, t_13, t_14, t_15, t_16, t_17;
 
-  // mask@(60:9)
+  // mask@(simple_timer.nx:60:9)
   wire [15:0] t_1;
 
   wire [6:0] t_19, t_20, t_21, t_22, t_23, t_24, t_25, t_26, t_27, t_28, t_29, t_30, t_31, t_32, t_33, t_34, t_35, t_36, t_37, t_38, t_39, t_40, t_41, t_42, t_43, t_44, t_45, t_46, t_47, t_48, t_49, t_50;
@@ -128,14 +128,14 @@ module mod_2 (
   assign t_18 = t_20 | t_22 | t_24 | t_26 | t_28 | t_30 | t_32 | t_34 | t_36 | t_38 | t_40 | t_42 | t_44 | t_46 | t_48 | t_50;
 endmodule
 
-// @(68:10) DECODER@(68:10)(width=4)
+// @(simple_timer.nx:68:10) DECODER@(simple_timer.nx:68:10)(width=4)
 module mod_3 (
   t_0, t_1
 );
-  // out@(71:9)
+  // out@(simple_timer.nx:71:9)
   output [15:0] t_1;
 
-  // code@(70:9)
+  // code@(simple_timer.nx:70:9)
   input [3:0] t_0;
 
   wire t_2, t_3, t_4, t_5;
@@ -161,23 +161,23 @@ module mod_3 (
   assign t_1[15] = t_0[0] & t_0[1] & t_0[2] & t_0[3];
 endmodule
 
-// @(23:10) clock_divider@(23:10)(max=500000)
+// @(simple_timer.nx:23:10) clock_divider@(simple_timer.nx:23:10)(max=500000)
 module mod_4 (
   t_0, t_1
 );
-  // clk@(24:14)
+  // clk@(simple_timer.nx:24:14)
   output t_1;
 
-  // clk_50@(24:6)
+  // clk_50@(simple_timer.nx:24:6)
   input t_0;
 
   wire t_3, t_6, t_7;
-  // count@(25:6)
+  // count@(simple_timer.nx:25:6)
   wire [31:0] t_2;
 
   wire [31:0] t_4, t_5;
-  reg [31:0]  r_0; // $p_5@(0:0)
-  reg  r_1; // $p_6@(0:0)
+  reg [31:0]  r_0; // $p_5@(:0:0)
+  reg  r_1; // $p_6@(:0:0)
   mod_6 inst_0 (t_3, t_4, 32'h00000000, t_5);
   mod_5 inst_1 (t_3, t_1, t_6, t_7);
   assign t_3 = t_2 == 32'h0003D08F;
@@ -191,18 +191,18 @@ module mod_4 (
   end
 endmodule
 
-// @(57:10) MUX@(57:10)(width=1)
+// @(simple_timer.nx:57:10) MUX@(simple_timer.nx:57:10)(width=1)
 module mod_5 (
   t_0, t_2, t_3, t_4
 );
-  // out@(61:19)
+  // out@(simple_timer.nx:61:19)
   output t_4;
 
-  // code@(59:9), input[0]@(61:9), input[1]@(61:9)
+  // code@(simple_timer.nx:59:9), input[0]@(simple_timer.nx:61:9), input[1]@(simple_timer.nx:61:9)
   input t_0, t_2, t_3;
 
   wire t_5, t_6;
-  // mask@(60:9)
+  // mask@(simple_timer.nx:60:9)
   wire [1:0] t_1;
 
   mod_7 inst_0 (t_0, t_1);
@@ -211,21 +211,21 @@ module mod_5 (
   assign t_4 = t_5 | t_6;
 endmodule
 
-// @(57:10) MUX@(57:10)(width=1)
+// @(simple_timer.nx:57:10) MUX@(simple_timer.nx:57:10)(width=1)
 module mod_6 (
   t_0, t_2, t_3, t_4
 );
-  // out@(61:19)
+  // out@(simple_timer.nx:61:19)
   output [31:0] t_4;
 
-  // code@(59:9)
+  // code@(simple_timer.nx:59:9)
   input t_0;
 
-  // input[0]@(61:9), input[1]@(61:9)
+  // input[0]@(simple_timer.nx:61:9), input[1]@(simple_timer.nx:61:9)
   input [31:0] t_2, t_3;
 
   wire [31:0] t_5, t_6, t_7, t_8;
-  // mask@(60:9)
+  // mask@(simple_timer.nx:60:9)
   wire [1:0] t_1;
 
   mod_7 inst_0 (t_0, t_1);
@@ -236,14 +236,14 @@ module mod_6 (
   assign t_4 = t_6 | t_8;
 endmodule
 
-// @(68:10) DECODER@(68:10)(width=1)
+// @(simple_timer.nx:68:10) DECODER@(simple_timer.nx:68:10)(width=1)
 module mod_7 (
   t_0, t_1
 );
-  // out@(71:9)
+  // out@(simple_timer.nx:71:9)
   output [1:0] t_1;
 
-  // code@(70:9)
+  // code@(simple_timer.nx:70:9)
   input t_0;
 
   assign t_1[0] = ~t_0;

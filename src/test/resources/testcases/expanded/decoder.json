@@ -5,79 +5,79 @@
   "design": {
     "type": "component",
     "id": "top",
-    "loc": "1:10",
+    "loc": "decoder.nx:1:10",
     "input": ["input@0"],
     "output": ["output@1"],
     "members": [
-      {"type": "wire", "width": 3, "id": "input@0", "loc": "2:9"},
-      {"type": "wire", "width": 8, "id": "output@1", "loc": "3:9"},
+      {"type": "wire", "width": 3, "id": "input@0", "loc": "decoder.nx:2:9"},
+      {"type": "wire", "width": 8, "id": "output@1", "loc": "decoder.nx:3:9"},
       {
-        "type": "component", "id": "decoder", "loc": "4:14",
+        "type": "component", "id": "decoder", "loc": "decoder.nx:4:14",
         "input": ["input@0"],
         "output": ["output@1"],
         "attribute": {"width": "3"},
         "members": [
           {
-            "type": "builtin", "id": "NOT", "loc": "14:52",
+            "type": "builtin", "id": "NOT", "loc": "decoder.nx:14:52",
             "input": ["input@0[0]"],
             "output": ["$o@2"],
             "members": [
-              {"type": "wire", "width": 1, "id": "$o@2", "loc": "14:52"}
+              {"type": "wire", "width": 1, "id": "$o@2", "loc": "decoder.nx:14:52"}
             ]
           },
           {
-            "type": "builtin", "id": "NOT", "loc": "14:52",
+            "type": "builtin", "id": "NOT", "loc": "decoder.nx:14:52",
             "input": ["input@0[1]"],
             "output": ["$o@3"],
             "members": [
-              {"type": "wire", "width": 1, "id": "$o@3", "loc": "14:52"}
+              {"type": "wire", "width": 1, "id": "$o@3", "loc": "decoder.nx:14:52"}
             ]
           },
           {
-            "type": "builtin", "id": "NOT", "loc": "14:52",
+            "type": "builtin", "id": "NOT", "loc": "decoder.nx:14:52",
             "input": ["input@0[2]"],
             "output": ["$o@4"],
             "members": [
-              {"type": "wire", "width": 1, "id": "$o@4", "loc": "14:52"}
+              {"type": "wire", "width": 1, "id": "$o@4", "loc": "decoder.nx:14:52"}
             ]
           },
           {
-            "type": "builtin", "id": "AND", "loc": "12:21",
+            "type": "builtin", "id": "AND", "loc": "decoder.nx:12:21",
             "input": ["$o@2", "$o@3", "$o@4"],
             "output": ["output@1[0]"]
           },
           {
-            "type": "builtin", "id": "AND", "loc": "12:21",
+            "type": "builtin", "id": "AND", "loc": "decoder.nx:12:21",
             "input": ["input@0[0]", "$o@3", "$o@4"],
             "output": ["output@1[1]"]
           },
           {
-            "type": "builtin", "id": "AND", "loc": "12:21",
+            "type": "builtin", "id": "AND", "loc": "decoder.nx:12:21",
             "input": ["$o@2", "input@0[1]", "$o@4"],
             "output": ["output@1[2]"]
           },
           {
-            "type": "builtin", "id": "AND", "loc": "12:21",
+            "type": "builtin", "id": "AND", "loc": "decoder.nx:12:21",
             "input": ["input@0[0]", "input@0[1]", "$o@4"],
             "output": ["output@1[3]"]
           },
           {
-            "type": "builtin", "id": "AND", "loc": "12:21",
+            "type": "builtin", "id": "AND", "loc": "decoder.nx:12:21",
             "input": ["$o@2", "$o@3", "input@0[2]"],
             "output": ["output@1[4]"]
           },
           {
-            "type": "builtin", "id": "AND", "loc": "12:21",
+            "type": "builtin", "id": "AND", "loc": "decoder.nx:12:21",
             "input": ["input@0[0]", "$o@3", "input@0[2]"],
             "output": ["output@1[5]"]
           },
           {
-            "type": "builtin", "id": "AND", "loc": "12:21",
+            "type": "builtin", "id": "AND", "loc": "decoder.nx:12:21",
             "input": ["$o@2", "input@0[1]", "input@0[2]"],
             "output": ["output@1[6]"]
           },
           {
-            "type": "builtin", "id": "AND", "loc": "12:21",
+            "type": "builtin", "id": "AND", "loc": "decoder.nx:12:21",
             "input": ["input@0[0]", "input@0[1]", "input@0[2]"],
             "output": ["output@1[7]"]
           }

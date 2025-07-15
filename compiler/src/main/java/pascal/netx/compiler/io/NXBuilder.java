@@ -22,12 +22,12 @@ public final class NXBuilder {
     }
 
     public NXCompiler load(CharStream charStream) {
-        var root = new NXParser(charStream).parse();
+        var root = new NXParser(charStream, "test.nx").parse();
         return NXCompiler.forSinglePackage(root, config);
     }
 
     public NXCompiler load(String string) {
-        var root = new NXParser(CharStreams.fromString(string)).parse();
+        var root = new NXParser(CharStreams.fromString(string), "test.nx").parse();
         return NXCompiler.forSinglePackage(root, config);
     }
 
@@ -37,8 +37,8 @@ public final class NXBuilder {
         var extension = fileName.substring(fileName.lastIndexOf('.') + 1);
         return switch (extension) {
             case "nx" -> {
-                var root = new NXParser(CharStreams.fromPath(path)).parse();
-                yield NXCompiler.forSinglePackage(root, config);
+                var parser = new NXParser(CharStreams.fromPath(path), fileName);
+                yield NXCompiler.forSinglePackage(parser.parse(), config);
             }
             case "toml" -> {
                 var projConfReader = new ProjectConfigReader(config, path);

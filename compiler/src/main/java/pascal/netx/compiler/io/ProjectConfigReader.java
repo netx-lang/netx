@@ -2,7 +2,6 @@ package pascal.netx.compiler.io;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.dataformat.toml.TomlMapper;
-import org.antlr.v4.runtime.CharStreams;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
@@ -76,7 +75,8 @@ public final class ProjectConfigReader {
         for (var file : include) {
             if (!exclude.contains(file)) {
                 log.info("Start Parsing: {}", file);
-                packages.add(new NXParser(CharStreams.fromPath(file)).parse());
+                var parser = new NXParser(file);
+                packages.add(parser.parse());
             }
         }
     }

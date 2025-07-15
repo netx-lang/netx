@@ -1,18 +1,18 @@
-// @(12:10) top@(12:10)
+// @(nested_type.nx:12:10) top@(nested_type.nx:12:10)
 module mod_0 (
   t_10, t_13, t_14, t_0, t_1, t_2, t_3, t_4, t_5, t_6, t_7, t_8
 );
-  // b.c@(14:11)
+  // b.c@(nested_type.nx:14:11)
   output [2:0] t_8;
 
-  // b.b[0].left@(14:11), b.b[0].right@(14:11), b.b[1].left@(14:11), b.b[1].right@(14:11), b.b[2].left@(14:11), b.b[2].right@(14:11), b.b[3].left@(14:11), b.b[3].right@(14:11)
+  // b.b[0].left@(nested_type.nx:14:11), b.b[0].right@(nested_type.nx:14:11), b.b[1].left@(nested_type.nx:14:11), b.b[1].right@(nested_type.nx:14:11), b.b[2].left@(nested_type.nx:14:11), b.b[2].right@(nested_type.nx:14:11), b.b[3].left@(nested_type.nx:14:11), b.b[3].right@(nested_type.nx:14:11)
   output [1:0] t_0, t_1, t_2, t_3, t_4, t_5, t_6, t_7;
 
   output [1:0] t_13, t_14;
-  // d@(16:12)
+  // d@(nested_type.nx:16:12)
   input t_10;
 
-  // c@(16:9)
+  // c@(nested_type.nx:16:9)
   wire t_9;
 
   wire [1:0] t_11, t_12;
