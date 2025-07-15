@@ -65,8 +65,7 @@ namespace nxon {
                           &edgecut,
                           part.get());
 
-        auto result_ptr = std::make_unique<impl::partitioned_circuit_context>();
-        auto &result = *result_ptr;
+        impl::partitioned_circuit_context result;
         result.num_parts = nparts;
         for (int id = 0; id < n; ++id) {
             auto old_id = to_old[id];
@@ -95,44 +94,19 @@ namespace nxon {
             }
         }
 
-        context = std::move(result_ptr);
+        context = std::move(result);
     }
 
-    void partitioned_circuit::worker_part(const std::stop_token &stop_token,
-                                          impl::partitioned_circuit_context &partition,
-                                          const size_t part_id) {
-        auto &[updates, part, mutex] = *partition.circuit_parts[part_id];
-        auto &[q, condition] = updates;
-        while (!stop_token.stop_requested()) {
-            std::unique_lock lock(mutex);
-            const bool wait_result = condition.wait_for(lock, std::chrono::milliseconds(200), [&q] {
-                return !q.empty();
-            });
-            if (!wait_result) continue;
+    void impl::partitioned_circuit_context::worker_part(partitioned_circuit_context &partition, const size_t part_id) {
+        auto &part = *partition.circuit_parts[part_id];
 
-            value_batch to_update;
-            std::shared_ptr<std::latch> latch_to_wait;
-            while (!(q.empty() || latch_to_wait)) {
-                auto &[id, value, latch] = q.front();
-                to_update[id] = value;
-                if (latch) latch_to_wait = latch;
-                q.pop();
-            }
-            for (auto iter = to_update.begin(); iter != to_update.end();) {
-                if (part.get_value(iter->first) == iter->second) to_update.erase(iter++);
-                else ++iter;
-            }
-
-            id_set changed = part.update_batch(to_update);
-            lock.unlock();
-            to_update.clear();
-            if (latch_to_wait) latch_to_wait->arrive_and_wait();
-            value_batch changed_values;
-            for (auto id: changed) {
-                if (partition.belongs[id] != part_id) continue;
-                changed_values[id] = part.get_value(id);
-            }
-            partition.broadcast_batch(changed_values, true);
+        id_set changed = part.part.update_batch(part.updates_old);
+        part.updates_old.clear();
+        value_batch changed_values;
+        for (auto id: changed) {
+            if (partition.belongs[id] != part_id) continue;
+            changed_values[id] = part.part.get_value(id);
         }
+        partition.broadcast_batch(changed_values, true);
     }
 }

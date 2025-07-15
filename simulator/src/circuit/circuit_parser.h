@@ -16,6 +16,22 @@ namespace nxon {
             self.flip_input_clocks();
             self.flip_input_clocks();
         }
+
+        [[nodiscard]] value_t get_by_name(this auto &&self, const std::string &name) {
+            return self.get(self.name_map.at(name));
+        }
+
+        void flip_by_name(this auto &&self, const std::string &name) {
+            self.flip(self.name_map.at(name));
+        }
+
+        void update_by_name(this auto &&self, const std::string &name, const value_t &value) {
+            self.update(self.name_map.at(name), value);
+        }
+
+        void flip_input_clocks(this auto &&self) {
+            self.flip_batch(self.circuit_input_clocks);
+        }
     };
 
     struct parse_context : parse_context_common {
@@ -41,20 +57,24 @@ namespace nxon {
             name_map.emplace(org_name, id);
         }
 
-        void flip_input_clocks() {
-            circuit.flip_batch(circuit_input_clocks);
+        [[nodiscard]] value_t get(const id_t id) const {
+            return circuit.get_value(id);
         }
 
-        [[nodiscard]] value_t get_by_name(const std::string &name) const {
-            return circuit.get_value(name_map.at(name));
+        void flip(const id_t id) {
+            circuit.flip(id);
         }
 
-        void flip_by_name(const std::string &name) {
-            circuit.flip(name_map.at(name));
+        void flip_batch(const id_set &ids) {
+            circuit.flip_batch(ids);
         }
 
-        void update_by_name(const std::string &name, const value_t &value) {
-            circuit.update(name_map.at(name), value);
+        void update(const id_t id, const value_t &value) {
+            circuit.update(id, value);
+        }
+
+        void update_batch(const value_batch &batch) {
+            circuit.update_batch(batch);
         }
     };
 

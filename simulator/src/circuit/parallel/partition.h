@@ -5,16 +5,12 @@
 #ifndef PARTITION_H
 #define PARTITION_H
 
-#include <condition_variable>
 #include <memory>
-#include <latch>
 #include <mutex>
 #include <map>
 #include <set>
 #include <vector>
-#include <queue>
-#include <thread>
-#include <atomic>
+#include <future>
 #include "../circuit.h"
 
 namespace nxon {
@@ -22,22 +18,16 @@ namespace nxon {
         struct update_info {
             id_t id;
             value_t value;
-            std::shared_ptr<std::latch> latch;
-        };
-
-        struct update_queue {
-            std::queue<update_info> queue;
-            std::condition_variable condition;
         };
 
         struct circuit_part_context {
-            update_queue updates;
+            value_batch updates_old;
+            value_batch updates;
+            std::mutex updates_mutex;
             circuit part;
-            std::mutex mutex;
         };
 
         struct partitioned_circuit_context {
-            std::atomic_ullong wait_cnt;
             size_t num_parts = 0;
             std::map<id_t, size_t> belongs;
             std::map<id_t, std::set<size_t> > relate;
@@ -49,71 +39,101 @@ namespace nxon {
             }
 
             void broadcast_batch(const value_batch &to_update, const bool exclude_belong = false) {
-                std::set<size_t> to_notify;
-                for (auto &[id, value]: to_update) {
-                    broadcast_impl(id, value, exclude_belong, false);
-                    const auto &belong = belongs[id];
-                    for (const auto &related: relate[id]) {
-                        if (exclude_belong && related == belong) continue;
-                        to_notify.insert(related);
-                    }
-                }
-                for (auto &notify: to_notify) circuit_parts[notify]->updates.condition.notify_all();
+                for (auto &[id, value]: to_update)
+                    broadcast_impl(id, value, exclude_belong);
             }
 
             [[nodiscard]] auto get_value(const id_t id) const {
-                const auto belong = belongs.at(id);
-                std::lock_guard lock(circuit_parts[belong]->mutex);
-                return circuit_parts[belong]->part.get_value(id);
+                return circuit_parts[belongs.at(id)]->part.get_value(id);
+            }
+
+            void run_to_fixed() {
+                while (true) {
+                    size_t cnt = 0;
+                    for (size_t i = 0; i < num_parts; ++i) {
+                        auto &part = *circuit_parts[i];
+                        if (part.updates.empty()) continue;
+                        ++cnt;
+                        part.updates_old.swap(part.updates);
+                    }
+                    if (cnt == 0) break;
+
+                    auto futures = std::make_unique<std::future<void>[]>(cnt);
+                    cnt = 0;
+                    for (size_t i = 0; i < num_parts; ++i) {
+                        if (auto &part = *circuit_parts[i]; part.updates_old.empty()) continue;
+                        futures[cnt++] = std::async(worker_part, std::ref(*this), i);
+                    }
+                    for (size_t i = 0; i < cnt; ++i) futures[i].get();
+                }
             }
 
         private:
-            void broadcast_impl(const id_t id, const value_t &value, const bool exclude_belong = false,
-                                const bool notify = true) {
+            static void worker_part(partitioned_circuit_context &partition,
+                                    size_t part_id);
+
+            void broadcast_impl(const id_t id, const value_t &value, const bool exclude_belong = false) {
                 const auto &belong = belongs[id];
-                const auto latch_count = relate[id].size() - exclude_belong;
-                auto latch = clocks.contains(id) ? std::make_shared<std::latch>(latch_count) : nullptr;
                 for (const auto &related: relate[id]) {
                     if (exclude_belong && related == belong) continue;
-                    auto &[update, _, mutex] = *circuit_parts[related];
-                    auto &[queue, condition] = update;
-                    {
-                        auto lock = std::lock_guard(mutex);
-                        queue.emplace(id, value, latch);
-                    }
-                    if (notify) condition.notify_all();
+                    auto &part = *circuit_parts[related];
+                    auto lock = std::lock_guard(part.updates_mutex);
+                    part.updates.emplace(id, value);
                 }
             }
         };
     }
 
     class partitioned_circuit {
-        std::unique_ptr<impl::partitioned_circuit_context> context;
-        std::vector<std::jthread> workers;
-        static void worker_part(const std::stop_token &stop_token, impl::partitioned_circuit_context &partition, size_t part_id);
+        impl::partitioned_circuit_context context;
+
     public:
         explicit partitioned_circuit(const circuit &circuit);
 
-        void broadcast(const id_t id, const value_t &value, const bool exclude_belong = false) const {
-            context->broadcast(id, value, exclude_belong);
-        }
-
-        void broadcast_batch(const value_batch &to_update, const bool exclude_belong = false) const {
-            context->broadcast_batch(to_update, exclude_belong);
-        }
-
         [[nodiscard]] auto get_value(const id_t id) const {
-            return context->get_value(id);
+            return context.get_value(id);
         }
 
-        void start_workers() {
-            auto& partition = *context;
-            for (size_t i = 0; i < partition.num_parts; ++i)
-                workers.emplace_back(worker_part, std::ref(partition), i);
+        void broadcast(const id_t id, const value_t &value, const bool exclude_belong = false) {
+            context.broadcast(id, value, exclude_belong);
         }
 
-        void stop_workers() {
-            workers.clear();
+        void broadcast_batch(const value_batch &to_update, const bool exclude_belong = false) {
+            context.broadcast_batch(to_update, exclude_belong);
+        }
+
+        void run_to_fixed() {
+            context.run_to_fixed();
+        }
+
+        void update(const id_t id, const value_t &value) {
+            broadcast(id, value);
+            run_to_fixed();
+        }
+
+        void update_batch(const value_batch &to_update) {
+            broadcast_batch(to_update);
+            run_to_fixed();
+        }
+
+        void broadcast_flip(const id_t id) {
+            auto v = get_value(id);
+            v.flip();
+            broadcast(id, v);
+        }
+
+        void broadcast_flip_batch(const id_set &ids) {
+            for (auto &id: ids) broadcast_flip(id);
+        }
+
+        void flip(const id_t id) {
+            broadcast_flip(id);
+            run_to_fixed();
+        }
+
+        void flip_batch(const id_set &ids) {
+            broadcast_flip_batch(ids);
+            run_to_fixed();
         }
     };
 }
