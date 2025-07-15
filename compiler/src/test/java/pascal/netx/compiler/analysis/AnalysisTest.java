@@ -33,6 +33,19 @@ class AnalysisTest {
         }
     }
 
+    private static void testEquals(String code, String output) throws IOException {
+        Configuration config = Configuration.forCommon();
+        if (GENERATE_EXPECTED) {
+            var builder = NXBuilder.from(config);
+            var compiler = builder.load(code);
+            builder.printer(NotepadWriter.pathOut(TEST_DIR.resolve(output))).print(compiler.compileAndDump());
+        } else {
+            var compiler = NXBuilder.from(config).load(code);
+            var expected = MAPPER.reader().readTree(Files.readString(TEST_DIR.resolve(output)));
+            assertEquals(expected, compiler.compileAndDump());
+        }
+    }
+
     @Test
     void testDataTypeInference() {
         var expected = """
@@ -57,7 +70,7 @@ class AnalysisTest {
                     c <> NOT <> REGISTER(true) <> [AND <> [a[1:0], b[1:0]], clk];
                 }
                 """;
-        var builder = NXBuilder.from(Configuration.forExpandedTest());
+        var builder = NXBuilder.from(Configuration.forCommon());
         assertEquals(
                 builder.load(expected).compileAndDump(),
                 builder.load(actual).compileAndDump()
@@ -83,7 +96,7 @@ class AnalysisTest {
                     ];
                 }
                 """;
-        assertDoesNotThrow(() -> NXBuilder.from(Configuration.forExpandedTest()).load(code).compileAndDump());
+        assertDoesNotThrow(() -> NXBuilder.from(Configuration.forCommon()).load(code).compileAndDump());
     }
 
     @Test
@@ -103,7 +116,7 @@ class AnalysisTest {
                     d <> AND <> [a, b];
                 }
                 """;
-        var builder = NXBuilder.from(Configuration.forExpandedTest());
+        var builder = NXBuilder.from(Configuration.forCommon());
         assertEquals(
                 builder.load(expected).compileAndDump(),
                 builder.load(actual).compileAndDump());
@@ -133,7 +146,7 @@ class AnalysisTest {
                     f <> a;
                 }
                 """;
-        var builder = NXBuilder.from(Configuration.forExpandedTest());
+        var builder = NXBuilder.from(Configuration.forCommon());
         assertEquals(
                 builder.load(expected).compileAndDump(),
                 builder.load(actual).compileAndDump());
@@ -153,22 +166,9 @@ class AnalysisTest {
                     a[1:0] <> AND <> [b[5:4], b[3:2]];
                 }
                 """;
-        var builder = NXBuilder.from(Configuration.forExpandedTest());
+        var builder = NXBuilder.from(Configuration.forCommon());
         assertThrows(TypeCheckingException.class, () -> builder.load(a).compileAndDump());
         assertThrows(TypeCheckingException.class, () -> builder.load(b).compileAndDump());
-    }
-
-    private static void testEquals(String code, String output, boolean isCompact) throws IOException {
-        var config = isCompact ? Configuration.forCompactTest() : Configuration.forExpandedTest();
-        if (GENERATE_EXPECTED) {
-            var builder = NXBuilder.from(config);
-            var compiler = builder.load(code);
-            builder.printer(NotepadWriter.pathOut(TEST_DIR.resolve(output))).print(compiler.compileAndDump());
-        } else {
-            var compiler = NXBuilder.from(config).load(code);
-            var expected = MAPPER.reader().readTree(Files.readString(TEST_DIR.resolve(output)));
-            assertEquals(expected, compiler.compileAndDump());
-        }
     }
 
     @Test
@@ -182,7 +182,7 @@ class AnalysisTest {
                   }
                 }
                 """;
-        testEquals(code, "expected/direct_alias_a.json", false);
+        testEquals(code, "expected/direct_alias_a.json");
     }
 
     @Test
@@ -196,7 +196,7 @@ class AnalysisTest {
                   }
                 }
                 """;
-        testEquals(code, "expected/direct_alias_b.json", false);
+        testEquals(code, "expected/direct_alias_b.json");
     }
 
     @Test
@@ -208,7 +208,7 @@ class AnalysisTest {
                   o <> i[4];
                 }
                 """;
-        testEquals(code, "expected/direct_alias_c.json", false);
+        testEquals(code, "expected/direct_alias_c.json");
     }
 
     @Test
@@ -224,7 +224,7 @@ class AnalysisTest {
                   }
                 }
                 """;
-        testEquals(code, "expected/direct_alias_d.json", false);
+        testEquals(code, "expected/direct_alias_d.json");
     }
 
     @Test
@@ -243,6 +243,6 @@ class AnalysisTest {
                   c <> tmp[3];
                 }
                 """;
-        testEquals(code, "expected/direct_alias_e.json", false);
+        testEquals(code, "expected/direct_alias_e.json");
     }
 }

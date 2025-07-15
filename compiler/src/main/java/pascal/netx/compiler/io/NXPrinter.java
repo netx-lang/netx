@@ -20,11 +20,11 @@ public final class NXPrinter {
     NXPrinter(Configuration config, NotepadWriter writer) {
         this.config = config;
         this.writer = writer;
-        this.componentHead = config.fullyExpand() ? 3 : 4;
+        this.componentHead = config.expanded() ? 3 : 4;
     }
 
     public void print(JsonNode json) {
-        if (config.fullyExpand()) {
+        if (config.expanded()) {
             printObject(json);
         } else {
             startArray();
@@ -58,7 +58,7 @@ public final class NXPrinter {
         switch (NxonType.typeOf(node)) {
             case WIRE, CLOCK -> printData(node);
             case BUILTIN -> printObject(node, 3);
-            case INSTANTIATE, COMPONENT -> printObject(node, componentHead);
+            case COMPONENT -> printObject(node, componentHead);
         }
     }
 

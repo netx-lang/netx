@@ -17,12 +17,11 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static pascal.netx.compiler.TestUtils.testBothCompactAndExpanded;
-import static pascal.netx.compiler.TestUtils.testExpanded;
+import static pascal.netx.compiler.TestUtils.test;
 
 class ElaboratorUnitTest {
     private static PackageScope loadDesign(String code) {
-        return NXBuilder.from(Configuration.forExpandedTest())
+        return NXBuilder.from(Configuration.forCommon())
                 .load(CharStreams.fromString(code)).elaborate().getTop();
     }
 
@@ -60,7 +59,7 @@ class ElaboratorUnitTest {
                     c <> AND <> (a || b);
                 }
                 """;
-        testBothCompactAndExpanded(expected, actual);
+        test(expected, actual);
     }
 
     @Test
@@ -104,7 +103,7 @@ class ElaboratorUnitTest {
                          parametric_comp(b=4, a=3, c = 5) <> i;
                 }
                 """;
-        testExpanded(expected, actual);
+        test(expected, actual);
     }
 
     @Test
@@ -130,8 +129,8 @@ class ElaboratorUnitTest {
                     else o <> OR <> [i, 1];
                 }
                 """;
-        var thenConf = Configuration.builder().forExpanded().withArgs(List.of("cond=true")).build();
-        var elseConf = Configuration.builder().forExpanded().withArgs(List.of("cond=false")).build();
+        var thenConf = Configuration.builder().forCommon().withArgs(List.of("cond=true")).build();
+        var elseConf = Configuration.builder().forCommon().withArgs(List.of("cond=false")).build();
         assertNotEquals(
                 NXBuilder.from(thenConf).load(code).compileAndDump(),
                 NXBuilder.from(elseConf).load(code).compileAndDump()
@@ -152,7 +151,7 @@ class ElaboratorUnitTest {
                     e <> AND(4) <> [a, b, c, d];
                 }
                 """;
-        testBothCompactAndExpanded(expected, actual);
+        test(expected, actual);
     }
 
     @Test
@@ -172,7 +171,7 @@ class ElaboratorUnitTest {
                     ];
                 }
                 """;
-        testBothCompactAndExpanded(expected, actual);
+        test(expected, actual);
     }
 
     @Test
@@ -195,7 +194,7 @@ class ElaboratorUnitTest {
                     f <> AND <> [a, b, c, d, e];
                 }
                 """;
-        testBothCompactAndExpanded(expected, actual);
+        test(expected, actual);
     }
 
     @Test
@@ -218,6 +217,6 @@ class ElaboratorUnitTest {
                     c <> AND <> [a, b];
                 }
                 """;
-        testBothCompactAndExpanded(expected, actual);
+        test(expected, actual);
     }
 }

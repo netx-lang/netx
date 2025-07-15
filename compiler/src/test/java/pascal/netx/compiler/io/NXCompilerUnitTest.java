@@ -21,12 +21,12 @@ class NXCompilerUnitTest {
     private static void testNonNull(String fileName) throws IOException {
         String content = new String(Files.readAllBytes(TEST_DIR.resolve(fileName)));
         CharStream charStream = CharStreams.fromString(content);
-        NXCompiler compiler = NXBuilder.from(Configuration.forExpandedTest()).load(charStream);
+        NXCompiler compiler = NXBuilder.from(Configuration.forCommon()).load(charStream);
         assertNotNull(compiler.compileAndDump());
     }
 
-    private static void testEquals(String testcase, String output, boolean isCompact) throws IOException {
-        var config = isCompact ? Configuration.forCompactTest() : Configuration.forExpandedTest();
+    private static void testEquals(String testcase, String output) throws IOException {
+        Configuration config = Configuration.forCommon();
         if (GENERATE_EXPECTED) {
             var builder = NXBuilder.from(config);
             var compiler = builder.loadPath(TEST_DIR.resolve(testcase));
@@ -40,27 +40,25 @@ class NXCompilerUnitTest {
 
     @Test
     void testProjectBuild() throws IOException {
-        testEquals("project/_netx.toml", "expected/project_e.json", false);
-        testEquals("project/_netx.toml", "expected/project_c.json", true);
+        testEquals("project/_netx.toml", "expected/project.json");
     }
 
     @Test
     void testEnum() throws IOException {
-        testEquals("enum.nx", "expected/enum.json", true);
-        testEquals("enum_2.nx", "expected/enum_2.json", false);
+        testEquals("enum.nx", "expected/enum.json");
     }
 
     @Test
     void loadWithValidCharStream() throws IOException {
         var string = Files.readString(TEST_DIR.resolve("bind_1.nx"));
         CharStream charStream = CharStreams.fromString(string);
-        NXCompiler compiler = NXBuilder.from(Configuration.forExpandedTest()).load(charStream);
+        NXCompiler compiler = NXBuilder.from(Configuration.forCommon()).load(charStream);
         assertNotNull(compiler);
     }
 
     @Test
     void loadPathWithValidPath() throws IOException {
-        NXCompiler compiler = NXBuilder.from(Configuration.forExpandedTest())
+        NXCompiler compiler = NXBuilder.from(Configuration.forCommon())
                 .loadPath(TEST_DIR.resolve("bind_1.nx"));
         assertNotNull(compiler);
     }
@@ -68,7 +66,7 @@ class NXCompilerUnitTest {
     @Test
     void loadPathWithInvalidPath() {
         Path path = Path.of("invalid/path/to/file.nx");
-        assertThrows(IOException.class, () -> NXBuilder.from(Configuration.forExpandedTest()).loadPath(path));
+        assertThrows(IOException.class, () -> NXBuilder.from(Configuration.forCommon()).loadPath(path));
     }
 
     @Test
@@ -89,6 +87,6 @@ class NXCompilerUnitTest {
     void testInvalidInput() {
         CharStream charStream = CharStreams.fromString("invalid input");
         assertThrows(ParseCancellationException.class,
-                () -> NXBuilder.from(Configuration.forExpandedTest()).load(charStream));
+                () -> NXBuilder.from(Configuration.forCommon()).load(charStream));
     }
 }

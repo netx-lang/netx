@@ -15,7 +15,7 @@ class NXVisualizerTest {
     @Disabled
     @Test
     void testCounter() throws IOException {
-        var compiler = NXBuilder.from(Configuration.forCompactTest())
+        var compiler = NXBuilder.from(Configuration.forVisualization())
                 .loadPath(TEST_DIR.resolve("counter.nx"));
         var notepad = NotepadWriter.pathOut(Path.of("a.out"));
         compiler.compileAndVisualize(notepad, 2);

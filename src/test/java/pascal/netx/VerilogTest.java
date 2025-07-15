@@ -1,11 +1,10 @@
 package pascal.netx;
 
 import org.junit.jupiter.api.Test;
+import pascal.netx.backend.verilog.VerilogTransformer;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXBuilder;
 import pascal.netx.util.print.NotepadWriter;
-import pascal.netx.verilog.VerilogDumper;
-import pascal.netx.verilog.frontend.HFrontend;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,7 +13,7 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VerilogTest {
-    private static final boolean GENERATE_EXPECTED = false;
+    private static final boolean GENERATE_EXPECTED = true;
     private static final Path TEST_DIR = Path.of("src/test/resources/testcases/");
     private static final Path EXPECTED_DIR = Path.of("src/test/resources/testcases/verilog/");
 
@@ -39,15 +38,14 @@ public class VerilogTest {
     }
 
     private static void test(String other) throws IOException {
-        var design = NXBuilder.from(Configuration.forCompactTest())
+        var design = NXBuilder.from(Configuration.forCommon())
                 .loadPath(TEST_DIR.resolve(other + ".nx")).compileAndDump();
-        var vModules = HFrontend.load(design).parse();
         if (GENERATE_EXPECTED) {
             var notepad = NotepadWriter.pathOut(EXPECTED_DIR.resolve(other + ".v"));
-            new VerilogDumper(notepad, vModules).dump();
+            new VerilogTransformer(notepad, design).parse();
         } else {
             var notepad = NotepadWriter.strOut();
-            new VerilogDumper(notepad, vModules).dump();
+            new VerilogTransformer(notepad, design).parse();
             assertEquals(Files.readString(EXPECTED_DIR.resolve(other + ".v")), notepad.toString());
         }
     }

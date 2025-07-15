@@ -3,11 +3,10 @@ package pascal.netx;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pascal.netx.backend.verilog.VerilogTransformer;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXBuilder;
 import pascal.netx.util.print.NotepadWriter;
-import pascal.netx.verilog.VerilogDumper;
-import pascal.netx.verilog.frontend.HFrontend;
 import picocli.CommandLine;
 
 import java.io.IOException;
@@ -136,9 +135,9 @@ public class Main {
         private Configuration buildConfig() {
             var builder = super.setupConfiguration();
             if (compact) {
-                builder.forCompact();
+                builder.forVisualization();
             } else {
-                builder.forExpanded();
+                builder.forCommon();
             }
             return builder.build();
         }
@@ -152,12 +151,10 @@ public class Main {
         @Override
         public Integer call() {
             try {
-                var builder = NXBuilder.from(setupConfiguration().forCompact().build());
+                var builder = NXBuilder.from(setupConfiguration().build());
                 var node = builder.loadPath(source).compileAndDump();
-                new VerilogDumper(
-                        notepadWriterFor(output),
-                        HFrontend.load(node).parse()
-                ).dump();
+                NotepadWriter notepad = notepadWriterFor(output);
+                new VerilogTransformer(notepad, node).parse();
                 return 0;
             } catch (Exception e) {
                 log.error("Dumping failed", e);
@@ -181,7 +178,7 @@ public class Main {
         @Override
         public Integer call() {
             try {
-                var builder = NXBuilder.from(setupConfiguration().forCompact().build());
+                var builder = NXBuilder.from(setupConfiguration().build());
                 var compiler = builder.loadPath(source);
                 compiler.compileAndVisualize(notepadWriterFor(output), depth);
                 return 0;
