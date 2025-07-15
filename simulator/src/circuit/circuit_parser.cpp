@@ -271,22 +271,22 @@ namespace nxon {
             }
             case builtin_type::CAST: {
                 context.circuit.add_rule(rule_factory::id_rule(
-                    parse_source(input[0], context),
-                    data_factory::signed_resize_sink_adapter(parse_sink(output[0], context)))
+                        parse_source(input[0], context),
+                        data_factory::signed_resize_sink_adapter(parse_sink(output[0], context)))
                 );
                 break;
             }
             case builtin_type::UCAST: {
                 context.circuit.add_rule(rule_factory::id_rule(
-                    parse_source(input[0], context),
-                    data_factory::unsigned_resize_sink_adapter(parse_sink(output[0], context)))
+                        parse_source(input[0], context),
+                        data_factory::unsigned_resize_sink_adapter(parse_sink(output[0], context)))
                 );
                 break;
             }
             case builtin_type::TO: {
                 context.circuit.add_rule(rule_factory::id_rule(
-                    parse_source(input[0], context),
-                    parse_sink(output[0], context))
+                        parse_source(input[0], context),
+                        parse_sink(output[0], context))
                 );
                 break;
             }
@@ -389,16 +389,16 @@ namespace nxon {
 
     static void parse_circuit_io_alias(parse_context &context, const nlohmann::json &json) {
         auto input_iter = context.circuit_input.begin();
-        for (auto &top_input : json.at("top_input")) {
+        for (auto &top_input: json.at("top_input")) {
             context.name_map.emplace(top_input, *input_iter++);
         }
         auto output_iter = context.circuit_output.begin();
-        for (auto &top_output : json.at("top_output")) {
+        for (auto &top_output: json.at("top_output")) {
             context.name_map.emplace(top_output, *output_iter++);
         }
     }
 
-    void parse_circuit(parse_context &context, const nlohmann::json &json, const native_map &native_map) {
+    void parse_circuit_json(parse_context &context, const nlohmann::json &json, const native_map &native_map) {
         context.members_total = json["totalData"];
         auto &design = json["design"];
         parse_circuit_io(design, context);
@@ -411,11 +411,5 @@ namespace nxon {
             initial_values[id] = value_t(context.size_map.at(id), 0ul);
         context.circuit.put_batch(initial_values);
         context.circuit.refresh_all();
-    }
-
-    parse_context parse_circuit(const nlohmann::json &json, const native_map &native_map) {
-        parse_context context;
-        parse_circuit(context, json, native_map);
-        return context;
     }
 }

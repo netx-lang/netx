@@ -88,9 +88,34 @@ namespace nxon {
 
     sink_t parse_sink(const std::string &sink, const parse_context &context);
 
-    void parse_circuit(parse_context &context, const nlohmann::json &json, const native_map &native_map = {});
+    void parse_circuit_json(parse_context &context, const nlohmann::json &json, const native_map &native_map = {});
 
-    parse_context parse_circuit(const nlohmann::json &json, const native_map &native_map = {});
+    template<typename T>
+    void parse_circuit(parse_context &context, T &&json_source, const native_map &native_map = {}) {
+        parse_circuit_json(context, nlohmann::json::parse(std::forward<T>(json_source)), native_map);
+    }
+
+    template<>
+    inline void parse_circuit(parse_context &context, nlohmann::json &json, const native_map &native_map) {
+        parse_circuit_json(context, json, native_map);
+    }
+
+    template<>
+    inline void parse_circuit(parse_context &context, const nlohmann::json &json, const native_map &native_map) {
+        parse_circuit_json(context, json, native_map);
+    }
+
+    template<>
+    inline void parse_circuit(parse_context &context, nlohmann::json &&json, const native_map &native_map) {
+        parse_circuit_json(context, json, native_map);
+    }
+
+    template<typename T>
+    parse_context parse_circuit(T &&json_source, const native_map &native_map = {}) {
+        parse_context context;
+        parse_circuit(context, std::forward<T>(json_source), native_map);
+        return context;
+    }
 }
 
 #endif //PARSER_H

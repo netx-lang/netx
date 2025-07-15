@@ -13,7 +13,7 @@
 int main() {
     const std::string path = "/home/czm233/draft/NetX-FFT/fft.json";
     nxon::parallel_parse_context parsed;
-    nxon::parse_circuit(parsed, nlohmann::json::parse(std::ifstream(path)));
+    nxon::parse_circuit(parsed, std::ifstream(path));
     parsed.init_parallel();
 
     using namespace std::chrono;
