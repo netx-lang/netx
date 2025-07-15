@@ -2,7 +2,6 @@ package pascal.netx.compiler.io;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
-import pascal.netx.compiler.antlr.NetXParser;
 import pascal.netx.compiler.ast.element.BindingNode;
 import pascal.netx.compiler.ast.expr.*;
 import pascal.netx.compiler.ast.expr.qualifier.BindingQualifier;
@@ -21,21 +20,21 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class NXParserUnitTest {
     private static final Path TEST_DIR = Path.of("src/test/resources/testcases/");
 
-    static NetXParser makeParser(String code) {
-        var frontend = new NXParser(CharStreams.fromString(code));
-        return frontend.buildANTLRParser();
+    static NXParser makeParser(String code) {
+        return new NXParser(CharStreams.fromString(code), "test.nx");
     }
 
     @Test
     void testPackage() throws IOException {
-        var compiler = new NXParser(CharStreams.fromPath(TEST_DIR.resolve("package.nx")));
-        assertNotNull(compiler.parse());
+        var parser = new NXParser(TEST_DIR.resolve("package.nx"));
+        assertNotNull(parser.parse());
     }
 
     @Test
     void testParseAccessExpr() {
-        var context = makeParser("arr[1][2:0]").expression();
-        var accessExpr = TreeParser.parseExpr(context);
+        var parser = makeParser("arr[1][2:0]");
+        var context = parser.buildANTLRParser().expression();
+        var accessExpr = parser.buildTreeParser().parseExpr(context);
         assertEquals(AccessExpr.of(AccessExpr.of(
                         IdentifierExpr.of(Identifier.of("arr")),
                         BitSelector.of(IntNumber.of(1))),
@@ -44,8 +43,9 @@ class NXParserUnitTest {
 
     @Test
     void testParseListExpr() {
-        var context = makeParser("[lhs | i in [0..5], let lhs = [1, x[i]]]").expression();
-        var listExpr = TreeParser.parseExpr(context);
+        var parser = makeParser("[lhs | i in [0..5], let lhs = [1, x[i]]]");
+        var context = parser.buildANTLRParser().expression();
+        var listExpr = parser.buildTreeParser().parseExpr(context);
         assertEquals(ListComprehension.of(
                 IdentifierExpr.of(Identifier.of("lhs")), List.of(
                         GeneratorQualifier.of(

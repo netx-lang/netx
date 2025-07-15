@@ -31,9 +31,15 @@ import java.util.List;
 
 public final class TreeParser {
 
-    private static final Logger log = LoggerFactory.getLogger(TreeParser.class);
+    private final Logger log = LoggerFactory.getLogger(TreeParser.class);
 
-    public static PackageNode parseDesign(DesignContext ctx) {
+    private final String fileName;
+
+    public TreeParser(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public PackageNode parseDesign(DesignContext ctx) {
         PackageNode result = PackageNode.of(parsePackageInfo(ctx.header())).setSourceLoc(locationOf(ctx.getStart()));
         for (var child : ctx.children) {
             switch (child) {
@@ -50,23 +56,23 @@ public final class TreeParser {
         return result;
     }
 
-    static void parseImportInto(Import_Context ctx, PackageNode design) {
+    void parseImportInto(Import_Context ctx, PackageNode design) {
         parseImport(ctx).forEach(design::addDefinition);
     }
 
-    static void parseComponentInto(ComponentContext ctx, PackageNode design) {
+    void parseComponentInto(ComponentContext ctx, PackageNode design) {
         design.addDefinition(parseComponent(ctx));
     }
 
-    static  void parseInterfaceInto(InterfaceContext ctx, PackageNode design) {
+     void parseInterfaceInto(InterfaceContext ctx, PackageNode design) {
         design.addDefinition(parseInterface(ctx));
     }
 
-    static void parseEnumInto(EnumContext ctx, PackageNode design) {
+    void parseEnumInto(EnumContext ctx, PackageNode design) {
         design.addDefinition(parseEnum(ctx));
     }
 
-    static EnumNode parseEnum(EnumContext ctx) {
+    EnumNode parseEnum(EnumContext ctx) {
         var iterator = ctx.ID().iterator();
         EnumNode result = EnumNode.of(parseIdentifier(iterator.next()));
         iterator.forEachRemaining(field -> result.addField(parseIdentifier(field)));
@@ -83,7 +89,7 @@ public final class TreeParser {
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static PackageInfoNode parsePackageInfo(HeaderContext ctx) {
+    PackageInfoNode parsePackageInfo(HeaderContext ctx) {
         if (ctx == null) {
             return PackageInfoNode.of(PackageInfoNode.Kind.APPLICATION, null);
         }
@@ -95,7 +101,7 @@ public final class TreeParser {
         return PackageInfoNode.of(kind, parseIdentifier(ctx.ID()));
     }
 
-    static ComponentNode parseComponent(ComponentContext ctx) {
+    ComponentNode parseComponent(ComponentContext ctx) {
         var identifier = parseIdentifier(ctx.ID());
         var attributes = parseComponentAttributes(ctx);
         var type = parseComponentType(ctx.component_type(), locationOf(ctx.getStart()));
@@ -103,7 +109,7 @@ public final class TreeParser {
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static InterfaceNode parseInterface(InterfaceContext ctx) {
+    InterfaceNode parseInterface(InterfaceContext ctx) {
         var type = parseExpr(ctx.expression());
         var identifier = parseIdentifier(ctx.ID());
         var attributes = parseInterfaceAttributes(ctx);
@@ -111,7 +117,7 @@ public final class TreeParser {
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static List<ImportNode> parseImport(Import_Context ctx) {
+    List<ImportNode> parseImport(Import_Context ctx) {
         return switch (ctx.reference()) {
             case CommonRefContext refCtx -> parseCommonImport(ctx, refCtx);
             case WildcardRefContext refCtx -> parseWildcardImport(ctx, refCtx);
@@ -119,20 +125,20 @@ public final class TreeParser {
         };
     }
 
-    private static List<ImportNode> parseWildcardImport(Import_Context ctx, WildcardRefContext refCtx) {
+    private List<ImportNode> parseWildcardImport(Import_Context ctx, WildcardRefContext refCtx) {
         return List.of(
                 ImportNode.ofWildcard(
-                        refCtx.ID().stream().map(TreeParser::parseIdentifier).toList()
+                        refCtx.ID().stream().map(this::parseIdentifier).toList()
                 ).setSourceLoc(locationOf(ctx.getStart()))
         );
     }
 
-    private static List<ImportNode> parseCommonImport(Import_Context ctx, CommonRefContext refCtx) {
-        var prefix = refCtx.ID().stream().map(TreeParser::parseIdentifier).toList();
+    private List<ImportNode> parseCommonImport(Import_Context ctx, CommonRefContext refCtx) {
+        var prefix = refCtx.ID().stream().map(this::parseIdentifier).toList();
         List<ImportNode> results;
         if (refCtx.reference_set() != null) {
             results = refCtx.reference_set().ID().stream()
-                    .map(TreeParser::parseIdentifier)
+                    .map(this::parseIdentifier)
                     .map(id -> new ArrayList<>(prefix) {{
                         add(id);
                     }})
@@ -148,12 +154,12 @@ public final class TreeParser {
         return results;
     }
 
-    private static void parseImportAlias(AliasContext ctx, List<ImportNode> results) {
+    private void parseImportAlias(AliasContext ctx, List<ImportNode> results) {
         List<Identifier> aliasID;
         if (ctx.ID() != null) {
             aliasID = List.of(parseIdentifier(ctx.ID()));
         } else {
-            aliasID = ctx.reference_set().ID().stream().map(TreeParser::parseIdentifier).toList();
+            aliasID = ctx.reference_set().ID().stream().map(this::parseIdentifier).toList();
         }
         if (aliasID.size() != results.size()) {
             log.error("{}: Unmatched number of import alias", locationOf(ctx.getStart()));
@@ -163,23 +169,23 @@ public final class TreeParser {
         results.forEach(stmt -> stmt.setAlias(iter.next()));
     }
 
-    static List<Identifier> parseInterfaceAttributes(InterfaceContext ctx) {
+    List<Identifier> parseInterfaceAttributes(InterfaceContext ctx) {
         if (ctx.attributes() == null) {
             return List.of();
         }
         return ctx.attributes().ID().stream()
-                .map(TreeParser::parseIdentifier).toList();
+                .map(this::parseIdentifier).toList();
     }
 
-    static List<Identifier> parseComponentAttributes(ComponentContext ctx) {
+    List<Identifier> parseComponentAttributes(ComponentContext ctx) {
         if (ctx.attributes() == null) {
             return List.of();
         }
         return ctx.attributes().ID().stream()
-                .map(TreeParser::parseIdentifier).toList();
+                .map(this::parseIdentifier).toList();
     }
 
-    static ComponentTypeNode parseComponentType(Component_typeContext ctx, SourceLoc sourceLoc) {
+    ComponentTypeNode parseComponentType(Component_typeContext ctx, SourceLoc sourceLoc) {
         if (ctx == null) {
             var result = ComponentTypeNode.of(CommonList.ofEmpty(), CommonList.ofEmpty());
             result.walk(new ASTListener() {
@@ -195,7 +201,7 @@ public final class TreeParser {
         }
     }
 
-    static ComponentElement parseElement(ElementContext ctx) {
+    ComponentElement parseElement(ElementContext ctx) {
         var result = switch (ctx) {
             case BindingStatementContext sub -> parseBinding(sub.binding());
             case MixedInstantiationContext sub -> parseMixedInstantiation(sub);
@@ -209,19 +215,19 @@ public final class TreeParser {
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static ComponentInstantiationNode parseComponentInstantiation(ComponentInstantiationContext ctx) {
+    ComponentInstantiationNode parseComponentInstantiation(ComponentInstantiationContext ctx) {
         return ComponentInstantiationNode.of(parseExpr(ctx.expression()), false);
     }
 
-    static ComponentInstantiationNode parseMixedInstantiation(MixedInstantiationContext ctx) {
+    ComponentInstantiationNode parseMixedInstantiation(MixedInstantiationContext ctx) {
         return ComponentInstantiationNode.of(parseExpr(ctx.expression()), true);
     }
 
-    static LoopNode parseLoop(LoopContext ctx) {
+    LoopNode parseLoop(LoopContext ctx) {
         return LoopNode.of(parseGeneratorQualifier(ctx.iterator()), parseElement(ctx.element()));
     }
 
-    static BranchNode parseBranch(BranchContext ctx) {
+    BranchNode parseBranch(BranchContext ctx) {
         var result = BranchNode.of(parseExpr(ctx.cond), parseElement(ctx.thenBranch), null);
         if (ctx.elseBranch != null) {
             result.setElseBranch(parseElement(ctx.elseBranch));
@@ -229,7 +235,7 @@ public final class TreeParser {
         return result;
     }
 
-    static DataInstantiationNode parseDataInstantiation(DataDeclarationContext ctx) {
+    DataInstantiationNode parseDataInstantiation(DataDeclarationContext ctx) {
         var decl = ctx.data_declaration();
         SymbolExpr type;
         DataInstantiationNode.Kind kind;
@@ -252,19 +258,19 @@ public final class TreeParser {
         return DataInstantiationNode.of(kind, declarations, type);
     }
 
-    static List<DataRestNode> parseDeclarationList(Declaration_listContext ctx) {
+    List<DataRestNode> parseDeclarationList(Declaration_listContext ctx) {
         List<DataRestNode> result = new ArrayList<>();
         for (var sub : ctx.declaration_symbol()) {
             DataRestNode data = DataRestNode.of(
                     parseIdentifier(sub.ID()),
-                    sub.expression().stream().map(TreeParser::parseExpr).toList()
+                    sub.expression().stream().map(this::parseExpr).toList()
             ).setSourceLoc(locationOf(sub.getStart()));
             result.add(data);
         }
         return result;
     }
 
-    static ExprNode parseExpr(ExpressionContext ctx) {
+    ExprNode parseExpr(ExpressionContext ctx) {
         var result = switch (ctx) {
             case ListExprContext sub -> parseListExpr(sub);
             case UnaryExprContext sub -> parseUnaryExpr(sub);
@@ -281,11 +287,11 @@ public final class TreeParser {
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static SymbolExpr parseSymbolExpr(SymbolExprContext ctx) {
+    SymbolExpr parseSymbolExpr(SymbolExprContext ctx) {
         return parseSymbolExpr(ctx.symbol());
     }
 
-    static SymbolExpr parseSymbolExpr(SymbolContext ctx) {
+    SymbolExpr parseSymbolExpr(SymbolContext ctx) {
         return switch (ctx) {
             case PrimarySymbolContext sub -> parsePrimarySymbol(sub);
             case CallSymbolContext sub -> parseParamSymbolExpr(sub);
@@ -293,7 +299,7 @@ public final class TreeParser {
         };
     }
 
-    static ListExpr parseListExpr(ListExprContext ctx) {
+    ListExpr parseListExpr(ListExprContext ctx) {
         return switch (ctx.list()) {
             case CommonListContext sub -> CommonList.of(parseExprList(sub.expression()));
             case RangeListContext sub -> RangeList.of(parseExpr(sub.from), parseExpr(sub.to));
@@ -303,13 +309,13 @@ public final class TreeParser {
         };
     }
 
-    static ListComprehension parseListComprehension(ListComprehensionContext ctx) {
+    ListComprehension parseListComprehension(ListComprehensionContext ctx) {
         return ListComprehension.of(
                 parseExpr(ctx.expression()),
-                ctx.qualifier().stream().map(TreeParser::parserQualifier).toList());
+                ctx.qualifier().stream().map(this::parserQualifier).toList());
     }
 
-    static Qualifier parserQualifier(QualifierContext ctx) {
+    Qualifier parserQualifier(QualifierContext ctx) {
         var result = switch (ctx) {
             case GeneratorContext sub -> parseGeneratorQualifier(sub.iterator());
             case FilterContext sub -> FilterQualifier.of(parseExpr(sub.expression()));
@@ -319,19 +325,19 @@ public final class TreeParser {
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static GeneratorQualifier parseGeneratorQualifier(IteratorContext ctx) {
+    GeneratorQualifier parseGeneratorQualifier(IteratorContext ctx) {
         return GeneratorQualifier.of(
                 parseIdentifier(ctx.ID()),
                 parseExpr(ctx.expression())
         ).setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static BindingNode parseBinding(BindingContext ctx) {
+    BindingNode parseBinding(BindingContext ctx) {
         return BindingNode.of(parseSymbolExpr(ctx.symbol()), parseExpr(ctx.expression()))
                 .setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static ExprNode parsePortExpr(PortExprContext ctx) {
+    ExprNode parsePortExpr(PortExprContext ctx) {
         List<PortConnectionExpr.PortAssign> ports = new ArrayList<>();
         for (var assign : ctx.port_assign()) {
             var lhs = parseExpr(assign.lhs);
@@ -341,7 +347,7 @@ public final class TreeParser {
         return PortConnectionExpr.of(ports);
     }
 
-    static ExprNode parseUnaryExpr(UnaryExprContext ctx) {
+    ExprNode parseUnaryExpr(UnaryExprContext ctx) {
         UnaryExpr.Operator op;
         if (ctx.prev != null) {
             op = UnaryExpr.Operator.BLOCK_OUT;
@@ -353,16 +359,16 @@ public final class TreeParser {
         return UnaryExpr.of(op, parseExpr(ctx.expression()));
     }
 
-    static ExprNode parseBinaryExpr(BinaryExprContext ctx) {
+    ExprNode parseBinaryExpr(BinaryExprContext ctx) {
         var op = BinaryExpr.Operator.fromString(ctx.op.getText());
         return BinaryExpr.of(op, parseExpr(ctx.lhs), parseExpr(ctx.rhs));
     }
 
-    static NumberExpr parseNumberExpr(NumberExprContext ctx) {
+    NumberExpr parseNumberExpr(NumberExprContext ctx) {
         return parseNumber(ctx.number());
     }
 
-    private static NumberExpr parseNumber(NumberContext n) {
+    private NumberExpr parseNumber(NumberContext n) {
         return switch (n) {
             case IntNumberContext sub -> IntNumber.of(Integer.parseUnsignedInt(sub.UNSIGNED_INTEGER().getText()));
             case BoolNumberContext sub -> BoolNumber.of(Boolean.parseBoolean(sub.BOOLEAN().getText()));
@@ -371,17 +377,17 @@ public final class TreeParser {
         };
     }
 
-    static BitVectorNumber parseBitVectorNumber(BitVectorNumberContext ctx) {
+    BitVectorNumber parseBitVectorNumber(BitVectorNumberContext ctx) {
         return BitVectorNumber.of(BitVector.parse(ctx.getText()));
     }
 
-    static ExprNode parseFieldExpr(FieldExprContext ctx) {
+    ExprNode parseFieldExpr(FieldExprContext ctx) {
         return FieldExpr.of(
                 parseExpr(ctx.expression()),
                 parseIdentifier(ctx.ID()));
     }
 
-    static ExprNode parseAccessExpr(AccessExprContext ctx) {
+    ExprNode parseAccessExpr(AccessExprContext ctx) {
         var result = parseExpr(ctx.expression());
         for (var selector : ctx.selector()) {
             result = AccessExpr.of(result, parseSelector(selector)).setSourceLoc(result.getSourceLoc());
@@ -389,7 +395,7 @@ public final class TreeParser {
         return result;
     }
 
-    static Selector parseSelector(SelectorContext ctx) {
+    Selector parseSelector(SelectorContext ctx) {
         var result = switch (ctx) {
             case BitSelectorContext sub -> BitSelector.of(parseExpr(sub.expression()));
             case PartSelectorContext sub -> PartSelector.of(parseExpr(sub.from), parseExpr(sub.to));
@@ -398,7 +404,7 @@ public final class TreeParser {
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static CallSymbolExpr parseParamSymbolExpr(CallSymbolContext ctx) {
+    CallSymbolExpr parseParamSymbolExpr(CallSymbolContext ctx) {
         CallSymbolExpr result;
         var head = parseIdentifier(ctx.ID());
         if (!ctx.expression().isEmpty()) {
@@ -411,7 +417,7 @@ public final class TreeParser {
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static List<Pair<Identifier, ExprNode>> parseAttrAssigns(List<Attribute_assignContext> list) {
+    List<Pair<Identifier, ExprNode>> parseAttrAssigns(List<Attribute_assignContext> list) {
         List<Pair<Identifier, ExprNode>> result = new ArrayList<>();
         for (var assign : list) {
             var id = parseIdentifier(assign.ID());
@@ -421,19 +427,19 @@ public final class TreeParser {
         return result;
     }
 
-    static ExprNode parseConditionalExpr(ConditionalExprContext ctx) {
+    ExprNode parseConditionalExpr(ConditionalExprContext ctx) {
         return ConditionalExpr.of(parseExpr(ctx.cond), parseExpr(ctx.thenBranch), parseExpr(ctx.elseBranch));
     }
 
-    static Identifier parseIdentifier(TerminalNode ID) {
+    Identifier parseIdentifier(TerminalNode ID) {
         return Identifier.of(ID.getText()).setSourceLoc(locationOf(ID.getSymbol()));
     }
 
-    static IdentifierExpr parsePrimarySymbol(PrimarySymbolContext ctx) {
+    IdentifierExpr parsePrimarySymbol(PrimarySymbolContext ctx) {
         return IdentifierExpr.of(parseIdentifier(ctx.ID())).setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    static List<ComponentElement> parseElements(List<ElementContext> list) {
+    List<ComponentElement> parseElements(List<ElementContext> list) {
         List<ComponentElement> result = new ArrayList<>();
         for (var element : list) {
             result.add(parseElement(element));
@@ -441,7 +447,7 @@ public final class TreeParser {
         return result;
     }
 
-    static List<ExprNode> parseExprList(List<ExpressionContext> list) {
+    List<ExprNode> parseExprList(List<ExpressionContext> list) {
         List<ExprNode> result = new ArrayList<>();
         for (var expr : list) {
             result.add(parseExpr(expr));
@@ -449,7 +455,7 @@ public final class TreeParser {
         return result;
     }
 
-    static SourceLoc locationOf(Token token) {
-        return new SourceLoc(token.getLine(), token.getCharPositionInLine());
+    SourceLoc locationOf(Token token) {
+        return new SourceLoc(token.getLine(), token.getCharPositionInLine(), fileName);
     }
 }

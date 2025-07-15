@@ -5,11 +5,11 @@
   "design": {
     "type": "component",
     "id": "top",
-    "loc": "1:10",
+    "loc": "test.nx:1:10",
     "input": ["i@0"],
     "output": ["i@0[4]"],
     "members": [
-      {"type": "wire", "width": 5, "id": "i@0", "loc": "2:7"}
+      {"type": "wire", "width": 5, "id": "i@0", "loc": "test.nx:2:7"}
     ]
   }
 }

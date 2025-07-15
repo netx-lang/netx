@@ -5,59 +5,59 @@
   "design": {
     "type": "component",
     "id": "Divide_by_3",
-    "loc": "1:10",
+    "loc": "divide_by_3.nx:1:10",
     "input": ["clk@0"],
     "output": ["clk_3@1"],
     "members": [
-      {"type": "clock", "id": "clk@0", "loc": "2:9"},
-      {"type": "clock", "id": "clk_3@1", "loc": "2:14"},
-      {"type": "wire", "width": 1, "id": "a@2", "loc": "3:9"},
-      {"type": "wire", "width": 1, "id": "b@3", "loc": "3:12"},
-      {"type": "wire", "width": 1, "id": "c@4", "loc": "3:15"},
+      {"type": "clock", "id": "clk@0", "loc": "divide_by_3.nx:2:9"},
+      {"type": "clock", "id": "clk_3@1", "loc": "divide_by_3.nx:2:14"},
+      {"type": "wire", "width": 1, "id": "a@2", "loc": "divide_by_3.nx:3:9"},
+      {"type": "wire", "width": 1, "id": "b@3", "loc": "divide_by_3.nx:3:12"},
+      {"type": "wire", "width": 1, "id": "c@4", "loc": "divide_by_3.nx:3:15"},
       {
-        "type": "builtin", "id": "NOT", "loc": "8:28",
+        "type": "builtin", "id": "NOT", "loc": "divide_by_3.nx:8:28",
         "input": ["a@2"],
         "output": ["$o@5"],
         "members": [
-          {"type": "wire", "width": 1, "id": "$o@5", "loc": "8:28"}
+          {"type": "wire", "width": 1, "id": "$o@5", "loc": "divide_by_3.nx:8:28"}
         ]
       },
       {
-        "type": "builtin", "id": "NOT", "loc": "8:38",
+        "type": "builtin", "id": "NOT", "loc": "divide_by_3.nx:8:38",
         "input": ["b@3"],
         "output": ["$o@6"],
         "members": [
-          {"type": "wire", "width": 1, "id": "$o@6", "loc": "8:38"}
+          {"type": "wire", "width": 1, "id": "$o@6", "loc": "divide_by_3.nx:8:38"}
         ]
       },
       {
-        "type": "builtin", "id": "AND", "loc": "8:20",
+        "type": "builtin", "id": "AND", "loc": "divide_by_3.nx:8:20",
         "input": ["$o@5", "$o@6"],
         "output": ["$o@7"],
         "members": [
-          {"type": "wire", "width": 1, "id": "$o@7", "loc": "8:20"}
+          {"type": "wire", "width": 1, "id": "$o@7", "loc": "divide_by_3.nx:8:20"}
         ]
       },
       {
-        "type": "builtin", "id": "REGISTER", "loc": "5:29",
+        "type": "builtin", "id": "REGISTER", "loc": "divide_by_3.nx:5:29",
         "input": ["$o@7", "clk@0"],
         "output": ["a@2"],
         "attribute": {"pos_edge": "true"}
       },
       {
-        "type": "builtin", "id": "REGISTER", "loc": "5:29",
+        "type": "builtin", "id": "REGISTER", "loc": "divide_by_3.nx:5:29",
         "input": ["a@2", "clk@0"],
         "output": ["b@3"],
         "attribute": {"pos_edge": "true"}
       },
       {
-        "type": "builtin", "id": "REGISTER", "loc": "5:29",
+        "type": "builtin", "id": "REGISTER", "loc": "divide_by_3.nx:5:29",
         "input": ["b@3", "clk@0"],
         "output": ["c@4"],
         "attribute": {"pos_edge": "false"}
       },
       {
-        "type": "builtin", "id": "OR", "loc": "11:13",
+        "type": "builtin", "id": "OR", "loc": "divide_by_3.nx:11:13",
         "input": ["b@3", "c@4"],
         "output": ["clk_3@1"]
       }

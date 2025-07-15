@@ -1,38 +1,38 @@
 [
   {
-    "type": "component", "id": "top", "defIndex": 1, "loc": "1:10",
+    "type": "component", "id": "top", "defIndex": 1, "loc": "encoder.nx:1:10",
     "input": ["input@0"],
     "output": ["output@0"],
     "members": [
-      {"type": "wire", "width": 8, "id": "input", "loc": "2:9"},
-      {"type": "wire", "width": 3, "id": "output", "loc": "3:9"},
+      {"type": "wire", "width": 8, "id": "input", "loc": "encoder.nx:2:9"},
+      {"type": "wire", "width": 3, "id": "output", "loc": "encoder.nx:3:9"},
       {
-        "type": "instantiate", "id": "encoder@1", "defIndex": 1, "loc": "4:14",
+        "type": "instantiate", "id": "encoder@1", "defIndex": 1, "loc": "encoder.nx:4:14",
         "input": ["input@0"],
         "output": ["output@0"]
       }
     ]
   },
   {
-    "type": "component", "id": "encoder", "defIndex": 1, "loc": "7:10",
+    "type": "component", "id": "encoder", "defIndex": 1, "loc": "encoder.nx:7:10",
     "attribute": {"width": "3"},
     "input": ["code@0"],
     "output": ["output@0"],
     "members": [
-      {"type": "wire", "width": 8, "id": "code", "loc": "8:9"},
-      {"type": "wire", "width": 3, "id": "output", "loc": "9:9"},
+      {"type": "wire", "width": 8, "id": "code", "loc": "encoder.nx:8:9"},
+      {"type": "wire", "width": 3, "id": "output", "loc": "encoder.nx:9:9"},
       {
-        "type": "builtin", "id": "OR@1", "loc": "12:21",
+        "type": "builtin", "id": "OR@1", "loc": "encoder.nx:12:21",
         "input": ["code@0[1]", "code@0[3]", "code@0[5]", "code@0[7]"],
         "output": ["output@0[0]"]
       },
       {
-        "type": "builtin", "id": "OR@2", "loc": "12:21",
+        "type": "builtin", "id": "OR@2", "loc": "encoder.nx:12:21",
         "input": ["code@0[2]", "code@0[3]", "code@0[6]", "code@0[7]"],
         "output": ["output@0[1]"]
       },
       {
-        "type": "builtin", "id": "OR@3", "loc": "12:21",
+        "type": "builtin", "id": "OR@3", "loc": "encoder.nx:12:21",
         "input": ["code@0[4]", "code@0[5]", "code@0[6]", "code@0[7]"],
         "output": ["output@0[2]"]
       }

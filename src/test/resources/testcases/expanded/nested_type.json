@@ -5,84 +5,84 @@
   "design": {
     "type": "component",
     "id": "top",
-    "loc": "12:10",
+    "loc": "nested_type.nx:12:10",
     "input": ["d@0"],
     "output": ["2'h00", "2'h03", "b.b[0].left@1", "b.b[0].right@2", "b.b[1].left@3", "b.b[1].right@4", "b.b[2].left@5", "b.b[2].right@6", "b.b[3].left@7", "b.b[3].right@8", "b.c@9"],
     "members": [
-      {"type": "wire", "width": 2, "id": "b.b[0].left@1", "loc": "14:11"},
-      {"type": "wire", "width": 2, "id": "b.b[0].right@2", "loc": "14:11"},
-      {"type": "wire", "width": 2, "id": "b.b[1].left@3", "loc": "14:11"},
-      {"type": "wire", "width": 2, "id": "b.b[1].right@4", "loc": "14:11"},
-      {"type": "wire", "width": 2, "id": "b.b[2].left@5", "loc": "14:11"},
-      {"type": "wire", "width": 2, "id": "b.b[2].right@6", "loc": "14:11"},
-      {"type": "wire", "width": 2, "id": "b.b[3].left@7", "loc": "14:11"},
-      {"type": "wire", "width": 2, "id": "b.b[3].right@8", "loc": "14:11"},
-      {"type": "wire", "width": 3, "id": "b.c@9", "loc": "14:11"},
-      {"type": "wire", "width": 1, "id": "c@10", "loc": "16:9"},
-      {"type": "wire", "width": 1, "id": "d@0", "loc": "16:12"},
+      {"type": "wire", "width": 2, "id": "b.b[0].left@1", "loc": "nested_type.nx:14:11"},
+      {"type": "wire", "width": 2, "id": "b.b[0].right@2", "loc": "nested_type.nx:14:11"},
+      {"type": "wire", "width": 2, "id": "b.b[1].left@3", "loc": "nested_type.nx:14:11"},
+      {"type": "wire", "width": 2, "id": "b.b[1].right@4", "loc": "nested_type.nx:14:11"},
+      {"type": "wire", "width": 2, "id": "b.b[2].left@5", "loc": "nested_type.nx:14:11"},
+      {"type": "wire", "width": 2, "id": "b.b[2].right@6", "loc": "nested_type.nx:14:11"},
+      {"type": "wire", "width": 2, "id": "b.b[3].left@7", "loc": "nested_type.nx:14:11"},
+      {"type": "wire", "width": 2, "id": "b.b[3].right@8", "loc": "nested_type.nx:14:11"},
+      {"type": "wire", "width": 3, "id": "b.c@9", "loc": "nested_type.nx:14:11"},
+      {"type": "wire", "width": 1, "id": "c@10", "loc": "nested_type.nx:16:9"},
+      {"type": "wire", "width": 1, "id": "d@0", "loc": "nested_type.nx:16:12"},
       {
-        "type": "builtin", "id": "NOT", "loc": "17:9",
+        "type": "builtin", "id": "NOT", "loc": "nested_type.nx:17:9",
         "input": ["d@0"],
         "output": ["c@10"]
       },
       {
-        "type": "builtin", "id": "CAST", "loc": "20:31",
+        "type": "builtin", "id": "CAST", "loc": "nested_type.nx:20:31",
         "input": ["c@10"],
         "output": ["$o@11"],
         "members": [
-          {"type": "wire", "width": 2, "id": "$o@11", "loc": "20:31"}
+          {"type": "wire", "width": 2, "id": "$o@11", "loc": "nested_type.nx:20:31"}
         ]
       },
       {
-        "type": "builtin", "id": "ADD", "loc": "20:12",
+        "type": "builtin", "id": "ADD", "loc": "nested_type.nx:20:12",
         "input": ["2'h00", "$o@11"],
         "output": ["b.b[0].left@1"]
       },
       {
-        "type": "builtin", "id": "CAST", "loc": "21:31",
+        "type": "builtin", "id": "CAST", "loc": "nested_type.nx:21:31",
         "input": ["d@0"],
         "output": ["$o@12"],
         "members": [
-          {"type": "wire", "width": 2, "id": "$o@12", "loc": "21:31"}
+          {"type": "wire", "width": 2, "id": "$o@12", "loc": "nested_type.nx:21:31"}
         ]
       },
       {
-        "type": "builtin", "id": "ADD", "loc": "21:12",
+        "type": "builtin", "id": "ADD", "loc": "nested_type.nx:21:12",
         "input": ["2'h00", "$o@12"],
         "output": ["b.b[0].right@2"]
       },
       {
-        "type": "builtin", "id": "ADD", "loc": "20:12",
+        "type": "builtin", "id": "ADD", "loc": "nested_type.nx:20:12",
         "input": ["2'h01", "$o@11"],
         "output": ["b.b[1].left@3"]
       },
       {
-        "type": "builtin", "id": "ADD", "loc": "21:12",
+        "type": "builtin", "id": "ADD", "loc": "nested_type.nx:21:12",
         "input": ["2'h01", "$o@12"],
         "output": ["b.b[1].right@4"]
       },
       {
-        "type": "builtin", "id": "ADD", "loc": "20:12",
+        "type": "builtin", "id": "ADD", "loc": "nested_type.nx:20:12",
         "input": ["2'h02", "$o@11"],
         "output": ["b.b[2].left@5"]
       },
       {
-        "type": "builtin", "id": "ADD", "loc": "21:12",
+        "type": "builtin", "id": "ADD", "loc": "nested_type.nx:21:12",
         "input": ["2'h02", "$o@12"],
         "output": ["b.b[2].right@6"]
       },
       {
-        "type": "builtin", "id": "ADD", "loc": "20:12",
+        "type": "builtin", "id": "ADD", "loc": "nested_type.nx:20:12",
         "input": ["2'h03", "$o@11"],
         "output": ["b.b[3].left@7"]
       },
       {
-        "type": "builtin", "id": "ADD", "loc": "21:12",
+        "type": "builtin", "id": "ADD", "loc": "nested_type.nx:21:12",
         "input": ["2'h03", "$o@12"],
         "output": ["b.b[3].right@8"]
       },
       {
-        "type": "builtin", "id": "CAST", "loc": "24:22",
+        "type": "builtin", "id": "CAST", "loc": "nested_type.nx:24:22",
         "input": ["c@10"],
         "output": ["b.c@9"]
       }

@@ -35,7 +35,7 @@ public final class FrontendUtils {
 
     public static SourceLoc sourceLocOf(JsonNode node) {
         var literal = node.get("loc").textValue().split(":");
-        return SourceLoc.of(Integer.parseUnsignedInt(literal[0]), Integer.parseUnsignedInt(literal[1]));
+        return new SourceLoc(Integer.parseUnsignedInt(literal[1]), Integer.parseUnsignedInt(literal[2]), literal[0]);
     }
 
     public static int defIndexOf(JsonNode node) {

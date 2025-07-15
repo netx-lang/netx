@@ -6,7 +6,7 @@
   "design": {
     "type": "component",
     "id": "top",
-    "loc": "5:10",
+    "loc": "enum_2.nx:5:10",
     "input": [
     ],
     "output": ["32'hABCDABCD", "32'h00000015"]

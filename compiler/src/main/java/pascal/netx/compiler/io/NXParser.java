@@ -9,16 +9,30 @@ import pascal.netx.compiler.antlr.NetXLexer;
 import pascal.netx.compiler.antlr.NetXParser;
 import pascal.netx.compiler.ast.PackageNode;
 
+import java.io.IOException;
+import java.nio.file.Path;
+
 public final class NXParser {
     private static final Logger log = LoggerFactory.getLogger(NXParser.class);
     private final CharStream charStream;
+    private final String fileName;
 
-    public NXParser(CharStream charStream) {
+    public NXParser(Path path) throws IOException {
+        this.charStream = CharStreams.fromPath(path);
+        this.fileName = path.getFileName().toString();
+    }
+
+    public NXParser(CharStream charStream, String fileName) {
         this.charStream = charStream;
+        this.fileName = fileName;
+    }
+
+    TreeParser buildTreeParser() {
+        return new TreeParser(fileName);
     }
 
     public PackageNode parse() {
-        var design = TreeParser.parseDesign(buildANTLRParser().design());
+        var design = buildTreeParser().parseDesign(buildANTLRParser().design());
         var manager = new ASTAnalysisManager(design);
         manager.analyze(SourceLocChecker.class);
         manager.analyze(PortExprRotation.class);

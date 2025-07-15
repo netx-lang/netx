@@ -2,16 +2,12 @@ package pascal.netx.util.lang;
 
 import javax.annotation.Nonnull;
 
-public record SourceLoc(int line, int column) implements Comparable<SourceLoc> {
+public record SourceLoc(int line, int column, String file) implements Comparable<SourceLoc> {
 
-    static SourceLoc NONE = new SourceLoc(0, 0);
+    static SourceLoc NONE = new SourceLoc(0, 0, "");
 
     public static SourceLoc none() {
         return NONE;
-    }
-
-    public static SourceLoc of(int line, int column) {
-        return new SourceLoc(line, column);
     }
 
     public boolean isNone() {
@@ -21,7 +17,7 @@ public record SourceLoc(int line, int column) implements Comparable<SourceLoc> {
     @Override
     @Nonnull
     public String toString() {
-        return line + ":" + column;
+        return file + ":" + line + ":" + column;
     }
 
     @Override
