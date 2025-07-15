@@ -1,33 +1,24 @@
-// @(divide_by_3.nx:1:10) Divide_by_3@(divide_by_3.nx:1:10)
-module mod_0 (
-  t_0, t_1
+module Divide_by_3(
+  _0, _1
 );
-  // clk_3@(divide_by_3.nx:2:14)
-  output t_1;
-
-  // clk@(divide_by_3.nx:2:9)
-  input t_0;
-
-  // a@(divide_by_3.nx:3:9), b@(divide_by_3.nx:3:12), c@(divide_by_3.nx:3:15)
-  wire t_2, t_3, t_4;
-
-  wire t_5, t_6, t_7;
-  reg  r_0; // $p_0@(:0:0)
-  reg  r_1; // $p_1@(:0:0)
-  reg  r_2; // $p_2@(:0:0)
-  assign t_5 = ~t_2;
-  assign t_6 = ~t_3;
-  assign t_7 = t_5 & t_6;
-  assign t_1 = t_3 | t_4;
-  assign t_4 = r_2;
-  always @(negedge t_0) begin
-    r_2 <= t_3;
-  end
-  assign t_2 = r_0;
-  assign t_3 = r_1;
-  always @(posedge t_0) begin
-    r_0 <= t_7;
-    r_1 <= t_2;
-  end
+/*
+  COMPONENT "Divide_by_3"; "divide_by_3.nx:1:10"
+  input: clk@0
+  output: clk_3@1
+*/
+  input wire _0; // CLOCK divide_by_3.nx:2:9:clk
+  output wire _1; // CLOCK divide_by_3.nx:2:14:clk_3
+  wire _2; // divide_by_3.nx:3:9:a
+  wire _3; // divide_by_3.nx:3:12:b
+  wire _4; // divide_by_3.nx:3:15:c
+  wire _5; // divide_by_3.nx:8:28:$o
+  assign _5 = ~_2; // divide_by_3.nx:8:28
+  wire _6; // divide_by_3.nx:8:38:$o
+  assign _6 = ~_3; // divide_by_3.nx:8:38
+  wire _7; // divide_by_3.nx:8:20:$o
+  assign _7 = _5 & _6; // divide_by_3.nx:8:20
+  always @(posedge _7) _2 <= _7; // divide_by_3.nx:5:29
+  always @(posedge _2) _3 <= _2; // divide_by_3.nx:5:29
+  always @(negedge _3) _4 <= _3; // divide_by_3.nx:5:29
+  assign _1 = _3 | _4; // divide_by_3.nx:11:13
 endmodule
-

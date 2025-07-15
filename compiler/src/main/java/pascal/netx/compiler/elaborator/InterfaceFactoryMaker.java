@@ -27,7 +27,7 @@ public class InterfaceFactoryMaker {
     }
 
     public Bundle.Factory make(InterfaceNode node) {
-        var config = Configuration.builder().forInterface().build();
+        var config = Configuration.builder().build();
         var elaborator = new ComponentElaborator(config, scope);
         elaborator.buildElements(node.getElements());
         var fields = elaborator.extractIOList(node.getSourceLoc(), node.getType());

@@ -75,9 +75,7 @@ class NXCompilerTest {
 
     public void test(String fileName) throws IOException {
         Path testcase = TEST_DIR.resolve(fileName + ".nx");
-        Path expected = TEST_DIR.resolve("expanded").resolve(fileName + ".json");
-        testHelper(NXBuilder.from(Configuration.forExpandedTest()), testcase, expected);
-        expected = TEST_DIR.resolve("compact").resolve(fileName + ".json");
-        testHelper(NXBuilder.from(Configuration.forCompactTest()), testcase, expected);
+        Path expected = TEST_DIR.resolve("expected").resolve(fileName + ".json");
+        testHelper(NXBuilder.from(Configuration.forCommon()), testcase, expected);
     }
 }

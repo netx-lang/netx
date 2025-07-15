@@ -6,7 +6,7 @@ plugins {
 dependencies {
     implementation(project(":util"))
     implementation(project(":compiler"))
-    implementation(project(":verilog"))
+    implementation(project(":backend"))
 
     implementation("info.picocli:picocli:4.7.4")
     annotationProcessor("info.picocli:picocli-codegen:4.7.4")
@@ -23,7 +23,7 @@ tasks.compileJava {
 
 tasks.jar {
     dependsOn(":util:jar")
-    dependsOn(":verilog:jar")
+    dependsOn(":backend:jar")
     dependsOn(":compiler:jar")
     manifest {
         attributes(

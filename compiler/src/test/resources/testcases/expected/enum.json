@@ -1,103 +1,102 @@
-[
-  {
-    "type": "component", "id": "top", "defIndex": 1, "loc": "enum.nx:14:10",
-    "input": ["i@0", "rst@0", "clk@0"],
-    "output": ["state@0"],
+{
+  "totalData": 13,
+  "top_input": ["i", "rst", "clk"],
+  "top_output": ["state"],
+  "design": {
+    "type": "component",
+    "id": "top",
+    "loc": "enum.nx:14:10",
+    "input": ["i@0", "rst@1", "clk@2"],
+    "output": ["state@3"],
     "members": [
-      {"type": "wire", "width": 1, "id": "i", "loc": "enum.nx:15:8"},
-      {"type": "wire", "width": 1, "id": "rst", "loc": "enum.nx:15:11"},
-      {"type": "clock", "id": "clk", "loc": "enum.nx:16:8"},
-      {"type": "wire", "width": 1, "id": "state", "loc": "enum.nx:17:8"},
+      {"type": "wire", "width": 1, "id": "i@0", "loc": "enum.nx:15:8"},
+      {"type": "wire", "width": 1, "id": "rst@1", "loc": "enum.nx:15:11"},
+      {"type": "clock", "id": "clk@2", "loc": "enum.nx:16:8"},
+      {"type": "wire", "width": 1, "id": "state@3", "loc": "enum.nx:17:8"},
       {
-        "type": "builtin", "id": "EQ@1", "loc": "enum.nx:19:25",
+        "type": "builtin", "id": "EQ", "loc": "enum.nx:19:25",
         "input": ["i@0", "1'h01"],
-        "output": ["$o@1"],
-        "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "enum.nx:19:25"}
-        ]
-      },
-      {
-        "type": "builtin", "id": "AND@2", "loc": "enum.nx:21:5",
-        "input": ["$o@1", "1'h01"],
-        "output": ["$o@2"],
-        "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "enum.nx:21:5"}
-        ]
-      },
-      {
-        "type": "builtin", "id": "NOT@3", "loc": "enum.nx:22:13",
-        "input": ["$o@1"],
-        "output": ["$o@3"],
-        "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "enum.nx:22:13"}
-        ]
-      },
-      {
-        "type": "builtin", "id": "AND@4", "loc": "enum.nx:22:5",
-        "input": ["$o@3", "state@0"],
         "output": ["$o@4"],
         "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "enum.nx:22:5"}
+          {"type": "wire", "width": 1, "id": "$o@4", "loc": "enum.nx:19:25"}
         ]
       },
       {
-        "type": "builtin", "id": "OR@5", "loc": "enum.nx:20:29",
-        "input": ["$o@2", "$o@4"],
-        "output": ["i@6"]
-      },
-      {
-        "type": "instantiate", "id": "REG@6", "defIndex": 1, "loc": "enum.nx:20:12",
-        "input": ["i@6"],
-        "output": ["state@0"]
-      }
-    ]
-  },
-  {
-    "type": "component", "id": "REG", "defIndex": 1, "loc": "enum.nx:5:10",
-    "attribute": {"rst": "rst@(enum.nx:15:11)", "clk": "clk@(enum.nx:16:8)"},
-    "input": ["i@0"],
-    "output": ["o@0"],
-    "members": [
-      {"type": "wire", "width": 1, "id": "i", "loc": "enum.nx:9:40"},
-      {"type": "wire", "width": 1, "id": "o", "loc": "enum.nx:6:9"},
-      {
-        "type": "builtin", "id": "AND@1", "loc": "enum.nx:8:12",
-        "input": ["rst@0", "1'h00"],
-        "output": ["$o@1"],
+        "type": "builtin", "id": "AND", "loc": "enum.nx:21:5",
+        "input": ["$o@4", "1'h01"],
+        "output": ["$o@5"],
         "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "enum.nx:8:12"}
+          {"type": "wire", "width": 1, "id": "$o@5", "loc": "enum.nx:21:5"}
         ]
       },
       {
-        "type": "builtin", "id": "NOT@2", "loc": "enum.nx:9:20",
-        "input": ["rst@0"],
-        "output": ["$o@2"],
+        "type": "builtin", "id": "NOT", "loc": "enum.nx:22:13",
+        "input": ["$o@4"],
+        "output": ["$o@6"],
         "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "enum.nx:9:20"}
+          {"type": "wire", "width": 1, "id": "$o@6", "loc": "enum.nx:22:13"}
         ]
       },
       {
-        "type": "builtin", "id": "AND@3", "loc": "enum.nx:9:12",
-        "input": ["$o@2", "i@0"],
-        "output": ["$o@3"],
+        "type": "builtin", "id": "AND", "loc": "enum.nx:22:5",
+        "input": ["$o@6", "state@3"],
+        "output": ["$o@7"],
         "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "enum.nx:9:12"}
+          {"type": "wire", "width": 1, "id": "$o@7", "loc": "enum.nx:22:5"}
         ]
       },
       {
-        "type": "builtin", "id": "OR@4", "loc": "enum.nx:7:8",
-        "input": ["$o@1", "$o@3"],
-        "output": ["$o@4"],
+        "type": "builtin", "id": "OR", "loc": "enum.nx:20:29",
+        "input": ["$o@5", "$o@7"],
+        "output": ["i@8"]
+      },
+      {
+        "type": "component", "id": "REG", "loc": "enum.nx:20:12",
+        "input": ["i@8"],
+        "output": ["state@3"],
+        "attribute": {"clk": "clk@(enum.nx:16:8)", "rst": "rst@(enum.nx:15:11)"},
         "members": [
-          {"type": "wire", "width": 1, "id": "$o", "loc": "enum.nx:7:8"}
+          {"type": "wire", "width": 1, "id": "i@8", "loc": "enum.nx:9:40"},
+          {
+            "type": "builtin", "id": "AND", "loc": "enum.nx:8:12",
+            "input": ["rst@1", "1'h00"],
+            "output": ["$o@9"],
+            "members": [
+              {"type": "wire", "width": 1, "id": "$o@9", "loc": "enum.nx:8:12"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "enum.nx:9:20",
+            "input": ["rst@1"],
+            "output": ["$o@10"],
+            "members": [
+              {"type": "wire", "width": 1, "id": "$o@10", "loc": "enum.nx:9:20"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "enum.nx:9:12",
+            "input": ["$o@10", "i@8"],
+            "output": ["$o@11"],
+            "members": [
+              {"type": "wire", "width": 1, "id": "$o@11", "loc": "enum.nx:9:12"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "enum.nx:7:8",
+            "input": ["$o@9", "$o@11"],
+            "output": ["$o@12"],
+            "members": [
+              {"type": "wire", "width": 1, "id": "$o@12", "loc": "enum.nx:7:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "REGISTER", "loc": "enum.nx:6:14",
+            "input": ["$o@12", "clk@2"],
+            "output": ["state@3"],
+            "attribute": {"pos_edge": "true"}
+          }
         ]
-      },
-      {
-        "type": "builtin", "id": "REGISTER@5", "loc": "enum.nx:6:14",
-        "input": ["$o@4", "clk@0"],
-        "output": ["o@0"],
-        "attribute": {"pos_edge": "true"}
       }
     ]
   }
-]
+}

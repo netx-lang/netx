@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public record Configuration(boolean fullyExpand,
+public record Configuration(boolean expanded,
                             @Nullable Identifier topPack,
                             @Nonnull  Identifier topName,
                             @Nullable ArgBindList arguments) {
@@ -23,47 +23,43 @@ public record Configuration(boolean fullyExpand,
     private static final Logger log = LoggerFactory.getLogger(Configuration.class);
 
     private Configuration(Builder builder) {
-        this(builder.fullyExpand, builder.topPack, builder.topName, builder.arguments);
+        this(builder.expanded, builder.topPack, builder.topName, builder.arguments);
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static Configuration forExpandedTest() {
-        return new Builder().forExpanded().build();
+    public static Configuration forCommon() {
+        return new Builder().forCommon().build();
     }
 
-    public static Configuration forCompactTest() {
-        return new Builder().forCompact().build();
+    public static Configuration forVisualization() {
+        return new Builder().forVisualization().build();
     }
 
     public static class Builder {
-        private boolean fullyExpand;
+        private boolean expanded = true;
         private Identifier topPack;
         private Identifier topName = Identifier.of("top");
         private ArgBindList arguments;
 
         public Builder basedOn(Configuration config) {
-            this.fullyExpand = config.fullyExpand;
+            this.expanded = config.expanded;
             this.topPack = config.topPack;
             this.topName = config.topName;
             this.arguments = config.arguments;
             return this;
         }
 
-        public Builder forCompact() {
-            this.fullyExpand = false;
+        public Builder forVisualization() {
+            this.expanded = false;
             return this;
         }
 
-        public Builder forExpanded() {
-            this.fullyExpand = true;
+        public Builder forCommon() {
+            this.expanded = true;
             return this;
-        }
-
-        public Builder forInterface() {
-            return forExpanded();
         }
 
         public Builder withTop(String literal) {

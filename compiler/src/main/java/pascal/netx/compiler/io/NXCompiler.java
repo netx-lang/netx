@@ -79,7 +79,7 @@ public final class NXCompiler {
         manager.analyze(CompositeDataBlaster.class);
         manager.analyze(IOAnalysis.class);
         manager.analyze(BuiltinAliasAnalysis.class);
-        if (config.fullyExpand()) {
+        if (config.expanded()) {
             manager.analyze(PackageAliasAnalysis.class);
             manager.analyze(PackageDuplicatedElimination.class);
         } else {
@@ -90,11 +90,10 @@ public final class NXCompiler {
     }
 
     private JsonNode dump(PackageScope scope) {
-        if (config.fullyExpand()) {
-            return new ExpandedDumper(scope).dump();
-        } else {
-            return new CompactDumper(scope).dump();
+        if (!config.expanded()) {
+            throw new ShallNotReachHereError();
         }
+        return new ExpandedDumper(scope).dump();
     }
 
     public JsonNode compileAndDump() {
@@ -103,10 +102,14 @@ public final class NXCompiler {
     }
 
     public void compileAndVisualize(NotepadWriter notepad, int depth) {
-        if (config.fullyExpand()) {
+        compile();
+        visualize(notepad, depth);
+    }
+
+    public void visualize(NotepadWriter notepad, int depth) {
+        if (config.expanded()) {
             throw new ShallNotReachHereError();
         }
-        compile();
         new NXVisualizer(repo.getTop(), depth, notepad).visualize();
     }
 
