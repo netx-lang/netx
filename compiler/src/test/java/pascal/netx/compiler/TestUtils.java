@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestUtils {
     public static void test(String expected, String actual) {
-        var builder = NXBuilder.from(Configuration.forCommon());
+        var builder = NXBuilder.from(Configuration.asDefault());
         assertEquals(
                 eliminateSource(builder.load(expected).compileAndDump()),
                 eliminateSource(builder.load(actual).compileAndDump())

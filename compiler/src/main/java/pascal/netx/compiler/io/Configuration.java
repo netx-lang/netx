@@ -15,50 +15,33 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public record Configuration(boolean expanded,
-                            @Nullable Identifier topPack,
+public record Configuration(@Nullable Identifier topPack,
                             @Nonnull  Identifier topName,
                             @Nullable ArgBindList arguments) {
 
     private static final Logger log = LoggerFactory.getLogger(Configuration.class);
 
     private Configuration(Builder builder) {
-        this(builder.expanded, builder.topPack, builder.topName, builder.arguments);
+        this(builder.topPack, builder.topName, builder.arguments);
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static Configuration forCommon() {
-        return new Builder().forCommon().build();
-    }
-
-    public static Configuration forVisualization() {
-        return new Builder().forVisualization().build();
+    public static Configuration asDefault() {
+        return builder().build();
     }
 
     public static class Builder {
-        private boolean expanded = true;
         private Identifier topPack;
         private Identifier topName = Identifier.of("top");
         private ArgBindList arguments;
 
         public Builder basedOn(Configuration config) {
-            this.expanded = config.expanded;
             this.topPack = config.topPack;
             this.topName = config.topName;
             this.arguments = config.arguments;
-            return this;
-        }
-
-        public Builder forVisualization() {
-            this.expanded = false;
-            return this;
-        }
-
-        public Builder forCommon() {
-            this.expanded = true;
             return this;
         }
 

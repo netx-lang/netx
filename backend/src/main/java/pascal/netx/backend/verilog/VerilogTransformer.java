@@ -1,64 +1,25 @@
 package pascal.netx.backend.verilog;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import pascal.netx.backend.AbstractNxonTransformer;
+import pascal.netx.backend.NxonParseUtils;
+import pascal.netx.backend.model.DataReference;
+import pascal.netx.backend.model.Reference;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.nxon.NxonType;
 import pascal.netx.util.print.NotepadWriter;
 
-import java.util.*;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
-public class VerilogTransformer extends AbstractNxonTransformer<Void> {
-    private static final Set<String> VERILOG_KEYWORDS;
+public class VerilogTransformer extends AbstractNxonTransformer {
 
-    static {
-        VERILOG_KEYWORDS = new HashSet<>();
-        VERILOG_KEYWORDS.addAll(Arrays.asList(
-                "always", "and", "assign", "automatic", "begin", "buf", "bufif0", "bufif1",
-                "case", "casex", "casez", "cell", "cmos", "config", "deassign", "default",
-                "defparam", "design", "disable", "edge", "else", "end", "endcase", "endconfig",
-                "endfunction", "endgenerate", "endmodule", "endprimitive", "endspecify", "endtable", "endtask", "event",
-                "for", "force", "forever", "fork", "function", "generate", "genvar", "highz0",
-                "highz1", "if", "ifnone", "incdir", "include", "initial", "inout", "input",
-                "instance", "integer", "join", "large", "liblist", "library", "localparam", "macromodule",
-                "medium", "module", "nand", "negedge", "nmos", "nor", "noshowcancelled", "not",
-                "notif0", "notif1", "or", "output", "parameter", "pmos", "posedge", "primitive",
-                "pull0", "pull1", "pulldown", "pullup", "pulsestyle_onevent", "pulsestyle_ondetect", "rcmos", "real",
-                "realtime", "reg", "release", "repeat", "rnmos", "rpmos", "rtran", "rtranif0",
-                "rtranif1", "scalared", "showcancelled", "signed", "small", "specify", "specparam", "strong0",
-                "strong1", "supply0", "supply1", "table", "task", "time", "tran", "tranif0",
-                "tranif1", "tri", "tri0", "tri1", "triand", "trior", "trireg", "unsigned",
-                "use", "uwire", "vectored", "wait", "wand", "weak0", "weak1", "while",
-                "wire", "wor", "xnor", "xor"
-        ));
-    }
-
-    private final NotepadWriter notepad;
     private final HashSet<Integer> globalIn = new HashSet<>();
     private final HashSet<Integer> globalOut = new HashSet<>();
 
     public VerilogTransformer(NotepadWriter notepad, JsonNode json) {
-        super(json);
-        this.notepad = notepad;
-    }
-
-    private static ArrayNode arrayOf(JsonNode node, String field) {
-        return (ArrayNode) node.get(field);
-    }
-
-    private static Stream<JsonNode> streamOf(JsonNode node, String field) {
-        var array = arrayOf(node, field);
-        return StreamSupport.stream(array.spliterator(), false);
-    }
-
-    private static String escape(String str) {
-        if (!VERILOG_KEYWORDS.contains(str)) {
-            return str;
-        }
-        return "\\" + str + " ";
+        super(notepad, json);
     }
 
     private static String parseWidth(int width) {
@@ -69,18 +30,17 @@ public class VerilogTransformer extends AbstractNxonTransformer<Void> {
     }
 
     @Override
-    public Void parse() {
+    public void parse() {
         var node = json.get("design");
         notepad.print("module ");
         prepareGlobalIO(node);
         parseComponent(node);
         notepad.println("endmodule");
         notepad.flush();
-        return null;
     }
 
     private void prepareGlobalIO(JsonNode node) {
-        notepad.print(escape(json.get("design").get("id").textValue()));
+        notepad.print(NxonParseUtils.escape(json.get("design").get("id").textValue()));
         notepad.println("(");
         notepad.incIndent();
         List<String> io = new ArrayList<>();
@@ -92,12 +52,14 @@ public class VerilogTransformer extends AbstractNxonTransformer<Void> {
     }
 
     private void processIOPorts(JsonNode node, String portType, List<String> io, HashSet<Integer> globalSet) {
-        streamOf(node, portType)
+        NxonParseUtils.streamOf(node, portType)
                 .map(JsonNode::textValue)
                 .map(Reference::from)
                 .forEach(ref -> {
                     io.add(ref.dump());
-                    globalSet.add(ref.id());
+                    if (ref instanceof DataReference dataRef) {
+                        globalSet.add(dataRef.id());
+                    }
                 });
     }
 
@@ -111,12 +73,12 @@ public class VerilogTransformer extends AbstractNxonTransformer<Void> {
     private void printComponentHeader(JsonNode node) {
         notepad.println("/*");
         notepad.incIndent();
-        notepad.print("COMPONENT " );
+        notepad.print("COMPONENT ");
         notepad.println(node.get("id") + "; " + node.get("loc"));
         notepad.println("input" + ": " + String.join(", ",
-                streamOf(node, "input").map(JsonNode::textValue).toList()));
+                NxonParseUtils.streamOf(node, "input").map(JsonNode::textValue).toList()));
         notepad.println("output" + ": " + String.join(", ",
-                streamOf(node, "output").map(JsonNode::textValue).toList()));
+                NxonParseUtils.streamOf(node, "output").map(JsonNode::textValue).toList()));
         printAttributes(node);
         notepad.decIndent();
         notepad.println("*/");
@@ -143,7 +105,7 @@ public class VerilogTransformer extends AbstractNxonTransformer<Void> {
                 switch (NxonType.typeOf(sub)) {
                     case WIRE -> parseWire(sub);
                     case CLOCK -> parseClock(sub);
-                    case BUILTIN ->  parseBuiltin(sub);
+                    case BUILTIN -> parseBuiltin(sub);
                     case COMPONENT -> parseComponent(sub);
                 }
             }
@@ -151,7 +113,7 @@ public class VerilogTransformer extends AbstractNxonTransformer<Void> {
     }
 
     private void parseWire(JsonNode node) {
-        var ref = Reference.from(node.get("id").textValue());
+        var ref = (DataReference) Reference.from(node.get("id").textValue());
         if (globalIn.contains(ref.id())) {
             notepad.print("input ");
         } else if (globalOut.contains(ref.id())) {
@@ -166,7 +128,7 @@ public class VerilogTransformer extends AbstractNxonTransformer<Void> {
     }
 
     private void parseClock(JsonNode node) {
-        var ref = Reference.from(node.get("id").textValue());
+        var ref = (DataReference) Reference.from(node.get("id").textValue());
         if (globalIn.contains(ref.id())) {
             notepad.print("input ");
         } else if (globalOut.contains(ref.id())) {
@@ -226,35 +188,11 @@ public class VerilogTransformer extends AbstractNxonTransformer<Void> {
     }
 
     private List<String> getArgList(JsonNode node, String field) {
-        return streamOf(node, field)
+        return NxonParseUtils.streamOf(node, field)
                 .map(JsonNode::textValue)
                 .map(Reference::from)
                 .map(Reference::dump)
                 .toList();
     }
-
-    private record Reference(String name, Integer id, String selector, String constant) {
-        static Reference from(String literal) {
-            if (literal.contains("@")) {
-                var parts = literal.split("@");
-                if (parts[1].contains("[")) {
-                    int index = parts[1].indexOf('[');
-                    return new Reference(parts[0],
-                            Integer.parseUnsignedInt(parts[1].substring(0, index)),
-                            parts[1].substring(index), null);
-                } else {
-                    return new Reference(parts[0], Integer.parseUnsignedInt(parts[1]), "", null);
-                }
-            } else {
-                return new Reference(null, null, null, literal);
-            }
-        }
-
-        String dump() {
-            if (constant == null) {
-                return "_" + id + selector;
-            }
-            return constant;
-        }
-    }
 }
+

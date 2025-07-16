@@ -8,10 +8,8 @@ import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.RepoScope;
 import pascal.netx.compiler.model.scope.binding.ArgBindList;
-import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
-import pascal.netx.util.print.NotepadWriter;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -79,38 +77,18 @@ public final class NXCompiler {
         manager.analyze(CompositeDataBlaster.class);
         manager.analyze(IOAnalysis.class);
         manager.analyze(BuiltinAliasAnalysis.class);
-        if (config.expanded()) {
-            manager.analyze(PackageAliasAnalysis.class);
-            manager.analyze(PackageDuplicatedElimination.class);
-        } else {
-            manager.analyze(ComponentAliasAnalysis.class);
-            manager.analyze(ComponentDuplicatedElimination.class);
-        }
+        manager.analyze(AliasAnalysis.class);
+        manager.analyze(DuplicatedElimination.class);
         manager.analyze(RedundantElimination.class);
     }
 
     private JsonNode dump(PackageScope scope) {
-        if (!config.expanded()) {
-            throw new ShallNotReachHereError();
-        }
-        return new ExpandedDumper(scope).dump();
+        return new NxonDumper(scope).dump();
     }
 
     public JsonNode compileAndDump() {
         compile();
         return dump(repo.getTop());
-    }
-
-    public void compileAndVisualize(NotepadWriter notepad, int depth) {
-        compile();
-        visualize(notepad, depth);
-    }
-
-    public void visualize(NotepadWriter notepad, int depth) {
-        if (config.expanded()) {
-            throw new ShallNotReachHereError();
-        }
-        new NXVisualizer(repo.getTop(), depth, notepad).visualize();
     }
 
     public PackageManager getPackManager() {

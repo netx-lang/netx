@@ -21,7 +21,7 @@ import static pascal.netx.compiler.TestUtils.test;
 
 class ElaboratorUnitTest {
     private static PackageScope loadDesign(String code) {
-        return NXBuilder.from(Configuration.forCommon())
+        return NXBuilder.from(Configuration.asDefault())
                 .load(CharStreams.fromString(code)).elaborate().getTop();
     }
 
@@ -129,8 +129,8 @@ class ElaboratorUnitTest {
                     else o <> OR <> [i, 1];
                 }
                 """;
-        var thenConf = Configuration.builder().forCommon().withArgs(List.of("cond=true")).build();
-        var elseConf = Configuration.builder().forCommon().withArgs(List.of("cond=false")).build();
+        var thenConf = Configuration.builder().withArgs(List.of("cond=true")).build();
+        var elseConf = Configuration.builder().withArgs(List.of("cond=false")).build();
         assertNotEquals(
                 NXBuilder.from(thenConf).load(code).compileAndDump(),
                 NXBuilder.from(elseConf).load(code).compileAndDump()
