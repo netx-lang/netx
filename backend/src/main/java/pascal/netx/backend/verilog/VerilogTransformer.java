@@ -15,6 +15,8 @@ import java.util.List;
 
 public class VerilogTransformer extends AbstractNxonTransformer {
 
+    private static final String BAR = "=".repeat(30);
+
     private final HashSet<Integer> globalIn = new HashSet<>();
     private final HashSet<Integer> globalOut = new HashSet<>();
 
@@ -34,7 +36,14 @@ public class VerilogTransformer extends AbstractNxonTransformer {
         var node = json.get("design");
         notepad.print("module ");
         prepareGlobalIO(node);
-        parseComponent(node);
+        notepad.newLine();
+        notepad.println("/*" + BAR + " DATA " + BAR + "*/");
+        notepad.newLine();
+        parseComponent(node, ParseMode.DATA);
+        notepad.newLine();
+        notepad.println("/*" + BAR + " CONNECTION " + BAR + "*/");
+        notepad.newLine();
+        parseComponent(node, ParseMode.CONNECTION);
         notepad.println("endmodule");
         notepad.flush();
     }
@@ -63,25 +72,35 @@ public class VerilogTransformer extends AbstractNxonTransformer {
                 });
     }
 
-    private void parseComponent(JsonNode node) {
-        printComponentHeader(node);
+    private void parseComponent(JsonNode node, ParseMode mode) {
+        printComponentHeader(node, mode);
         notepad.incIndent();
-        parseMembers(node);
+        parseMembers(node, mode);
         notepad.decIndent();
+        printComponentTail(node);
     }
 
-    private void printComponentHeader(JsonNode node) {
-        notepad.println("/*");
-        notepad.incIndent();
-        notepad.print("COMPONENT ");
-        notepad.println(node.get("id") + "; " + node.get("loc"));
-        notepad.println("input" + ": " + String.join(", ",
-                NxonParseUtils.streamOf(node, "input").map(JsonNode::textValue).toList()));
-        notepad.println("output" + ": " + String.join(", ",
-                NxonParseUtils.streamOf(node, "output").map(JsonNode::textValue).toList()));
-        printAttributes(node);
-        notepad.decIndent();
-        notepad.println("*/");
+    private void printComponentHeader(JsonNode node, ParseMode mode) {
+        switch (mode) {
+            case DATA -> notepad.println("/* " + node.get("id") + "; " + node.get("loc") + " */");
+            case CONNECTION -> {
+                notepad.println("/*");
+                notepad.incIndent();
+                notepad.print("COMPONENT ");
+                notepad.println(node.get("id") + "; " + node.get("loc"));
+                notepad.println("input" + ": " + String.join(", ",
+                        NxonParseUtils.streamOf(node, "input").map(JsonNode::textValue).toList()));
+                notepad.println("output" + ": " + String.join(", ",
+                        NxonParseUtils.streamOf(node, "output").map(JsonNode::textValue).toList()));
+                printAttributes(node);
+                notepad.decIndent();
+                notepad.println("*/");
+            }
+        }
+    }
+
+    private void printComponentTail(JsonNode node) {
+        notepad.println("/* END " + node.get("id") + "; " + node.get("loc") + " */");
     }
 
     private void printAttributes(JsonNode node) {
@@ -99,14 +118,22 @@ public class VerilogTransformer extends AbstractNxonTransformer {
         }
     }
 
-    private void parseMembers(JsonNode node) {
+    private void parseMembers(JsonNode node, ParseMode mode) {
         if (node.has("members")) {
             for (var sub : node.get("members")) {
                 switch (NxonType.typeOf(sub)) {
-                    case WIRE -> parseWire(sub);
-                    case CLOCK -> parseClock(sub);
-                    case BUILTIN -> parseBuiltin(sub);
-                    case COMPONENT -> parseComponent(sub);
+                    case WIRE -> {
+                        if (mode == ParseMode.DATA) {
+                            parseWire(sub);
+                        }
+                    }
+                    case CLOCK -> {
+                        if (mode == ParseMode.DATA) {
+                            parseClock(sub);
+                        }
+                    }
+                    case BUILTIN -> parseBuiltin(sub, mode);
+                    case COMPONENT -> parseComponent(sub, mode);
                 }
             }
         }
@@ -141,17 +168,19 @@ public class VerilogTransformer extends AbstractNxonTransformer {
         notepad.println(ref.name());
     }
 
-    private void parseBuiltin(JsonNode node) {
-        parseMembers(node);
-        var builtin = BuiltinComponent.of(node.get("id").textValue());
-        var input = getArgList(node, "input");
-        var output = getArgList(node, "output");
-        if (builtin == BuiltinComponent.REGISTER) {
-            parseRegister(node, output, input);
-        } else {
-            parseCombinational(builtin, output, input);
+    private void parseBuiltin(JsonNode node, ParseMode mode) {
+        parseMembers(node, mode);
+        if (mode == ParseMode.CONNECTION) {
+            var builtin = BuiltinComponent.of(node.get("id").textValue());
+            var input = getArgList(node, "input");
+            var output = getArgList(node, "output");
+            if (builtin == BuiltinComponent.REGISTER) {
+                parseRegister(node, output, input);
+            } else {
+                parseCombinational(builtin, output, input);
+            }
+            notepad.println(" // " + node.get("loc").textValue());
         }
-        notepad.println(" // " + node.get("loc").textValue());
     }
 
     private void parseRegister(JsonNode node, List<String> output, List<String> input) {
@@ -193,6 +222,10 @@ public class VerilogTransformer extends AbstractNxonTransformer {
                 .map(Reference::from)
                 .map(Reference::dump)
                 .toList();
+    }
+
+    enum ParseMode {
+        DATA, CONNECTION
     }
 }
 
