@@ -20,13 +20,13 @@ import java.util.Map;
 
 import static pascal.netx.util.lang.BuiltinComponent.ATTRIBUTED;
 
-final class ExpandedDumper {
+final class NxonDumper {
     private final PackageScope design;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final Map<Data, Integer> dataIndices = new HashMap<>();
 
-    public ExpandedDumper(PackageScope scope) {
+    public NxonDumper(PackageScope scope) {
         this.design = scope;
     }
 

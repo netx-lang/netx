@@ -12,33 +12,16 @@ import pascal.netx.util.print.NotepadWriter;
 import java.util.Map;
 
 public final class NXPrinter {
-    private final Configuration config;
-
     private final int componentHead;
     private final NotepadWriter writer;
 
-    NXPrinter(Configuration config, NotepadWriter writer) {
-        this.config = config;
+    NXPrinter(NotepadWriter writer) {
         this.writer = writer;
-        this.componentHead = config.expanded() ? 3 : 4;
+        this.componentHead = 3;
     }
 
     public void print(JsonNode json) {
-        if (config.expanded()) {
-            printObject(json);
-        } else {
-            startArray();
-            var iterator = json.elements();
-            if (iterator.hasNext()) {
-                printObject(iterator.next(), componentHead);
-                while (iterator.hasNext()) {
-                    writer.println(",");
-                    printObject(iterator.next(), componentHead);
-                }
-                writer.newLine();
-            }
-            endArray();
-        }
+        printObject(json);
         writer.flush();
         writer.close();
     }

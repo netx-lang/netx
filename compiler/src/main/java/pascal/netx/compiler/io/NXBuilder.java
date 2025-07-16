@@ -53,6 +53,6 @@ public final class NXBuilder {
     }
 
     public NXPrinter printer(NotepadWriter writer) {
-        return new NXPrinter(config, writer);
+        return new NXPrinter(writer);
     }
 }

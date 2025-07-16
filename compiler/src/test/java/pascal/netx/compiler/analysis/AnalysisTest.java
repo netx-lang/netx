@@ -34,7 +34,7 @@ class AnalysisTest {
     }
 
     private static void testEquals(String code, String output) throws IOException {
-        Configuration config = Configuration.forCommon();
+        Configuration config = Configuration.asDefault();
         if (GENERATE_EXPECTED) {
             var builder = NXBuilder.from(config);
             var compiler = builder.load(code);
@@ -70,7 +70,7 @@ class AnalysisTest {
                     c <> NOT <> REGISTER(true) <> [AND <> [a[1:0], b[1:0]], clk];
                 }
                 """;
-        var builder = NXBuilder.from(Configuration.forCommon());
+        var builder = NXBuilder.from(Configuration.asDefault());
         assertEquals(
                 builder.load(expected).compileAndDump(),
                 builder.load(actual).compileAndDump()
@@ -96,7 +96,7 @@ class AnalysisTest {
                     ];
                 }
                 """;
-        assertDoesNotThrow(() -> NXBuilder.from(Configuration.forCommon()).load(code).compileAndDump());
+        assertDoesNotThrow(() -> NXBuilder.from(Configuration.asDefault()).load(code).compileAndDump());
     }
 
     @Test
@@ -116,7 +116,7 @@ class AnalysisTest {
                     d <> AND <> [a, b];
                 }
                 """;
-        var builder = NXBuilder.from(Configuration.forCommon());
+        var builder = NXBuilder.from(Configuration.asDefault());
         assertEquals(
                 builder.load(expected).compileAndDump(),
                 builder.load(actual).compileAndDump());
@@ -146,7 +146,7 @@ class AnalysisTest {
                     f <> a;
                 }
                 """;
-        var builder = NXBuilder.from(Configuration.forCommon());
+        var builder = NXBuilder.from(Configuration.asDefault());
         assertEquals(
                 builder.load(expected).compileAndDump(),
                 builder.load(actual).compileAndDump());
@@ -166,7 +166,7 @@ class AnalysisTest {
                     a[1:0] <> AND <> [b[5:4], b[3:2]];
                 }
                 """;
-        var builder = NXBuilder.from(Configuration.forCommon());
+        var builder = NXBuilder.from(Configuration.asDefault());
         assertThrows(TypeCheckingException.class, () -> builder.load(a).compileAndDump());
         assertThrows(TypeCheckingException.class, () -> builder.load(b).compileAndDump());
     }

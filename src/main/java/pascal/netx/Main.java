@@ -3,6 +3,7 @@ package pascal.netx;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pascal.netx.backend.graphviz.DotTransformer;
 import pascal.netx.backend.verilog.VerilogTransformer;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXBuilder;
@@ -97,13 +98,6 @@ public class Main {
     )
     static class CompileCommand extends BaseCommand {
         @CommandLine.Option(
-                names = {"-c", "--compact"},
-                description = "compact the output JSON",
-                defaultValue = "false"
-        )
-        private boolean compact;
-
-        @CommandLine.Option(
                 names = {"-m", "--minimal"},
                 description = "do not pretty print the output JSON",
                 defaultValue = "false"
@@ -133,13 +127,7 @@ public class Main {
         }
 
         private Configuration buildConfig() {
-            var builder = super.setupConfiguration();
-            if (compact) {
-                builder.forVisualization();
-            } else {
-                builder.forCommon();
-            }
-            return builder.build();
+            return setupConfiguration().build();
         }
     }
 
@@ -180,7 +168,8 @@ public class Main {
             try {
                 var builder = NXBuilder.from(setupConfiguration().build());
                 var compiler = builder.loadPath(source);
-                compiler.compileAndVisualize(notepadWriterFor(output), depth);
+                var node = compiler.compileAndDump();
+                new DotTransformer(notepadWriterFor(output), node, depth).parse();
                 return 0;
             } catch (Exception e) {
                 log.error("Visualization failed", e);

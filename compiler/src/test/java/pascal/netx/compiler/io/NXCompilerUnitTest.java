@@ -21,12 +21,12 @@ class NXCompilerUnitTest {
     private static void testNonNull(String fileName) throws IOException {
         String content = new String(Files.readAllBytes(TEST_DIR.resolve(fileName)));
         CharStream charStream = CharStreams.fromString(content);
-        NXCompiler compiler = NXBuilder.from(Configuration.forCommon()).load(charStream);
+        NXCompiler compiler = NXBuilder.from(Configuration.asDefault()).load(charStream);
         assertNotNull(compiler.compileAndDump());
     }
 
     private static void testEquals(String testcase, String output) throws IOException {
-        Configuration config = Configuration.forCommon();
+        Configuration config = Configuration.asDefault();
         if (GENERATE_EXPECTED) {
             var builder = NXBuilder.from(config);
             var compiler = builder.loadPath(TEST_DIR.resolve(testcase));
@@ -52,13 +52,13 @@ class NXCompilerUnitTest {
     void loadWithValidCharStream() throws IOException {
         var string = Files.readString(TEST_DIR.resolve("bind_1.nx"));
         CharStream charStream = CharStreams.fromString(string);
-        NXCompiler compiler = NXBuilder.from(Configuration.forCommon()).load(charStream);
+        NXCompiler compiler = NXBuilder.from(Configuration.asDefault()).load(charStream);
         assertNotNull(compiler);
     }
 
     @Test
     void loadPathWithValidPath() throws IOException {
-        NXCompiler compiler = NXBuilder.from(Configuration.forCommon())
+        NXCompiler compiler = NXBuilder.from(Configuration.asDefault())
                 .loadPath(TEST_DIR.resolve("bind_1.nx"));
         assertNotNull(compiler);
     }
@@ -66,7 +66,7 @@ class NXCompilerUnitTest {
     @Test
     void loadPathWithInvalidPath() {
         Path path = Path.of("invalid/path/to/file.nx");
-        assertThrows(IOException.class, () -> NXBuilder.from(Configuration.forCommon()).loadPath(path));
+        assertThrows(IOException.class, () -> NXBuilder.from(Configuration.asDefault()).loadPath(path));
     }
 
     @Test
@@ -87,6 +87,6 @@ class NXCompilerUnitTest {
     void testInvalidInput() {
         CharStream charStream = CharStreams.fromString("invalid input");
         assertThrows(ParseCancellationException.class,
-                () -> NXBuilder.from(Configuration.forCommon()).load(charStream));
+                () -> NXBuilder.from(Configuration.asDefault()).load(charStream));
     }
 }
