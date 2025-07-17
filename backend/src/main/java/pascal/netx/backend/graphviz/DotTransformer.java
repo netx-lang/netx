@@ -67,9 +67,14 @@ public class DotTransformer extends AbstractNxonTransformer {
 
     @Override
     public void parse() {
+        int total = json.get("totalData").intValue();
+        double ranksep = Math.min(10.0, Math.max(0.5, total / 200.0 * depthThreshold));
         notepad.println("digraph {");
         notepad.incIndent();
         notepad.println("rankdir=\"RL\";");
+        notepad.println(String.format("graph [fontname = \"monospace\" compound=true ranksep=%.1f];", ranksep));
+        notepad.println("node [fontname = \"monospace\"]");
+        notepad.println("edge [fontname = \"monospace\"]");
         notepad.println("concentrate=false;");
         collectWireDef(json.get("design"), 1);
         printComponent(json.get("design"), 1);
@@ -228,7 +233,7 @@ public class DotTransformer extends AbstractNxonTransformer {
         notepad.print("<tr>");
         var connection = PendingConnection.create();
         connection.merge(printPort(node, index, IO.OUTPUT));
-        notepad.print(String.format("<td>%s</td>", node.get("id")));
+        notepad.print(String.format("<td>%s</td>", node.get("id").textValue()));
         connection.merge(printPort(node, index, IO.INPUT));
         notepad.print("</tr>");
         notepad.print("</table>");
@@ -318,7 +323,7 @@ public class DotTransformer extends AbstractNxonTransformer {
 
     private String dotDefOfInWire(DataReference ref) {
         return wireDotOf(ref.id(), true)
-                + "[label=" + quote(ref.name() + "@" + ref.id() + " : "
+                + "[label=" + quote(ref.name() + "@" + ref.id() + "\\l"
                 + wireDef.get(ref.id()).get("loc").textValue())
                 + "]" + IN_WIRE_STYLE;
     }
