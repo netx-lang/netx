@@ -55,14 +55,59 @@ Commands:
   visualize  Visualize the NetX source code
 ```
 
-Note that visualization requires [Graphviz](https://graphviz.gitlab.io/) for further rendering:
-```bash
-nx visualize my_design.nx -o output.dot
-dot -Tpng output.dot -o output.png
-```
+Here, we have the following subcommands:
+
+- `compile` compiles the NetX source code into a JSON representation (NXON).
+
+  ```shell
+  Usage: NetX compile [-m] [-o=<output>] [-t=<top>] [-a=<args>...]... SOURCE
+  Compile the NetX source code into JSON
+        SOURCE              the source file to compile
+    -a, --args=<args>...    arguments to pass to the top component, in the form
+                              of --args a=true b=2 c=2'b01
+    -m, --minimal           print the JSON in a single line without formatting
+    -o, --output=<output>   output file
+    -t, --top=<top>         name of the top component
+  ```
+  
+- `dump` dumps the NetX source code to Verilog. We will support more output formats in the future.
+
+    ```shell
+    Usage: NetX dump [-o=<output>] [-t=<top>] [-a=<args>...]... SOURCE
+    Dump the NetX source code to Verilog
+          SOURCE              the source file to compile
+      -a, --args=<args>...    arguments to pass to the top component, in the form
+                                of --args a=true b=2 c=2'b01
+      -o, --output=<output>   output file
+      -t, --top=<top>         name of the top component
+    ```
+
+- `visualize` visualizes the NetX source code. 
+
+  ```shell
+  Usage: NetX visualize [-d=<depth>] [-o=<output>] [-t=<top>] [-a=<args>...]...
+                        SOURCE
+  Visualize the NetX source code
+        SOURCE              the source file to compile
+    -a, --args=<args>...    arguments to pass to the top component, in the form
+                              of --args a=true b=2 c=2'b01
+    -d, --depth=<depth>     depth of visualization
+    -o, --output=<output>   output file
+    -t, --top=<top>         name of the top component
+  ```
+
+  Note that visualization requires [Graphviz](https://graphviz.gitlab.io/) for further rendering:
+
+  ```shell
+  nx visualize my_design.nx -o output.dot
+  dot -T pdf output.dot -o output.pdf
+  ```
+
+### Package Mangement
 
 The package manager is built into the `nx` command, allowing you to manage NetX packages easily.
 For example, given a project with a `_next.toml` file:
+
 ```toml
 [project]
 name = "std"
@@ -75,6 +120,7 @@ nx compile _next.toml --top arith_test.sqrt32_test
 ```
 This will compile the project with the specified top-level component `sqrt32_test` under the package `arith_test`.
 Moreover, you can import other packages by adding them to the `_next.toml` file, like:
+
 ```toml
 [dependencies]
 std = { version = "0.1.0", git = "git@github.com:pascal-lab/NetX-std.git" }
