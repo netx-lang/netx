@@ -47,7 +47,7 @@ public class Main {
     static abstract class BaseCommand implements Callable<Integer> {
         @CommandLine.Parameters(
                 paramLabel = "SOURCE",
-                description = "The source file to compile"
+                description = "the source file to compile"
         )
         protected Path source;
 
@@ -99,7 +99,7 @@ public class Main {
     static class CompileCommand extends BaseCommand {
         @CommandLine.Option(
                 names = {"-m", "--minimal"},
-                description = "do not pretty print the output JSON",
+                description = "print the JSON in a single line without formatting",
                 defaultValue = "false"
         )
         private boolean minimal;
