@@ -186,7 +186,7 @@ public class VerilogTransformer extends AbstractNxonTransformer {
     private void parseRegister(JsonNode node, List<String> output, List<String> input) {
         boolean pos_edge = node.get("attribute").get("pos_edge").textValue().equals("true");
         String sensitive = pos_edge ? "posedge " : "negedge ";
-        notepad.print("always @(" + sensitive + input.getFirst() + ") ");
+        notepad.print("always @(" + sensitive + input.get(1) + ") ");
         notepad.print(output.getFirst() + " <= " + input.getFirst() + ";");
     }
 
