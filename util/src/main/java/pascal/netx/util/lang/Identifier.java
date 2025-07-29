@@ -27,6 +27,10 @@ public final class Identifier {
         return this;
     }
 
+    public static Identifier ofDummy() {
+        return new Identifier("ANONYMOUS").setSourceLoc(SourceLoc.none());
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) return true;

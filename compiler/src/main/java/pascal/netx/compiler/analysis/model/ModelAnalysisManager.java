@@ -2,9 +2,9 @@ package pascal.netx.compiler.analysis.model;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.RepoScope;
+import pascal.netx.util.exception.ShallNotReachHereError;
 
 /**
  * Manages the execution of model analyses across all packages in a repository.
@@ -26,7 +26,7 @@ public final class ModelAnalysisManager {
             }
         } catch (ReflectiveOperationException e) {
             log.error("Failed to register analysis: {}", type.getName());
-            throw new CompileCancellationException();
+            throw new ShallNotReachHereError();
         }
     }
 }
