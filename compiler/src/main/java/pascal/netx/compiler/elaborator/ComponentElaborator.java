@@ -49,24 +49,24 @@ final class ComponentElaborator {
         }
     }
 
-    public void buildComponent(ComponentNode node) {
+    private void buildComponent(ComponentNode node) {
         buildElements(node.getElements());
         buildComponentIO(node);
     }
 
-    public void buildInterface(InterfaceNode node) {
+    private void buildInterface(InterfaceNode node) {
         buildElements(node.getElements());
         buildInterfaceIO(node);
     }
 
-    void buildComponentIO(ComponentNode node) {
+    private void buildComponentIO(ComponentNode node) {
         var sourceLoc = node.getSourceLoc();
         var type = node.getType();
         extractIOList(sourceLoc, type.getInput()).forEach(scope::addInput);
         extractIOList(sourceLoc, type.getOutput()).forEach(scope::addOutput);
     }
 
-    void buildInterfaceIO(InterfaceNode node) {
+    private void buildInterfaceIO(InterfaceNode node) {
         var loc = node.getSourceLoc();
         var factory = new InterfaceFactoryMaker(scope).make(node);
         extractIOList(loc, node.getType()).forEach(scope::addInput);

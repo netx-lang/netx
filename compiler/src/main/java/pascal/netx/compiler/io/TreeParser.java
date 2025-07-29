@@ -91,7 +91,7 @@ public final class TreeParser {
 
     PackageInfoNode parsePackageInfo(HeaderContext ctx) {
         if (ctx == null) {
-            return PackageInfoNode.of(PackageInfoNode.Kind.APPLICATION, null);
+            return PackageInfoNode.of(PackageInfoNode.Kind.APPLICATION, Identifier.ofDummy());
         }
         PackageInfoNode.Kind kind = switch (ctx.kind.getText()) {
             case "library" -> PackageInfoNode.Kind.LIBRARY;

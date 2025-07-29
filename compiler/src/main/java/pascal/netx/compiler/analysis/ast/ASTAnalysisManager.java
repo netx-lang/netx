@@ -3,7 +3,7 @@ package pascal.netx.compiler.analysis.ast;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.PackageNode;
-import pascal.netx.compiler.exception.CompileCancellationException;
+import pascal.netx.util.exception.ShallNotReachHereError;
 
 /**
  * Manages the execution of AST analyses for a specific package.
@@ -23,7 +23,7 @@ public final class ASTAnalysisManager {
             method.newInstance(node).analyze();
         } catch (ReflectiveOperationException e) {
             log.error("Failed to register analysis: {}", type.getName());
-            throw new CompileCancellationException();
+            throw new ShallNotReachHereError();
         }
     }
 }
