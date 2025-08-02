@@ -172,3 +172,4 @@ ID : [a-zA-Z_][a-zA-Z_0-9]*;
 
 WHITE_SPACE: [ \t\r\n]+ -> skip;
 COMMENT: '//' ~('\n')* '\n' -> skip;
+BLOCK_COMMENT: '/*' .*? '*/' -> skip;
