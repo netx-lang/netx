@@ -1,7 +1,6 @@
 package pascal.netx.compiler.analysis.model;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import pascal.netx.compiler.elaborator.Logger;
 import pascal.netx.compiler.exception.TypeCheckingException;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
@@ -21,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class IOAnalysis extends ModelAnalysis {
-    private static final Logger log = LoggerFactory.getLogger(IOAnalysis.class);
     private final Map<Data, DataCoverage> def = new HashMap<>();
     private final Map<Data, DataCoverage> use = new HashMap<>();
 
@@ -30,20 +28,20 @@ public final class IOAnalysis extends ModelAnalysis {
     }
 
     private static void errorDefineInput(SourceLoc sourceLoc, Mutable mutable) {
-        log.error("{}: component defines its input {}", sourceLoc, mutable);
+        Logger.error(sourceLoc, "component defines its input {}", mutable);
         throw new TypeCheckingException();
     }
 
     private static void warnUnusedInput(SourceLoc sourceLoc, Mutable mutable) {
-        log.warn("{}: component has unused bits of input {}", sourceLoc, mutable);
+        Logger.warn(sourceLoc, "component has unused bits of input {}", mutable);
     }
 
     private static void warnMultipleDriver(SourceLoc sourceLoc, Mutable mutable) {
-        log.warn("{}: component has multiple driver to its output {}", sourceLoc, mutable);
+        Logger.warn(sourceLoc, "component has multiple driver to its output {}", mutable);
     }
 
     private static void errorUndefOut(SourceLoc sourceLoc, Mutable mutable) {
-        log.error("{}: component has undefined bits of output {}", sourceLoc, mutable);
+        Logger.error(sourceLoc, "component has undefined bits of output {}", mutable);
         throw new TypeCheckingException();
     }
 

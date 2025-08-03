@@ -1,7 +1,6 @@
 package pascal.netx.compiler.model.variable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import pascal.netx.compiler.elaborator.Logger;
 import pascal.netx.compiler.model.variable.type.BitType;
 import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.lang.BitVector;
@@ -9,8 +8,6 @@ import pascal.netx.util.lang.BitVector;
 import javax.annotation.Nonnull;
 
 public record BitVectorValue(BitVector value) implements IntegerValue {
-
-    private static final Logger log = LoggerFactory.getLogger(BitVectorValue.class);
 
     public static BitVectorValue of(BitVector value) {
         return new BitVectorValue(value);
@@ -25,7 +22,7 @@ public record BitVectorValue(BitVector value) implements IntegerValue {
     @Override
     public int toInt() {
         if (value.size() > 32) {
-            log.warn("Truncating bit vector rhs {} to 32 bits", value);
+            Logger.warn("Truncating bit vector rhs {} to 32 bits", value);
         }
         return value.toInt();
     }

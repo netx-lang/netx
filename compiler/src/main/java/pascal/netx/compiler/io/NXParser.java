@@ -1,19 +1,17 @@
 package pascal.netx.compiler.io;
 
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.analysis.ast.*;
 import pascal.netx.compiler.antlr.NetXLexer;
 import pascal.netx.compiler.antlr.NetXParser;
 import pascal.netx.compiler.ast.PackageNode;
+import pascal.netx.compiler.elaborator.Logger;
+import pascal.netx.compiler.exception.ParseCancellationException;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
 public final class NXParser {
-    private static final Logger log = LoggerFactory.getLogger(NXParser.class);
     private final CharStream charStream;
     private final String fileName;
 
@@ -60,7 +58,7 @@ public final class NXParser {
         public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol,
                                 int line, int charPositionInLine,
                                 String msg, RecognitionException e) throws ParseCancellationException {
-            log.error("ParseCancellation {}:{} {}", line, charPositionInLine, msg);
+            Logger.error("ParseCancellation {}:{} {}", line, charPositionInLine, msg);
             throw new ParseCancellationException();
         }
     }

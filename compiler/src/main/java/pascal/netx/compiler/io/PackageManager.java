@@ -1,10 +1,9 @@
 package pascal.netx.compiler.io;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.ComponentNode;
 import pascal.netx.compiler.ast.element.ImportNode;
+import pascal.netx.compiler.elaborator.Logger;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.expr.ImportRef;
 import pascal.netx.compiler.model.scope.RepoScope;
@@ -18,8 +17,6 @@ import java.util.Map;
 import java.util.Objects;
 
 public final class PackageManager {
-    private static final Logger log = LoggerFactory.getLogger(PackageManager.class);
-
     private RepoScope repo;
     private final Map<Identifier, PackageNode> packs = new HashMap<>();
     private final Map<Identifier, NXCompiler> extRepos = new HashMap<>();
@@ -41,8 +38,11 @@ public final class PackageManager {
         }
         var applications = packs.values().stream().filter(PackageNode::isApplication).toList();
         if (applications.size() != 1) {
-            log.error("Cannot infer the top package of the project.");
-            log.error("There are multiple applications: {}", applications);
+            Logger.error("Cannot infer the top package of the project. " +
+                    "There are multiple applications: {}", applications.stream()
+                    .map(PackageNode::getPackageInfo)
+                    .map(info -> info.getIdentifier().toString())
+                    .toList());
             throw new CompileCancellationException();
         }
         return applications.getFirst();
@@ -68,7 +68,7 @@ public final class PackageManager {
                             .getPackManager()
                             .resolvePackage(node.getSourceLoc(), reference.get(1)));
             default -> {
-                log.error("Invalid wildcard reference: {}", reference);
+                Logger.error(node.getSourceLoc(), "Invalid wildcard reference: {}", reference);
                 throw new CompileCancellationException();
             }
         };
@@ -88,7 +88,7 @@ public final class PackageManager {
 
     public NXCompiler resolveRepo(SourceLoc sourceLoc, Identifier identifier) {
         if (!extRepos.containsKey(identifier)) {
-            log.error("{}: Cannot resolve repository: {}", sourceLoc, identifier);
+            Logger.error(sourceLoc, "Cannot resolve repository: " + identifier);
             throw new CompileCancellationException();
         }
         return extRepos.get(identifier);
@@ -100,7 +100,7 @@ public final class PackageManager {
 
     public PackageNode resolvePackage(SourceLoc sourceLoc, Identifier identifier) {
         if (!packs.containsKey(identifier)) {
-            log.error("{}: Cannot resolve package: {}", sourceLoc, identifier);
+            Logger.error(sourceLoc, "Cannot resolve package: " + identifier);
             throw new CompileCancellationException();
         }
         return packs.get(identifier);

@@ -1,7 +1,5 @@
 package pascal.netx.compiler.elaborator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.element.*;
 import pascal.netx.compiler.ast.expr.ExprNode;
 import pascal.netx.compiler.exception.CompileCancellationException;
@@ -28,7 +26,6 @@ import static pascal.netx.compiler.model.Utils.*;
 import static pascal.netx.compiler.model.scope.Attributes.from;
 
 final class ComponentElaborator {
-    private static final Logger log = LoggerFactory.getLogger(ComponentElaborator.class);
     private final ComponentScope scope;
     private final ComponentEvaluator evaluator;
 
@@ -44,8 +41,24 @@ final class ComponentElaborator {
 
     public void build(AbstractComponentNode def) {
         switch (def) {
-            case ComponentNode node -> buildComponent(node);
-            case InterfaceNode node -> buildInterface(node);
+            case ComponentNode node -> {
+                Identifier name = node.getIdentifier();
+                Logger.startComponent(name, node.getSourceLoc());
+                try {
+                    buildComponent(node);
+                } finally {
+                    Logger.finishComponent();
+                }
+            }
+            case InterfaceNode node -> {
+                Identifier name = node.getIdentifier();
+                Logger.startComponent(name, node.getSourceLoc());
+                try {
+                    buildInterface(node);
+                } finally {
+                    Logger.finishComponent();
+                }
+            }
         }
     }
 
@@ -86,7 +99,7 @@ final class ComponentElaborator {
                 if (member instanceof Variable variable) {
                     result.add(variable);
                 } else {
-                    log.error("{}: Expected list of instances but got {}", sourceLoc, list);
+                    Logger.error(sourceLoc, "Expected list of instances but got {}", list);
                     throw new CompileCancellationException();
                 }
             }
@@ -94,7 +107,7 @@ final class ComponentElaborator {
         } else if (entity instanceof Variable variable) {
             return List.of(variable);
         }
-        log.error("{}: Expected list of instances but got {}", sourceLoc, entity);
+        Logger.error(sourceLoc, "Expected list of instances but got {}", entity);
         throw new CompileCancellationException();
     }
 
@@ -172,12 +185,12 @@ final class ComponentElaborator {
         } else {
             if (isBundle) {
                 if (!(type instanceof InterfaceType)) {
-                    log.error("{}: Expected bundle type got {}", sourceLoc, type);
+                    Logger.error(sourceLoc, "Expected bundle type but got {}", type);
                     throw new CompileCancellationException();
                 }
             } else {
                 if (type instanceof InterfaceType) {
-                    log.error("{}: Expected wire type but got {}", sourceLoc, type);
+                    Logger.error(sourceLoc, "Expected wire type but got {}", type);
                     throw new CompileCancellationException();
                 }
             }
@@ -219,7 +232,7 @@ final class ComponentElaborator {
                 case DecoratedExpr decorated -> instantiateDecoratedExpr(decorated);
                 case SequentialExpr sequential -> instantiateSequentialExpr(sequential);
                 case PortExpr connection -> {
-                    log.error("{}: Unexpected Port Connect Expression {}", connection.loc(), connection);
+                    Logger.error(connection.loc(), "Unexpected Port Connect Expression {}", connection);
                     throw new CompileCancellationException();
                 }
             };
@@ -283,7 +296,7 @@ final class ComponentElaborator {
             for (var entry : connection.ports()) {
                 var conn = doInstantiate(entry.expr());
                 if (!(getter.apply(conn).size() == 1)) {
-                    log.error("{}: Expect exactly one output of {} but got {}", loc, entry.expr(), conn.output());
+                    Logger.error(loc, "Expect exactly one output of {} but got", entry.expr(), conn.output());
                     throw new CompileCancellationException();
                 }
                 var port = inst.getEvaluator().evaluate(entry.port());
@@ -293,11 +306,11 @@ final class ComponentElaborator {
             requiresMatchedSize(connection.loc(), assigns.size(), port);
             for (var variable : port) {
                 if (!(variable instanceof Mutable mutable)) {
-                    log.error("{}: Expected mutable variable but got {}", connection.loc(), variable);
+                    Logger.error(connection.loc(), "Expected mutable variable but got {}", variable);
                     throw new CompileCancellationException();
                 }
                 if (!assigns.containsKey(mutable)) {
-                    log.error("{}: Missing assignment for {}", connection.loc(), variable);
+                    Logger.error(connection.loc(), "Missing assignment for {}", variable);
                     throw new CompileCancellationException();
                 }
 
@@ -330,7 +343,7 @@ final class ComponentElaborator {
         private ComponentPort instantiateInstanceRef(VariableRef ref) {
             var inst = List.of(ref.getInstance());
             if (ref.getArgList() != null) {
-                log.error("{}: Unexpected arguments in instance reference {}", sourceLoc, ref.getInstance());
+                Logger.error(sourceLoc, "Unexpected arguments in instance reference {}", ref.getInstance());
                 throw new CompileCancellationException();
             }
             if (ref.getInstance() instanceof Mutable) {
@@ -346,7 +359,7 @@ final class ComponentElaborator {
                 case BuiltinRef ref -> instantiateBuiltinRef(ref);
                 case ComponentRef ref -> instantiateComponentRef(ref);
                 default -> {
-                    log.error("{}: Unexpected expression type {}", sourceLoc, expr);
+                    Logger.error(sourceLoc, "Unexpected expression type {}", expr);
                    throw new CompileCancellationException();
                 }
             };

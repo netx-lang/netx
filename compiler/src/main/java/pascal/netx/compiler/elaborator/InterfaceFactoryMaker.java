@@ -1,7 +1,5 @@
 package pascal.netx.compiler.elaborator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.element.InterfaceNode;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.io.Configuration;
@@ -16,8 +14,6 @@ import pascal.netx.util.lang.SourceLoc;
 import java.util.LinkedHashMap;
 
 public class InterfaceFactoryMaker {
-    private static final Logger log = LoggerFactory.getLogger(InterfaceFactoryMaker.class);
-
     private final ComponentScope scope;
     private final NXCompiler compiler;
 
@@ -34,7 +30,7 @@ public class InterfaceFactoryMaker {
         LinkedHashMap<Identifier, Mutable.Factory<?>> factories = new LinkedHashMap<>();
         for (var inst : fields) {
             if (!(inst instanceof Mutable mutable)) {
-                log.error("{}: Expected mutable instance but got {}", node.getSourceLoc(), inst);
+                Logger.error(node.getSourceLoc(), "Expected mutable instance but got {}", inst);
                 throw new CompileCancellationException();
             }
             var factory = getFactoryFrom(node.getSourceLoc(), mutable);
@@ -48,7 +44,7 @@ public class InterfaceFactoryMaker {
             case Clock _ -> new Clock.Factory(compiler);
             case Wire wire -> {
                 if (wire.getType() instanceof PolyType) {
-                    log.error("{}: Interface shall not contain auto-typed instance: {}", loc, wire);
+                    Logger.error(loc, "Interface shall not contain auto-typed instance: {}", wire);
                     throw new CompileCancellationException();
                 }
                 yield new Wire.Factory(wire.getType(), compiler);
@@ -65,7 +61,7 @@ public class InterfaceFactoryMaker {
                 yield new Array.Factory(compiler, array.getElements().size(), elementFactory);
             }
             case Access _ -> {
-                log.error("{}: Interface shall not contain data access: {}", loc, mutable);
+                Logger.error(loc, "Interface shall not contain data access: {}", mutable);
                 throw new CompileCancellationException();
             }
         };

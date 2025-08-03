@@ -1,10 +1,7 @@
 package pascal.netx.compiler.io;
 
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.antlr.NetXParser.*;
 import pascal.netx.compiler.ast.ASTListener;
 import pascal.netx.compiler.ast.ASTNode;
@@ -19,7 +16,9 @@ import pascal.netx.compiler.ast.expr.qualifier.Qualifier;
 import pascal.netx.compiler.ast.expr.selector.BitSelector;
 import pascal.netx.compiler.ast.expr.selector.PartSelector;
 import pascal.netx.compiler.ast.expr.selector.Selector;
+import pascal.netx.compiler.elaborator.Logger;
 import pascal.netx.compiler.exception.CompileCancellationException;
+import pascal.netx.compiler.exception.ParseCancellationException;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.lang.Identifier;
@@ -30,9 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class TreeParser {
-
-    private final Logger log = LoggerFactory.getLogger(TreeParser.class);
-
     private final String fileName;
 
     public TreeParser(String fileName) {
@@ -79,7 +75,7 @@ public final class TreeParser {
         if (ctx.number() != null) {
             for (var number : ctx.number()) {
                 if (!(number instanceof BitVectorNumberContext bitCtx)) {
-                    log.error("{}: Expected a bitvector number for enum", locationOf(number.getStart()));
+                    Logger.error(locationOf(number.getStart()), "Expected a bitvector number for enum");
                     throw new ParseCancellationException();
                 }
                 var value = parseBitVectorNumber(bitCtx);
@@ -162,7 +158,7 @@ public final class TreeParser {
             aliasID = ctx.reference_set().ID().stream().map(this::parseIdentifier).toList();
         }
         if (aliasID.size() != results.size()) {
-            log.error("{}: Unmatched number of import alias", locationOf(ctx.getStart()));
+            Logger.error(locationOf(ctx.getStart()), "Unmatched number of import alias");
             throw new CompileCancellationException();
         }
         var iter = aliasID.iterator();

@@ -1,7 +1,6 @@
 package pascal.netx.compiler.model.variable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import pascal.netx.compiler.elaborator.Logger;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.variable.selector.BitSelector;
@@ -15,8 +14,6 @@ import java.util.List;
 
 public sealed interface Variable extends Entity permits Mutable, Value {
 
-    Logger log = LoggerFactory.getLogger(Variable.class);
-
     static Variable accessOf(Variable base, Selector selector) {
         switch (base) {
             case Value value -> {
@@ -28,7 +25,7 @@ public sealed interface Variable extends Entity permits Mutable, Value {
                         return array.getElements().get(index.toInt());
                     }
                     case PartSelector _ -> {
-                        log.error("Array {} cannot be accessed with a part selector {}", array, selector);
+                        Logger.error("Array {} cannot be accessed with a part selector {}", array, selector);
                         throw new CompileCancellationException();
                     }
                 }

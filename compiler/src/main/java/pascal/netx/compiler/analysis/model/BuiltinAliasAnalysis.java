@@ -1,7 +1,6 @@
 package pascal.netx.compiler.analysis.model;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import pascal.netx.compiler.elaborator.Logger;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
@@ -28,8 +27,6 @@ import java.util.List;
  * we inline these relations to make them direct aliases {@code i <> o}.
  */
 public class BuiltinAliasAnalysis extends ModelAnalysis {
-    private static final Logger log = LoggerFactory.getLogger(BuiltinAliasAnalysis.class);
-
     public BuiltinAliasAnalysis(PackageScope pack) {
         super(pack);
     }
@@ -52,7 +49,7 @@ public class BuiltinAliasAnalysis extends ModelAnalysis {
         var lhs = scope.getOutputs().getFirst();
         var rhs = scope.getInputs().getFirst();
         if (!(lhs.getType() instanceof BitType(int lhsW)) || !(rhs.getType() instanceof BitType(int rhsW))) {
-            log.warn("Unexpected type for CAST component: {} -> {}", lhs.getType(), rhs.getType());
+            Logger.error("Unexpected type for CAST component: {} -> {}", lhs.getType(), rhs.getType());
             throw new CompileCancellationException();
         }
         if (lhsW == rhsW) {
@@ -60,7 +57,7 @@ public class BuiltinAliasAnalysis extends ModelAnalysis {
         } else if (lhsW < rhsW) {
             var truncated = Variable.accessOf(rhs, Selector.ofWidth(lhsW));
             scope.getAliases().add(new ComponentScope.Alias(lhs, truncated));
-            log.info("Truncating {} to {}", rhs, truncated);
+            Logger.info("Truncating {} to {}", rhs, truncated);
         }
     }
 

@@ -1,7 +1,5 @@
 package pascal.netx.compiler.elaborator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.ComponentNode;
 import pascal.netx.compiler.ast.element.EnumNode;
@@ -15,12 +13,11 @@ import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.RepoScope;
 import pascal.netx.compiler.model.scope.binding.MultiBinding;
 import pascal.netx.compiler.model.scope.binding.OrderedArgBindList;
+import pascal.netx.util.lang.Identifier;
 
 import static pascal.netx.compiler.model.Utils.requiresMatchedSize;
 
 public final class PackageElaborator {
-    private static final Logger log = LoggerFactory.getLogger(PackageElaborator.class);
-
     private final PackageNode node;
     private final PackageScope pack;
     private final Configuration config;
@@ -38,13 +35,19 @@ public final class PackageElaborator {
     }
 
     public PackageScope elaborate() {
-        initializePackageDefs();
-        var topNode = findTopNode();
-        var topScope = pack.instantiateTop(topNode.getIdentifier());
-        bindConfigParameters(topNode, topScope);
-        new ComponentElaborator(config, topScope).build(topNode);
-        setSignature(topScope, topNode);
-        return pack;
+        Identifier name = node.getPackageInfo().getIdentifier();
+        Logger.startPackage(name, node.getSourceLoc());
+        try {
+            initializePackageDefs();
+            var topNode = findTopNode();
+            var topScope = pack.instantiateTop(topNode.getIdentifier());
+            bindConfigParameters(topNode, topScope);
+            new ComponentElaborator(config, topScope).build(topNode);
+            setSignature(topScope, topNode);
+            return pack;
+        } finally {
+            Logger.finishPackage();
+        }
     }
 
     private void bindConfigParameters(ComponentNode topNode, ComponentScope topScope) {
@@ -73,7 +76,7 @@ public final class PackageElaborator {
                 }
             }
         }
-        log.warn("No component named '{}' found, using the first component as top", config.topName().name());
+        Logger.warn("No component named '{}' found, using the first component as top", config.topName().name());
         return result;
     }
 

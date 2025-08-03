@@ -452,7 +452,7 @@ module top(
         attribute: { width: "1" }
       */
         assign _18[0] = ~_15; // simple_timer.nx:75:52
-        assign _18[1] = _15; // :0:0
+        assign _18[1] = _15; // 
       /* END "DECODER"; "simple_timer.nx:62:12" */
       assign _19 = $signed(_18[0]); // simple_timer.nx:64:26
       assign _20 = _16 & _19; // simple_timer.nx:64:8
@@ -475,7 +475,7 @@ module top(
         attribute: { width: "1" }
       */
         assign _25[0] = ~_15; // simple_timer.nx:75:52
-        assign _25[1] = _26; // :0:0
+        assign _25[1] = _26; // 
       /* END "DECODER"; "simple_timer.nx:62:12" */
       assign _27 = _9 & _25[0]; // simple_timer.nx:64:8
       assign _28 = _23 & _25[1]; // simple_timer.nx:64:8
@@ -498,7 +498,7 @@ module top(
       attribute: { width: "1" }
     */
       assign _32[0] = ~_29; // simple_timer.nx:75:52
-      assign _32[1] = _29; // :0:0
+      assign _32[1] = _29; // 
     /* END "DECODER"; "simple_timer.nx:62:12" */
     assign _33 = $signed(_32[0]); // simple_timer.nx:64:26
     assign _34 = _30 & _33; // simple_timer.nx:64:8

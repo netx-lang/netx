@@ -1,7 +1,5 @@
 package pascal.netx.compiler.elaborator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.element.BindingNode;
 import pascal.netx.compiler.ast.element.InterfaceNode;
 import pascal.netx.compiler.ast.expr.*;
@@ -42,7 +40,6 @@ import java.util.stream.IntStream;
 import static pascal.netx.compiler.model.Entities.*;
 
 public final class ComponentEvaluator {
-    private static final Logger log = LoggerFactory.getLogger(ComponentEvaluator.class);
     private static final Map<BinaryExpr.Operator, BiFunction<IntegerValue, IntegerValue, Value>>
             BINARY_OPERATOR_MAP = Map.ofEntries(
             Map.entry(BinaryExpr.Operator.ADD, IntegerValue::add),
@@ -205,7 +202,7 @@ public final class ComponentEvaluator {
                 try {
                     yield Variable.accessOf(inst, selector);
                 } catch (CompileCancellationException e) {
-                    log.error("{}: invalid selectors {}", expr.getSourceLoc(), expr);
+                    Logger.error(expr.getSourceLoc(), "invalid selectors {}", expr);
                     throw e;
                 }
             }
@@ -213,14 +210,14 @@ public final class ComponentEvaluator {
                 try {
                     yield Variable.accessOf(ref.getInstance(), selector);
                 } catch (CompileCancellationException e) {
-                    log.error("{}: invalid selectors {}", expr.getSourceLoc(), expr);
+                    Logger.error(expr.getSourceLoc(), "invalid selectors {}", expr);
                     throw e;
                 }
             }
             case EntityList list -> list.select(selector);
             default -> {
-                log.error("{}: Expected variable or list but got {}",
-                        expr.getBase().getSourceLoc(), base);
+                Logger.error(expr.getBase().getSourceLoc(), "Expected variable or list but got {}",
+                        base);
                 throw new CompileCancellationException();
             }
         };
@@ -338,7 +335,7 @@ public final class ComponentEvaluator {
                 List<Expr> result = new LinkedList<>();
                 for (var element : list) {
                     if (!(element instanceof Expr expr)) {
-                        log.error("{}: Expected instantiate expr but got {}", base.getSourceLoc(), element);
+                        Logger.error(base.getSourceLoc(), "Expected instantiate expr but got {}", element);
                         throw new CompileCancellationException();
                     }
                     result.add(DecoratedExpr.of(decorator, expr));
@@ -348,7 +345,7 @@ public final class ComponentEvaluator {
             case Expr expr -> DecoratedExpr.of(decorator, expr);
             case Variable variable -> DecoratedExpr.of(decorator, VariableRef.of(variable, base.getSourceLoc()));
             default -> {
-                log.error("{}: Expected instantiate expr(s) but got {}", base.getSourceLoc(), operand);
+                Logger.error(base.getSourceLoc(), "Expected instantiate expr(s) but got {}", operand);
                 throw new CompileCancellationException();
             }
         };
@@ -441,7 +438,7 @@ public final class ComponentEvaluator {
             } else if (pack.defs().hasEnum(id)) {
                 return new Wire.Factory(BitType.of(pack.defs().getEnum(id).width()), Utils.compilerOf(pack));
             } else {
-                log.error("{}: Unknown interface type {}", expr.getSourceLoc(), id);
+                Logger.error(expr.getSourceLoc(), "Unknown interface type {}", id);
                 throw new CompileCancellationException();
             }
         } else {
@@ -500,7 +497,7 @@ public final class ComponentEvaluator {
             if (mode == EvaluationMode.DECLARE_IN_PLACE) {
                 return declareDataInPlace(id);
             }
-            log.error("{}: Unresolved identifier {}", id.getSourceLoc(), id);
+            Logger.error(id.getSourceLoc(), "Unresolved identifier {}", id);
             throw new CompileCancellationException();
         });
     }
@@ -522,7 +519,7 @@ public final class ComponentEvaluator {
             atom.setArgList(arguments);
             return atom;
         } else {
-            log.error("{}: Expected component type but got {}", expr.getSourceLoc(), prototype);
+            Logger.error(expr.getSourceLoc(), "Expected component type but got {}", prototype);
             throw new CompileCancellationException();
         }
     }
@@ -554,7 +551,7 @@ public final class ComponentEvaluator {
                     var def = pack.defs().getInterface(expr.getHead());
                     yield evaluateInterfacrFactory(expr.getSourceLoc(), def, evaluateArguments(expr));
                 }
-                log.error("{}: Unknown component type {}", expr.getSourceLoc(), expr);
+                Logger.error(expr.getSourceLoc(), "Unknown component type {}", expr);
                 throw new CompileCancellationException();
             }
         };
@@ -581,7 +578,7 @@ public final class ComponentEvaluator {
         if (arguments.isEmpty()) {
             return new Clock.Factory(Utils.compilerOf(pack));
         } else {
-            log.error("{}: Unexpected specification for component type clock: {}", sourceLoc, arguments);
+            Logger.error(sourceLoc, "Unexpected specification for component type clock: {}", arguments);
             throw new CompileCancellationException();
         }
     }

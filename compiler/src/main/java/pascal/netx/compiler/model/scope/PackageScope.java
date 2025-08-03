@@ -1,8 +1,7 @@
 package pascal.netx.compiler.model.scope;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.element.*;
+import pascal.netx.compiler.elaborator.Logger;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.expr.ImportRef;
 import pascal.netx.compiler.model.variable.BitVectorValue;
@@ -19,8 +18,6 @@ import java.util.function.Consumer;
  * A package can be either an application or a library.
  */
 public final class PackageScope extends Scope {
-    private static final Logger log = LoggerFactory.getLogger(PackageScope.class);
-
     private final PackageDefManager defs;
     private final RepoScope project;
     private ComponentScope top;
@@ -51,14 +48,15 @@ public final class PackageScope extends Scope {
         return project;
     }
 
+    private static void doForEachSubComponent(ComponentScope scope, Consumer<ComponentScope> consumer) {
+        Logger.startComponent(scope.getIdentifier(), scope.getSourceLoc());
+        consumer.accept(scope);
+        scope.getChildren().forEach(child -> doForEachSubComponent((ComponentScope) child, consumer));
+        Logger.finishComponent();
+    }
+
     public void forEachSubComponent(Consumer<ComponentScope> consumer) {
-        Stack<ComponentScope> stack = new Stack<>();
-        stack.push(getTop());
-        while (!stack.isEmpty()) {
-            ComponentScope scope = stack.pop();
-            consumer.accept(scope);
-            scope.getChildren().forEach(child -> stack.push((ComponentScope) child));
-        }
+        doForEachSubComponent(getTop(), consumer);
     }
 
     public PackageDefManager defs() {
@@ -83,16 +81,16 @@ public final class PackageScope extends Scope {
 
         static private void checkUniqueEnumFields(EnumNode node) {
             if (node.getFields().size() != new HashSet<>(node.getFields()).size()) {
-                log.error("{}: Enum fields must be unique, but found duplicates in '{}'",
-                        node.getSourceLoc(), node.getName());
+                Logger.error(node.getSourceLoc(), "Enum fields must be unique, but found duplicates in '{}'",
+                        node.getName());
                 throw new CompileCancellationException();
             }
         }
 
         static private void checkUniqueEnumValues(EnumNode node, Collection<BitVectorValue> values) {
             if (values.size() != new HashSet<>(values).size()) {
-                log.error("{}: Enum values must be unique, but found duplicates in '{}'",
-                        node.getSourceLoc(), node.getName());
+                Logger.error(node.getSourceLoc(), "Enum values must be unique, but found duplicates in '{}'",
+                        node.getName());
                 throw new CompileCancellationException();
             }
         }
@@ -129,7 +127,7 @@ public final class PackageScope extends Scope {
             for (var def : enumDef.values()) {
                 if (def.fields().containsKey(id)) {
                     if (result != null) {
-                        log.warn("Enum field '{}' is ambiguous", id);
+                        Logger.warn("Enum field '{}' is ambiguous", id);
                     }
                     result = def.fields().get(id);
                 }
