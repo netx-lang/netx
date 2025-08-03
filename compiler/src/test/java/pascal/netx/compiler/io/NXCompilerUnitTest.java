@@ -3,8 +3,8 @@ package pascal.netx.compiler.io;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.jupiter.api.Test;
+import pascal.netx.compiler.exception.ParseCancellationException;
 import pascal.netx.util.print.NotepadWriter;
 
 import java.io.IOException;

@@ -4,11 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.ImportNode;
 import pascal.netx.compiler.ast.element.PackageElement;
+import pascal.netx.compiler.elaborator.Logger;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.scope.RepoScope;
 import pascal.netx.util.lang.Identifier;
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
 public final class ProjectConfigReader {
     private static final String DEFAULT_CONFIG = "_netx.toml";
     private static final TomlMapper MAPPER = new TomlMapper();
-    private static final Logger log = LoggerFactory.getLogger(ProjectConfigReader.class);
 
     private final List<PackageNode> packages = new ArrayList<>();
 
@@ -74,7 +72,7 @@ public final class ProjectConfigReader {
         var exclude = extractSourceFiles(toml.get("project").get("exclude"));
         for (var file : include) {
             if (!exclude.contains(file)) {
-                log.info("Start Parsing: {}", file);
+                Logger.info("Start Parsing: {}", file);
                 var parser = new NXParser(file);
                 packages.add(parser.parse());
             }
@@ -127,7 +125,7 @@ public final class ProjectConfigReader {
         var iter = toml.get("dependencies").fields();
         while (iter.hasNext()) {
             var entry = iter.next();
-            log.info("Start resolving dependency: {}", entry.getKey());
+            Logger.info("Start resolving dependency: {}", entry.getKey());
             var spec = entry.getValue();
 
             Path path;
@@ -149,7 +147,8 @@ public final class ProjectConfigReader {
         if (spec.has("version")) {
             var versionSpec = VersionSpec.of(spec.get("version").textValue());
             if (!versionSpec.isCompatibleWith(libCompiler.info.version())) {
-                log.error("Dependency {} version mismatch", libCompiler.info.name());
+                Logger.error("Dependency {} version mismatch: expected {}, got {}",
+                        libCompiler.info.name(), versionSpec.base, libCompiler.info.version());
                 throw new CompileCancellationException();
             }
         }
@@ -191,7 +190,7 @@ public final class ProjectConfigReader {
             checkoutGitRepo(spec, repo);
             repo.close();
         } catch (GitAPIException e) {
-            log.error("Failed to open git repository", e);
+            Logger.error("Failed to open git repository: {}", e.getMessage());
             throw new CompileCancellationException();
         }
         return repoDir;

@@ -1,18 +1,16 @@
 package pascal.netx.compiler.analysis.ast;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.ast.ASTListener;
 import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.ComponentInstantiationNode;
 import pascal.netx.compiler.ast.element.InterfaceNode;
+import pascal.netx.compiler.elaborator.Logger;
 import pascal.netx.compiler.exception.TypeCheckingException;
 
 /**
  * Ensure interfaces do not contain component instantiations.
  */
 public final class InterfaceChecker extends ASTAnalysis implements ASTListener {
-    private static final Logger log = LoggerFactory.getLogger(InterfaceChecker.class);
     private boolean insideInterface = false;
 
     public InterfaceChecker(PackageNode design) {
@@ -32,7 +30,7 @@ public final class InterfaceChecker extends ASTAnalysis implements ASTListener {
     @Override
     public void enter(ComponentInstantiationNode node) {
         if (insideInterface) {
-            log.error("{}: Component instantiation is not allowed inside an interface", node.getSourceLoc());
+            Logger.error(node.getSourceLoc(), "Component instantiation is not allowed inside an interface");
             throw new TypeCheckingException();
         }
     }

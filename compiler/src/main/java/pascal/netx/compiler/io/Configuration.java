@@ -1,7 +1,6 @@
 package pascal.netx.compiler.io;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import pascal.netx.compiler.elaborator.Logger;
 import pascal.netx.compiler.model.scope.binding.ArgBindList;
 import pascal.netx.compiler.model.scope.binding.MultiBinding;
 import pascal.netx.compiler.model.variable.BitVectorValue;
@@ -18,8 +17,6 @@ import java.util.List;
 public record Configuration(@Nullable Identifier topPack,
                             @Nonnull  Identifier topName,
                             @Nullable ArgBindList arguments) {
-
-    private static final Logger log = LoggerFactory.getLogger(Configuration.class);
 
     private Configuration(Builder builder) {
         this(builder.topPack, builder.topName, builder.arguments);
@@ -66,8 +63,8 @@ public record Configuration(@Nullable Identifier topPack,
                     try {
                         return BitVectorValue.of(BitVector.parse(value));
                     } catch (Exception ignored) {
-                        log.error("Invalid argument rhs: {}", value);
-                        throw new IllegalArgumentException("Invalid argument rhs: " + value);
+                        Logger.error("Invalid argument rhs: " + value);
+                        throw new IllegalArgumentException();
                     }
                 }
             }
@@ -80,8 +77,8 @@ public record Configuration(@Nullable Identifier topPack,
                 if (parts.length == 2) {
                     bindings.bind(Identifier.of(parts[0]), parseValue(parts[1]));
                 } else {
-                    log.error("Invalid argument format: {}", arg);
-                    throw new IllegalArgumentException("Invalid argument format: " + arg);
+                    Logger.error("Invalid argument format: " + arg);
+                    throw new IllegalArgumentException();
                 }
             }
             return withArgs(bindings);

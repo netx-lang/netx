@@ -1,10 +1,8 @@
 package pascal.netx.compiler.model;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import pascal.netx.compiler.elaborator.Logger;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.expr.Expr;
-import pascal.netx.compiler.model.expr.InstantiationRef;
 import pascal.netx.compiler.model.expr.ParallelExpr;
 import pascal.netx.compiler.model.expr.VariableRef;
 import pascal.netx.compiler.model.variable.*;
@@ -14,13 +12,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 public final class Entities {
-    private static final Logger log = LoggerFactory.getLogger(Entities.class);
 
     public static Bundle requiresDataBundle(SourceLoc loc, Entity entity) {
         if (entity instanceof Bundle bundle) {
             return bundle;
         } else {
-            log.error("{}: Expected data bundle but got {}", loc, entity);
+            Logger.error(loc, "Expected data bundle but got {}", entity);
             throw new CompileCancellationException();
         }
     }
@@ -40,16 +37,7 @@ public final class Entities {
         if (entity instanceof Value value) {
             return value;
         } else {
-            log.error("{}: Expected value but got {}", loc, entity);
-            throw new CompileCancellationException();
-        }
-    }
-
-    public static InstantiationRef requiresInstantiationRef(SourceLoc loc, Entity entity) {
-        if (entity instanceof InstantiationRef instantiationRef) {
-            return instantiationRef;
-        } else {
-            log.error("{}: Expected instantiation ref but got {}", loc, entity);
+            Logger.error(loc, "Expected value but got {}", entity);
             throw new CompileCancellationException();
         }
     }
@@ -58,7 +46,7 @@ public final class Entities {
         if (entity instanceof Mutable instance) {
             return instance;
         } else {
-            log.error("{}: Expected instance but got {}", loc, entity);
+            Logger.error(loc, "Expected instance but got {}", entity);
             throw new CompileCancellationException();
         }
     }
@@ -67,7 +55,7 @@ public final class Entities {
         if (entity instanceof Mutable.Factory<?> factory) {
             return factory;
         } else {
-            log.error("{}: Expected component factory but got {}", loc, entity);
+            Logger.error(loc, "Expected component factory but got {}", entity);
             throw new CompileCancellationException();
         }
     }
@@ -76,7 +64,7 @@ public final class Entities {
         if (entity instanceof IntegerValue integerValue) {
             return integerValue;
         } else {
-            log.error("{}: Expected integer rhs but got {}", loc, entity);
+            Logger.error(loc, "Expected integer rhs but got {}", entity);
             throw new CompileCancellationException();
         }
     }
@@ -85,7 +73,7 @@ public final class Entities {
         if (entity instanceof BooleanValue booleanValue) {
             return booleanValue;
         } else {
-            log.error("{}: Expected boolean rhs but got {}", loc, entity);
+            Logger.error(loc, "Expected boolean rhs but got {}", entity);
             throw new CompileCancellationException();
         }
     }
@@ -95,7 +83,7 @@ public final class Entities {
             case BooleanValue booleanValue -> booleanValue;
             case IntegerValue integerValue -> BooleanValue.of(integerValue.toInt() != 0);
             default -> {
-                log.error("{}: Cannot cast {} to boolean", loc, entity);
+                Logger.error(loc, "Cannot cast {} to boolean", entity);
                 throw new CompileCancellationException();
             }
         };
@@ -107,7 +95,7 @@ public final class Entities {
             case Expr expr -> expr;
             case Variable inst -> VariableRef.of(inst, loc);
             default -> {
-                log.error("{}: Cannot cast {} to component type", loc, entity);
+                Logger.error(loc, "Cannot cast {} to component type", entity);
                 throw new CompileCancellationException();
             }
         };

@@ -114,7 +114,9 @@
                 "output": ["mask@10[0]"]
               },
               {
-                "type": "builtin", "id": "TO", "loc": ":0:0",
+                  "type": "builtin",
+                  "id": "TO",
+                  "loc": "",
                 "input": ["1'h01"],
                 "output": ["mask@10[1]"]
               }

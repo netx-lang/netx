@@ -17,6 +17,9 @@ public record SourceLoc(int line, int column, String file) implements Comparable
     @Override
     @Nonnull
     public String toString() {
+        if (isNone()) {
+            return "";
+        }
         return file + ":" + line + ":" + column;
     }
 

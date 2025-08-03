@@ -1,7 +1,6 @@
 package pascal.netx.compiler.model.variable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import pascal.netx.compiler.elaborator.Logger;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.model.Entity;
@@ -16,7 +15,6 @@ import java.util.LinkedHashMap;
 import java.util.Objects;
 
 public final class Bundle extends Composition {
-    private static final Logger log = LoggerFactory.getLogger(Bundle.class);
     private final LinkedHashMap<Identifier, Mutable> map = new LinkedHashMap<>();
 
     private Bundle(Identifier id, InterfaceType type, int index) {
@@ -36,7 +34,7 @@ public final class Bundle extends Composition {
     @Nonnull
     public Entity getField(Identifier field) {
         if (!map.containsKey(field)) {
-            log.error("{}: Field {} not found in bundle {}", field.getSourceLoc(), field, this);
+            Logger.error(field.getSourceLoc(), "Field {} not found in bundle {}", field, this);
             throw new CompileCancellationException();
         }
         return map.get(field);

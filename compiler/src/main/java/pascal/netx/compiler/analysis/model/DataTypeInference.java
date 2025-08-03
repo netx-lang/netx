@@ -2,9 +2,8 @@ package pascal.netx.compiler.analysis.model;
 
 import org.jgrapht.Graph;
 import org.jgrapht.graph.SimpleGraph;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pascal.netx.compiler.analysis.model.constraint.*;
+import pascal.netx.compiler.elaborator.Logger;
 import pascal.netx.compiler.exception.TypeCheckingException;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
@@ -27,7 +26,6 @@ import java.util.stream.Stream;
  * If a variable cannot be inferred, it will throw a TypeCheckingException.
  */
 public final class DataTypeInference extends ModelAnalysis {
-    private static final Logger log = LoggerFactory.getLogger(DataTypeInference.class);
     private final Graph<Variable, BinaryConstraint> graph = new SimpleGraph<>(BinaryConstraint.class);
     private final List<DataConstraint> constraints = new LinkedList<>();
     private final Queue<Variable> workList = new LinkedList<>();
@@ -164,7 +162,7 @@ public final class DataTypeInference extends ModelAnalysis {
                         throw new ShallNotReachHereError();
                     }
                     if (inst.hasImplicitType()) {
-                        log.error("{}: Cannot infer type of data: {}", ((Data) inst).getSourceLoc(), inst);
+                        Logger.error(((Data) inst).getSourceLoc(), "Cannot infer type of data: {}", inst);
                         throw new TypeCheckingException();
                     }
                 }
@@ -174,7 +172,7 @@ public final class DataTypeInference extends ModelAnalysis {
 
     private void throwIfConstraintNotHolds(DataConstraint constraint) {
         if (!constraint.holds()) {
-            log.error("Type constraint violation: {}", constraint.error());
+            Logger.error("Type constraint violation: {}", constraint.error());
             throw new TypeCheckingException();
         }
     }

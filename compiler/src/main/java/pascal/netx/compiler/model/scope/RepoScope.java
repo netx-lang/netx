@@ -1,7 +1,6 @@
 package pascal.netx.compiler.model.scope;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import pascal.netx.compiler.elaborator.Logger;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.io.PackageManager;
@@ -15,8 +14,6 @@ import java.util.List;
  * and the top-level component in that package becomes the entry point of the whole project.
  */
 public final class RepoScope extends Scope {
-    private static final Logger log = LoggerFactory.getLogger(RepoScope.class);
-
     private PackageScope top;
     private NXCompiler compiler;
     private PackageManager manager;
@@ -53,7 +50,7 @@ public final class RepoScope extends Scope {
 
     public void setTop(PackageScope pack) {
         if (top != null) {
-            log.error("Cannot conclude the application package of the project");
+            Logger.error("Cannot conclude the application package of the project");
             throw new CompileCancellationException();
         }
         this.top = pack;

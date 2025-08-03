@@ -1,7 +1,6 @@
 package pascal.netx.compiler.model;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import pascal.netx.compiler.elaborator.Logger;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.model.scope.ComponentScope;
@@ -12,12 +11,9 @@ import pascal.netx.util.lang.SourceLoc;
 import java.util.List;
 
 public final class Utils {
-    private static final Logger log = LoggerFactory.getLogger(Utils.class);
-
     public static int requiresMatchedSize(SourceLoc sourceLoc, List<?> target, List<?> source) {
         if (target.size() != source.size()) {
-            log.error("{}: Instantiation with mismatched component size: {} vs {}",
-                    sourceLoc, target.size(), source.size());
+            Logger.error(sourceLoc, "Mismatched component size: " + target.size() + " vs " + source.size());
             throw new CompileCancellationException();
         }
         return target.size();
@@ -25,7 +21,7 @@ public final class Utils {
 
     public static void requiresMatchedSize(SourceLoc sourceLoc, int expected, List<?> actual) {
         if (expected != actual.size()) {
-            log.error("{}: Expected list of size {} but got {}", sourceLoc, expected, actual);
+            Logger.error(sourceLoc, "Expected list of size {} but got {}", expected, actual.size());
             throw new CompileCancellationException();
         }
     }

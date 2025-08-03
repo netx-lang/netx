@@ -1,7 +1,6 @@
 package pascal.netx.compiler.analysis.model;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import pascal.netx.compiler.elaborator.Logger;
 import pascal.netx.compiler.exception.TypeCheckingException;
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.scope.ComponentScope;
@@ -18,8 +17,6 @@ import pascal.netx.compiler.model.variable.type.BitType;
  */
 public final class AccessChecker extends ModelAnalysis {
 
-    private static final Logger log = LoggerFactory.getLogger(AccessChecker.class);
-
     public AccessChecker(PackageScope design) {
         super(design);
     }
@@ -35,7 +32,7 @@ public final class AccessChecker extends ModelAnalysis {
                     if (check(start, baseWidth) && check(end, baseWidth)) return;
                 }
             }
-            log.error("{}: Invalid access to {}{}", base.getSourceLoc(), base, selector);
+            Logger.error(base.getSourceLoc(), "Invalid access to {}{}", base, selector);
             throw new TypeCheckingException();
         }
     }
