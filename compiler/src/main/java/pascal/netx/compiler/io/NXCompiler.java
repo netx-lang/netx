@@ -76,7 +76,6 @@ public final class NXCompiler {
         manager.analyze(AccessChecker.class);
         manager.analyze(CompositeDataBlaster.class);
         manager.analyze(IOAnalysis.class);
-        manager.analyze(BuiltinAliasAnalysis.class);
         manager.analyze(AliasAnalysis.class);
         manager.analyze(DuplicatedElimination.class);
         manager.analyze(RedundantElimination.class);

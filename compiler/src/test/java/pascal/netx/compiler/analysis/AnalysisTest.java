@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static pascal.netx.compiler.TestUtils.test;
 
 
 class AnalysisTest {
@@ -244,5 +245,107 @@ class AnalysisTest {
                 }
                 """;
         testEquals(code, "expected/direct_alias_e.json");
+    }
+
+    @Test
+    void testConstantGateAnd() {
+        var code = """
+                component top : a -> b {
+                    wire a, b of bit(1);
+                    b <> AND <> [a, 1'b1];
+                }
+                """;
+        var expected = """
+                component top : a -> b {
+                    wire a, b of bit(1);
+                    b <> a;
+                }
+                """;
+        test(expected, code);
+    }
+
+    @Test
+    void testConstantGateOr() {
+        var code = """
+                component top : a -> b {
+                    wire a, b of bit(1);
+                    b <> OR <> [a, 1'b0];
+                }
+                """;
+        var expected = """
+                component top : a -> b {
+                    wire a, b of bit(1);
+                    b <> a;
+                }
+                """;
+        test(expected, code);
+    }
+
+    @Test
+    void testConstantGateXor1() {
+        var code = """
+                component top : a -> b {
+                    wire a, b of bit(1);
+                    b <> XOR <> [a, 1'b0];
+                }
+                """;
+        var expected = """
+                component top : a -> b {
+                    wire a, b of bit(1);
+                    b <> a;
+                }
+                """;
+        test(expected, code);
+    }
+
+    @Test
+    void testConstantGateXor2() {
+        var code = """
+                component top : a -> b {
+                    wire a, b of bit(1);
+                    b <> XOR <> [a, 1'b1];
+                }
+                """;
+        var expected = """
+                component top : a -> b {
+                    wire a, b of bit(1);
+                    b <> NOT <> a;
+                }
+                """;
+        test(expected, code);
+    }
+
+    @Test
+    void testConstantGateNand() {
+        var code = """
+                component top : a -> b {
+                    wire a, b of bit(1);
+                    b <> NAND <> [a, 1'b1];
+                }
+                """;
+        var expected = """
+                component top : a -> b {
+                    wire a, b of bit(1);
+                    b <> NOT <> a;
+                }
+                """;
+        test(expected, code);
+    }
+
+    @Test
+    void testConstantGateNor() {
+        var code = """
+                component top : a -> b {
+                    wire a, b of bit(1);
+                    b <> NOR <> [a, 1'b0];
+                }
+                """;
+        var expected = """
+                component top : a -> b {
+                    wire a, b of bit(1);
+                    b <> NOT <> a;
+                }
+                """;
+        test(expected, code);
     }
 }

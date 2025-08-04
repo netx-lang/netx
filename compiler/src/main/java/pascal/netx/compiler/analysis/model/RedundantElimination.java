@@ -22,6 +22,13 @@ public final class RedundantElimination extends ModelAnalysis {
         stack.push(pack.getTop());
         while (!stack.isEmpty()) {
             ComponentScope scope = stack.pop();
+            var toRemove = scope.getChildren().stream()
+                    .map(ComponentScope.class::cast)
+                    .filter(this::isRedundant).toList();
+            for (var child : toRemove) {
+                scope.getBinding().bind(child.getBinding());
+                scope.getChildren().remove(child);
+            }
             scope.getChildren().removeIf(child -> isRedundant((ComponentScope) child));
             scope.getChildren().forEach(child -> stack.push((ComponentScope) child));
         }

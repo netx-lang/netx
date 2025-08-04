@@ -1,16 +1,18 @@
 package pascal.netx.compiler.analysis.model;
 
+import pascal.netx.compiler.elaborator.Logger;
+import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
-import pascal.netx.compiler.model.variable.Access;
-import pascal.netx.compiler.model.variable.Mutable;
-import pascal.netx.compiler.model.variable.Value;
-import pascal.netx.compiler.model.variable.Variable;
+import pascal.netx.compiler.model.variable.*;
+import pascal.netx.compiler.model.variable.selector.Selector;
 import pascal.netx.compiler.model.variable.type.BitType;
 import pascal.netx.util.collection.UnionFind;
+import pascal.netx.util.lang.BuiltinComponent;
 
 import javax.annotation.Nonnull;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -29,6 +31,9 @@ public final class AliasAnalysis extends ModelAnalysis {
     @Override
     public void analyze() {
         pack.forEachSubComponent(manager::addAliasForScope);
+        manager.resolveRepresentatives();
+        new BuiltinAnalysis().analyze();
+        manager.sourceRep.clear();
         manager.resolveRepresentatives();
         pack.forEachSubComponent(scope -> {
             scope.getBinding().releaseIf(Predicate.not(manager::needDump));
@@ -202,6 +207,230 @@ public final class AliasAnalysis extends ModelAnalysis {
                 return Objects.requireNonNullElse(sourceRep.get(result), result);
             }
             return inst;
+        }
+    }
+
+    /**
+     * This analysis extracts alias relations from built-in components.
+     * There are three cases:
+     * <li> In {@code CAST} components, the input is truncated, extended, or directly passed to the output;
+     * we explicitly add the alias relation between the output and the input (or a truncated input).
+     * <li> In {@code CONCAT} components, if there is only one input,
+     * we add an alias relation between the output and the input since there is no concatenation actually happening.
+     * <li> In {@code AND}, {@code NAND}, {@code OR}, {@code NOR}, and {@code XOR} components,
+     * we analyze the inputs and outputs to determine if they can be simplified to a direct alias
+     * (e.g., if one input is a constant high, the other input can be directly passed to the output for an AND gate).
+     * <li> In {@code TO} components, the elaborator introduces relations
+     * like {@code i <> $TO_DUMMY}. and {@code $TO_DUMMY <> o};
+     * we inline these relations to make them direct aliases {@code i <> o}.
+     */
+    public final class BuiltinAnalysis {
+        private void addBuiltinAlias(ComponentScope scope, Variable lhs, Variable rhs) {
+            manager.set.union(lhs, rhs);
+            scope.getAliases().add(new ComponentScope.Alias(lhs, rhs));
+        }
+
+        public void analyze() {
+            pack.forEachSubComponent(scope -> {
+                if (scope.isBuiltin()) {
+                    var builtinRef = BuiltinComponent.of(scope.getIdentifier());
+                    switch (builtinRef) {
+                        case CAST, UCAST -> extractFromCast(scope);
+                        case CONCAT -> extractFromConcat(scope);
+                        case OR -> extractFromOr(scope);
+                        case NOR -> extractFromNor(scope);
+                        case XOR -> extractFromXor(scope);
+                        case AND -> extractFromAnd(scope);
+                        case NAND -> extractFromNand(scope);
+                    }
+                }
+            });
+            pack.forEachSubComponent(this::inlineIndirectToAlias);
+        }
+
+        private void extractFromCast(ComponentScope scope) {
+            var lhs = scope.getOutputs().getFirst();
+            var rhs = scope.getInputs().getFirst();
+            if (!(lhs.getType() instanceof BitType(int lhsW)) || !(rhs.getType() instanceof BitType(int rhsW))) {
+                Logger.error("Unexpected type for CAST component: {} -> {}", lhs.getType(), rhs.getType());
+                throw new CompileCancellationException();
+            }
+            if (lhsW == rhsW) {
+                addBuiltinAlias(scope, lhs, rhs);
+            } else if (lhsW < rhsW) {
+                var truncated = Variable.accessOf(rhs, Selector.ofWidth(lhsW));
+                addBuiltinAlias(scope, lhs, truncated);
+                Logger.info("Truncating {} to {}", rhs, truncated);
+            }
+        }
+
+        private void extractFromConcat(ComponentScope scope) {
+            if (scope.getInputs().size() == 1) {
+                var lhs = scope.getOutputs().getFirst();
+                var rhs = scope.getInputs().getFirst();
+                addBuiltinAlias(scope, lhs, rhs);
+            }
+        }
+
+        private void extractFromAnd(ComponentScope scope) {
+            if (scope.getInputs().size() == 2) {
+                var inputA = scope.getInputs().get(0);
+                var inputB = scope.getInputs().get(1);
+
+                if (isHigh(inputA)) {
+                    setAsTo(scope, inputB);
+                } else if (isHigh(inputB)) {
+                    setAsTo(scope, inputA);
+                }
+            }
+        }
+
+        private void extractFromOr(ComponentScope scope) {
+            if (scope.getInputs().size() == 2) {
+                var inputA = scope.getInputs().get(0);
+                var inputB = scope.getInputs().get(1);
+
+                if (isLow(inputA)) {
+                    setAsTo(scope, inputB);
+                } else if (isLow(inputB)) {
+                    setAsTo(scope, inputA);
+                }
+            }
+        }
+
+        private void extractFromNand(ComponentScope scope) {
+            if (scope.getInputs().size() == 2) {
+                var inputA = scope.getInputs().get(0);
+                var inputB = scope.getInputs().get(1);
+
+                if (isHigh(inputA)) {
+                    setAsNot(scope, inputB);
+                } else if (isHigh(inputB)) {
+                    setAsNot(scope, inputA);
+                }
+            }
+        }
+
+        private void extractFromNor(ComponentScope scope) {
+            if (scope.getInputs().size() == 2) {
+                var inputA = scope.getInputs().get(0);
+                var inputB = scope.getInputs().get(1);
+
+                if (isLow(inputA)) {
+                    setAsNot(scope, inputB);
+                } else if (isLow(inputB)) {
+                    setAsNot(scope, inputA);
+                }
+            }
+        }
+
+        private void extractFromXor(ComponentScope scope) {
+            if (scope.getInputs().size() == 2) {
+                var inputA = scope.getInputs().get(0);
+                var inputB = scope.getInputs().get(1);
+
+                if (isLow(inputA)) {
+                    setAsTo(scope, inputB);
+                } else if (isHigh(inputA)) {
+                    setAsNot(scope, inputB);
+                } else if (isLow(inputB)) {
+                    setAsTo(scope, inputA);
+                } else if (isHigh(inputB)) {
+                    setAsNot(scope, inputA);
+                }
+            }
+        }
+
+        private void setAsTo(ComponentScope scope, Variable input) {
+            transformComponent(scope, BuiltinComponent.TO, input);
+            addBuiltinAlias(scope, input, scope.getOutputs().getFirst());
+        }
+
+        private void setAsNot(ComponentScope scope, Variable input) {
+            transformComponent(scope, BuiltinComponent.NOT, input);
+        }
+
+        private void transformComponent(ComponentScope scope, BuiltinComponent builtin, Variable input) {
+            scope.setInputs(new ArrayList<>(List.of(input)));
+            scope.setIdentifier(builtin.asID());
+        }
+
+        private boolean isLow(Variable variable) {
+            variable = manager.repOf(variable);
+            if (variable instanceof Value value) {
+                return switch (value) {
+                    case BooleanValue _ -> false;
+                    case Int32Value v -> v.toInt() == 0;
+                    case BitVectorValue v -> v.value().toBigInteger().equals(BigInteger.ZERO);
+                };
+            }
+            return false;
+        }
+
+        private boolean isHigh(Variable variable) {
+            variable = manager.repOf(variable);
+            if (variable instanceof Value value) {
+                return switch (value) {
+                    case BooleanValue _ -> false;
+                    case Int32Value v -> v.toInt() == 0xFFFFFFFF;
+                    case BitVectorValue v -> v.value().not().toBigInteger().equals(BigInteger.ZERO);
+                };
+            }
+            return false;
+        }
+
+        /**
+         * In TO components, there are alias relations i -> dummy and dummy -> o.
+         * This indirect alias may cause further problems, so we inline them here.
+         */
+        private void inlineIndirectToAlias(ComponentScope scope) {
+            var dummies = collectDummies(scope);
+
+            // Collect non-dummy <-> dummy relations
+            var dummyToRhs = collectNonDummies(scope, dummies, true);
+            var dummyToLhs = collectNonDummies(scope, dummies, false);
+
+            // Build direct alias for non-dummy <-> non-dummy relations
+            for (var dummy : dummies.representatives()) {
+                var lhsList = dummyToLhs.get(dummy);
+                var rhsList = dummyToRhs.get(dummy);
+                if (lhsList == null || rhsList == null) continue;
+                for (var lhs : lhsList) {
+                    for (var rhs : rhsList) {
+                        addBuiltinAlias(scope, lhs, rhs);
+                    }
+                }
+            }
+        }
+
+        // Find all dummies and group them using UnionFind
+        private UnionFind<Variable> collectDummies(ComponentScope scope) {
+            var dummies = new UnionFind<Variable>();
+            for (var alias : scope.getAliases()) {
+                boolean dummyLhs = isToDummy(alias.lhs());
+                boolean dummyRhs = isToDummy(alias.rhs());
+                if (dummyLhs) dummies.add(alias.lhs());
+                if (dummyRhs) dummies.add(alias.rhs());
+                if (dummyLhs && dummyRhs) dummies.union(alias.lhs(), alias.rhs());
+            }
+            return dummies;
+        }
+
+        private HashMap<Variable, List<Variable>> collectNonDummies(
+                ComponentScope scope, UnionFind<Variable> dummies, boolean lhsIsDummy) {
+            var dummyToOther = new HashMap<Variable, List<Variable>>();
+            for (var alias : scope.getAliases()) {
+                Variable dummy = lhsIsDummy ? alias.lhs() : alias.rhs();
+                Variable other = lhsIsDummy ? alias.rhs() : alias.lhs();
+                if (isToDummy(dummy) && !isToDummy(other)) {
+                    dummyToOther.computeIfAbsent(dummies.find(dummy), _ -> new ArrayList<>()).add(other);
+                }
+            }
+            return dummyToOther;
+        }
+
+        private boolean isToDummy(Variable var) {
+            return var instanceof Wire wire && wire.getIdentifier().name().equals("$TO_DUMMY");
         }
     }
 }

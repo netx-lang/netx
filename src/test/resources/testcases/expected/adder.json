@@ -1,5 +1,5 @@
 {
-  "totalData": 35,
+  "totalData": 34,
   "top_input": ["a", "b"],
   "top_output": ["c"],
   "design": {
@@ -27,14 +27,18 @@
               {
                 "type": "component", "id": "half_adder", "loc": "adder.nx:14:52",
                 "input": ["a@0[0]", "b@1[0]"],
-                "output": ["carry@4", "out@5"],
+                "output": [
+                  "carry@4",
+                  "c@2[0]"
+                ],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "out@5", "loc": "adder.nx:18:9"},
                   {"type": "wire", "width": 1, "id": "carry@4", "loc": "adder.nx:19:9"},
                   {
                     "type": "builtin", "id": "XOR", "loc": "adder.nx:18:18",
                     "input": ["a@0[0]", "b@1[0]"],
-                    "output": ["out@5"]
+                    "output": [
+                      "c@2[0]"
+                    ]
                   },
                   {
                     "type": "builtin", "id": "AND", "loc": "adder.nx:19:18",
@@ -45,25 +49,39 @@
               },
               {
                 "type": "component", "id": "half_adder", "loc": "adder.nx:14:36",
-                "input": ["out@5", "1'h00"],
-                "output": ["carry@6", "c@2[0]"],
+                "input": [
+                  "c@2[0]",
+                  "1'h00"
+                ],
+                "output": [
+                  "carry@5",
+                  "c@2[0]"
+                ],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@6", "loc": "adder.nx:19:9"},
                   {
-                    "type": "builtin", "id": "XOR", "loc": "adder.nx:18:18",
-                    "input": ["out@5", "1'h00"],
-                    "output": ["c@2[0]"]
+                    "type": "wire",
+                    "width": 1,
+                    "id": "carry@5",
+                    "loc": "adder.nx:19:9"
                   },
                   {
                     "type": "builtin", "id": "AND", "loc": "adder.nx:19:18",
-                    "input": ["out@5", "1'h00"],
-                    "output": ["carry@6"]
+                    "input": [
+                      "c@2[0]",
+                      "1'h00"
+                    ],
+                    "output": [
+                      "carry@5"
+                    ]
                   }
                 ]
               },
               {
                 "type": "builtin", "id": "OR", "loc": "adder.nx:14:20",
-                "input": ["carry@4", "carry@6"],
+                "input": [
+                  "carry@4",
+                  "carry@5"
+                ],
                 "output": ["cout@3"]
               }
             ]
@@ -71,350 +89,717 @@
           {
             "type": "component", "id": "full_adder", "loc": "adder.nx:7:34",
             "input": ["a@0[1]", "b@1[1]", "cout@3"],
-            "output": ["c@2[1]", "cout@7"],
+            "output": [
+              "c@2[1]",
+              "cout@6"
+            ],
             "members": [
-              {"type": "wire", "width": 1, "id": "cout@7", "loc": "adder.nx:13:25"},
+              {
+                "type": "wire",
+                "width": 1,
+                "id": "cout@6",
+                "loc": "adder.nx:13:25"
+              },
               {
                 "type": "component", "id": "half_adder", "loc": "adder.nx:14:52",
                 "input": ["a@0[1]", "b@1[1]"],
-                "output": ["carry@8", "out@9"],
+                "output": [
+                  "carry@7",
+                  "out@8"
+                ],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "out@9", "loc": "adder.nx:18:9"},
-                  {"type": "wire", "width": 1, "id": "carry@8", "loc": "adder.nx:19:9"},
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "out@8",
+                    "loc": "adder.nx:18:9"
+                  },
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "carry@7",
+                    "loc": "adder.nx:19:9"
+                  },
                   {
                     "type": "builtin", "id": "XOR", "loc": "adder.nx:18:18",
                     "input": ["a@0[1]", "b@1[1]"],
-                    "output": ["out@9"]
+                    "output": [
+                      "out@8"
+                    ]
                   },
                   {
                     "type": "builtin", "id": "AND", "loc": "adder.nx:19:18",
                     "input": ["a@0[1]", "b@1[1]"],
-                    "output": ["carry@8"]
+                    "output": [
+                      "carry@7"
+                    ]
                   }
                 ]
               },
               {
                 "type": "component", "id": "half_adder", "loc": "adder.nx:14:36",
-                "input": ["out@9", "cout@3"],
-                "output": ["carry@10", "c@2[1]"],
+                "input": [
+                  "out@8",
+                  "cout@3"
+                ],
+                "output": [
+                  "carry@9",
+                  "c@2[1]"
+                ],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@10", "loc": "adder.nx:19:9"},
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "carry@9",
+                    "loc": "adder.nx:19:9"
+                  },
                   {
                     "type": "builtin", "id": "XOR", "loc": "adder.nx:18:18",
-                    "input": ["out@9", "cout@3"],
+                    "input": [
+                      "out@8",
+                      "cout@3"
+                    ],
                     "output": ["c@2[1]"]
                   },
                   {
                     "type": "builtin", "id": "AND", "loc": "adder.nx:19:18",
-                    "input": ["out@9", "cout@3"],
-                    "output": ["carry@10"]
+                    "input": [
+                      "out@8",
+                      "cout@3"
+                    ],
+                    "output": [
+                      "carry@9"
+                    ]
                   }
                 ]
               },
               {
                 "type": "builtin", "id": "OR", "loc": "adder.nx:14:20",
-                "input": ["carry@8", "carry@10"],
-                "output": ["cout@7"]
+                "input": [
+                  "carry@7",
+                  "carry@9"
+                ],
+                "output": [
+                  "cout@6"
+                ]
               }
             ]
           },
           {
             "type": "component", "id": "full_adder", "loc": "adder.nx:7:34",
-            "input": ["a@0[2]", "b@1[2]", "cout@7"],
-            "output": ["c@2[2]", "cout@11"],
+            "input": [
+              "a@0[2]",
+              "b@1[2]",
+              "cout@6"
+            ],
+            "output": [
+              "c@2[2]",
+              "cout@10"
+            ],
             "members": [
-              {"type": "wire", "width": 1, "id": "cout@11", "loc": "adder.nx:13:25"},
+              {
+                "type": "wire",
+                "width": 1,
+                "id": "cout@10",
+                "loc": "adder.nx:13:25"
+              },
               {
                 "type": "component", "id": "half_adder", "loc": "adder.nx:14:52",
                 "input": ["a@0[2]", "b@1[2]"],
-                "output": ["carry@12", "out@13"],
+                "output": [
+                  "carry@11",
+                  "out@12"
+                ],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "out@13", "loc": "adder.nx:18:9"},
-                  {"type": "wire", "width": 1, "id": "carry@12", "loc": "adder.nx:19:9"},
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "out@12",
+                    "loc": "adder.nx:18:9"
+                  },
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "carry@11",
+                    "loc": "adder.nx:19:9"
+                  },
                   {
                     "type": "builtin", "id": "XOR", "loc": "adder.nx:18:18",
                     "input": ["a@0[2]", "b@1[2]"],
-                    "output": ["out@13"]
+                    "output": [
+                      "out@12"
+                    ]
                   },
                   {
                     "type": "builtin", "id": "AND", "loc": "adder.nx:19:18",
                     "input": ["a@0[2]", "b@1[2]"],
-                    "output": ["carry@12"]
+                    "output": [
+                      "carry@11"
+                    ]
                   }
                 ]
               },
               {
                 "type": "component", "id": "half_adder", "loc": "adder.nx:14:36",
-                "input": ["out@13", "cout@7"],
-                "output": ["carry@14", "c@2[2]"],
+                "input": [
+                  "out@12",
+                  "cout@6"
+                ],
+                "output": [
+                  "carry@13",
+                  "c@2[2]"
+                ],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@14", "loc": "adder.nx:19:9"},
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "carry@13",
+                    "loc": "adder.nx:19:9"
+                  },
                   {
                     "type": "builtin", "id": "XOR", "loc": "adder.nx:18:18",
-                    "input": ["out@13", "cout@7"],
+                    "input": [
+                      "out@12",
+                      "cout@6"
+                    ],
                     "output": ["c@2[2]"]
                   },
                   {
                     "type": "builtin", "id": "AND", "loc": "adder.nx:19:18",
-                    "input": ["out@13", "cout@7"],
-                    "output": ["carry@14"]
+                    "input": [
+                      "out@12",
+                      "cout@6"
+                    ],
+                    "output": [
+                      "carry@13"
+                    ]
                   }
                 ]
               },
               {
                 "type": "builtin", "id": "OR", "loc": "adder.nx:14:20",
-                "input": ["carry@12", "carry@14"],
-                "output": ["cout@11"]
+                "input": [
+                  "carry@11",
+                  "carry@13"
+                ],
+                "output": [
+                  "cout@10"
+                ]
               }
             ]
           },
           {
             "type": "component", "id": "full_adder", "loc": "adder.nx:7:34",
-            "input": ["a@0[3]", "b@1[3]", "cout@11"],
-            "output": ["c@2[3]", "cout@15"],
+            "input": [
+              "a@0[3]",
+              "b@1[3]",
+              "cout@10"
+            ],
+            "output": [
+              "c@2[3]",
+              "cout@14"
+            ],
             "members": [
-              {"type": "wire", "width": 1, "id": "cout@15", "loc": "adder.nx:13:25"},
+              {
+                "type": "wire",
+                "width": 1,
+                "id": "cout@14",
+                "loc": "adder.nx:13:25"
+              },
               {
                 "type": "component", "id": "half_adder", "loc": "adder.nx:14:52",
                 "input": ["a@0[3]", "b@1[3]"],
-                "output": ["carry@16", "out@17"],
+                "output": [
+                  "carry@15",
+                  "out@16"
+                ],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "out@17", "loc": "adder.nx:18:9"},
-                  {"type": "wire", "width": 1, "id": "carry@16", "loc": "adder.nx:19:9"},
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "out@16",
+                    "loc": "adder.nx:18:9"
+                  },
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "carry@15",
+                    "loc": "adder.nx:19:9"
+                  },
                   {
                     "type": "builtin", "id": "XOR", "loc": "adder.nx:18:18",
                     "input": ["a@0[3]", "b@1[3]"],
-                    "output": ["out@17"]
+                    "output": [
+                      "out@16"
+                    ]
                   },
                   {
                     "type": "builtin", "id": "AND", "loc": "adder.nx:19:18",
                     "input": ["a@0[3]", "b@1[3]"],
-                    "output": ["carry@16"]
+                    "output": [
+                      "carry@15"
+                    ]
                   }
                 ]
               },
               {
                 "type": "component", "id": "half_adder", "loc": "adder.nx:14:36",
-                "input": ["out@17", "cout@11"],
-                "output": ["carry@18", "c@2[3]"],
+                "input": [
+                  "out@16",
+                  "cout@10"
+                ],
+                "output": [
+                  "carry@17",
+                  "c@2[3]"
+                ],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@18", "loc": "adder.nx:19:9"},
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "carry@17",
+                    "loc": "adder.nx:19:9"
+                  },
                   {
                     "type": "builtin", "id": "XOR", "loc": "adder.nx:18:18",
-                    "input": ["out@17", "cout@11"],
+                    "input": [
+                      "out@16",
+                      "cout@10"
+                    ],
                     "output": ["c@2[3]"]
                   },
                   {
                     "type": "builtin", "id": "AND", "loc": "adder.nx:19:18",
-                    "input": ["out@17", "cout@11"],
-                    "output": ["carry@18"]
+                    "input": [
+                      "out@16",
+                      "cout@10"
+                    ],
+                    "output": [
+                      "carry@17"
+                    ]
                   }
                 ]
               },
               {
                 "type": "builtin", "id": "OR", "loc": "adder.nx:14:20",
-                "input": ["carry@16", "carry@18"],
-                "output": ["cout@15"]
+                "input": [
+                  "carry@15",
+                  "carry@17"
+                ],
+                "output": [
+                  "cout@14"
+                ]
               }
             ]
           },
           {
             "type": "component", "id": "full_adder", "loc": "adder.nx:7:34",
-            "input": ["a@0[4]", "b@1[4]", "cout@15"],
-            "output": ["c@2[4]", "cout@19"],
+            "input": [
+              "a@0[4]",
+              "b@1[4]",
+              "cout@14"
+            ],
+            "output": [
+              "c@2[4]",
+              "cout@18"
+            ],
             "members": [
-              {"type": "wire", "width": 1, "id": "cout@19", "loc": "adder.nx:13:25"},
+              {
+                "type": "wire",
+                "width": 1,
+                "id": "cout@18",
+                "loc": "adder.nx:13:25"
+              },
               {
                 "type": "component", "id": "half_adder", "loc": "adder.nx:14:52",
                 "input": ["a@0[4]", "b@1[4]"],
-                "output": ["carry@20", "out@21"],
+                "output": [
+                  "carry@19",
+                  "out@20"
+                ],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "out@21", "loc": "adder.nx:18:9"},
-                  {"type": "wire", "width": 1, "id": "carry@20", "loc": "adder.nx:19:9"},
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "out@20",
+                    "loc": "adder.nx:18:9"
+                  },
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "carry@19",
+                    "loc": "adder.nx:19:9"
+                  },
                   {
                     "type": "builtin", "id": "XOR", "loc": "adder.nx:18:18",
                     "input": ["a@0[4]", "b@1[4]"],
-                    "output": ["out@21"]
+                    "output": [
+                      "out@20"
+                    ]
                   },
                   {
                     "type": "builtin", "id": "AND", "loc": "adder.nx:19:18",
                     "input": ["a@0[4]", "b@1[4]"],
-                    "output": ["carry@20"]
+                    "output": [
+                      "carry@19"
+                    ]
                   }
                 ]
               },
               {
                 "type": "component", "id": "half_adder", "loc": "adder.nx:14:36",
-                "input": ["out@21", "cout@15"],
-                "output": ["carry@22", "c@2[4]"],
+                "input": [
+                  "out@20",
+                  "cout@14"
+                ],
+                "output": [
+                  "carry@21",
+                  "c@2[4]"
+                ],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@22", "loc": "adder.nx:19:9"},
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "carry@21",
+                    "loc": "adder.nx:19:9"
+                  },
                   {
                     "type": "builtin", "id": "XOR", "loc": "adder.nx:18:18",
-                    "input": ["out@21", "cout@15"],
+                    "input": [
+                      "out@20",
+                      "cout@14"
+                    ],
                     "output": ["c@2[4]"]
                   },
                   {
                     "type": "builtin", "id": "AND", "loc": "adder.nx:19:18",
-                    "input": ["out@21", "cout@15"],
-                    "output": ["carry@22"]
+                    "input": [
+                      "out@20",
+                      "cout@14"
+                    ],
+                    "output": [
+                      "carry@21"
+                    ]
                   }
                 ]
               },
               {
                 "type": "builtin", "id": "OR", "loc": "adder.nx:14:20",
-                "input": ["carry@20", "carry@22"],
-                "output": ["cout@19"]
+                "input": [
+                  "carry@19",
+                  "carry@21"
+                ],
+                "output": [
+                  "cout@18"
+                ]
               }
             ]
           },
           {
             "type": "component", "id": "full_adder", "loc": "adder.nx:7:34",
-            "input": ["a@0[5]", "b@1[5]", "cout@19"],
-            "output": ["c@2[5]", "cout@23"],
+            "input": [
+              "a@0[5]",
+              "b@1[5]",
+              "cout@18"
+            ],
+            "output": [
+              "c@2[5]",
+              "cout@22"
+            ],
             "members": [
-              {"type": "wire", "width": 1, "id": "cout@23", "loc": "adder.nx:13:25"},
+              {
+                "type": "wire",
+                "width": 1,
+                "id": "cout@22",
+                "loc": "adder.nx:13:25"
+              },
               {
                 "type": "component", "id": "half_adder", "loc": "adder.nx:14:52",
                 "input": ["a@0[5]", "b@1[5]"],
-                "output": ["carry@24", "out@25"],
+                "output": [
+                  "carry@23",
+                  "out@24"
+                ],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "out@25", "loc": "adder.nx:18:9"},
-                  {"type": "wire", "width": 1, "id": "carry@24", "loc": "adder.nx:19:9"},
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "out@24",
+                    "loc": "adder.nx:18:9"
+                  },
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "carry@23",
+                    "loc": "adder.nx:19:9"
+                  },
                   {
                     "type": "builtin", "id": "XOR", "loc": "adder.nx:18:18",
                     "input": ["a@0[5]", "b@1[5]"],
-                    "output": ["out@25"]
+                    "output": [
+                      "out@24"
+                    ]
                   },
                   {
                     "type": "builtin", "id": "AND", "loc": "adder.nx:19:18",
                     "input": ["a@0[5]", "b@1[5]"],
-                    "output": ["carry@24"]
+                    "output": [
+                      "carry@23"
+                    ]
                   }
                 ]
               },
               {
                 "type": "component", "id": "half_adder", "loc": "adder.nx:14:36",
-                "input": ["out@25", "cout@19"],
-                "output": ["carry@26", "c@2[5]"],
+                "input": [
+                  "out@24",
+                  "cout@18"
+                ],
+                "output": [
+                  "carry@25",
+                  "c@2[5]"
+                ],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@26", "loc": "adder.nx:19:9"},
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "carry@25",
+                    "loc": "adder.nx:19:9"
+                  },
                   {
                     "type": "builtin", "id": "XOR", "loc": "adder.nx:18:18",
-                    "input": ["out@25", "cout@19"],
+                    "input": [
+                      "out@24",
+                      "cout@18"
+                    ],
                     "output": ["c@2[5]"]
                   },
                   {
                     "type": "builtin", "id": "AND", "loc": "adder.nx:19:18",
-                    "input": ["out@25", "cout@19"],
-                    "output": ["carry@26"]
+                    "input": [
+                      "out@24",
+                      "cout@18"
+                    ],
+                    "output": [
+                      "carry@25"
+                    ]
                   }
                 ]
               },
               {
                 "type": "builtin", "id": "OR", "loc": "adder.nx:14:20",
-                "input": ["carry@24", "carry@26"],
-                "output": ["cout@23"]
+                "input": [
+                  "carry@23",
+                  "carry@25"
+                ],
+                "output": [
+                  "cout@22"
+                ]
               }
             ]
           },
           {
             "type": "component", "id": "full_adder", "loc": "adder.nx:7:34",
-            "input": ["a@0[6]", "b@1[6]", "cout@23"],
-            "output": ["c@2[6]", "cout@27"],
+            "input": [
+              "a@0[6]",
+              "b@1[6]",
+              "cout@22"
+            ],
+            "output": [
+              "c@2[6]",
+              "cout@26"
+            ],
             "members": [
-              {"type": "wire", "width": 1, "id": "cout@27", "loc": "adder.nx:13:25"},
+              {
+                "type": "wire",
+                "width": 1,
+                "id": "cout@26",
+                "loc": "adder.nx:13:25"
+              },
               {
                 "type": "component", "id": "half_adder", "loc": "adder.nx:14:52",
                 "input": ["a@0[6]", "b@1[6]"],
-                "output": ["carry@28", "out@29"],
+                "output": [
+                  "carry@27",
+                  "out@28"
+                ],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "out@29", "loc": "adder.nx:18:9"},
-                  {"type": "wire", "width": 1, "id": "carry@28", "loc": "adder.nx:19:9"},
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "out@28",
+                    "loc": "adder.nx:18:9"
+                  },
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "carry@27",
+                    "loc": "adder.nx:19:9"
+                  },
                   {
                     "type": "builtin", "id": "XOR", "loc": "adder.nx:18:18",
                     "input": ["a@0[6]", "b@1[6]"],
-                    "output": ["out@29"]
+                    "output": [
+                      "out@28"
+                    ]
                   },
                   {
                     "type": "builtin", "id": "AND", "loc": "adder.nx:19:18",
                     "input": ["a@0[6]", "b@1[6]"],
-                    "output": ["carry@28"]
+                    "output": [
+                      "carry@27"
+                    ]
                   }
                 ]
               },
               {
                 "type": "component", "id": "half_adder", "loc": "adder.nx:14:36",
-                "input": ["out@29", "cout@23"],
-                "output": ["carry@30", "c@2[6]"],
+                "input": [
+                  "out@28",
+                  "cout@22"
+                ],
+                "output": [
+                  "carry@29",
+                  "c@2[6]"
+                ],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@30", "loc": "adder.nx:19:9"},
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "carry@29",
+                    "loc": "adder.nx:19:9"
+                  },
                   {
                     "type": "builtin", "id": "XOR", "loc": "adder.nx:18:18",
-                    "input": ["out@29", "cout@23"],
+                    "input": [
+                      "out@28",
+                      "cout@22"
+                    ],
                     "output": ["c@2[6]"]
                   },
                   {
                     "type": "builtin", "id": "AND", "loc": "adder.nx:19:18",
-                    "input": ["out@29", "cout@23"],
-                    "output": ["carry@30"]
+                    "input": [
+                      "out@28",
+                      "cout@22"
+                    ],
+                    "output": [
+                      "carry@29"
+                    ]
                   }
                 ]
               },
               {
                 "type": "builtin", "id": "OR", "loc": "adder.nx:14:20",
-                "input": ["carry@28", "carry@30"],
-                "output": ["cout@27"]
+                "input": [
+                  "carry@27",
+                  "carry@29"
+                ],
+                "output": [
+                  "cout@26"
+                ]
               }
             ]
           },
           {
             "type": "component", "id": "full_adder", "loc": "adder.nx:7:34",
-            "input": ["a@0[7]", "b@1[7]", "cout@27"],
-            "output": ["c@2[7]", "cout@31"],
+            "input": [
+              "a@0[7]",
+              "b@1[7]",
+              "cout@26"
+            ],
+            "output": [
+              "c@2[7]",
+              "cout@30"
+            ],
             "members": [
-              {"type": "wire", "width": 1, "id": "cout@31", "loc": "adder.nx:13:25"},
+              {
+                "type": "wire",
+                "width": 1,
+                "id": "cout@30",
+                "loc": "adder.nx:13:25"
+              },
               {
                 "type": "component", "id": "half_adder", "loc": "adder.nx:14:52",
                 "input": ["a@0[7]", "b@1[7]"],
-                "output": ["carry@32", "out@33"],
+                "output": [
+                  "carry@31",
+                  "out@32"
+                ],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "out@33", "loc": "adder.nx:18:9"},
-                  {"type": "wire", "width": 1, "id": "carry@32", "loc": "adder.nx:19:9"},
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "out@32",
+                    "loc": "adder.nx:18:9"
+                  },
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "carry@31",
+                    "loc": "adder.nx:19:9"
+                  },
                   {
                     "type": "builtin", "id": "XOR", "loc": "adder.nx:18:18",
                     "input": ["a@0[7]", "b@1[7]"],
-                    "output": ["out@33"]
+                    "output": [
+                      "out@32"
+                    ]
                   },
                   {
                     "type": "builtin", "id": "AND", "loc": "adder.nx:19:18",
                     "input": ["a@0[7]", "b@1[7]"],
-                    "output": ["carry@32"]
+                    "output": [
+                      "carry@31"
+                    ]
                   }
                 ]
               },
               {
                 "type": "component", "id": "half_adder", "loc": "adder.nx:14:36",
-                "input": ["out@33", "cout@27"],
-                "output": ["carry@34", "c@2[7]"],
+                "input": [
+                  "out@32",
+                  "cout@26"
+                ],
+                "output": [
+                  "carry@33",
+                  "c@2[7]"
+                ],
                 "members": [
-                  {"type": "wire", "width": 1, "id": "carry@34", "loc": "adder.nx:19:9"},
+                  {
+                    "type": "wire",
+                    "width": 1,
+                    "id": "carry@33",
+                    "loc": "adder.nx:19:9"
+                  },
                   {
                     "type": "builtin", "id": "XOR", "loc": "adder.nx:18:18",
-                    "input": ["out@33", "cout@27"],
+                    "input": [
+                      "out@32",
+                      "cout@26"
+                    ],
                     "output": ["c@2[7]"]
                   },
                   {
                     "type": "builtin", "id": "AND", "loc": "adder.nx:19:18",
-                    "input": ["out@33", "cout@27"],
-                    "output": ["carry@34"]
+                    "input": [
+                      "out@32",
+                      "cout@26"
+                    ],
+                    "output": [
+                      "carry@33"
+                    ]
                   }
                 ]
               },
               {
                 "type": "builtin", "id": "OR", "loc": "adder.nx:14:20",
-                "input": ["carry@32", "carry@34"],
-                "output": ["cout@31"]
+                "input": [
+                  "carry@31",
+                  "carry@33"
+                ],
+                "output": [
+                  "cout@30"
+                ]
               }
             ]
           }
