@@ -80,7 +80,10 @@ public final class DuplicatedElimination extends ModelAnalysis {
                     }
                 }
             }
-            scope.getChildren().removeAll(toRemove);
+            for (var child : toRemove) {
+                scope.getBinding().bind(child.getBinding());
+                scope.getChildren().remove(child);
+            }
         }
 
         public void resolveRepresentatives() {
