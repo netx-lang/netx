@@ -1,6 +1,7 @@
 plugins {
     `shared-build-conventions`
     application
+    distribution
 }
 
 dependencies {
@@ -22,18 +23,11 @@ tasks.compileJava {
 }
 
 tasks.jar {
-    dependsOn(":util:jar")
-    dependsOn(":backend:jar")
-    dependsOn(":compiler:jar")
     manifest {
         attributes(
             "Main-Class" to "pascal.netx.Main",
             "Multi-Release" to "true"
         )
-    }
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) }) {
-        exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
     }
 }
 
@@ -45,22 +39,23 @@ tasks.register("configureCMake", Exec::class) {
     description = "Configures the C++ project using CMake."
     workingDir = cppBuildDir
     commandLine = listOf(
-        "cmake",
-        cmakeSourceDir.absolutePath,
-        "-DCMAKE_BUILD_TYPE=Release",
-        "-DBUILD_TESTS=OFF"
+        "cmake", cmakeSourceDir.absolutePath, "-DCMAKE_BUILD_TYPE=Release"
     )
     doFirst {
         cppBuildDir.mkdirs()
     }
+    outputs.dir(cppBuildDir)
+    inputs.dir(cmakeSourceDir)
 }
 
 tasks.register("buildCMake", Exec::class) {
     group = "build"
     description = "Builds the C++ project using CMake."
     workingDir = cppBuildDir
-    commandLine = listOf("cmake", "--build", ".", "--config", "Release")
+    commandLine = listOf("cmake", "--build", ".", "--config", "Release", "-j")
     dependsOn("configureCMake")
+    inputs.dir(cmakeSourceDir)
+    outputs.dir("$cppBuildDir/src")
 }
 
 tasks.register("cleanCMake", Exec::class) {
@@ -68,12 +63,9 @@ tasks.register("cleanCMake", Exec::class) {
     description = "Cleans the C++ build directory."
     workingDir = cppBuildDir
     commandLine = listOf("cmake", "--build", ".", "--target", "clean")
+    onlyIf { cppBuildDir.exists() }
 }
 
 tasks.clean {
     dependsOn("cleanCMake")
-}
-
-tasks.build {
-    dependsOn("buildCMake")
 }
