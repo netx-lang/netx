@@ -26,17 +26,37 @@ Alternatively, you can install it using a package manager like vcpkg or your sys
 
 You can download KaHiP from its [GitHub repository](https://github.com/KaHIP/KaHIP) and follow the instructions to build it. Make sure to put the built library in your library path or use `cmake --install build/` to install it to the default location.
 
-### Build
-To build the project, run the following command from the root directory:
-```bash
-./gradlew build
-```
-This will build the Java components and the C++ simulator.
-
 ### Installation
-After a successful build, you can install the `nx` command-line tool by running the installation script. This will install the tool to `/usr/local/bin`:
+
+To install NetX, use the cross-platform installation script:
+
 ```bash
-sudo ./install.sh
+# Install to default location (~/.local/netx)
+./install.sh
+
+# Install to custom location (Make sure you have write permissions to the directory)
+INSTALL_PREFIX=/opt/netx ./install.sh
+INSTALL_PREFIX=/usr/local ./install.sh
+```
+
+The installation script will build the NetX toolchain and install it to the specified location. By default, it installs
+to `~/.local/netx`. Also, the script will automatically configure your environment variables to your shell configuration
+file (`.bashrc`, `.zshrc`, `config.fish`, etc.), so you can use the `nx` command directly after installation, including:
+
+- `PATH` - for the `nx` and `nxsim` command
+- `CPLUS_INCLUDE_PATH` and `C_INCLUDE_PATH` - for C++ compiler include paths
+- `LIBRARY_PATH` - for linker library search paths
+- `LD_LIBRARY_PATH` - for runtime library loading
+
+After installation, either restart your terminal or run:
+```bash
+source ~/.bashrc  # or ~/.zshrc, depending on your shell
+```
+
+To uninstall NetX completely (including automatic cleanup of environment variables):
+
+```bash
+./uninstall.sh
 ```
 
 ## Usage
@@ -69,7 +89,7 @@ Here, we have the following subcommands:
     -o, --output=<output>   output file
     -t, --top=<top>         name of the top component
   ```
-  
+
 - `dump` dumps the NetX source code to Verilog. We will support more output formats in the future.
 
     ```shell
@@ -82,7 +102,7 @@ Here, we have the following subcommands:
       -t, --top=<top>         name of the top component
     ```
 
-- `visualize` visualizes the NetX source code. 
+- `visualize` visualizes the NetX source code.
 
   ```shell
   Usage: NetX visualize [-d=<depth>] [-o=<output>] [-t=<top>] [-a=<args>...]...
@@ -128,10 +148,32 @@ std = { version = "0.1.0", git = "git@github.com:pascal-lab/NetX-std.git" }
 The package manager will automatically download the package from the specified Git repository, resolve its dependencies, and make it available for compilation.
 
 ### Simulation
+
+#### Interactive Simulation
+
 The NetX simulator supports interactive simulation using the `nxsim` command, given the compiled JSON hardware representation (NXON).
 
 ```bash
 nx compile my_design.nx --minimal | nxsim
 ```
 
-You can also use the nxsim library to build your own simulation testbench. Check the testbenches in the [NetX standard library](https://github.com/pascal-lab/NetX-std) for examples. More examples can be found in [NetX-FFT](https://github.com/naiiren/NetX-FFT) and [NetX-RISC-V](https://github.com/naiiren/NetX-RISC-V).
+#### Using Nxsim Library
+
+You can also use the `nxsim` library to build your own simulation testbench. The library provides a C++ API to interact
+with the compiled NetX design, allowing you to simulate and test your designs programmatically.
+
+Include the following header files to use the `nxsim` library in your C++ testbench:
+
+```cpp
+#include <nxsim/circuit.h>
+#include <nxsim/circuit_parser.h>
+```
+
+During compilation, remember the flags
+
+- `-lnxsim` to link against the `nxsim` library
+- `-flto` to enable link-time optimization
+
+Check the testbenches in the [NetX standard library](https://github.com/pascal-lab/NetX-std) for examples. More examples
+can be found in [NetX-FFT](https://github.com/naiiren/NetX-FFT)
+and [NetX-RISC-V](https://github.com/naiiren/NetX-RISC-V).
