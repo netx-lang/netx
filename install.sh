@@ -264,7 +264,6 @@ else
     echo "To use NetX immediately, either:"
     echo "  1. Restart your terminal/shell"
     echo "  2. Run: source $(detect_shell_config)"
-    echo "  3. Or run directly: $BIN_DIR/nx [arguments]"
 fi
 
 echo
@@ -277,7 +276,6 @@ echo "To uninstall, run: ./uninstall.sh"
 if [ "$PLATFORM" != "windows" ]; then
     echo "For C++ development:"
     echo "  - Headers and libraries are automatically configured via environment variables"
-    echo "  - You can now simply use: g++ myfile.cpp -lnxsim"
-    echo "  - Or explicitly: g++ -I\"$INSTALL_DIR/include\" -L\"$INSTALL_DIR/lib\" -lnxsim myfile.cpp"
+    echo "  - You can now simply use: g++ myfile.cpp -flto -lnxsim"
     echo
 fi
