@@ -7,7 +7,8 @@ The NetX toolchain includes a compiler, a package manager, a simulator, and a vi
 ## Build and Installation
 
 ### Prerequisites
-- Java Development Kit (JDK) 23 or later
+
+- Java Development Kit (JDK) 21 or later
 - CMake 3.28 or later
 - Boost 1.80 or later
 - A C++23 compatible compiler.

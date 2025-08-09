@@ -16,6 +16,7 @@ dependencies {
 application {
     applicationName = "nx"
     mainClass.set("pascal.netx.Main")
+    applicationDefaultJvmArgs = listOf("--enable-preview")
 }
 
 tasks.compileJava {
