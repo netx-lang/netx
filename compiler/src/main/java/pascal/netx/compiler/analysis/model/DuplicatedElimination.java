@@ -3,6 +3,7 @@ package pascal.netx.compiler.analysis.model;
 import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
+import pascal.netx.compiler.model.variable.Access;
 import pascal.netx.compiler.model.variable.Mutable;
 import pascal.netx.compiler.model.variable.Value;
 import pascal.netx.compiler.model.variable.Variable;
@@ -10,6 +11,7 @@ import pascal.netx.util.collection.UnionFind;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -156,11 +158,30 @@ public final class DuplicatedElimination extends ModelAnalysis {
             return false;
         }
 
-        public Variable repOf(Variable variable) {
-            if (set.contains(variable)) {
-                return rep.get(set.find(variable));
+        // FIXME: duplicated to AliasManager::repOf
+        @Nonnull
+        Variable repOf(Variable inst) {
+            while (true) {
+                var next = getNextRep(inst);
+                if (next == inst) {
+                    return inst;
+                }
+                inst = next;
             }
-            return variable;
+        }
+
+        @Nonnull
+        Variable getNextRep(Variable inst) {
+            if (inst instanceof Access(var base, var selector)) {
+                var baseRep = repOf(base);
+                if (baseRep != base) {
+                    return Variable.accessOf(baseRep, selector);
+                }
+            }
+            if (set.contains(inst)) {
+                return rep.get(set.find(inst));
+            }
+            return inst;
         }
     }
 }
