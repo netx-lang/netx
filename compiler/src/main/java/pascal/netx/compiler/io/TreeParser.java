@@ -273,6 +273,7 @@ public final class TreeParser {
             case FieldExprContext sub -> parseFieldExpr(sub);
             case SymbolExprContext sub -> parseSymbolExpr(sub);
             case NumberExprContext sub -> parseNumberExpr(sub);
+            case StringExprContext sub -> parseStringExpr(sub);
             case AccessExprContext sub -> parseAccessExpr(sub);
             case BinaryExprContext sub -> parseBinaryExpr(sub);
             case PortExprContext sub -> parsePortExpr(sub);
@@ -362,6 +363,11 @@ public final class TreeParser {
 
     NumberExpr parseNumberExpr(NumberExprContext ctx) {
         return parseNumber(ctx.number());
+    }
+
+    StringExpr parseStringExpr(StringExprContext ctx) {
+        var literal = ctx.STRING().getText();
+        return StringExpr.of(literal.substring(1, literal.length() - 1)).setSourceLoc(locationOf(ctx.getStart()));
     }
 
     private NumberExpr parseNumber(NumberContext n) {

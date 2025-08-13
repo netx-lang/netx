@@ -170,6 +170,14 @@ public interface ASTListener {
         exitDefault(node);
     }
 
+    default void enter(StringExpr node) {
+        enterDefault(node);
+    }
+
+    default void exit(StringExpr node) {
+        exitDefault(node);
+    }
+
     default void enter(UnaryExpr node) {
         enterDefault(node);
     }

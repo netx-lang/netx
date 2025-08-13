@@ -80,6 +80,7 @@ declaration_symbol
 
 expression
     : symbol                                                          # SymbolExpr
+    | STRING                                                          # StringExpr
     | number                                                          # NumberExpr
     | '[' list ']'                                                    # ListExpr
     | expression (selector)+                                          # AccessExpr
@@ -160,6 +161,7 @@ number
     ;
 
 BOOLEAN : 'true' | 'false';
+STRING : '"' (~["\\] | '\\' .)* '"';
 
 BIN_NUMBER : UNSIGNED_INTEGER '\'' [bB] [01] [01_]*;
 HEX_NUMBER : UNSIGNED_INTEGER '\'' [hH] [0-9a-fA-F] [0-9a-fA-F_]*;

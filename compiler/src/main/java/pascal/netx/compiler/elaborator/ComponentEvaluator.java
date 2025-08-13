@@ -174,6 +174,7 @@ public final class ComponentEvaluator {
             case AccessExpr sub -> evaluateAccessExpr(sub);
             case BinaryExpr sub -> evaluateBinaryExpr(sub);
             case NumberExpr sub -> evaluateNumberExpr(sub);
+            case StringExpr sub -> evaluateStringExpr(sub);
             case SymbolExpr sub -> evaluateSymbolExpr(sub);
             case PortConnectionExpr sub -> evaluatePortExpr(sub);
             case ConditionalExpr sub -> evaluateConditionalExpr(sub);
@@ -312,6 +313,10 @@ public final class ComponentEvaluator {
             case BoolNumber boolNumber -> BooleanValue.of(boolNumber.getValue());
             case IntNumber intNumber -> Int32Value.of(intNumber.getValue());
         };
+    }
+
+    private Entity evaluateStringExpr(StringExpr expr) {
+        return StringLiteral.of(expr.getSourceLoc(), expr.getValue());
     }
 
     private Entity evaluateUnaryExpr(UnaryExpr expr) {
