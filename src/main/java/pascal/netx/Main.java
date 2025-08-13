@@ -1,5 +1,6 @@
 package pascal.netx;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import pascal.netx.backend.graphviz.DotTransformer;
 import pascal.netx.backend.verilog.VerilogTransformer;
@@ -9,25 +10,33 @@ import pascal.netx.util.print.NotepadWriter;
 import picocli.CommandLine;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 public class Main {
-    public static void main(String[] args) {
-        int exitCode = new CommandLine(new NetXApp())
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    static void main(String[] args) {
+        var cmd = new CommandLine(new NetXApp())
                 .addSubcommand("compile", new CompileCommand())
-                .addSubcommand("dump", new DumpCommand())
-                .addSubcommand("visualize", new VisualizeCommand())
-                .execute(args);
+                .addSubcommand("dump", new DumpCommand());
+        int exitCode = cmd.execute(args);
         System.exit(exitCode);
+    }
+
+    @FunctionalInterface
+    interface CommandExecution {
+        void execute() throws Exception;
     }
 
     @CommandLine.Command(
             name = "NetX",
             description = "Main CLI for the NetX tool",
-            mixinStandardHelpOptions = true, // Adds --help and --version options
-            version = "NetX CLI 1.0"
+            mixinStandardHelpOptions = true,
+            usageHelpAutoWidth = true,
+            version = "NetX CLI 0.1.0"
     )
     static class NetXApp implements Callable<Integer> {
         @CommandLine.Spec
@@ -63,110 +72,126 @@ public class Main {
         @CommandLine.Option(
                 names = {"-a", "--args"},
                 arity = "1..*",
-                description = "arguments to pass to the top component, " +
-                        "in the form of --args a=true b=2 c=2'b01"
+                description = "arguments to pass to the top component (e.g., --args a=true b=2 c=2'b01)"
         )
         protected List<String> args;
 
-        protected Configuration.Builder setupConfiguration() {
-            var builder = Configuration.builder();
-            builder.withTop(top);
+        protected Configuration buildConfiguration() {
+            var builder = Configuration.builder().withTop(top);
             if (args != null) {
                 builder.withArgs(args);
             }
-            return builder;
+            return builder.build();
         }
 
-        protected NotepadWriter notepadWriterFor(Path output) throws IOException {
-            NotepadWriter writer;
-            if (output == null) {
-                writer = NotepadWriter.stdOut();
-            } else {
-                writer = NotepadWriter.pathOut(output.toAbsolutePath().normalize());
+        protected NotepadWriter notePad() throws IOException {
+            return output == null ?
+                    NotepadWriter.stdOut() :
+                    NotepadWriter.pathOut(output.toAbsolutePath().normalize());
+        }
+
+        protected int handleExecution(CommandExecution execution) {
+            try {
+                execution.execute();
+                return 0;
+            } catch (Exception e) {
+                System.err.println(e.getClass().getName());
+                return 1;
             }
-            return writer;
+        }
+
+        protected JsonNode getSourceNode() throws IOException {
+            var path = source.toAbsolutePath().normalize();
+            var fileName = path.getFileName().toString();
+            var extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+            if (extension.equals("json")) {
+                return OBJECT_MAPPER.readTree(Files.readString(path));
+            } else {
+                var builder = NXBuilder.from(buildConfiguration());
+                return builder.loadPath(path).compileAndDump();
+            }
         }
     }
 
     @CommandLine.Command(
             name = "compile",
-            description = "Compile the NetX source code into JSON"
+            usageHelpAutoWidth = true,
+            description = "Compile the NetX source code into NXON representation"
     )
-    static class CompileCommand extends BaseCommand {
+    static final class CompileCommand extends BaseCommand {
         @CommandLine.Option(
                 names = {"-m", "--minimal"},
-                description = "print the JSON in a single line without formatting",
+                description = "output NXON in a single line without formatting",
                 defaultValue = "false"
         )
         private boolean minimal;
 
         @Override
         public Integer call() {
-            try {
-                var builder = NXBuilder.from(buildConfig());
+            return handleExecution(() -> {
+                var builder = NXBuilder.from(buildConfiguration());
                 var node = builder.loadPath(source).compileAndDump();
+
                 if (minimal) {
-                    var mapper = new ObjectMapper();
                     if (output == null) {
-                        mapper.writeValue(System.out, node);
+                        OBJECT_MAPPER.writeValue(System.out, node);
                     } else {
-                        mapper.writeValue(output.toFile(), node);
+                        OBJECT_MAPPER.writeValue(output.toAbsolutePath().normalize().toFile(), node);
                     }
                 } else {
-                    builder.printer(notepadWriterFor(output)).print(node);
+                    builder.printer(notePad()).print(node);
                 }
-                return 0;
-            } catch (Exception e) {
-                return 1;
-            }
-        }
-
-        private Configuration buildConfig() {
-            return setupConfiguration().build();
+            });
         }
     }
 
     @CommandLine.Command(
             name = "dump",
-            description = "Dump the NetX source code to Verilog"
+            usageHelpAutoWidth = true,
+            description = "Dump NetX source code or NXON representation into backend formats",
+            subcommands = {
+                    DumpCommand.VerilogCommand.class,
+                    DumpCommand.DotCommand.class,
+            }
     )
-    static class DumpCommand extends BaseCommand {
+    static final class DumpCommand implements Callable<Integer> {
+        @CommandLine.Spec
+        CommandLine.Model.CommandSpec spec;
+
         @Override
         public Integer call() {
-            try {
-                var builder = NXBuilder.from(setupConfiguration().build());
-                var node = builder.loadPath(source).compileAndDump();
-                NotepadWriter notepad = notepadWriterFor(output);
-                new VerilogTransformer(notepad, node).parse();
-                return 0;
-            } catch (Exception e) {
-                return 1;
+            spec.commandLine().usage(System.out);
+            return 0;
+        }
+
+        @CommandLine.Command(
+                name = "verilog",
+                usageHelpAutoWidth = true,
+                description = "Dump to Verilog format"
+        )
+        static final class VerilogCommand extends BaseCommand {
+            @Override
+            public Integer call() {
+                return handleExecution(() -> new VerilogTransformer(notePad(), getSourceNode()).parse());
             }
         }
-    }
 
-    @CommandLine.Command(
-            name = "visualize",
-            description = "Visualize the NetX source code"
-    )
-    static class VisualizeCommand extends BaseCommand {
-        @CommandLine.Option(
-                names = {"-d", "--depth"},
-                description = "depth of visualization",
-                defaultValue = "1"
+        @CommandLine.Command(
+                name = "dot",
+                usageHelpAutoWidth = true,
+                description = "Dump to DOT format (Graphviz)"
         )
-        private int depth;
+        static final class DotCommand extends BaseCommand {
+            @CommandLine.Option(
+                    names = {"-d", "--depth"},
+                    description = "depth of the hierarchy to dump",
+                    defaultValue = "2"
+            )
+            private int depth;
 
-        @Override
-        public Integer call() {
-            try {
-                var builder = NXBuilder.from(setupConfiguration().build());
-                var compiler = builder.loadPath(source);
-                var node = compiler.compileAndDump();
-                new DotTransformer(notepadWriterFor(output), node, depth).parse();
-                return 0;
-            } catch (Exception e) {
-                return 1;
+            @Override
+            public Integer call() {
+                return handleExecution(() -> new DotTransformer(notePad(), getSourceNode(), depth).parse());
             }
         }
     }
