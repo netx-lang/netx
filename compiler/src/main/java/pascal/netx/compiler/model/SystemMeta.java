@@ -53,8 +53,11 @@ public enum SystemMeta implements Entity {
     }
 
     private static Entity print(SourceLoc ignored, ArgBindList args) {
-        var str = args.getArguments().toString();
-        Logger.print(str.substring(1, str.length() - 1));
+        var sb = new StringBuilder();
+        for (var arg : args.getArguments()) {
+            sb.append(arg.toString());
+        }
+        Logger.print(sb.toString());
         return EntityList.ofEmpty();
     }
 

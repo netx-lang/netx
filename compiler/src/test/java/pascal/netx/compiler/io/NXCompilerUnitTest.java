@@ -116,7 +116,7 @@ class NXCompilerUnitTest {
                 component test {
                     for (i in [0..4]) {
                         for (j in [0..4]) {
-                            print(i, j);
+                            print("i = ", i, ", ", "j = ", j);
                         }
                     }
                 }
