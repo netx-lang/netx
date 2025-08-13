@@ -8,10 +8,7 @@ import pascal.netx.compiler.ast.expr.qualifier.FilterQualifier;
 import pascal.netx.compiler.ast.expr.qualifier.GeneratorQualifier;
 import pascal.netx.compiler.ast.expr.qualifier.Qualifier;
 import pascal.netx.compiler.exception.CompileCancellationException;
-import pascal.netx.compiler.model.Entity;
-import pascal.netx.compiler.model.EntityList;
-import pascal.netx.compiler.model.Macro;
-import pascal.netx.compiler.model.Utils;
+import pascal.netx.compiler.model.*;
 import pascal.netx.compiler.model.expr.*;
 import pascal.netx.compiler.model.scope.Attributes;
 import pascal.netx.compiler.model.scope.ComponentScope;
@@ -445,6 +442,8 @@ public final class ComponentEvaluator {
             Entity entity = resolveIdentifier(id);
             if (entity instanceof Macro macro) {
                 return evaluateMacroExpr(expr.getSourceLoc(), macro, ArgBindList.ofEmpty());
+            } else if (entity instanceof SystemMeta meta) {
+                return evaluateSystemMetaExpr(expr.getSourceLoc(), meta, ArgBindList.ofEmpty());
             }
             return entity;
         }
@@ -454,7 +453,7 @@ public final class ComponentEvaluator {
         if (mode == EvaluationMode.FACTORY) {
             return evaluateVariableFactory(expr);
         } else {
-            return evaluateInstantiateExpr(expr);
+            return evaluateCallExpr(expr);
         }
     }
 
@@ -476,6 +475,10 @@ public final class ComponentEvaluator {
         return result;
     }
 
+    public Entity evaluateSystemMetaExpr(SourceLoc sourceLoc, SystemMeta meta, ArgBindList parameters) {
+        return meta.apply(sourceLoc, parameters);
+    }
+
     @Nonnull
     private Entity resolveIdentifier(Identifier id) {
         Entity entity = scope.lookup(id);
@@ -488,6 +491,8 @@ public final class ComponentEvaluator {
                     entity = pack.defs().getImport(id);
                 } else if (BuiltinComponent.isBuiltin(id)) {
                     entity = BuiltinRef.of(BuiltinComponent.of(id), id.getSourceLoc());
+                } else if (SystemMeta.contains(id)) {
+                    entity = SystemMeta.resolve(id);
                 } else {
                     entity = pack.defs().lookupEnum(id);
                 }
@@ -510,18 +515,21 @@ public final class ComponentEvaluator {
         return data;
     }
 
-    private Entity evaluateInstantiateExpr(CallSymbolExpr expr) {
+    private Entity evaluateCallExpr(CallSymbolExpr expr) {
         Entity prototype = resolveIdentifier(expr.getHead());
         ArgBindList arguments = evaluateArguments(expr);
-        if (prototype instanceof Macro macro) {
-            return evaluateMacroExpr(expr.getSourceLoc(), macro, arguments);
-        } else if (prototype instanceof PrimaryExpr atom) {
-            atom.setArgList(arguments);
-            return atom;
-        } else {
-            Logger.error(expr.getSourceLoc(), "Expected component type but got {}", prototype);
-            throw new CompileCancellationException();
-        }
+        return switch (prototype) {
+            case Macro macro -> evaluateMacroExpr(expr.getSourceLoc(), macro, arguments);
+            case SystemMeta systemMeta -> evaluateSystemMetaExpr(expr.getSourceLoc(), systemMeta, arguments);
+            case PrimaryExpr atom -> {
+                atom.setArgList(arguments);
+                yield atom;
+            }
+            default -> {
+                Logger.error(expr.getSourceLoc(), "Expected component type but got {}", prototype);
+                throw new CompileCancellationException();
+            }
+        };
     }
 
     private ArgBindList evaluateArguments(CallSymbolExpr expr) {

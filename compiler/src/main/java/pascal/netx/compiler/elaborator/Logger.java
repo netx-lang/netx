@@ -55,6 +55,10 @@ public final class Logger {
         logWithContext(log::info, false, loc, message, args);
     }
 
+    public static void print(String message, Object... args) {
+        log.info(message, args);
+    }
+
     private static void logWithContext(LogFunction logFunc, boolean clear, SourceLoc loc, String message, Object... args) {
         var sb = new StringBuilder();
         if (!loc.isNone()) {
