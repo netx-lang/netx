@@ -65,15 +65,13 @@ To uninstall NetX completely (including automatic cleanup of environment variabl
 The `nx` command-line tool is the main entry point for using NetX.
 
 ```bash
-nx --help
 Usage: NetX [-hV] [COMMAND]
 Main CLI for the NetX tool
   -h, --help      Show this help message and exit.
   -V, --version   Print version information and exit.
 Commands:
-  compile    Compile the NetX source code into JSON
-  dump       Dump the NetX source code to Verilog
-  visualize  Visualize the NetX source code
+  compile  Compile the NetX source code into NXON representation
+  dump     Dump NetX source code or NXON representation into backend formats
 ```
 
 Here, we have the following subcommands:
@@ -82,47 +80,35 @@ Here, we have the following subcommands:
 
   ```shell
   Usage: NetX compile [-m] [-o=<output>] [-t=<top>] [-a=<args>...]... SOURCE
-  Compile the NetX source code into JSON
+  Compile the NetX source code into NXON representation
         SOURCE              the source file to compile
     -a, --args=<args>...    arguments to pass to the top component, in the form
                               of --args a=true b=2 c=2'b01
-    -m, --minimal           print the JSON in a single line without formatting
+    -m, --minimal           output NXON in a single line without formatting
     -o, --output=<output>   output file
-    -t, --top=<top>         name of the top component
+    -t, --top=<top>         name of the top componen
   ```
 
-- `dump` dumps the NetX source code to Verilog. We will support more output formats in the future.
+- `dump` dumps the NetX source code to backend representations. Currently only Verilog and DOT formats are supported,
+  but more formats will be added in the future.
 
     ```shell
-    Usage: NetX dump [-o=<output>] [-t=<top>] [-a=<args>...]... SOURCE
-    Dump the NetX source code to Verilog
-          SOURCE              the source file to compile
-      -a, --args=<args>...    arguments to pass to the top component, in the form
-                                of --args a=true b=2 c=2'b01
-      -o, --output=<output>   output file
-      -t, --top=<top>         name of the top component
+    Usage: NetX dump [COMMAND]
+    Dump NetX source code or NXON representation into backend formats
+    Commands:
+      verilog  Dump to Verilog format
+      dot      Dump to DOT format (Graphviz)
     ```
 
-- `visualize` visualizes the NetX source code.
+    - For Verilog, use `nx dump verilog SOURCE` to dump the NetX source code or NXON representation into Verilog format.
 
-  ```shell
-  Usage: NetX visualize [-d=<depth>] [-o=<output>] [-t=<top>] [-a=<args>...]...
-                        SOURCE
-  Visualize the NetX source code
-        SOURCE              the source file to compile
-    -a, --args=<args>...    arguments to pass to the top component, in the form
-                              of --args a=true b=2 c=2'b01
-    -d, --depth=<depth>     depth of visualization
-    -o, --output=<output>   output file
-    -t, --top=<top>         name of the top component
-  ```
+    - For DOT, use `nx dump dot SOURCE` to dump the NetX source code or NXON representation into DOT format. Note that
+      visualization requires [Graphviz](https://graphviz.gitlab.io/) for further rendering:
 
-  Note that visualization requires [Graphviz](https://graphviz.gitlab.io/) for further rendering:
-
-  ```shell
-  nx visualize my_design.nx -o output.dot
-  dot -T pdf output.dot -o output.pdf
-  ```
+      ```shell
+      nx dump dot my_design.nx -o output.dot
+      dot -T pdf output.dot -o output.pdf
+      ```
 
 ### Package Mangement
 

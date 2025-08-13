@@ -17,7 +17,7 @@ import static pascal.netx.backend.NxonParseUtils.arrayOf;
 import static pascal.netx.backend.NxonParseUtils.quote;
 import static pascal.netx.util.nxon.NxonType.typeOf;
 
-public class DotTransformer extends AbstractNxonTransformer {
+public final class DotTransformer extends AbstractNxonTransformer {
 
     private static final String DOTTED_EDGE_STYLE = " [dir=none style=dotted constraint=false]";
     private static final String EDGE_STYLE = " [arrowsize=0.5 color=\"Navy\" penwidth=1.5]";
