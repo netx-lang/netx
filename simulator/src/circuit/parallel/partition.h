@@ -10,7 +10,7 @@
 #include <map>
 #include <set>
 #include <vector>
-#include <future>
+#include <omp.h>
 #include "../circuit.h"
 
 namespace nxon {
@@ -58,13 +58,11 @@ namespace nxon {
                     }
                     if (cnt == 0) break;
 
-                    auto futures = std::make_unique<std::future<void>[]>(cnt);
-                    cnt = 0;
+                    #pragma omp parallel for
                     for (size_t i = 0; i < num_parts; ++i) {
                         if (auto &part = *circuit_parts[i]; part.updates_old.empty()) continue;
-                        futures[cnt++] = std::async(worker_part, std::ref(*this), i);
+                        worker_part(*this, i);
                     }
-                    for (size_t i = 0; i < cnt; ++i) futures[i].get();
                 }
             }
 

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 project(nxsim_src VERSION 1.0 LANGUAGES CXX)
 
 add_library(nxsim)
-target_link_libraries(nxsim PRIVATE nlohmann_json::nlohmann_json kahip)
+target_link_libraries(nxsim PRIVATE nlohmann_json::nlohmann_json kahip OpenMP::OpenMP_CXX)
 
 add_subdirectory(circuit)
 
