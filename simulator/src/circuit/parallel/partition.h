@@ -7,8 +7,6 @@
 
 #include <memory>
 #include <mutex>
-#include <map>
-#include <set>
 #include <vector>
 #include <omp.h>
 #include "../circuit.h"
@@ -29,8 +27,8 @@ namespace nxon {
 
         struct partitioned_circuit_context {
             size_t num_parts = 0;
-            std::map<id_t, size_t> belongs;
-            std::map<id_t, std::set<size_t> > relate;
+            std::unordered_map<id_t, size_t> belongs;
+            std::unordered_map<id_t, id_set> relate;
             id_set clocks;
             std::vector<std::unique_ptr<circuit_part_context> > circuit_parts;
 

@@ -102,11 +102,9 @@ namespace nxon {
 
         id_set changed = part.part.update_batch(part.updates_old);
         part.updates_old.clear();
-        value_batch changed_values;
         for (auto id: changed) {
             if (partition.belongs[id] != part_id) continue;
-            changed_values[id] = part.part.get_value(id);
+            partition.broadcast_impl(id, part.part.get_value(id), true);
         }
-        partition.broadcast_batch(changed_values, true);
     }
 }
