@@ -76,4 +76,23 @@ public class SystemMetaUnitTest {
                 """;
         TestUtils.test(expected, code);
     }
+
+    @Test
+    void testLength() {
+        var code = """
+                component test {
+                    let a = [1, 2, 3];
+                    let b = [];
+                    $print("Length of a: ", $length(a));
+                    $print("Length of b: ", $length(b));
+                }
+                """;
+        var expected = """
+                component test {
+                    $print("Length of a: ", 3);
+                    $print("Length of b: ", 0);
+                }
+                """;
+        TestUtils.test(expected, code);
+    }
 }
