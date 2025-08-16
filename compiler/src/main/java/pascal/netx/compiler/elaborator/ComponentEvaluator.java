@@ -407,12 +407,16 @@ public final class ComponentEvaluator {
     }
 
     private Entity evaluatePortExpr(PortConnectionExpr expr) {
-        List<PortExpr.PortAssign> ports = new LinkedList<>();
+        var ports = new PortExpr();
         for (var assign : expr.getPorts()) {
-            ports.add(PortExpr.PortAssign.of(
-                    assign.lhs(), castToInstantiateExpr(assign.rhs().getSourceLoc(), evaluate(assign.rhs()))));
+            var rhs = castToInstantiateExpr(assign.rhs().getSourceLoc(), evaluate(assign.rhs()));
+            if (assign.isDefault()) {
+                ports.setDefaultExpr(rhs);
+            } else {
+                ports.addPortAssign(assign.lhs(), rhs);
+            }
         }
-        return PortExpr.of(expr.getSourceLoc(), ports);
+        return ports;
     }
 
     private Entity evaluateSequentialExpr(BinaryExpr expr) {
@@ -492,19 +496,13 @@ public final class ComponentEvaluator {
 
         Entity entity = scope.lookup(id);
         if (entity == null) {
-            entity = pack.lookup(id);
-            if (entity == null) {
-                if (pack.defs().hasComponent(id)) {
-                    entity = ComponentRef.of(pack.defs().getComponent(id), id);
-                } else if (pack.defs().hasImport(id)) {
-                    entity = pack.defs().getImport(id);
-                } else if (BuiltinComponent.isBuiltin(id)) {
-                    entity = BuiltinRef.of(BuiltinComponent.of(id), id.getSourceLoc());
-                } else {
-                    entity = pack.defs().lookupEnum(id);
-                }
+            if (BuiltinComponent.isBuiltin(id)) {
+                entity = BuiltinRef.of(BuiltinComponent.of(id), id.getSourceLoc());
+            } else {
+                entity = resolveIdentifierInPack(id);
             }
         }
+
         return Objects.requireNonNullElseGet(entity, () -> {
             if (mode == EvaluationMode.DECLARE_IN_PLACE) {
                 return declareDataInPlace(id);
@@ -512,6 +510,25 @@ public final class ComponentEvaluator {
             Logger.error(id.getSourceLoc(), "Unresolved identifier {}", id);
             throw new CompileCancellationException();
         });
+    }
+
+    private Entity resolveIdentifierInPack(Identifier id) {
+        Entity entity = pack.lookup(id);
+        if (entity == null) {
+            if (pack.defs().hasComponent(id)) {
+                entity = ComponentRef.of(pack.defs().getComponent(id), id);
+            } else if (pack.defs().hasImport(id)) {
+                entity = pack.defs().getImport(id);
+            } else {
+                entity = pack.defs().lookupEnum(id);
+            }
+        }
+
+        // Handling cross-package resolution
+        if (entity == null && scope.getParent() instanceof ComponentScope parent) {
+            entity = parent.getEvaluator().resolveIdentifierInPack(id);
+        }
+        return entity;
     }
 
     @Nonnull
