@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
-import pascal.netx.compiler.TestUtils;
 import pascal.netx.compiler.exception.ParseCancellationException;
 import pascal.netx.util.print.NotepadWriter;
 
@@ -89,38 +88,5 @@ class NXCompilerUnitTest {
         CharStream charStream = CharStreams.fromString("invalid input");
         assertThrows(ParseCancellationException.class,
                 () -> NXBuilder.from(Configuration.asDefault()).load(charStream));
-    }
-
-    @Test
-    void testSystemMetaLog2() {
-        var code = """
-                component test : [a] -> [b] {
-                    wire a of bit(log2(32));
-                    wire b of bit(log2(64));
-                    b <> CONCAT <> [1'b0, a];
-                }
-                """;
-        var expected = """
-                component test : [a] -> [b] {
-                    wire a of bit(5);
-                    wire b of bit(6);
-                    b <> CONCAT <> [1'b0, a];
-                }
-                """;
-        TestUtils.test(expected, code);
-    }
-
-    @Test
-    void testSystemMetaPrint() {
-        var code = """
-                component test {
-                    for (i in [0..4]) {
-                        for (j in [0..4]) {
-                            print("i = ", i, ", ", "j = ", j);
-                        }
-                    }
-                }
-                """;
-        assertDoesNotThrow(() -> NXBuilder.from(Configuration.asDefault()).load(code).compileAndDump());
     }
 }

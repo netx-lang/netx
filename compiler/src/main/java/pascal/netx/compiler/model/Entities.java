@@ -33,6 +33,15 @@ public final class Entities {
         }
     }
 
+    public static EntityList requiresList(SourceLoc loc, Entity entity) {
+        if (entity instanceof EntityList list) {
+            return list;
+        } else {
+            Logger.error(loc, "Expected list but got {}", entity);
+            throw new CompileCancellationException();
+        }
+    }
+
     public static Value requiresValue(SourceLoc loc, Entity entity) {
         if (entity instanceof Value value) {
             return value;
