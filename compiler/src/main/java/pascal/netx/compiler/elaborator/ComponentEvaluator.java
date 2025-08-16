@@ -486,6 +486,10 @@ public final class ComponentEvaluator {
 
     @Nonnull
     private Entity resolveIdentifier(Identifier id) {
+        if (id.isSystemMeta()) {
+            return SystemMeta.resolve(id);
+        }
+
         Entity entity = scope.lookup(id);
         if (entity == null) {
             entity = pack.lookup(id);
@@ -496,8 +500,6 @@ public final class ComponentEvaluator {
                     entity = pack.defs().getImport(id);
                 } else if (BuiltinComponent.isBuiltin(id)) {
                     entity = BuiltinRef.of(BuiltinComponent.of(id), id.getSourceLoc());
-                } else if (SystemMeta.contains(id)) {
-                    entity = SystemMeta.resolve(id);
                 } else {
                     entity = pack.defs().lookupEnum(id);
                 }

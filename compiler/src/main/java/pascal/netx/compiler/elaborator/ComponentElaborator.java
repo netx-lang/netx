@@ -149,7 +149,7 @@ final class ComponentElaborator {
         var condition = evaluator.evaluateToBoolean(branch.getCondition());
         if (condition.value()) {
             buildElement(branch.getThenBranch());
-        } else {
+        } else if (branch.getElseBranch() != null) {
             buildElement(branch.getElseBranch());
         }
     }

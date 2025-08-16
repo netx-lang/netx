@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 import static pascal.netx.compiler.TestUtils.test;
 
 public class EvaluatorUnitTest {
-
-
     @Test
     void testBoolean() {
         var expected = """

@@ -170,7 +170,7 @@ DEC_NUMBER : UNSIGNED_INTEGER '\'' [dD] [0-9] [0-9_]*;
 
 UNSIGNED_INTEGER : [0-9] [0-9_]*;
 
-ID : [a-zA-Z_][a-zA-Z_0-9]*;
+ID : '$'?[a-zA-Z_][a-zA-Z_0-9]*;
 
 WHITE_SPACE: [ \t\r\n]+ -> skip;
 COMMENT: '//' ~('\n')* '\n' -> skip;

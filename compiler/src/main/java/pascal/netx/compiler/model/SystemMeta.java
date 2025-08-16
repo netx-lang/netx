@@ -3,6 +3,7 @@ package pascal.netx.compiler.model;
 import pascal.netx.compiler.elaborator.Logger;
 import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.model.scope.binding.ArgBindList;
+import pascal.netx.compiler.model.variable.BooleanValue;
 import pascal.netx.compiler.model.variable.Int32Value;
 import pascal.netx.compiler.model.variable.IntegerValue;
 import pascal.netx.util.lang.Identifier;
@@ -12,7 +13,9 @@ import java.math.BigInteger;
 
 public enum SystemMeta implements Entity {
     LOG2(SystemMeta::log2),
-    PRINT(SystemMeta::print);
+    PRINT(SystemMeta::print),
+    EMPTY(SystemMeta::empty),
+    CONTAINS(SystemMeta::contains);
 
     private final SystemMetaFunction function;
 
@@ -21,16 +24,12 @@ public enum SystemMeta implements Entity {
     }
 
     public static SystemMeta resolve(Identifier id) {
-        return SystemMeta.valueOf(id.name().toUpperCase());
-    }
-
-    public static boolean contains(Identifier id) {
         try {
-            SystemMeta.valueOf(id.name().toUpperCase());
+            return SystemMeta.valueOf(id.asSystemMeta());
         } catch (IllegalArgumentException e) {
-            return false;
+            Logger.error(id.getSourceLoc(), "Unknown system meta function: {}", id.name());
+            throw new CompileCancellationException();
         }
-        return true;
     }
 
     private static Entity log2(SourceLoc loc, ArgBindList args) {
@@ -59,6 +58,27 @@ public enum SystemMeta implements Entity {
         }
         Logger.print(sb.toString());
         return EntityList.ofEmpty();
+    }
+
+    private static Entity contains(SourceLoc loc, ArgBindList args) {
+        if (args.size() != 2) {
+            Logger.error(loc, "SystemMeta contains requires exactly two arguments, found: {}", args.size());
+            throw new CompileCancellationException();
+        }
+
+        var list = Entities.requiresList(loc, args.getArguments().get(0));
+        var element = args.getArguments().get(1);
+        return BooleanValue.of(list.entities().contains(element));
+    }
+
+    private static Entity empty(SourceLoc loc, ArgBindList args) {
+        if (args.size() != 1) {
+            Logger.error(loc, "SystemMeta empty requires exactly one argument, found: {}", args.size());
+            throw new CompileCancellationException();
+        }
+
+        var list = Entities.requiresList(loc, args.getArguments().getFirst());
+        return BooleanValue.of(list.entities().isEmpty());
     }
 
     public Entity apply(SourceLoc loc, ArgBindList parameters) {
