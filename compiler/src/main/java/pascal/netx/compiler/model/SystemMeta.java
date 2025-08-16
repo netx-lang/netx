@@ -15,6 +15,7 @@ public enum SystemMeta implements Entity {
     LOG2(SystemMeta::log2),
     PRINT(SystemMeta::print),
     EMPTY(SystemMeta::empty),
+    LENGTH(SystemMeta::length), // Alias for empty
     CONTAINS(SystemMeta::contains);
 
     private final SystemMetaFunction function;
@@ -79,6 +80,16 @@ public enum SystemMeta implements Entity {
 
         var list = Entities.requiresList(loc, args.getArguments().getFirst());
         return BooleanValue.of(list.entities().isEmpty());
+    }
+
+    private static Entity length(SourceLoc loc, ArgBindList args) {
+        if (args.size() != 1) {
+            Logger.error(loc, "SystemMeta length requires exactly one argument, found: {}", args.size());
+            throw new CompileCancellationException();
+        }
+
+        var list = Entities.requiresList(loc, args.getArguments().getFirst());
+        return Int32Value.of(list.entities().size());
     }
 
     public Entity apply(SourceLoc loc, ArgBindList parameters) {
