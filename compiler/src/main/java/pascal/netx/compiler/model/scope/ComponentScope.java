@@ -32,14 +32,18 @@ public final class ComponentScope extends Scope {
 
     public ComponentScope(Scope parent, boolean isInterface, Identifier identifier) {
         super(parent);
-        this.pack = switch (parent) {
-            case PackageScope scope -> scope;
-            case ComponentScope scope -> scope.getPackage();
-            default -> throw new ShallNotReachHereError();
-        };
+        this.pack = resolvePackage(parent);
         this.isInterface = isInterface;
         this.identifier = identifier;
         this.evaluator = new ComponentEvaluator(this);
+    }
+
+    private static PackageScope resolvePackage(Scope scope) {
+        return switch (scope) {
+            case PackageScope pack -> pack;
+            case ComponentScope component -> resolvePackage(component.getParent());
+            default -> throw new ShallNotReachHereError();
+        };
     }
 
     public static ComponentScope newComponent(Scope parent, Identifier identifier) {

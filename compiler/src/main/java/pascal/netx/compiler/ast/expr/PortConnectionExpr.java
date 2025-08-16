@@ -1,7 +1,9 @@
 package pascal.netx.compiler.ast.expr;
 
 import pascal.netx.compiler.ast.ASTListener;
+import pascal.netx.util.lang.Identifier;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,7 +26,9 @@ public final class PortConnectionExpr extends ExprNode {
     public void walk(ASTListener listener) {
         listener.enter(this);
         ports.forEach(assign -> {
-            assign.lhs.walk(listener);
+            if (assign.lhs != null) {
+                assign.lhs.walk(listener);
+            }
             assign.rhs.walk(listener);
         });
         listener.exit(this);
@@ -49,8 +53,22 @@ public final class PortConnectionExpr extends ExprNode {
     }
 
     public record PortAssign(ExprNode lhs, ExprNode rhs) {
+        public static PortAssign of(ExprNode lhs, ExprNode rhs) {
+            if (lhs.equals(IdentifierExpr.of(Identifier.of("$default")))) {
+                lhs = null;
+            }
+            return new PortAssign(lhs, rhs);
+        }
+
+        public boolean isDefault() {
+            return lhs == null;
+        }
+
         @Override
-        public String toString() {
+        public @Nonnull String toString() {
+            if (lhs == null) {
+                return "$default : " + rhs;
+            }
             return lhs + " : " + rhs;
         }
     }

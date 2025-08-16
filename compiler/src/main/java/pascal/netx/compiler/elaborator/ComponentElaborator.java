@@ -232,7 +232,7 @@ final class ComponentElaborator {
                 case DecoratedExpr decorated -> instantiateDecoratedExpr(decorated);
                 case SequentialExpr sequential -> instantiateSequentialExpr(sequential);
                 case PortExpr connection -> {
-                    Logger.error(connection.loc(), "Unexpected Port Connect Expression {}", connection);
+                    Logger.error(connection.getLoc(), "Unexpected Port Connect Expression {}", connection);
                     throw new CompileCancellationException();
                 }
             };
@@ -287,13 +287,14 @@ final class ComponentElaborator {
         }
 
         private ComponentPort doPortConnection(ComponentScope inst, PortExpr connection, boolean isInput) {
-            var loc = connection.loc();
+            var loc = connection.getLoc();
             var instPort = ComponentPort.of(inst);
-            Map<Mutable, ComponentPort> assigns = new HashMap<>();
+
             Function<ComponentPort, List<Variable>> getter =
                     (ComponentPort port) -> (isInput ? port.output : port.input);
 
-            for (var entry : connection.ports()) {
+            Map<Mutable, ComponentPort> assigns = new HashMap<>();
+            for (var entry : connection.getPorts()) {
                 var conn = doInstantiate(entry.expr());
                 if (!(getter.apply(conn).size() == 1)) {
                     Logger.error(loc, "Expect exactly one output of {} but got", entry.expr(), conn.output());
@@ -302,27 +303,29 @@ final class ComponentElaborator {
                 var port = inst.getEvaluator().evaluate(entry.port());
                 assigns.put(requiresMutable(loc, port), conn);
             }
+
+            ComponentPort defaultPort = null;
             var port = isInput ? instPort.input() : instPort.output();
-            requiresMatchedSize(connection.loc(), assigns.size(), port);
+            if (!connection.hasDefault()) {
+                requiresMatchedSize(loc, assigns.size(), port);
+            } else {
+                defaultPort = doInstantiate(connection.getDefaultExpr());
+            }
+
             for (var variable : port) {
                 if (!(variable instanceof Mutable mutable)) {
-                    Logger.error(connection.loc(), "Expected mutable variable but got {}", variable);
-                    throw new CompileCancellationException();
-                }
-                if (!assigns.containsKey(mutable)) {
-                    Logger.error(connection.loc(), "Missing assignment for {}", variable);
+                    Logger.error(loc, "Expected mutable variable but got {}", variable);
                     throw new CompileCancellationException();
                 }
 
-                var expr = assigns.get(mutable);
+                var expr = assigns.getOrDefault(mutable, defaultPort);
                 if (isInput) {
-                    scope.assigns().add(connection.loc(),
-                            mutable, getter.apply(expr).getFirst());
+                    scope.assigns().add(loc, mutable, getter.apply(expr).getFirst());
                 } else {
-                    scope.assigns().add(connection.loc(),
-                            getter.apply(expr).getFirst(), mutable);
+                    scope.assigns().add(loc, getter.apply(expr).getFirst(), mutable);
                 }
             }
+
             if (isInput) {
                 return new ComponentPort(List.of(), instPort.output);
             } else {

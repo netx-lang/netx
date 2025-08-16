@@ -339,7 +339,7 @@ public final class TreeParser {
         for (var assign : ctx.port_assign()) {
             var lhs = parseExpr(assign.lhs);
             var rhs = parseExpr(assign.rhs);
-            ports.add(new PortConnectionExpr.PortAssign(lhs, rhs));
+            ports.add(PortConnectionExpr.PortAssign.of(lhs, rhs));
         }
         return PortConnectionExpr.of(ports);
     }
