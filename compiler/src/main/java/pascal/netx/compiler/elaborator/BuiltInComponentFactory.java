@@ -75,8 +75,8 @@ public class BuiltInComponentFactory {
         var isPosTrigger = requiresBooleanValue(ref.getSourceLoc(), ref.getArguments().getFirst());
         attributes.addAttribute(Identifier.of(REGISTER_ATTRIBUTE), isPosTrigger);
         result.setAttributes(attributes);
-        result.addInput(newWire(result, "i"));
         result.addInput(newClock(result));
+        result.addInput(newWire(result, "i"));
         result.addOutput(newWire(result, "o"));
         return result;
     }

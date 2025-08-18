@@ -2,7 +2,7 @@ component counter : [clk, rst] -> [count] {
     wire count of bit(32);
     wire rst of bit(1);
     wire clk of clock();
-    let REG = REGISTER(true) <> [TO, clk#];
+    let REG = REGISTER(true) <> [clk#, TO];
     count <> REG <> MUX <> [rst, ADD <> [count, 1], 0];
 }
 

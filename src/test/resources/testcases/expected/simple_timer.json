@@ -62,9 +62,7 @@
                     "output": ["mask@18[0]"]
                   },
                   {
-                    "type": "builtin",
-                    "id": "TO",
-                    "loc": "",
+                    "type": "builtin", "id": "TO", "loc": "",
                     "input": ["code@15"],
                     "output": ["mask@18[1]"]
                   }
@@ -111,7 +109,7 @@
           },
           {
             "type": "builtin", "id": "REGISTER", "loc": "simple_timer.nx:27:11",
-            "input": ["out@17", "clk_50@0"],
+            "input": ["clk_50@0", "out@17"],
             "output": ["count@14"],
             "attribute": {"pos_edge": "true"}
           },
@@ -141,9 +139,7 @@
                     "output": ["mask@25[0]"]
                   },
                   {
-                    "type": "builtin",
-                    "id": "TO",
-                    "loc": "",
+                    "type": "builtin", "id": "TO", "loc": "",
                     "input": ["code@26"],
                     "output": ["mask@25[1]"]
                   }
@@ -174,7 +170,7 @@
           },
           {
             "type": "builtin", "id": "REGISTER", "loc": "simple_timer.nx:27:11",
-            "input": ["out@24", "clk_50@0"],
+            "input": ["clk_50@0", "out@24"],
             "output": ["ms_clk@9"],
             "attribute": {"pos_edge": "true"}
           }
@@ -212,9 +208,7 @@
                 "output": ["mask@32[0]"]
               },
               {
-                "type": "builtin",
-                "id": "TO",
-                "loc": "",
+                "type": "builtin", "id": "TO", "loc": "",
                 "input": ["code@29"],
                 "output": ["mask@32[1]"]
               }
@@ -261,7 +255,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER", "loc": "simple_timer.nx:5:16",
-        "input": ["out@31", "ms_clk@9"],
+        "input": ["ms_clk@9", "out@31"],
         "output": ["ms@13"],
         "attribute": {"pos_edge": "true"}
       },
