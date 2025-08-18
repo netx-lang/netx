@@ -437,6 +437,10 @@ public final class ComponentEvaluator {
     private Entity evaluatePrimarySymbolExpr(IdentifierExpr expr) {
         var id = expr.getIdentifier();
         if (mode == EvaluationMode.FACTORY) {
+            if (id.name().equals("clock")) {
+                return evaluateClockFactory(expr.getSourceLoc(), List.of());
+            }
+
             var pack = scope.getPackage();
             if (pack.defs().hasInterface(id)) {
                 return evaluateInterfacrFactory(expr.getSourceLoc(),
