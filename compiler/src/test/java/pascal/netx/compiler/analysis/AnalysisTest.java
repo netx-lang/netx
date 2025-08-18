@@ -57,7 +57,7 @@ class AnalysisTest {
                     wire x of bit(4);
                     wire c of bit(2);
                     x <> OR <> [a, b];
-                    c <> NOT <> REGISTER(true) <> [AND <> [a[1:0], b[1:0]], clk];
+                    c <> NOT <> REGISTER(true) <> [clk, AND <> [a[1:0], b[1:0]]];
                 }
                 """;
         var actual = """
@@ -68,7 +68,7 @@ class AnalysisTest {
                     auto x;
                     auto c;
                     x <> OR <> [a, b];
-                    c <> NOT <> REGISTER(true) <> [AND <> [a[1:0], b[1:0]], clk];
+                    c <> NOT <> REGISTER(true) <> [clk, AND <> [a[1:0], b[1:0]]];
                 }
                 """;
         var builder = NXBuilder.from(Configuration.asDefault());

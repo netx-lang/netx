@@ -292,8 +292,8 @@ namespace nxon {
             }
             case builtin_type::REGISTER: {
                 context.circuit.add_rule(rule_factory::register_rule(
-                    parse_clock(input[1], json["attribute"]),
-                    parse_source(input[0], context),
+                    parse_clock(input[0], json["attribute"]),
+                    parse_source(input[1], context),
                     parse_sink(output[0], context)));
                 break;
             }

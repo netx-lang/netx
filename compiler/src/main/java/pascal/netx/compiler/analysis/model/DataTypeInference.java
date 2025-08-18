@@ -73,9 +73,10 @@ public final class DataTypeInference extends ModelAnalysis {
     }
 
     private void addContainsForRegister(ComponentScope component) {
-        Variable input = component.getInputs().getFirst(), output = component.getOutputs().getFirst();
-        addConstraint(new EqualTypeConstraint(input, output));
-        addConstraint(new ClockConstraint(component.getInputs().get(1)));
+        addConstraint(new ClockConstraint(component.getInputs().get(0)));
+        addConstraint(new EqualTypeConstraint(
+                component.getInputs().get(1),
+                component.getOutputs().getFirst()));
     }
 
     private void addConstraintForConcat(ComponentScope component) {

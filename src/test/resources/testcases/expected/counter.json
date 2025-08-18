@@ -73,7 +73,7 @@
       },
       {
         "type": "builtin", "id": "REGISTER", "loc": "counter.nx:5:14",
-        "input": ["output@4", "clk@0"],
+        "input": ["clk@0", "output@4"],
         "output": ["count@2"],
         "attribute": {"pos_edge": "true"}
       }
