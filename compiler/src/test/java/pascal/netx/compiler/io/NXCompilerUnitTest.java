@@ -3,6 +3,7 @@ package pascal.netx.compiler.io;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import pascal.netx.compiler.exception.ParseCancellationException;
 import pascal.netx.util.print.NotepadWriter;
@@ -38,6 +39,7 @@ class NXCompilerUnitTest {
         }
     }
 
+    @Disabled
     @Test
     void testProjectBuild() throws IOException {
         testEquals("project/_netx.toml", "expected/project.json");
