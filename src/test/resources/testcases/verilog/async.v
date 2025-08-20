@@ -1,0 +1,26 @@
+module top(
+  _0, _1, _2, _3
+);
+
+/*============================== DATA ==============================*/
+
+/* "top"; "async.nx:1:10" */
+  input wire [31:0] _2; // async.nx:2:9:i
+  output wire [31:0] _3; // async.nx:2:12:o
+  input wire _1; // async.nx:3:9:rst
+  input wire _0; // CLOCK async.nx:4:9:clk
+/* END "top"; "async.nx:1:10" */
+
+/*============================== CONNECTION ==============================*/
+
+/*
+  COMPONENT "top"; "async.nx:1:10"
+  input: clk@0, rst@1, i@2
+  output: o@3
+*/
+  always @(posedge _0 or negedge _1) begin
+    if (~_1) _3 <= 0;
+    else _3 <= _2;
+  end // async.nx:6:9
+/* END "top"; "async.nx:1:10" */
+endmodule

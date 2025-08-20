@@ -37,6 +37,11 @@ public class VerilogTest {
         test("nested_type");
     }
 
+    @Test
+    void testAsync() throws IOException {
+        test("async");
+    }
+
     private static void test(String other) throws IOException {
         var design = NXBuilder.from(Configuration.asDefault())
                 .loadPath(TEST_DIR.resolve(other + ".nx")).compileAndDump();

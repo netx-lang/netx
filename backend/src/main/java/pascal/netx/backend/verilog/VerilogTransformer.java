@@ -37,11 +37,11 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
         notepad.print("module ");
         prepareGlobalIO(node);
         notepad.newLine();
-        notepad.println("/*" + BAR + " DATA " + BAR + "*/");
+        notepad.println("/*%s DATA %s*/".formatted(BAR, BAR));
         notepad.newLine();
         parseComponent(node, ParseMode.DATA);
         notepad.newLine();
-        notepad.println("/*" + BAR + " CONNECTION " + BAR + "*/");
+        notepad.println("/*%s CONNECTION %s*/".formatted(BAR, BAR));
         notepad.newLine();
         parseComponent(node, ParseMode.CONNECTION);
         notepad.println("endmodule");
@@ -82,16 +82,16 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
 
     private void printComponentHeader(JsonNode node, ParseMode mode) {
         switch (mode) {
-            case DATA -> notepad.println("/* " + node.get("id") + "; " + node.get("loc") + " */");
+            case DATA -> notepad.println("/* %s; %s */".formatted(node.get("id"), node.get("loc")));
             case CONNECTION -> {
                 notepad.println("/*");
                 notepad.incIndent();
                 notepad.print("COMPONENT ");
-                notepad.println(node.get("id") + "; " + node.get("loc"));
-                notepad.println("input" + ": " + String.join(", ",
-                        NxonParseUtils.streamOf(node, "input").map(JsonNode::textValue).toList()));
-                notepad.println("output" + ": " + String.join(", ",
-                        NxonParseUtils.streamOf(node, "output").map(JsonNode::textValue).toList()));
+                notepad.println("%s; %s".formatted(node.get("id"), node.get("loc")));
+                notepad.println("input: %s".formatted(String.join(", ",
+                        NxonParseUtils.streamOf(node, "input").map(JsonNode::textValue).toList())));
+                notepad.println("output: %s".formatted(String.join(", ",
+                        NxonParseUtils.streamOf(node, "output").map(JsonNode::textValue).toList())));
                 printAttributes(node);
                 notepad.decIndent();
                 notepad.println("*/");
@@ -100,7 +100,7 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
     }
 
     private void printComponentTail(JsonNode node) {
-        notepad.println("/* END " + node.get("id") + "; " + node.get("loc") + " */");
+        notepad.println("/* END %s; %s */".formatted(node.get("id"), node.get("loc")));
     }
 
     private void printAttributes(JsonNode node) {
@@ -109,7 +109,7 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
             var iter = node.get("attribute").fields();
             while (iter.hasNext()) {
                 var entry = iter.next();
-                notepad.print(entry.getKey() + ": " + entry.getValue());
+                notepad.print("%s: %s".formatted(entry.getKey(), entry.getValue()));
                 if (iter.hasNext()) {
                     notepad.print(", ");
                 }
@@ -150,7 +150,7 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
         notepad.print(parseWidth(node.get("width").intValue()));
         notepad.print(ref.dump());
         notepad.print("; // ");
-        notepad.print(node.get("loc").textValue() + ":");
+        notepad.print("%s:".formatted(node.get("loc").textValue()));
         notepad.println(ref.name());
     }
 
@@ -164,7 +164,7 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
         notepad.print("wire ");
         notepad.print(ref.dump());
         notepad.print("; // CLOCK ");
-        notepad.print(node.get("loc").textValue() + ":");
+        notepad.print("%s:".formatted(node.get("loc").textValue()));
         notepad.println(ref.name());
     }
 
@@ -174,24 +174,39 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
             var builtin = BuiltinComponent.of(node.get("id").textValue());
             var input = getArgList(node, "input");
             var output = getArgList(node, "output");
-            if (builtin == BuiltinComponent.REGISTER) {
-                parseRegister(node, output, input);
-            } else {
-                parseCombinational(builtin, output, input);
+            switch (builtin) {
+                case REGISTER -> parseRegister(node, output, input);
+                case ASYNC_REGISTER -> parseAsyncRegister(node, output, input);
+                default -> parseCombinational(builtin, output, input);
             }
-            notepad.println(" // " + node.get("loc").textValue());
+            notepad.println(" // %s".formatted(node.get("loc").textValue()));
         }
     }
 
     private void parseRegister(JsonNode node, List<String> output, List<String> input) {
         boolean pos_edge = node.get("attribute").get("pos_edge").textValue().equals("true");
         String sensitive = pos_edge ? "posedge " : "negedge ";
-        notepad.print("always @(" + sensitive + input.get(1) + ") ");
-        notepad.print(output.getFirst() + " <= " + input.getFirst() + ";");
+        notepad.print("always @(%s%s) ".formatted(sensitive, input.get(0)));
+        notepad.print("%s <= %s;".formatted(output.getFirst(), input.get(1)));
+    }
+
+    private void parseAsyncRegister(JsonNode node, List<String> output, List<String> input) {
+        boolean pos_edge = node.get("attribute").get("pos_edge").textValue().equals("true");
+        boolean high_rst = node.get("attribute").get("high_rst").textValue().equals("true");
+        String rst_value = node.get("attribute").get("rst_value").textValue();
+        String clk_sensitive = pos_edge ? "posedge " : "negedge ";
+        String rst_sensitive = high_rst ? "posedge " : "negedge ";
+        notepad.println("always @(%s%s or %s%s) begin".formatted(clk_sensitive, input.get(0), rst_sensitive, input.get(1)));
+        notepad.incIndent();
+        notepad.print("if (%s%s) ".formatted(high_rst ? "" : "~", input.get(1)));
+        notepad.println("%s <= %s;".formatted(output.getFirst(), rst_value));
+        notepad.println("else %s <= %s;".formatted(output.getFirst(), input.get(2)));
+        notepad.decIndent();
+        notepad.print("end");
     }
 
     private void parseCombinational(BuiltinComponent builtin, List<String> output, List<String> input) {
-        notepad.print("assign " + output.getFirst() + " = ");
+        notepad.print("assign %s = ".formatted(output.getFirst()));
         switch (builtin) {
             case NOT -> {
                 notepad.print("~");
@@ -209,7 +224,7 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
             }
             case UCAST, TO -> notepad.print(input.getFirst());
             default -> {
-                var delimiter = " " + BuiltinComponent.VERILOG_OP.get(builtin) + " ";
+                var delimiter = " %s ".formatted(BuiltinComponent.VERILOG_OP.get(builtin));
                 notepad.print(String.join(delimiter, input));
             }
         }
