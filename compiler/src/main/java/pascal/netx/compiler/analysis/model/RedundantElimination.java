@@ -40,6 +40,7 @@ public final class RedundantElimination extends ModelAnalysis {
             return switch (builtinRef) {
                 case UCAST, CAST -> isRedundantCast(scope);
                 case CONCAT -> isRedundantConcat(scope);
+                case SPLIT, DUP -> true;
                 default -> false;
             };
         }

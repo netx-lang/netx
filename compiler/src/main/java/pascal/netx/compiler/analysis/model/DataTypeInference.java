@@ -57,9 +57,6 @@ public final class DataTypeInference extends ModelAnalysis {
             case OR, NOT, AND, XOR, NOR, NAND, XNOR, ADD, SUB, MUL, DIV, MOD -> addAllEqualConstraints(component);
             case CONCAT -> addConstraintForConcat(component);
             case REGISTER -> addContainsForRegister(component);
-            case SPLIT -> {
-                // do nothing
-            }
         }
     }
 

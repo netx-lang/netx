@@ -7,7 +7,9 @@ import pascal.netx.compiler.model.scope.Attributes;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.Scope;
 import pascal.netx.compiler.model.variable.Clock;
+import pascal.netx.compiler.model.variable.Variable;
 import pascal.netx.compiler.model.variable.Wire;
+import pascal.netx.compiler.model.variable.selector.Selector;
 import pascal.netx.compiler.model.variable.type.BitType;
 import pascal.netx.compiler.model.variable.type.PolyType;
 import pascal.netx.compiler.model.variable.type.Type;
@@ -41,6 +43,7 @@ public class BuiltInComponentFactory {
     public ComponentScope createBuiltInComponent(Scope parent, BuiltinRef ref) {
         return switch (ref.getBuiltin()) {
             case REGISTER -> createRegisterComponent(parent, ref);
+            case DUP -> createDupComponent(parent, ref);
             case SPLIT -> createSplitComponent(parent, ref);
             case TO -> createIdentityComponent(parent, ref);
             case UCAST, CAST -> createCastComponent(parent, ref);
@@ -81,17 +84,30 @@ public class BuiltInComponentFactory {
         return result;
     }
 
+    private ComponentScope createDupComponent(Scope parent, BuiltinRef ref) {
+        Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArguments());
+        int dup = requiresIntegerValue(ref.getSourceLoc(), ref.getArguments().getFirst()).toInt();
+
+        var component = instantiate(parent, ref);
+        var entity = newWire(component, "entity");
+        component.addInput(entity);
+        for (int i = 0; i < dup; ++i) {
+            component.addOutput(entity);
+        }
+        return component;
+    }
+
     private ComponentScope createSplitComponent(Scope parent, BuiltinRef ref) {
         Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArguments());
         int split = requiresIntegerValue(ref.getSourceLoc(), ref.getArguments().getFirst()).toInt();
 
-        var Component = instantiate(parent, ref);
-        var entity = newWire(Component, "entity");
-        Component.addInput(entity);
-        for (int i = 0; i < split; ++i) {
-            Component.addOutput(entity);
+        var result = instantiate(parent, ref);
+        var entity = newWire(result, "entity", BitType.of(split));
+        result.addInput(entity);
+        for (int i = split - 1; i >= 0; i--) {
+            result.addOutput(Variable.accessOf(entity, Selector.ofBit(i)));
         }
-        return Component;
+        return result;
     }
 
     private ComponentScope createCastComponent(Scope parent, BuiltinRef ref) {

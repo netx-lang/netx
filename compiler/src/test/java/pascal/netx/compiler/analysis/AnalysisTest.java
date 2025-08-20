@@ -348,4 +348,46 @@ class AnalysisTest {
                 """;
         test(expected, code);
     }
+
+    @Test
+    void testDup() {
+        var code = """
+                component top : a -> b {
+                    wire a    of bit(4);
+                    wire b[4] of bit(4);
+                    [b[i] | i in [0..4]] <> DUP(4) <> a;
+                }
+                """;
+        var expected = """
+                component top : a -> b {
+                    wire a    of bit(4);
+                    wire b[4] of bit(4);
+                    b[0] <> a;
+                    b[1] <> a;
+                    b[2] <> a;
+                    b[3] <> a;
+                }
+                """;
+        test(expected, code);
+    }
+
+    @Test
+    void testSplit() {
+        var code = """
+                component top : a -> b {
+                    wire a, b of bit(4);
+                    [b[i] | i in [0..4]] <> SPLIT(4) <> a;
+                }
+                """;
+        var expected = """
+                component top : a -> b {
+                    wire a, b of bit(4);
+                    b[0] <> a[3];
+                    b[1] <> a[2];
+                    b[2] <> a[1];
+                    b[3] <> a[0];
+                }
+                """;
+        test(expected, code);
+    }
 }

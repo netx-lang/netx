@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 public enum BuiltinComponent {
-    REGISTER, SPLIT, TO,
+    REGISTER, DUP, SPLIT, TO,
     UCAST, CAST, CONCAT,
     OR, NOT, AND, XOR, NOR, NAND, XNOR,
     EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE,

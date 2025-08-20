@@ -12,6 +12,10 @@ public sealed interface Selector permits PartSelector, BitSelector {
 
     Selector refine(Selector selector);
 
+    static Selector ofBit(int index) {
+        return new BitSelector(Int32Value.of(index));
+    }
+
     static Selector ofWidth(int width) {
         if (width == 1) {
             return new BitSelector(IntegerValue.ZERO);
