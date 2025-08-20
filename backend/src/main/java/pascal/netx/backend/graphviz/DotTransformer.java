@@ -48,9 +48,7 @@ public final class DotTransformer extends AbstractNxonTransformer {
     }
 
     static String dotDefOfOutWire(DataReference ref) {
-        return wireDotOf(ref.id(), false)
-                + "[label=" + quote(ref.name() + "@" + ref.id())
-                + "]" + OUT_WIRE_STYLE;
+        return "%s[label=%s]%s".formatted(wireDotOf(ref.id(), false), quote("%s@%d".formatted(ref.name(), ref.id())), OUT_WIRE_STYLE);
     }
 
     static private String componentDotOf(int index) {
@@ -58,7 +56,7 @@ public final class DotTransformer extends AbstractNxonTransformer {
     }
 
     static private String wireDotOf(int index, boolean isInSide) {
-        return quote("w_" + index + (isInSide ? "i" : "o"));
+        return quote("w_%d%s".formatted(index, isInSide ? "i" : "o"));
     }
 
     static private String dirOf(boolean isInSide) {
@@ -121,8 +119,7 @@ public final class DotTransformer extends AbstractNxonTransformer {
                 notepad.println(dotDefOfOutWire(ref));
             }
             notepad.println(
-                    wireDotOf(ref.id(), true) + dirOf(false) + " -> " +
-                    wireDotOf(ref.id(), false) + dirOf(true) + DOTTED_EDGE_STYLE);
+                    "%s%s -> %s%s%s".formatted(wireDotOf(ref.id(), true), dirOf(false), wireDotOf(ref.id(), false), dirOf(true), DOTTED_EDGE_STYLE));
         }
     }
 
@@ -131,12 +128,12 @@ public final class DotTransformer extends AbstractNxonTransformer {
             var id = entry.getKey();
             if (wireDef.containsKey(id)) {
                 for (var dot : defineSelection(entry)) {
-                    notepad.println(dot + " -> " + wireDotOf(id, false) + DOTTED_EDGE_STYLE);
-                    notepad.println(wireDotOf(id, true) + dirOf(false) + " -> " + dot + DOTTED_EDGE_STYLE);
+                    notepad.println("%s -> %s%s".formatted(dot, wireDotOf(id, false), DOTTED_EDGE_STYLE));
+                    notepad.println("%s%s -> %s%s".formatted(wireDotOf(id, true), dirOf(false), dot, DOTTED_EDGE_STYLE));
                 }
             } else if (tempIn.containsKey(id)) {
                 for (var dot : defineSelection(entry)) {
-                    notepad.println(dot + " -> " + tempIn.get(id) + DOTTED_EDGE_STYLE);
+                    notepad.println("%s -> %s%s".formatted(dot, tempIn.get(id), DOTTED_EDGE_STYLE));
                 }
             }
         }
@@ -184,7 +181,7 @@ public final class DotTransformer extends AbstractNxonTransformer {
     }
 
     private void printEdge(String source, String target) {
-        notepad.println(source + " -> " + target + EDGE_STYLE);
+        notepad.println("%s -> %s%s".formatted(source, target, EDGE_STYLE));
     }
 
     private void printComponent(JsonNode node, int depth) {
@@ -219,7 +216,7 @@ public final class DotTransformer extends AbstractNxonTransformer {
     }
 
     private void printSubgraphStyle(JsonNode node) {
-        notepad.println("label=" + quote(node.get("id").textValue()));
+        notepad.println("label=%s".formatted(quote(node.get("id").textValue())));
         notepad.println("labeljust = c");
         notepad.println("labelloc = t");
         notepad.println("pencolor = seagreen");
@@ -256,7 +253,7 @@ public final class DotTransformer extends AbstractNxonTransformer {
         var iter = arrayOf(node, io.asField()).elements();
         while (iter.hasNext()) {
             var port = iter.next();
-            var portDotRef = io.asField() + "_" + portIndex++;
+            var portDotRef = "%s_%d".formatted(io.asField(), portIndex++);
             notepad.print("<tr>");
             notepad.print(String.format("<td port=%s>•</td>", quote(portDotRef)));
             notepad.print("</tr>");
@@ -280,8 +277,8 @@ public final class DotTransformer extends AbstractNxonTransformer {
     }
 
     private void handleValueReference(IO io, ValueReference ref, PendingConnection result, String globalRef) {
-        var dot = quote("v_" + constantIndexer.get());
-        result.define().add(dot + "[label=" + quote(ref.dump()) + "]" + VALUE_NODE_STYLE);
+        var dot = quote("v_%d".formatted(constantIndexer.get()));
+        result.define().add("%s[label=%s]%s".formatted(dot, quote(ref.dump()), VALUE_NODE_STYLE));
         switch (io) {
             case INPUT -> result.wireOut().add(new Pair<>(dot + dirOf(false), globalRef));
             case OUTPUT -> result.wireOut().add(new Pair<>(dot + dirOf(true), globalRef));
@@ -290,13 +287,13 @@ public final class DotTransformer extends AbstractNxonTransformer {
 
     private void handleDataReference(IO io, DataReference ref, PendingConnection result, String globalRef) {
         if (ref.hasSelector()) {
-            var dot = quote("s_" + ref.id() + ref.selector());
+            var dot = quote("s_%d%s".formatted(ref.id(), ref.selector()));
             switch (io) {
                 case INPUT -> result.wireOut().add(new Pair<>(dot + dirOf(false), globalRef));
                 case OUTPUT -> result.wireIn().add(new Pair<>(dot + dirOf(true), globalRef));
             }
             selections.computeIfAbsent(ref.id(), _ -> new ArrayList<>()).add(
-                    dot + " [label=" + quote(ref.name() + ref.selector()) + "]" + VALUE_NODE_STYLE
+                    "%s [label=%s]%s".formatted(dot, quote(ref.name() + ref.selector()), VALUE_NODE_STYLE)
             );
         } else {
             switch (io) {
@@ -322,10 +319,12 @@ public final class DotTransformer extends AbstractNxonTransformer {
     }
 
     private String dotDefOfInWire(DataReference ref) {
-        return wireDotOf(ref.id(), true)
-                + "[label=" + quote(ref.name() + "@" + ref.id() + "\\l"
-                + wireDef.get(ref.id()).get("loc").textValue())
-                + "]" + IN_WIRE_STYLE;
+        return "%s[label=%s]%s".formatted(
+                wireDotOf(ref.id(), true),
+                quote("%s@%d\\l%s".formatted(
+                        ref.name(), ref.id(), wireDef.get(ref.id()).get("loc").textValue())),
+                IN_WIRE_STYLE
+        );
     }
 
     private void handleInputConnection(DataReference ref, PendingConnection result, String globalRef) {

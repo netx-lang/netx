@@ -460,7 +460,7 @@ module top(
       assign _22 = 0 & _21; // simple_timer.nx:64:8
       assign _17 = _20 | _22; // simple_timer.nx:63:11
     /* END "MUX"; "simple_timer.nx:29:17" */
-    always @(posedge _17) _14 <= _0; // simple_timer.nx:27:11
+    always @(posedge _0) _14 <= _17; // simple_timer.nx:27:11
     assign _23 = ~_9; // simple_timer.nx:30:38
     /*
       COMPONENT "MUX"; "simple_timer.nx:30:17"
@@ -481,7 +481,7 @@ module top(
       assign _28 = _23 & _25[1]; // simple_timer.nx:64:8
       assign _24 = _27 | _28; // simple_timer.nx:63:11
     /* END "MUX"; "simple_timer.nx:30:17" */
-    always @(posedge _24) _9 <= _0; // simple_timer.nx:27:11
+    always @(posedge _0) _9 <= _24; // simple_timer.nx:27:11
   /* END "clock_divider"; "simple_timer.nx:10:11" */
   assign _29 = _13 == 8639999; // simple_timer.nx:11:33
   assign _30 = _13 + 1; // simple_timer.nx:11:66
@@ -506,7 +506,7 @@ module top(
     assign _36 = 0 & _35; // simple_timer.nx:64:8
     assign _31 = _34 | _36; // simple_timer.nx:63:11
   /* END "MUX"; "simple_timer.nx:11:22" */
-  always @(posedge _31) _13 <= _9; // simple_timer.nx:5:16
+  always @(posedge _9) _13 <= _31; // simple_timer.nx:5:16
   assign _37 = _13 % 10; // simple_timer.nx:13:34
   assign _38 = $signed(_37); // simple_timer.nx:13:26
   /*

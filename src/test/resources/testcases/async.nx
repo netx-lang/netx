@@ -1,0 +1,11 @@
+component top : [clk, rst, i] -> [o] {
+    wire i, o of bit(32);
+    wire rst  of bit(1);
+    wire clk  of clock;
+
+    o <> ASYNC_REGISTER(
+        pos_edge = true,
+        high_rst = false,
+        rst_value = 0
+    ) <> [clk, rst, i];
+}
