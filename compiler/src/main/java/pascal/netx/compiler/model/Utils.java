@@ -6,6 +6,7 @@ import pascal.netx.compiler.io.NXCompiler;
 import pascal.netx.compiler.model.scope.ComponentScope;
 import pascal.netx.compiler.model.scope.PackageScope;
 import pascal.netx.compiler.model.scope.RepoScope;
+import pascal.netx.compiler.model.scope.binding.ArgBindList;
 import pascal.netx.util.lang.SourceLoc;
 
 import java.util.List;
@@ -20,6 +21,13 @@ public final class Utils {
     }
 
     public static void requiresMatchedSize(SourceLoc sourceLoc, int expected, List<?> actual) {
+        if (expected != actual.size()) {
+            Logger.error(sourceLoc, "Expected list of size {} but got {}", expected, actual.size());
+            throw new CompileCancellationException();
+        }
+    }
+
+    public static void requiresMatchedSize(SourceLoc sourceLoc, int expected, ArgBindList actual) {
         if (expected != actual.size()) {
             Logger.error(sourceLoc, "Expected list of size {} but got {}", expected, actual.size());
             throw new CompileCancellationException();

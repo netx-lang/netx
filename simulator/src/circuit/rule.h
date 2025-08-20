@@ -290,6 +290,9 @@ namespace nxon {
         [[nodiscard]] rule_t neq_rule(source_t a, source_t b, sink_t out);
 
         [[nodiscard]] rule_t register_rule(clock_t clk, source_t in, sink_t out);
+
+        [[nodiscard]] rule_t async_register_rule(clock_t clk, source_t rst, source_t in, sink_t out, bool high_rst, value_t rst_value);
+
     }
 
     using rule_storage = impl::id_based_map<std::vector<rule_t> >;

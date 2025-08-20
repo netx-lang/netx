@@ -82,6 +82,11 @@ public final class MultiBinding implements Binding, ArgBindList {
     }
 
     @Override
+    public Entity get(String name, int index) {
+        return lookup(Identifier.of(name));
+    }
+
+    @Override
     public void forEachEntity(Consumer<Entity> consumer) {
         bindings.values().forEach(consumer);
     }

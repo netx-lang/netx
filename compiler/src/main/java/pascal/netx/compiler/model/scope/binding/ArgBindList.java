@@ -14,4 +14,6 @@ public sealed interface ArgBindList permits OrderedArgBindList, MultiBinding {
     int size();
 
     boolean isEmpty();
+
+    Entity get(String name, int index);
 }

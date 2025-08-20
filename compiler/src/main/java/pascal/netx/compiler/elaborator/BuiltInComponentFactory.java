@@ -1,6 +1,8 @@
 package pascal.netx.compiler.elaborator;
 
 import pascal.netx.compiler.io.NXCompiler;
+import pascal.netx.compiler.model.Entities;
+import pascal.netx.compiler.model.Entity;
 import pascal.netx.compiler.model.Utils;
 import pascal.netx.compiler.model.expr.BuiltinRef;
 import pascal.netx.compiler.model.scope.Attributes;
@@ -15,10 +17,12 @@ import pascal.netx.compiler.model.variable.type.PolyType;
 import pascal.netx.compiler.model.variable.type.Type;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
+import pascal.netx.util.lang.SourceLoc;
 
-import static pascal.netx.compiler.model.Entities.requiresBooleanValue;
+import java.util.function.BiFunction;
+
 import static pascal.netx.compiler.model.Entities.requiresIntegerValue;
-import static pascal.netx.util.lang.BuiltinComponent.REGISTER_ATTRIBUTE;
+import static pascal.netx.util.lang.BuiltinComponent.REG_CLK_EDGE_ATTR;
 import static pascal.netx.util.lang.BuiltinComponent.TO;
 
 public class BuiltInComponentFactory {
@@ -40,20 +44,9 @@ public class BuiltInComponentFactory {
         }
     }
 
-    public ComponentScope createBuiltInComponent(Scope parent, BuiltinRef ref) {
-        return switch (ref.getBuiltin()) {
-            case REGISTER -> createRegisterComponent(parent, ref);
-            case DUP -> createDupComponent(parent, ref);
-            case SPLIT -> createSplitComponent(parent, ref);
-            case TO -> createIdentityComponent(parent, ref);
-            case UCAST, CAST -> createCastComponent(parent, ref);
-            case NOT -> createNotComponent(parent, ref);
-            case OR, AND, XOR, NOR, NAND, XNOR, CONCAT, ADD, MUL ->
-                    createMultiInputComponent(parent, ref, 2);
-            case SUB, DIV, MOD ->  createDualInputComponent(parent, ref);
-            case EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE -> createRelationalOpComponent(parent, ref);
-            case SHL, ASHR, LSHR -> createShiftComponent(parent, ref);
-        };
+    private static void moveAttribute(Attributes attr, BuiltinRef ref, String name, int index,
+                                      BiFunction<SourceLoc, Entity, ? extends  Entity> checker) {
+        attr.addAttribute(Identifier.of(name), checker.apply(ref.getSourceLoc(), ref.getArgList().get(name, index)));
     }
 
     private ComponentScope createNotComponent(Scope parent, BuiltinRef ref) {
@@ -71,12 +64,28 @@ public class BuiltInComponentFactory {
         return result;
     }
 
+    public ComponentScope createBuiltInComponent(Scope parent, BuiltinRef ref) {
+        return switch (ref.getBuiltin()) {
+            case REGISTER -> createRegisterComponent(parent, ref);
+            case ASYNC_REGISTER -> createAsyncRegisterComponent(parent, ref);
+            case DUP -> createDupComponent(parent, ref);
+            case SPLIT -> createSplitComponent(parent, ref);
+            case TO -> createIdentityComponent(parent, ref);
+            case UCAST, CAST -> createCastComponent(parent, ref);
+            case NOT -> createNotComponent(parent, ref);
+            case OR, AND, XOR, NOR, NAND, XNOR, CONCAT, ADD, MUL ->
+                    createMultiInputComponent(parent, ref, 2);
+            case SUB, DIV, MOD ->  createDualInputComponent(parent, ref);
+            case EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE -> createRelationalOpComponent(parent, ref);
+            case SHL, ASHR, LSHR -> createShiftComponent(parent, ref);
+        };
+    }
+
     private ComponentScope createRegisterComponent(Scope parent, BuiltinRef ref) {
-        Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArguments());
+        Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArgList());
         var result = instantiate(parent, ref);
         var attributes = new Attributes();
-        var isPosTrigger = requiresBooleanValue(ref.getSourceLoc(), ref.getArguments().getFirst());
-        attributes.addAttribute(Identifier.of(REGISTER_ATTRIBUTE), isPosTrigger);
+        moveAttribute(attributes, ref, REG_CLK_EDGE_ATTR, 0, Entities::requiresBooleanValue);
         result.setAttributes(attributes);
         result.addInput(newClock(result));
         result.addInput(newWire(result, "i"));
@@ -84,9 +93,26 @@ public class BuiltInComponentFactory {
         return result;
     }
 
+    private ComponentScope createAsyncRegisterComponent(Scope parent, BuiltinRef ref) {
+        var loc = ref.getSourceLoc();
+
+        Utils.requiresMatchedSize(loc, 3, ref.getArgList());
+        var result = instantiate(parent, ref);
+        var attributes = new Attributes();
+        moveAttribute(attributes, ref, REG_CLK_EDGE_ATTR, 0, Entities::requiresBooleanValue);
+        moveAttribute(attributes, ref, BuiltinComponent.REG_RST_EDGE_ATTR, 1, Entities::requiresBooleanValue);
+        moveAttribute(attributes, ref, BuiltinComponent.REG_RST_VALUE_ATTR, 2, Entities::requiresIntegerValue);
+        result.setAttributes(attributes);
+        result.addInput(newClock(result));
+        result.addInput(newWire(result, "rst", BitType.of(1)));
+        result.addInput(newWire(result, "i"));
+        result.addOutput(newWire(result, "o"));
+        return result;
+    }
+
     private ComponentScope createDupComponent(Scope parent, BuiltinRef ref) {
-        Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArguments());
-        int dup = requiresIntegerValue(ref.getSourceLoc(), ref.getArguments().getFirst()).toInt();
+        Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArgList());
+        int dup = requiresIntegerValue(ref.getSourceLoc(), ref.getArgList().get("n", 0)).toInt();
 
         var component = instantiate(parent, ref);
         var entity = newWire(component, "entity");
@@ -98,8 +124,8 @@ public class BuiltInComponentFactory {
     }
 
     private ComponentScope createSplitComponent(Scope parent, BuiltinRef ref) {
-        Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArguments());
-        int split = requiresIntegerValue(ref.getSourceLoc(), ref.getArguments().getFirst()).toInt();
+        Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArgList());
+        int split = requiresIntegerValue(ref.getSourceLoc(), ref.getArgList().get("n", 0)).toInt();
 
         var result = instantiate(parent, ref);
         var entity = newWire(result, "entity", BitType.of(split));
@@ -112,12 +138,12 @@ public class BuiltInComponentFactory {
 
     private ComponentScope createCastComponent(Scope parent, BuiltinRef ref) {
         var result = instantiate(parent, ref);
-        if (ref.getArguments().isEmpty()) {
+        if (ref.getArgList().isEmpty()) {
             result.addInput(newWire(result, "i"));
             result.addOutput(newWire(result, "o"));
         } else {
-            Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArguments());
-            int width = requiresIntegerValue(ref.getSourceLoc(), ref.getArguments().getFirst()).toInt();
+            Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArgList());
+            int width = requiresIntegerValue(ref.getSourceLoc(), ref.getArgList().get("width", 0)).toInt();
             result.addInput(newWire(result, "i"));
             result.addOutput(newWire(result, "o", BitType.of(width)));
         }
@@ -125,7 +151,7 @@ public class BuiltInComponentFactory {
     }
 
     private ComponentScope createRelationalOpComponent(Scope parent, BuiltinRef ref) {
-        Utils.requiresMatchedSize(ref.getSourceLoc(), 0, ref.getArguments());
+        Utils.requiresMatchedSize(ref.getSourceLoc(), 0, ref.getArgList());
         var result = instantiate(parent, ref);
         result.addInput(newWire(result, "i1"), newWire(result, "i2"));
         result.addOutput(newWire(result, "o", BitType.forBoolean()));
@@ -133,7 +159,7 @@ public class BuiltInComponentFactory {
     }
 
     private ComponentScope createShiftComponent(Scope parent, BuiltinRef ref) {
-        Utils.requiresMatchedSize(ref.getSourceLoc(), 0, ref.getArguments());
+        Utils.requiresMatchedSize(ref.getSourceLoc(), 0, ref.getArgList());
         var result = instantiate(parent, ref);
         result.addInput(newWire(result, "i"), newWire(result, "off"));
         result.addOutput(newWire(result, "o"));
@@ -141,7 +167,7 @@ public class BuiltInComponentFactory {
     }
 
     private ComponentScope createDualInputComponent(Scope parent, BuiltinRef ref) {
-        Utils.requiresMatchedSize(ref.getSourceLoc(), 0, ref.getArguments());
+        Utils.requiresMatchedSize(ref.getSourceLoc(), 0, ref.getArgList());
         var result = instantiate(parent, ref);
         result.addInput(newWire(result, "i1"), newWire(result, "i2"));
         result.addOutput(newWire(result, "o"));
@@ -150,9 +176,9 @@ public class BuiltInComponentFactory {
 
     private ComponentScope createMultiInputComponent(Scope parent, BuiltinRef ref, int argNumHint) {
         int ports;
-        if (!ref.getArguments().isEmpty()) {
-            Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArguments());
-            ports = requiresIntegerValue(ref.getSourceLoc(), ref.getArguments().getFirst()).toInt();
+        if (!ref.getArgList().isEmpty()) {
+            Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArgList());
+            ports = requiresIntegerValue(ref.getSourceLoc(), ref.getArgList().get("n", 0)).toInt();
         } else {
             ports = argNumHint;
         }
