@@ -137,7 +137,7 @@ namespace nxon {
 
     enum class builtin_type {
         NOT, AND, OR, XOR, SHL, LSHR, ASHR, ADD, SUB, MUL, DIV, MOD, CONCAT, ULT, UGT, ULE, UGE, SLT, SGT, SLE, SGE, EQ,
-        NEQ, UCAST, CAST, REGISTER, TO
+        NEQ, UCAST, CAST, REGISTER, ASYNC_REGISTER, TO
     };
 
     static const std::map<std::string, builtin_type> builtin_type_map{
@@ -167,7 +167,8 @@ namespace nxon {
         {"CAST", builtin_type::CAST},
         {"UCAST", builtin_type::UCAST},
         {"TO", builtin_type::TO},
-        {"REGISTER", builtin_type::REGISTER}
+        {"REGISTER", builtin_type::REGISTER},
+        {"ASYNC_REGISTER", builtin_type::ASYNC_REGISTER}
     };
 
     static void parse_builtin(const nlohmann::json &json, parse_context &context) {
@@ -295,6 +296,16 @@ namespace nxon {
                     parse_clock(input[0], json["attribute"]),
                     parse_source(input[1], context),
                     parse_sink(output[0], context)));
+                break;
+            }
+            case builtin_type::ASYNC_REGISTER: {
+                context.circuit.add_rule(rule_factory::async_register_rule(
+                    parse_clock(input[0], json["attribute"]),
+                    parse_source(input[1], context),
+                    parse_source(input[2], context),
+                    parse_sink(output[0], context),
+                    json["attribute"]["high_rst"] == "true",
+                    value_t::parse(json["attribute"]["rst_value"])));
                 break;
             }
             default:

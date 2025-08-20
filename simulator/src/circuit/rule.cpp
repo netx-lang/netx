@@ -253,6 +253,39 @@ namespace nxon {
                 return indirect_id_set(EMPTY_ID_SET);
             }
         };
+
+        struct async_register_rule final : rule_impl {
+            const clock_t clk;
+            const source_t rst;
+            const source_t in;
+            const sink_t out;
+
+            const bool high_rst;
+            const value_t rst_value;
+
+            async_register_rule(clock_t clk, source_t rst, source_t in, sink_t out, const bool high_rst, value_t rst_value)
+                : rule_impl(clk.dependencies(), clk.dependencies() + rst.dependencies() + in.dependencies(), out.outcomes()),
+                  clk(std::move(clk)), rst(std::move(rst)),
+                  in(std::move(in)), out(std::move(out)),
+                  high_rst(high_rst), rst_value(std::move(rst_value)) {
+            }
+
+            indirect_id_set perform(value_storage &values) const override {
+                if (const auto rst_v = rst.get(values); static_cast<bool>(*rst_v) == high_rst && out.check(values, rst_value)) {
+                    out.put(values, rst_value);
+                    return indirect_id_set(out.outcomes());
+                }
+
+                if (auto value = in.get(values); clk.triggered(values) && out.check(values, *value)) {
+                    values.delay([value = value.release(), out = out](auto &cur_values) {
+                        out.put(cur_values, std::move(value));
+                    });
+                    return indirect_id_set(out.outcomes());
+                }
+
+                return indirect_id_set(EMPTY_ID_SET);
+            }
+        };
     }
 
     namespace rule_factory {
@@ -416,6 +449,14 @@ namespace nxon {
 
         rule_t register_rule(clock_t clk, source_t in, sink_t out) {
             return rule_t{new impl::register_rule(std::move(clk), std::move(in), std::move(out))};
+        }
+
+        rule_t async_register_rule(clock_t clk, source_t rst, source_t in, sink_t out, const bool high_rst, value_t rst_value) {
+            return rule_t{new impl::async_register_rule(
+                std::move(clk), std::move(rst),
+                std::move(in), std::move(out),
+                high_rst, std::move(rst_value))
+            };
         }
     }
 }

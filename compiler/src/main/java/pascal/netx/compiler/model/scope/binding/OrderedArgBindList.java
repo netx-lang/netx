@@ -31,6 +31,11 @@ public record OrderedArgBindList(List<Entity> args) implements ArgBindList {
     }
 
     @Override
+    public Entity get(String name, int index) {
+        return  args.get(index);
+    }
+
+    @Override
     @Nonnull
     public String toString() {
         return "(" + String.join(", ", args.stream().map(Entity::toString).toList()) + ")";

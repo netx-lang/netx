@@ -6,14 +6,17 @@ import java.util.Map;
 import java.util.Set;
 
 public enum BuiltinComponent {
-    REGISTER, DUP, SPLIT, TO,
+    REGISTER, ASYNC_REGISTER,
+    DUP, SPLIT, TO,
     UCAST, CAST, CONCAT,
     OR, NOT, AND, XOR, NOR, NAND, XNOR,
     EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE,
     ADD, SUB, SHL, MUL, DIV, MOD, ASHR, LSHR;
 
-    public static final Set<BuiltinComponent> ATTRIBUTED = Set.of(REGISTER);
-    public static final String REGISTER_ATTRIBUTE = "pos_edge";
+    public static final Set<BuiltinComponent> ATTRIBUTED = Set.of(REGISTER, ASYNC_REGISTER);
+    public static final String REG_CLK_EDGE_ATTR = "pos_edge";
+    public static final String REG_RST_EDGE_ATTR = "high_rst";
+    public static final String REG_RST_VALUE_ATTR = "rst_value";
 
     public static final Set<BuiltinComponent> MULTI_INPUT = Set.of(OR, AND, XOR, NOR, NAND, XNOR, CONCAT, ADD, MUL);
     public static final Map<BuiltinComponent, String> VERILOG_OP;
