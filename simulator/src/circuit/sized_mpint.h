@@ -402,10 +402,9 @@ namespace nxon::impl {
 
     protected:
         const sized_mpint &ref;
-        const size_t from, to, len;
+        const size_t from, len;
 
-        const_sized_mpint_slice(const sized_mpint &ref, const size_t from, const size_t to) : ref(ref), from(from),
-            to(to), len(to + 1 - from) {
+        const_sized_mpint_slice(const sized_mpint &ref, const size_t from, const size_t to) : ref(ref), from(from), len(to + 1 - from) {
         }
 
     public:
@@ -418,9 +417,15 @@ namespace nxon::impl {
         const_sized_mpint_slice &operator=(const_sized_mpint_slice &&) = delete;
 
         [[nodiscard]] sized_mpint from_slice() const {
-            sized_mpint::base_t tmp = ref.content;
-            tmp >>= from;
-            return {len, std::move(tmp)};
+            if (len == 1) {
+                static sized_mpint high = {1, 1};
+                static sized_mpint low  = {1, 0};
+                if (ref.content >> from & 1) {
+                    return high;
+                }
+                return low;
+            }
+            return {len, ref.content >> from};
         }
 
         [[nodiscard]] size_t length() const {
