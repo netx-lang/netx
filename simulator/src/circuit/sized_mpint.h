@@ -8,6 +8,8 @@
 #include <concepts>
 #include <string>
 #include <algorithm>
+#include <unordered_map>
+#include <mutex>
 #include <boost/multiprecision/cpp_int.hpp>
 
 namespace nxon::impl {
@@ -18,12 +20,25 @@ namespace nxon::impl {
 
         base_t content;
         size_t _size;
-        base_t mask;
+
+        [[nodiscard]] base_t &mask() const {
+            return mask(_size);
+        }
+
+        [[nodiscard]] static base_t &mask(const size_t _size) {
+            static std::unordered_map<size_t, base_t> mask_cache;
+            static std::mutex mask_mutex;
+            std::lock_guard lock(mask_mutex);
+            if (!mask_cache.contains(_size)) {
+                base_t mask = 1;
+                mask <<= _size;
+                mask -= 1;
+                mask_cache[_size] = mask;
+            }
+            return mask_cache[_size];
+        }
 
         void init_mask() {
-            mask = 1;
-            mask <<= size();
-            mask -= 1;
             and_mask();
         }
 
@@ -37,7 +52,7 @@ namespace nxon::impl {
         }
 
         void and_mask() {
-            content &= mask;
+            content &= mask();
         }
 
         bool normalize_sign(sized_mpint &other) {
@@ -177,7 +192,7 @@ namespace nxon::impl {
             if (comp == std::strong_ordering::greater) {
                 sized_mpint result(new_size);
                 result.content |= content;
-                if (sign()) result.content |= result.mask ^ mask;
+                if (sign()) result.content |= result.mask() ^ mask();
                 return result;
             }
             if (comp == std::strong_ordering::less)
@@ -200,7 +215,7 @@ namespace nxon::impl {
         }
 
         sized_mpint &flip() {
-            content ^= mask;
+            content ^= mask();
             return *this;
         }
 
@@ -238,7 +253,7 @@ namespace nxon::impl {
             operator>>=(cnt);
             if (flag) {
                 const auto mask_tail = size() - std::min(cnt, size());
-                auto mask_head = mask;
+                auto mask_head = mask();
                 mask_head >>= mask_tail;
                 mask_head <<= mask_tail;
                 content |= mask_head;
@@ -388,14 +403,9 @@ namespace nxon::impl {
     protected:
         const sized_mpint &ref;
         const size_t from, to, len;
-        sized_mpint::base_t mask_n{1};
 
         const_sized_mpint_slice(const sized_mpint &ref, const size_t from, const size_t to) : ref(ref), from(from),
             to(to), len(to + 1 - from) {
-            mask_n <<= len;
-            mask_n -= 1;
-            mask_n <<= from;
-            mask_n = ~mask_n;
         }
 
     public:
@@ -410,7 +420,6 @@ namespace nxon::impl {
         [[nodiscard]] sized_mpint from_slice() const {
             sized_mpint::base_t tmp = ref.content;
             tmp >>= from;
-            tmp ^= tmp >> len << len;
             return {len, std::move(tmp)};
         }
 
@@ -451,7 +460,7 @@ namespace nxon::impl {
             auto &other_ref = other.content;
             other_ref <<= from;
             auto &this_ref = ref.content;
-            this_ref &= mask_n;
+            this_ref &= ~(sized_mpint::mask(len) << from);
             this_ref |= other_ref;
             return *this;
         }
