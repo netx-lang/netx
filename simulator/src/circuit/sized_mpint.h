@@ -9,6 +9,7 @@
 #include <string>
 #include <algorithm>
 #include <unordered_map>
+#include <mutex>
 #include <shared_mutex>
 #include <boost/multiprecision/cpp_int.hpp>
 
@@ -75,6 +76,15 @@ namespace nxon::impl {
             return result_sign;
         }
 
+        static base_t stomul(const std::string &s, const int base = 10) {
+            base_t result = 0;
+            for (const auto c: s) {
+                result *= base;
+                result += std::stoi(std::string{c}, nullptr, base);
+            }
+            return result;
+        }
+
     public:
         friend std::ostream &operator<<(std::ostream &out, const sized_mpint &self) {
             out << self.size() << "'b";
@@ -114,9 +124,9 @@ namespace nxon::impl {
                     default:
                         throw std::invalid_argument("Invalid number base");
                 }
-                return {size, std::stoull(str.substr(pos + 2), nullptr, base)};
+                return {size, stomul(str.substr(pos + 2), base)};
             }
-            return {32, std::stoull(str)};
+            return {32, stomul(str)};
         }
 
         sized_mpint() : sized_mpint(1) {
