@@ -45,24 +45,7 @@ namespace nxon {
                 return circuit_parts[belongs.at(id)]->part.get_value(id);
             }
 
-            void run_to_fixed() {
-                while (true) {
-                    size_t cnt = 0;
-                    for (size_t i = 0; i < num_parts; ++i) {
-                        auto &part = *circuit_parts[i];
-                        if (part.updates.empty()) continue;
-                        ++cnt;
-                        part.updates_old.swap(part.updates);
-                    }
-                    if (cnt == 0) break;
-
-                    #pragma omp parallel for
-                    for (size_t i = 0; i < num_parts; ++i) {
-                        if (auto &part = *circuit_parts[i]; part.updates_old.empty()) continue;
-                        worker_part(*this, i);
-                    }
-                }
-            }
+            void run_to_fixed();
 
         private:
             static void worker_part(partitioned_circuit_context &partition,

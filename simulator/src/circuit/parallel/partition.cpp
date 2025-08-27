@@ -97,6 +97,25 @@ namespace nxon {
         context = std::move(result);
     }
 
+    void impl::partitioned_circuit_context::run_to_fixed() {
+        while (true) {
+            size_t cnt = 0;
+            for (size_t i = 0; i < num_parts; ++i) {
+                auto &part = *circuit_parts[i];
+                if (part.updates.empty()) continue;
+                ++cnt;
+                part.updates_old.swap(part.updates);
+            }
+            if (cnt == 0) break;
+
+#pragma omp parallel for default(shared)
+            for (size_t i = 0; i < num_parts; ++i) {
+                if (auto &part = *circuit_parts[i]; part.updates_old.empty()) continue;
+                worker_part(*this, i);
+            }
+        }
+    }
+
     void impl::partitioned_circuit_context::worker_part(partitioned_circuit_context &partition, const size_t part_id) {
         auto &part = *partition.circuit_parts[part_id];
 
