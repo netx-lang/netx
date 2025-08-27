@@ -9,7 +9,7 @@
 #include <string>
 #include <algorithm>
 #include <unordered_map>
-#include <mutex>
+#include <shared_mutex>
 #include <boost/multiprecision/cpp_int.hpp>
 
 namespace nxon::impl {
@@ -20,22 +20,29 @@ namespace nxon::impl {
 
         base_t content;
         size_t _size;
+        mutable const base_t *mask_ptr = nullptr;
 
-        [[nodiscard]] base_t &mask() const {
-            return mask(_size);
+        [[nodiscard]] const base_t &mask() const {
+            if (mask_ptr == nullptr)
+                mask_ptr = &mask(_size);
+            return *mask_ptr;
         }
 
-        [[nodiscard]] static base_t &mask(const size_t _size) {
+        [[nodiscard]] static const base_t &mask(const size_t _size) {
             static std::unordered_map<size_t, base_t> mask_cache;
-            static std::mutex mask_mutex;
-            std::lock_guard lock(mask_mutex);
-            if (!mask_cache.contains(_size)) {
+            static std::shared_mutex mask_mutex; {
+                std::shared_lock lock(mask_mutex);
+                if (const auto iter = mask_cache.find(_size); iter != mask_cache.end())
+                    return iter->second;
+            } {
+                std::unique_lock lock(mask_mutex);
+                if (const auto iter = mask_cache.find(_size); iter != mask_cache.end())
+                    return iter->second;
                 base_t mask = 1;
                 mask <<= _size;
                 mask -= 1;
-                mask_cache[_size] = mask;
+                return mask_cache.emplace(_size, std::move(mask)).first->second;
             }
-            return mask_cache[_size];
         }
 
         void init_mask() {
@@ -404,7 +411,8 @@ namespace nxon::impl {
         const sized_mpint &ref;
         const size_t from, len;
 
-        const_sized_mpint_slice(const sized_mpint &ref, const size_t from, const size_t to) : ref(ref), from(from), len(to + 1 - from) {
+        const_sized_mpint_slice(const sized_mpint &ref, const size_t from, const size_t to) : ref(ref), from(from),
+            len(to + 1 - from) {
         }
 
     public:
@@ -419,7 +427,7 @@ namespace nxon::impl {
         [[nodiscard]] sized_mpint from_slice() const {
             if (len == 1) {
                 static sized_mpint high = {1, 1};
-                static sized_mpint low  = {1, 0};
+                static sized_mpint low = {1, 0};
                 if (ref.content >> from & 1) {
                     return high;
                 }
