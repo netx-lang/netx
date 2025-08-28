@@ -3,9 +3,13 @@ project(nxsim_src VERSION 1.0 LANGUAGES CXX)
 
 add_library(nxsim INTERFACE)
 target_include_directories(nxsim INTERFACE ${Boost_INCLUDE_DIRS})
+if (GMP_FOUND)
+    target_link_libraries(nxsim INTERFACE gmp)
+endif ()
 target_link_libraries(nxsim INTERFACE nlohmann_json::nlohmann_json kahip OpenMP::OpenMP_CXX)
 
 add_subdirectory(circuit)
+add_subdirectory(multiprecision)
 
 add_executable(nxsim_exe main.cpp cli.cpp)
 target_link_libraries(nxsim_exe PRIVATE nxsim)
@@ -17,7 +21,7 @@ install(TARGETS nxsim nxsim_exe
         ARCHIVE DESTINATION lib
 )
 
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/circuit/
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
         DESTINATION include/nxsim
         FILES_MATCHING PATTERN "*.h"
 )
