@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 
+#define SIZED_MPINT_BACKEND boost::multiprecision::uint128_t
 #include "circuit/parallel.h"
 #include "circuit/circuit_parser.h"
 
