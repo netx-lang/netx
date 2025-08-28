@@ -5,7 +5,7 @@
 #ifndef PARALLEL_H
 #define PARALLEL_H
 #include "circuit_parser.h"
-#include "partition.h"
+#include "parallel/partition.h"
 
 namespace nxon {
     struct parallel_parse_context : parse_context {

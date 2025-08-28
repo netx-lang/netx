@@ -143,23 +143,6 @@ else
     sed -i "s|APP_HOME=.*|APP_HOME=\"$INSTALL_DIR\"|" "$BIN_DIR/nx"
 fi
 
-# Copy C++ headers to include directory
-SIM_SRC_DIR="simulator/src"
-INCLUDE_DIR="$INSTALL_DIR/include"
-echo "Installing C++ headers..."
-if [ -d "$SIM_SRC_DIR" ]; then
-    mkdir -p "$INCLUDE_DIR"
-    # Copy all .h and .hpp files, preserving directory structure
-    find "$SIM_SRC_DIR" \( -name '*.h' -o -name '*.hpp' \) | while read -r header; do
-        relpath="${header#$SIM_SRC_DIR/}"
-        targetdir="$INCLUDE_DIR/$(dirname "$relpath")"
-        mkdir -p "$targetdir"
-        cp "$header" "$targetdir/"
-    done
-else
-    echo "Warning: No C++ headers found in $SIM_SRC_DIR"
-fi
-
 # Function to detect user's shell and get config file
 detect_shell_config() {
     # Get the user's shell
@@ -271,11 +254,3 @@ echo "For system-wide installation, run with:"
 echo "  INSTALL_PREFIX=/usr/local ./install.sh"
 echo
 echo "To uninstall, run: ./uninstall.sh"
-
-# Updated C++ development instructions
-if [ "$PLATFORM" != "windows" ]; then
-    echo "For C++ development:"
-    echo "  - Headers and libraries are automatically configured via environment variables"
-    echo "  - You can now simply use: g++ myfile.cpp -flto -lnxsim"
-    echo
-fi
