@@ -6,7 +6,6 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -fno-rtti")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ffast-math")
 set(CMAKE_CXX_FLAGS_DEBUG "-ggdb -fsanitize=address,undefined -fno-omit-frame-pointer -fsanitize-trap=all -O0")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Og -ggdb")
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-stdlib=libc++" HAS_LIBCXX)
