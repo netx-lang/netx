@@ -713,11 +713,9 @@ namespace std {
 namespace boost::multiprecision {
    namespace backends {
       using uint64_backend = arithmetic_backend<uint64_t>;
-      using uint128_backend = arithmetic_backend<uint128_t>;
    }
 
    using uint64_based_int = number<backends::uint64_backend>;
-   using uint128_based_int = number<backends::uint128_backend>;
 }
 
 #endif
