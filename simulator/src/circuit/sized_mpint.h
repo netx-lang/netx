@@ -13,9 +13,13 @@
 #include <shared_mutex>
 #include <boost/multiprecision/cpp_int.hpp>
 
+#ifndef SIZED_MPINT_BACKEND
+#define SIZED_MPINT_BACKEND boost::multiprecision::cpp_int
+#endif
+
 namespace nxon::impl {
     class sized_mpint {
-        using base_t = boost::multiprecision::cpp_int;
+        using base_t = SIZED_MPINT_BACKEND;
         friend class const_sized_mpint_slice;
         friend class sized_mpint_slice;
 
