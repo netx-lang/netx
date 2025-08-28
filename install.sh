@@ -34,6 +34,7 @@ DEFAULT_INSTALL_DIR=$(get_default_install_dir)
 INSTALL_DIR="${INSTALL_PREFIX:-${INSTALL_DIR:-$DEFAULT_INSTALL_DIR}}"
 DIST_DIR="build/install/nx"
 BIN_DIR="$INSTALL_DIR/bin"
+INCLUDE_DIR="$INSTALL_DIR/include"
 LIB_DIR="$INSTALL_DIR/lib"
 
 echo "NetX Installation Script"
