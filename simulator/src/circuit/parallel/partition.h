@@ -143,8 +143,8 @@ namespace nxon {
                     adjncy[current_ptr++] = static_cast<int>(out_id);
             }
             xadj[n] = current_ptr;
-            int nparts = static_cast<int>(std::thread::hardware_concurrency());
-            double imbalance = 0.02;
+            int nparts = 2 + static_cast<int>(std::thread::hardware_concurrency());
+            double imbalance = 10;
             const int seed = static_cast<int>(std::random_device{}());
             int edgecut;
             const auto part = std::make_unique<int[]>(n);
