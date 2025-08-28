@@ -7,7 +7,8 @@
 #include <fstream>
 #include <iostream>
 
-#define SIZED_MPINT_BACKEND boost::multiprecision::uint128_t
+#include "multiprecision/arithmetic_backend.h"
+#define SIZED_MPINT_BACKEND boost::multiprecision::uint64_based_int
 #include "circuit/parallel.h"
 #include "circuit/circuit_parser.h"
 

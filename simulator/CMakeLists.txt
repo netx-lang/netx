@@ -14,6 +14,8 @@ if (HAS_LIBCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 endif ()
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 # Disable FindBoost module
 if (POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)
@@ -21,6 +23,7 @@ endif ()
 find_package(Boost 1.80 REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(OpenMP REQUIRED)
+find_package(GMP QUIET)
 
 add_subdirectory(src)
 
