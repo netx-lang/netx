@@ -505,4 +505,15 @@ namespace nxon::impl {
     }
 }
 
+template<>
+struct std::formatter<nxon::impl::sized_mpint> {
+    static constexpr auto parse(const std::format_parse_context& ctx) {
+        return ctx.begin();
+    }
+
+    static auto format(const nxon::impl::sized_mpint& v, std::format_context& ctx) {
+        return std::format_to(ctx.out(), "{}'b{} ({})", v.size(), v.to_binary_string(), static_cast<uint64_t>(v));
+    }
+};
+
 #endif //SIZED_MPINT_H
