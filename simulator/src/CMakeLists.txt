@@ -9,7 +9,6 @@ endif ()
 target_link_libraries(nxsim INTERFACE nlohmann_json::nlohmann_json kahip OpenMP::OpenMP_CXX)
 
 add_subdirectory(circuit)
-add_subdirectory(multiprecision)
 
 add_executable(nxsim_exe main.cpp cli.cpp)
 target_link_libraries(nxsim_exe PRIVATE nxsim)
