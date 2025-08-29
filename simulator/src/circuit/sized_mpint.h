@@ -53,7 +53,7 @@ namespace nxon::impl {
             and_mask();
         }
 
-        sized_mpint(const size_t size, base_t value) : content(std::move(value)), _size(size) {
+        sized_mpint(const size_t size, base_t value, int) : content(std::move(value)), _size(size) {
             init_mask();
         }
 
@@ -127,20 +127,31 @@ namespace nxon::impl {
                     default:
                         throw std::invalid_argument("Invalid number base");
                 }
-                return {size, stomul(str.substr(pos + 2), base)};
+                return {size, stomul(str.substr(pos + 2), base), 0};
             }
-            return {32, stomul(str)};
+            return {32, stomul(str), 0};
         }
 
         sized_mpint() : sized_mpint(1) {
         }
 
-        explicit sized_mpint(const size_t size) : _size(size) {
+        explicit sized_mpint(const size_t size) : content(), _size(size) {
             init_mask();
         }
 
-        sized_mpint(const size_t size, const unsigned long long value) : content(value), _size(size) {
+        sized_mpint(const size_t size, const std::unsigned_integral auto value) : content(value), _size(size) {
             init_mask();
+        }
+
+        template<std::signed_integral T>
+        static auto unsigned_abs(const T value) {
+            using target_t = std::make_unsigned_t<T>;
+            if (value >= 0) return static_cast<target_t>(value);
+            return static_cast<target_t>(-(value + 1)) + 1;
+        }
+
+        sized_mpint(const size_t size, const std::signed_integral auto value) : sized_mpint(size, unsigned_abs(value)) {
+            if (value < 0) negate();
         }
 
         sized_mpint(const sized_mpint &) = default;
@@ -160,12 +171,12 @@ namespace nxon::impl {
         }
 
         [[nodiscard]] explicit operator bool() const {
-            return content.operator bool();
+            return static_cast<bool>(content);
         }
 
         template<std::unsigned_integral T>
         [[nodiscard]] explicit operator T() const {
-            return content.template convert_to<T>();
+            return static_cast<T>(content);
         }
 
         template<std::signed_integral T>
@@ -173,7 +184,7 @@ namespace nxon::impl {
             sized_mpint tmp = *this;
             const bool flag = tmp.sign();
             if (flag) tmp.negate();
-            auto v = tmp.content.template convert_to<T>();
+            auto v = static_cast<T>(tmp.content);
             if (flag) v = -v;
             return v;
         }
@@ -216,7 +227,7 @@ namespace nxon::impl {
                 return result;
             }
             if (comp == std::strong_ordering::less)
-                return {new_size, content};
+                return {new_size, content, 0};
             std::unreachable();
         }
 
@@ -229,7 +240,7 @@ namespace nxon::impl {
                 return result;
             }
             if (comp == std::strong_ordering::less) {
-                return {new_size, content};
+                return {new_size, content, 0};
             }
             std::unreachable();
         }
@@ -413,7 +424,7 @@ namespace nxon::impl {
             base_t tmp = content;
             tmp <<= other.size();
             tmp |= other.content;
-            return {size() + other.size(), std::move(tmp)};
+            return {size() + other.size(), std::move(tmp), 0};
         }
     };
 
@@ -440,14 +451,14 @@ namespace nxon::impl {
 
         [[nodiscard]] sized_mpint<backend> from_slice() const {
             if (len == 1) {
-                static sized_mpint<backend> high = {1, 1};
-                static sized_mpint<backend> low = {1, 0};
+                static sized_mpint<backend> high = {1, 1u};
+                static sized_mpint<backend> low = {1, 0u};
                 if (ref.content >> from & 1) {
                     return high;
                 }
                 return low;
             }
-            return {len, ref.content >> from};
+            return {len, ref.content >> from, 0};
         }
 
         [[nodiscard]] size_t length() const {
@@ -511,11 +522,11 @@ namespace nxon::impl {
 
 template<typename backend>
 struct std::formatter<nxon::impl::sized_mpint<backend>> {
-    static constexpr auto parse(const std::format_parse_context& ctx) {
+    static constexpr auto parse(const std::format_parse_context &ctx) {
         return ctx.begin();
     }
 
-    static auto format(const nxon::impl::sized_mpint<backend>& v, std::format_context& ctx) {
+    static auto format(const nxon::impl::sized_mpint<backend> &v, std::format_context &ctx) {
         return std::format_to(ctx.out(), "{}'b{} ({})", v.size(), v.to_binary_string(), static_cast<uint64_t>(v));
     }
 };
