@@ -13,15 +13,14 @@
 #include <shared_mutex>
 #include <boost/multiprecision/cpp_int.hpp>
 
-#ifndef SIZED_MPINT_BACKEND
-#define SIZED_MPINT_BACKEND boost::multiprecision::cpp_int
-#endif
-
 namespace nxon::impl {
+    template<typename backend>
     class sized_mpint {
-        using base_t = SIZED_MPINT_BACKEND;
-        friend class const_sized_mpint_slice;
-        friend class sized_mpint_slice;
+        using base_t = backend;
+
+        template<typename T> friend class const_sized_mpint_slice;
+
+        template<typename T> friend class sized_mpint_slice;
 
         base_t content;
         size_t _size;
@@ -166,7 +165,7 @@ namespace nxon::impl {
 
         template<std::unsigned_integral T>
         [[nodiscard]] explicit operator T() const {
-            return content.convert_to<T>();
+            return content.template convert_to<T>();
         }
 
         template<std::signed_integral T>
@@ -174,20 +173,20 @@ namespace nxon::impl {
             sized_mpint tmp = *this;
             const bool flag = tmp.sign();
             if (flag) tmp.negate();
-            auto v = tmp.content.convert_to<T>();
+            auto v = tmp.content.template convert_to<T>();
             if (flag) v = -v;
             return v;
         }
 
         [[nodiscard]] std::strong_ordering operator<=>(const sized_mpint &other) const {
-            if (size() != other.size()) throw std::runtime_error("Sizes don't match");
+            if (size() != other.size()) throw std::invalid_argument("Sizes don't match");
             if (content < other.content) return std::strong_ordering::less;
             if (content == other.content) return std::strong_ordering::equal;
             return std::strong_ordering::greater;
         }
 
         [[nodiscard]] std::strong_ordering signed_compare(const sized_mpint &other) const {
-            if (size() != other.size()) throw std::runtime_error("Sizes don't match");
+            if (size() != other.size()) throw std::invalid_argument("Sizes don't match");
             const bool this_sign = sign(), other_sign = other.sign();
             if (this_sign && other_sign) return -other <=> -*this;
             if (this_sign) return std::strong_ordering::less;
@@ -418,14 +417,15 @@ namespace nxon::impl {
         }
     };
 
+    template<typename backend>
     class const_sized_mpint_slice {
-        friend class sized_mpint;
+        template<typename T> friend class sized_mpint;
 
     protected:
-        const sized_mpint &ref;
+        const sized_mpint<backend> &ref;
         const size_t from, len;
 
-        const_sized_mpint_slice(const sized_mpint &ref, const size_t from, const size_t to) : ref(ref), from(from),
+        const_sized_mpint_slice(const sized_mpint<backend> &ref, const size_t from, const size_t to) : ref(ref), from(from),
             len(to + 1 - from) {
         }
 
@@ -438,10 +438,10 @@ namespace nxon::impl {
 
         const_sized_mpint_slice &operator=(const_sized_mpint_slice &&) = delete;
 
-        [[nodiscard]] sized_mpint from_slice() const {
+        [[nodiscard]] sized_mpint<backend> from_slice() const {
             if (len == 1) {
-                static sized_mpint high = {1, 1};
-                static sized_mpint low = {1, 0};
+                static sized_mpint<backend> high = {1, 1};
+                static sized_mpint<backend> low = {1, 0};
                 if (ref.content >> from & 1) {
                     return high;
                 }
@@ -455,21 +455,24 @@ namespace nxon::impl {
         }
     };
 
-    inline auto sized_mpint::slice(const size_t from, const size_t to) const {
+    template<typename backend>
+    auto sized_mpint<backend>::slice(const size_t from, const size_t to) const {
         bound_check(from, to);
-        return const_sized_mpint_slice{*this, from, to};
+        return const_sized_mpint_slice<backend>(*this, from, to);
     }
 
-    inline auto sized_mpint::const_slice(const size_t from, const size_t to) const {
+    template<typename backend>
+    auto sized_mpint<backend>::const_slice(const size_t from, const size_t to) const {
         return slice(from, to);
     }
 
-    class sized_mpint_slice final : public const_sized_mpint_slice {
-        friend class sized_mpint;
+    template<typename backend>
+    class sized_mpint_slice final : public const_sized_mpint_slice<backend> {
+        template<typename T> friend class sized_mpint;
 
-        sized_mpint &ref;
+        sized_mpint<backend> &ref;
 
-        sized_mpint_slice(sized_mpint &ref, const size_t from, const size_t to) : const_sized_mpint_slice(
+        sized_mpint_slice(sized_mpint<backend> &ref, const size_t from, const size_t to) : const_sized_mpint_slice<backend>(
                 ref, from, to), ref(ref) {
         }
 
@@ -482,36 +485,37 @@ namespace nxon::impl {
 
         sized_mpint_slice &operator=(sized_mpint_slice &&) = delete;
 
-        sized_mpint_slice &operator=(sized_mpint other) {
-            if (length() != other.size()) throw std::runtime_error("Sizes don't match");
+        sized_mpint_slice &operator=(sized_mpint<backend> other) {
+            if (this->length() != other.size()) throw std::invalid_argument("Sizes don't match");
             auto &other_ref = other.content;
-            other_ref <<= from;
+            other_ref <<= this->from;
             auto &this_ref = ref.content;
-            this_ref &= ~(sized_mpint::mask(len) << from);
+            this_ref &= ~(sized_mpint<backend>::mask(this->len) << this->from);
             this_ref |= other_ref;
             return *this;
         }
 
-        sized_mpint_slice &operator=(const const_sized_mpint_slice &other) {
-            if (length() != other.length()) throw std::runtime_error("Sizes don't match");
+        sized_mpint_slice &operator=(const const_sized_mpint_slice<backend> &other) {
+            if (this->length() != other.length()) throw std::invalid_argument("Sizes don't match");
             operator=(other.from_slice());
             return *this;
         }
     };
 
-    inline auto sized_mpint::slice(const size_t from, const size_t to) {
+    template<typename backend>
+    auto sized_mpint<backend>::slice(const size_t from, const size_t to) {
         bound_check(from, to);
         return sized_mpint_slice{*this, from, to};
     }
 }
 
-template<>
-struct std::formatter<nxon::impl::sized_mpint> {
+template<typename backend>
+struct std::formatter<nxon::impl::sized_mpint<backend>> {
     static constexpr auto parse(const std::format_parse_context& ctx) {
         return ctx.begin();
     }
 
-    static auto format(const nxon::impl::sized_mpint& v, std::format_context& ctx) {
+    static auto format(const nxon::impl::sized_mpint<backend>& v, std::format_context& ctx) {
         return std::format_to(ctx.out(), "{}'b{} ({})", v.size(), v.to_binary_string(), static_cast<uint64_t>(v));
     }
 };

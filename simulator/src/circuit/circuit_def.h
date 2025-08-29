@@ -22,7 +22,12 @@ using compatible_flat_set = boost::container::flat_set<T>;
 namespace nxon {
     using id_t = unsigned;
 
-    using value_t = impl::sized_mpint;
+#ifndef SIZED_MPINT_BACKEND
+    using value_t = impl::sized_mpint<boost::multiprecision::cpp_int>;
+#else
+    using value_t = impl::sized_mpint<SIZED_MPINT_BACKEND>;
+#endif
+
 
     namespace impl {
         class id_set_impl : public compatible_flat_set<id_t> {
