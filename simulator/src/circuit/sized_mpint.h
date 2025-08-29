@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <mutex>
 #include <shared_mutex>
-#include <boost/multiprecision/cpp_int.hpp>
+#include <utility>
 
 namespace nxon::impl {
     template<typename Backend>
@@ -55,7 +55,7 @@ namespace nxon::impl {
             and_mask();
         }
 
-        sized_mpint(const size_t size, base_t value, int) : content(std::move(value)), _size(size) {
+        sized_mpint(const size_t size, base_t value, uint32_t) : content(std::move(value)), _size(size) {
             init_mask();
         }
 

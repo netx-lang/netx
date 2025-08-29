@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 #include <print>
 
-#include "arithmetic_backend.h"
+#include <boost/multiprecision/cpp_int.hpp>
 #include "sized_mpint.h"
 
-using vec_64 = nxon::impl::sized_mpint<boost::multiprecision::uint64_based_int>;
+using vec_64 = nxon::impl::sized_mpint<uint64_t>;
 using vec_unlimited = nxon::impl::sized_mpint<boost::multiprecision::cpp_int>;
 
 TEST(SizedMpint64Test, ConstructionAndMask) {
