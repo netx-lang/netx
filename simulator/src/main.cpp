@@ -7,9 +7,8 @@
 #include <fstream>
 #include <iostream>
 
-#define SIZED_MPINT_BACKEND uint64_t
-#include "circuit/parallel.h"
-#include "circuit/circuit_parser.h"
+#define NX_BACKEND uint64_t
+#include "simulation.h"
 
 int main() {
     const std::string path = "/home/czm233/draft/NetX-FFT/fft.json";

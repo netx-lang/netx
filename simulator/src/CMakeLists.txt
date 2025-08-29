@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.28)
 project(nxsim_src VERSION 1.0 LANGUAGES CXX)
 
-add_library(nxsim INTERFACE)
+add_library(nxsim INTERFACE simulation.h)
 target_include_directories(nxsim INTERFACE ${Boost_INCLUDE_DIRS})
 if (GMP_FOUND)
     target_link_libraries(nxsim INTERFACE gmp)

@@ -5,6 +5,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <functional>
 #include <version>
 #include <unordered_map>
 #ifdef __cpp_lib_flat_set
@@ -22,12 +23,7 @@ using compatible_flat_set = boost::container::flat_set<T>;
 namespace nxon {
     using id_t = unsigned;
 
-#ifndef SIZED_MPINT_BACKEND
-    using value_t = impl::sized_mpint<boost::multiprecision::cpp_int>;
-#else
-    using value_t = impl::sized_mpint<SIZED_MPINT_BACKEND>;
-#endif
-
+    using value_t = impl::sized_mpint<NX_BACKEND>;
 
     namespace impl {
         class id_set_impl : public compatible_flat_set<id_t> {
