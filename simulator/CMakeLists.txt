@@ -8,12 +8,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "-ggdb -fsanitize=address,undefined -fno-omit-frame-po
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Og -ggdb")
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 
-include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag("-stdlib=libc++" HAS_LIBCXX)
-if (HAS_LIBCXX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-endif ()
-
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Disable FindBoost module
@@ -26,6 +20,13 @@ find_package(OpenMP REQUIRED)
 find_package(GMP QUIET)
 
 add_subdirectory(src)
+
+option(TESTING "Enable testing" ON)
+if(TESTING)
+    find_package(GTest REQUIRED)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(

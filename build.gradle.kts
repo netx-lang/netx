@@ -40,7 +40,7 @@ tasks.register("configureCMake", Exec::class) {
     description = "Configures the C++ project using CMake."
     workingDir = cppBuildDir
     commandLine = listOf(
-        "cmake", cmakeSourceDir.absolutePath, "-DCMAKE_BUILD_TYPE=Release"
+        "cmake", cmakeSourceDir.absolutePath, "-DCMAKE_BUILD_TYPE=Release", "-DTESTING=OFF"
     )
     doFirst {
         cppBuildDir.mkdirs()
