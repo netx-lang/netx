@@ -23,6 +23,9 @@ using compatible_flat_set = boost::container::flat_set<T>;
 namespace nxon {
     using id_t = unsigned;
 
+#ifndef NX_BACKEND
+    #define NX_BACKEND uint64_t
+#endif
     using value_t = impl::sized_mpint<NX_BACKEND>;
 
     namespace impl {
