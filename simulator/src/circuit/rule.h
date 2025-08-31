@@ -7,6 +7,7 @@
 
 #include "circuit_def.h"
 #include <version>
+#include <atomic>
 #include <memory>
 #include <utility>
 #include <algorithm>
@@ -685,6 +686,10 @@ namespace nxon {
 
     using rule_storage = impl::id_based_map<std::vector<rule_t> >;
 
+#ifdef NX_COUNT_PERFORM
+    inline std::atomic_uint32_t perform_cnt = 0;
+#endif
+
     class rule_set {
         std::set<rule_t> all_rules;
         rule_storage trigger_rules;
@@ -707,6 +712,9 @@ namespace nxon {
                 for (const id_t id: to_consider) collect_rules(to_perform, id);
 
                 for (const auto &rule: to_perform) {
+#ifdef NX_COUNT_PERFORM
+                    ++perform_cnt;
+#endif
                     const auto rule_changed = rule.perform(values);
 #ifdef __cpp_lib_containers_ranges
                     to_consider_swap.append_range(*rule_changed);
