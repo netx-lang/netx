@@ -148,9 +148,8 @@ namespace nxon {
             const int seed = static_cast<int>(std::random_device{}());
             int edgecut;
             const auto part = std::make_unique<int[]>(n);
-            kaffpa_balance_NE(&n, nullptr, xadj.get(), nullptr, adjncy.get(), &nparts, &imbalance, false, seed, STRONG,
-                              &edgecut,
-                              part.get());
+            kaffpa(&n, nullptr, xadj.get(), nullptr, adjncy.get(), &nparts, &imbalance, false, seed, STRONG, &edgecut,
+                   part.get());
 
             impl::partitioned_circuit_context result;
             result.num_parts = nparts;
