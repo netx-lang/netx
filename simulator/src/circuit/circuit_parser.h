@@ -63,6 +63,13 @@ namespace nxon {
             name_map.emplace(org_name, id);
         }
 
+        id_t new_tmp_wire(const size_t size, std::string org_name) {
+            const auto id = members_total;
+            ++members_total;
+            new_wire(id, size, std::move(org_name));
+            return id;
+        }
+
         [[nodiscard]] value_t get(const id_t id) const {
             return circuit.get_value(id);
         }
@@ -159,12 +166,14 @@ namespace nxon {
                                           parse_sink(outputs.at(0), context)));
         }
 
+        inline size_t binary_output_len(const source_t &a, const source_t &b, const bool len_sum) {
+            return len_sum ? a.len() + b.len() : a.len();;
+        }
+
         inline source_t binary_combine(rule_t (*cons)(source_t, source_t, sink_t), source_t a, source_t b,
                                        parse_context &context, const bool len_sum) {
-            const auto new_id = context.members_total;
-            const auto new_len = len_sum ? a.len() + b.len() : a.len();
-            ++context.members_total;
-            context.new_wire(new_id, new_len, "binary_mid");
+            const auto new_len = binary_output_len(a, b, len_sum);
+            const auto new_id = context.new_tmp_wire(new_len, "binary_mid");
             context.circuit.add_rule(cons(std::move(a), std::move(b), data_factory::id_sink(new_id, new_len)));
 
             return data_factory::id_source(new_id, new_len);
@@ -172,8 +181,9 @@ namespace nxon {
 
         inline void parse_variadic_binary(const nlohmann::json &inputs, const nlohmann::json &outputs,
                                           parse_context &context,
-                                          rule_t (*cons)(source_t, source_t, sink_t), const bool assoc = true,
-                                          const bool len_sum = false) {
+                                          rule_t (*cons)(source_t, source_t, sink_t),
+                                          const bool assoc = true, const bool len_sum = false,
+                                          rule_t (*last)(source_t, sink_t) = nullptr) {
             if (outputs.size() != 1) throw std::invalid_argument("Need exactly one output");
             sink_t output = parse_sink(outputs.at(0), context);
 
@@ -221,11 +231,16 @@ namespace nxon {
             sources.pop_front();
             auto src2 = sources.front();
             sources.pop_front();
-            context.circuit.add_rule(cons(std::move(src1), std::move(src2), std::move(output)));
+            if (last == nullptr)
+                context.circuit.add_rule(cons(std::move(src1), std::move(src2), std::move(output)));
+            else
+                context.circuit.add_rule(last(binary_combine(cons, std::move(src1), std::move(src2), context, len_sum),
+                                              std::move(output)));
         }
 
         enum class builtin_type {
-            NOT, AND, OR, XOR, SHL, LSHR, ASHR, ADD, SUB, MUL, DIV, MOD, CONCAT, ULT, UGT, ULE, UGE, SLT, SGT, SLE, SGE,
+            NOT, AND, NAND, OR, NOR, XOR, SHL, LSHR, ASHR, ADD, SUB, MUL, DIV, MOD, CONCAT, ULT, UGT, ULE, UGE, SLT,
+            SGT, SLE, SGE,
             EQ,
             NEQ, UCAST, CAST, REGISTER, ASYNC_REGISTER, TO
         };
@@ -233,7 +248,9 @@ namespace nxon {
         const std::map<std::string, builtin_type> builtin_type_map{
             {"NOT", builtin_type::NOT},
             {"AND", builtin_type::AND},
+            {"NAND", builtin_type::NAND},
             {"OR", builtin_type::OR},
+            {"NOR", builtin_type::NOR},
             {"XOR", builtin_type::XOR},
             {"SHL", builtin_type::SHL},
             {"LSHR", builtin_type::LSHR},
@@ -276,8 +293,18 @@ namespace nxon {
                     parse_variadic_binary(input, output, context, rule_factory::and_rule);
                     break;
                 }
+                case builtin_type::NAND: {
+                    parse_variadic_binary(input, output, context, rule_factory::and_rule, true, false,
+                                          rule_factory::not_rule);
+                    break;
+                }
                 case builtin_type::OR: {
                     parse_variadic_binary(input, output, context, rule_factory::or_rule);
+                    break;
+                }
+                case builtin_type::NOR: {
+                    parse_variadic_binary(input, output, context, rule_factory::or_rule, true, false,
+                                          rule_factory::not_rule);
                     break;
                 }
                 case builtin_type::XOR: {
