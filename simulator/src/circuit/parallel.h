@@ -8,9 +8,10 @@
 #include "parallel/partition.h"
 
 namespace nxon {
-    struct parallel_parse_context : parse_context {
-        void init_parallel() {
-            partitioned = partitioned_circuit(circuit);
+    template<typename PartitionedContext>
+    struct partitioned_parse_context_common : parse_context {
+        void init_partition() {
+            partitioned = partitioned_circuit<PartitionedContext>(circuit);
         }
 
         [[nodiscard]] value_t get(const id_t id) const {
@@ -62,8 +63,11 @@ namespace nxon {
         }
 
     private:
-        std::optional<partitioned_circuit> partitioned;
+        std::optional<partitioned_circuit<PartitionedContext> > partitioned;
     };
+
+    using partitioned_parse_context = partitioned_parse_context_common<impl::partitioned_circuit_context>;
+    using parallel_parse_context = partitioned_parse_context_common<impl::parallel_partitioned_circuit_context>;
 }
 
 #endif //PARALLEL_H
