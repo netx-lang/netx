@@ -32,7 +32,7 @@ namespace nxon {
 
         struct partitioned_circuit_context {
             size_t num_parts = 0;
-            std::unordered_map<id_t, size_t> belongs;
+            std::unordered_map<id_t, id_t> belongs;
             std::unordered_map<id_t, id_set> relate;
             id_set clocks;
             std::vector<std::unique_ptr<circuit_part_context> > circuit_parts;
@@ -62,7 +62,7 @@ namespace nxon {
                     if (cnt == 0) break;
 
 #pragma omp parallel for default(none) schedule(dynamic)
-                    for (size_t i = 0; i < num_parts; ++i) {
+                    for (id_t i = 0; i < num_parts; ++i) {
                         if (auto &part = *circuit_parts[i]; part.updates_old.empty()) continue;
                         worker_part(*this, i);
                     }
@@ -71,7 +71,7 @@ namespace nxon {
 
         private:
             static void worker_part(partitioned_circuit_context &partition,
-                                    const size_t part_id) {
+                                    const id_t part_id) {
                 auto &part = *partition.circuit_parts[part_id];
 
                 id_set changed = part.part.update_batch(part.updates_old);
