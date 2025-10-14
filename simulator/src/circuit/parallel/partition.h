@@ -8,13 +8,11 @@
 #include <memory>
 #include <mutex>
 #include <vector>
-#include <omp.h>
 #include <random>
 #include <thread>
 
-#include "kaHIP_interface.h"
-
 #include "../circuit.h"
+#include "partitioner.h"
 
 namespace nxon {
     namespace impl {
@@ -23,62 +21,89 @@ namespace nxon {
             value_t value;
         };
 
-        struct circuit_part_context {
-            value_batch updates_old;
-            value_batch updates;
-            std::mutex updates_mutex;
-            circuit part;
-        };
-
-        struct partitioned_circuit_context {
+        template<typename Part>
+        struct partitioned_circuit_context_common {
+            using part_t = Part;
             size_t num_parts = 0;
             std::unordered_map<id_t, id_t> belongs;
             std::unordered_map<id_t, id_set> relate;
             id_set clocks;
-            std::vector<std::unique_ptr<circuit_part_context> > circuit_parts;
+            std::vector<std::unique_ptr<part_t> > circuit_parts;
 
-            void broadcast(const id_t id, const value_t &value, const bool exclude_belong = false) {
-                broadcast_impl(id, value, exclude_belong);
+            void broadcast(this auto &&self, const id_t id, const value_t &value, const bool exclude_belong = false) {
+                self.broadcast_impl(id, value, exclude_belong);
             }
 
-            void broadcast_batch(const value_batch &to_update, const bool exclude_belong = false) {
+            void broadcast_batch(this auto &&self, const value_batch &to_update, const bool exclude_belong = false) {
                 for (auto &[id, value]: to_update)
-                    broadcast_impl(id, value, exclude_belong);
+                    self.broadcast_impl(id, value, exclude_belong);
             }
 
             [[nodiscard]] auto get_value(const id_t id) const {
                 return circuit_parts[belongs.at(id)]->part.get_value(id);
             }
 
-            void run_to_fixed() {
+            void run_to_fixed(this auto &&self) {
                 while (true) {
-                    size_t cnt = 0;
-                    for (size_t i = 0; i < num_parts; ++i) {
-                        auto &part = *circuit_parts[i];
+                    bool has_update = false;
+                    for (auto &part_ptr: self.circuit_parts) {
+                        auto &part = *part_ptr;
                         if (part.updates.empty()) continue;
-                        ++cnt;
+                        has_update = true;
                         part.updates_old.swap(part.updates);
                     }
-                    if (cnt == 0) break;
+                    if (!has_update) break;
 
-#pragma omp parallel for default(none) schedule(dynamic)
-                    for (id_t i = 0; i < num_parts; ++i) {
-                        if (auto &part = *circuit_parts[i]; part.updates_old.empty()) continue;
-                        worker_part(*this, i);
-                    }
+                    self.process_parts();
                 }
             }
 
-        private:
-            static void worker_part(partitioned_circuit_context &partition,
-                                    const id_t part_id) {
-                auto &part = *partition.circuit_parts[part_id];
+            void process_part(this auto &&self, const id_t part_id) {
+                auto &part = *self.circuit_parts[part_id];
 
-                id_set changed = part.part.update_batch(part.updates_old);
+                const id_set changed = part.part.update_batch(part.updates_old);
                 part.updates_old.clear();
                 for (auto id: changed) {
-                    if (partition.belongs[id] != part_id) continue;
-                    partition.broadcast_impl(id, part.part.get_value(id), true);
+                    if (self.belongs[id] != part_id) continue;
+                    self.broadcast_impl(id, part.part.get_value(id), true);
+                }
+            }
+        };
+
+        struct circuit_part {
+            value_batch updates_old;
+            value_batch updates;
+            circuit part;
+        };
+
+        struct partitioned_circuit_context : partitioned_circuit_context_common<circuit_part> {
+            void process_parts() {
+                for (id_t i = 0; i < num_parts; ++i) {
+                    if (auto &part = *circuit_parts[i]; part.updates_old.empty()) continue;
+                    process_part(i);
+                }
+            }
+
+            void broadcast_impl(const id_t id, const value_t &value, const bool exclude_belong = false) {
+                const auto &belong = belongs[id];
+                for (const auto &related: relate[id]) {
+                    if (exclude_belong && related == belong) continue;
+                    auto &part = *circuit_parts[related];
+                    part.updates.emplace(id, value);
+                }
+            }
+        };
+
+        struct parallel_circuit_part : circuit_part {
+            std::mutex updates_mutex;
+        };
+
+        struct parallel_partitioned_circuit_context : partitioned_circuit_context_common<parallel_circuit_part> {
+            void process_parts() {
+#pragma omp parallel for default(none) schedule(dynamic)
+                for (id_t i = 0; i < num_parts; ++i) {
+                    if (auto &part = *circuit_parts[i]; part.updates_old.empty()) continue;
+                    process_part(i);
                 }
             }
 
@@ -94,71 +119,21 @@ namespace nxon {
         };
     }
 
+    template<typename Context = impl::partitioned_circuit_context>
     class partitioned_circuit {
-        impl::partitioned_circuit_context context;
+        Context context;
 
     public:
-        explicit partitioned_circuit(const circuit &circuit) {
-            auto out_rules = circuit.all_rules();
+        explicit partitioned_circuit(const circuit &circuit, const partitioner_t &partitioner = naive_partitioner) {
+            const auto [num_parts, belongs] = partitioner(circuit);
 
-            std::vector<id_t> to_old;
-            std::map<id_t, size_t> to_new;
-            for (const auto &rule: out_rules)
-                for (const auto &old_id: rule.dependencies() + rule.outcomes()) {
-                    if (to_new.contains(old_id)) continue;
-                    const auto new_id = to_old.size();
-                    to_old.push_back(old_id);
-                    to_new[old_id] = new_id;
-                }
-
-            std::map<size_t, std::vector<size_t> > edges;
-            for (const auto &rule: out_rules)
-                for (const auto &old_id: rule.dependencies()) {
-                    auto new_id = to_new[old_id];
-                    for (const auto &old_out_id: rule.outcomes()) {
-                        auto new_out_id = to_new[old_out_id];
-                        edges[new_id].push_back(new_out_id);
-                        edges[new_out_id].push_back(new_id);
-                    }
-                }
-
-            size_t adj_size = 0;
-            for (auto &[id, out]: edges) {
-                // Remove parallel edges and self-loops, if any
-                std::ranges::sort(out);
-                auto [l, r] = std::ranges::unique(out);
-                out.erase(l, r);
-                erase(out, id);
-
-                adj_size += out.size();
+            Context result;
+            result.num_parts = num_parts;
+            for (auto [id, part]: belongs) {
+                result.belongs[id] = part;
+                result.relate[id].insert(part);
             }
-
-            int n = static_cast<int>(to_old.size());
-            const auto xadj = std::make_unique<int[]>(n + 1);
-            const auto adjncy = std::make_unique<int[]>(adj_size);
-            int current_ptr = 0;
-            for (int id = 0; id < n; ++id) {
-                xadj[id] = current_ptr;
-                for (const auto &out = edges[id]; const auto &out_id: out)
-                    adjncy[current_ptr++] = static_cast<int>(out_id);
-            }
-            xadj[n] = current_ptr;
-            int nparts = 2 + static_cast<int>(std::thread::hardware_concurrency());
-            double imbalance = 10;
-            const int seed = static_cast<int>(std::random_device{}());
-            int edgecut;
-            const auto part = std::make_unique<int[]>(n);
-            kaffpa(&n, nullptr, xadj.get(), nullptr, adjncy.get(), &nparts, &imbalance, false, seed, STRONG, &edgecut,
-                   part.get());
-
-            impl::partitioned_circuit_context result;
-            result.num_parts = nparts;
-            for (int id = 0; id < n; ++id) {
-                auto old_id = to_old[id];
-                auto part_id = part[id];
-                result.belongs[old_id] = part_id;
-                result.relate[old_id].insert(part_id);
-            }
+            const auto out_rules = circuit.all_rules();
             for (const auto &rule: out_rules)
                 for (const auto &old_id: rule.dependencies())
                     for (const auto &old_out_id: rule.outcomes())
@@ -166,7 +141,7 @@ namespace nxon {
             result.clocks = circuit.all_clocks();
             for (size_t i = 0; i < result.num_parts; ++i)
                 result.circuit_parts.emplace_back(
-                    std::make_unique<impl::circuit_part_context>());
+                    std::make_unique<typename Context::part_t>());
             for (const auto &[id, part_id]: result.belongs)
                 result.circuit_parts[part_id]->part.put(id, circuit.get_value(id));
             for (const auto &rule: out_rules) {

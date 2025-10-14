@@ -14,7 +14,7 @@ int main() {
     const std::string path = "/home/czm233/draft/NetX-FFT/fft.json";
     nxon::parallel_parse_context parsed;
     nxon::parse_circuit(parsed, std::ifstream(path));
-    parsed.init_parallel();
+    parsed.init_partition();
 
     using namespace std::chrono;
     using nxon::value_t;
