@@ -3,7 +3,7 @@ project(nxsim VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -fno-rtti")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ffast-math")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ffast-math -march=native")
 set(CMAKE_CXX_FLAGS_DEBUG "-ggdb -fsanitize=address,undefined -fno-omit-frame-pointer -fsanitize-trap=all -O0")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Og -ggdb")
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
