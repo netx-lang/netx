@@ -7,12 +7,42 @@
 #include <unordered_map>
 #include <functional>
 #include <vector>
+#include <boost/graph/adjacency_list.hpp>
 
 #include "kaHIP_interface.h"
 #include "../circuit.h"
 #include "../circuit_def.h"
 
 namespace nxon {
+    namespace impl {
+        using extracted_vertex_t = boost::graph_traits<boost::adjacency_list<> >::vertex_descriptor;
+        using extracted_graph_t = boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, id_t,
+            boost::no_property, std::unordered_map<id_t, extracted_vertex_t> >;
+
+        inline extracted_graph_t extract_graph(const circuit &circuit) {
+            extracted_graph_t graph;
+            auto &to_new = graph[boost::graph_bundle_t{}];
+            const auto out_rules = circuit.all_rules();
+            for (const auto &rule: out_rules)
+                for (const auto &old_id: rule.dependencies() + rule.outcomes()) {
+                    if (to_new.contains(old_id)) continue;
+                    const auto new_id = add_vertex(old_id, graph);
+                    to_new[old_id] = new_id;
+                }
+
+            for (const auto &rule: out_rules)
+                for (const auto &old_id: rule.dependencies()) {
+                    const auto new_id = to_new[old_id];
+                    for (const auto &old_out_id: rule.outcomes()) {
+                        const auto new_out_id = to_new[old_out_id];
+                        add_edge(new_id, new_out_id, graph);
+                    }
+                }
+
+            return graph;
+        }
+    }
+
     struct partition_result {
         size_t num_parts = 0;
         std::unordered_map<id_t, id_t> belongs;
@@ -21,28 +51,14 @@ namespace nxon {
     using partitioner_t = std::function<partition_result(const circuit &circuit)>;
 
     inline partition_result naive_partitioner(const circuit &circuit) {
-        const auto out_rules = circuit.all_rules();
+        const auto graph = impl::extract_graph(circuit);
 
-        std::vector<id_t> to_old;
-        std::unordered_map<id_t, size_t> to_new;
-        for (const auto &rule: out_rules)
-            for (const auto &old_id: rule.dependencies() + rule.outcomes()) {
-                if (to_new.contains(old_id)) continue;
-                const auto new_id = to_old.size();
-                to_old.push_back(old_id);
-                to_new[old_id] = new_id;
-            }
-
-        std::unordered_map<size_t, std::vector<size_t> > edges;
-        for (const auto &rule: out_rules)
-            for (const auto &old_id: rule.dependencies()) {
-                auto new_id = to_new[old_id];
-                for (const auto &old_out_id: rule.outcomes()) {
-                    auto new_out_id = to_new[old_out_id];
-                    edges[new_id].push_back(new_out_id);
-                    edges[new_out_id].push_back(new_id);
-                }
-            }
+        auto [edges_begin, edges_end] = boost::edges(graph);
+        std::unordered_map<impl::extracted_vertex_t, std::vector<impl::extracted_vertex_t> > edges;
+        for (const auto &edge: std::ranges::subrange(edges_begin, edges_end)) {
+            edges[edge.m_source].emplace_back(edge.m_target);
+            edges[edge.m_target].emplace_back(edge.m_source);
+        }
 
         size_t adj_size = 0;
         for (auto &[id, out]: edges) {
@@ -55,7 +71,7 @@ namespace nxon {
             adj_size += out.size();
         }
 
-        int n = static_cast<int>(to_old.size());
+        int n = static_cast<int>(num_vertices(graph));
         const auto xadj = std::make_unique<int[]>(n + 1);
         const auto adjncy = std::make_unique<int[]>(adj_size);
         int current_ptr = 0;
@@ -76,7 +92,7 @@ namespace nxon {
         partition_result res;
         res.num_parts = nparts;
         for (int id = 0; id < n; ++id) {
-            auto old_id = to_old[id];
+            auto old_id = graph[id];
             auto part_id = part[id];
             res.belongs[old_id] = part_id;
         }
