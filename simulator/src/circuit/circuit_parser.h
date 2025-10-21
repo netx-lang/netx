@@ -40,6 +40,11 @@ namespace nxon {
         }
     };
 
+    struct component_hierarchy {
+        std::vector<id_t> wires;
+        std::vector<component_hierarchy> children;
+    };
+
     struct parse_context : parse_context_common {
         id_t members_total = 0;
         nxon::circuit circuit;
@@ -48,6 +53,7 @@ namespace nxon {
         std::unordered_map<id_t, size_t> size_map;
         std::unordered_map<id_t, std::string> name_of_map;
         std::unordered_map<std::string, id_t> name_map;
+        component_hierarchy root_hierarchy;
 
         void new_wire(const id_t id, const size_t size, std::string org_name) {
             size_map.emplace(id, size);
@@ -470,17 +476,21 @@ namespace nxon {
             }
         }
 
-        inline void parse_name_size(const nlohmann::json &json, parse_context &context) { // NOLINT(*-no-recursion)
+        inline void parse_name_size(const nlohmann::json &json, parse_context &context, component_hierarchy &hierarchy) { // NOLINT(*-no-recursion)
             const std::string member_type = json["type"];
             if (!member_type_map.contains(member_type)) throw std::runtime_error("Unknown member type " + member_type);
-            if (json.contains("members"))
+            if (json.contains("members")) {
+                component_hierarchy sub_hierarchy;
                 for (const auto &member: json["members"])
-                    parse_name_size(member, context);
+                    parse_name_size(member, context, sub_hierarchy);
+                hierarchy.children.emplace_back(std::move(sub_hierarchy));
+            }
             switch (member_type_map.at(member_type)) {
                 case member_type::WIRE: {
                     auto [name, id, selection] = parse_id(json["id"]);
                     if (selection) throw std::runtime_error("Wire member cannot be selected");
                     context.new_wire(id, json["width"], name);
+                    hierarchy.wires.push_back(id);
                     break;
                 }
                 case member_type::CLOCK: {
@@ -491,6 +501,7 @@ namespace nxon {
                     if (std::ranges::contains(context.circuit_input, id)) {
                         context.circuit_input_clocks.insert(id);
                     }
+                    hierarchy.wires.push_back(id);
                     break;
                 }
                 case member_type::COMPONENT:
@@ -557,7 +568,7 @@ namespace nxon {
         auto &design = json["design"];
         impl::parse_circuit_io(design, context);
         impl::parse_circuit_io_alias(context, json);
-        impl::parse_name_size(design, context);
+        impl::parse_name_size(design, context, context.root_hierarchy);
         impl::parse_member(design, context, native_map);
 
         value_batch initial_values;
