@@ -235,11 +235,13 @@ namespace nxon {
         impl::extracted_graph_t graph_T;
         boost::transpose_graph(graph, graph_T);
 
-        std::vector<std::vector<id_t> > parts(1);
+        std::vector<id_t> root_part;
+        std::vector<std::vector<id_t> > parts;
         const auto min_size = static_cast<size_t>(std::round(
             static_cast<double>(impl::hierarchy_size(context.root_hierarchy)) *
             SEMANTIC_SIZE_THRESHOLD));
-        impl::semantic_partitioner_impl(parts, parts.back(), graph, graph_T, context.root_hierarchy, min_size);
+        impl::semantic_partitioner_impl(parts, root_part, graph, graph_T, context.root_hierarchy, min_size);
+        parts.emplace_back(std::move(root_part));
 
         partition_result res;
         res.num_parts = parts.size();
