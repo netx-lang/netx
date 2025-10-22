@@ -79,7 +79,7 @@ namespace nxon {
                         ++in_mem_cnt;
                 }
             }
-            return static_cast<double>(in_mem_cnt) / static_cast<double>(in_cnt);
+            return in_cnt == 0 ? 0 : static_cast<double>(in_mem_cnt) / static_cast<double>(in_cnt);
         }
 
         constexpr double SERIAL_THRESHOLD = 0.6;
