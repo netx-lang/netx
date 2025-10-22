@@ -12,7 +12,7 @@
 
 int main() {
     const std::string path = "/home/czm233/draft/NetX-FFT/fft.json";
-    nxon::partitioned_parse_context<nxon::semantic_partitioner<> > parsed;
+    nxon::parallel_parse_context<nxon::semantic_partitioner<> > parsed;
     nxon::parse_circuit(parsed, std::ifstream(path));
     parsed.init_partition();
 
