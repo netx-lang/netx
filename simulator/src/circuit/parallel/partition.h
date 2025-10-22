@@ -8,7 +8,6 @@
 #include <memory>
 #include <mutex>
 #include <vector>
-#include <random>
 #include <thread>
 
 #include "../circuit.h"
@@ -44,17 +43,7 @@ namespace nxon {
             }
 
             void run_to_fixed(this auto &&self) {
-                while (true) {
-                    bool has_update = false;
-                    for (auto &part_ptr: self.circuit_parts) {
-                        auto &part = *part_ptr;
-                        if (part.updates.empty()) continue;
-                        has_update = true;
-                        part.updates_old.swap(part.updates);
-                    }
-                    if (!has_update) break;
-
-                    self.process_parts();
+                while (self.process_parts()) {
                 }
             }
 
@@ -77,11 +66,16 @@ namespace nxon {
         };
 
         struct partitioned_circuit_context : partitioned_circuit_context_common<circuit_part> {
-            void process_parts() {
+            bool process_parts() {
+                bool has_update = false;
                 for (id_t i = 0; i < num_parts; ++i) {
-                    if (auto &part = *circuit_parts[i]; part.updates_old.empty()) continue;
+                    auto &part = *circuit_parts[i];
+                    if (part.updates.empty()) continue;
+                    has_update = true;
+                    part.updates_old.swap(part.updates);
                     process_part(i);
                 }
+                return has_update;
             }
 
             void broadcast_impl(const id_t id, const value_t &value, const bool exclude_belong = false) {
@@ -99,12 +93,24 @@ namespace nxon {
         };
 
         struct parallel_partitioned_circuit_context : partitioned_circuit_context_common<parallel_circuit_part> {
-            void process_parts() {
-#pragma omp parallel for default(none) schedule(dynamic)
+            std::vector<id_t> to_update_cache;
+
+            bool process_parts() {
+                to_update_cache.clear();
+                to_update_cache.reserve(num_parts);
                 for (id_t i = 0; i < num_parts; ++i) {
-                    if (auto &part = *circuit_parts[i]; part.updates_old.empty()) continue;
+                    auto &part = *circuit_parts[i];
+                    if (part.updates.empty()) continue;
+                    part.updates_old.swap(part.updates);
+                    to_update_cache.emplace_back(i);
+                }
+
+#pragma omp parallel for default(none) schedule(static)
+                for (const id_t i: to_update_cache) {
                     process_part(i);
                 }
+
+                return !to_update_cache.empty();
             }
 
             void broadcast_impl(const id_t id, const value_t &value, const bool exclude_belong = false) {
