@@ -228,9 +228,8 @@ namespace nxon {
         return res;
     }
 
-    constexpr double SEMANTIC_SIZE_THRESHOLD = 0.05;
-
-    inline partition_result semantic_partitioner(const parse_context &context) {
+    template<double SizeThreshold = 0.05>
+    partition_result semantic_partitioner(const parse_context &context) {
         const auto graph = impl::extract_graph(context.circuit);
         impl::extracted_graph_t graph_T;
         boost::transpose_graph(graph, graph_T);
@@ -239,7 +238,7 @@ namespace nxon {
         std::vector<std::vector<id_t> > parts;
         const auto min_size = static_cast<size_t>(std::round(
             static_cast<double>(impl::hierarchy_size(context.root_hierarchy)) *
-            SEMANTIC_SIZE_THRESHOLD));
+            SizeThreshold));
         impl::semantic_partitioner_impl(parts, root_part, graph, graph_T, context.root_hierarchy, min_size);
         parts.emplace_back(std::move(root_part));
 
