@@ -9,6 +9,10 @@
 #include <vector>
 #include <cmath>
 #include <random>
+#include <unordered_set>
+#include <queue>
+#include <ranges>
+#include <algorithm>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/transpose_graph.hpp>
 
@@ -66,17 +70,48 @@ namespace nxon {
             return vertices;
         }
 
+        inline std::unordered_set<extracted_vertex_t> determination_closure(
+            const std::vector<extracted_vertex_t> &vertices,
+            const extracted_graph_t &graph,
+            const extracted_graph_t &graph_T) {
+            std::unordered_set<extracted_vertex_t> result;
+            result.insert_range(vertices);
+
+            std::queue<extracted_vertex_t> worklist;
+            for (const auto &v: vertices) {
+                auto [adj_begin, adj_end] = adjacent_vertices(v, graph);
+                worklist.push_range(std::ranges::subrange(adj_begin, adj_end));
+            }
+
+            while (!worklist.empty()) {
+                const extracted_vertex_t v = worklist.front();
+                worklist.pop();
+                if (result.contains(v)) continue;
+                if (auto [adj_begin, adj_end] = adjacent_vertices(v, graph_T);
+                    !std::all_of(adj_begin, adj_end, [&](const auto &adj) {
+                        return result.contains(adj);
+                    }))
+                    continue;
+                result.insert(v);
+                auto [adj_begin, adj_end] = adjacent_vertices(v, graph);
+                worklist.push_range(std::ranges::subrange(adj_begin, adj_end));
+            }
+
+            return result;
+        }
+
         inline double serial_relation([[maybe_unused]] const extracted_graph_t &graph,
                                       const extracted_graph_t &graph_T,
-                                      const std::vector<extracted_vertex_t> &from,
-                                      const std::vector<extracted_vertex_t> &to) {
+                                      const std::unordered_set<extracted_vertex_t> &from,
+                                      const std::unordered_set<extracted_vertex_t> &to) {
             size_t in_cnt = 0;
             size_t in_mem_cnt = 0;
             for (const auto &v: to) {
-                for (auto [edge_begin, edge_end] = out_edges(v, graph_T); const auto &edge: std::ranges::subrange(
-                         edge_begin, edge_end)) {
+                for (auto [adj_begin, adj_end] = boost::adjacent_vertices(v, graph_T);
+                     const auto &adj: std::ranges::subrange(adj_begin, adj_end)) {
+                    if (to.contains(adj)) continue;
                     ++in_cnt;
-                    if (std::ranges::binary_search(from, edge.m_target))
+                    if (from.contains(adj))
                         ++in_mem_cnt;
                 }
             }
@@ -95,14 +130,11 @@ namespace nxon {
             if (hierarchy.children.empty()) return;
 
             const size_t child_cnt = hierarchy.children.size();
-            std::vector<std::vector<extracted_vertex_t> > vertices;
+            std::vector<std::unordered_set<extracted_vertex_t> > vertices;
             vertices.reserve(child_cnt);
             for (const auto &child: hierarchy.children) {
                 auto vert = hierarchy_vertices(graph, child);
-                std::ranges::sort(vert);
-                auto [dup_begin, dup_end] = std::ranges::unique(vert);
-                vert.erase(dup_begin, dup_end);
-                vertices.emplace_back(std::move(vert));
+                vertices.emplace_back(determination_closure(vert, graph, graph_T));
             }
             // Build directed pseudoforest by serial relationship and threshold
             std::vector<size_t> father;
