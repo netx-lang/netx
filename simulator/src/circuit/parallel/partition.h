@@ -130,9 +130,8 @@ namespace nxon {
         Context context;
 
     public:
-        explicit partitioned_circuit(const parse_context &p_context, const partitioner_t auto &partitioner) {
-            auto &circuit = p_context.circuit;
-            const auto [num_parts, belongs] = partitioner(p_context);
+        explicit partitioned_circuit(const circuit &circuit, const partition_result &partitioned) {
+            const auto &[num_parts, belongs] = partitioned;
 
             Context result;
             result.num_parts = num_parts;
