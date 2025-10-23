@@ -104,7 +104,7 @@ namespace nxon {
                 vert.erase(dup_begin, dup_end);
                 vertices.emplace_back(std::move(vert));
             }
-            // Build directed pseudoforest forest by serial relationship and threshold
+            // Build directed pseudoforest by serial relationship and threshold
             std::vector<size_t> father;
             std::vector<size_t> in_deg;
             father.resize(child_cnt);
