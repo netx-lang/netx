@@ -19,6 +19,12 @@ find_package(nlohmann_json REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(GMP QUIET)
 
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(OpenMP_CXX_FLAGS "-fopenmp=libomp")
+    set(OpenMP_CXX_LIB_NAMES "omp")
+    set(OpenMP_omp_LIBRARY "omp")
+endif()
+
 add_subdirectory(src)
 
 option(TESTING "Enable testing" ON)
