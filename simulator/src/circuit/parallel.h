@@ -98,7 +98,7 @@ namespace nxon {
                 out << v;
                 const auto id = graph[v];
                 if (const auto iter = partition_res.belongs.find(id); iter != partition_res.belongs.end())
-                    out << " [color=" << GRAPHVIZ_COLOR_LIST[iter->second % COLOR_COUNT] << ']';
+                    out << " [style=filled,color=" << GRAPHVIZ_COLOR_LIST[iter->second % COLOR_COUNT] << ']';
                 out << '\n';
             }
             for (const auto [edge_begin, edge_end] = edges(graph);
