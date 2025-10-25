@@ -112,9 +112,9 @@ namespace nxon {
         std::optional<partitioned_circuit<PartitionedContext> > partitioned;
     };
 
-    template<partitioner_t auto Partitioner = kahip_partitioner>
+    template<partitioner_t auto Partitioner = semantic_partitioner<> >
     using partitioned_parse_context = partitioned_parse_context_common<impl::partitioned_circuit_context, Partitioner>;
-    template<partitioner_t auto Partitioner = kahip_partitioner>
+    template<partitioner_t auto Partitioner = semantic_partitioner<> >
     using parallel_parse_context = partitioned_parse_context_common<impl::parallel_partitioned_circuit_context,
         Partitioner>;
 }

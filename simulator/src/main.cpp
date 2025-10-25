@@ -14,7 +14,7 @@
 int main() {
     const std::string path = "/home/czm233/draft/NetX-FFT/fft.json";
     omp_set_num_threads(8);
-    nxon::parallel_parse_context<nxon::semantic_partitioner<> > parsed;
+    nxon::parallel_parse_context<> parsed;
     nxon::parse_circuit(parsed, std::ifstream(path));
     parsed.init_partition();
 
