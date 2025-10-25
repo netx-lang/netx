@@ -54,6 +54,7 @@ namespace nxon {
         std::unordered_map<id_t, std::string> name_of_map;
         std::unordered_map<std::string, id_t> name_map;
         component_hierarchy root_hierarchy;
+        component_hierarchy *cur_hierarchy = &root_hierarchy;
 
         void new_wire(const id_t id, const size_t size, std::string org_name) {
             size_map.emplace(id, size);
@@ -67,6 +68,7 @@ namespace nxon {
             }
             name_of_map.emplace(id, org_name);
             name_map.emplace(org_name, id);
+            cur_hierarchy->wires.emplace_back(id);
         }
 
         id_t new_tmp_wire(const size_t size, std::string org_name) {
@@ -458,11 +460,16 @@ namespace nxon {
                     if (native_map.contains(json["id"])) {
                         const auto &factory = native_map.at(json["id"]);
                         context.circuit.add_rule(factory(context, json));
-                    } else {
-                        if (json.contains("members")) {
-                            for (const auto &member: json["members"]) {
+                    } else if (json.contains("members")) {
+                        for (size_t i = 0; const auto &member: json["members"]) {
+                            if (member.contains("members")) {
+                                const auto cur_hierarchy = context.cur_hierarchy;
+                                context.cur_hierarchy = &cur_hierarchy->children.at(i);
                                 parse_member(member, context, native_map);
-                            }
+                                context.cur_hierarchy = cur_hierarchy;
+                                ++i;
+                            } else
+                                parse_member(member, context, native_map);
                         }
                     }
                     break;
@@ -476,21 +483,23 @@ namespace nxon {
             }
         }
 
-        inline void parse_name_size(const nlohmann::json &json, parse_context &context, component_hierarchy &hierarchy) { // NOLINT(*-no-recursion)
+        inline void parse_name_size(const nlohmann::json &json, parse_context &context) { // NOLINT(*-no-recursion)
             const std::string member_type = json["type"];
             if (!member_type_map.contains(member_type)) throw std::runtime_error("Unknown member type " + member_type);
             if (json.contains("members")) {
+                const auto cur_hierarchy = context.cur_hierarchy;
                 component_hierarchy sub_hierarchy;
+                context.cur_hierarchy = &sub_hierarchy;
                 for (const auto &member: json["members"])
-                    parse_name_size(member, context, sub_hierarchy);
-                hierarchy.children.emplace_back(std::move(sub_hierarchy));
+                    parse_name_size(member, context);
+                context.cur_hierarchy = cur_hierarchy;
+                cur_hierarchy->children.emplace_back(std::move(sub_hierarchy));
             }
             switch (member_type_map.at(member_type)) {
                 case member_type::WIRE: {
                     auto [name, id, selection] = parse_id(json["id"]);
                     if (selection) throw std::runtime_error("Wire member cannot be selected");
                     context.new_wire(id, json["width"], name);
-                    hierarchy.wires.push_back(id);
                     break;
                 }
                 case member_type::CLOCK: {
@@ -501,7 +510,6 @@ namespace nxon {
                     if (std::ranges::contains(context.circuit_input, id)) {
                         context.circuit_input_clocks.insert(id);
                     }
-                    hierarchy.wires.push_back(id);
                     break;
                 }
                 case member_type::COMPONENT:
@@ -568,8 +576,10 @@ namespace nxon {
         auto &design = json["design"];
         impl::parse_circuit_io(design, context);
         impl::parse_circuit_io_alias(context, json);
-        impl::parse_name_size(design, context, context.root_hierarchy);
+        impl::parse_name_size(design, context);
+        context.cur_hierarchy = &context.root_hierarchy.children.at(0);
         impl::parse_member(design, context, native_map);
+        context.cur_hierarchy = &context.root_hierarchy;
 
         value_batch initial_values;
         for (id_t id = 0; id < context.members_total; ++id)
