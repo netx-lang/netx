@@ -741,6 +741,14 @@ namespace nxon {
                 trigger_rules[trigger].emplace_back(new_rule);
         }
 
+        // Pass by value to avoid dangling reference (erasing itself in the process)
+        // ReSharper disable once CppPassValueParameterByConstReference
+        void remove(const rule_t rule) { // NOLINT(*-unnecessary-value-param)
+            all_rules.erase(rule);
+            for (const id_t trigger: rule.triggers())
+                erase(trigger_rules[trigger], rule);
+        }
+
         id_set update(value_storage &values, const id_set &hint, const bool to_fixed = true) const {
             std::vector<rule_t> to_perform;
             for (const id_t id: hint) collect_rules(to_perform, id);
