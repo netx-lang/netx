@@ -178,6 +178,7 @@ public final class ComponentEvaluator {
             case SymbolExpr sub -> evaluateSymbolExpr(sub);
             case PortConnectionExpr sub -> evaluatePortExpr(sub);
             case ConditionalExpr sub -> evaluateConditionalExpr(sub);
+            case LetExpr sub -> evaluateLetExpr(sub);
         };
     }
 
@@ -305,6 +306,14 @@ public final class ComponentEvaluator {
         return condition.value()
                 ? evaluate(expr.getThenBranch())
                 : evaluate(expr.getElseBranch());
+    }
+
+    private Entity evaluateLetExpr(LetExpr expr) {
+        var binding = evaluateBinding(expr.getBinding());
+        scope.overrideBindings(binding);
+        var result = evaluate(expr.getBody());
+        scope.restoreBindings();
+        return result;
     }
 
     private Entity evaluateNumberExpr(NumberExpr expr) {

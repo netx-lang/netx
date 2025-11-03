@@ -278,6 +278,7 @@ public final class TreeParser {
             case BinaryExprContext sub -> parseBinaryExpr(sub);
             case PortExprContext sub -> parsePortExpr(sub);
             case ConditionalExprContext sub -> parseConditionalExpr(sub);
+            case LetExprContext sub -> parseLetExpr(sub);
             case ParenExprContext sub -> parseExpr(sub.expression());
             default -> throw new ShallNotReachHereError();
         };
@@ -431,6 +432,10 @@ public final class TreeParser {
 
     ExprNode parseConditionalExpr(ConditionalExprContext ctx) {
         return ConditionalExpr.of(parseExpr(ctx.cond), parseExpr(ctx.thenBranch), parseExpr(ctx.elseBranch));
+    }
+
+    ExprNode parseLetExpr(LetExprContext ctx) {
+        return LetExpr.of(parseBinding(ctx.binding()), parseExpr(ctx.body));
     }
 
     Identifier parseIdentifier(TerminalNode ID) {
