@@ -1,0 +1,70 @@
+{
+  "totalData": 7,
+  "top_input": [
+  ],
+  "top_output": ["result"],
+  "design": {
+    "type": "component",
+    "id": "frege",
+    "loc": "frege.nx:2:10",
+    "input": [
+    ],
+    "output": ["result@0"],
+    "members": [
+      {"type": "wire", "width": 1, "id": "result@0", "loc": "frege.nx:3:9"},
+      {
+        "type": "builtin", "id": "EQ", "loc": "frege.nx:7:33",
+        "input": ["1'h01", "1'h01"],
+        "output": ["$o@1"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@1", "loc": "frege.nx:7:33"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "EQ", "loc": "frege.nx:8:33",
+        "input": ["1'h01", "1'h00"],
+        "output": ["$o@2"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@2", "loc": "frege.nx:8:33"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "frege.nx:6:12",
+        "input": ["$o@1", "$o@2"],
+        "output": ["$o@3"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@3", "loc": "frege.nx:6:12"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "EQ", "loc": "frege.nx:13:33",
+        "input": ["1'h00", "1'h01"],
+        "output": ["$o@4"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@4", "loc": "frege.nx:13:33"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "EQ", "loc": "frege.nx:14:33",
+        "input": ["1'h00", "1'h00"],
+        "output": ["$o@5"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@5", "loc": "frege.nx:14:33"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "frege.nx:12:12",
+        "input": ["$o@4", "$o@5"],
+        "output": ["$o@6"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@6", "loc": "frege.nx:12:12"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "frege.nx:4:14",
+        "input": ["$o@3", "$o@6"],
+        "output": ["result@0"]
+      }
+    ]
+  }
+}

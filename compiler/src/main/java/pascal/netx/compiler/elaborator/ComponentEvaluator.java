@@ -168,6 +168,7 @@ public final class ComponentEvaluator {
 
     public Entity evaluate(ExprNode expr) {
         return switch (expr) {
+            case LetExpr sub -> evaluateLetExpr(sub);
             case ListExpr sub -> evaluateListExpr(sub);
             case UnaryExpr sub -> evaluateUnaryExpr(sub);
             case FieldExpr sub -> evaluateFieldExpr(sub);
@@ -178,7 +179,6 @@ public final class ComponentEvaluator {
             case SymbolExpr sub -> evaluateSymbolExpr(sub);
             case PortConnectionExpr sub -> evaluatePortExpr(sub);
             case ConditionalExpr sub -> evaluateConditionalExpr(sub);
-            case LetExpr sub -> evaluateLetExpr(sub);
         };
     }
 

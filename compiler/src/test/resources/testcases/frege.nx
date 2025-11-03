@@ -1,0 +1,18 @@
+// ∀x ∃y (x = y)
+component frege : [] -> [result] {
+    wire result of bit(1);
+    result <> AND <> [
+        (let x = 1'b1 in
+            OR <> [
+                (let y = 1'b1 in EQ <> [x, y]),
+                (let y = 1'b0 in EQ <> [x, y])
+            ]
+        ),
+        (let x = 1'b0 in
+            OR <> [
+                (let y = 1'b1 in EQ <> [x, y]),
+                (let y = 1'b0 in EQ <> [x, y])
+            ]
+        )
+    ];
+}
