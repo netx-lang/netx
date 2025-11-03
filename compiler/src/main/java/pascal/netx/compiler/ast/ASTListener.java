@@ -202,6 +202,14 @@ public interface ASTListener {
         exitDefault(node);
     }
 
+    default void enter(LetExpr node) {
+        enterDefault(node);
+    }
+
+    default void exit(LetExpr node) {
+        exitDefault(node);
+    }
+
     default void enter(PortConnectionExpr node) {
         enterDefault(node);
     }

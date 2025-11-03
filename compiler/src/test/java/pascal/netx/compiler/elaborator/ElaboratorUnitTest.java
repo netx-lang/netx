@@ -219,4 +219,23 @@ class ElaboratorUnitTest {
                 """;
         test(expected, actual);
     }
+
+    @Test
+    void testLetExpr() {
+        var expected = """
+                component top : [] -> [o] {
+                    wire o of bit(32);
+                    let x = 1 in
+                    let y = 2 in
+                    o <> AND <> [x, y];
+                }
+                """;
+        var actual = """
+                component top : [] -> [o] {
+                    wire o of bit(32);
+                    o <> AND <> [1, 2];
+                }
+                """;
+        test(expected, actual);
+    }
 }

@@ -107,6 +107,7 @@ expression
     | 'if' cond=expression
       'then' thenBranch=expression
       'else' elseBranch=expression                                    # ConditionalExpr
+    | binding 'in' body=expression                                    # LetExpr
     | '(' expression ')'                                              # ParenExpr
     ;
 
