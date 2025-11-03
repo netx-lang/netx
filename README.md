@@ -8,24 +8,18 @@ The NetX toolchain includes a compiler, a package manager, a simulator, and a vi
 
 ### Prerequisites
 
-- Java Development Kit (JDK) 21 or later
+- Java Development Kit (JDK) 25 or later
+- C++23 or later compliant compiler
 - CMake 3.28 or later
 - Boost 1.80 or later
-- A C++23 compatible compiler.
+- [nlohmann/json](https://github.com/nlohmann/json) 3.11.3 or later
 
-Although g++-15 and clang++-21 are recommended for standard support for `flat_set` and container ranges, other compilers (e.g., g++-13) may work as well since we use [feature testing](https://en.cppreference.com/w/cpp/experimental/feature_test.html).
+For Ubuntu/Debian-based systems, you can install the prerequisites using:
 
-#### Building Dependencies
-
-**nlohmann_json**
-
-You can download the single-header file `json.hpp` from the [nlohmann/json GitHub repository](https://github.com/nlohmann/json) and place it in your include path.
-
-Alternatively, you can install it using a package manager like vcpkg or your system's package manager (e.g., `apt-get install nlohmann-json3-dev` on Debian-based systems).
-
-**KaHiP**
-
-You can download KaHiP from its [GitHub repository](https://github.com/KaHIP/KaHIP) and follow the instructions to build it. Make sure to put the built library in your library path or use `cmake --install build/` to install it to the default location.
+```bash
+sudo apt update
+sudo apt install -y openjdk-25-jdk g++-15 cmake libboost-all-dev nlohmann-json3-dev
+```
 
 ### Installation
 
@@ -36,7 +30,6 @@ To install NetX, use the cross-platform installation script:
 ./install.sh
 
 # Install to custom location (Make sure you have write permissions to the directory)
-INSTALL_PREFIX=/opt/netx ./install.sh
 INSTALL_PREFIX=/usr/local ./install.sh
 ```
 
@@ -54,7 +47,7 @@ After installation, either restart your terminal or run:
 source ~/.bashrc  # or ~/.zshrc, depending on your shell
 ```
 
-To uninstall NetX completely (including automatic cleanup of environment variables):
+To uninstall NetX completely (remove the files and cleanup environment variables):
 
 ```bash
 ./uninstall.sh
@@ -144,22 +137,19 @@ The NetX simulator supports interactive simulation using the `nxsim` command, gi
 nx compile my_design.nx --minimal | nxsim
 ```
 
-#### Using Nxsim Library
+#### Using the nxsim Library
 
-You can also use the `nxsim` library to build your own simulation testbench. The library provides a C++ API to interact
-with the compiled NetX design, allowing you to simulate and test your designs programmatically.
+You can also use the `nxsim` library to build your own simulation testbench. The library provides a C++ API to interact with the compiled NetX design, allowing you to simulate and test your designs programmatically.
 
-Include the following header files to use the `nxsim` library in your C++ testbench:
+`nxsim` is a header-only library, so you only need to include the relevant headers in your C++ code.
 
 ```cpp
-#include <nxsim/circuit.h>
-#include <nxsim/circuit_parser.h>
+#include <nxsim/simulation.h>
 ```
 
-During compilation, remember the flags
+To enable parallel simulation, remember to link against OpenMP by adding the `-fopenmp` flag when compiling your C++ code.
+For more details on how to use the `nxsim` library, refer to [NetX Simulator Documentation](https://github.com/pascal-lab/NetX/blob/main/simulator/README.md).
 
-- `-lnxsim` to link against the `nxsim` library
-- `-flto` to enable link-time optimization
 
 Check the testbenches in the [NetX standard library](https://github.com/pascal-lab/NetX-std) for examples. More examples
 can be found in [NetX-FFT](https://github.com/naiiren/NetX-FFT)
