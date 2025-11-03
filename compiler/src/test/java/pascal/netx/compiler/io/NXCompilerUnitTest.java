@@ -51,6 +51,11 @@ class NXCompilerUnitTest {
     }
 
     @Test
+    void testFrege() throws IOException {
+        testEquals("frege.nx", "expected/frege.json");
+    }
+
+    @Test
     void loadWithValidCharStream() throws IOException {
         var string = Files.readString(TEST_DIR.resolve("bind_1.nx"));
         CharStream charStream = CharStreams.fromString(string);
