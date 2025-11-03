@@ -18,5 +18,5 @@ dependencies {
 
 tasks.generateGrammarSource {
     outputDirectory = file(layout.buildDirectory.dir("generated-src/antlr/main/pascal/netx/compiler/antlr"))
-    arguments = listOf("-package", "pascal.netx.compiler.antlr")
+    packageName = "pascal.netx.compiler.antlr"
 }
