@@ -3,10 +3,12 @@ project(nxsim_src VERSION 1.0 LANGUAGES CXX)
 
 add_library(nxsim INTERFACE simulation.h)
 target_include_directories(nxsim INTERFACE ${Boost_INCLUDE_DIRS})
-if (GMP_FOUND)
-    target_link_libraries(nxsim INTERFACE gmp)
+if (KAHIP)
+    message("Link KaHIP to nxsim")
+    target_link_libraries(nxsim INTERFACE kahip)
+    target_compile_definitions(nxsim INTERFACE NX_KAHIP)
 endif ()
-target_link_libraries(nxsim INTERFACE nlohmann_json::nlohmann_json kahip OpenMP::OpenMP_CXX)
+target_link_libraries(nxsim INTERFACE nlohmann_json::nlohmann_json OpenMP::OpenMP_CXX)
 
 add_subdirectory(circuit)
 

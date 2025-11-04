@@ -13,7 +13,6 @@
 #include <ranges>
 #include <algorithm>
 
-#include "kaHIP_interface.h"
 #include "../circuit_def.h"
 #include "../graph_helper.h"
 
@@ -112,6 +111,35 @@ namespace nxon {
     template<typename T>
     concept partitioner_t = std::is_invocable_r_v<partition_result, T, const parse_context &>;
 
+    template<double SizeThreshold = 0.05>
+    partition_result semantic_partitioner(const parse_context &context) {
+        const auto graph = impl::extract_graph(context.circuit);
+        impl::extracted_graph_t graph_T;
+        boost::transpose_graph(graph, graph_T);
+
+        std::vector<id_t> root_part;
+        std::vector<std::vector<id_t> > parts;
+        const auto min_size = static_cast<size_t>(std::round(
+            static_cast<double>(impl::hierarchy_size(context.root_hierarchy)) *
+            SizeThreshold));
+        impl::semantic_partitioner_impl(parts, root_part, graph, graph_T, context.root_hierarchy, min_size);
+        parts.emplace_back(std::move(root_part));
+
+        partition_result res;
+        res.num_parts = parts.size() + 1;
+        const auto clocks = context.circuit.all_clocks();
+        for (size_t i = 0; i < parts.size(); ++i)
+            for (const auto &id: parts[i])
+                if (clocks.contains(id)) res.belongs[id] = parts.size();
+                else res.belongs[id] = i;
+        return res;
+    }
+}
+
+#ifdef NX_KAHIP
+#include "kaHIP_interface.h"
+
+namespace nxon {
     inline partition_result kahip_partitioner(const parse_context &context) {
         const auto graph = impl::extract_graph(context.circuit);
 
@@ -163,30 +191,7 @@ namespace nxon {
 
         return res;
     }
-
-    template<double SizeThreshold = 0.05>
-    partition_result semantic_partitioner(const parse_context &context) {
-        const auto graph = impl::extract_graph(context.circuit);
-        impl::extracted_graph_t graph_T;
-        boost::transpose_graph(graph, graph_T);
-
-        std::vector<id_t> root_part;
-        std::vector<std::vector<id_t> > parts;
-        const auto min_size = static_cast<size_t>(std::round(
-            static_cast<double>(impl::hierarchy_size(context.root_hierarchy)) *
-            SizeThreshold));
-        impl::semantic_partitioner_impl(parts, root_part, graph, graph_T, context.root_hierarchy, min_size);
-        parts.emplace_back(std::move(root_part));
-
-        partition_result res;
-        res.num_parts = parts.size() + 1;
-        const auto clocks = context.circuit.all_clocks();
-        for (size_t i = 0; i < parts.size(); ++i)
-            for (const auto &id: parts[i])
-                if (clocks.contains(id)) res.belongs[id] = parts.size();
-                else res.belongs[id] = i;
-        return res;
-    }
 }
+#endif
 
 #endif //NXSIM_PARTITIONER_H
