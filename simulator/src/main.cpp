@@ -22,22 +22,22 @@ int main() {
     using nxon::value_t;
     const auto start = high_resolution_clock::now();
 
-    parsed.broadcast(1, {1, 0});
-    parsed.run_to_fixed();
+    parsed.cached_update(1, {1, 0});
+    parsed.apply_cache();
     parsed.advance_input_clocks();
-    parsed.broadcast(1, {1, 1});
-    parsed.broadcast_by_name("x[0].real", {24, 10});
-    parsed.broadcast_by_name("x[1].real", {24, 20});
-    parsed.broadcast_by_name("x[2].real", {24, 30});
-    parsed.broadcast_by_name("x[3].real", {24, 40});
-    parsed.broadcast_by_name("x[4].real", {24, 10});
-    parsed.broadcast_by_name("x[5].real", {24, 20});
-    parsed.broadcast_by_name("x[6].real", {24, 30});
-    parsed.broadcast_by_name("x[7].real", {24, 40});
-    parsed.run_to_fixed();
+    parsed.cached_update(1, {1, 1});
+    parsed.cached_update_by_name("x[0].real", {24, 10});
+    parsed.cached_update_by_name("x[1].real", {24, 20});
+    parsed.cached_update_by_name("x[2].real", {24, 30});
+    parsed.cached_update_by_name("x[3].real", {24, 40});
+    parsed.cached_update_by_name("x[4].real", {24, 10});
+    parsed.cached_update_by_name("x[5].real", {24, 20});
+    parsed.cached_update_by_name("x[6].real", {24, 30});
+    parsed.cached_update_by_name("x[7].real", {24, 40});
+    parsed.apply_cache();
     parsed.advance_input_clocks();
-    parsed.broadcast(2, {1, 1});
-    parsed.run_to_fixed();
+    parsed.cached_update(2, {1, 1});
+    parsed.apply_cache();
     for (int i = 0; i != 65536; ++i) {
         parsed.advance_input_clocks();
         for (int j = 0; j != 8; ++j) {
@@ -48,20 +48,20 @@ int main() {
             auto imag = parsed.get_by_name(imag_name);
 
             if (real > value_t{24, 0x3FFFFF}) {
-                parsed.broadcast_by_name(real_name, {24, 0});
+                parsed.cached_update_by_name(real_name, {24, 0});
             } else {
                 const unsigned step_real[8] = {1, 1, 31, 1, 23, 1, 6, 1};
-                parsed.broadcast_by_name(real_name, real + value_t{24, step_real[j]});
+                parsed.cached_update_by_name(real_name, real + value_t{24, step_real[j]});
             }
 
             if (imag > value_t{24, 0x3FFFFF}) {
-                parsed.broadcast_by_name(imag_name, {24, 0});
+                parsed.cached_update_by_name(imag_name, {24, 0});
             } else {
                 const unsigned step_imag[8] = {2, 5, 3, 6, 4, 8, 11, 7};
-                parsed.broadcast_by_name(imag_name, imag + value_t{24, step_imag[j]});
+                parsed.cached_update_by_name(imag_name, imag + value_t{24, step_imag[j]});
             }
         }
-        parsed.run_to_fixed();
+        parsed.apply_cache();
         if (i == 65535) {
             for (int j = 0; j != 8; ++j) {
                 std::cout << parsed.get_by_name(std::format("y[{}].real", j)) << " "

@@ -38,6 +38,47 @@ namespace nxon {
         void flip_input_clocks(this auto &&self) {
             self.flip_batch(self.circuit_input_clocks);
         }
+
+        void cached_flip_by_name(this auto &&self, const std::string &name) {
+            self.cached_flip(self.name_map.at(name));
+        }
+
+        void cached_update_by_name(this auto &&self, const std::string &name, const value_t &value) {
+            self.cached_update(self.name_map.at(name), value);
+        }
+    };
+
+    struct trivial_cached_capability {
+        void cached_flip(const id_t id) {
+            flip_cache.insert(id);
+        }
+
+        void cached_flip_batch(const id_set &ids) {
+            flip_cache += ids;
+        }
+
+        void cached_update(const id_t id, const value_t &value) {
+            update_cache.emplace(id, value);
+        }
+
+        void cached_update_batch(const value_batch &batch) {
+            update_cache.insert_range(batch);
+        }
+
+        void apply_cache(this auto &&self) {
+            if (!self.flip_cache.empty()) {
+                self.flip_batch(self.flip_cache);
+                self.flip_cache.clear();
+            }
+            if (!self.update_cache.empty()) {
+                self.update_batch(self.update_cache);
+                self.update_cache.clear();
+            }
+        }
+
+    private:
+        id_set flip_cache;
+        value_batch update_cache;
     };
 
     struct component_hierarchy {
@@ -45,7 +86,7 @@ namespace nxon {
         std::vector<component_hierarchy> children;
     };
 
-    struct parse_context : parse_context_common {
+    struct parse_context : parse_context_common, trivial_cached_capability {
         id_t members_total = 0;
         nxon::circuit circuit;
         std::vector<id_t> circuit_input, circuit_output;
