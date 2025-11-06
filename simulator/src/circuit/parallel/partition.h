@@ -105,7 +105,7 @@ namespace nxon {
                     to_update_cache.emplace_back(i);
                 }
 
-#pragma omp parallel for default(none) schedule(static)
+#pragma omp parallel for default(none) schedule(static) num_threads(NX_NUM_THREADS)
                 for (const id_t i: to_update_cache) {
                     process_part(i);
                 }
