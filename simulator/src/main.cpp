@@ -6,14 +6,12 @@
 #include <format>
 #include <fstream>
 #include <iostream>
-#include <omp.h>
 
 #define NX_BACKEND uint64_t
 #include "simulation.h"
 
 int main() {
     const std::string path = "/home/czm233/draft/NetX-FFT/fft.json";
-    omp_set_num_threads(8);
     nxon::parallel_parse_context<> parsed;
     nxon::parse_circuit(parsed, std::ifstream(path));
     parsed.init_partition();

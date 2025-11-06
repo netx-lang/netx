@@ -14,7 +14,12 @@
  * - The arbitrary precision backend `boost::multiprecision::cpp_int`
 */
 #ifndef NX_BACKEND
-    #define NX_BACKEND uint64_t
+#define NX_BACKEND uint64_t
+#endif
+
+// The number of threads used in parallel simulation
+#ifndef NX_NUM_THREADS
+#define NX_NUM_THREADS 8
 #endif
 
 #include "circuit/circuit_def.h"
