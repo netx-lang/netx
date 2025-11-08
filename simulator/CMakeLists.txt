@@ -22,20 +22,27 @@ if (KAHIP)
     message("Found KaHIP at ${KAHIP}")
 endif ()
 
+include(FetchContent)
+FetchContent_Declare(cli
+        GIT_REPOSITORY https://github.com/daniele77/cli.git
+        GIT_TAG v2.1.0
+)
+FetchContent_MakeAvailable(cli)
+
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(OpenMP_CXX_FLAGS "-fopenmp=libomp")
     set(OpenMP_CXX_LIB_NAMES "omp")
     set(OpenMP_omp_LIBRARY "omp")
-endif()
+endif ()
 
 add_subdirectory(src)
 
 option(TESTING "Enable testing" ON)
-if(TESTING)
+if (TESTING)
     find_package(GTest REQUIRED)
     enable_testing()
     add_subdirectory(tests)
-endif()
+endif ()
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(

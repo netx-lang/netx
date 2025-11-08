@@ -12,8 +12,8 @@ target_link_libraries(nxsim INTERFACE nlohmann_json::nlohmann_json OpenMP::OpenM
 
 add_subdirectory(circuit)
 
-add_executable(nxsim_exe main.cpp cli.cpp)
-target_link_libraries(nxsim_exe PRIVATE nxsim)
+add_executable(nxsim_exe cli.cpp)
+target_link_libraries(nxsim_exe PRIVATE nxsim cli::cli)
 
 # Suppress Warning when using GCC with Boost and LTO
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_INTERPROCEDURAL_OPTIMIZATION)
