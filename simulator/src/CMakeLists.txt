@@ -12,15 +12,15 @@ target_link_libraries(nxsim INTERFACE nlohmann_json::nlohmann_json OpenMP::OpenM
 
 add_subdirectory(circuit)
 
-add_executable(nxsim_exe cli.cpp)
-target_link_libraries(nxsim_exe PRIVATE nxsim cli::cli)
+add_executable(nxsim_cli cli.cpp)
+target_link_libraries(nxsim_cli PRIVATE nxsim cli::cli)
 
 # Suppress Warning when using GCC with Boost and LTO
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_INTERPROCEDURAL_OPTIMIZATION)
-    target_link_options(nxsim_exe PRIVATE -Wno-error=maybe-uninitialized)
+    target_link_options(nxsim_cli PRIVATE -Wno-error=maybe-uninitialized)
 endif()
 
-install(TARGETS nxsim nxsim_exe
+install(TARGETS nxsim nxsim_cli
         EXPORT nxsimTargets
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib

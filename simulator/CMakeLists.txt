@@ -26,6 +26,7 @@ include(FetchContent)
 FetchContent_Declare(cli
         GIT_REPOSITORY https://github.com/daniele77/cli.git
         GIT_TAG v2.2.0
+        EXCLUDE_FROM_ALL
 )
 FetchContent_MakeAvailable(cli)
 
