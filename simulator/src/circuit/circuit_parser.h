@@ -46,6 +46,10 @@ namespace nxon {
         void cached_update_by_name(this auto &&self, const std::string &name, const value_t &value) {
             self.cached_update(self.name_map.at(name), value);
         }
+
+        size_t size_by_name(this auto &&self, const std::string &name) {
+            return self.size(self.name_map.at(name));
+        }
     };
 
     struct trivial_cached_capability {
@@ -138,9 +142,13 @@ namespace nxon {
         void update_batch(const value_batch &batch) {
             circuit.update_batch(batch);
         }
+
+        size_t size(const id_t id) const {
+            return size_map.at(id);
+        }
     };
 
-    using native_factory = std::function<rule_t(const parse_context &ctx, const nlohmann::json &json)>;
+    using native_factory = std::function<rule_t(const parse_context & ctx, const nlohmann::json & json)>;
 
     using native_map = std::map<std::string, native_factory>;
 
@@ -219,8 +227,8 @@ namespace nxon {
             return len_sum ? a.len() + b.len() : a.len();;
         }
 
-        inline source_t binary_combine(rule_t (*cons)(source_t, source_t, sink_t), source_t a, source_t b,
-                                       parse_context &context, const bool len_sum) {
+        inline source_t binary_combine(rule_t(*cons)(source_t, source_t, sink_t), source_t a, source_t b,
+                                       parse_context & context, const bool len_sum) {
             const auto new_len = binary_output_len(a, b, len_sum);
             const auto new_id = context.new_tmp_wire(new_len, "binary_mid");
             context.circuit.add_rule(cons(std::move(a), std::move(b), data_factory::id_sink(new_id, new_len)));

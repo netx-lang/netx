@@ -134,6 +134,33 @@ namespace nxon::impl {
             return {32, stomul(str), 0};
         }
 
+        static sized_mpint parse_fixed(const size_t size, std::string str) {
+            if (str.empty()) return sized_mpint{size};
+
+            int base;
+            switch (str.back()) {
+                case 'd':
+                    base = 10;
+                    break;
+                case 'b':
+                    base = 2;
+                    break;
+                case 'o':
+                    base = 8;
+                    break;
+                case 'h':
+                    base = 16;
+                    break;
+                default:
+                    base = -1;
+                    break;
+            }
+            if (base == -1) base = 10;
+            else str.pop_back();
+
+            return {size, stomul(str, base), 0};
+        }
+
         sized_mpint() : sized_mpint(1) {
         }
 
