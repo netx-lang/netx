@@ -66,7 +66,7 @@ void launch_cli(auto &parsed) {
 
 int main(const int argc, char *argv[]) {
     if (argc < 2 || argc > 3) {
-        std::cout << "Usage: nxsim <path to NXON file> (<directory for waveform dumping>)" << std::endl;
+        std::cout << "Usage: nxsim_cli <path to NXON file> (<directory for waveform dumping>)" << std::endl;
         return 1;
     }
     std::ifstream in{argv[1]};
