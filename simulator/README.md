@@ -118,7 +118,7 @@ To configure the thread count, define `NX_NUM_THREADS` before including nxsim he
 
 #### KaHIP Partitioner
 
-nxsim optionally depends on KaHIP to provide an alternative circuit partitioner.
+nxsim optionally depends on [KaHIP](https://kahip.github.io/) to provide an alternative circuit partitioner.
 
 If CMake is used to add nxsim to your project, this partitioner is automatically enabled whenever possible.
 
@@ -284,7 +284,8 @@ nxon::partitioned_parse_context<nxon::semantic_partitioner<0.01 /* 1% of the tot
 
 **KaHIP Partitioner (Optional):**
 
-This partitioner uses the KaHIP graph partitioning library (requires `NX_KAHIP` flag) to create partitions.
+This partitioner uses the [KaHIP](https://kahip.github.io/) graph partitioning library (requires `NX_KAHIP` flag) to
+create partitions.
 
 ```cpp
 nxon::partitioned_parse_context<nxon::kahip_partitioner> ctx;
