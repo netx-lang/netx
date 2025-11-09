@@ -17,43 +17,43 @@ namespace nxon {
             partitioned = partitioned_circuit<PartitionedContext>(circuit, partition_res);
         }
 
-        [[nodiscard]] value_t get(const id_t id) const {
+        [[nodiscard]] value_t iget(const id_t id) const {
             return partitioned->get_value(id);
         }
 
-        void flip(const id_t id) {
+        void iflip(const id_t id) {
             partitioned->flip(id);
         }
 
-        void flip_batch(const id_set &ids) {
+        void iflip_batch(const id_set &ids) {
             partitioned->flip_batch(ids);
         }
 
-        void update(const id_t id, const value_t &value) {
+        void iset(const id_t id, const value_t &value) {
             partitioned->update(id, value);
         }
 
-        void update_batch(const value_batch &batch) {
+        void iset_batch(const value_batch &batch) {
             partitioned->update_batch(batch);
         }
 
-        void cached_flip(const id_t id) {
+        void stashed_iflip(const id_t id) {
             partitioned->broadcast_flip(id);
         }
 
-        void cached_flip_batch(const id_set &ids) {
+        void stashed_iflip_batch(const id_set &ids) {
             partitioned->broadcast_flip_batch(ids);
         }
 
-        void cached_update(const id_t id, const value_t &value) {
+        void stashed_iset(const id_t id, const value_t &value) {
             partitioned->broadcast(id, value);
         }
 
-        void cached_update_batch(const value_batch &batch) {
+        void stashed_iset_batch(const value_batch &batch) {
             partitioned->broadcast_batch(batch);
         }
 
-        void apply_cache() {
+        void apply_stash() {
             partitioned->run_to_fixed();
         }
 

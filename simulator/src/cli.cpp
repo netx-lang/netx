@@ -15,29 +15,29 @@
 void launch_cli(auto &parsed) {
     auto rootMenu = std::make_unique<cli::Menu>("nxsim");
     rootMenu->Insert("iset", [&](std::ostream &out, const id_t id, const std::string &rep) {
-        const auto val = nxon::value_t::parse_fixed(parsed.size(id), rep);
-        parsed.update(id, val);
+        const auto val = nxon::value_t::parse_fixed(parsed.isize(id), rep);
+        parsed.iset(id, val);
         out << id << ": " << val << std::endl;
     }, "Set the value of the given wire", {"wire id", "N(d/b/o/h), e.g. 10, 10d, ABh, 001b"});
     rootMenu->Insert("iget", [&](std::ostream &out, const id_t id) {
-        out << id << ": " << parsed.get(id) << std::endl;
+        out << id << ": " << parsed.iget(id) << std::endl;
     }, "Get the value of the given wire", {"wire id"});
     rootMenu->Insert("iflip", [&](std::ostream &out, const id_t id) {
-        parsed.flip(id);
-        out << id << ": " << parsed.get(id) << std::endl;
+        parsed.iflip(id);
+        out << id << ": " << parsed.iget(id) << std::endl;
     }, "Flip the given wire", {"wire id"});
 
     rootMenu->Insert("set", [&](std::ostream &out, const std::string &name, const std::string &rep) {
-        const auto val = nxon::value_t::parse_fixed(parsed.size_by_name(name), rep);
-        parsed.update_by_name(name, val);
+        const auto val = nxon::value_t::parse_fixed(parsed.size(name), rep);
+        parsed.set(name, val);
         out << name << ": " << val << std::endl;
     }, "Set the value of the given wire", {"wire name", "N(d/b/o/h), e.g. 10, 10d, ABh, 001b"});
     rootMenu->Insert("get", [&](std::ostream &out, const std::string &name) {
-        out << name << ": " << parsed.get_by_name(name) << std::endl;
+        out << name << ": " << parsed.get(name) << std::endl;
     }, "Get the value of the given wire", {"wire name"});
     rootMenu->Insert("flip", [&](std::ostream &out, const std::string &name) {
-        parsed.flip_by_name(name);
-        out << name << ": " << parsed.get_by_name(name) << std::endl;
+        parsed.flip(name);
+        out << name << ": " << parsed.get(name) << std::endl;
     }, "Flip the given wire", {"wire name"});
 
     rootMenu->Insert("fc", [&](std::ostream &out) {

@@ -23,66 +23,68 @@ namespace nxon {
             self.flip_input_clocks();
         }
 
-        [[nodiscard]] value_t get_by_name(this auto &&self, const std::string &name) {
-            return self.get(self.name_map.at(name));
+        [[nodiscard]] value_t get(this auto &&self, const std::string &name) {
+            return self.iget(self.name_map.at(name));
         }
 
-        void flip_by_name(this auto &&self, const std::string &name) {
-            self.flip(self.name_map.at(name));
+        void flip(this auto &&self, const std::string &name) {
+            self.iflip(self.name_map.at(name));
         }
 
-        void update_by_name(this auto &&self, const std::string &name, const value_t &value) {
-            self.update(self.name_map.at(name), value);
+        void set(this auto &&self, const std::string &name, const value_t &value) {
+            self.iset(self.name_map.at(name), value);
         }
 
         void flip_input_clocks(this auto &&self) {
-            self.flip_batch(self.circuit_input_clocks);
+            self.iflip_batch(self.circuit_input_clocks);
         }
 
-        void cached_flip_by_name(this auto &&self, const std::string &name) {
-            self.cached_flip(self.name_map.at(name));
+        void stashed_flip(this auto &&self, const std::string &name) {
+            self.stashed_iflip(self.name_map.at(name));
         }
 
-        void cached_update_by_name(this auto &&self, const std::string &name, const value_t &value) {
-            self.cached_update(self.name_map.at(name), value);
+        void stashed_set(this auto &&self, const std::string &name, const value_t &value) {
+            self.stashed_iset(self.name_map.at(name), value);
         }
 
-        size_t size_by_name(this auto &&self, const std::string &name) {
-            return self.size(self.name_map.at(name));
+        size_t size(this auto &&self, const std::string &name) {
+            return self.isize(self.name_map.at(name));
         }
     };
 
     struct trivial_cached_capability {
-        void cached_flip(const id_t id) {
-            flip_cache.insert(id);
+        void stashed_iflip(const id_t id) {
+            if (flip_stash.contains(id)) flip_stash.erase(id);
+            else flip_stash.insert(id);
         }
 
-        void cached_flip_batch(const id_set &ids) {
-            flip_cache += ids;
+        void stashed_iflip_batch(const id_set &ids) {
+            for (auto &id: ids)
+                stashed_iflip(id);
         }
 
-        void cached_update(const id_t id, const value_t &value) {
-            update_cache.emplace(id, value);
+        void stashed_iset(const id_t id, const value_t &value) {
+            set_stash.emplace(id, value);
         }
 
-        void cached_update_batch(const value_batch &batch) {
-            update_cache.insert_range(batch);
+        void stashed_iset_batch(const value_batch &batch) {
+            set_stash.insert_range(batch);
         }
 
-        void apply_cache(this auto &&self) {
-            if (!self.flip_cache.empty()) {
-                self.flip_batch(self.flip_cache);
-                self.flip_cache.clear();
+        void apply_stash(this auto &&self) {
+            if (!self.flip_stash.empty()) {
+                self.iflip_batch(self.flip_stash);
+                self.flip_stash.clear();
             }
-            if (!self.update_cache.empty()) {
-                self.update_batch(self.update_cache);
-                self.update_cache.clear();
+            if (!self.set_stash.empty()) {
+                self.iset_batch(self.set_stash);
+                self.set_stash.clear();
             }
         }
 
     private:
-        id_set flip_cache;
-        value_batch update_cache;
+        id_set flip_stash;
+        value_batch set_stash;
     };
 
     struct component_hierarchy {
@@ -123,27 +125,27 @@ namespace nxon {
             return id;
         }
 
-        [[nodiscard]] value_t get(const id_t id) const {
+        [[nodiscard]] value_t iget(const id_t id) const {
             return circuit.get_value(id);
         }
 
-        void flip(const id_t id) {
+        void iflip(const id_t id) {
             circuit.flip(id);
         }
 
-        void flip_batch(const id_set &ids) {
+        void iflip_batch(const id_set &ids) {
             circuit.flip_batch(ids);
         }
 
-        void update(const id_t id, const value_t &value) {
+        void iset(const id_t id, const value_t &value) {
             circuit.update(id, value);
         }
 
-        void update_batch(const value_batch &batch) {
+        void iset_batch(const value_batch &batch) {
             circuit.update_batch(batch);
         }
 
-        size_t size(const id_t id) const {
+        size_t isize(const id_t id) const {
             return size_map.at(id);
         }
     };

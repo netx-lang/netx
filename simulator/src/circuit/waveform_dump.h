@@ -77,14 +77,14 @@ $scope module TOP $end
             }
         }
 
-        void flip(const id_t id) {
+        void iflip(const id_t id) {
             circuit.flip(id);
 
             if (!circuit_input_clocks.contains(id)) return;
             advance_and_dump(id);
         }
 
-        void flip_batch(const id_set &ids) {
+        void iflip_batch(const id_set &ids) {
             circuit.flip_batch(ids);
 
             for (auto &id: ids) {
