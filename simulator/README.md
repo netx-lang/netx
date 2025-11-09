@@ -148,12 +148,12 @@ auto context = nxon::parse_circuit(input);
 
 nxsim provides several methods to inspect and manipulate circuit state:
 
-- `get`: Get the value of the wire with given id
-- `get_by_name`: Get the value of the wire with given name
-- `update`: Update the value of the wire with given id
-- `update_by_name`: Update the value of the wire with given name
-- `flip`: Flip the wire with given id
-- `flip_by_name`: Flip the wire with given name
+- `iget`: Get the value of the wire with given id
+- `get`: Get the value of the wire with given name
+- `iset`: Update the value of the wire with given id
+- `set`: Update the value of the wire with given name
+- `iflip`: Flip the wire with given id
+- `flip`: Flip the wire with given name
 - `flip_input_clocks`: Flip all input clocks
 - `advance_input_clocks`: Advance all input clocks by one cycle (flip twice)
 
@@ -161,13 +161,13 @@ The value of a wire is a `nxon::value_t`, which is an integer with custom width.
 
 ```cpp
 // Access wire value
-auto value = context.get_by_name("output_signal");
+auto value = context.get("output_signal");
 
 // Update wire value
-context.update_by_name("input_signal", nxon::value_t{5 /* width */, 3 /* value */});
+context.set("input_signal", nxon::value_t{5 /* width */, 3 /* value */});
 
 // Flip wire
-context.flip_by_name("clock");
+context.flip("clock");
 
 // Advance clocks
 context.advance_input_clocks();  // Full cycle (two edges)
@@ -178,41 +178,41 @@ context.flip_input_clocks();     // Single edge
 
 There are also batched manipulation methods:
 
-- `flip_batch`: Flip wires with given ids
-- `update_batch`: Update values of wires with given ids
+- `iflip_batch`: Flip wires with given ids
+- `iset_batch`: Update values of wires with given ids
 
 ```cpp
 // Flip wires
-context.flip_batch({1, 2, 3});
+context.iflip_batch({1, 2, 3});
 
 // Update wires
-context.update_batch({{1, nxon::value_t{5, 3}}, {2, nxon::value_t{5, 4}}});
+context.iset_batch({{1, nxon::value_t{5, 3}}, {2, nxon::value_t{5, 4}}});
 ```
 
-#### Cached Manipulation
+#### Stashed Manipulation
 
 Batched operations apply multiple updates at once to reduce overhead. But they are not as convenient as direct
 operations.
 
-To address this, nxsim provides cached manipulation methods:
+To address this, nxsim provides stashed manipulation methods:
 
-- `cached_flip`
-- `cached_flip_batch`
-- `cached_flip_by_name`
-- `cached_update`
-- `cached_update_batch`
-- `cached_update_by_name`
+- `stashed_iflip`
+- `stashed_iflip_batch`
+- `stashed_flip`
+- `stashed_iset`
+- `stashed_iset_batch`
+- `stashed_set`
 
-The usage of these cached operations are almost the same as direct operations, but they are not applied immediately.
-Instead, they are cached and applied at once when `apply_cache` is called.
+The usage of these stashed operations are almost the same as direct operations, but they are not applied immediately.
+Instead, they are stashed and applied at once when `apply_stash` is called.
 
 ```cpp
-// Cache operations
-context.cached_flip(1);
-context.cached_update(2, nxon::value_t{5, 3});
+// Stashed operations
+context.stashed_iflip(1);
+context.stashed_iset(2, nxon::value_t{5, 3});
 
-// Apply all cached operations at once
-context.apply_cache();
+// Apply all stashed operations at once
+context.apply_stash();
 ```
 
 ### Parse Context Wrappers
@@ -240,7 +240,7 @@ nxon::parse_circuit(ctx, input);
 ctx.init_dump();  // Initialize VCD files
 
 // Automatically dump wires on clock edges
-ctx.flip_by_name("clk");  // Triggers waveform update
+ctx.flip("clk");  // Triggers waveform update
 ```
 
 #### Partitioning and Parallel Simulation
@@ -258,14 +258,15 @@ nxon::parse_circuit(ctx, input);
 ctx.init_partition();
 
 // Operations automatically propagate across partitions
-ctx.update_by_name("input", value);
+ctx.set("input", value);
 ```
 
 You may wonder what a `paritioned_parse_context` without parallel execution can achieve. In fact, the propagation
-order of updates in `parse_context` is not always ideal, which may lead to many redundant updates. When the
-circuit is partitioned, unlike `parse_context`, updates will first propagate in their current part of circuit,
-reach a local fixed point, and then propagate to the others. For some circuits, this change in order can reduce the
-total number of updates by up to 30%.
+order of updates in `parse_context` is not always ideal: sometimes rules with multiple inputs are executed too eagerly
+on arrival of any updates to any of its inputs, instead of waiting for all updates to its inputs to happen, leading to
+redundant updates. When the circuit is partitioned, unlike `parse_context`, updates will first propagate in their
+current part of circuit, reach a local fixed point, and then propagate to the others. When applied to our RV32I CPU
+implementation, this change in update order can reduce the total number of updates by 30%.
 
 ##### Partitioner
 
