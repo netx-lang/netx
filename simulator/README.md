@@ -133,7 +133,7 @@ In case CMake is not used, you can define `NX_KAHIP` before including nxsim head
 
 #### Parsing
 
-To get a circuit from a NXON file, use `nxon::parse_circuit`.
+To get a circuit from a NXON file, use `parse_circuit`.
 
 ```cpp
 #include "simulation.h"
@@ -216,9 +216,9 @@ context.apply_cache();
 
 ### Parse Context Wrappers
 
-nxsim provides several wrappers around `nxon::parse_context` to provide additional functionalities.
+nxsim provides several wrappers around `parse_context` to provide additional functionalities.
 
-To use a wrapper, pass it as an additional parameter to `nxon::parse_circuit`.
+To use a wrapper, pass it as an additional parameter to `parse_circuit`.
 
 ```cpp
 custon_parse_context ctx; 
@@ -227,9 +227,9 @@ nxon::parse_circuit(ctx, input);
 
 #### Waveform Dumping
 
-`nxon::dumping_parse_context` is a wrapper that provides waveform dumping functionality.
+`dumping_parse_context` is a wrapper that provides waveform dumping functionality.
 
-After parsing, it is needed to call `init_dump` to initialize the VCD files before any manipulation. It automatically
+After parsing, it is required to call `init_dump` to initialize the VCD files before any manipulation. It automatically
 generates separate VCD waveforms under the given directory for every input clock, and tracks all wire state changes
 synchronized to clock edges.
 
@@ -246,8 +246,8 @@ ctx.flip_by_name("clk");  // Triggers waveform update
 
 nxsim supports automatic circuit partitioning and parallel execution on partitioned circuit.
 
-There are two wrappers around this: `nxon::partitioned_parse_context` (Sequential Partitioned) and
-`nxon::parallel_parse_context` (Parallel Execution). Both require calling `init_partition` to perform partitioning
+There are two wrappers around this: `partitioned_parse_context` (Sequential Partitioned) and
+`parallel_parse_context` (Parallel Execution). Both require calling `init_partition` to perform partitioning
 before any manipulation.
 
 ```cpp
@@ -259,15 +259,15 @@ ctx.init_partition();
 ctx.update_by_name("input", value);
 ```
 
-You may wonder what a `nxon::paritioned_parse_context` without parallel execution can achieve. In fact, the propagation
-order of updates in `nxon::parse_context` is not always ideal, which may lead to many redundant updates. When the
-circuit is partitioned, unlike `nxon::parse_context`, updates will first propagate in their current part of circuit,
+You may wonder what a `paritioned_parse_context` without parallel execution can achieve. In fact, the propagation
+order of updates in `parse_context` is not always ideal, which may lead to many redundant updates. When the
+circuit is partitioned, unlike `parse_context`, updates will first propagate in their current part of circuit,
 reach a local fixed point, and then propagate to the others. For some circuits, this change in order can reduce the
 total number of updates by up to 30%.
 
 ##### Partitioner
 
-`nxon::partitioned_parse_context` and `nxon::parallel_parse_context` accept a partitioner as template parameter to
+`partitioned_parse_context` and `parallel_parse_context` accept a partitioner as template parameter to
 perform circuit partitioning. nxsim provides two partitioners:
 
 **Semantic Partitioner (Default):**
@@ -304,20 +304,20 @@ dot -Tsvg partition.dot -o partition.svg
 
 ### Native Modelling
 
-#### Sources, Sinks, and Rules
+#### Clocks, Sources, Sinks, and Rules
 
 nxsim uses a **rule-based simulation model** where circuit behavior is defined by rules that read from sources, do
 calculation and write to sinks.
 
-##### **Source (`source_t`)**
+##### Source (`source_t`)
 
 A source represents a **read operation** from the circuit state:
 
 - **Dependencies:** Set of wire IDs that may be read
 - **Length:** Width of the value produced
-- **Operation:** Extracts and potentially transforms wire values
+- **Operation (`get()`):** Extracts and potentially transforms wire values
 
-**Built-in source types:**
+There are some built-in source types:
 
 ```cpp
 // Direct wire access
@@ -330,7 +330,21 @@ auto const_src = data_factory::constant_source(nxon::value_t::parse_fixed(8, "42
 auto slice_src = data_factory::select_source(wire_id, from_bit, to_bit);
 ```
 
-##### **Sink (`sink_t`)**
+##### Clock (`clock_t`)
+
+A clock represents a **clock signal** in the circuit:
+
+- **Dependencies:** Set of wire IDs that may be read
+- **Operation (`triggered()`):** Check if the clock is triggered
+
+There is one built-in clock type:
+
+```cpp
+// Direct clock
+auto clk = data_factory::id_clock(wire_id, pos_edge);
+```
+
+##### Sink (`sink_t`)
 
 A sink represents a **write operation** to the circuit state:
 
@@ -340,13 +354,13 @@ A sink represents a **write operation** to the circuit state:
     - `check()`: Returns true if writing would change the current value
     - `put()`: Writes the value to circuit state
 
-**Built-in sink types:**
+There are some built-in sink types:
 
 ```cpp
 // Direct wire write
 auto sink = data_factory::id_sink(wire_id, bit_width);
 
-// Bit selection write (modifies slice of a wire)
+// Bit selection write (modifies a slice of a wire)
 auto slice_sink = data_factory::select_sink(wire_id, from_bit, to_bit);
 
 // Sink adapters (automatic width conversion)
@@ -354,14 +368,14 @@ auto signed_sink = data_factory::signed_resize_sink_adapter(underlying_sink); //
 auto unsigned_sink = data_factory::unsigned_resize_sink_adapter(underlying_sink); // Resize as unsigned integer
 ```
 
-##### **Rule (`rule_t`)**
+##### Rule (`rule_t`)
 
 A rule defines a **computational relationship** between sources and sinks:
 
 - **Triggers:** Wire IDs that activate this rule when changed
 - **Dependencies:** Wire IDs that this rule may depend on (superset of triggers)
 - **Outcomes:** Wire IDs that may be written
-- **Operation:** Computes output values from input values
+- **Operation (`perform()`):** Computes output values from input values and reports affected wires
 
 Usually, the task of a rule is:
 
@@ -370,6 +384,101 @@ Usually, the task of a rule is:
 3. If outputs differ from current values (checked via `sink.check()`), they are written
 4. Return the set of wire IDs whose values are actually modified
 
-#### Create and Use Native Rules
+To create custom rule, inherit from `impl::rule_impl`, provide triggers, dependencies and outcomes in the constructor,
+and implement the `perform()` method.
 
-TODO
+For simple binary and unary operations, there are some built-in universal rule implementations.
+
+```cpp
+// Unary operation
+auto unary_rule = nxon::rule_t{new nxon::impl::unary_rule(
+    source, sink,
+    [](const nxon::value_t& x) { return x.some_operation(); }
+)};
+
+// Binary operation
+auto binary_rule = nxon::rule_t{new nxon::impl::binary_rule(
+    source_a, source_b, sink,
+    [](const nxon::value_t& a, const nxon::value_t& b) { return a.some_operation(b); }
+)};
+```
+
+When implementing rules that triggers on a clock, you should use `value_storage::delay` to delay the write operation
+until all rules in one round are performed, to ensure that rules do not interfere with each other on the same clock
+edge.
+
+For example, a custom register with synchronous reset can be implemented as follows:
+
+```cpp
+struct reg_rule final : nxon::impl::rule_impl {
+    nxon::clock_t clk;
+    nxon::source_t rst, in;
+    nxon::sink_t out;
+
+    reg_rule(nxon::clock_t clk, nxon::source_t rst, nxon::source_t in, nxon::sink_t out)
+        : rule_impl(clk.dependencies(), clk.dependencies() + rst.dependencies() + in.dependencies(), out.outcomes()),
+          clk(std::move(clk)), rst(std::move(rst)), in(std::move(in)), out(std::move(out)) {
+    }
+
+    nxon::impl::indirect_id_set perform(nxon::value_storage &values) const override {
+        static nxon::id_set EMPTY_ID_SET;
+        if (const auto rst_v = rst.get(values);
+            static_cast<bool>(*rst_v)) [[likely]] {
+            if (auto in_v = in.get(values); clk.triggered(values) && out.check(values, *in_v)) {
+                values.delay([value = in_v.release(), out = out](auto &cur_values) {
+                    out.put(cur_values, std::move(value));
+                });
+                return nxon::impl::indirect_id_set(out.outcomes());
+            }
+        }
+        return nxon::impl::indirect_id_set(EMPTY_ID_SET);
+    }
+};
+```
+
+##### Potential Holder (`impl::potential_holder`, `impl::indirect_id_set`, `impl::indirect_value_t`)
+
+To avoid unnecessary copies, the return types of `source.get()` and `rule.perform()` are `impl::potential_holder`.
+
+`impl::potential_holder<T>` holds an instance of `T` or a constant reference to it, depending on the argument provided
+upon construction. When it holds a reference, it is the responsibility of its creator to ensure that the reference lives
+long enough. And users should not store the reference for later use, nor assume its validity after any modifications to
+the circuit state.
+
+To get a persistent instance out of a `potential_holder`, use `potential_holder.release()`. It returns a `T` obtained
+via move constructor (when holding an instance) or copy constructor (when holding a reference), and invalidates the
+potential holder.
+
+#### Using Custom Rules
+
+nxsim allows you to pass a `native_map` to `parse_circuit`. When the parser sees a component, it checks `native_map`with
+its `id`.
+
+- If found, it invokes the factory: `factory(context, json)` and adds the returned `rule_t` to the circuit.
+- Otherwise, it recursively parses sub-members as usual.
+
+With that, you can replace some components with your custom rules. When writing a custom rule factory, you may want to:
+
+- Get component inputs, outputs and attributes: `json["input"]`, `json["output"]`, `json["attribute"]`
+- Use sources/sinks/clocks parsing helpers: `parse_source()`, `parse_sink()`, `parse_clock()`
+- Create temporary wires: `ctx.new_tmp_wire()`
+
+For example, to use the custom register rule implemented in the previous section, you can do the following:
+
+```cpp
+nxon::rule_t parse_reg(const nxon::parse_context &ctx, const nlohmann::json &json) {
+    const auto &input = json["input"];
+    const auto &output = json["output"];
+
+    return nxon::rule_t{new reg_rule(
+        nxon::parse_clock(input.at(0), true),
+        parse_source(input.at(1), ctx),
+        parse_source(input.at(2), ctx),
+        parse_sink(output.at(0), ctx)
+    )};
+}
+
+parse_circuit(ctx, nlohmann::json::parse(json), {
+    {"reg", std::function(parse_reg)}
+});
+```
