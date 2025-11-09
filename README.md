@@ -131,10 +131,11 @@ The package manager will automatically download the package from the specified G
 
 #### Interactive Simulation
 
-The NetX simulator supports interactive simulation using the `nxsim` command, given the compiled JSON hardware representation (NXON).
+The NetX simulator supports interactive simulation using the `nxsim_cli` command, given the compiled JSON hardware representation (NXON).
 
 ```bash
-nx compile my_design.nx --minimal | nxsim
+nx compile my_design.nx --minimal -o circuit.nxon
+nxsim_cli circuit.nxon
 ```
 
 #### Using the nxsim Library

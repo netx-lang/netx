@@ -77,7 +77,7 @@ The interactive CLI provides commands for inspecting and manipulating circuit st
 nxsim provides an all-in-one header to include the entire library:
 
 ```cpp
-#include "simulation.h"
+#include <nxsim/simulation.h>
 ```
 
 And it is allowed to configure the library by defining some macros before including the header:
@@ -93,7 +93,7 @@ To use a custom backend, define `NX_BACKEND` before including nxsim headers.
 ```cpp
 #include <boost/multiprecision/cpp_int.hpp>
 #define NX_BACKEND boost::multiprecision::cpp_int
-#include "simulation.h"
+#include <nxsim/simulation.h>
 ```
 
 **Recommended backends:**
@@ -113,7 +113,7 @@ To configure the thread count, define `NX_NUM_THREADS` before including nxsim he
 
 ```cpp
 #define NX_NUM_THREADS 16
-#include "simulation.h"
+#include <nxsim/simulation.h>
 ```
 
 #### KaHIP Partitioner
@@ -122,11 +122,12 @@ nxsim optionally depends on KaHIP to provide an alternative circuit partitioner.
 
 If CMake is used to add nxsim to your project, this partitioner is automatically enabled whenever possible.
 
-In case CMake is not used, you can define `NX_KAHIP` before including nxsim headers to enable it manually.
+In case CMake is not used, you can add `-lkahip` to the linker flags, and define `NX_KAHIP` before including nxsim
+headers to enable it manually.
 
 ```cpp
 #define NX_KAHIP
-#include "simulation.h"
+#include <nxsim/simulation.h>
 ```
 
 ### Basic Usage
@@ -136,7 +137,7 @@ In case CMake is not used, you can define `NX_KAHIP` before including nxsim head
 To get a circuit from a NXON file, use `parse_circuit`.
 
 ```cpp
-#include "simulation.h"
+#include <nxsim/simulation.h>
 
 // Parse from file
 std::ifstream input("circuit.nxon");
@@ -248,7 +249,8 @@ nxsim supports automatic circuit partitioning and parallel execution on partitio
 
 There are two wrappers around this: `partitioned_parse_context` (Sequential Partitioned) and
 `parallel_parse_context` (Parallel Execution). Both require calling `init_partition` to perform partitioning
-before any manipulation.
+before any manipulation. To use parallel execution, you need to link against OpenMP by adding the `-fopenmp` flag
+when compiling your C++ code (automatically configured when using nxsim with CMake).
 
 ```cpp
 nxon::partitioned_parse_context ctx;
