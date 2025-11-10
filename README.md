@@ -1,5 +1,10 @@
 # NetX
 
+[![CI](https://github.com/pascal-lab/NetX/actions/workflows/ci.yml/badge.svg)](https://github.com/pascal-lab/NetX/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/)
+[![C++](https://img.shields.io/badge/C++-23-blue.svg)](https://en.cppreference.com/)
+
 NetX is a novel hardware description language (HDL) that employs a schematic programming model to intuitively ensure code-to-circuit consistency. In NetX, code is arranged to resemble circuit schematics, enabling a "what you design is what you get" paradigm that empowers designers to manipulate the exact structure of circuits without obscuration.
 
 The NetX toolchain includes a compiler, a package manager, a simulator, and a visualizer implemented in this repository.
