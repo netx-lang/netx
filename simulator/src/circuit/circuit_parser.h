@@ -68,7 +68,11 @@ namespace nxon {
         }
 
         void stashed_iset_batch(const value_batch &batch) {
+#ifdef __cpp_lib_containers_ranges
             set_stash.insert_range(batch);
+#else
+            set_stash.insert(batch.begin(), batch.end());
+#endif
         }
 
         void apply_stash(this auto &&self) {

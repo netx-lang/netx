@@ -55,9 +55,9 @@ jobs:
     - name: Setup Environment
       run: |
         sudo apt update
-        sudo apt install -y g++-15 cmake build-essential
+        sudo apt install -y g++-14 cmake build-essential
         sudo apt install -y libboost-all-dev nlohmann-json3-dev libgtest-dev libgmock-dev
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-15 10
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 10
 
     - name: Configure CMake
       working-directory: simulator
