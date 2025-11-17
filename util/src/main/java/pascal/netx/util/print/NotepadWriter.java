@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  * <p>It typically provides APIs to manipulate indents so that we can
  * print code conveniently just like writing code on a notepad.</p>
  */
-public class NotepadWriter implements AutoCloseable {
+public final class NotepadWriter implements AutoCloseable {
 
     private static final String DEFAULT_INDENT = " ".repeat(2);
 

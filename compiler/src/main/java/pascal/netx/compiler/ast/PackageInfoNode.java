@@ -4,7 +4,7 @@ import pascal.netx.util.lang.Identifier;
 
 import java.util.Objects;
 
-public class PackageInfoNode extends ASTNode {
+public final class PackageInfoNode extends ASTNode {
     private Identifier id;
     private Kind kind;
 

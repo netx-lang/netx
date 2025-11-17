@@ -8,7 +8,7 @@ import pascal.netx.util.lang.Identifier;
 import java.util.List;
 import java.util.Objects;
 
-public class DataRestNode extends ASTNode {
+public final class DataRestNode extends ASTNode {
     private Identifier identifier;
     private List<ExprNode> dimensions;
 

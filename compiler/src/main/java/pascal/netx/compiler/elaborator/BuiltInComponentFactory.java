@@ -25,7 +25,7 @@ import static pascal.netx.compiler.model.Entities.requiresIntegerValue;
 import static pascal.netx.util.lang.BuiltinComponent.REG_CLK_EDGE_ATTR;
 import static pascal.netx.util.lang.BuiltinComponent.TO;
 
-public class BuiltInComponentFactory {
+public final class BuiltInComponentFactory {
     private final NXCompiler compiler;
 
     public BuiltInComponentFactory(NXCompiler compiler) {
