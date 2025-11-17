@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class NxonParseUtils {
+public final class NxonParseUtils {
     public static final Set<String> VERILOG_KEYWORDS;
 
     static {

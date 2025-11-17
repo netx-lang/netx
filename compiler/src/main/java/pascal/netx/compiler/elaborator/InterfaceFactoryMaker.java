@@ -13,7 +13,7 @@ import pascal.netx.util.lang.SourceLoc;
 
 import java.util.LinkedHashMap;
 
-public class InterfaceFactoryMaker {
+public final class InterfaceFactoryMaker {
     private final ComponentScope scope;
     private final NXCompiler compiler;
 
