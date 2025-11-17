@@ -26,7 +26,11 @@ namespace nxon {
                                               const extracted_graph_t &graph_T,
                                               const component_hierarchy &hierarchy,
                                               const size_t min_size) {
+#ifdef __cpp_lib_containers_ranges
             cur_part.append_range(hierarchy.wires);
+#else
+            cur_part.insert(cur_part.end(), hierarchy.wires.begin(), hierarchy.wires.end());
+#endif
             if (hierarchy.children.empty()) return;
 
             const size_t child_cnt = hierarchy.children.size();
@@ -92,12 +96,18 @@ namespace nxon {
             else {
                 for (const auto &path: paths) {
                     std::vector<id_t> new_part;
-                    for (const auto i: path)
+                    for (const auto i: path) {
                         semantic_partitioner_impl(parts, new_part, graph, graph_T, hierarchy.children[i], min_size);
-                    if (new_part.size() >= min_size)
+                    }
+                    if (new_part.size() >= min_size) {
                         parts.emplace_back(std::move(new_part));
-                    else
+                    } else {
+#ifdef __cpp_lib_containers_ranges
                         cur_part.append_range(new_part);
+#else
+                        cur_part.insert(cur_part.end(), new_part.begin(), new_part.end());
+#endif
+                    }
                 }
             }
         }

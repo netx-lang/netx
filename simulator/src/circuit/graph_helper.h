@@ -55,7 +55,13 @@ namespace nxon::impl {
             vertices.emplace_back(iter->second);
         }
         for (const auto &child: hierarchy.children)
+#ifdef __cpp_lib_containers_ranges
             vertices.append_range(hierarchy_vertices(graph, child));
+#else
+            vertices.insert(vertices.end(),
+                            hierarchy_vertices(graph, child).begin(),
+                            hierarchy_vertices(graph, child).end());
+#endif
         return vertices;
     }
 
@@ -64,12 +70,21 @@ namespace nxon::impl {
         const extracted_graph_t &graph,
         const extracted_graph_t &graph_T) {
         std::unordered_set<extracted_vertex_t> result;
+#ifdef __cpp_lib_containers_ranges
         result.insert_range(vertices);
-
+#else
+        result.insert(vertices.begin(), vertices.end());
+#endif
         std::queue<extracted_vertex_t> worklist;
         for (const auto &v: vertices) {
             auto [adj_begin, adj_end] = adjacent_vertices(v, graph);
+#ifdef __cpp_lib_containers_ranges
             worklist.push_range(std::ranges::subrange(adj_begin, adj_end));
+#else
+            for (const auto &adj: std::ranges::subrange(adj_begin, adj_end)) {
+                worklist.push(adj);
+            }
+#endif
         }
 
         while (!worklist.empty()) {
@@ -83,7 +98,13 @@ namespace nxon::impl {
                 continue;
             result.insert(v);
             auto [adj_begin, adj_end] = adjacent_vertices(v, graph);
+#ifdef __cpp_lib_containers_ranges
             worklist.push_range(std::ranges::subrange(adj_begin, adj_end));
+#else
+            for (const auto &adj: std::ranges::subrange(adj_begin, adj_end)) {
+                worklist.push(adj);
+            }
+#endif
         }
 
         return result;
