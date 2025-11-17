@@ -88,4 +88,9 @@ public final class CallSymbolExpr extends SymbolExpr {
         sb.append(")");
         return sb.toString();
     }
+
+    @Override
+    public Identifier getSymbol() {
+        return head;
+    }
 }

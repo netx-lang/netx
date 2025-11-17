@@ -2,6 +2,7 @@ package pascal.netx.compiler.elaborator;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
+import pascal.netx.compiler.exception.CompileCancellationException;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXBuilder;
 import pascal.netx.compiler.model.scope.ComponentScope;
@@ -218,5 +219,25 @@ class ElaboratorUnitTest {
                 }
                 """;
         test(expected, actual);
+    }
+
+    @Test
+    void testClosedMacro() {
+        var good = """
+                component top : [] -> [] {
+                    let f(a) = AND <> [1'b1, a];
+                    wire a of bit(1);
+                    f(a);
+                }
+                """;
+        var bad = """
+                component top : [] -> [] {
+                    let f = AND <> [1'b1, a];
+                    wire a of bit(1);
+                    f;
+                }
+                """;
+        assertDoesNotThrow(() -> loadSingleComponent(good));
+        assertThrows(CompileCancellationException.class, () -> loadSingleComponent(bad));
     }
 }
