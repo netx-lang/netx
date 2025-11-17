@@ -1,5 +1,6 @@
 package pascal.netx.compiler.elaborator;
 
+import pascal.netx.compiler.analysis.ast.FreeVariableDetector;
 import pascal.netx.compiler.ast.element.BindingNode;
 import pascal.netx.compiler.ast.element.InterfaceNode;
 import pascal.netx.compiler.ast.expr.*;
@@ -156,7 +157,24 @@ public final class ComponentEvaluator {
                 freeVariables = List.of();
             }
         }
-        return MonoBinding.of(id, Macro.of(freeVariables, binding.getExpr()));
+        var macro = Macro.of(freeVariables, binding.getExpr());
+        checkClosedMacro(binding.getSourceLoc(), id, macro);
+        return MonoBinding.of(id, macro);
+    }
+
+    private void checkClosedMacro(SourceLoc sourceLoc, Identifier name, Macro macro) {
+        var freeVariables = FreeVariableDetector.detect(macro.expr());
+        macro.identifiers().forEach(freeVariables::remove);
+        for (var id : freeVariables) {
+            if (!name.equals(id)) { // Not a recursive macro
+                try {
+                    resolveIdentifier(id);
+                } catch (CompileCancellationException e) {
+                    Logger.error(sourceLoc, "Macro {} is not closed, missing variable {}", macro.expr(), id);
+                    throw e;
+                }
+            }
+        }
     }
 
     public Entity evaluateAndDeclInPlace(ExprNode expr) {

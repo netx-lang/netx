@@ -37,17 +37,14 @@ public final class PackageElaborator {
     public PackageScope elaborate() {
         Identifier name = node.getPackageInfo().getIdentifier();
         Logger.startPackage(name, node.getSourceLoc());
-        try {
-            initializePackageDefs();
-            var topNode = findTopNode();
-            var topScope = pack.instantiateTop(topNode.getIdentifier());
-            bindConfigParameters(topNode, topScope);
-            new ComponentElaborator(config, topScope).build(topNode);
-            setSignature(topScope, topNode);
-            return pack;
-        } finally {
-            Logger.finishPackage();
-        }
+        initializePackageDefs();
+        var topNode = findTopNode();
+        var topScope = pack.instantiateTop(topNode.getIdentifier());
+        bindConfigParameters(topNode, topScope);
+        new ComponentElaborator(config, topScope).build(topNode);
+        setSignature(topScope, topNode);
+        Logger.finishPackage();
+        return pack;
     }
 
     private void bindConfigParameters(ComponentNode topNode, ComponentScope topScope) {

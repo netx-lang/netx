@@ -44,20 +44,14 @@ final class ComponentElaborator {
             case ComponentNode node -> {
                 Identifier name = node.getIdentifier();
                 Logger.startComponent(name, node.getSourceLoc());
-                try {
-                    buildComponent(node);
-                } finally {
-                    Logger.finishComponent();
-                }
+                buildComponent(node);
+                Logger.finishComponent();
             }
             case InterfaceNode node -> {
                 Identifier name = node.getIdentifier();
                 Logger.startComponent(name, node.getSourceLoc());
-                try {
-                    buildInterface(node);
-                } finally {
-                    Logger.finishComponent();
-                }
+                buildInterface(node);
+                Logger.finishComponent();
             }
         }
     }

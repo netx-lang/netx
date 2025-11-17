@@ -47,4 +47,9 @@ public final class IdentifierExpr extends SymbolExpr {
     public String toString() {
         return identifier.name();
     }
+
+    @Override
+    public Identifier getSymbol() {
+        return identifier;
+    }
 }
