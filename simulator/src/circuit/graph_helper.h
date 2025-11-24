@@ -54,14 +54,14 @@ namespace nxon::impl {
             if (iter == to_new.end()) continue;
             vertices.emplace_back(iter->second);
         }
-        for (const auto &child: hierarchy.children)
+        for (const auto &child: hierarchy.children) {
 #ifdef __cpp_lib_containers_ranges
             vertices.append_range(hierarchy_vertices(graph, child));
 #else
-            vertices.insert(vertices.end(),
-                            hierarchy_vertices(graph, child).begin(),
-                            hierarchy_vertices(graph, child).end());
+            auto child_vertices = hierarchy_vertices(graph, child);
+            vertices.insert(vertices.end(), child_vertices.begin(), child_vertices.end());
 #endif
+        }
         return vertices;
     }
 
