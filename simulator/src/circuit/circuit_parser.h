@@ -237,7 +237,7 @@ namespace nxon {
                                        parse_context & context, const bool len_sum) {
             const auto new_len = binary_output_len(a, b, len_sum);
             const auto new_id = context.new_tmp_wire(new_len, "binary_mid");
-            context.circuit.add_rule(cons(std::move(a), std::move(b), data_factory::id_sink(new_id, new_len)));
+            context.circuit.add_rule(cons(a, b, data_factory::id_sink(new_id, new_len)));
 
             return data_factory::id_source(new_id, new_len);
         }
@@ -254,7 +254,7 @@ namespace nxon {
             for (auto &input: inputs) sources.push_back(parse_source(input, context));
             if (sources.empty()) throw std::invalid_argument("No sources specified");
             if (sources.size() == 1) {
-                context.circuit.add_rule(rule_factory::id_rule(sources.front(), std::move(output)));
+                context.circuit.add_rule(rule_factory::id_rule(sources.front(), output));
                 return;
             }
 
@@ -273,7 +273,7 @@ namespace nxon {
                     sources.pop_front();
                     auto src2 = sources.front();
                     sources.pop_front();
-                    next_sources.push_back(binary_combine(cons, std::move(src1), std::move(src2), context, len_sum));
+                    next_sources.push_back(binary_combine(cons, src1, src2, context, len_sum));
                 }
 
                 while (!sources.empty()) {
@@ -287,18 +287,18 @@ namespace nxon {
                     sources.pop_front();
                     auto src2 = sources.front();
                     sources.pop_front();
-                    sources.push_front(binary_combine(cons, std::move(src1), std::move(src2), context, len_sum));
+                    sources.push_front(binary_combine(cons, src1, src2, context, len_sum));
                 }
             }
-            auto src1 = sources.front();
+            const auto src1 = sources.front();
             sources.pop_front();
-            auto src2 = sources.front();
+            const auto src2 = sources.front();
             sources.pop_front();
-            if (last == nullptr)
-                context.circuit.add_rule(cons(std::move(src1), std::move(src2), std::move(output)));
-            else
-                context.circuit.add_rule(last(binary_combine(cons, std::move(src1), std::move(src2), context, len_sum),
-                                              std::move(output)));
+            if (last == nullptr) {
+                context.circuit.add_rule(cons(src1, src2, output));
+            } else {
+                context.circuit.add_rule(last(binary_combine(cons, src1, src2, context, len_sum), output));
+            }
         }
 
         enum class builtin_type {
