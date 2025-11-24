@@ -461,6 +461,7 @@ namespace nxon::impl {
     class const_sized_mpint_slice {
         template<typename T>
         friend class sized_mpint;
+        sized_mpint<Backend>::base_t mask{1};
 
     protected:
         const sized_mpint<Backend> &ref;
@@ -469,6 +470,7 @@ namespace nxon::impl {
         const_sized_mpint_slice(const sized_mpint<Backend> &ref, const size_t from, const size_t to) : ref(ref),
             from(from),
             len(to + 1 - from) {
+            mask <<= from;
         }
 
     public:
@@ -484,7 +486,7 @@ namespace nxon::impl {
             if (len == 1) {
                 static sized_mpint<Backend> high = {1, 1u};
                 static sized_mpint<Backend> low = {1, 0u};
-                if (ref.content >> from & 1) {
+                if (ref.content & mask) {
                     return high;
                 }
                 return low;

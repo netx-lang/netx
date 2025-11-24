@@ -66,7 +66,7 @@ namespace nxon {
             return values.at(id);
         }
 
-        [[nodiscard]] std::set<rule_t> all_rules() const {
+        [[nodiscard]] std::vector<rule_t> all_rules() const {
             return rules.rules();
         }
 

@@ -5,13 +5,10 @@
 #include <gtest/gtest.h>
 #include <fstream>
 #include <print>
+#include <boost/multiprecision/cpp_int.hpp>
 
+// #define NX_BACKEND boost::multiprecision::cpp_int
 #include "../simulation.h"
-// #define NX_BACKEND uint64_t
-// #define NX_NUM_THREADS 8
-// #include "circuit_def.h"
-// #include "circuit_parser.h"
-// #include "parallel.h"
 
 using namespace nxon;
 
@@ -115,17 +112,13 @@ namespace nxon::impl {
         source_t a, b, alu_ctl;
         sink_t result, zero, less;
 
-        alu_rule(source_t a, source_t b, source_t alu_ctl, sink_t result, sink_t zero, sink_t less)
+        alu_rule(const source_t a, const source_t b, const source_t alu_ctl,
+                 const sink_t result, const sink_t zero, const sink_t less)
             : rule_impl(
                 a.dependencies() + b.dependencies() + alu_ctl.dependencies(),
                 result.outcomes() + zero.outcomes() + less.outcomes()
             ),
-            a(std::move(a)),
-            b(std::move(b)),
-            alu_ctl(std::move(alu_ctl)),
-            result(std::move(result)),
-            zero(std::move(zero)),
-            less(std::move(less)) {}
+            a(a), b(b), alu_ctl(alu_ctl), result(result), zero(zero), less(less) {}
 
         indirect_id_set perform(value_storage &values) const override {
             const auto a_val = *a.get(values);
@@ -271,6 +264,6 @@ TEST(IntegrationTest, RV32I_P) {
     stimuli(*parse_circuit(false, true));
 }
 
-TEST(IntegrationTest, RV32ITest) {
+TEST(IntegrationTest, RV32I) {
     stimuli(*parse_circuit(false, false));
 }

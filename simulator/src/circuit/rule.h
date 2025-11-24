@@ -6,7 +6,6 @@
 #define RULE_H
 
 #include "circuit_def.h"
-#include <version>
 #include <atomic>
 #include <memory>
 #include <utility>
@@ -145,83 +144,147 @@ namespace nxon {
         };
     }
 
-    class rule_t : public std::shared_ptr<impl::rule_impl> {
-        using base_t = shared_ptr;
+    template<typename T>
+    class registry {
+        std::vector<std::unique_ptr<T>> storage;
 
     public:
-        using base_t::base_t;
+        using handle_t = size_t;
 
-        [[nodiscard]] auto &triggers() const {
-            return get()->triggers;
+        handle_t add(std::unique_ptr<T> item) {
+            storage.push_back(std::move(item));
+            return storage.size() - 1;
         }
 
-        [[nodiscard]] auto &dependencies() const {
-            return get()->dependencies;
+        T* get(const handle_t h) { return storage[h].get(); }
+        [[nodiscard]] const T* get(const handle_t h) const { return storage[h].get(); }
+
+        [[nodiscard]] size_t size() const { return storage.size(); }
+    };
+
+    inline registry<impl::rule_impl> &rule_registry() {
+        static registry<impl::rule_impl> instance;
+        return instance;
+    }
+
+    inline registry<impl::clock_impl> &clock_registry() {
+        static registry<impl::clock_impl> instance;
+        return instance;
+    }
+
+    inline registry<impl::source_impl> &source_registry() {
+        static registry<impl::source_impl> instance;
+        return instance;
+    }
+
+    inline registry<impl::sink_impl> &sink_registry() {
+        static registry<impl::sink_impl> instance;
+        return instance;
+    }
+
+    class rule_t {
+        registry<impl::rule_impl>::handle_t handle;
+
+    public:
+        explicit rule_t(impl::rule_impl* impl) {
+            handle = rule_registry().add(std::unique_ptr<impl::rule_impl>(impl));
         }
 
-        [[nodiscard]] auto &outcomes() const {
-            return get()->outcomes;
+        [[nodiscard]] auto& triggers() const {
+            return rule_registry().get(handle)->triggers;
         }
 
-        auto perform(value_storage &values) const {
-            return get()->perform(values);
+        [[nodiscard]] auto& dependencies() const {
+            return rule_registry().get(handle)->dependencies;
+        }
+
+        [[nodiscard]] auto& outcomes() const {
+            return rule_registry().get(handle)->outcomes;
+        }
+
+        auto perform(value_storage& values) const {
+            return rule_registry().get(handle)->perform(values);
+        }
+        
+        auto operator<=>(const rule_t& other) const {
+            return handle <=> other.handle;
+        }
+        
+        [[nodiscard]] const impl::rule_impl* get() const { return rule_registry().get(handle); }
+    };
+
+    class clock_t {
+        registry<impl::clock_impl>::handle_t handle;
+        
+    public:
+        explicit clock_t(impl::clock_impl* impl) {
+            handle = clock_registry().add(std::unique_ptr<impl::clock_impl>(impl));
+        }
+
+        [[nodiscard]] const id_set& dependencies() const {
+            return clock_registry().get(handle)->dependencies;
+        }
+
+        bool triggered(value_storage& values) const {
+            return clock_registry().get(handle)->triggered(values);
+        }
+
+        auto operator<=>(const clock_t& other) const {
+            return handle <=> other.handle;
         }
     };
 
-    class clock_t : public std::shared_ptr<impl::clock_impl> {
-        using base_t = shared_ptr;
-
+    class source_t {
+        registry<impl::source_impl>::handle_t handle;
+        
     public:
-        using base_t::base_t;
-
-        [[nodiscard]] const id_set &dependencies() const {
-            return get()->dependencies;
+        explicit source_t(impl::source_impl* impl) {
+            handle = source_registry().add(std::unique_ptr<impl::source_impl>(impl));
         }
 
-        bool triggered(value_storage &values) const {
-            return get()->triggered(values);
-        }
-    };
-
-    class source_t : public std::shared_ptr<impl::source_impl> {
-        using base_t = shared_ptr;
-
-    public:
-        using base_t::base_t;
-
-        [[nodiscard]] const id_set &dependencies() const {
-            return shared_ptr::get()->dependencies;
+        [[nodiscard]] const id_set& dependencies() const {
+            return source_registry().get(handle)->dependencies;
         }
 
         [[nodiscard]] size_t len() const {
-            return shared_ptr::get()->len;
+            return source_registry().get(handle)->len;
         }
 
-        auto get(value_storage &values) const {
-            return shared_ptr::get()->get(values);
+        auto get(value_storage& values) const {
+            return source_registry().get(handle)->get(values);
+        }
+        
+        auto operator<=>(const source_t &other) const {
+            return handle <=> other.handle;
         }
     };
 
-    class sink_t : public std::shared_ptr<impl::sink_impl> {
-        using base_t = shared_ptr;
-
+    class sink_t {
+        registry<impl::sink_impl>::handle_t handle;
+        
     public:
-        using base_t::base_t;
+        explicit sink_t(impl::sink_impl* impl) {
+            handle = sink_registry().add(std::unique_ptr<impl::sink_impl>(impl));
+        }
 
-        [[nodiscard]] const id_set &outcomes() const {
-            return get()->outcomes;
+        [[nodiscard]] const id_set& outcomes() const {
+            return sink_registry().get(handle)->outcomes;
         }
 
         [[nodiscard]] size_t len() const {
-            return get()->len;
+            return sink_registry().get(handle)->len;
         }
 
-        [[nodiscard]] bool check(const value_storage &values, const value_t &v) const {
-            return get()->check(values, v);
+        [[nodiscard]] bool check(const value_storage& values, const value_t& v) const {
+            return sink_registry().get(handle)->check(values, v);
         }
 
-        void put(value_storage &values, value_t v) const {
-            get()->put(values, std::move(v));
+        void put(value_storage& values, value_t v) const {
+            sink_registry().get(handle)->put(values, std::move(v));
+        }
+        
+        auto operator<=>(const sink_t &other) const {
+            return handle <=> other.handle;
         }
     };
 
@@ -337,8 +400,8 @@ namespace nxon {
         struct signed_resize_sink_adapter final : sink_impl {
             const sink_t underlying;
 
-            explicit signed_resize_sink_adapter(sink_t underlying)
-                : sink_impl(underlying.outcomes(), underlying.len()), underlying(std::move(underlying)) {
+            explicit signed_resize_sink_adapter(const sink_t underlying)
+                : sink_impl(underlying.outcomes(), underlying.len()), underlying(underlying) {
             }
 
             [[nodiscard]] bool check(const value_storage &values, const value_t &v) const override {
@@ -353,8 +416,8 @@ namespace nxon {
         struct unsigned_resize_sink_adapter final : sink_impl {
             const sink_t underlying;
 
-            explicit unsigned_resize_sink_adapter(sink_t underlying)
-                : sink_impl(underlying.outcomes(), underlying.len()), underlying(std::move(underlying)) {
+            explicit unsigned_resize_sink_adapter(const sink_t underlying)
+                : sink_impl(underlying.outcomes(), underlying.len()), underlying(underlying) {
             }
 
             [[nodiscard]] bool check(const value_storage &values, const value_t &v) const override {
@@ -392,12 +455,12 @@ namespace nxon {
             return source_t{new impl::constant_source(std::move(value))};
         }
 
-        [[nodiscard]] inline sink_t signed_resize_sink_adapter(sink_t sink) {
-            return sink_t{new impl::signed_resize_sink_adapter(std::move(sink))};
+        [[nodiscard]] inline sink_t signed_resize_sink_adapter(const sink_t sink) {
+            return sink_t{new impl::signed_resize_sink_adapter(sink)};
         }
 
-        [[nodiscard]] inline sink_t unsigned_resize_sink_adapter(sink_t sink) {
-            return sink_t{new impl::unsigned_resize_sink_adapter(std::move(sink))};
+        [[nodiscard]] inline sink_t unsigned_resize_sink_adapter(const sink_t sink) {
+            return sink_t{new impl::unsigned_resize_sink_adapter(sink)};
         }
     }
 
@@ -410,10 +473,10 @@ namespace nxon {
             const sink_t out;
             const std::function<value_t(const value_t &, const value_t &)> op;
 
-            binary_rule(source_t a, source_t b, sink_t out,
+            binary_rule(const source_t a, const source_t b, const sink_t out,
                         std::function<value_t(const value_t &, const value_t &)> op)
-                : rule_impl(a.dependencies() + b.dependencies(), out.outcomes()), a(std::move(a)), b(std::move(b)),
-                  out(std::move(out)), op(std::move(op)) {
+                : rule_impl(a.dependencies() + b.dependencies(), out.outcomes()),
+                            a(a), b(b), out(out), op(std::move(op)) {
             }
 
             indirect_id_set perform(value_storage &values) const override {
@@ -432,10 +495,9 @@ namespace nxon {
             const sink_t out;
             const std::function<value_t(const value_t &)> op;
 
-            unary_rule(source_t x, sink_t out,
+            unary_rule(const source_t x, const sink_t out,
                        std::function<value_t(const value_t &)> op)
-                : rule_impl(x.dependencies(), out.outcomes()), in(std::move(x)), out(std::move(out)),
-                  op(std::move(op)) {
+                : rule_impl(x.dependencies(), out.outcomes()), in(x), out(out), op(std::move(op)) {
             }
 
             indirect_id_set perform(value_storage &values) const override {
@@ -453,10 +515,9 @@ namespace nxon {
             const source_t in;
             const sink_t out;
 
-            register_rule(clock_t clk, source_t in, sink_t out)
+            register_rule(const clock_t clk, const source_t in, const sink_t out)
                 : rule_impl(clk.dependencies(), clk.dependencies() + in.dependencies(), out.outcomes()),
-                  clk(std::move(clk)),
-                  in(std::move(in)), out(std::move(out)) {
+                  clk(clk), in(in), out(out) {
             }
 
             indirect_id_set perform(value_storage &values) const override {
@@ -479,12 +540,11 @@ namespace nxon {
             const bool high_rst;
             const value_t rst_value;
 
-            async_register_rule(clock_t clk, source_t rst, source_t in, sink_t out, const bool high_rst,
-                                value_t rst_value)
+            async_register_rule(const clock_t clk, const source_t rst, const source_t in, const sink_t out,
+                                const bool high_rst, value_t rst_value)
                 : rule_impl(clk.dependencies(), clk.dependencies() + rst.dependencies() + in.dependencies(),
                             out.outcomes()),
-                  clk(std::move(clk)), rst(std::move(rst)),
-                  in(std::move(in)), out(std::move(out)),
+                  clk(clk), rst(rst), in(in), out(out),
                   high_rst(high_rst), rst_value(std::move(rst_value)) {
             }
 
@@ -511,129 +571,129 @@ namespace nxon {
         using boost::lambda2::_1;
         using boost::lambda2::_2;
 
-        [[nodiscard]] inline rule_t id_rule(source_t in, sink_t out) {
-            return rule_t{new impl::unary_rule(std::move(in), std::move(out), _1)};
+        [[nodiscard]] inline rule_t id_rule(const source_t in, const sink_t out) {
+            return rule_t{new impl::unary_rule(in, out, _1)};
         }
 
-        [[nodiscard]] inline rule_t not_rule(source_t in, sink_t out) {
-            return rule_t{new impl::unary_rule(std::move(in), std::move(out), ~_1)};
+        [[nodiscard]] inline rule_t not_rule(const source_t in, const sink_t out) {
+            return rule_t{new impl::unary_rule(in, out, ~_1)};
         }
 
-        [[nodiscard]] inline rule_t and_rule(source_t a, source_t b, sink_t out) {
-            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 & _2)};
+        [[nodiscard]] inline rule_t and_rule(const source_t a, const source_t b, const sink_t out) {
+            return rule_t{new impl::binary_rule(a, b, out, _1 & _2)};
         }
 
-        [[nodiscard]] inline rule_t or_rule(source_t a, source_t b, sink_t out) {
-            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 | _2)};
+        [[nodiscard]] inline rule_t or_rule(const source_t a, const source_t b, const sink_t out) {
+            return rule_t{new impl::binary_rule(a, b, out, _1 | _2)};
         }
 
-        [[nodiscard]] inline rule_t xor_rule(source_t a, source_t b, sink_t out) {
-            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 ^ _2)};
+        [[nodiscard]] inline rule_t xor_rule(const source_t a, const source_t b, const sink_t out) {
+            return rule_t{new impl::binary_rule(a, b, out, _1 ^ _2)};
         }
 
-        [[nodiscard]] inline rule_t shl_rule(source_t a, source_t b, sink_t out) {
+        [[nodiscard]] inline rule_t shl_rule(const source_t a, const source_t b, const sink_t out) {
             return rule_t{
-                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
                     return x << static_cast<size_t>(y);
                 })
             };
         }
 
-        [[nodiscard]] inline rule_t logical_shr_rule(source_t a, source_t b, sink_t out) {
+        [[nodiscard]] inline rule_t logical_shr_rule(const source_t a, const source_t b, const sink_t out) {
             return rule_t{
-                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
                     return x >> static_cast<size_t>(y);
                 })
             };
         }
 
-        [[nodiscard]] inline rule_t arithmetic_shr_rule(source_t a, source_t b, sink_t out) {
+        [[nodiscard]] inline rule_t arithmetic_shr_rule(const source_t a, const source_t b, const sink_t out) {
             return rule_t{
-                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
                     return x.arithmetic_shr(static_cast<size_t>(y));
                 })
             };
         }
 
-        [[nodiscard]] inline rule_t add_rule(source_t a, source_t b, sink_t out) {
-            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 + _2)};
+        [[nodiscard]] inline rule_t add_rule(const source_t a, const source_t b, const sink_t out) {
+            return rule_t{new impl::binary_rule(a, b, out, _1 + _2)};
         }
 
-        [[nodiscard]] inline rule_t sub_rule(source_t a, source_t b, sink_t out) {
-            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 - _2)};
+        [[nodiscard]] inline rule_t sub_rule(const source_t a, const source_t b, const sink_t out) {
+            return rule_t{new impl::binary_rule(a, b, out, _1 - _2)};
         }
 
-        [[nodiscard]] inline rule_t mul_rule(source_t a, source_t b, sink_t out) {
-            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 * _2)};
+        [[nodiscard]] inline rule_t mul_rule(const source_t a, const source_t b, const sink_t out) {
+            return rule_t{new impl::binary_rule(a, b, out, _1 * _2)};
         }
 
-        [[nodiscard]] inline rule_t div_rule(source_t a, source_t b, sink_t out) {
-            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 / _2)};
+        [[nodiscard]] inline rule_t div_rule(const source_t a, const source_t b, const sink_t out) {
+            return rule_t{new impl::binary_rule(a, b, out, _1 / _2)};
         }
 
-        [[nodiscard]] inline rule_t mod_rule(source_t a, source_t b, sink_t out) {
-            return rule_t{new impl::binary_rule(std::move(a), std::move(b), std::move(out), _1 % _2)};
+        [[nodiscard]] inline rule_t mod_rule(const source_t a, const source_t b, const sink_t out) {
+            return rule_t{new impl::binary_rule(a, b, out, _1 % _2)};
         }
 
-        [[nodiscard]] inline rule_t concat_rule(source_t a, source_t b, sink_t out) {
+        [[nodiscard]] inline rule_t concat_rule(const source_t a, const source_t b, const sink_t out) {
             return rule_t{
-                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
                     return x.concat(y);
                 })
             };
         }
 
-        [[nodiscard]] inline rule_t unsigned_lt_rule(source_t a, source_t b, sink_t out) {
+        [[nodiscard]] inline rule_t unsigned_lt_rule(const source_t a, const source_t b, const sink_t out) {
             return rule_t{
-                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
                     return value_t{1, x < y};
                 })
             };
         }
 
-        [[nodiscard]] inline rule_t unsigned_gt_rule(source_t a, source_t b, sink_t out) {
+        [[nodiscard]] inline rule_t unsigned_gt_rule(const source_t a, const source_t b, const sink_t out) {
             return rule_t{
-                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
                     return value_t{1, x > y};
                 })
             };
         }
 
-        [[nodiscard]] inline rule_t unsigned_le_rule(source_t a, source_t b, sink_t out) {
+        [[nodiscard]] inline rule_t unsigned_le_rule(const source_t a, const source_t b, const sink_t out) {
             return rule_t{
-                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
                     return value_t{1, x <= y};
                 })
             };
         }
 
-        [[nodiscard]] inline rule_t unsigned_ge_rule(source_t a, source_t b, sink_t out) {
+        [[nodiscard]] inline rule_t unsigned_ge_rule(const source_t a, const source_t b, const sink_t out) {
             return rule_t{
-                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
                     return value_t{1, x >= y};
                 })
             };
         }
 
-        [[nodiscard]] inline rule_t signed_lt_rule(source_t a, source_t b, sink_t out) {
+        [[nodiscard]] inline rule_t signed_lt_rule(const source_t a, const source_t b, const sink_t out) {
             return rule_t{
-                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
                     return value_t{1, x.signed_compare(y) == std::strong_ordering::less};
                 })
             };
         }
 
-        [[nodiscard]] inline rule_t signed_gt_rule(source_t a, source_t b, sink_t out) {
+        [[nodiscard]] inline rule_t signed_gt_rule(const source_t a, const source_t b, const sink_t out) {
             return rule_t{
-                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
                     return value_t{1, x.signed_compare(y) == std::strong_ordering::greater};
                 })
             };
         }
 
-        [[nodiscard]] inline rule_t signed_le_rule(source_t a, source_t b, sink_t out) {
+        [[nodiscard]] inline rule_t signed_le_rule(const source_t a, const source_t b, const sink_t out) {
             return rule_t{
-                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
                     auto compared = x.signed_compare(y);
                     return value_t{
                         1, compared == std::strong_ordering::less || compared == std::strong_ordering::equal
@@ -642,9 +702,9 @@ namespace nxon {
             };
         }
 
-        [[nodiscard]] inline rule_t signed_ge_rule(source_t a, source_t b, sink_t out) {
+        [[nodiscard]] inline rule_t signed_ge_rule(const source_t a, const source_t b, const sink_t out) {
             return rule_t{
-                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
                     auto compared = x.signed_compare(y);
                     return value_t{
                         1, compared == std::strong_ordering::greater || compared == std::strong_ordering::equal
@@ -653,34 +713,30 @@ namespace nxon {
             };
         }
 
-        [[nodiscard]] inline rule_t eq_rule(source_t a, source_t b, sink_t out) {
+        [[nodiscard]] inline rule_t eq_rule(const source_t a, const source_t b, const sink_t out) {
             return rule_t{
-                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
                     return value_t{1, x == y};
                 })
             };
         }
 
-        [[nodiscard]] inline rule_t neq_rule(source_t a, source_t b, sink_t out) {
+        [[nodiscard]] inline rule_t neq_rule(const source_t a, const source_t b, const sink_t out) {
             return rule_t{
-                new impl::binary_rule(std::move(a), std::move(b), std::move(out), [](auto &x, auto &y) {
+                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
                     return value_t{1, x != y};
                 })
             };
         }
 
-        [[nodiscard]] inline rule_t register_rule(clock_t clk, source_t in, sink_t out) {
-            return rule_t{new impl::register_rule(std::move(clk), std::move(in), std::move(out))};
+        [[nodiscard]] inline rule_t register_rule(const clock_t clk, const source_t in, const sink_t out) {
+            return rule_t{new impl::register_rule(clk, in, out)};
         }
 
-        [[nodiscard]] inline rule_t async_register_rule(clock_t clk, source_t rst, source_t in, sink_t out,
-                                                        const bool high_rst, value_t rst_value) {
-            return rule_t{
-                new impl::async_register_rule(
-                    std::move(clk), std::move(rst),
-                    std::move(in), std::move(out),
-                    high_rst, std::move(rst_value))
-            };
+        [[nodiscard]] inline rule_t async_register_rule(
+            const clock_t clk, const source_t rst, const source_t in, const sink_t out,
+            const bool high_rst, value_t rst_value) {
+            return rule_t{new impl::async_register_rule( clk, rst, in, out, high_rst, std::move(rst_value))};
         }
     }
 
@@ -691,7 +747,7 @@ namespace nxon {
 #endif
 
     class rule_set {
-        std::set<rule_t> all_rules;
+        std::vector<rule_t> all_rules;
         rule_storage trigger_rules;
 
         void collect_rules(std::vector<rule_t> &to_perform, const id_t id) const {
@@ -736,17 +792,9 @@ namespace nxon {
 
     public:
         void add(const rule_t &new_rule) {
-            all_rules.insert(new_rule);
+            all_rules.push_back(new_rule);
             for (const id_t trigger: new_rule.triggers())
                 trigger_rules[trigger].emplace_back(new_rule);
-        }
-
-        // Pass by value to avoid dangling reference (erasing itself in the process)
-        // ReSharper disable once CppPassValueParameterByConstReference
-        void remove(const rule_t rule) { // NOLINT(*-unnecessary-value-param)
-            all_rules.erase(rule);
-            for (const id_t trigger: rule.triggers())
-                erase(trigger_rules[trigger], rule);
         }
 
         id_set update(value_storage &values, const id_set &hint, const bool to_fixed = true) const {
@@ -755,16 +803,16 @@ namespace nxon {
             return perform_rules(values, std::move(to_perform), to_fixed);
         }
 
-        id_set refresh_rules(value_storage &values, const std::set<rule_t> &to_update,
+        id_set refresh_rules(value_storage &values, const std::vector<rule_t> &to_update,
                              const bool to_fixed = true) const {
-            return perform_rules(values, std::vector(to_update.begin(), to_update.end()), to_fixed);
+            return perform_rules(values, to_update, to_fixed);
         }
 
         id_set refresh_all_rules(value_storage &values, const bool to_fixed = true) const {
             return refresh_rules(values, all_rules, to_fixed);
         }
 
-        [[nodiscard]] std::set<rule_t> rules() const {
+        [[nodiscard]] std::vector<rule_t> rules() const {
             return all_rules;
         }
     };
