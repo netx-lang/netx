@@ -28,7 +28,7 @@ alias
     ;
 
 component
-    : 'component' ID attributes? (':' component_type)? component_body
+    : 'component' ID attributes? (':' component_sig)? component_body
     ;
 
 interface
@@ -40,7 +40,7 @@ enum
     | 'enum' ID '{' ID '=' number ( ',' ID '=' number )* '}'
     ;
 
-component_type
+component_sig
     : from=expression '->' to=expression
     ;
 

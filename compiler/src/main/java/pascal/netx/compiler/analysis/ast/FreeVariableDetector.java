@@ -2,7 +2,7 @@ package pascal.netx.compiler.analysis.ast;
 
 
 import pascal.netx.compiler.ast.ASTListener;
-import pascal.netx.compiler.ast.expr.CallSymbolExpr;
+import pascal.netx.compiler.ast.expr.CallExpr;
 import pascal.netx.compiler.ast.expr.ExprNode;
 import pascal.netx.compiler.ast.expr.IdentifierExpr;
 import pascal.netx.compiler.ast.expr.LetExpr;
@@ -42,7 +42,7 @@ public final class FreeVariableDetector implements ASTListener {
     }
 
     @Override
-    public void enter(CallSymbolExpr node) {
+    public void enter(CallExpr node) {
         var id = node.getSymbol();
         if (!boundVariables.contains(id)) {
             freeVariables.add(id);

@@ -103,7 +103,7 @@ public final class Entities {
             case EList list -> makeParallelTypeFromList(list);
             case Signal inst -> SignalRef.of(inst);
             default -> {
-                Logger.error("Cannot cast {} to component type", entity);
+                Logger.error("Cannot cast {} to circuit expression", entity);
                 throw new CompileCancellationException();
             }
         };
