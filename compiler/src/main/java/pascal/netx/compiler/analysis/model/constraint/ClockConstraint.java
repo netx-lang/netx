@@ -1,7 +1,7 @@
 package pascal.netx.compiler.analysis.model.constraint;
 
-import pascal.netx.compiler.model.variable.Clock;
-import pascal.netx.compiler.model.variable.Variable;
+import pascal.netx.compiler.circuit.variable.Clock;
+import pascal.netx.compiler.circuit.variable.Variable;
 
 public final class ClockConstraint extends UnaryConstraint {
 

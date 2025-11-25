@@ -1,17 +1,17 @@
 package pascal.netx.compiler.analysis.model;
 
-import pascal.netx.compiler.elaborator.Logger;
-import pascal.netx.compiler.exception.TypeCheckingException;
-import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.PackageScope;
-import pascal.netx.compiler.model.variable.Access;
-import pascal.netx.compiler.model.variable.Clock;
-import pascal.netx.compiler.model.variable.Data;
-import pascal.netx.compiler.model.variable.Mutable;
-import pascal.netx.compiler.model.variable.selector.BitSelector;
-import pascal.netx.compiler.model.variable.selector.PartSelector;
-import pascal.netx.compiler.model.variable.selector.Selector;
-import pascal.netx.compiler.model.variable.type.BitType;
+import pascal.netx.compiler.circuit.scope.ComponentScope;
+import pascal.netx.compiler.circuit.scope.PackageScope;
+import pascal.netx.compiler.circuit.variable.Access;
+import pascal.netx.compiler.circuit.variable.Clock;
+import pascal.netx.compiler.circuit.variable.Data;
+import pascal.netx.compiler.circuit.variable.Mutable;
+import pascal.netx.compiler.circuit.variable.selector.BitSelector;
+import pascal.netx.compiler.circuit.variable.selector.PartSelector;
+import pascal.netx.compiler.circuit.variable.selector.Selector;
+import pascal.netx.compiler.circuit.variable.type.BitType;
+import pascal.netx.compiler.utils.Logger;
+import pascal.netx.compiler.utils.TypeCheckingException;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.SourceLoc;
 

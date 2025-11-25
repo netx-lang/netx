@@ -1,12 +1,12 @@
 package pascal.netx.compiler.analysis.model;
 
-import pascal.netx.compiler.model.Entity;
-import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.PackageScope;
-import pascal.netx.compiler.model.variable.Access;
-import pascal.netx.compiler.model.variable.Mutable;
-import pascal.netx.compiler.model.variable.Value;
-import pascal.netx.compiler.model.variable.Variable;
+import pascal.netx.compiler.circuit.Entity;
+import pascal.netx.compiler.circuit.scope.ComponentScope;
+import pascal.netx.compiler.circuit.scope.PackageScope;
+import pascal.netx.compiler.circuit.variable.Access;
+import pascal.netx.compiler.circuit.variable.Mutable;
+import pascal.netx.compiler.circuit.variable.Value;
+import pascal.netx.compiler.circuit.variable.Variable;
 import pascal.netx.util.collection.UnionFind;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;

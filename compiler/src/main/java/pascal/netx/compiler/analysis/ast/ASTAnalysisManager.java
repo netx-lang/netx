@@ -1,7 +1,7 @@
 package pascal.netx.compiler.analysis.ast;
 
 import pascal.netx.compiler.ast.PackageNode;
-import pascal.netx.compiler.elaborator.Logger;
+import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.exception.ShallNotReachHereError;
 
 /**

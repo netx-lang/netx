@@ -5,8 +5,8 @@ import pascal.netx.compiler.analysis.ast.*;
 import pascal.netx.compiler.antlr.NetXLexer;
 import pascal.netx.compiler.antlr.NetXParser;
 import pascal.netx.compiler.ast.PackageNode;
-import pascal.netx.compiler.elaborator.Logger;
-import pascal.netx.compiler.exception.ParseCancellationException;
+import pascal.netx.compiler.utils.Logger;
+import pascal.netx.compiler.utils.ParseCancellationException;
 
 import java.io.IOException;
 import java.nio.file.Path;

@@ -1,7 +1,7 @@
 package pascal.netx.compiler.analysis.model;
 
 import pascal.netx.compiler.analysis.Analysis;
-import pascal.netx.compiler.model.scope.PackageScope;
+import pascal.netx.compiler.circuit.scope.PackageScope;
 
 /**
  * Base class for analyses that operate on compiler intermediate representations called models.

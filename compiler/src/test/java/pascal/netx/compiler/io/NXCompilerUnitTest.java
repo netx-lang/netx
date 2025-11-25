@@ -5,7 +5,8 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import pascal.netx.compiler.exception.ParseCancellationException;
+import pascal.netx.compiler.NXCompiler;
+import pascal.netx.compiler.utils.ParseCancellationException;
 import pascal.netx.util.print.NotepadWriter;
 
 import java.io.IOException;

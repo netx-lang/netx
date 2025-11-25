@@ -1,13 +1,13 @@
 package pascal.netx.compiler.analysis.model;
 
-import pascal.netx.compiler.elaborator.Logger;
-import pascal.netx.compiler.exception.CompileCancellationException;
-import pascal.netx.compiler.model.Entity;
-import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.PackageScope;
-import pascal.netx.compiler.model.variable.*;
-import pascal.netx.compiler.model.variable.selector.Selector;
-import pascal.netx.compiler.model.variable.type.BitType;
+import pascal.netx.compiler.circuit.Entity;
+import pascal.netx.compiler.circuit.scope.ComponentScope;
+import pascal.netx.compiler.circuit.scope.PackageScope;
+import pascal.netx.compiler.circuit.variable.*;
+import pascal.netx.compiler.circuit.variable.selector.Selector;
+import pascal.netx.compiler.circuit.variable.type.BitType;
+import pascal.netx.compiler.utils.CompileCancellationException;
+import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.collection.UnionFind;
 import pascal.netx.util.lang.BuiltinComponent;
 
