@@ -46,15 +46,19 @@ public abstract sealed class Scope permits ComponentScope, PackageScope, RepoSco
         if (bindings.size() != 1) {
             throw new ShallNotReachHereError();
         }
-        return getLastBinding();
+        return getBaseBinding();
     }
 
-    public Binding getLastBinding() {
+    public Binding getTopBinding() {
+        return bindings.getFirst();
+    }
+
+    public Binding getBaseBinding() {
         return bindings.getLast();
     }
 
     public void bind(Identifier identifier, Entity entity) {
-        getLastBinding().bind(identifier, entity);
+        getBaseBinding().bind(identifier, entity);
     }
 
     public void bind(Map.Entry<Identifier, Entity> entry) {
