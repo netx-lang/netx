@@ -3,6 +3,7 @@ package pascal.netx.compiler.circuit.scope;
 import pascal.netx.compiler.circuit.Entity;
 import pascal.netx.compiler.circuit.scope.binding.Binding;
 import pascal.netx.compiler.circuit.scope.binding.MultiBinding;
+import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 
 import javax.annotation.Nullable;
@@ -42,11 +43,18 @@ public abstract sealed class Scope permits ComponentScope, PackageScope, RepoSco
     }
 
     public Binding getBinding() {
+        if (bindings.size() != 1) {
+            throw new ShallNotReachHereError();
+        }
+        return getLastBinding();
+    }
+
+    public Binding getLastBinding() {
         return bindings.getLast();
     }
 
     public void bind(Identifier identifier, Entity entity) {
-        getBinding().bind(identifier, entity);
+        getLastBinding().bind(identifier, entity);
     }
 
     public void bind(Map.Entry<Identifier, Entity> entry) {

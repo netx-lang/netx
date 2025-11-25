@@ -67,7 +67,7 @@ public enum SystemMeta implements Entity {
             throw new CompileCancellationException();
         }
 
-        var list = Entities.requiresList(args.getArguments().get(0));
+        var list = Entities.requiresEList(args.getArguments().get(0));
         var element = args.getArguments().get(1);
         return BooleanValue.of(list.contains(element));
     }
@@ -78,7 +78,7 @@ public enum SystemMeta implements Entity {
             throw new CompileCancellationException();
         }
 
-        var list = Entities.requiresList(args.getArguments().getFirst());
+        var list = Entities.requiresEList(args.getArguments().getFirst());
         return BooleanValue.of(list.isEmpty());
     }
 
@@ -88,7 +88,7 @@ public enum SystemMeta implements Entity {
             throw new CompileCancellationException();
         }
 
-        var list = Entities.requiresList(args.getArguments().getFirst());
+        var list = Entities.requiresEList(args.getArguments().getFirst());
         return Int32Value.of(list.size());
     }
 

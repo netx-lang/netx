@@ -13,10 +13,7 @@ import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static pascal.netx.util.lang.BuiltinComponent.ATTRIBUTED;
 
@@ -83,6 +80,16 @@ public final class NxonDumper {
         return objectMapper.createObjectNode();
     }
 
+    static private Collection<Wire> getDefinedWiresIn(ComponentScope scope) {
+        var wires = new ArrayList<Wire>();
+        scope.getBinding().forEachEntity(entity -> {
+            if (entity instanceof Wire wire && wire.getParent().equals(scope)) {
+                wires.add(wire);
+            }
+        });
+        return wires;
+    }
+
     private class ComponentDumper {
         private final ComponentScope component;
 
@@ -102,7 +109,7 @@ public final class NxonDumper {
             }
 
             List<ObjectNode> needDump = new LinkedList<>();
-            component.getBinding().forEachWire(wire -> needDump.add(defineWire(wire)));
+            getDefinedWiresIn(component).forEach(wire -> needDump.add(defineWire(wire)));
             component.getChildren().stream()
                     .map(ComponentScope.class::cast)
                     .forEach(child -> {
@@ -141,8 +148,7 @@ public final class NxonDumper {
             if (ATTRIBUTED.contains(BuiltinComponent.of(instID))) {
                 dumpInstAttr(builtin, sub.getAttributes());
             }
-            List<Wire> needDump = new LinkedList<>();
-            sub.getBinding().forEachWire(needDump::add);
+            List<Wire> needDump = new LinkedList<>(getDefinedWiresIn(sub));
             if (!needDump.isEmpty()) {
                 var subarray = makeMembersIn(builtin);
                 needDump.forEach(c -> subarray.add(defineWire(c)));

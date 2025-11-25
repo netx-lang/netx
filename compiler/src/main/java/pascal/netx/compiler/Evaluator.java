@@ -58,23 +58,6 @@ public final class Evaluator {
         this.factory = new BuiltInComponentFactory(compilerOf(scope));
     }
 
-    private static Entity castArgument(Entity entity) {
-        return switch (entity) {
-            case Expr type -> type;
-            case Wire _, Access _ -> castToCircuitExpr(entity);
-            default -> entity;
-        };
-    }
-
-    public EList castToList(ExprNode expr) {
-        var entity = evaluate(expr);
-        if (entity instanceof EList list) {
-            return list;
-        } else {
-            return EList.of(List.of(entity));
-        }
-    }
-
     public int evaluateToInt(ExprNode expr) {
         return evaluateToIntegerValue(expr).toInt();
     }
@@ -232,17 +215,14 @@ public final class Evaluator {
     }
 
     private List<Entity> doListComprehension(ExprNode head, LinkedList<Qualifier> qualifiers) {
-        List<Entity> result;
+        List<Entity> result = new LinkedList<>();
         if (qualifiers.isEmpty()) {
             return List.of(evaluate(head));
         } else {
             switch (qualifiers.pop()) {
                 case GeneratorQualifier generator -> {
-                    result = new LinkedList<>();
-                    var id = generator.getHead();
-                    var list = castToList(generator.getFrom());
-                    for (var entity : list) {
-                        scope.overrideBindings(MonoBinding.of(id, entity));
+                    for (var entity : requiresEList(evaluate(generator.getFrom()))) {
+                        scope.overrideBindings(MonoBinding.of(generator.getHead(), entity));
                         result.addAll(doListComprehension(head, new LinkedList<>(qualifiers)));
                         scope.restoreBindings();
                     }
@@ -250,15 +230,13 @@ public final class Evaluator {
                 case FilterQualifier filter -> {
                     var condition = evaluateToBoolean(filter.getCondition());
                     if (condition.value()) {
-                        result = doListComprehension(head, new LinkedList<>(qualifiers));
-                    } else {
-                        result = List.of();
+                        result.addAll(doListComprehension(head, new LinkedList<>(qualifiers)));
                     }
                 }
                 case BindingQualifier qualifier -> {
                     var binding = qualifier.getBinding();
                     scope.overrideBindings(evaluateBinding(binding));
-                    result = doListComprehension(head, new LinkedList<>(qualifiers));
+                    result.addAll(doListComprehension(head, new LinkedList<>(qualifiers)));
                     scope.restoreBindings();
                 }
             }
@@ -379,8 +357,8 @@ public final class Evaluator {
 
     private EList evaluateListConcat(BinaryExpr expr) {
         List<Entity> result = new LinkedList<>();
-        result.addAll(castToList(expr.getLhs()));
-        result.addAll(castToList(expr.getRhs()));
+        result.addAll(requiresEList(evaluate(expr.getLhs())));
+        result.addAll(requiresEList(evaluate(expr.getRhs())));
         return EList.of(result);
     }
 
@@ -522,13 +500,13 @@ public final class Evaluator {
         if (expr.getAssigns().isEmpty() || expr.getAssigns().getFirst().first() == null) {
             var result = OrderedAttrBindList.ofEmpty();
             for (var argument : expr.getArguments()) {
-                result.add(castArgument(evaluate(argument)));
+                result.add(evaluate(argument));
             }
             return result;
         } else {
             var result = MultiBinding.ofEmpty();
             for (var assign : expr.getAssigns()) {
-                var argument = castArgument(evaluate(assign.second()));
+                var argument = evaluate(assign.second());
                 result.bind(assign.first(), argument);
             }
             return result;
