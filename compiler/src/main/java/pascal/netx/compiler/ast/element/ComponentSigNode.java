@@ -6,17 +6,17 @@ import pascal.netx.compiler.ast.expr.ExprNode;
 
 import java.util.Objects;
 
-public class ComponentTypeNode extends ASTNode {
+public class ComponentSigNode extends ASTNode {
     private ExprNode input;
     private ExprNode output;
 
-    private ComponentTypeNode(ExprNode input, ExprNode output) {
+    private ComponentSigNode(ExprNode input, ExprNode output) {
         this.input = input;
         this.output = output;
     }
 
-    public static ComponentTypeNode of(ExprNode from, ExprNode to) {
-        return new ComponentTypeNode(from, to);
+    public static ComponentSigNode of(ExprNode from, ExprNode to) {
+        return new ComponentSigNode(from, to);
     }
 
     public ExprNode getInput() {
@@ -39,7 +39,7 @@ public class ComponentTypeNode extends ASTNode {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ComponentTypeNode that = (ComponentTypeNode) o;
+        ComponentSigNode that = (ComponentSigNode) o;
         return Objects.equals(input, that.input) && Objects.equals(output, that.output);
     }
 

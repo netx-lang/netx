@@ -4,9 +4,9 @@ import pascal.netx.compiler.circuit.Entity;
 
 import java.util.List;
 
-public sealed interface ArgBindList permits OrderedArgBindList, MultiBinding {
-    static ArgBindList ofEmpty() {
-        return OrderedArgBindList.ofEmpty();
+public sealed interface AttrBindList permits OrderedAttrBindList, MultiBinding {
+    static AttrBindList ofEmpty() {
+        return OrderedAttrBindList.ofEmpty();
     }
 
     List<Entity> getArguments();

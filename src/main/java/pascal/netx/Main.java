@@ -70,9 +70,9 @@ public class Main {
         protected Path output;
 
         @CommandLine.Option(
-                names = {"-a", "--args"},
+                names = {"-a", "--attrs"},
                 arity = "1..*",
-                description = "arguments to pass to the top component (e.g., --args a=true b=2 c=2'b01)"
+                description = "attributes to pass to the top component (e.g., --attrs a=true b=2 c=2'b01)"
         )
         protected List<String> args;
 

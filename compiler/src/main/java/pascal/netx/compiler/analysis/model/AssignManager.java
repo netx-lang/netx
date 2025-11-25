@@ -6,7 +6,6 @@ import pascal.netx.compiler.circuit.variable.Composition;
 import pascal.netx.compiler.circuit.variable.Data;
 import pascal.netx.compiler.circuit.variable.Mutable;
 import pascal.netx.compiler.circuit.variable.Variable;
-import pascal.netx.util.lang.SourceLoc;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,12 +20,13 @@ public final class AssignManager {
         this.scope = scope;
     }
 
-    public void add(SourceLoc sourceLoc, Variable lhs, Variable rhs) {
+    public void add(Variable lhs, Variable rhs) {
         use(rhs);
         define(lhs);
         if (lhs instanceof Composition lhsComposite && rhs instanceof Composition rhsComposite) {
             List<Data> lhsFlatten = lhsComposite.flatten(), rhsFlatten = rhsComposite.flatten();
-            int size = Utils.requiresMatchedSize(sourceLoc, lhsFlatten, rhsFlatten);
+            // TODO: add type checking
+            int size = Utils.requireEqSize(lhsFlatten, rhsFlatten, "TODO");
             for (int i = 0; i < size; i++) {
                 define(lhsFlatten.get(i));
                 use(rhsFlatten.get(i));

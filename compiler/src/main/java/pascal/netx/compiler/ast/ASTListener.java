@@ -114,11 +114,11 @@ public interface ASTListener {
         exitDefault(node);
     }
 
-    default void enter(ComponentTypeNode node) {
+    default void enter(ComponentSigNode node) {
         enterDefault(node);
     }
 
-    default void exit(ComponentTypeNode node) {
+    default void exit(ComponentSigNode node) {
         exitDefault(node);
     }
 

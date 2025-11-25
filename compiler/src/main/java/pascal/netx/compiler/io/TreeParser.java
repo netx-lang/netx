@@ -181,9 +181,9 @@ public final class TreeParser {
                 .map(this::parseIdentifier).toList();
     }
 
-    ComponentTypeNode parseComponentType(Component_typeContext ctx, SourceLoc sourceLoc) {
+    ComponentSigNode parseComponentType(Component_typeContext ctx, SourceLoc sourceLoc) {
         if (ctx == null) {
-            var result = ComponentTypeNode.of(CommonList.ofEmpty(), CommonList.ofEmpty());
+            var result = ComponentSigNode.of(CommonList.ofEmpty(), CommonList.ofEmpty());
             result.walk(new ASTListener() {
                 @Override
                 public void enterDefault(ASTNode node) {
@@ -192,7 +192,7 @@ public final class TreeParser {
             });
             return result;
         } else {
-            return ComponentTypeNode.of(parseExpr(ctx.from), parseExpr(ctx.to))
+            return ComponentSigNode.of(parseExpr(ctx.from), parseExpr(ctx.to))
                     .setSourceLoc(locationOf(ctx.getStart()));
         }
     }

@@ -6,113 +6,112 @@ import pascal.netx.compiler.circuit.expr.VariableRef;
 import pascal.netx.compiler.circuit.variable.*;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.Logger;
-import pascal.netx.util.lang.SourceLoc;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public final class Entities {
 
-    public static Bundle requiresDataBundle(SourceLoc loc, Entity entity) {
+    public static Bundle requiresDataBundle(Entity entity) {
         if (entity instanceof Bundle bundle) {
             return bundle;
         } else {
-            Logger.error(loc, "Expected data bundle but got {}", entity);
+            Logger.error("Expected data bundle but got {}", entity);
             throw new CompileCancellationException();
         }
     }
 
-    public static Entity requiresListedValue(SourceLoc loc, Entity entity) {
+    public static Entity requiresListedValue(Entity entity) {
         if (entity instanceof EntityList(var list)) {
             for (var element : list) {
-                requiresListedValue(loc, element);
+                requiresListedValue(element);
             }
             return entity;
         } else {
-            return requiresValue(loc, entity);
+            return requiresValue(entity);
         }
     }
 
-    public static EntityList requiresList(SourceLoc loc, Entity entity) {
+    public static EntityList requiresList(Entity entity) {
         if (entity instanceof EntityList list) {
             return list;
         } else {
-            Logger.error(loc, "Expected list but got {}", entity);
+            Logger.error("Expected list but got {}", entity);
             throw new CompileCancellationException();
         }
     }
 
-    public static Value requiresValue(SourceLoc loc, Entity entity) {
+    public static Value requiresValue(Entity entity) {
         if (entity instanceof Value value) {
             return value;
         } else {
-            Logger.error(loc, "Expected value but got {}", entity);
+            Logger.error("Expected value but got {}", entity);
             throw new CompileCancellationException();
         }
     }
 
-    public static Mutable requiresMutable(SourceLoc loc, Entity entity) {
+    public static Mutable requiresMutable(Entity entity) {
         if (entity instanceof Mutable instance) {
             return instance;
         } else {
-            Logger.error(loc, "Expected instance but got {}", entity);
+            Logger.error("Expected instance but got {}", entity);
             throw new CompileCancellationException();
         }
     }
 
-    public static Mutable.Factory<?> requiresMutableFactory(SourceLoc loc, Entity entity) {
+    public static Mutable.Factory<?> requiresMutableFactory(Entity entity) {
         if (entity instanceof Mutable.Factory<?> factory) {
             return factory;
         } else {
-            Logger.error(loc, "Expected component factory but got {}", entity);
+            Logger.error("Expected component factory but got {}", entity);
             throw new CompileCancellationException();
         }
     }
 
-    public static IntegerValue requiresIntegerValue(SourceLoc loc, Entity entity) {
+    public static IntegerValue requiresIntegerValue(Entity entity) {
         if (entity instanceof IntegerValue integerValue) {
             return integerValue;
         } else {
-            Logger.error(loc, "Expected integer rhs but got {}", entity);
+            Logger.error("Expected integer rhs but got {}", entity);
             throw new CompileCancellationException();
         }
     }
 
-    public static BooleanValue requiresBooleanValue(SourceLoc loc, Entity entity) {
+    public static BooleanValue requiresBooleanValue(Entity entity) {
         if (entity instanceof BooleanValue booleanValue) {
             return booleanValue;
         } else {
-            Logger.error(loc, "Expected boolean rhs but got {}", entity);
+            Logger.error("Expected boolean rhs but got {}", entity);
             throw new CompileCancellationException();
         }
     }
 
-    public static BooleanValue castToBooleanValue(SourceLoc loc, Entity entity) {
+    public static BooleanValue castToBooleanValue(Entity entity) {
         return switch (entity) {
             case BooleanValue booleanValue -> booleanValue;
             case IntegerValue integerValue -> BooleanValue.of(integerValue.toInt() != 0);
             default -> {
-                Logger.error(loc, "Cannot cast {} to boolean", entity);
+                Logger.error("Cannot cast {} to boolean", entity);
                 throw new CompileCancellationException();
             }
         };
     }
 
-    public static Expr castToInstantiateExpr(SourceLoc loc, Entity entity) {
+    public static Expr castToInstantiateExpr(Entity entity) {
         return switch (entity) {
-            case EntityList list -> makeParallelTypeFromList(list, loc);
+            case EntityList list -> makeParallelTypeFromList(list);
             case Expr expr -> expr;
-            case Variable inst -> VariableRef.of(inst, loc);
+            case Variable inst -> VariableRef.of(inst);
             default -> {
-                Logger.error(loc, "Cannot cast {} to component type", entity);
+                Logger.error("Cannot cast {} to component type", entity);
                 throw new CompileCancellationException();
             }
         };
     }
 
-    private static ParallelExpr makeParallelTypeFromList(EntityList list, SourceLoc sourceLoc) {
+    private static ParallelExpr makeParallelTypeFromList(EntityList list) {
         List<Expr> result = new LinkedList<>();
-        list.forEach(entity -> result.add(castToInstantiateExpr(sourceLoc, entity)));
+        list.forEach(entity -> result.add(castToInstantiateExpr(entity)));
         return ParallelExpr.from(result);
     }
 }

@@ -2,7 +2,7 @@ package pascal.netx.compiler.ast;
 
 import pascal.netx.util.lang.SourceLoc;
 
-public abstract class ASTNode {
+public abstract class ASTNode implements Locatable {
 
     protected SourceLoc sourceLoc;
 

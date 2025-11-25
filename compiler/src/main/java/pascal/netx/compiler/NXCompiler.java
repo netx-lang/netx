@@ -6,7 +6,7 @@ import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.scope.PackageScope;
 import pascal.netx.compiler.circuit.scope.RepoScope;
-import pascal.netx.compiler.circuit.scope.binding.ArgBindList;
+import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NxonDumper;
 import pascal.netx.compiler.io.PackageManager;
@@ -86,7 +86,7 @@ public final class NXCompiler {
         return repo;
     }
 
-    public ComponentScope elaborateComponent(PackageNode pack, Identifier top, ArgBindList parameters) {
+    public ComponentScope elaborateComponent(PackageNode pack, Identifier top, AttrBindList parameters) {
         var newConfig = Configuration.builder().basedOn(config).withTop(top.name()).withArgs(parameters).build();
         var scope = new Elaborator(repo, pack, newConfig).elaborate();
         return scope.getTop();

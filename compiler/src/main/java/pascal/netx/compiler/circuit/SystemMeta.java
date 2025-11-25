@@ -1,6 +1,6 @@
 package pascal.netx.compiler.circuit;
 
-import pascal.netx.compiler.circuit.scope.binding.ArgBindList;
+import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
 import pascal.netx.compiler.circuit.variable.BooleanValue;
 import pascal.netx.compiler.circuit.variable.Int32Value;
 import pascal.netx.compiler.circuit.variable.IntegerValue;
@@ -33,7 +33,7 @@ public enum SystemMeta implements Entity {
         }
     }
 
-    private static Entity log2(SourceLoc loc, ArgBindList args) {
+    private static Entity log2(SourceLoc loc, AttrBindList args) {
         if (args.size() != 1) {
             Logger.error(loc, "SystemMeta log2 requires exactly one argument, found: {}", args.size());
             throw new CompileCancellationException();
@@ -52,7 +52,7 @@ public enum SystemMeta implements Entity {
         return Int32Value.of(integer.subtract(BigInteger.ONE).bitLength());
     }
 
-    private static Entity print(SourceLoc ignored, ArgBindList args) {
+    private static Entity print(SourceLoc ignored, AttrBindList args) {
         var sb = new StringBuilder();
         for (var arg : args.getArguments()) {
             sb.append(arg.toString());
@@ -61,43 +61,43 @@ public enum SystemMeta implements Entity {
         return EntityList.ofEmpty();
     }
 
-    private static Entity contains(SourceLoc loc, ArgBindList args) {
+    private static Entity contains(SourceLoc loc, AttrBindList args) {
         if (args.size() != 2) {
-            Logger.error(loc, "SystemMeta contains requires exactly two arguments, found: {}", args.size());
+            Logger.error(loc, "SystemMeta contains requires exactly two attributes, found: {}", args.size());
             throw new CompileCancellationException();
         }
 
-        var list = Entities.requiresList(loc, args.getArguments().get(0));
+        var list = Entities.requiresList(args.getArguments().get(0));
         var element = args.getArguments().get(1);
         return BooleanValue.of(list.entities().contains(element));
     }
 
-    private static Entity empty(SourceLoc loc, ArgBindList args) {
+    private static Entity empty(SourceLoc loc, AttrBindList args) {
         if (args.size() != 1) {
             Logger.error(loc, "SystemMeta empty requires exactly one argument, found: {}", args.size());
             throw new CompileCancellationException();
         }
 
-        var list = Entities.requiresList(loc, args.getArguments().getFirst());
+        var list = Entities.requiresList(args.getArguments().getFirst());
         return BooleanValue.of(list.entities().isEmpty());
     }
 
-    private static Entity length(SourceLoc loc, ArgBindList args) {
+    private static Entity length(SourceLoc loc, AttrBindList args) {
         if (args.size() != 1) {
             Logger.error(loc, "SystemMeta length requires exactly one argument, found: {}", args.size());
             throw new CompileCancellationException();
         }
 
-        var list = Entities.requiresList(loc, args.getArguments().getFirst());
+        var list = Entities.requiresList(args.getArguments().getFirst());
         return Int32Value.of(list.entities().size());
     }
 
-    public Entity apply(SourceLoc loc, ArgBindList parameters) {
+    public Entity apply(SourceLoc loc, AttrBindList parameters) {
         return function.apply(loc, parameters);
     }
 
     @FunctionalInterface
     interface SystemMetaFunction {
-        Entity apply(SourceLoc loc, ArgBindList parameters);
+        Entity apply(SourceLoc loc, AttrBindList parameters);
     }
 }
