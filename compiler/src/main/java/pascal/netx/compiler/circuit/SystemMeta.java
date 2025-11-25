@@ -1,9 +1,9 @@
 package pascal.netx.compiler.circuit;
 
 import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
-import pascal.netx.compiler.circuit.variable.BooleanValue;
-import pascal.netx.compiler.circuit.variable.Int32Value;
-import pascal.netx.compiler.circuit.variable.IntegerValue;
+import pascal.netx.compiler.circuit.signal.BooleanValue;
+import pascal.netx.compiler.circuit.signal.Int32Value;
+import pascal.netx.compiler.circuit.signal.IntegerValue;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.lang.Identifier;
@@ -58,7 +58,7 @@ public enum SystemMeta implements Entity {
             sb.append(arg.toString());
         }
         Logger.print(sb.toString());
-        return EntityList.ofEmpty();
+        return EList.ofEmpty();
     }
 
     private static Entity contains(SourceLoc loc, AttrBindList args) {
@@ -69,7 +69,7 @@ public enum SystemMeta implements Entity {
 
         var list = Entities.requiresList(args.getArguments().get(0));
         var element = args.getArguments().get(1);
-        return BooleanValue.of(list.entities().contains(element));
+        return BooleanValue.of(list.contains(element));
     }
 
     private static Entity empty(SourceLoc loc, AttrBindList args) {
@@ -79,7 +79,7 @@ public enum SystemMeta implements Entity {
         }
 
         var list = Entities.requiresList(args.getArguments().getFirst());
-        return BooleanValue.of(list.entities().isEmpty());
+        return BooleanValue.of(list.isEmpty());
     }
 
     private static Entity length(SourceLoc loc, AttrBindList args) {
@@ -89,7 +89,7 @@ public enum SystemMeta implements Entity {
         }
 
         var list = Entities.requiresList(args.getArguments().getFirst());
-        return Int32Value.of(list.entities().size());
+        return Int32Value.of(list.size());
     }
 
     public Entity apply(SourceLoc loc, AttrBindList parameters) {

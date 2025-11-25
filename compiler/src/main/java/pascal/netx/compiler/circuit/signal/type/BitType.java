@@ -1,4 +1,4 @@
-package pascal.netx.compiler.circuit.variable.type;
+package pascal.netx.compiler.circuit.signal.type;
 
 public record BitType(int width) implements Type {
     private static final BitType BOOLEAN = new BitType(1);

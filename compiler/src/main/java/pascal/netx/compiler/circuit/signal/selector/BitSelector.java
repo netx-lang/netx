@@ -1,13 +1,14 @@
-package pascal.netx.compiler.circuit.variable.selector;
+package pascal.netx.compiler.circuit.signal.selector;
 
-import pascal.netx.compiler.circuit.variable.IntegerValue;
+import pascal.netx.compiler.circuit.EList;
+import pascal.netx.compiler.circuit.Entity;
+import pascal.netx.compiler.circuit.signal.IntegerValue;
 import pascal.netx.compiler.utils.CompileCancellationException;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
 public record BitSelector(IntegerValue index) implements Selector {
-
     @Override
     @Nonnull
     public String toString() {
@@ -44,6 +45,11 @@ public record BitSelector(IntegerValue index) implements Selector {
             }
         }
         return this;
+    }
+
+    @Override
+    public Entity applyOn(EList list) {
+        return list.get(index().toInt());
     }
 
     @Override

@@ -6,9 +6,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import pascal.netx.compiler.circuit.scope.Attributes;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.scope.PackageScope;
-import pascal.netx.compiler.circuit.variable.*;
-import pascal.netx.compiler.circuit.variable.type.BitType;
-import pascal.netx.compiler.circuit.variable.type.PolyType;
+import pascal.netx.compiler.circuit.signal.*;
+import pascal.netx.compiler.circuit.signal.type.BitType;
+import pascal.netx.compiler.circuit.signal.type.PolyType;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -24,7 +24,7 @@ public final class NxonDumper {
     private final PackageScope design;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final Map<Data, Integer> dataIndices = new HashMap<>();
+    private final Map<Wire, Integer> indexer = new HashMap<>();
 
     public NxonDumper(PackageScope scope) {
         this.design = scope;
@@ -56,7 +56,7 @@ public final class NxonDumper {
         var result = createObjectNode();
         var design_node = dumperOf(design.getTop()).dump();
 
-        result.put("totalData", dataIndices.size());
+        result.put("totalData", indexer.size());
         var input = makeArrayIn(result, "top_input");
         var output = makeArrayIn(result, "top_output");
         var signature = design.getTop().getSignature();
@@ -66,12 +66,12 @@ public final class NxonDumper {
         return result;
     }
 
-    private String dumpTopPort(Variable variable) {
-        return switch (variable) {
-            case Data data -> data.getIdentifier().name();
+    private String dumpTopPort(Signal signal) {
+        return switch (signal) {
+            case Wire wire -> wire.getIdentifier().name();
             case Value value -> value.toString();
             case Access access -> dumpTopPort(access.base()) + access.selector();
-            default -> throw new ShallNotReachHereError("Should be eliminated by CompositeDataBlaster");
+            default -> throw new ShallNotReachHereError("Should be eliminated by CompositionBlaster");
         };
     }
 
@@ -102,7 +102,7 @@ public final class NxonDumper {
             }
 
             List<ObjectNode> needDump = new LinkedList<>();
-            component.getBinding().forEachData(data -> needDump.add(defineData(data)));
+            component.getBinding().forEachWire(wire -> needDump.add(defineWire(wire)));
             component.getChildren().stream()
                     .map(ComponentScope.class::cast)
                     .forEach(child -> {
@@ -141,11 +141,11 @@ public final class NxonDumper {
             if (ATTRIBUTED.contains(BuiltinComponent.of(instID))) {
                 dumpInstAttr(builtin, sub.getAttributes());
             }
-            List<Data> needDump = new LinkedList<>();
-            sub.getBinding().forEachData(needDump::add);
+            List<Wire> needDump = new LinkedList<>();
+            sub.getBinding().forEachWire(needDump::add);
             if (!needDump.isEmpty()) {
                 var subarray = makeMembersIn(builtin);
-                needDump.forEach(c -> subarray.add(defineData(c)));
+                needDump.forEach(c -> subarray.add(defineWire(c)));
             }
             return builtin;
         }
@@ -153,8 +153,8 @@ public final class NxonDumper {
         private void dumpInstAttr(ObjectNode node, Attributes attributes) {
             var result = createObjectNode();
             for (var entry : attributes.entrySet()) {
-                if (entry.getValue() instanceof Variable variable) {
-                    result.put(entry.getKey().name(), dumpVariable(variable));
+                if (entry.getValue() instanceof Signal signal) {
+                    result.put(entry.getKey().name(), dumpVariable(signal));
                 } else {
                     result.put(entry.getKey().name(), entry.getValue().toString());
                 }
@@ -162,14 +162,11 @@ public final class NxonDumper {
             node.putIfAbsent("attribute", result);
         }
 
-        private ObjectNode defineData(Data data) {
-            return switch (data) {
-                case Wire wire -> defineWire(wire);
-                case Clock clock -> defineClock(clock);
-            };
-        }
-
         private ObjectNode defineWire(Wire wire) {
+            if (wire instanceof Clock clock) {
+                return defineClock(clock);
+            }
+
             var result = createObjectNode();
             setType(result, "wire");
             switch (wire.getType()) {
@@ -179,37 +176,37 @@ public final class NxonDumper {
                     // do nothing for ArrayType and InterfaceType
                 }
             }
-            setDataID(result, wire);
+            setWireID(result, wire);
             return result;
         }
 
         private ObjectNode defineClock(Clock clock) {
             var result = createObjectNode();
             setType(result, "clock");
-            setDataID(result, clock);
+            setWireID(result, clock);
             return result;
         }
 
-        private void dumpInstIO(ObjectNode node, String port, List<Variable> sub) {
+        private void dumpInstIO(ObjectNode node, String port, List<Signal> sub) {
             var array = makeArrayIn(node, port);
             sub.stream().map(this::dumpVariable).forEach(array::add);
         }
 
-        private String dumpVariable(Variable entity) {
+        private String dumpVariable(Signal entity) {
             return switch (entity) {
-                case Data data -> dumpData(data);
+                case Wire wire -> dumpWire(wire);
                 case Value value -> dumpValue(value);
-                case Access access -> dumpDataAccess(access);
-                default -> throw new ShallNotReachHereError("Should be eliminated by CompositeDataBlaster");
+                case Access access -> dumpAccess(access);
+                default -> throw new ShallNotReachHereError("Should be eliminated by CompositionBlaster");
             };
         }
 
-        private String dumpData(Data data) {
-            return String.format("%s@%d", data.getIdentifier().name(), indexOf(data));
+        private String dumpWire(Wire wire) {
+            return String.format("%s@%d", wire.getIdentifier().name(), indexOf(wire));
         }
 
-        private int indexOf(Data data) {
-            return dataIndices.computeIfAbsent(data, _ -> dataIndices.size());
+        private int indexOf(Wire data) {
+            return indexer.computeIfAbsent(data, _ -> indexer.size());
         }
 
         private String dumpValue(Value value) {
@@ -220,13 +217,13 @@ public final class NxonDumper {
             };
         }
 
-        private String dumpDataAccess(Access access) {
-            return dumpData(access.base()) + access.selector();
+        private String dumpAccess(Access access) {
+            return dumpWire(access.base()) + access.selector();
         }
 
-        private void setDataID(ObjectNode node, Data data) {
-            node.put("id", dumpData(data));
-            node.put("loc", data.getSourceLoc().toString());
+        private void setWireID(ObjectNode node, Wire wire) {
+            node.put("id", dumpWire(wire));
+            node.put("loc", wire.getSourceLoc().toString());
         }
     }
 }

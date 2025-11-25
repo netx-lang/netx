@@ -3,7 +3,7 @@ package pascal.netx.compiler.circuit.scope;
 import pascal.netx.compiler.Evaluator;
 import pascal.netx.compiler.analysis.model.AssignManager;
 import pascal.netx.compiler.circuit.Signature;
-import pascal.netx.compiler.circuit.variable.Variable;
+import pascal.netx.compiler.circuit.signal.Signal;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -21,8 +21,8 @@ public final class ComponentScope extends Scope {
     private final AssignManager manager = new AssignManager(this);
 
     private Attributes attributes;
-    private List<Variable> inputs = new ArrayList<>();
-    private List<Variable> outputs = new ArrayList<>();
+    private List<Signal> inputs = new ArrayList<>();
+    private List<Signal> outputs = new ArrayList<>();
 
     /**
      * Only used in compact compilation mode to distinguish the components.
@@ -88,27 +88,27 @@ public final class ComponentScope extends Scope {
         return evaluator;
     }
 
-    public List<Variable> getInputs() {
+    public List<Signal> getInputs() {
         return inputs;
     }
 
-    public void setInputs(List<Variable> inputs) {
+    public void setInputs(List<Signal> inputs) {
         this.inputs = inputs;
     }
 
-    public List<Variable> getOutputs() {
+    public List<Signal> getOutputs() {
         return outputs;
     }
 
-    public void setOutputs(List<Variable> outputs) {
+    public void setOutputs(List<Signal> outputs) {
         this.outputs = outputs;
     }
 
-    public void addInput(Variable... inputs) {
+    public void addInput(Signal... inputs) {
         Collections.addAll(this.inputs, inputs);
     }
 
-    public void addOutput(Variable... outputs) {
+    public void addOutput(Signal... outputs) {
         Collections.addAll(this.outputs, outputs);
     }
 
@@ -144,7 +144,7 @@ public final class ComponentScope extends Scope {
         return BuiltinComponent.isBuiltin(identifier);
     }
 
-    public record Alias(Variable lhs, Variable rhs) {
+    public record Alias(Signal lhs, Signal rhs) {
         public Alias flip() {
             return new Alias(rhs, lhs);
         }

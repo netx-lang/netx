@@ -1,15 +1,15 @@
 package pascal.netx.compiler.analysis.model.constraint;
 
-import pascal.netx.compiler.circuit.variable.Variable;
+import pascal.netx.compiler.circuit.signal.Signal;
 
-public abstract sealed class UnaryConstraint implements DataConstraint permits ClockConstraint {
-    protected final Variable inst;
+public abstract sealed class UnaryConstraint implements WireConstraint permits ClockConstraint {
+    protected final Signal inst;
 
-    protected UnaryConstraint(Variable inst) {
+    protected UnaryConstraint(Signal inst) {
         this.inst = inst;
     }
 
-    public Variable getData() {
+    public Signal getData() {
         return inst;
     }
 }

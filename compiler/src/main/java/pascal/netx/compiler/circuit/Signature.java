@@ -1,8 +1,8 @@
 package pascal.netx.compiler.circuit;
 
 import pascal.netx.compiler.circuit.expr.ComponentRef;
-import pascal.netx.compiler.circuit.variable.Variable;
-import pascal.netx.compiler.circuit.variable.type.Type;
+import pascal.netx.compiler.circuit.signal.Signal;
+import pascal.netx.compiler.circuit.signal.type.Type;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,14 +10,14 @@ import java.util.Objects;
 
 public final class Signature {
     private final ComponentRef caller;
-    private List<Variable> inputs, outputs;
+    private List<Signal> inputs, outputs;
     private List<Type> inTypeCache, outTypeCache;
 
     private Signature(ComponentRef caller) {
         this.caller = caller;
     }
 
-    public static Signature of(ComponentRef caller, List<Variable> inputs, List<Variable> outputs) {
+    public static Signature of(ComponentRef caller, List<Signal> inputs, List<Signal> outputs) {
         var result = new Signature(caller);
         result.setInputs(inputs);
         result.setOutputs(outputs);
@@ -44,32 +44,32 @@ public final class Signature {
         return caller;
     }
 
-    public List<Variable> inputs() {
+    public List<Signal> inputs() {
         return inputs;
     }
 
-    public List<Variable> outputs() {
+    public List<Signal> outputs() {
         return outputs;
     }
 
-    public void setInputs(List<Variable> inputs) {
+    public void setInputs(List<Signal> inputs) {
         this.inputs = new ArrayList<>(inputs);
     }
 
-    public void setOutputs(List<Variable> outputs) {
+    public void setOutputs(List<Signal> outputs) {
         this.outputs = new ArrayList<>(outputs);
     }
 
     private List<Type> getInType() {
         if (inTypeCache == null) {
-            inTypeCache = inputs.stream().map(Variable::getType).toList();
+            inTypeCache = inputs.stream().map(Signal::getType).toList();
         }
         return inTypeCache;
     }
 
     private List<Type> getOutType() {
         if (outTypeCache == null) {
-            outTypeCache = outputs.stream().map(Variable::getType).toList();
+            outTypeCache = outputs.stream().map(Signal::getType).toList();
         }
         return outTypeCache;
     }

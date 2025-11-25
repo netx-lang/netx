@@ -1,20 +1,20 @@
-package pascal.netx.compiler.circuit.variable;
+package pascal.netx.compiler.circuit.signal;
 
 import pascal.netx.compiler.circuit.Entity;
-import pascal.netx.compiler.circuit.variable.selector.BitSelector;
-import pascal.netx.compiler.circuit.variable.selector.PartSelector;
-import pascal.netx.compiler.circuit.variable.selector.Selector;
-import pascal.netx.compiler.circuit.variable.type.PolyType;
-import pascal.netx.compiler.circuit.variable.type.Type;
+import pascal.netx.compiler.circuit.signal.selector.BitSelector;
+import pascal.netx.compiler.circuit.signal.selector.PartSelector;
+import pascal.netx.compiler.circuit.signal.selector.Selector;
+import pascal.netx.compiler.circuit.signal.type.PolyType;
+import pascal.netx.compiler.circuit.signal.type.Type;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.Logger;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public sealed interface Variable extends Entity permits Mutable, Value {
+public sealed interface Signal extends Entity permits Data, Value {
 
-    static Variable accessOf(Variable base, Selector selector) {
+    static Signal accessOf(Signal base, Selector selector) {
         switch (base) {
             case Value value -> {
                 return selectConstant(value, selector);
@@ -33,7 +33,7 @@ public sealed interface Variable extends Entity permits Mutable, Value {
             case Access _ -> {
                 List<Selector> selectors = new LinkedList<>();
                 selectors.add(selector);
-                while (base instanceof Access(Data nextBase, Selector nextSelector)) {
+                while (base instanceof Access(Wire nextBase, Selector nextSelector)) {
                     base = nextBase;
                     selectors.addFirst(nextSelector);
                 }
@@ -41,10 +41,10 @@ public sealed interface Variable extends Entity permits Mutable, Value {
                 for (int i = 1; i < selectors.size(); i++) {
                     finalSelector = finalSelector.refine(selectors.get(i));
                 }
-                return new Access((Data) base, finalSelector);
+                return new Access((Wire) base, finalSelector);
             }
             default -> {
-                return new Access((Data) base, selector);
+                return new Access((Wire) base, selector);
             }
         }
     }

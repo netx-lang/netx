@@ -1,7 +1,7 @@
-package pascal.netx.compiler.circuit.variable;
+package pascal.netx.compiler.circuit.signal;
 
-import pascal.netx.compiler.circuit.variable.type.BitType;
-import pascal.netx.compiler.circuit.variable.type.Type;
+import pascal.netx.compiler.circuit.signal.type.BitType;
+import pascal.netx.compiler.circuit.signal.type.Type;
 import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.lang.BitVector;
 

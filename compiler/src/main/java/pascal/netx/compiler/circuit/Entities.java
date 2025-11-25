@@ -2,8 +2,8 @@ package pascal.netx.compiler.circuit;
 
 import pascal.netx.compiler.circuit.expr.Expr;
 import pascal.netx.compiler.circuit.expr.ParallelExpr;
-import pascal.netx.compiler.circuit.expr.VariableRef;
-import pascal.netx.compiler.circuit.variable.*;
+import pascal.netx.compiler.circuit.expr.SignalRef;
+import pascal.netx.compiler.circuit.signal.*;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.Logger;
 
@@ -22,7 +22,7 @@ public final class Entities {
     }
 
     public static Entity requiresListedValue(Entity entity) {
-        if (entity instanceof EntityList(var list)) {
+        if (entity instanceof EList list) {
             for (var element : list) {
                 requiresListedValue(element);
             }
@@ -32,8 +32,8 @@ public final class Entities {
         }
     }
 
-    public static EntityList requiresList(Entity entity) {
-        if (entity instanceof EntityList list) {
+    public static EList requiresList(Entity entity) {
+        if (entity instanceof EList list) {
             return list;
         } else {
             Logger.error("Expected list but got {}", entity);
@@ -50,8 +50,8 @@ public final class Entities {
         }
     }
 
-    public static Mutable requiresMutable(Entity entity) {
-        if (entity instanceof Mutable instance) {
+    public static Data requiresMutable(Entity entity) {
+        if (entity instanceof Data instance) {
             return instance;
         } else {
             Logger.error("Expected instance but got {}", entity);
@@ -59,8 +59,8 @@ public final class Entities {
         }
     }
 
-    public static Mutable.Factory<?> requiresMutableFactory(Entity entity) {
-        if (entity instanceof Mutable.Factory<?> factory) {
+    public static Data.Factory<?> requiresMutableFactory(Entity entity) {
+        if (entity instanceof Data.Factory<?> factory) {
             return factory;
         } else {
             Logger.error("Expected component factory but got {}", entity);
@@ -97,11 +97,11 @@ public final class Entities {
         };
     }
 
-    public static Expr castToInstantiateExpr(Entity entity) {
+    public static Expr castToCircuitExpr(Entity entity) {
         return switch (entity) {
-            case EntityList list -> makeParallelTypeFromList(list);
             case Expr expr -> expr;
-            case Variable inst -> VariableRef.of(inst);
+            case EList list -> makeParallelTypeFromList(list);
+            case Signal inst -> SignalRef.of(inst);
             default -> {
                 Logger.error("Cannot cast {} to component type", entity);
                 throw new CompileCancellationException();
@@ -109,9 +109,9 @@ public final class Entities {
         };
     }
 
-    private static ParallelExpr makeParallelTypeFromList(EntityList list) {
+    private static ParallelExpr makeParallelTypeFromList(EList list) {
         List<Expr> result = new LinkedList<>();
-        list.forEach(entity -> result.add(castToInstantiateExpr(entity)));
+        list.forEach(entity -> result.add(castToCircuitExpr(entity)));
         return ParallelExpr.from(result);
     }
 }

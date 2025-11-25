@@ -1,6 +1,6 @@
-package pascal.netx.compiler.circuit.variable;
+package pascal.netx.compiler.circuit.signal;
 
-import pascal.netx.compiler.circuit.variable.type.Type;
+import pascal.netx.compiler.circuit.signal.type.Type;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 
@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-public abstract sealed class Composition implements Mutable permits Array, Bundle {
+public abstract sealed class Composition implements Data permits Array, Bundle {
     protected final Type type;
     protected final Identifier id;
     protected final int index;
@@ -20,13 +20,13 @@ public abstract sealed class Composition implements Mutable permits Array, Bundl
         this.index = index;
     }
 
-    abstract public Collection<Mutable> getElements();
+    abstract public Collection<Data> getElements();
 
-    public List<Data> flatten() {
-        List<Data> result = new LinkedList<>();
+    public List<Wire> flatten() {
+        List<Wire> result = new LinkedList<>();
         for (var value : getElements()) {
             switch (value) {
-                case Data data -> result.add(data);
+                case Wire wire -> result.add(wire);
                 case Composition composition -> result.addAll(composition.flatten());
                 default -> throw new ShallNotReachHereError();
             }

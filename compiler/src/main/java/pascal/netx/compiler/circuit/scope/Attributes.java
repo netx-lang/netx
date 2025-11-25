@@ -5,7 +5,7 @@ import pascal.netx.compiler.circuit.Entity;
 import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
 import pascal.netx.compiler.circuit.scope.binding.MultiBinding;
 import pascal.netx.compiler.circuit.scope.binding.OrderedAttrBindList;
-import pascal.netx.compiler.circuit.variable.Variable;
+import pascal.netx.compiler.circuit.signal.Signal;
 import pascal.netx.util.lang.Identifier;
 
 import java.util.HashMap;
@@ -55,10 +55,10 @@ public final class Attributes {
         return attributes.isEmpty();
     }
 
-    public void replaceAllVariable(UnaryOperator<Variable> operator) {
+    public void replaceAllVariable(UnaryOperator<Signal> operator) {
         for (var entry : attributes.entrySet()) {
-            if (entry.getValue() instanceof Variable variable) {
-                entry.setValue(operator.apply(variable));
+            if (entry.getValue() instanceof Signal signal) {
+                entry.setValue(operator.apply(signal));
             }
         }
     }

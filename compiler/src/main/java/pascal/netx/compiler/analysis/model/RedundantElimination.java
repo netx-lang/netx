@@ -2,7 +2,7 @@ package pascal.netx.compiler.analysis.model;
 
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.scope.PackageScope;
-import pascal.netx.compiler.circuit.variable.Value;
+import pascal.netx.compiler.circuit.signal.Value;
 import pascal.netx.util.lang.BuiltinComponent;
 
 import java.util.Stack;

@@ -3,9 +3,9 @@ package pascal.netx.compiler.analysis.model;
 import pascal.netx.compiler.circuit.Entity;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.scope.PackageScope;
-import pascal.netx.compiler.circuit.variable.*;
-import pascal.netx.compiler.circuit.variable.selector.Selector;
-import pascal.netx.compiler.circuit.variable.type.BitType;
+import pascal.netx.compiler.circuit.signal.*;
+import pascal.netx.compiler.circuit.signal.selector.Selector;
+import pascal.netx.compiler.circuit.signal.type.BitType;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.collection.UnionFind;
@@ -56,11 +56,11 @@ public final class AliasAnalysis extends ModelAnalysis {
      * this class eliminates unnecessary alias relations in {@link #clearIn}.
      */
     public static final class AliasManager {
-        private final UnionFind<Variable> set = new UnionFind<>();
-        private final Map<Variable, Variable> sourceRep = new HashMap<>();
+        private final UnionFind<Signal> set = new UnionFind<>();
+        private final Map<Signal, Signal> sourceRep = new HashMap<>();
 
-        static boolean isSelfAlias(Variable variable) {
-            if (variable instanceof Access(var base, var selector)) {
+        static boolean isSelfAlias(Signal signal) {
+            if (signal instanceof Access(var base, var selector)) {
                 if (base.getType() instanceof BitType(int width)) {
                     return width == selector.getWidth();
                 }
@@ -122,11 +122,11 @@ public final class AliasAnalysis extends ModelAnalysis {
             scope.getAliases().addAll(newAlias);
         }
 
-        boolean isValidDump(Variable variable) {
-            return needDump(variable) || (variable instanceof Access access && needDump(access.base()));
+        boolean isValidDump(Signal signal) {
+            return needDump(signal) || (signal instanceof Access access && needDump(access.base()));
         }
 
-        private boolean isNotIdentity(Variable lhs, Variable rhs) {
+        private boolean isNotIdentity(Signal lhs, Signal rhs) {
             return !lhs.equals(rhs)
                     && (!(rhs instanceof Access access)
                             || (!isSelfAlias(access) || !access.base().equals(lhs)));
@@ -146,7 +146,7 @@ public final class AliasAnalysis extends ModelAnalysis {
         }
 
         boolean needDump(Entity entity) {
-            if (entity instanceof Variable inst) {
+            if (entity instanceof Signal inst) {
                 if (inst.isUserDefined()) {
                     return repOf(inst) == inst;
                 } else {
@@ -156,18 +156,18 @@ public final class AliasAnalysis extends ModelAnalysis {
             return false;
         }
 
-        boolean needUpdate(Variable now, Variable old) {
+        boolean needUpdate(Signal now, Signal old) {
             // Prefer Value to Data
             if (old instanceof Value) {
                 return false;
             } else if (now instanceof Value) {
                 return true;
             } else {
-                return ((Mutable) now).getIndex() < ((Mutable) old).getIndex();
+                return ((Data) now).getIndex() < ((Data) old).getIndex();
             }
         }
 
-        boolean hasSourceAlias(Variable inst) {
+        boolean hasSourceAlias(Signal inst) {
             if (set.contains(inst)) {
                 return sourceRep.containsKey(set.find(inst));
             }
@@ -175,7 +175,7 @@ public final class AliasAnalysis extends ModelAnalysis {
         }
 
         @Nonnull
-        Variable repOf(Variable inst) {
+        Signal repOf(Signal inst) {
             // We need to keep trying to get the representative until reach a fixed point,
             // since there may have a representation chain such as x -> y[2:0] -> z[2:0]
             while (true) {
@@ -188,7 +188,7 @@ public final class AliasAnalysis extends ModelAnalysis {
         }
 
         @Nonnull
-        Variable getNextRep(Variable inst) {
+        Signal getNextRep(Signal inst) {
             // If the inst is a DataAccess, find the alias of its base
             if (inst instanceof Access(var base, var selector)) {
                 var baseRep = repOf(base);
@@ -198,7 +198,7 @@ public final class AliasAnalysis extends ModelAnalysis {
                             return baseRep;
                         }
                     }
-                    return Variable.accessOf(baseRep, selector);
+                    return Signal.accessOf(baseRep, selector);
                 }
             }
             // Otherwise find the alias of the inst itself
@@ -225,7 +225,7 @@ public final class AliasAnalysis extends ModelAnalysis {
      * we inline these relations to make them direct aliases {@code i <> o}.
      */
     public final class BuiltinAnalysis {
-        private void addBuiltinAlias(ComponentScope scope, Variable lhs, Variable rhs) {
+        private void addBuiltinAlias(ComponentScope scope, Signal lhs, Signal rhs) {
             manager.set.union(lhs, rhs);
             scope.getAliases().add(new ComponentScope.Alias(lhs, rhs));
         }
@@ -258,7 +258,7 @@ public final class AliasAnalysis extends ModelAnalysis {
             if (lhsW == rhsW) {
                 addBuiltinAlias(scope, lhs, rhs);
             } else if (lhsW < rhsW) {
-                var truncated = Variable.accessOf(rhs, Selector.ofWidth(lhsW));
+                var truncated = Signal.accessOf(rhs, Selector.ofWidth(lhsW));
                 addBuiltinAlias(scope, lhs, truncated);
             }
         }
@@ -340,23 +340,23 @@ public final class AliasAnalysis extends ModelAnalysis {
             }
         }
 
-        private void setAsTo(ComponentScope scope, Variable input) {
+        private void setAsTo(ComponentScope scope, Signal input) {
             transformComponent(scope, BuiltinComponent.TO, input);
             addBuiltinAlias(scope, input, scope.getOutputs().getFirst());
         }
 
-        private void setAsNot(ComponentScope scope, Variable input) {
+        private void setAsNot(ComponentScope scope, Signal input) {
             transformComponent(scope, BuiltinComponent.NOT, input);
         }
 
-        private void transformComponent(ComponentScope scope, BuiltinComponent builtin, Variable input) {
+        private void transformComponent(ComponentScope scope, BuiltinComponent builtin, Signal input) {
             scope.setInputs(new ArrayList<>(List.of(input)));
             scope.setIdentifier(builtin.asID());
         }
 
-        private boolean isLow(Variable variable) {
-            variable = manager.repOf(variable);
-            if (variable instanceof Value value) {
+        private boolean isLow(Signal signal) {
+            signal = manager.repOf(signal);
+            if (signal instanceof Value value) {
                 return switch (value) {
                     case BooleanValue _ -> false;
                     case Int32Value v -> v.toInt() == 0;
@@ -366,9 +366,9 @@ public final class AliasAnalysis extends ModelAnalysis {
             return false;
         }
 
-        private boolean isHigh(Variable variable) {
-            variable = manager.repOf(variable);
-            if (variable instanceof Value value) {
+        private boolean isHigh(Signal signal) {
+            signal = manager.repOf(signal);
+            if (signal instanceof Value value) {
                 return switch (value) {
                     case BooleanValue _ -> false;
                     case Int32Value v -> v.toInt() == 0xFFFFFFFF;
@@ -403,8 +403,8 @@ public final class AliasAnalysis extends ModelAnalysis {
         }
 
         // Find all dummies and group them using UnionFind
-        private UnionFind<Variable> collectDummies(ComponentScope scope) {
-            var dummies = new UnionFind<Variable>();
+        private UnionFind<Signal> collectDummies(ComponentScope scope) {
+            var dummies = new UnionFind<Signal>();
             for (var alias : scope.getAliases()) {
                 boolean dummyLhs = isToDummy(alias.lhs());
                 boolean dummyRhs = isToDummy(alias.rhs());
@@ -415,12 +415,12 @@ public final class AliasAnalysis extends ModelAnalysis {
             return dummies;
         }
 
-        private HashMap<Variable, List<Variable>> collectNonDummies(
-                ComponentScope scope, UnionFind<Variable> dummies, boolean lhsIsDummy) {
-            var dummyToOther = new HashMap<Variable, List<Variable>>();
+        private HashMap<Signal, List<Signal>> collectNonDummies(
+                ComponentScope scope, UnionFind<Signal> dummies, boolean lhsIsDummy) {
+            var dummyToOther = new HashMap<Signal, List<Signal>>();
             for (var alias : scope.getAliases()) {
-                Variable dummy = lhsIsDummy ? alias.lhs() : alias.rhs();
-                Variable other = lhsIsDummy ? alias.rhs() : alias.lhs();
+                Signal dummy = lhsIsDummy ? alias.lhs() : alias.rhs();
+                Signal other = lhsIsDummy ? alias.rhs() : alias.lhs();
                 if (isToDummy(dummy) && !isToDummy(other)) {
                     dummyToOther.computeIfAbsent(dummies.find(dummy), _ -> new ArrayList<>()).add(other);
                 }
@@ -428,7 +428,7 @@ public final class AliasAnalysis extends ModelAnalysis {
             return dummyToOther;
         }
 
-        private boolean isToDummy(Variable var) {
+        private boolean isToDummy(Signal var) {
             return var instanceof Wire wire && wire.getIdentifier().name().equals("$TO_DUMMY");
         }
     }

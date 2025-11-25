@@ -1,10 +1,10 @@
-package pascal.netx.compiler.circuit.variable;
+package pascal.netx.compiler.circuit.signal;
 
 import pascal.netx.compiler.NXCompiler;
 import pascal.netx.compiler.circuit.Entity;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
-import pascal.netx.compiler.circuit.variable.type.InterfaceType;
-import pascal.netx.compiler.circuit.variable.type.Type;
+import pascal.netx.compiler.circuit.signal.type.InterfaceType;
+import pascal.netx.compiler.circuit.signal.type.Type;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.lang.Identifier;
@@ -15,7 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.Objects;
 
 public final class Bundle extends Composition {
-    private final LinkedHashMap<Identifier, Mutable> map = new LinkedHashMap<>();
+    private final LinkedHashMap<Identifier, Data> map = new LinkedHashMap<>();
 
     private Bundle(Identifier id, InterfaceType type, int index) {
         super(type, id, index);
@@ -54,24 +54,24 @@ public final class Bundle extends Composition {
     }
 
     @Override
-    public Collection<Mutable> getElements() {
+    public Collection<Data> getElements() {
         return map.values();
     }
 
-    public LinkedHashMap<Identifier, Mutable> getFields() {
+    public LinkedHashMap<Identifier, Data> getFields() {
         return map;
     }
 
-    public static class Factory extends Mutable.Factory<Bundle> {
-        private final LinkedHashMap<Identifier, Mutable.Factory<?>> factories;
+    public static class Factory extends Data.Factory<Bundle> {
+        private final LinkedHashMap<Identifier, Data.Factory<?>> factories;
         private final InterfaceType type;
 
         public Factory(Identifier id, NXCompiler compiler,
-                       LinkedHashMap<Identifier, Mutable.Factory<?>> factories) {
+                       LinkedHashMap<Identifier, Data.Factory<?>> factories) {
             super(compiler);
             this.factories = factories;
             this.type = InterfaceType.of(id,
-                    factories.values().stream().map(Mutable.Factory::getType).toList());
+                    factories.values().stream().map(Data.Factory::getType).toList());
         }
 
         @Override
@@ -80,10 +80,10 @@ public final class Bundle extends Composition {
 
             for (var entry : factories.entrySet()) {
                 Identifier fieldID = entry.getKey();
-                Mutable.Factory<?> factory = entry.getValue();
+                Data.Factory<?> factory = entry.getValue();
 
                 Identifier dataID = Identifier.of(id.name() + "." + fieldID.name()).setSourceLoc(id.getSourceLoc());
-                Mutable data = factory.create(parent, dataID);
+                Data data = factory.create(parent, dataID);
                 result.map.put(fieldID, data);
                 parent.bind(dataID, data);
             }

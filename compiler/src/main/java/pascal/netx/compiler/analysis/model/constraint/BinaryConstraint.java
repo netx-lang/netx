@@ -1,21 +1,21 @@
 package pascal.netx.compiler.analysis.model.constraint;
 
-import pascal.netx.compiler.circuit.variable.Variable;
-import pascal.netx.compiler.circuit.variable.type.Type;
+import pascal.netx.compiler.circuit.signal.Signal;
+import pascal.netx.compiler.circuit.signal.type.Type;
 
-public abstract sealed class BinaryConstraint implements DataConstraint permits EqualTypeConstraint {
-    protected final Variable lhs, rhs;
+public abstract sealed class BinaryConstraint implements WireConstraint permits EqualTypeConstraint {
+    protected final Signal lhs, rhs;
 
-    protected BinaryConstraint(Variable lhs, Variable rhs) {
+    protected BinaryConstraint(Signal lhs, Signal rhs) {
         this.lhs = lhs;
         this.rhs = rhs;
     }
 
-    public Variable getLhs() {
+    public Signal getLhs() {
         return lhs;
     }
 
-    public Variable getRhs() {
+    public Signal getRhs() {
         return rhs;
     }
 

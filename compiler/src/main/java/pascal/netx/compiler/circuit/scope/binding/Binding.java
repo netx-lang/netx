@@ -1,7 +1,7 @@
 package pascal.netx.compiler.circuit.scope.binding;
 
 import pascal.netx.compiler.circuit.Entity;
-import pascal.netx.compiler.circuit.variable.Data;
+import pascal.netx.compiler.circuit.signal.Wire;
 import pascal.netx.util.lang.Identifier;
 
 import javax.annotation.Nonnull;
@@ -25,10 +25,10 @@ public sealed interface Binding permits MultiBinding, MonoBinding {
 
     void forEachEntity(Consumer<Entity> consumer);
 
-    default void forEachData(Consumer<Data> consumer) {
+    default void forEachWire(Consumer<Wire> consumer) {
         forEachEntity(entity -> {
-            if (entity instanceof Data data) {
-                consumer.accept(data);
+            if (entity instanceof Wire wire) {
+                consumer.accept(wire);
             }
         });
     }

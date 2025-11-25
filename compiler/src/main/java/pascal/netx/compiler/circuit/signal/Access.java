@@ -1,9 +1,9 @@
-package pascal.netx.compiler.circuit.variable;
+package pascal.netx.compiler.circuit.signal;
 
 import pascal.netx.compiler.circuit.scope.ComponentScope;
-import pascal.netx.compiler.circuit.variable.selector.Selector;
-import pascal.netx.compiler.circuit.variable.type.BitType;
-import pascal.netx.compiler.circuit.variable.type.Type;
+import pascal.netx.compiler.circuit.signal.selector.Selector;
+import pascal.netx.compiler.circuit.signal.type.BitType;
+import pascal.netx.compiler.circuit.signal.type.Type;
 import pascal.netx.compiler.utils.Logger;
 import pascal.netx.compiler.utils.TypeCheckingException;
 import pascal.netx.util.exception.ShallNotReachHereError;
@@ -12,7 +12,7 @@ import pascal.netx.util.lang.Identifier;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-public record Access(Data base, Selector selector) implements Mutable {
+public record Access(Wire base, Selector selector) implements Data {
 
     @Override
     public Type getType() {
@@ -21,7 +21,7 @@ public record Access(Data base, Selector selector) implements Mutable {
 
     @Override
     public void setType(Type type) {
-        Logger.error(base.getSourceLoc(), "DataAccess {} has an immutable type", this);
+        Logger.error("DataAccess {} has an immutable type", this);
         throw new TypeCheckingException();
     }
 
