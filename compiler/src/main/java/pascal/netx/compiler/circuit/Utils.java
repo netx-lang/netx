@@ -4,36 +4,35 @@ import pascal.netx.compiler.NXCompiler;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.scope.PackageScope;
 import pascal.netx.compiler.circuit.scope.RepoScope;
-import pascal.netx.compiler.circuit.scope.binding.ArgBindList;
+import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
 import pascal.netx.compiler.circuit.variable.BooleanValue;
 import pascal.netx.compiler.circuit.variable.IntegerValue;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.exception.ShallNotReachHereError;
-import pascal.netx.util.lang.SourceLoc;
 
 import java.util.List;
 import java.util.stream.IntStream;
 
 public final class Utils {
-    public static int requiresMatchedSize(SourceLoc sourceLoc, List<?> target, List<?> source) {
+    public static int requireEqSize(List<?> target, List<?> source, String message) {
         if (target.size() != source.size()) {
-            Logger.error(sourceLoc, "Mismatched component size: " + target.size() + " vs " + source.size());
+            Logger.error("{}\nMismatched component size: {} vs {}", message, target.size(), source.size());
             throw new CompileCancellationException();
         }
         return target.size();
     }
 
-    public static void requiresMatchedSize(SourceLoc sourceLoc, int expected, List<?> actual) {
+    public static void requireEqSize(int expected, List<?> actual, String message) {
         if (expected != actual.size()) {
-            Logger.error(sourceLoc, "Expected list of size {} but got {}", expected, actual.size());
+            Logger.error("{}\nExpected list of size {} but got {}", message, expected, actual.size());
             throw new CompileCancellationException();
         }
     }
 
-    public static void requiresMatchedSize(SourceLoc sourceLoc, int expected, ArgBindList actual) {
+    public static void requireEqSize(int expected, AttrBindList actual, String message) {
         if (expected != actual.size()) {
-            Logger.error(sourceLoc, "Expected list of size {} but got {}", expected, actual.size());
+            Logger.error("{}\nExpected list of size {} but got {}", message, expected, actual.size());
             throw new CompileCancellationException();
         }
     }

@@ -6,38 +6,38 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-public record OrderedArgBindList(List<Entity> args) implements ArgBindList {
-    public static OrderedArgBindList ofEmpty() {
-        return new OrderedArgBindList(new ArrayList<>());
+public record OrderedAttrBindList(List<Entity> attrs) implements AttrBindList {
+    public static OrderedAttrBindList ofEmpty() {
+        return new OrderedAttrBindList(new ArrayList<>());
     }
 
     public void add(Entity entity) {
-        args.add(entity);
+        attrs.add(entity);
     }
 
     @Override
     public List<Entity> getArguments() {
-        return args;
+        return attrs;
     }
 
     @Override
     public int size() {
-        return args.size();
+        return attrs.size();
     }
 
     @Override
     public boolean isEmpty() {
-        return args.isEmpty();
+        return attrs.isEmpty();
     }
 
     @Override
     public Entity get(String name, int index) {
-        return  args.get(index);
+        return  attrs.get(index);
     }
 
     @Override
     @Nonnull
     public String toString() {
-        return "(" + String.join(", ", args.stream().map(Entity::toString).toList()) + ")";
+        return "(" + String.join(", ", attrs.stream().map(Entity::toString).toList()) + ")";
     }
 }

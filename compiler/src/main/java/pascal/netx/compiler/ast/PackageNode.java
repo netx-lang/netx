@@ -1,6 +1,7 @@
 package pascal.netx.compiler.ast;
 
 import pascal.netx.compiler.ast.element.AbstractComponentNode;
+import pascal.netx.compiler.ast.element.ComponentNode;
 import pascal.netx.compiler.ast.element.PackageElement;
 import pascal.netx.util.lang.Identifier;
 
@@ -34,6 +35,12 @@ public final class PackageNode extends ASTNode {
 
     public void setElements(List<PackageElement> elements) {
         this.elements = elements;
+    }
+
+    public List<ComponentNode> getComponents() {
+        return getElements().stream()
+                .filter(ComponentNode.class::isInstance)
+                .map(ComponentNode.class::cast).toList();
     }
 
     public AbstractComponentNode resolveComponent(Identifier identifier) {

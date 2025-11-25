@@ -260,7 +260,6 @@ public final class AliasAnalysis extends ModelAnalysis {
             } else if (lhsW < rhsW) {
                 var truncated = Variable.accessOf(rhs, Selector.ofWidth(lhsW));
                 addBuiltinAlias(scope, lhs, truncated);
-                Logger.info("Truncating {} to {}", rhs, truncated);
             }
         }
 

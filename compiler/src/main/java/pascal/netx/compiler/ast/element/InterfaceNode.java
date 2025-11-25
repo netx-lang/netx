@@ -9,12 +9,12 @@ import java.util.Objects;
 
 public final class InterfaceNode extends AbstractComponentNode implements PackageElement {
     public static final String OUTPUT_NAME = "$product";
-    private ExprNode type;
+    private ExprNode sig;
 
-    private InterfaceNode(Identifier identifier, ExprNode type,
+    private InterfaceNode(Identifier identifier, ExprNode sig,
                           List<Identifier> attributes, List<ComponentElement> elements) {
         super(identifier, attributes, elements);
-        this.type = type;
+        this.sig = sig;
     }
 
     public static InterfaceNode of(Identifier id, ExprNode type,
@@ -22,18 +22,18 @@ public final class InterfaceNode extends AbstractComponentNode implements Packag
         return new InterfaceNode(id, type, attributes, elements);
     }
 
-    public ExprNode getType() {
-        return type;
+    public ExprNode getSig() {
+        return sig;
     }
 
-    public void setType(ExprNode type) {
-        this.type = type;
+    public void setSig(ExprNode sig) {
+        this.sig = sig;
     }
 
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);
-        type.walk(listener);
+        sig.walk(listener);
         elements.forEach(stmt -> stmt.walk(listener));
         listener.exit(this);
     }
@@ -44,20 +44,20 @@ public final class InterfaceNode extends AbstractComponentNode implements Packag
         InterfaceNode that = (InterfaceNode) o;
         return Objects.equals(identifier, that.identifier)
                 && Objects.equals(attributes, that.attributes)
-                && Objects.equals(type, that.type)
+                && Objects.equals(sig, that.sig)
                 && Objects.equals(elements, that.elements);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(identifier, attributes, type, elements);
+        return Objects.hash(identifier, attributes, sig, elements);
     }
 
     @Override
     public String toString() {
         var sb = new StringBuilder();
         sb.append("interface ").append(identifier);
-        sb.append(" : ").append(type);
+        sb.append(" : ").append(sig);
         sb.append(" {");
         elements.forEach(stmt -> sb.append("\n").append(stmt));
         sb.append("\n}");

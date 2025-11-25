@@ -25,8 +25,8 @@ public final class ImportRef extends PrimaryExpr implements InstantiationRef {
 
     public ImportRef copy() {
         var result = new ImportRef(references, sourceLoc);
-        if (argBindList != null) {
-            result.argBindList = argBindList;
+        if (attrBindList != null) {
+            result.attrBindList = attrBindList;
         }
         return result;
     }
@@ -34,8 +34,8 @@ public final class ImportRef extends PrimaryExpr implements InstantiationRef {
     @Override
     public String toString() {
         var base = String.join(".", references.stream().map(Identifier::name).toList());
-        if (argBindList != null) {
-            return base + argBindList;
+        if (attrBindList != null) {
+            return base + attrBindList;
         }
         return base;
     }

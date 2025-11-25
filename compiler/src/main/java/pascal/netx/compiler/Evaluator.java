@@ -14,10 +14,10 @@ import pascal.netx.compiler.circuit.scope.Attributes;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.scope.PackageScope;
 import pascal.netx.compiler.circuit.scope.Scope;
-import pascal.netx.compiler.circuit.scope.binding.ArgBindList;
+import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
 import pascal.netx.compiler.circuit.scope.binding.MonoBinding;
 import pascal.netx.compiler.circuit.scope.binding.MultiBinding;
-import pascal.netx.compiler.circuit.scope.binding.OrderedArgBindList;
+import pascal.netx.compiler.circuit.scope.binding.OrderedAttrBindList;
 import pascal.netx.compiler.circuit.variable.*;
 import pascal.netx.compiler.circuit.variable.selector.BitSelector;
 import pascal.netx.compiler.circuit.variable.selector.PartSelector;
@@ -36,15 +36,20 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import static pascal.netx.compiler.circuit.Entities.*;
+import static pascal.netx.compiler.circuit.Utils.compilerOf;
+import static pascal.netx.compiler.circuit.Utils.repoOf;
+import static pascal.netx.compiler.circuit.scope.Attributes.from;
 import static pascal.netx.util.lang.BuiltinComponent.REG_CLK_EDGE_ATTR;
 import static pascal.netx.util.lang.BuiltinComponent.TO;
 
 public final class Evaluator {
     private final PackageScope pack;
     private final ComponentScope scope;
+    private final BuiltInComponentFactory factory;
 
     private EvaluationMode mode = EvaluationMode.COMMON;
 
@@ -79,6 +84,7 @@ public final class Evaluator {
     public Evaluator(ComponentScope component) {
         this.scope = component;
         this.pack = component.getPackage();
+        this.factory = new BuiltInComponentFactory(compilerOf(scope));
     }
 
     public EntityList castToList(ExprNode expr) {
@@ -90,20 +96,25 @@ public final class Evaluator {
         }
     }
 
-    public IntegerValue evaluateToIntegerValue(ExprNode expr) {
-        return requiresIntegerValue(expr.getSourceLoc(), evaluate(expr));
+    private static Entity castArgument(Entity entity) {
+        return switch (entity) {
+            case Expr type -> type;
+            case Data ignored -> castToInstantiateExpr(entity);
+            case Access ignored -> castToInstantiateExpr(entity);
+            default -> entity;
+        };
     }
 
     public int evaluateToInt(ExprNode expr) {
         return evaluateToIntegerValue(expr).toInt();
     }
 
-    public BooleanValue evaluateToBoolean(ExprNode expr) {
-        return castToBooleanValue(expr.getSourceLoc(), evaluate(expr));
+    public IntegerValue evaluateToIntegerValue(ExprNode expr) {
+        return requiresIntegerValue(evaluate(expr));
     }
 
-    public Bundle evaluateDataBundle(ExprNode expr) {
-        return requiresDataBundle(expr.getSourceLoc(), evaluate(expr));
+    public BooleanValue evaluateToBoolean(ExprNode expr) {
+        return castToBooleanValue(evaluate(expr));
     }
 
     public MonoBinding evaluateBinding(BindingNode binding) {
@@ -321,6 +332,10 @@ public final class Evaluator {
         };
     }
 
+    public Bundle evaluateDataBundle(ExprNode expr) {
+        return requiresDataBundle(evaluate(expr));
+    }
+
     private Entity evaluateDecoratedExpr(DecoratedExpr.Decorator decorator, ExprNode base) {
         var operand = evaluate(base);
         return switch (operand) {
@@ -336,7 +351,7 @@ public final class Evaluator {
                 yield ParallelExpr.from(result);
             }
             case Expr expr -> DecoratedExpr.of(decorator, expr);
-            case Variable variable -> DecoratedExpr.of(decorator, VariableRef.of(variable, base.getSourceLoc()));
+            case Variable variable -> DecoratedExpr.of(decorator, VariableRef.of(variable));
             default -> {
                 Logger.error(base.getSourceLoc(), "Expected instantiate expr(s) but got {}", operand);
                 throw new CompileCancellationException();
@@ -350,19 +365,10 @@ public final class Evaluator {
             factory = new Wire.Factory(PolyType.getInstance(), Utils.compilerOf(pack));
         } else {
             mode = EvaluationMode.FACTORY;
-            factory = requiresMutableFactory(expr.getSourceLoc(), evaluate(expr));
+            factory = requiresMutableFactory(evaluate(expr));
             mode = EvaluationMode.COMMON;
         }
         return factory;
-    }
-
-    private static Entity castArgument(SourceLoc loc, Entity entity) {
-        return switch (entity) {
-            case Expr type -> type;
-            case Data ignored -> castToInstantiateExpr(loc, entity);
-            case Access ignored -> castToInstantiateExpr(loc, entity);
-            default -> entity;
-        };
     }
 
     private Entity evaluateBinaryExpr(BinaryExpr expr) {
@@ -389,11 +395,14 @@ public final class Evaluator {
         return op.apply(evaluateToBoolean(expr.getLhs()), evaluateToBoolean(expr.getRhs()));
     }
 
-    public Expr evaluate(ExprNode expr, boolean needDeclareInPlace) {
+    public void evaluate(ExprNode expr, boolean needDeclareInPlace) {
+        Expr ee;
         if (needDeclareInPlace) {
-            return castToInstantiateExpr(expr.getSourceLoc(), evaluateAndDeclInPlace(expr));
+            ee = castToInstantiateExpr(evaluateAndDeclInPlace(expr));
+        } else {
+            ee = castToInstantiateExpr(evaluate(expr));
         }
-        return castToInstantiateExpr(expr.getSourceLoc(), evaluate(expr));
+        new Connector().instantiate(ee);
     }
 
     private EntityList evaluateListConcat(BinaryExpr expr) {
@@ -408,7 +417,7 @@ public final class Evaluator {
     private Entity evaluatePortExpr(PortConnectionExpr expr) {
         var ports = new PortExpr();
         for (var assign : expr.getPorts()) {
-            var rhs = castToInstantiateExpr(assign.rhs().getSourceLoc(), evaluate(assign.rhs()));
+            var rhs = castToInstantiateExpr(evaluate(assign.rhs()));
             if (assign.isDefault()) {
                 ports.setDefaultExpr(rhs);
             } else {
@@ -419,10 +428,8 @@ public final class Evaluator {
     }
 
     private Entity evaluateSequentialExpr(BinaryExpr expr) {
-        var leftLoc = expr.getLhs().getSourceLoc();
-        var rightLoc = expr.getRhs().getSourceLoc();
-        var rhs = castToInstantiateExpr(rightLoc, evaluate(expr.getRhs()));
-        var lhs = castToInstantiateExpr(leftLoc, evaluate(expr.getLhs()));
+        var rhs = castToInstantiateExpr(evaluate(expr.getRhs()));
+        var lhs = castToInstantiateExpr(evaluate(expr.getLhs()));
         return SequentialExpr.of(lhs, rhs);
     }
 
@@ -434,8 +441,8 @@ public final class Evaluator {
     }
 
     private Value evaluateEqualityExpr(BinaryExpr expr) {
-        var lhs = requiresListedValue(expr.getLhs().getSourceLoc(), evaluate(expr.getLhs()));
-        var rhs = requiresListedValue(expr.getRhs().getSourceLoc(), evaluate(expr.getRhs()));
+        var lhs = requiresListedValue(evaluate(expr.getLhs()));
+        var rhs = requiresListedValue(evaluate(expr.getRhs()));
         boolean isEqual = Utils.isEqualListedValue(lhs, rhs);
         boolean needEqual = expr.getOp() == BinaryExpr.Operator.EQ;
         return BooleanValue.of(needEqual == isEqual);
@@ -449,11 +456,13 @@ public final class Evaluator {
         }
     }
 
-    public Entity evaluateMacroExpr(SourceLoc sourceLoc, Macro marco, ArgBindList parameters) {
+    public Entity evaluateMacroExpr(SourceLoc sourceLoc, Macro marco, AttrBindList parameters) {
         var override = switch (parameters) {
             case MultiBinding binding -> binding.copyOf();
-            case OrderedArgBindList(var args) -> {
-                int size = Utils.requiresMatchedSize(sourceLoc, marco.identifiers(), args);
+            case OrderedAttrBindList(var args) -> {
+                // FIXME: message
+                int size = Utils.requireEqSize(marco.identifiers(), args,
+                        "Macro invocation requires all positional arguments");
                 var bindings = MultiBinding.ofEmpty();
                 for (int i = 0; i < size; i++) {
                     bindings.bind(marco.identifiers().get(i), args.get(i));
@@ -467,7 +476,7 @@ public final class Evaluator {
         return result;
     }
 
-    public Entity evaluateSystemMetaExpr(SourceLoc sourceLoc, SystemMeta meta, ArgBindList parameters) {
+    public Entity evaluateSystemMetaExpr(SourceLoc sourceLoc, SystemMeta meta, AttrBindList parameters) {
         return meta.apply(sourceLoc, parameters);
     }
 
@@ -524,7 +533,7 @@ public final class Evaluator {
 
     private Entity evaluateCallExpr(CallSymbolExpr expr) {
         Entity prototype = resolveIdentifier(expr.getHead());
-        ArgBindList arguments = evaluateArguments(expr);
+        AttrBindList arguments = evaluateArguments(expr);
         return switch (prototype) {
             case Macro macro -> evaluateMacroExpr(expr.getSourceLoc(), macro, arguments);
             case SystemMeta systemMeta -> evaluateSystemMetaExpr(expr.getSourceLoc(), systemMeta, arguments);
@@ -539,17 +548,17 @@ public final class Evaluator {
         };
     }
 
-    private ArgBindList evaluateArguments(CallSymbolExpr expr) {
+    private AttrBindList evaluateArguments(CallSymbolExpr expr) {
         if (expr.getAssigns().isEmpty() || expr.getAssigns().getFirst().first() == null) {
-            var result = OrderedArgBindList.ofEmpty();
+            var result = OrderedAttrBindList.ofEmpty();
             for (var argument : expr.getArguments()) {
-                result.add(castArgument(argument.getSourceLoc(), evaluate(argument)));
+                result.add(castArgument(evaluate(argument)));
             }
             return result;
         } else {
             var result = MultiBinding.ofEmpty();
             for (var assign : expr.getAssigns()) {
-                var argument = castArgument(assign.second().getSourceLoc(), evaluate(assign.second()));
+                var argument = castArgument(evaluate(assign.second()));
                 result.bind(assign.first(), argument);
             }
             return result;
@@ -565,8 +574,8 @@ public final class Evaluator {
 
             var pack = scope.getPackage();
             if (pack.defs().hasInterface(id)) {
-                return evaluateInterfaceFactory(expr.getSourceLoc(),
-                        pack.defs().getInterface(id), ArgBindList.ofEmpty());
+                return evaluateInterfaceFactory(
+                        pack.defs().getInterface(id), AttrBindList.ofEmpty());
             } else if (pack.defs().hasEnum(id)) {
                 return new Wire.Factory(BitType.of(pack.defs().getEnum(id).width()), Utils.compilerOf(pack));
             } else {
@@ -576,9 +585,9 @@ public final class Evaluator {
         } else {
             Entity entity = resolveIdentifier(id);
             if (entity instanceof Macro macro) {
-                return evaluateMacroExpr(expr.getSourceLoc(), macro, ArgBindList.ofEmpty());
+                return evaluateMacroExpr(expr.getSourceLoc(), macro, AttrBindList.ofEmpty());
             } else if (entity instanceof SystemMeta meta) {
-                return evaluateSystemMetaExpr(expr.getSourceLoc(), meta, ArgBindList.ofEmpty());
+                return evaluateSystemMetaExpr(expr.getSourceLoc(), meta, AttrBindList.ofEmpty());
             }
             return entity;
         }
@@ -592,7 +601,7 @@ public final class Evaluator {
             default -> {
                 if (pack.defs().hasInterface(expr.getHead())) {
                     var def = pack.defs().getInterface(expr.getHead());
-                    yield evaluateInterfaceFactory(expr.getSourceLoc(), def, evaluateArguments(expr));
+                    yield evaluateInterfaceFactory(def, evaluateArguments(expr));
                 }
                 Logger.error(expr.getSourceLoc(), "Unknown component type {}", expr);
                 throw new CompileCancellationException();
@@ -600,9 +609,9 @@ public final class Evaluator {
         };
     }
 
-    private Bundle.Factory evaluateInterfaceFactory(SourceLoc sourceLoc, InterfaceNode node, ArgBindList arguments) {
+    private Bundle.Factory evaluateInterfaceFactory(InterfaceNode node, AttrBindList arguments) {
         var component = ComponentScope.newInterface(scope, node.getIdentifier(), false);
-        var attributes = Attributes.from(sourceLoc, node, arguments);
+        var attributes = Attributes.from(node, arguments);
         for (var bind : attributes.entrySet()) {
             component.bind(bind.getKey(), bind.getValue());
         }
@@ -610,7 +619,7 @@ public final class Evaluator {
     }
 
     private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
-        Utils.requiresMatchedSize(sourceLoc, 1, arguments);
+        Utils.requireEqSize(1, arguments, "Wire factory requires one argument");
         mode = EvaluationMode.COMMON;
         var bitType = BitType.of(evaluateToInt(arguments.getFirst()));
         mode = EvaluationMode.FACTORY;
@@ -641,9 +650,9 @@ public final class Evaluator {
 
         public Bundle.Factory create(InterfaceNode node) {
             var config = Configuration.builder().build();
-            var elaborator = new Elaborator.ComponentElaborator(config, scope);
-            elaborator.buildElements(node.getElements());
-            var fields = elaborator.extractIOList(node.getSourceLoc(), node.getType());
+            var elaborator = new Elaborator.ComponentElaborator(scope);
+            node.getElements().forEach(elaborator::buildElement);
+            var fields = elaborator.extractIOList(node.getSig());
             LinkedHashMap<Identifier, Mutable.Factory<?>> factories = new LinkedHashMap<>();
             for (var inst : fields) {
                 if (!(inst instanceof Mutable mutable)) {
@@ -697,8 +706,8 @@ public final class Evaluator {
         }
 
         private static void moveAttribute(Attributes attr, BuiltinRef ref, String name, int index,
-                                          BiFunction<SourceLoc, Entity, ? extends  Entity> checker) {
-            attr.addAttribute(Identifier.of(name), checker.apply(ref.getSourceLoc(), ref.getArgList().get(name, index)));
+                                          Function<Entity, ? extends  Entity> checker) {
+            attr.addAttribute(Identifier.of(name), checker.apply(ref.getArgList().get(name, index)));
         }
 
         public ComponentScope createBuiltInComponent(Scope parent, BuiltinRef ref, int argNumHint) {
@@ -742,7 +751,8 @@ public final class Evaluator {
         }
 
         private ComponentScope createRegisterComponent(Scope parent, BuiltinRef ref) {
-            Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArgList());
+            Utils.requireEqSize(1, ref.getArgList(),
+                    "Register component requires only one boolean argument for clock edge");
             var result = instantiate(parent, ref);
             var attributes = new Attributes();
             moveAttribute(attributes, ref, REG_CLK_EDGE_ATTR, 0, Entities::requiresBooleanValue);
@@ -754,9 +764,9 @@ public final class Evaluator {
         }
 
         private ComponentScope createAsyncRegisterComponent(Scope parent, BuiltinRef ref) {
-            var loc = ref.getSourceLoc();
-
-            Utils.requiresMatchedSize(loc, 3, ref.getArgList());
+            Utils.requireEqSize(3, ref.getArgList(),
+                    "AsyncRegister component requires three arguments: " +
+                             "boolean clock edge, boolean reset edge, integer reset value");
             var result = instantiate(parent, ref);
             var attributes = new Attributes();
             moveAttribute(attributes, ref, REG_CLK_EDGE_ATTR, 0, Entities::requiresBooleanValue);
@@ -771,8 +781,9 @@ public final class Evaluator {
         }
 
         private ComponentScope createDupComponent(Scope parent, BuiltinRef ref) {
-            Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArgList());
-            int dup = requiresIntegerValue(ref.getSourceLoc(), ref.getArgList().get("n", 0)).toInt();
+            Utils.requireEqSize(1, ref.getArgList(),
+                    "Dup component requires only one integer argument for number of outputs");
+            int dup = requiresIntegerValue(ref.getArgList().get("n", 0)).toInt();
 
             var component = instantiate(parent, ref);
             var entity = newWire(component, "entity");
@@ -784,8 +795,9 @@ public final class Evaluator {
         }
 
         private ComponentScope createSplitComponent(Scope parent, BuiltinRef ref) {
-            Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArgList());
-            int split = requiresIntegerValue(ref.getSourceLoc(), ref.getArgList().get("n", 0)).toInt();
+            Utils.requireEqSize(1, ref.getArgList(),
+                    "Split component requires only one integer argument for input bit width");
+            int split = requiresIntegerValue(ref.getArgList().get("n", 0)).toInt();
 
             var result = instantiate(parent, ref);
             var entity = newWire(result, "entity", BitType.of(split));
@@ -802,8 +814,9 @@ public final class Evaluator {
                 result.addInput(newWire(result, "i"));
                 result.addOutput(newWire(result, "o"));
             } else {
-                Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArgList());
-                int width = requiresIntegerValue(ref.getSourceLoc(), ref.getArgList().get("width", 0)).toInt();
+                Utils.requireEqSize(1, ref.getArgList(),
+                        "Cast component requires one integer argument for bit width");
+                int width = requiresIntegerValue(ref.getArgList().get("width", 0)).toInt();
                 result.addInput(newWire(result, "i"));
                 result.addOutput(newWire(result, "o", BitType.of(width)));
             }
@@ -811,7 +824,8 @@ public final class Evaluator {
         }
 
         private ComponentScope createRelationalOpComponent(Scope parent, BuiltinRef ref) {
-            Utils.requiresMatchedSize(ref.getSourceLoc(), 0, ref.getArgList());
+            Utils.requireEqSize(0, ref.getArgList(),
+                    "Relational operator component requires no argument");
             var result = instantiate(parent, ref);
             result.addInput(newWire(result, "i1"), newWire(result, "i2"));
             result.addOutput(newWire(result, "o", BitType.forBoolean()));
@@ -819,7 +833,8 @@ public final class Evaluator {
         }
 
         private ComponentScope createShiftComponent(Scope parent, BuiltinRef ref) {
-            Utils.requiresMatchedSize(ref.getSourceLoc(), 0, ref.getArgList());
+            Utils.requireEqSize(0, ref.getArgList(),
+                    "Shift operator component requires no argument");
             var result = instantiate(parent, ref);
             result.addInput(newWire(result, "i"), newWire(result, "off"));
             result.addOutput(newWire(result, "o"));
@@ -827,7 +842,7 @@ public final class Evaluator {
         }
 
         private ComponentScope createDualInputComponent(Scope parent, BuiltinRef ref) {
-            Utils.requiresMatchedSize(ref.getSourceLoc(), 0, ref.getArgList());
+            Utils.requireEqSize(0, ref.getArgList(), ref.getBuiltin() + "requires no argument");
             var result = instantiate(parent, ref);
             result.addInput(newWire(result, "i1"), newWire(result, "i2"));
             result.addOutput(newWire(result, "o"));
@@ -837,8 +852,9 @@ public final class Evaluator {
         private ComponentScope createMultiInputComponent(Scope parent, BuiltinRef ref, int argNumHint) {
             int ports;
             if (!ref.getArgList().isEmpty()) {
-                Utils.requiresMatchedSize(ref.getSourceLoc(), 1, ref.getArgList());
-                ports = requiresIntegerValue(ref.getSourceLoc(), ref.getArgList().get("n", 0)).toInt();
+                Utils.requireEqSize(1, ref.getArgList(),
+                        "Multi-input component requires only one integer argument for number of inputs");
+                ports = requiresIntegerValue(ref.getArgList().get("n", 0)).toInt();
             } else {
                 ports = argNumHint;
             }
@@ -875,6 +891,225 @@ public final class Evaluator {
             var wire = new Wire.Factory(type, compiler).create(result, id);
             result.bind(wire.getIdentifier(), wire);
             return wire;
+        }
+    }
+
+    private class Connector {
+        private Integer argNumHint = null;
+
+        private static boolean needHintForContinuationOf(Expr expr) {
+            return switch (expr) {
+                case BuiltinRef _ -> true;
+                case SequentialExpr e -> needHintForContinuationOf(e.rhs());
+                default -> false;
+            };
+        }
+
+        public void instantiate(Expr type) {
+            doInstantiate(type);
+        }
+
+        ComponentPort doInstantiate(Expr expr) {
+            return switch (expr) {
+                case PrimaryExpr primary -> instantiatePrimaryExpr(primary);
+                case ParallelExpr parallel -> instantiateParallelExpr(parallel);
+                case DecoratedExpr decorated -> instantiateDecoratedExpr(decorated);
+                case SequentialExpr sequential -> instantiateSequentialExpr(sequential);
+                case PortExpr connection -> {
+                    Logger.error(connection.getLoc(), "Unexpected Port Connect Expression {}", connection);
+                    throw new CompileCancellationException();
+                }
+            };
+        }
+
+        private ComponentPort instantiateDecoratedExpr(DecoratedExpr expr) {
+            var port = doInstantiate(expr.operand());
+            return switch (expr.decorator()) {
+                case BLOCK_IN -> new ComponentPort(List.of(), port.output);
+                case BLOCK_OUT -> new ComponentPort(port.input, List.of());
+                case NON_BLOCK -> port;
+            };
+        }
+
+        private ComponentPort instantiatePrimaryExpr(PrimaryExpr expr) {
+            return switch (expr) {
+                case ComponentRef ref -> ComponentPort.of(instantiateComponentRef(ref));
+                case BuiltinRef ref -> ComponentPort.of(instantiateBuiltinRef(ref));
+                case ImportRef ref -> ComponentPort.of(instantiateImportRef(ref));
+                case VariableRef ref -> instantiateInstanceRef(ref);
+            };
+        }
+
+        private ComponentPort instantiateSequentialExpr(SequentialExpr expr) {
+            if (expr.rhs() instanceof PortExpr port) {
+                return doPortConnection(instantiateScope(expr.lhs()), port, true);
+            }
+            if (expr.lhs() instanceof PortExpr lhs) {
+                if (expr.rhs() instanceof SequentialExpr(Expr mid, PortExpr rhs)) {
+                    var midInst = instantiateScope(mid);
+                    doPortConnection(midInst, rhs, true);
+                    doPortConnection(midInst, lhs, false);
+                    return ComponentPort.ofEmpty();
+                } else {
+                    return doPortConnection(instantiateScope(expr.rhs()), lhs, false);
+                }
+            }
+
+            // right-hand-side goes first
+            ComponentPort lhs, rhs;
+            rhs = doInstantiate(expr.rhs());
+            if (needHintForContinuationOf(expr.lhs())) {
+                argNumHint = rhs.output().size();
+            }
+            lhs = doInstantiate(expr.lhs());
+
+            int size = Utils.requireEqSize(lhs.input(), rhs.output(),
+                    "Sequential connection requires matched port size");
+            for (int i = 0; i < size; ++i) {
+                scope.assigns().add(lhs.input().get(i), rhs.output().get(i));
+            }
+            return new ComponentPort(rhs.input(), lhs.output());
+        }
+
+        private ComponentPort doPortConnection(ComponentScope inst, PortExpr connection, boolean isInput) {
+            var loc = connection.getLoc();
+            var instPort = ComponentPort.of(inst);
+
+            Function<ComponentPort, List<Variable>> getter =
+                    (ComponentPort port) -> (isInput ? port.output : port.input);
+
+            Map<Mutable, ComponentPort> assigns = new HashMap<>();
+            for (var entry : connection.getPorts()) {
+                var conn = doInstantiate(entry.expr());
+                if (!(getter.apply(conn).size() == 1)) {
+                    Logger.error(loc, "Expect exactly one output of {} but got", entry.expr(), conn.output());
+                    throw new CompileCancellationException();
+                }
+                var port = inst.getEvaluator().evaluate(entry.port());
+                assigns.put(requiresMutable(port), conn);
+            }
+
+            ComponentPort defaultPort = null;
+            var port = isInput ? instPort.input() : instPort.output();
+            if (!connection.hasDefault()) {
+                Utils.requireEqSize(assigns.size(), port,
+                        "Port connection requires all ports to be connected or provide a default connection");
+            } else {
+                defaultPort = doInstantiate(connection.getDefaultExpr());
+            }
+
+            for (var variable : port) {
+                if (!(variable instanceof Mutable mutable)) {
+                    Logger.error("Expected mutable variable but got {}", variable);
+                    throw new CompileCancellationException();
+                }
+
+                var expr = assigns.getOrDefault(mutable, defaultPort);
+                if (isInput) {
+                    scope.assigns().add(mutable, getter.apply(expr).getFirst());
+                } else {
+                    scope.assigns().add(getter.apply(expr).getFirst(), mutable);
+                }
+            }
+
+            if (isInput) {
+                return new ComponentPort(List.of(), instPort.output);
+            } else {
+                return new ComponentPort(instPort.input, List.of());
+            }
+        }
+
+        private ComponentPort instantiateParallelExpr(ParallelExpr parallelExpr) {
+            List<Variable> output = new LinkedList<>(), input = new LinkedList<>();
+            for (var sub : parallelExpr.exprs()) {
+                var port = doInstantiate(sub);
+                output.addAll(port.output());
+                input.addAll(port.input());
+            }
+            return new ComponentPort(input, output);
+        }
+
+        private ComponentPort instantiateInstanceRef(VariableRef ref) {
+            var inst = List.of(ref.getInstance());
+            if (ref.getArgList() != null) {
+                Logger.error("Unexpected attributes in instance reference {}", ref.getInstance());
+                throw new CompileCancellationException();
+            }
+            if (ref.getInstance() instanceof Mutable) {
+                return new ComponentPort(inst, inst);
+            } else {
+                return new ComponentPort(List.of(), inst);
+            }
+        }
+
+        private ComponentScope instantiateScope(Expr expr) {
+            return switch (expr) {
+                case ImportRef ref -> instantiateImportRef(ref);
+                case BuiltinRef ref -> instantiateBuiltinRef(ref);
+                case ComponentRef ref -> instantiateComponentRef(ref);
+                default -> {
+                    Logger.error("Unexpected expression type {}", expr);
+                    throw new CompileCancellationException();
+                }
+            };
+        }
+
+        private ComponentScope instantiateImportRef(ImportRef ref) {
+            SourceLoc sourceLoc = ref.getSourceLoc();
+
+            var compiler = repoOf(scope).getManager().dispatchCompiler(sourceLoc, ref);
+            var pack = compiler.getPackManager().resolvePackage(sourceLoc, ref.packageRef());
+            var component = compiler.elaborateComponent(pack, ref.componentRef(), ref.getArgList());
+
+            if (ref.getArgList() != null) {
+                var attributes = from(pack.resolveComponent(ref.componentRef()), ref.getArgList());
+                component.setAttributes(attributes);
+            }
+            component.setParent(scope);
+            component.setPackage(scope.getPackage());
+            return component;
+        }
+
+        private ComponentScope instantiateBuiltinRef(BuiltinRef ref) {
+            ComponentScope component;
+            if (argNumHint != null) {
+                component = factory.createBuiltInComponent(scope, ref, argNumHint);
+                argNumHint = null;
+            } else {
+                component = factory.createBuiltInComponent(scope, ref);
+            }
+            return component;
+        }
+
+        private ComponentScope instantiateComponentRef(ComponentRef ref) {
+            var node = ref.getDefinition();
+            var component = ref.isInterface()
+                    ? ComponentScope.newInterface(scope, ref.getIdentifier(), true)
+                    : ComponentScope.newComponent(scope, ref.getIdentifier());
+
+            var attributes = from(node, ref.getArgList());
+            for (var entry : attributes.entrySet()) {
+                component.bind(entry.getKey(), entry.getValue());
+            }
+            component.setAttributes(attributes);
+            new Elaborator.ComponentElaborator(component).build(node);
+            setSignatureFor(ref, component);
+            return component;
+        }
+
+        private void setSignatureFor(ComponentRef ref, ComponentScope scope) {
+            var signature = Signature.of(ref, scope.getInputs(), scope.getOutputs());
+            scope.setSignature(signature);
+        }
+
+        private record ComponentPort(List<Variable> input, List<Variable> output) {
+            public static ComponentPort of(ComponentScope scope) {
+                return new ComponentPort(scope.getInputs(), scope.getOutputs());
+            }
+
+            public static ComponentPort ofEmpty() {
+                return new ComponentPort(List.of(), List.of());
+            }
         }
     }
 }

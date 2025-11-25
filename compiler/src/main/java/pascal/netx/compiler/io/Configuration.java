@@ -1,6 +1,6 @@
 package pascal.netx.compiler.io;
 
-import pascal.netx.compiler.circuit.scope.binding.ArgBindList;
+import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
 import pascal.netx.compiler.circuit.scope.binding.MultiBinding;
 import pascal.netx.compiler.circuit.variable.BitVectorValue;
 import pascal.netx.compiler.circuit.variable.BooleanValue;
@@ -16,7 +16,7 @@ import java.util.List;
 
 public record Configuration(@Nullable Identifier topPack,
                             @Nonnull  Identifier topName,
-                            @Nullable ArgBindList arguments) {
+                            @Nullable AttrBindList attributes) {
 
     private Configuration(Builder builder) {
         this(builder.topPack, builder.topName, builder.arguments);
@@ -33,12 +33,12 @@ public record Configuration(@Nullable Identifier topPack,
     public static class Builder {
         private Identifier topPack;
         private Identifier topName = Identifier.of("top");
-        private ArgBindList arguments;
+        private AttrBindList arguments;
 
         public Builder basedOn(Configuration config) {
             this.topPack = config.topPack;
             this.topName = config.topName;
-            this.arguments = config.arguments;
+            this.arguments = config.attributes;
             return this;
         }
 
@@ -84,7 +84,7 @@ public record Configuration(@Nullable Identifier topPack,
             return withArgs(bindings);
         }
 
-        public Builder withArgs(ArgBindList arguments) {
+        public Builder withArgs(AttrBindList arguments) {
             this.arguments = arguments;
             return this;
         }

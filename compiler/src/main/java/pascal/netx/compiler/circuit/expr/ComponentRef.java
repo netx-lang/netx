@@ -2,7 +2,7 @@ package pascal.netx.compiler.circuit.expr;
 
 import pascal.netx.compiler.ast.element.AbstractComponentNode;
 import pascal.netx.compiler.ast.element.InterfaceNode;
-import pascal.netx.compiler.circuit.scope.binding.ArgBindList;
+import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 
@@ -12,14 +12,14 @@ public final class ComponentRef extends PrimaryExpr implements InstantiationRef 
     private final Identifier identifier;
 
     public ComponentRef(AbstractComponentNode definition,
-                        Identifier identifier, ArgBindList argBindList) {
+                        Identifier identifier, AttrBindList attrBindList) {
         this.definition = definition;
         this.identifier = identifier;
-        this.argBindList = argBindList;
+        this.attrBindList = attrBindList;
     }
 
     public static ComponentRef of(AbstractComponentNode definition, Identifier id) {
-        return new ComponentRef(definition, id, ArgBindList.ofEmpty());
+        return new ComponentRef(definition, id, AttrBindList.ofEmpty());
     }
 
     public Identifier getIdentifier() {
@@ -39,8 +39,8 @@ public final class ComponentRef extends PrimaryExpr implements InstantiationRef 
 
     @Override
     public String toString() {
-        if (argBindList != null) {
-            return identifier.toString() + argBindList;
+        if (attrBindList != null) {
+            return identifier.toString() + attrBindList;
         }
         return identifier.toString();
     }

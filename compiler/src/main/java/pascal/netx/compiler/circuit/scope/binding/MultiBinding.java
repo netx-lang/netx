@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public final class MultiBinding implements Binding, ArgBindList {
+public final class MultiBinding implements Binding, AttrBindList {
     private final LinkedHashMap<Identifier, Entity> bindings = new LinkedHashMap<>();
 
     private MultiBinding() {

@@ -2,12 +2,11 @@ package pascal.netx.compiler.circuit.scope;
 
 import pascal.netx.compiler.ast.element.AbstractComponentNode;
 import pascal.netx.compiler.circuit.Entity;
-import pascal.netx.compiler.circuit.scope.binding.ArgBindList;
+import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
 import pascal.netx.compiler.circuit.scope.binding.MultiBinding;
-import pascal.netx.compiler.circuit.scope.binding.OrderedArgBindList;
+import pascal.netx.compiler.circuit.scope.binding.OrderedAttrBindList;
 import pascal.netx.compiler.circuit.variable.Variable;
 import pascal.netx.util.lang.Identifier;
-import pascal.netx.util.lang.SourceLoc;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +14,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 
-import static pascal.netx.compiler.circuit.Utils.requiresMatchedSize;
+import static pascal.netx.compiler.circuit.Utils.requireEqSize;
 
 public final class Attributes {
     private final Map<Identifier, Entity> attributes = new HashMap<>();
@@ -24,11 +23,12 @@ public final class Attributes {
         return new Attributes();
     }
 
-    public static Attributes from(SourceLoc sourceLoc, AbstractComponentNode node, ArgBindList arguments) {
+    public static Attributes from(AbstractComponentNode node, AttrBindList arguments) {
         Attributes attributes = new Attributes();
         switch (arguments) {
-            case OrderedArgBindList(var args) -> {
-                int size = requiresMatchedSize(sourceLoc, node.getAttributes(), args);
+            case OrderedAttrBindList(var args) -> {
+                // FIXME: message
+                int size = requireEqSize(node.getAttributes(), args, "");
                 for (int i = 0; i < size; i++) {
                     attributes.addAttribute(node.getAttributes().get(i), args.get(i));
                 }
