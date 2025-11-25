@@ -74,7 +74,7 @@ public final class Evaluator {
         Identifier id;
         List<Identifier> freeVariables;
         switch (binding.getHead()) {
-            case CallSymbolExpr param -> {
+            case CallExpr param -> {
                 id = param.getHead();
                 freeVariables = param.getArguments().stream()
                         .map(IdentifierExpr.class::cast)
@@ -384,7 +384,7 @@ public final class Evaluator {
     private Entity evaluateSymbolExpr(SymbolExpr expr) {
         return switch (expr) {
             case IdentifierExpr sub -> evaluatePrimarySymbolExpr(sub);
-            case CallSymbolExpr sub -> evaluateParamSymbolExpr(sub);
+            case CallExpr sub -> evaluateParamSymbolExpr(sub);
         };
     }
 
@@ -396,7 +396,7 @@ public final class Evaluator {
         return BooleanValue.of(needEqual == isEqual);
     }
 
-    private Entity evaluateParamSymbolExpr(CallSymbolExpr expr) {
+    private Entity evaluateParamSymbolExpr(CallExpr expr) {
         if (mode == EvaluationMode.FACTORY) {
             return evaluateVariableFactory(expr);
         } else {
@@ -408,9 +408,8 @@ public final class Evaluator {
         var override = switch (parameters) {
             case MultiBinding binding -> binding.copyOf();
             case OrderedAttrBindList(var args) -> {
-                // FIXME: message
                 int size = Utils.requireEqSize(marco.identifiers(), args,
-                        "Macro invocation requires all positional arguments");
+                        "Macro invocation requires all arguments to be bound");
                 var bindings = MultiBinding.ofEmpty();
                 for (int i = 0; i < size; i++) {
                     bindings.bind(marco.identifiers().get(i), args.get(i));
@@ -479,7 +478,7 @@ public final class Evaluator {
         return data;
     }
 
-    private Entity evaluateCallExpr(CallSymbolExpr expr) {
+    private Entity evaluateCallExpr(CallExpr expr) {
         Entity prototype = resolveIdentifier(expr.getHead());
         AttrBindList arguments = evaluateArguments(expr);
         return switch (prototype) {
@@ -490,13 +489,13 @@ public final class Evaluator {
                 yield atom;
             }
             default -> {
-                Logger.error(expr.getSourceLoc(), "Expected component type but got {}", prototype);
+                Logger.error(expr.getSourceLoc(), "Expected callable but got {}", prototype);
                 throw new CompileCancellationException();
             }
         };
     }
 
-    private AttrBindList evaluateArguments(CallSymbolExpr expr) {
+    private AttrBindList evaluateArguments(CallExpr expr) {
         if (expr.getAssigns().isEmpty() || expr.getAssigns().getFirst().first() == null) {
             var result = OrderedAttrBindList.ofEmpty();
             for (var argument : expr.getArguments()) {
@@ -541,7 +540,7 @@ public final class Evaluator {
         }
     }
 
-    private Data.Factory<?> evaluateVariableFactory(CallSymbolExpr expr) {
+    private Data.Factory<?> evaluateVariableFactory(CallExpr expr) {
         var sourceLoc = expr.getSourceLoc();
         return switch (expr.getHead().name()) {
             case "bit" -> evaluateWireFactory(expr.getArguments());
@@ -551,7 +550,7 @@ public final class Evaluator {
                     var def = pack.defs().getInterface(expr.getHead());
                     yield evaluateInterfaceFactory(def, evaluateArguments(expr));
                 }
-                Logger.error(expr.getSourceLoc(), "Unknown component type {}", expr);
+                Logger.error(expr.getSourceLoc(), "Unknown data type {}", expr);
                 throw new CompileCancellationException();
             }
         };

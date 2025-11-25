@@ -8,26 +8,26 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-public final class CallSymbolExpr extends SymbolExpr {
+public final class CallExpr extends SymbolExpr {
     private Identifier head;
     private final List<Pair<Identifier, ExprNode>> argAssigns;
 
-    private CallSymbolExpr(Identifier head, List<Pair<Identifier, ExprNode>> argAssigns) {
+    private CallExpr(Identifier head, List<Pair<Identifier, ExprNode>> argAssigns) {
         this.head = head;
         this.argAssigns = new LinkedList<>(argAssigns);
     }
 
-    public static CallSymbolExpr ofEmpty(Identifier head) {
-        return new CallSymbolExpr(head, List.of());
+    public static CallExpr ofEmpty(Identifier head) {
+        return new CallExpr(head, List.of());
     }
 
-    public static CallSymbolExpr fromOrder(Identifier head, List<ExprNode> arguments) {
+    public static CallExpr fromOrder(Identifier head, List<ExprNode> arguments) {
         var assigns = arguments.stream().map(e -> Pair.of((Identifier) null, e)).toList();
-        return new CallSymbolExpr(head, assigns);
+        return new CallExpr(head, assigns);
     }
 
-    public static CallSymbolExpr fromAssign(Identifier head, List<Pair<Identifier, ExprNode>> argAssigns) {
-        return new CallSymbolExpr(head, argAssigns);
+    public static CallExpr fromAssign(Identifier head, List<Pair<Identifier, ExprNode>> argAssigns) {
+        return new CallExpr(head, argAssigns);
     }
 
     @Override
@@ -57,7 +57,7 @@ public final class CallSymbolExpr extends SymbolExpr {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (CallSymbolExpr) obj;
+        var that = (CallExpr) obj;
         return Objects.equals(this.head, that.head) &&
                 Objects.equals(this.argAssigns, that.argAssigns);
     }

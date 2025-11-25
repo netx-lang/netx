@@ -27,8 +27,8 @@ public final class Attributes {
         Attributes attributes = new Attributes();
         switch (arguments) {
             case OrderedAttrBindList(var args) -> {
-                // FIXME: message
-                int size = requireEqSize(node.getAttributes(), args, "");
+                int size = requireEqSize(node.getAttributes(), args,
+                        "Instantiation requires all attributes to be bound.");
                 for (int i = 0; i < size; i++) {
                     attributes.addAttribute(node.getAttributes().get(i), args.get(i));
                 }

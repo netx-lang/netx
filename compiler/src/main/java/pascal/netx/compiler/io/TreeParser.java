@@ -100,7 +100,7 @@ public final class TreeParser {
     ComponentNode parseComponent(ComponentContext ctx) {
         var identifier = parseIdentifier(ctx.ID());
         var attributes = parseComponentAttributes(ctx);
-        var type = parseComponentType(ctx.component_type(), locationOf(ctx.getStart()));
+        var type = parseComponentType(ctx.component_sig(), locationOf(ctx.getStart()));
         var result = ComponentNode.of(identifier, type, attributes, parseElements(ctx.component_body().element()));
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
@@ -181,7 +181,7 @@ public final class TreeParser {
                 .map(this::parseIdentifier).toList();
     }
 
-    ComponentSigNode parseComponentType(Component_typeContext ctx, SourceLoc sourceLoc) {
+    ComponentSigNode parseComponentType(Component_sigContext ctx, SourceLoc sourceLoc) {
         if (ctx == null) {
             var result = ComponentSigNode.of(CommonList.ofEmpty(), CommonList.ofEmpty());
             result.walk(new ASTListener() {
@@ -407,15 +407,15 @@ public final class TreeParser {
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
 
-    CallSymbolExpr parseParamSymbolExpr(CallSymbolContext ctx) {
-        CallSymbolExpr result;
+    CallExpr parseParamSymbolExpr(CallSymbolContext ctx) {
+        CallExpr result;
         var head = parseIdentifier(ctx.ID());
         if (!ctx.expression().isEmpty()) {
-            result = CallSymbolExpr.fromOrder(head, parseExprList(ctx.expression()));
+            result = CallExpr.fromOrder(head, parseExprList(ctx.expression()));
         } else if (!ctx.attribute_assign().isEmpty()) {
-            result = CallSymbolExpr.fromAssign(head, parseAttrAssigns(ctx.attribute_assign()));
+            result = CallExpr.fromAssign(head, parseAttrAssigns(ctx.attribute_assign()));
         } else {
-            result = CallSymbolExpr.ofEmpty(head);
+            result = CallExpr.ofEmpty(head);
         }
         return result.setSourceLoc(locationOf(ctx.getStart()));
     }
