@@ -41,6 +41,14 @@ public final class Entities {
         }
     }
 
+    public static EList castToEList(Entity entity) {
+        if (entity instanceof EList list) {
+            return list;
+        } else {
+            return EList.of(entity);
+        }
+    }
+
     public static Value requiresValue(Entity entity) {
         if (entity instanceof Value value) {
             return value;

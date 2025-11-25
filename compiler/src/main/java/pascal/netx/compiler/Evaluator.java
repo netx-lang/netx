@@ -211,13 +211,13 @@ public final class Evaluator {
     }
 
     private EList evaluateListComprehension(ListComprehension list) {
-        return EList.of(doListComprehension(list.getHead(), new LinkedList<>(list.getQualifiers())));
+        return doListComprehension(list.getHead(), new LinkedList<>(list.getQualifiers()));
     }
 
-    private List<Entity> doListComprehension(ExprNode head, LinkedList<Qualifier> qualifiers) {
-        List<Entity> result = new LinkedList<>();
+    private EList doListComprehension(ExprNode head, LinkedList<Qualifier> qualifiers) {
+        EList result = new EList();
         if (qualifiers.isEmpty()) {
-            return List.of(evaluate(head));
+            return EList.of(evaluate(head));
         } else {
             switch (qualifiers.pop()) {
                 case GeneratorQualifier generator -> {
@@ -357,8 +357,8 @@ public final class Evaluator {
 
     private EList evaluateListConcat(BinaryExpr expr) {
         List<Entity> result = new LinkedList<>();
-        result.addAll(requiresEList(evaluate(expr.getLhs())));
-        result.addAll(requiresEList(evaluate(expr.getRhs())));
+        result.addAll(castToEList(evaluate(expr.getLhs())));
+        result.addAll(castToEList(evaluate(expr.getRhs())));
         return EList.of(result);
     }
 
@@ -427,47 +427,15 @@ public final class Evaluator {
         return meta.apply(sourceLoc, parameters);
     }
 
-    @Nonnull
-    private Entity resolveIdentifier(Identifier id) {
-        if (id.isSystemMeta()) {
-            return SystemMeta.resolve(id);
-        }
-
-        Entity entity = scope.lookup(id);
-        if (entity == null) {
-            if (BuiltinComponent.isBuiltin(id)) {
-                entity = BuiltinRef.of(BuiltinComponent.of(id), id.getSourceLoc());
-            } else {
-                entity = resolveIdentifierInPack(id);
-            }
-        }
-
+    @Nonnull Entity resolveIdentifier(Identifier id) {
+        var entity = scope.resolveIdentifier(id);
         return Objects.requireNonNullElseGet(entity, () -> {
-            if (mode == EvaluationMode.DECLARE_IN_PLACE) {
+            if (mode == Evaluator.EvaluationMode.DECLARE_IN_PLACE) {
                 return declareDataInPlace(id);
             }
             Logger.error(id.getSourceLoc(), "Unresolved identifier {}", id);
             throw new CompileCancellationException();
         });
-    }
-
-    private Entity resolveIdentifierInPack(Identifier id) {
-        Entity entity = pack.lookup(id);
-        if (entity == null) {
-            if (pack.defs().hasComponent(id)) {
-                entity = ComponentRef.of(pack.defs().getComponent(id), id);
-            } else if (pack.defs().hasImport(id)) {
-                entity = pack.defs().getImport(id);
-            } else {
-                entity = pack.defs().lookupEnum(id);
-            }
-        }
-
-        // Handling cross-package resolution
-        if (entity == null && scope.getParent() instanceof ComponentScope parent) {
-            entity = parent.getEvaluator().resolveIdentifierInPack(id);
-        }
-        return entity;
     }
 
     @Nonnull

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import pascal.netx.compiler.circuit.scope.Attributes;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.scope.PackageScope;
+import pascal.netx.compiler.circuit.scope.Scope;
 import pascal.netx.compiler.circuit.signal.*;
 import pascal.netx.compiler.circuit.signal.type.BitType;
 import pascal.netx.compiler.circuit.signal.type.PolyType;
@@ -83,11 +84,22 @@ public final class NxonDumper {
     static private Collection<Wire> getDefinedWiresIn(ComponentScope scope) {
         var wires = new ArrayList<Wire>();
         scope.getBinding().forEachEntity(entity -> {
-            if (entity instanceof Wire wire && wire.getParent().equals(scope)) {
+            if (entity instanceof Wire wire && isDefinedIn(scope, wire)) {
                 wires.add(wire);
             }
         });
         return wires;
+    }
+
+    static private boolean isDefinedIn(ComponentScope component, Wire wire) {
+        Scope scope = wire.getParent();
+        while (scope != null) {
+            if (scope.equals(component)) {
+                return true;
+            }
+            scope = scope.getParent();
+        }
+        return false;
     }
 
     private class ComponentDumper {

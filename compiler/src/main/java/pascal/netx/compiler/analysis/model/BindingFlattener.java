@@ -19,7 +19,7 @@ public final class BindingFlattener extends ModelAnalysis {
     private void flattenBindingIn(ComponentScope scope) {
         Stack<Binding> stack = new Stack<>();
         while (scope.getBindingCount() > 1) {
-            stack.push(scope.getLastBinding());
+            stack.push(scope.getTopBinding());
             scope.restoreBindings();
         }
 
