@@ -1,10 +1,10 @@
-package pascal.netx.compiler.circuit.variable;
+package pascal.netx.compiler.circuit.signal;
 
-import pascal.netx.compiler.circuit.variable.type.Type;
+import pascal.netx.compiler.circuit.signal.type.Type;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BitVector;
 
-public sealed interface Value extends Variable permits BooleanValue, IntegerValue {
+public sealed interface Value extends Signal permits BooleanValue, IntegerValue {
     @Override
     default void setType(Type type) {
         throw new ShallNotReachHereError();

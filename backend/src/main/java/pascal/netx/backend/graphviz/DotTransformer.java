@@ -2,9 +2,9 @@ package pascal.netx.backend.graphviz;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import pascal.netx.backend.AbstractNxonTransformer;
-import pascal.netx.backend.model.DataReference;
 import pascal.netx.backend.model.Reference;
 import pascal.netx.backend.model.ValueReference;
+import pascal.netx.backend.model.WireReference;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.print.NotepadWriter;
 import pascal.netx.util.type.Pair;
@@ -47,7 +47,7 @@ public final class DotTransformer extends AbstractNxonTransformer {
         this.depthThreshold = depth;
     }
 
-    static String dotDefOfOutWire(DataReference ref) {
+    static String dotDefOfOutWire(WireReference ref) {
         return "%s[label=%s]%s".formatted(wireDotOf(ref.id(), false), quote("%s@%d".formatted(ref.name(), ref.id())), OUT_WIRE_STYLE);
     }
 
@@ -92,7 +92,7 @@ public final class DotTransformer extends AbstractNxonTransformer {
                     switch (typeOf(sub)) {
                         case COMPONENT, BUILTIN -> collectWireDef(sub, depth + 1);
                         case WIRE, CLOCK -> {
-                            var ref = (DataReference) Reference.from(sub.get("id").textValue());
+                            var ref = (WireReference) Reference.from(sub.get("id").textValue());
                             wireDef.put(ref.id(), sub);
                         }
                     }
@@ -110,7 +110,7 @@ public final class DotTransformer extends AbstractNxonTransformer {
 
     private void printDefinedWireConnections() {
         for (var def : wireDef.values()) {
-            var ref = (DataReference) Reference.from(def.get("id").textValue());
+            var ref = (WireReference) Reference.from(def.get("id").textValue());
             if (!inDefined.contains(ref.id())) {
                 notepad.println(dotDefOfInWire(ref));
             }
@@ -271,7 +271,7 @@ public final class DotTransformer extends AbstractNxonTransformer {
 
         switch (Reference.from(port.textValue())) {
             case ValueReference ref -> handleValueReference(io, ref, result, globalRef);
-            case DataReference ref -> handleDataReference(io, ref, result, globalRef);
+            case WireReference ref -> handleDataReference(io, ref, result, globalRef);
         }
         return result;
     }
@@ -285,7 +285,7 @@ public final class DotTransformer extends AbstractNxonTransformer {
         }
     }
 
-    private void handleDataReference(IO io, DataReference ref, PendingConnection result, String globalRef) {
+    private void handleDataReference(IO io, WireReference ref, PendingConnection result, String globalRef) {
         if (ref.hasSelector()) {
             var dot = quote("s_%d%s".formatted(ref.id(), ref.selector()));
             switch (io) {
@@ -303,7 +303,7 @@ public final class DotTransformer extends AbstractNxonTransformer {
         }
     }
 
-    private void handleOutputConnection(DataReference ref, PendingConnection result, String globalRef) {
+    private void handleOutputConnection(WireReference ref, PendingConnection result, String globalRef) {
         if (wireDef.containsKey(ref.id())) {
             result.wireIn().add(new Pair<>(
                     wireDotOf(ref.id(), true) + dirOf(true),
@@ -318,7 +318,7 @@ public final class DotTransformer extends AbstractNxonTransformer {
         }
     }
 
-    private String dotDefOfInWire(DataReference ref) {
+    private String dotDefOfInWire(WireReference ref) {
         return "%s[label=%s]%s".formatted(
                 wireDotOf(ref.id(), true),
                 quote("%s@%d\\l%s".formatted(
@@ -327,7 +327,7 @@ public final class DotTransformer extends AbstractNxonTransformer {
         );
     }
 
-    private void handleInputConnection(DataReference ref, PendingConnection result, String globalRef) {
+    private void handleInputConnection(WireReference ref, PendingConnection result, String globalRef) {
         if (wireDef.containsKey(ref.id())) {
             result.wireOut().add(new Pair<>(
                     wireDotOf(ref.id(), false) + dirOf(false),

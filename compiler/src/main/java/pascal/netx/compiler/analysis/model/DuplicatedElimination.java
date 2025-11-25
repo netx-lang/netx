@@ -3,10 +3,10 @@ package pascal.netx.compiler.analysis.model;
 import pascal.netx.compiler.circuit.Entity;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.scope.PackageScope;
-import pascal.netx.compiler.circuit.variable.Access;
-import pascal.netx.compiler.circuit.variable.Mutable;
-import pascal.netx.compiler.circuit.variable.Value;
-import pascal.netx.compiler.circuit.variable.Variable;
+import pascal.netx.compiler.circuit.signal.Access;
+import pascal.netx.compiler.circuit.signal.Data;
+import pascal.netx.compiler.circuit.signal.Signal;
+import pascal.netx.compiler.circuit.signal.Value;
 import pascal.netx.util.collection.UnionFind;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -57,8 +57,8 @@ public final class DuplicatedElimination extends ModelAnalysis {
      * by which we can infer their outputs are actually alias.
      */
     public static class DuplicatedManager {
-        private final UnionFind<Variable> set = new UnionFind<>();
-        private final Map<Variable, Variable> rep = new HashMap<>();
+        private final UnionFind<Signal> set = new UnionFind<>();
+        private final Map<Signal, Signal> rep = new HashMap<>();
 
         public void collectDuplicatedComponents(ComponentScope scope) {
             Map<Identifier, List<ComponentScope>> idGroups = scope.getChildren().stream()
@@ -98,13 +98,13 @@ public final class DuplicatedElimination extends ModelAnalysis {
         }
 
         // FIXME: duplicated to AliasManager::needUpdate
-        boolean needUpdate(Variable now, Variable old) {
+        boolean needUpdate(Signal now, Signal old) {
             if (old instanceof Value) {
                 return false;
             } else if (now instanceof Value) {
                 return true;
             } else {
-                return ((Mutable) now).getIndex() < ((Mutable) old).getIndex();
+                return ((Data) now).getIndex() < ((Data) old).getIndex();
             }
         }
 
@@ -150,9 +150,9 @@ public final class DuplicatedElimination extends ModelAnalysis {
         }
 
         public boolean needRemove(Entity entity) {
-            if (entity instanceof Variable variable) {
-                if (set.contains(variable)) {
-                    return rep.get(set.find(variable)) != variable;
+            if (entity instanceof Signal signal) {
+                if (set.contains(signal)) {
+                    return rep.get(set.find(signal)) != signal;
                 }
             }
             return false;
@@ -160,7 +160,7 @@ public final class DuplicatedElimination extends ModelAnalysis {
 
         // FIXME: duplicated to AliasManager::repOf
         @Nonnull
-        Variable repOf(Variable inst) {
+        Signal repOf(Signal inst) {
             while (true) {
                 var next = getNextRep(inst);
                 if (next == inst) {
@@ -171,11 +171,11 @@ public final class DuplicatedElimination extends ModelAnalysis {
         }
 
         @Nonnull
-        Variable getNextRep(Variable inst) {
+        Signal getNextRep(Signal inst) {
             if (inst instanceof Access(var base, var selector)) {
                 var baseRep = repOf(base);
                 if (baseRep != base) {
-                    return Variable.accessOf(baseRep, selector);
+                    return Signal.accessOf(baseRep, selector);
                 }
             }
             if (set.contains(inst)) {

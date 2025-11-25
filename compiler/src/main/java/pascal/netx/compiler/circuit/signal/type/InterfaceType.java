@@ -1,4 +1,4 @@
-package pascal.netx.compiler.circuit.variable.type;
+package pascal.netx.compiler.circuit.signal.type;
 
 import pascal.netx.util.lang.Identifier;
 

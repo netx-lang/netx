@@ -1,11 +1,11 @@
 package pascal.netx.compiler.analysis.model.constraint;
 
-import pascal.netx.compiler.circuit.variable.Variable;
-import pascal.netx.compiler.circuit.variable.type.BitType;
+import pascal.netx.compiler.circuit.signal.Signal;
+import pascal.netx.compiler.circuit.signal.type.BitType;
 
 import java.util.List;
 
-public record ConcatConstraint(Variable lhs, List<Variable> rhs) implements DataConstraint {
+public record ConcatConstraint(Signal lhs, List<Signal> rhs) implements WireConstraint {
     @Override
     public boolean holds() {
         int length = 0;

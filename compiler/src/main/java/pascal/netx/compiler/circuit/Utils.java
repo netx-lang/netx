@@ -5,8 +5,8 @@ import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.scope.PackageScope;
 import pascal.netx.compiler.circuit.scope.RepoScope;
 import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
-import pascal.netx.compiler.circuit.variable.BooleanValue;
-import pascal.netx.compiler.circuit.variable.IntegerValue;
+import pascal.netx.compiler.circuit.signal.BooleanValue;
+import pascal.netx.compiler.circuit.signal.IntegerValue;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.exception.ShallNotReachHereError;
@@ -55,8 +55,8 @@ public final class Utils {
 
     public static boolean isEqualListedValue(Entity lhs, Entity rhs) {
         switch (lhs) {
-            case EntityList(var lhsList) -> {
-                if (rhs instanceof EntityList(var rhsList)) {
+            case EList lhsList -> {
+                if (rhs instanceof EList rhsList) {
                     if (lhsList.size() == rhsList.size()) {
                         return IntStream.range(0, lhsList.size())
                                 .allMatch(i -> isEqualListedValue(lhsList.get(i), rhsList.get(i)));

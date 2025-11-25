@@ -1,20 +1,15 @@
-package pascal.netx.compiler.circuit.variable;
+package pascal.netx.compiler.circuit.signal;
 
 import pascal.netx.compiler.NXCompiler;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
-import pascal.netx.compiler.circuit.variable.type.BitType;
-import pascal.netx.compiler.circuit.variable.type.Type;
+import pascal.netx.compiler.circuit.signal.type.BitType;
+import pascal.netx.compiler.circuit.signal.type.Type;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 
-public final class Clock extends Data {
+public final class Clock extends Wire {
     public Clock(Identifier id, ComponentScope parent, int index) {
-        super(id, parent, index);
-    }
-
-    @Override
-    public String toString() {
-        return id.toStringWithLoc();
+        super(id, parent, BitType.forClock(), index);
     }
 
     @Override

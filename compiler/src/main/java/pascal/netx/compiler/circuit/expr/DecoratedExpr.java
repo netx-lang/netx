@@ -1,5 +1,7 @@
 package pascal.netx.compiler.circuit.expr;
 
+import javax.annotation.Nonnull;
+
 public record DecoratedExpr(Decorator decorator, Expr operand) implements Expr {
 
     public static DecoratedExpr of(Decorator decorator, Expr operand) {
@@ -7,6 +9,7 @@ public record DecoratedExpr(Decorator decorator, Expr operand) implements Expr {
     }
 
     @Override
+    @Nonnull
     public String toString() {
         return switch (decorator) {
             case BLOCK_IN -> operand + "#";

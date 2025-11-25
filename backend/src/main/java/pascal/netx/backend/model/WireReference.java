@@ -1,6 +1,6 @@
 package pascal.netx.backend.model;
 
-public record DataReference(String name, Integer id, String selector) implements Reference {
+public record WireReference(String name, Integer id, String selector) implements Reference {
 
     public boolean hasSelector() {
         return !selector.isEmpty();

@@ -1,7 +1,9 @@
-package pascal.netx.compiler.circuit.variable.selector;
+package pascal.netx.compiler.circuit.signal.selector;
 
-import pascal.netx.compiler.circuit.variable.Int32Value;
-import pascal.netx.compiler.circuit.variable.IntegerValue;
+import pascal.netx.compiler.circuit.EList;
+import pascal.netx.compiler.circuit.Entity;
+import pascal.netx.compiler.circuit.signal.Int32Value;
+import pascal.netx.compiler.circuit.signal.IntegerValue;
 
 public sealed interface Selector permits PartSelector, BitSelector {
     int getWidth();
@@ -22,4 +24,6 @@ public sealed interface Selector permits PartSelector, BitSelector {
         }
         return new PartSelector(Int32Value.of(width - 1), IntegerValue.ZERO);
     }
+
+    Entity applyOn(EList list);
 }

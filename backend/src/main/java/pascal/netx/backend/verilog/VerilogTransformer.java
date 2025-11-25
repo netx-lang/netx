@@ -3,8 +3,8 @@ package pascal.netx.backend.verilog;
 import com.fasterxml.jackson.databind.JsonNode;
 import pascal.netx.backend.AbstractNxonTransformer;
 import pascal.netx.backend.NxonParseUtils;
-import pascal.netx.backend.model.DataReference;
 import pascal.netx.backend.model.Reference;
+import pascal.netx.backend.model.WireReference;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.nxon.NxonType;
 import pascal.netx.util.print.NotepadWriter;
@@ -66,7 +66,7 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
                 .map(Reference::from)
                 .forEach(ref -> {
                     io.add(ref.dump());
-                    if (ref instanceof DataReference dataRef) {
+                    if (ref instanceof WireReference dataRef) {
                         globalSet.add(dataRef.id());
                     }
                 });
@@ -140,7 +140,7 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
     }
 
     private void parseWire(JsonNode node) {
-        var ref = (DataReference) Reference.from(node.get("id").textValue());
+        var ref = (WireReference) Reference.from(node.get("id").textValue());
         if (globalIn.contains(ref.id())) {
             notepad.print("input ");
         } else if (globalOut.contains(ref.id())) {
@@ -155,7 +155,7 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
     }
 
     private void parseClock(JsonNode node) {
-        var ref = (DataReference) Reference.from(node.get("id").textValue());
+        var ref = (WireReference) Reference.from(node.get("id").textValue());
         if (globalIn.contains(ref.id())) {
             notepad.print("input ");
         } else if (globalOut.contains(ref.id())) {

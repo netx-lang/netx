@@ -66,7 +66,10 @@ public final class DataInstantiationNode extends ASTNode implements ComponentEle
     @Override
     public String toString() {
         var sb = new StringBuilder();
-        sb.append("wire ");
+        switch (kind) {
+            case WIRE ->  sb.append("wire ");
+            case BUNDLE -> sb.append("bundle ");
+        }
         sb.append(dataRests.getFirst());
         for (int i = 1; i < dataRests.size(); i++) {
             sb.append(", ").append(dataRests.get(i));

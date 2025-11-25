@@ -5,11 +5,10 @@ import org.jgrapht.graph.SimpleGraph;
 import pascal.netx.compiler.analysis.model.constraint.*;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.scope.PackageScope;
-import pascal.netx.compiler.circuit.variable.Data;
-import pascal.netx.compiler.circuit.variable.Variable;
-import pascal.netx.compiler.circuit.variable.type.BitType;
-import pascal.netx.compiler.circuit.variable.type.PolyType;
-import pascal.netx.compiler.circuit.variable.type.Type;
+import pascal.netx.compiler.circuit.signal.Signal;
+import pascal.netx.compiler.circuit.signal.type.BitType;
+import pascal.netx.compiler.circuit.signal.type.PolyType;
+import pascal.netx.compiler.circuit.signal.type.Type;
 import pascal.netx.compiler.utils.Logger;
 import pascal.netx.compiler.utils.TypeCheckingException;
 import pascal.netx.util.exception.ShallNotReachHereError;
@@ -25,12 +24,12 @@ import java.util.stream.Stream;
  * It collects type constraints from the design and infers types for all data variables.
  * If a variable cannot be inferred, it will throw a TypeCheckingException.
  */
-public final class DataTypeInference extends ModelAnalysis {
-    private final Graph<Variable, BinaryConstraint> graph = new SimpleGraph<>(BinaryConstraint.class);
-    private final List<DataConstraint> constraints = new LinkedList<>();
-    private final Queue<Variable> workList = new LinkedList<>();
+public final class WireTypeInference extends ModelAnalysis {
+    private final Graph<Signal, BinaryConstraint> graph = new SimpleGraph<>(BinaryConstraint.class);
+    private final List<WireConstraint> constraints = new LinkedList<>();
+    private final Queue<Signal> workList = new LinkedList<>();
 
-    public DataTypeInference(PackageScope design) {
+    public WireTypeInference(PackageScope design) {
         super(design);
     }
 
@@ -82,7 +81,7 @@ public final class DataTypeInference extends ModelAnalysis {
         addConstraint(new ConcatConstraint(output, input));
     }
 
-    private void addConstraint(DataConstraint constraint) {
+    private void addConstraint(WireConstraint constraint) {
         switch (constraint) {
             case UnaryConstraint unary -> constraints.add(unary);
             case ConcatConstraint concat -> addConcatConstraint(concat);
@@ -91,7 +90,7 @@ public final class DataTypeInference extends ModelAnalysis {
     }
 
     private void addBinaryConstraint(BinaryConstraint binary) {
-        Variable lhs = binary.getLhs(), rhs = binary.getRhs();
+        Signal lhs = binary.getLhs(), rhs = binary.getRhs();
         if (lhs == rhs) {
             return;
         }
@@ -114,13 +113,13 @@ public final class DataTypeInference extends ModelAnalysis {
 
     private void addConcatConstraint(ConcatConstraint concat) {
         boolean lhsHasType = !(concat.lhs().hasImplicitType());
-        boolean rhsHasType = concat.rhs().stream().noneMatch(Variable::hasImplicitType);
+        boolean rhsHasType = concat.rhs().stream().noneMatch(Signal::hasImplicitType);
         if (lhsHasType && rhsHasType) {
             throwIfConstraintNotHolds(concat);
         } else if (rhsHasType) {
             setTypeFor(concat.lhs(), BitType.of(
                     concat.rhs().stream()
-                            .map(Variable::getType)
+                            .map(Signal::getType)
                             .map(BitType.class::cast)
                             .map(BitType::width)
                             .reduce(0, Integer::sum)));
@@ -134,7 +133,7 @@ public final class DataTypeInference extends ModelAnalysis {
             var data = workList.poll();
             if (graph.containsVertex(data)) {
                 for (var constraint : graph.edgesOf(data)) {
-                    Variable lhs = constraint.getLhs(), rhs = constraint.getRhs();
+                    Signal lhs = constraint.getLhs(), rhs = constraint.getRhs();
                     if (lhs.hasImplicitType()) {
                         setTypeFor(lhs, constraint.expectedLhs());
                     } else if (rhs.hasImplicitType()) {
@@ -145,22 +144,22 @@ public final class DataTypeInference extends ModelAnalysis {
         }
     }
 
-    private void setTypeFor(Variable variable, Type type) {
+    private void setTypeFor(Signal signal, Type type) {
         if (type instanceof PolyType) {
             throw new ShallNotReachHereError();
         }
-        variable.setType(type);
-        workList.add(variable);
+        signal.setType(type);
+        workList.add(signal);
     }
 
     private void checkAllTyped() {
         pack.forEachSubComponent(scope ->
                 scope.getBinding().forEachEntity(entity -> {
-                    if (!(entity instanceof Variable inst)) {
+                    if (!(entity instanceof Signal inst)) {
                         throw new ShallNotReachHereError();
                     }
                     if (inst.hasImplicitType()) {
-                        Logger.error(((Data) inst).getSourceLoc(), "Cannot infer type of data: {}", inst);
+                        Logger.error("Cannot infer type of wire: {}", inst);
                         throw new TypeCheckingException();
                     }
                 }
@@ -168,7 +167,7 @@ public final class DataTypeInference extends ModelAnalysis {
         constraints.forEach(this::throwIfConstraintNotHolds);
     }
 
-    private void throwIfConstraintNotHolds(DataConstraint constraint) {
+    private void throwIfConstraintNotHolds(WireConstraint constraint) {
         if (!constraint.holds()) {
             Logger.error("Type constraint violation: {}", constraint.error());
             throw new TypeCheckingException();

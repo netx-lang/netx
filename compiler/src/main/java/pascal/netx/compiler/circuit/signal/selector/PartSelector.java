@@ -1,7 +1,9 @@
-package pascal.netx.compiler.circuit.variable.selector;
+package pascal.netx.compiler.circuit.signal.selector;
 
-import pascal.netx.compiler.circuit.variable.Int32Value;
-import pascal.netx.compiler.circuit.variable.IntegerValue;
+import pascal.netx.compiler.circuit.EList;
+import pascal.netx.compiler.circuit.Entity;
+import pascal.netx.compiler.circuit.signal.Int32Value;
+import pascal.netx.compiler.circuit.signal.IntegerValue;
 import pascal.netx.compiler.utils.CompileCancellationException;
 
 import javax.annotation.Nonnull;
@@ -36,6 +38,13 @@ public record PartSelector(IntegerValue start, IntegerValue end) implements Sele
             case BitSelector(var value) -> refineBitSelector(value.toInt());
             case PartSelector(var fv, var tv) -> refinePartSelector(fv.toInt(), tv.toInt());
         };
+    }
+
+    @Override
+    public Entity applyOn(EList list) {
+        int start = start().toInt();
+        int end = end().toInt();
+        return EList.of(list.subList(Integer.min(start, end), Integer.max(start, end) + 1));
     }
 
     private BitSelector refineBitSelector(int index) {

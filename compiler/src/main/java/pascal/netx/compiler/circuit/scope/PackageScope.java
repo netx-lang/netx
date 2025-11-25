@@ -2,7 +2,7 @@ package pascal.netx.compiler.circuit.scope;
 
 import pascal.netx.compiler.ast.element.*;
 import pascal.netx.compiler.circuit.expr.ImportRef;
-import pascal.netx.compiler.circuit.variable.BitVectorValue;
+import pascal.netx.compiler.circuit.signal.BitVectorValue;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.exception.ShallNotReachHereError;

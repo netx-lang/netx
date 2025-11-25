@@ -4,9 +4,9 @@ import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.scope.PackageScope;
-import pascal.netx.compiler.circuit.variable.Int32Value;
-import pascal.netx.compiler.circuit.variable.Variable;
-import pascal.netx.compiler.circuit.variable.selector.BitSelector;
+import pascal.netx.compiler.circuit.signal.Int32Value;
+import pascal.netx.compiler.circuit.signal.Signal;
+import pascal.netx.compiler.circuit.signal.selector.BitSelector;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXBuilder;
 import pascal.netx.compiler.utils.CompileCancellationException;
@@ -37,10 +37,10 @@ class ElaboratorUnitTest {
                     wire x of bit(4);
                 }
                 """);
-        var data = (Variable) component.getBinding().resolve(Identifier.of("x"));
+        var data = (Signal) component.getBinding().resolve(Identifier.of("x"));
         var expected = new ArrayList<>(IntStream.range(0, 4)
                 .mapToObj(Int32Value::of).map(BitSelector::new)
-                .map(selector -> Variable.accessOf(data, selector)).toList());
+                .map(selector -> Signal.accessOf(data, selector)).toList());
         assertEquals(expected, component.getInputs());
         Collections.reverse(expected);
         assertEquals(expected, component.getOutputs());

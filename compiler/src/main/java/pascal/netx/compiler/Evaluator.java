@@ -18,14 +18,13 @@ import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
 import pascal.netx.compiler.circuit.scope.binding.MonoBinding;
 import pascal.netx.compiler.circuit.scope.binding.MultiBinding;
 import pascal.netx.compiler.circuit.scope.binding.OrderedAttrBindList;
-import pascal.netx.compiler.circuit.variable.*;
-import pascal.netx.compiler.circuit.variable.selector.BitSelector;
-import pascal.netx.compiler.circuit.variable.selector.PartSelector;
-import pascal.netx.compiler.circuit.variable.selector.Selector;
-import pascal.netx.compiler.circuit.variable.type.BitType;
-import pascal.netx.compiler.circuit.variable.type.PolyType;
-import pascal.netx.compiler.circuit.variable.type.Type;
-import pascal.netx.compiler.io.Configuration;
+import pascal.netx.compiler.circuit.signal.*;
+import pascal.netx.compiler.circuit.signal.selector.BitSelector;
+import pascal.netx.compiler.circuit.signal.selector.PartSelector;
+import pascal.netx.compiler.circuit.signal.selector.Selector;
+import pascal.netx.compiler.circuit.signal.type.BitType;
+import pascal.netx.compiler.circuit.signal.type.PolyType;
+import pascal.netx.compiler.circuit.signal.type.Type;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.lang.BuiltinComponent;
@@ -53,56 +52,27 @@ public final class Evaluator {
 
     private EvaluationMode mode = EvaluationMode.COMMON;
 
-    private static final Map<BinaryExpr.Operator, BiFunction<IntegerValue, IntegerValue, Value>>
-            BINARY_OPERATOR_MAP = Map.ofEntries(
-            Map.entry(BinaryExpr.Operator.ADD, IntegerValue::add),
-            Map.entry(BinaryExpr.Operator.SUB, IntegerValue::sub),
-            Map.entry(BinaryExpr.Operator.MUL, IntegerValue::mul),
-            Map.entry(BinaryExpr.Operator.DIV, IntegerValue::div),
-            Map.entry(BinaryExpr.Operator.MOD, IntegerValue::mod),
-            Map.entry(BinaryExpr.Operator.POW, IntegerValue::pow),
-            Map.entry(BinaryExpr.Operator.AND, IntegerValue::and),
-            Map.entry(BinaryExpr.Operator.OR, IntegerValue::or),
-            Map.entry(BinaryExpr.Operator.XOR, IntegerValue::xor),
-            Map.entry(BinaryExpr.Operator.XNOR, IntegerValue::xnor),
-            Map.entry(BinaryExpr.Operator.ARITH_SHR, IntegerValue::ashr),
-            Map.entry(BinaryExpr.Operator.LOGIC_SHR, IntegerValue::lshr),
-            Map.entry(BinaryExpr.Operator.ARITH_SHL, IntegerValue::shl),
-            Map.entry(BinaryExpr.Operator.LOGIC_SHL, IntegerValue::shl),
-            Map.entry(BinaryExpr.Operator.EQ, IntegerValue::eq),
-            Map.entry(BinaryExpr.Operator.NE, IntegerValue::ne),
-            Map.entry(BinaryExpr.Operator.SLT, IntegerValue::slt),
-            Map.entry(BinaryExpr.Operator.SLE, IntegerValue::sle),
-            Map.entry(BinaryExpr.Operator.SGT, IntegerValue::sgt),
-            Map.entry(BinaryExpr.Operator.SGE, IntegerValue::sge),
-            Map.entry(BinaryExpr.Operator.ULT, IntegerValue::ult),
-            Map.entry(BinaryExpr.Operator.ULE, IntegerValue::ule),
-            Map.entry(BinaryExpr.Operator.UGT, IntegerValue::ugt),
-            Map.entry(BinaryExpr.Operator.UGE, IntegerValue::uge)
-    );
-
     public Evaluator(ComponentScope component) {
         this.scope = component;
         this.pack = component.getPackage();
         this.factory = new BuiltInComponentFactory(compilerOf(scope));
     }
 
-    public EntityList castToList(ExprNode expr) {
-        var entity = evaluate(expr);
-        if (entity instanceof EntityList list) {
-            return list;
-        } else {
-            return EntityList.of(List.of(entity));
-        }
-    }
-
     private static Entity castArgument(Entity entity) {
         return switch (entity) {
             case Expr type -> type;
-            case Data ignored -> castToInstantiateExpr(entity);
-            case Access ignored -> castToInstantiateExpr(entity);
+            case Wire _, Access _ -> castToCircuitExpr(entity);
             default -> entity;
         };
+    }
+
+    public EList castToList(ExprNode expr) {
+        var entity = evaluate(expr);
+        if (entity instanceof EList list) {
+            return list;
+        } else {
+            return EList.of(List.of(entity));
+        }
     }
 
     public int evaluateToInt(ExprNode expr) {
@@ -160,7 +130,8 @@ public final class Evaluator {
     }
 
     public Entity evaluate(ExprNode expr) {
-        return switch (expr) {
+        Logger.enterLoc(expr.getSourceLoc());
+        var result = switch (expr) {
             case LetExpr sub -> evaluateLetExpr(sub);
             case ListExpr sub -> evaluateListExpr(sub);
             case UnaryExpr sub -> evaluateUnaryExpr(sub);
@@ -173,6 +144,8 @@ public final class Evaluator {
             case PortConnectionExpr sub -> evaluatePortExpr(sub);
             case ConditionalExpr sub -> evaluateConditionalExpr(sub);
         };
+        Logger.exitLoc();
+        return result;
     }
 
     private Entity evaluateFieldExpr(FieldExpr expr) {
@@ -190,26 +163,25 @@ public final class Evaluator {
         var base = evaluate(expr.getBase());
         var selector = evaluateSelector(expr.getSelector());
         return switch (base) {
-            case Variable inst -> {
+            case Signal inst -> {
                 try {
-                    yield Variable.accessOf(inst, selector);
+                    yield Signal.accessOf(inst, selector);
                 } catch (CompileCancellationException e) {
                     Logger.error(expr.getSourceLoc(), "invalid selectors {}", expr);
                     throw e;
                 }
             }
-            case VariableRef ref -> {
+            case SignalRef ref -> {
                 try {
-                    yield Variable.accessOf(ref.getInstance(), selector);
+                    yield Signal.accessOf(ref.getInstance(), selector);
                 } catch (CompileCancellationException e) {
                     Logger.error(expr.getSourceLoc(), "invalid selectors {}", expr);
                     throw e;
                 }
             }
-            case EntityList list -> list.select(selector);
+            case EList list -> selector.applyOn(list);
             default -> {
-                Logger.error(expr.getBase().getSourceLoc(), "Expected variable or list but got {}",
-                        base);
+                Logger.error(expr.getBase().getSourceLoc(), "Expected variable or list but got {}", base);
                 throw new CompileCancellationException();
             }
         };
@@ -233,15 +205,15 @@ public final class Evaluator {
         };
     }
 
-    private EntityList evaluateCommonList(CommonList list) {
+    private EList evaluateCommonList(CommonList list) {
         var elements = list.getElements().stream().map(this::evaluate).toList();
         if (elements.isEmpty()) {
-            return EntityList.ofEmpty();
+            return EList.ofEmpty();
         }
-        return EntityList.of(elements);
+        return EList.of(elements);
     }
 
-    private EntityList evaluateRangeList(RangeList list) {
+    private EList evaluateRangeList(RangeList list) {
         var from = evaluateToInt(list.getFrom());
         var to = evaluateToInt(list.getTo());
         var result = new ArrayList<>(
@@ -252,11 +224,11 @@ public final class Evaluator {
         if (from > to) {
             Collections.reverse(result);
         }
-        return EntityList.of(result);
+        return EList.of(result);
     }
 
-    private EntityList evaluateListComprehension(ListComprehension list) {
-        return EntityList.of(doListComprehension(list.getHead(), new LinkedList<>(list.getQualifiers())));
+    private EList evaluateListComprehension(ListComprehension list) {
+        return EList.of(doListComprehension(list.getHead(), new LinkedList<>(list.getQualifiers())));
     }
 
     private List<Entity> doListComprehension(ExprNode head, LinkedList<Qualifier> qualifiers) {
@@ -269,7 +241,7 @@ public final class Evaluator {
                     result = new LinkedList<>();
                     var id = generator.getHead();
                     var list = castToList(generator.getFrom());
-                    for (var entity : list.entities()) {
+                    for (var entity : list) {
                         scope.overrideBindings(MonoBinding.of(id, entity));
                         result.addAll(doListComprehension(head, new LinkedList<>(qualifiers)));
                         scope.restoreBindings();
@@ -318,7 +290,7 @@ public final class Evaluator {
     }
 
     private Entity evaluateStringExpr(StringExpr expr) {
-        return StringLiteral.of(expr.getSourceLoc(), expr.getValue());
+        return StringLiteral.of(expr.getValue());
     }
 
     private Entity evaluateUnaryExpr(UnaryExpr expr) {
@@ -339,7 +311,7 @@ public final class Evaluator {
     private Entity evaluateDecoratedExpr(DecoratedExpr.Decorator decorator, ExprNode base) {
         var operand = evaluate(base);
         return switch (operand) {
-            case EntityList(var list) -> {
+            case EList list -> {
                 List<Expr> result = new LinkedList<>();
                 for (var element : list) {
                     if (!(element instanceof Expr expr)) {
@@ -351,7 +323,7 @@ public final class Evaluator {
                 yield ParallelExpr.from(result);
             }
             case Expr expr -> DecoratedExpr.of(decorator, expr);
-            case Variable variable -> DecoratedExpr.of(decorator, VariableRef.of(variable));
+            case Signal signal -> DecoratedExpr.of(decorator, SignalRef.of(signal));
             default -> {
                 Logger.error(base.getSourceLoc(), "Expected instantiate expr(s) but got {}", operand);
                 throw new CompileCancellationException();
@@ -359,8 +331,8 @@ public final class Evaluator {
         };
     }
 
-    public Mutable.Factory<?> evaluateToMutableFactory(ExprNode expr) {
-        Mutable.Factory<?> factory;
+    public Data.Factory<?> evaluateToMutableFactory(ExprNode expr) {
+        Data.Factory<?> factory;
         if (expr == null) {
             factory = new Wire.Factory(PolyType.getInstance(), Utils.compilerOf(pack));
         } else {
@@ -380,7 +352,7 @@ public final class Evaluator {
             case ADD, SUB, MUL, DIV, MOD, POW, AND, OR, XOR, XNOR,
                  ULT, ULE, UGT, UGE, SLT, SLE, SGT, SGE,
                  ARITH_SHR, ARITH_SHL, LOGIC_SHR, LOGIC_SHL ->
-                    evaluateBinaryExpr(expr, BINARY_OPERATOR_MAP.get(expr.getOp()));
+                    evaluateBinaryExpr(expr, IntegerValue.dispatchBinaryOp(expr.getOp()));
             case LOGIC_OR -> evaluateBinaryExpr(expr, BooleanValue::or);
             case LOGIC_AND -> evaluateBinaryExpr(expr, BooleanValue::and);
         };
@@ -398,26 +370,24 @@ public final class Evaluator {
     public void evaluate(ExprNode expr, boolean needDeclareInPlace) {
         Expr ee;
         if (needDeclareInPlace) {
-            ee = castToInstantiateExpr(evaluateAndDeclInPlace(expr));
+            ee = castToCircuitExpr(evaluateAndDeclInPlace(expr));
         } else {
-            ee = castToInstantiateExpr(evaluate(expr));
+            ee = castToCircuitExpr(evaluate(expr));
         }
         new Connector().instantiate(ee);
     }
 
-    private EntityList evaluateListConcat(BinaryExpr expr) {
+    private EList evaluateListConcat(BinaryExpr expr) {
         List<Entity> result = new LinkedList<>();
-        var lhs = castToList(expr.getLhs());
-        var rhs = castToList(expr.getRhs());
-        result.addAll(lhs.entities());
-        result.addAll(rhs.entities());
-        return EntityList.of(result);
+        result.addAll(castToList(expr.getLhs()));
+        result.addAll(castToList(expr.getRhs()));
+        return EList.of(result);
     }
 
     private Entity evaluatePortExpr(PortConnectionExpr expr) {
         var ports = new PortExpr();
         for (var assign : expr.getPorts()) {
-            var rhs = castToInstantiateExpr(evaluate(assign.rhs()));
+            var rhs = castToCircuitExpr(evaluate(assign.rhs()));
             if (assign.isDefault()) {
                 ports.setDefaultExpr(rhs);
             } else {
@@ -428,8 +398,8 @@ public final class Evaluator {
     }
 
     private Entity evaluateSequentialExpr(BinaryExpr expr) {
-        var rhs = castToInstantiateExpr(evaluate(expr.getRhs()));
-        var lhs = castToInstantiateExpr(evaluate(expr.getLhs()));
+        var rhs = castToCircuitExpr(evaluate(expr.getRhs()));
+        var lhs = castToCircuitExpr(evaluate(expr.getLhs()));
         return SequentialExpr.of(lhs, rhs);
     }
 
@@ -456,7 +426,7 @@ public final class Evaluator {
         }
     }
 
-    public Entity evaluateMacroExpr(SourceLoc sourceLoc, Macro marco, AttrBindList parameters) {
+    public Entity evaluateMacroExpr(Macro marco, AttrBindList parameters) {
         var override = switch (parameters) {
             case MultiBinding binding -> binding.copyOf();
             case OrderedAttrBindList(var args) -> {
@@ -535,7 +505,7 @@ public final class Evaluator {
         Entity prototype = resolveIdentifier(expr.getHead());
         AttrBindList arguments = evaluateArguments(expr);
         return switch (prototype) {
-            case Macro macro -> evaluateMacroExpr(expr.getSourceLoc(), macro, arguments);
+            case Macro macro -> evaluateMacroExpr(macro, arguments);
             case SystemMeta systemMeta -> evaluateSystemMetaExpr(expr.getSourceLoc(), systemMeta, arguments);
             case PrimaryExpr atom -> {
                 atom.setArgList(arguments);
@@ -585,7 +555,7 @@ public final class Evaluator {
         } else {
             Entity entity = resolveIdentifier(id);
             if (entity instanceof Macro macro) {
-                return evaluateMacroExpr(expr.getSourceLoc(), macro, AttrBindList.ofEmpty());
+                return evaluateMacroExpr(macro, AttrBindList.ofEmpty());
             } else if (entity instanceof SystemMeta meta) {
                 return evaluateSystemMetaExpr(expr.getSourceLoc(), meta, AttrBindList.ofEmpty());
             }
@@ -593,10 +563,10 @@ public final class Evaluator {
         }
     }
 
-    private Mutable.Factory<?> evaluateVariableFactory(CallSymbolExpr expr) {
+    private Data.Factory<?> evaluateVariableFactory(CallSymbolExpr expr) {
         var sourceLoc = expr.getSourceLoc();
         return switch (expr.getHead().name()) {
-            case "bit" -> evaluateWireFactory(sourceLoc, expr.getArguments());
+            case "bit" -> evaluateWireFactory(expr.getArguments());
             case "clock" -> evaluateClockFactory(sourceLoc, expr.getArguments());
             default -> {
                 if (pack.defs().hasInterface(expr.getHead())) {
@@ -618,7 +588,7 @@ public final class Evaluator {
         return new InterfaceFactoryCreator(component).create(node);
     }
 
-    private Wire.Factory evaluateWireFactory(SourceLoc sourceLoc, List<ExprNode> arguments) {
+    private Wire.Factory evaluateWireFactory(List<ExprNode> arguments) {
         Utils.requireEqSize(1, arguments, "Wire factory requires one argument");
         mode = EvaluationMode.COMMON;
         var bitType = BitType.of(evaluateToInt(arguments.getFirst()));
@@ -649,24 +619,23 @@ public final class Evaluator {
         }
 
         public Bundle.Factory create(InterfaceNode node) {
-            var config = Configuration.builder().build();
             var elaborator = new Elaborator.ComponentElaborator(scope);
             node.getElements().forEach(elaborator::buildElement);
             var fields = elaborator.extractIOList(node.getSig());
-            LinkedHashMap<Identifier, Mutable.Factory<?>> factories = new LinkedHashMap<>();
+            LinkedHashMap<Identifier, Data.Factory<?>> factories = new LinkedHashMap<>();
             for (var inst : fields) {
-                if (!(inst instanceof Mutable mutable)) {
+                if (!(inst instanceof Data data)) {
                     Logger.error(node.getSourceLoc(), "Expected mutable instance but got {}", inst);
                     throw new CompileCancellationException();
                 }
-                var factory = getFactoryFrom(node.getSourceLoc(), mutable);
-                factories.put(mutable.getIdentifier(), factory);
+                var factory = getFactoryFrom(node.getSourceLoc(), data);
+                factories.put(data.getIdentifier(), factory);
             }
             return new Bundle.Factory(scope.getIdentifier(), compiler, factories);
         }
 
-        private Mutable.Factory<?> getFactoryFrom(SourceLoc loc, Mutable mutable) {
-            return switch (mutable) {
+        private Data.Factory<?> getFactoryFrom(SourceLoc loc, Data data) {
+            return switch (data) {
                 case Clock _ -> new Clock.Factory(compiler);
                 case Wire wire -> {
                     if (wire.getType() instanceof PolyType) {
@@ -676,7 +645,7 @@ public final class Evaluator {
                     yield new Wire.Factory(wire.getType(), compiler);
                 }
                 case Bundle bundle -> {
-                    LinkedHashMap<Identifier, Mutable.Factory<?>> factories = new LinkedHashMap<>();
+                    LinkedHashMap<Identifier, Data.Factory<?>> factories = new LinkedHashMap<>();
                     for (var field : bundle.getFields().entrySet()) {
                         factories.put(field.getKey(), getFactoryFrom(loc, field.getValue()));
                     }
@@ -687,7 +656,7 @@ public final class Evaluator {
                     yield new Array.Factory(compiler, array.getElements().size(), elementFactory);
                 }
                 case Access _ -> {
-                    Logger.error(loc, "Interface shall not contain data access: {}", mutable);
+                    Logger.error(loc, "Interface shall not contain data access: {}", data);
                     throw new CompileCancellationException();
                 }
             };
@@ -699,10 +668,6 @@ public final class Evaluator {
 
         public BuiltInComponentFactory(NXCompiler compiler) {
             this.compiler = compiler;
-        }
-
-        public static BuiltInComponentFactory create(NXCompiler compiler) {
-            return new BuiltInComponentFactory(compiler);
         }
 
         private static void moveAttribute(Attributes attr, BuiltinRef ref, String name, int index,
@@ -803,7 +768,7 @@ public final class Evaluator {
             var entity = newWire(result, "entity", BitType.of(split));
             result.addInput(entity);
             for (int i = split - 1; i >= 0; i--) {
-                result.addOutput(Variable.accessOf(entity, Selector.ofBit(i)));
+                result.addOutput(Signal.accessOf(entity, Selector.ofBit(i)));
             }
             return result;
         }
@@ -936,7 +901,7 @@ public final class Evaluator {
                 case ComponentRef ref -> ComponentPort.of(instantiateComponentRef(ref));
                 case BuiltinRef ref -> ComponentPort.of(instantiateBuiltinRef(ref));
                 case ImportRef ref -> ComponentPort.of(instantiateImportRef(ref));
-                case VariableRef ref -> instantiateInstanceRef(ref);
+                case SignalRef ref -> instantiateInstanceRef(ref);
             };
         }
 
@@ -975,10 +940,10 @@ public final class Evaluator {
             var loc = connection.getLoc();
             var instPort = ComponentPort.of(inst);
 
-            Function<ComponentPort, List<Variable>> getter =
+            Function<ComponentPort, List<Signal>> getter =
                     (ComponentPort port) -> (isInput ? port.output : port.input);
 
-            Map<Mutable, ComponentPort> assigns = new HashMap<>();
+            Map<Data, ComponentPort> assigns = new HashMap<>();
             for (var entry : connection.getPorts()) {
                 var conn = doInstantiate(entry.expr());
                 if (!(getter.apply(conn).size() == 1)) {
@@ -999,16 +964,16 @@ public final class Evaluator {
             }
 
             for (var variable : port) {
-                if (!(variable instanceof Mutable mutable)) {
+                if (!(variable instanceof Data data)) {
                     Logger.error("Expected mutable variable but got {}", variable);
                     throw new CompileCancellationException();
                 }
 
-                var expr = assigns.getOrDefault(mutable, defaultPort);
+                var expr = assigns.getOrDefault(data, defaultPort);
                 if (isInput) {
-                    scope.assigns().add(mutable, getter.apply(expr).getFirst());
+                    scope.assigns().add(data, getter.apply(expr).getFirst());
                 } else {
-                    scope.assigns().add(getter.apply(expr).getFirst(), mutable);
+                    scope.assigns().add(getter.apply(expr).getFirst(), data);
                 }
             }
 
@@ -1020,7 +985,7 @@ public final class Evaluator {
         }
 
         private ComponentPort instantiateParallelExpr(ParallelExpr parallelExpr) {
-            List<Variable> output = new LinkedList<>(), input = new LinkedList<>();
+            List<Signal> output = new LinkedList<>(), input = new LinkedList<>();
             for (var sub : parallelExpr.exprs()) {
                 var port = doInstantiate(sub);
                 output.addAll(port.output());
@@ -1029,13 +994,13 @@ public final class Evaluator {
             return new ComponentPort(input, output);
         }
 
-        private ComponentPort instantiateInstanceRef(VariableRef ref) {
+        private ComponentPort instantiateInstanceRef(SignalRef ref) {
             var inst = List.of(ref.getInstance());
             if (ref.getArgList() != null) {
                 Logger.error("Unexpected attributes in instance reference {}", ref.getInstance());
                 throw new CompileCancellationException();
             }
-            if (ref.getInstance() instanceof Mutable) {
+            if (ref.getInstance() instanceof Data) {
                 return new ComponentPort(inst, inst);
             } else {
                 return new ComponentPort(List.of(), inst);
@@ -1102,7 +1067,7 @@ public final class Evaluator {
             scope.setSignature(signature);
         }
 
-        private record ComponentPort(List<Variable> input, List<Variable> output) {
+        private record ComponentPort(List<Signal> input, List<Signal> output) {
             public static ComponentPort of(ComponentScope scope) {
                 return new ComponentPort(scope.getInputs(), scope.getOutputs());
             }

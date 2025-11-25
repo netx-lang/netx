@@ -3,7 +3,7 @@ package pascal.netx.compiler;
 import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.*;
 import pascal.netx.compiler.ast.expr.ExprNode;
-import pascal.netx.compiler.circuit.EntityList;
+import pascal.netx.compiler.circuit.EList;
 import pascal.netx.compiler.circuit.Signature;
 import pascal.netx.compiler.circuit.expr.ComponentRef;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
@@ -12,11 +12,11 @@ import pascal.netx.compiler.circuit.scope.RepoScope;
 import pascal.netx.compiler.circuit.scope.binding.MonoBinding;
 import pascal.netx.compiler.circuit.scope.binding.MultiBinding;
 import pascal.netx.compiler.circuit.scope.binding.OrderedAttrBindList;
-import pascal.netx.compiler.circuit.variable.Array;
-import pascal.netx.compiler.circuit.variable.Variable;
-import pascal.netx.compiler.circuit.variable.type.ArrayType;
-import pascal.netx.compiler.circuit.variable.type.InterfaceType;
-import pascal.netx.compiler.circuit.variable.type.Type;
+import pascal.netx.compiler.circuit.signal.Array;
+import pascal.netx.compiler.circuit.signal.Signal;
+import pascal.netx.compiler.circuit.signal.type.ArrayType;
+import pascal.netx.compiler.circuit.signal.type.InterfaceType;
+import pascal.netx.compiler.circuit.signal.type.Type;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.Logger;
@@ -131,16 +131,16 @@ public final class Elaborator {
             scope.addOutput(product);
         }
 
-        List<Variable> extractIOList(ExprNode node) {
+        List<Signal> extractIOList(ExprNode node) {
             var entity = evaluator.evaluate(node);
-            if (entity instanceof EntityList(var list)) {
-                if (list.stream().anyMatch(Predicate.not(Variable.class::isInstance))) {
+            if (entity instanceof EList list) {
+                if (list.stream().anyMatch(Predicate.not(Signal.class::isInstance))) {
                     Logger.error("Expected wires and bundles in IO list but got {}", list);
                     throw new CompileCancellationException();
                 }
-                return list.stream().map(Variable.class::cast).toList();
-            } else if (entity instanceof Variable variable) {
-                return List.of(variable);
+                return list.stream().map(Signal.class::cast).toList();
+            } else if (entity instanceof Signal signal) {
+                return List.of(signal);
             }
             Logger.error("Expected wires and bundles in IO list but got {}", entity);
             throw new CompileCancellationException();
@@ -165,7 +165,7 @@ public final class Elaborator {
 
         private void buildLoop(LoopNode loop) {
             var generator = loop.getGenerator();
-            for (var entity : evaluator.castToList(generator.getFrom()).entities()) {
+            for (var entity : evaluator.castToList(generator.getFrom())) {
                 int count = scope.getBindingCount();
                 scope.overrideBindings(MonoBinding.of(generator.getHead(), entity));
                 buildElement(loop.getElement());

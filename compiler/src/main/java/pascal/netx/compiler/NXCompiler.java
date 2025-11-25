@@ -29,7 +29,7 @@ public final class NXCompiler {
      * During compilation, once a datum is instantiated,
      * it will be assigned with a unique index, which distinguishes it from other data in the repo.
      */
-    private Supplier<Integer> dataIndexer;
+    private Supplier<Integer> indexer;
 
     public NXCompiler(Configuration config, PackageManager manager) {
         this.config = config;
@@ -38,7 +38,7 @@ public final class NXCompiler {
         repo.setManager(manager);
         repo.setCompiler(this);
         manager.setRepo(repo);
-        this.dataIndexer = newIndexer();
+        this.indexer = newIndexer();
     }
 
     public static NXCompiler forSinglePackage(PackageNode node, Configuration config) {
@@ -55,9 +55,9 @@ public final class NXCompiler {
         elaborate();
         var manager = new ModelAnalysisManager(repo);
         manager.analyze(MetaElimination.class);
-        manager.analyze(DataTypeInference.class);
+        manager.analyze(WireTypeInference.class);
         manager.analyze(AccessChecker.class);
-        manager.analyze(CompositeDataBlaster.class);
+        manager.analyze(CompositionBlaster.class);
         manager.analyze(IOAnalysis.class);
         manager.analyze(AliasAnalysis.class);
         manager.analyze(DuplicatedElimination.class);
@@ -97,7 +97,7 @@ public final class NXCompiler {
     }
 
     public int nextDataIndex() {
-        return dataIndexer.get();
+        return indexer.get();
     }
 
     /**
@@ -105,7 +105,7 @@ public final class NXCompiler {
      * that is, it would inherit the data indexer from the parent compiler.
      */
     public NXCompiler asSubCompilerOf(NXCompiler parent) {
-        this.dataIndexer = parent.dataIndexer;
+        this.indexer = parent.indexer;
         return this;
     }
 }

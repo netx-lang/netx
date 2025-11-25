@@ -2,46 +2,45 @@ package pascal.netx.compiler.analysis.model;
 
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.scope.PackageScope;
-import pascal.netx.compiler.circuit.variable.Access;
-import pascal.netx.compiler.circuit.variable.Clock;
-import pascal.netx.compiler.circuit.variable.Data;
-import pascal.netx.compiler.circuit.variable.Mutable;
-import pascal.netx.compiler.circuit.variable.selector.BitSelector;
-import pascal.netx.compiler.circuit.variable.selector.PartSelector;
-import pascal.netx.compiler.circuit.variable.selector.Selector;
-import pascal.netx.compiler.circuit.variable.type.BitType;
+import pascal.netx.compiler.circuit.signal.Access;
+import pascal.netx.compiler.circuit.signal.Clock;
+import pascal.netx.compiler.circuit.signal.Data;
+import pascal.netx.compiler.circuit.signal.Wire;
+import pascal.netx.compiler.circuit.signal.selector.BitSelector;
+import pascal.netx.compiler.circuit.signal.selector.PartSelector;
+import pascal.netx.compiler.circuit.signal.selector.Selector;
+import pascal.netx.compiler.circuit.signal.type.BitType;
 import pascal.netx.compiler.utils.Logger;
 import pascal.netx.compiler.utils.TypeCheckingException;
 import pascal.netx.util.exception.ShallNotReachHereError;
-import pascal.netx.util.lang.SourceLoc;
 
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 
 public final class IOAnalysis extends ModelAnalysis {
-    private final Map<Data, DataCoverage> def = new HashMap<>();
-    private final Map<Data, DataCoverage> use = new HashMap<>();
+    private final Map<Wire, WireCoverage> def = new HashMap<>();
+    private final Map<Wire, WireCoverage> use = new HashMap<>();
 
     public IOAnalysis(PackageScope design) {
         super(design);
     }
 
-    private static void errorDefineInput(SourceLoc sourceLoc, Mutable mutable) {
-        Logger.error(sourceLoc, "component defines its input {}", mutable);
+    private static void errorDefineInput(Data data) {
+        Logger.error("component defines its input {}", data);
         throw new TypeCheckingException();
     }
 
-    private static void warnUnusedInput(SourceLoc sourceLoc, Mutable mutable) {
-        Logger.warn(sourceLoc, "component has unused bits of input {}", mutable);
+    private static void warnUnusedInput(Data data) {
+        Logger.warn("component has unused bits of input {}", data);
     }
 
-    private static void warnMultipleDriver(SourceLoc sourceLoc, Mutable mutable) {
-        Logger.warn(sourceLoc, "component has multiple driver to its output {}", mutable);
+    private static void warnMultipleDriver(Data data) {
+        Logger.warn("component has multiple driver to its output {}", data);
     }
 
-    private static void errorUndefOut(SourceLoc sourceLoc, Mutable mutable) {
-        Logger.error(sourceLoc, "component has undefined bits of output {}", mutable);
+    private static void errorUndefOut(Data data) {
+        Logger.error("component has undefined bits of output {}", data);
         throw new TypeCheckingException();
     }
 
@@ -52,23 +51,23 @@ public final class IOAnalysis extends ModelAnalysis {
         return !scope.isInterface();
     }
 
-    private static void initializeData(Map<Data, DataCoverage> coverage, Data data) {
-        if (coverage.containsKey(data)) {
-            coverage.get(data).update();
+    private static void initializeData(Map<Wire, WireCoverage> coverage, Wire wire) {
+        if (coverage.containsKey(wire)) {
+            coverage.get(wire).update();
         } else {
-            var cover = new DataCoverage(data);
+            var cover = new WireCoverage(wire);
             cover.update();
-            coverage.put(data, cover);
+            coverage.put(wire, cover);
         }
     }
 
-    private static void initializeDataAccess(Map<Data, DataCoverage> coverage, Access access) {
+    private static void initializeDataAccess(Map<Wire, WireCoverage> coverage, Access access) {
         var base = access.base();
         var selector = access.selector();
         if (coverage.containsKey(base)) {
             coverage.get(base).update(selector);
         } else {
-            var cover = new DataCoverage(base);
+            var cover = new WireCoverage(base);
             cover.update(selector);
             coverage.put(base, cover);
         }
@@ -92,76 +91,75 @@ public final class IOAnalysis extends ModelAnalysis {
             initialize(inst, use);
         }
 
-        var sourceLoc = component.getSourceLoc();
-        checkInputIntegrity(component, sourceLoc);
-        checkOutputIntegrity(component, sourceLoc);
+        checkInputIntegrity(component);
+        checkOutputIntegrity(component);
     }
 
-    private void checkInputIntegrity(ComponentScope component, SourceLoc sourceLoc) {
+    private void checkInputIntegrity(ComponentScope component) {
         for (var inst : component.getInputs()) {
-            if (inst instanceof Mutable mutable) {
-                switch (mutable) {
-                    case Data data -> checkInputData(sourceLoc, data);
-                    case Access access -> checkInputDataAccess(sourceLoc, access);
+            if (inst instanceof Data data) {
+                switch (data) {
+                    case Wire wire -> checkInputData(wire);
+                    case Access access -> checkInputDataAccess(access);
                     default -> throw new ShallNotReachHereError("Should be eliminated by CompositeDataBlaster");
                 }
             }
         }
     }
 
-    private void checkInputData(SourceLoc sourceLoc, Data data) {
-        if (!(data instanceof Clock)) {
-            if (!(use.containsKey(data) && use.get(data).isAllSet())) {
-                warnUnusedInput(sourceLoc, data);
-            } else if (def.containsKey(data)) {
-                errorDefineInput(sourceLoc, data);
+    private void checkInputData(Wire wire) {
+        if (!(wire instanceof Clock)) {
+            if (!(use.containsKey(wire) && use.get(wire).isAllSet())) {
+                warnUnusedInput(wire);
+            } else if (def.containsKey(wire)) {
+                errorDefineInput(wire);
             }
         }
     }
 
-    private void checkInputDataAccess(SourceLoc sourceLoc, Access access) {
+    private void checkInputDataAccess(Access access) {
         var base = access.base();
         var selector = access.selector();
         if (!(use.containsKey(base) && use.get(base).isSetFor(selector))) {
-            warnUnusedInput(sourceLoc, access);
+            warnUnusedInput(access);
         } else if (def.containsKey(base) && def.get(base).isClearFor(selector)) {
-            errorDefineInput(sourceLoc, access);
+            errorDefineInput(access);
         }
     }
 
-    private void checkOutputIntegrity(ComponentScope component, SourceLoc sourceLoc) {
+    private void checkOutputIntegrity(ComponentScope component) {
         for (var inst : component.getOutputs()) {
-            if (inst instanceof Mutable mutable) {
-                switch (mutable) {
-                    case Data data -> checkOutputData(sourceLoc, data);
-                    case Access access -> checkOutputDataAccess(sourceLoc, access);
+            if (inst instanceof Data data) {
+                switch (data) {
+                    case Wire wire -> checkOutputData(wire);
+                    case Access access -> checkOutputDataAccess(access);
                     default -> throw new ShallNotReachHereError("Should be eliminated by CompositeDataBlaster");
                 }
             }
         }
     }
 
-    private void checkOutputData(SourceLoc sourceLoc, Data data) {
-        if (!(def.containsKey(data) && def.get(data).isAllSet())) {
-            errorUndefOut(sourceLoc, data);
-        } else if (def.get(data).isDoubleSet()) {
-            warnMultipleDriver(sourceLoc, data);
+    private void checkOutputData(Wire wire) {
+        if (!(def.containsKey(wire) && def.get(wire).isAllSet())) {
+            errorUndefOut(wire);
+        } else if (def.get(wire).isDoubleSet()) {
+            warnMultipleDriver(wire);
         }
     }
 
-    private void checkOutputDataAccess(SourceLoc sourceLoc, Access access) {
+    private void checkOutputDataAccess(Access access) {
         var base = access.base();
         var selector = access.selector();
         if (!(def.containsKey(base) && def.get(base).isSetFor(selector))) {
-            errorUndefOut(sourceLoc, access);
+            errorUndefOut(access);
         } else if (def.get(base).isDoubleSet()) {
-            warnMultipleDriver(sourceLoc, access);
+            warnMultipleDriver(access);
         }
     }
 
-    private void initialize(Mutable inst, Map<Data, DataCoverage> coverage) {
+    private void initialize(Data inst, Map<Wire, WireCoverage> coverage) {
         switch (inst) {
-            case Data data -> initializeData(coverage, data);
+            case Wire wire -> initializeData(coverage, wire);
             case Access access -> initializeDataAccess(coverage, access);
             default -> {
                 // do nothing
@@ -169,14 +167,14 @@ public final class IOAnalysis extends ModelAnalysis {
         }
     }
 
-    private static class DataCoverage {
+    private static class WireCoverage {
         private final BitSet bitSet;
         private final int size;
         private boolean doubleSet = false;
         private boolean allSet = false;
 
-        private DataCoverage(Data data) {
-            if (!(data.getType() instanceof BitType(int width))) {
+        private WireCoverage(Wire wire) {
+            if (!(wire.getType() instanceof BitType(int width))) {
                 throw new ShallNotReachHereError();
             }
             this.size = width;

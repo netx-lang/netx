@@ -1,8 +1,8 @@
-package pascal.netx.compiler.circuit.variable;
+package pascal.netx.compiler.circuit.signal;
 
 import pascal.netx.compiler.NXCompiler;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
-import pascal.netx.compiler.circuit.variable.type.ArrayType;
+import pascal.netx.compiler.circuit.signal.type.ArrayType;
 import pascal.netx.util.lang.Identifier;
 
 import java.util.ArrayList;
@@ -11,14 +11,14 @@ import java.util.List;
 import java.util.Objects;
 
 public final class Array extends Composition {
-    private final List<Mutable> elements = new ArrayList<>();
+    private final List<Data> elements = new ArrayList<>();
 
     private Array(Identifier id, ArrayType type, int index) {
         super(type, id, index);
     }
 
     @Override
-    public List<Mutable> getElements() {
+    public List<Data> getElements() {
         return Collections.unmodifiableList(elements);
     }
 
@@ -45,12 +45,12 @@ public final class Array extends Composition {
         return Objects.hash(super.hashCode(), elements);
     }
 
-    public static class Factory extends Mutable.Factory<Array> {
-        private final Mutable.Factory<?> elementFactory;
+    public static class Factory extends Data.Factory<Array> {
+        private final Data.Factory<?> elementFactory;
         private final ArrayType type;
         private final int size;
 
-        public Factory(NXCompiler compiler, int size, Mutable.Factory<?> elementFactory) {
+        public Factory(NXCompiler compiler, int size, Data.Factory<?> elementFactory) {
             super(compiler);
             this.size = size;
             this.elementFactory = elementFactory;

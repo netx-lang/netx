@@ -1,4 +1,4 @@
-package pascal.netx.compiler.circuit.variable.type;
+package pascal.netx.compiler.circuit.signal.type;
 
 public final class PolyType implements Type {
     private static final PolyType INSTANCE = new PolyType();
