@@ -43,7 +43,7 @@
         "type": "component", "id": "REG", "loc": "enum.nx:20:12",
         "input": ["i@7"],
         "output": ["state@3"],
-        "attribute": {"clk": "clk@(enum.nx:16:8)", "rst": "rst@(enum.nx:15:11)"},
+        "attribute": {"clk": "clk@2", "rst": "rst@1"},
         "members": [
           {"type": "wire", "width": 1, "id": "i@7", "loc": "enum.nx:9:40"},
           {

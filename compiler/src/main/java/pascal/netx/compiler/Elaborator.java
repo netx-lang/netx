@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
+import static pascal.netx.compiler.circuit.Entities.requiresEList;
 import static pascal.netx.compiler.circuit.Utils.compilerOf;
 import static pascal.netx.compiler.circuit.Utils.requireEqSize;
 
@@ -165,7 +166,7 @@ public final class Elaborator {
 
         private void buildLoop(LoopNode loop) {
             var generator = loop.getGenerator();
-            for (var entity : evaluator.castToList(generator.getFrom())) {
+            for (var entity : requiresEList(evaluator.evaluate(generator.getFrom()))) {
                 int count = scope.getBindingCount();
                 scope.overrideBindings(MonoBinding.of(generator.getHead(), entity));
                 buildElement(loop.getElement());

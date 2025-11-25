@@ -32,7 +32,7 @@ public final class Entities {
         }
     }
 
-    public static EList requiresList(Entity entity) {
+    public static EList requiresEList(Entity entity) {
         if (entity instanceof EList list) {
             return list;
         } else {

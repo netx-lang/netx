@@ -54,6 +54,7 @@ public final class NXCompiler {
     public void compile() {
         elaborate();
         var manager = new ModelAnalysisManager(repo);
+        manager.analyze(BindingFlattener.class);
         manager.analyze(MetaElimination.class);
         manager.analyze(WireTypeInference.class);
         manager.analyze(AccessChecker.class);
