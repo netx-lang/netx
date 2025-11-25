@@ -5,8 +5,8 @@ import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.BindingNode;
 import pascal.netx.compiler.ast.expr.CallSymbolExpr;
 import pascal.netx.compiler.ast.expr.IdentifierExpr;
-import pascal.netx.compiler.elaborator.Logger;
-import pascal.netx.compiler.exception.ParseCancellationException;
+import pascal.netx.compiler.utils.Logger;
+import pascal.netx.compiler.utils.ParseCancellationException;
 
 /**
  * Checking whether CallSymbolExpr on the left-hand side of a binding contains no named bindings, i.e.,

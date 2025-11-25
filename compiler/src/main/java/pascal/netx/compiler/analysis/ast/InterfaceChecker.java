@@ -4,8 +4,8 @@ import pascal.netx.compiler.ast.ASTListener;
 import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.ComponentInstantiationNode;
 import pascal.netx.compiler.ast.element.InterfaceNode;
-import pascal.netx.compiler.elaborator.Logger;
-import pascal.netx.compiler.exception.TypeCheckingException;
+import pascal.netx.compiler.utils.Logger;
+import pascal.netx.compiler.utils.TypeCheckingException;
 
 /**
  * Ensure interfaces do not contain component instantiations.

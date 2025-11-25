@@ -2,14 +2,14 @@ package pascal.netx.compiler.elaborator;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
-import pascal.netx.compiler.exception.CompileCancellationException;
+import pascal.netx.compiler.circuit.scope.ComponentScope;
+import pascal.netx.compiler.circuit.scope.PackageScope;
+import pascal.netx.compiler.circuit.variable.Int32Value;
+import pascal.netx.compiler.circuit.variable.Variable;
+import pascal.netx.compiler.circuit.variable.selector.BitSelector;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXBuilder;
-import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.PackageScope;
-import pascal.netx.compiler.model.variable.Int32Value;
-import pascal.netx.compiler.model.variable.Variable;
-import pascal.netx.compiler.model.variable.selector.BitSelector;
+import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.util.lang.Identifier;
 
 import java.util.ArrayList;

@@ -1,7 +1,7 @@
 package pascal.netx.compiler.analysis.model.constraint;
 
-import pascal.netx.compiler.model.variable.Variable;
-import pascal.netx.compiler.model.variable.type.Type;
+import pascal.netx.compiler.circuit.variable.Variable;
+import pascal.netx.compiler.circuit.variable.type.Type;
 
 public final class EqualTypeConstraint extends BinaryConstraint {
     public EqualTypeConstraint(Variable lhs, Variable rhs) {

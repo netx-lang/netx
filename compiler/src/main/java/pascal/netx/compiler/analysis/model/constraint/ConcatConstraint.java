@@ -1,7 +1,7 @@
 package pascal.netx.compiler.analysis.model.constraint;
 
-import pascal.netx.compiler.model.variable.Variable;
-import pascal.netx.compiler.model.variable.type.BitType;
+import pascal.netx.compiler.circuit.variable.Variable;
+import pascal.netx.compiler.circuit.variable.type.BitType;
 
 import java.util.List;
 

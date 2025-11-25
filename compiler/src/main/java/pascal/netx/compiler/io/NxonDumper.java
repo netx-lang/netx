@@ -3,12 +3,12 @@ package pascal.netx.compiler.io;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import pascal.netx.compiler.model.scope.Attributes;
-import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.PackageScope;
-import pascal.netx.compiler.model.variable.*;
-import pascal.netx.compiler.model.variable.type.BitType;
-import pascal.netx.compiler.model.variable.type.PolyType;
+import pascal.netx.compiler.circuit.scope.Attributes;
+import pascal.netx.compiler.circuit.scope.ComponentScope;
+import pascal.netx.compiler.circuit.scope.PackageScope;
+import pascal.netx.compiler.circuit.variable.*;
+import pascal.netx.compiler.circuit.variable.type.BitType;
+import pascal.netx.compiler.circuit.variable.type.PolyType;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -20,7 +20,7 @@ import java.util.Map;
 
 import static pascal.netx.util.lang.BuiltinComponent.ATTRIBUTED;
 
-final class NxonDumper {
+public final class NxonDumper {
     private final PackageScope design;
     private final ObjectMapper objectMapper = new ObjectMapper();
 

@@ -1,11 +1,11 @@
 package pascal.netx.compiler.analysis.model;
 
-import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.PackageScope;
-import pascal.netx.compiler.model.variable.Array;
-import pascal.netx.compiler.model.variable.Bundle;
-import pascal.netx.compiler.model.variable.Composition;
-import pascal.netx.compiler.model.variable.Variable;
+import pascal.netx.compiler.circuit.scope.ComponentScope;
+import pascal.netx.compiler.circuit.scope.PackageScope;
+import pascal.netx.compiler.circuit.variable.Array;
+import pascal.netx.compiler.circuit.variable.Bundle;
+import pascal.netx.compiler.circuit.variable.Composition;
+import pascal.netx.compiler.circuit.variable.Variable;
 
 import java.util.ArrayList;
 import java.util.List;

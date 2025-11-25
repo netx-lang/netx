@@ -1,12 +1,13 @@
 package pascal.netx.compiler.io;
 
+import pascal.netx.compiler.NXCompiler;
 import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.ComponentNode;
 import pascal.netx.compiler.ast.element.ImportNode;
-import pascal.netx.compiler.elaborator.Logger;
-import pascal.netx.compiler.exception.CompileCancellationException;
-import pascal.netx.compiler.model.expr.ImportRef;
-import pascal.netx.compiler.model.scope.RepoScope;
+import pascal.netx.compiler.circuit.expr.ImportRef;
+import pascal.netx.compiler.circuit.scope.RepoScope;
+import pascal.netx.compiler.utils.CompileCancellationException;
+import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;

@@ -1,15 +1,15 @@
 package pascal.netx.compiler.analysis.model;
 
-import pascal.netx.compiler.elaborator.Logger;
-import pascal.netx.compiler.exception.TypeCheckingException;
-import pascal.netx.compiler.model.Entity;
-import pascal.netx.compiler.model.scope.ComponentScope;
-import pascal.netx.compiler.model.scope.PackageScope;
-import pascal.netx.compiler.model.variable.Access;
-import pascal.netx.compiler.model.variable.IntegerValue;
-import pascal.netx.compiler.model.variable.selector.BitSelector;
-import pascal.netx.compiler.model.variable.selector.PartSelector;
-import pascal.netx.compiler.model.variable.type.BitType;
+import pascal.netx.compiler.circuit.Entity;
+import pascal.netx.compiler.circuit.scope.ComponentScope;
+import pascal.netx.compiler.circuit.scope.PackageScope;
+import pascal.netx.compiler.circuit.variable.Access;
+import pascal.netx.compiler.circuit.variable.IntegerValue;
+import pascal.netx.compiler.circuit.variable.selector.BitSelector;
+import pascal.netx.compiler.circuit.variable.selector.PartSelector;
+import pascal.netx.compiler.circuit.variable.type.BitType;
+import pascal.netx.compiler.utils.Logger;
+import pascal.netx.compiler.utils.TypeCheckingException;
 
 /**
  * Checks the validity of access operations in the design.
