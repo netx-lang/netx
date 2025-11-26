@@ -4,7 +4,6 @@ import pascal.netx.compiler.circuit.Entity;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.scope.PackageScope;
 import pascal.netx.compiler.circuit.signal.Access;
-import pascal.netx.compiler.circuit.signal.IntegerValue;
 import pascal.netx.compiler.circuit.signal.selector.BitSelector;
 import pascal.netx.compiler.circuit.signal.selector.PartSelector;
 import pascal.netx.compiler.circuit.signal.type.BitType;
@@ -37,9 +36,8 @@ public final class AccessChecker extends ModelAnalysis {
         }
     }
 
-    private static boolean check(IntegerValue index, int width) {
-        var value = index.toInt();
-        return 0 <= value && value < width;
+    private static boolean check(int index, int width) {
+        return 0 <= index && index < width;
     }
 
     @Override

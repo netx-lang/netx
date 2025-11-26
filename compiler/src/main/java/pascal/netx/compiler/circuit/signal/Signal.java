@@ -22,7 +22,7 @@ public sealed interface Signal extends Entity permits Data, Value {
             case Array array -> {
                 switch (selector) {
                     case BitSelector(var index) -> {
-                        return array.getElements().get(index.toInt());
+                        return array.getElements().get(index);
                     }
                     case PartSelector _ -> {
                         Logger.error("Array {} cannot be accessed with a part selector {}", array, selector);
@@ -50,16 +50,7 @@ public sealed interface Signal extends Entity permits Data, Value {
     }
 
     private static BitVectorValue selectConstant(Value value, Selector selector) {
-        int msb, lsb;
-        switch (selector) {
-            case BitSelector(var index) -> msb = lsb = index.toInt();
-            case PartSelector(var f, var t) -> {
-                // FIXME: big endian?
-                msb = Math.max(f.toInt(), t.toInt());
-                lsb = Math.min(f.toInt(), t.toInt());
-            }
-        }
-        return BitVectorValue.of(value.toBitVector().select(msb, lsb));
+        return BitVectorValue.of(value.toBitVector().select(selector.msb(), selector.lsb()));
     }
 
     Type getType();

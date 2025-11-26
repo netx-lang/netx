@@ -2,17 +2,16 @@ package pascal.netx.compiler.circuit.signal.selector;
 
 import pascal.netx.compiler.circuit.EList;
 import pascal.netx.compiler.circuit.Entity;
-import pascal.netx.compiler.circuit.signal.IntegerValue;
 import pascal.netx.compiler.utils.CompileCancellationException;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-public record BitSelector(IntegerValue index) implements Selector {
+public record BitSelector(int index) implements Selector {
     @Override
     @Nonnull
     public String toString() {
-        return String.format("[%d]", index.toInt());
+        return String.format("[%d]", index);
     }
 
     @Override
@@ -21,12 +20,12 @@ public record BitSelector(IntegerValue index) implements Selector {
     }
 
     @Override
-    public IntegerValue msb() {
+    public int msb() {
         return index;
     }
 
     @Override
-    public IntegerValue lsb() {
+    public int lsb() {
         return index;
     }
 
@@ -34,12 +33,12 @@ public record BitSelector(IntegerValue index) implements Selector {
     public Selector refine(Selector selector) {
         switch (selector) {
             case BitSelector(var value) -> {
-                if (value.toInt() != 0) {
+                if (value != 0) {
                     throw new CompileCancellationException();
                 }
             }
             case PartSelector(var f, var t) -> {
-                if (f.toInt() != 0 || t.toInt() != 0) {
+                if (f != 0 || t != 0) {
                     throw new CompileCancellationException();
                 }
             }
@@ -49,7 +48,7 @@ public record BitSelector(IntegerValue index) implements Selector {
 
     @Override
     public Entity applyOn(EList list) {
-        return list.get(index().toInt());
+        return list.get(index());
     }
 
     @Override
