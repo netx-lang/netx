@@ -173,10 +173,10 @@ public final class Evaluator {
     private Selector evaluateSelector(pascal.netx.compiler.ast.expr.selector.Selector selector) {
         return switch (selector) {
             case pascal.netx.compiler.ast.expr.selector.BitSelector bitSelector ->
-                    new BitSelector(evaluateToIntegerValue(bitSelector.getIndex()));
+                    new BitSelector(evaluateToInt(bitSelector.getIndex()));
             case pascal.netx.compiler.ast.expr.selector.PartSelector partSelector -> new PartSelector(
-                            evaluateToIntegerValue(partSelector.getStart()),
-                            evaluateToIntegerValue(partSelector.getEnd()));
+                            evaluateToInt(partSelector.getStart()),
+                            evaluateToInt(partSelector.getEnd()));
         };
     }
 

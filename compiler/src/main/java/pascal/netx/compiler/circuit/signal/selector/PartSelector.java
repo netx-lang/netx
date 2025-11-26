@@ -2,62 +2,56 @@ package pascal.netx.compiler.circuit.signal.selector;
 
 import pascal.netx.compiler.circuit.EList;
 import pascal.netx.compiler.circuit.Entity;
-import pascal.netx.compiler.circuit.signal.Int32Value;
-import pascal.netx.compiler.circuit.signal.IntegerValue;
 import pascal.netx.compiler.utils.CompileCancellationException;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-public record PartSelector(IntegerValue start, IntegerValue end) implements Selector {
+public record PartSelector(int start, int end) implements Selector {
 
     @Override
     @Nonnull
     public String toString() {
-        return String.format("[%d:%d]", start.toInt(), end.toInt());
+        return String.format("[%d:%d]", start, end);
     }
 
     @Override
     public int getWidth() {
-        return Math.abs(end.toInt() - start.toInt()) + 1;
+        return Math.abs(end - start) + 1;
     }
 
     @Override
-    public IntegerValue msb() {
-        return start;
+    public int msb() {
+        return Math.max(start, end);
     }
 
     @Override
-    public IntegerValue lsb() {
-        return end;
+    public int lsb() {
+        return Math.min(start, end);
     }
 
     @Override
     public Selector refine(Selector selector) {
         return switch (selector) {
-            case BitSelector(var value) -> refineBitSelector(value.toInt());
-            case PartSelector(var fv, var tv) -> refinePartSelector(fv.toInt(), tv.toInt());
+            case BitSelector(var value) -> refineBitSelector(value);
+            case PartSelector(var fv, var tv) -> refinePartSelector(fv, tv);
         };
     }
 
     @Override
     public Entity applyOn(EList list) {
-        int start = start().toInt();
-        int end = end().toInt();
         return EList.of(list.subList(Integer.min(start, end), Integer.max(start, end) + 1));
     }
 
     private BitSelector refineBitSelector(int index) {
-        int msb = Math.max(start.toInt(), end.toInt());
-        int lsb = Math.min(start.toInt(), end.toInt());
-        if (lsb + index > msb) {
+        if (lsb() + index > msb()) {
             throw new CompileCancellationException();
         }
-        return new BitSelector(Int32Value.of(index + lsb));
+        return new BitSelector(index + lsb());
     }
 
     private PartSelector refinePartSelector(int f, int t) {
-        int s = start.toInt(), e = end.toInt();
+        int s = start, e = end;
         if ((s > e) != (f > t)) {
             throw new CompileCancellationException();
         }
@@ -66,8 +60,7 @@ public record PartSelector(IntegerValue start, IntegerValue end) implements Sele
         if ((s > e && resF > s) || (s <= e && resT > e)) {
             throw new CompileCancellationException();
         }
-        IntegerValue start1 = Int32Value.of(resF);
-        return new PartSelector(start1, Int32Value.of(resT));
+        return new PartSelector(resF, resT);
     }
 
     @Override

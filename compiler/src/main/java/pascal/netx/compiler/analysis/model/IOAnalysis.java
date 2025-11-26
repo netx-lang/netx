@@ -191,11 +191,9 @@ public final class IOAnalysis extends ModelAnalysis {
 
         public boolean isSetFor(Selector selector) {
             return switch (selector) {
-                case BitSelector(var index) -> bitSet.get(index.toInt());
-                case PartSelector(var from, var to) -> {
-                    int msb = Math.max(from.toInt(), to.toInt());
-                    int lsb = Math.min(from.toInt(), to.toInt());
-                    for (int i = lsb; i <= msb; ++i) {
+                case BitSelector(var index) -> bitSet.get(index);
+                case PartSelector part -> {
+                    for (int i = part.lsb(); i <= part.msb(); ++i) {
                         if (!bitSet.get(i)) {
                             yield false;
                         }
@@ -207,11 +205,9 @@ public final class IOAnalysis extends ModelAnalysis {
 
         public boolean isClearFor(Selector selector) {
             return switch (selector) {
-                case BitSelector(var index) -> !bitSet.get(index.toInt());
-                case PartSelector(var from, var to) -> {
-                    int msb = Math.max(from.toInt(), to.toInt());
-                    int lsb = Math.min(from.toInt(), to.toInt());
-                    for (int i = lsb; i <= msb; ++i) {
+                case BitSelector(var index) -> !bitSet.get(index);
+                case PartSelector part -> {
+                    for (int i = part.lsb(); i <= part.msb(); ++i) {
                         if (bitSet.get(i)) {
                             yield false;
                         }
@@ -228,11 +224,9 @@ public final class IOAnalysis extends ModelAnalysis {
         public void update(Selector selector) {
             if (!allSet) {
                 switch (selector) {
-                    case BitSelector bit -> bitSet.set(bit.index().toInt());
+                    case BitSelector bit -> bitSet.set(bit.index());
                     case PartSelector part -> {
-                        int msb = Math.max(part.start().toInt(), part.end().toInt());
-                        int lsb = Math.min(part.start().toInt(), part.end().toInt());
-                        for (int i = lsb; i <= msb; ++i) {
+                        for (int i = part.lsb(); i <= part.msb(); ++i) {
                             if (bitSet.get(i)) {
                                 doubleSet = true;
                             } else {
