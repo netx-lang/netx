@@ -49,8 +49,8 @@ public sealed interface Signal extends Entity permits Data, Value {
         }
     }
 
-    private static BitVectorValue selectConstant(Value value, Selector selector) {
-        return BitVectorValue.of(value.toBitVector().select(selector.msb(), selector.lsb()));
+    private static VectorValue selectConstant(Value value, Selector selector) {
+        return VectorValue.of(value.toBitVector().select(selector.msb(), selector.lsb()));
     }
 
     Type getType();

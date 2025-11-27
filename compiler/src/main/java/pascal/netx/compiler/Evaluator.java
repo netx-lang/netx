@@ -33,8 +33,6 @@ import pascal.netx.util.lang.SourceLoc;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
@@ -42,6 +40,7 @@ import static pascal.netx.compiler.circuit.Entities.*;
 import static pascal.netx.compiler.circuit.Utils.compilerOf;
 import static pascal.netx.compiler.circuit.Utils.repoOf;
 import static pascal.netx.compiler.circuit.scope.Attributes.from;
+import static pascal.netx.compiler.circuit.signal.VectorValue.dispatchUnaryOp;
 import static pascal.netx.util.lang.BuiltinComponent.REG_CLK_EDGE_ATTR;
 import static pascal.netx.util.lang.BuiltinComponent.TO;
 
@@ -59,14 +58,14 @@ public final class Evaluator {
     }
 
     public int evaluateToInt(ExprNode expr) {
-        return evaluateToIntegerValue(expr).toInt();
+        return evaluateToVectorValue(expr).toInt();
     }
 
-    public IntegerValue evaluateToIntegerValue(ExprNode expr) {
-        return requiresIntegerValue(evaluate(expr));
+    public VectorValue evaluateToVectorValue(ExprNode expr) {
+        return requiresVectorValue(evaluate(expr));
     }
 
-    public BooleanValue evaluateToBoolean(ExprNode expr) {
+    public BooleanValue evaluateAndCastToBoolean(ExprNode expr) {
         return castToBooleanValue(evaluate(expr));
     }
 
@@ -201,7 +200,7 @@ public final class Evaluator {
         var to = evaluateToInt(list.getTo());
         var result = new ArrayList<>(
                 IntStream.range(Integer.min(from, to), Integer.max(from, to))
-                        .mapToObj(Int32Value::of)
+                        .mapToObj(VectorValue::fromInt)
                         .map(Entity.class::cast)
                         .toList());
         if (from > to) {
@@ -228,7 +227,7 @@ public final class Evaluator {
                     }
                 }
                 case FilterQualifier filter -> {
-                    var condition = evaluateToBoolean(filter.getCondition());
+                    var condition = evaluateAndCastToBoolean(filter.getCondition());
                     if (condition.value()) {
                         result.addAll(doListComprehension(head, new LinkedList<>(qualifiers)));
                     }
@@ -245,7 +244,7 @@ public final class Evaluator {
     }
 
     private Entity evaluateConditionalExpr(ConditionalExpr expr) {
-        var condition = evaluateToBoolean(expr.getCondition());
+        var condition = evaluateAndCastToBoolean(expr.getCondition());
         return condition.value()
                 ? evaluate(expr.getThenBranch())
                 : evaluate(expr.getElseBranch());
@@ -261,9 +260,9 @@ public final class Evaluator {
 
     private Entity evaluateNumberExpr(NumberExpr expr) {
         return switch (expr) {
-            case BitVectorNumber bitVectorNumber -> BitVectorValue.of(bitVectorNumber.getRepresentation());
+            case BitVectorNumber bitVectorNumber -> VectorValue.of(bitVectorNumber.getRepresentation());
             case BoolNumber boolNumber -> BooleanValue.of(boolNumber.getValue());
-            case IntNumber intNumber -> Int32Value.of(intNumber.getValue());
+            case IntNumber intNumber -> VectorValue.fromInt(intNumber.getValue());
         };
     }
 
@@ -273,10 +272,8 @@ public final class Evaluator {
 
     private Entity evaluateUnaryExpr(UnaryExpr expr) {
         return switch (expr.getOp()) {
-            case ADD -> evaluateToIntegerValue(expr.getOperand());
-            case SUB -> evaluateToIntegerValue(expr.getOperand()).neg();
-            case NOT -> evaluateToBoolean(expr.getOperand()).not();
-            case BITWISE_NOT -> evaluateToIntegerValue(expr.getOperand()).bitwiseNot();
+            case POS, NEG, NOT, BITWISE_NOT
+                    -> dispatchUnaryOp(expr.getOp()).apply(evaluateToVectorValue(expr.getOperand()));
             case BLOCK_OUT -> evaluateDecoratedExpr(DecoratedExpr.Decorator.BLOCK_OUT, expr.getOperand());
             case BLOCK_IN -> evaluateDecoratedExpr(DecoratedExpr.Decorator.BLOCK_IN, expr.getOperand());
         };
@@ -330,19 +327,18 @@ public final class Evaluator {
             case ADD, SUB, MUL, DIV, MOD, POW, AND, OR, XOR, XNOR,
                  ULT, ULE, UGT, UGE, SLT, SLE, SGT, SGE,
                  ARITH_SHR, ARITH_SHL, LOGIC_SHR, LOGIC_SHL ->
-                    evaluateBinaryExpr(expr, IntegerValue.dispatchBinaryOp(expr.getOp()));
-            case LOGIC_OR -> evaluateBinaryExpr(expr, BooleanValue::or);
-            case LOGIC_AND -> evaluateBinaryExpr(expr, BooleanValue::and);
+                    evaluateBinaryExpr(expr, VectorValue.dispatchBinaryOp(expr.getOp()));
+            case LOGIC_OR, LOGIC_AND ->
+                    evaluateBinaryExpr(expr, BooleanValue.dispatchBinaryOp(expr.getOp()));
         };
     }
 
-    private Value evaluateBinaryExpr(BinaryExpr expr,
-                                     BiFunction<IntegerValue, IntegerValue, Value> op) {
-        return op.apply(evaluateToIntegerValue(expr.getLhs()), evaluateToIntegerValue(expr.getRhs()));
+    private Value evaluateBinaryExpr(BinaryExpr expr, VectorValue.BinaryOp op) {
+        return op.apply(evaluateToVectorValue(expr.getLhs()), evaluateToVectorValue(expr.getRhs()));
     }
 
-    private Value evaluateBinaryExpr(BinaryExpr expr, BinaryOperator<BooleanValue> op) {
-        return op.apply(evaluateToBoolean(expr.getLhs()), evaluateToBoolean(expr.getRhs()));
+    private BooleanValue evaluateBinaryExpr(BinaryExpr expr, BooleanValue.BinaryOp op) {
+        return op.apply(evaluateAndCastToBoolean(expr.getLhs()), evaluateAndCastToBoolean(expr.getRhs()));
     }
 
     public void evaluate(ExprNode expr, boolean needDeclareInPlace) {
@@ -681,7 +677,7 @@ public final class Evaluator {
             var attributes = new Attributes();
             moveAttribute(attributes, ref, REG_CLK_EDGE_ATTR, 0, Entities::requiresBooleanValue);
             moveAttribute(attributes, ref, BuiltinComponent.REG_RST_EDGE_ATTR, 1, Entities::requiresBooleanValue);
-            moveAttribute(attributes, ref, BuiltinComponent.REG_RST_VALUE_ATTR, 2, Entities::requiresIntegerValue);
+            moveAttribute(attributes, ref, BuiltinComponent.REG_RST_VALUE_ATTR, 2, Entities::requiresVectorValue);
             result.setAttributes(attributes);
             result.addInput(newClock(result));
             result.addInput(newWire(result, "rst", BitType.of(1)));
@@ -693,7 +689,7 @@ public final class Evaluator {
         private ComponentScope createDupComponent(Scope parent, BuiltinRef ref) {
             Utils.requireEqSize(1, ref.getArgList(),
                     "Dup component requires only one integer argument for number of outputs");
-            int dup = requiresIntegerValue(ref.getArgList().get("n", 0)).toInt();
+            int dup = requiresVectorValue(ref.getArgList().get("n", 0)).toInt();
 
             var component = instantiate(parent, ref);
             var entity = newWire(component, "entity");
@@ -707,7 +703,7 @@ public final class Evaluator {
         private ComponentScope createSplitComponent(Scope parent, BuiltinRef ref) {
             Utils.requireEqSize(1, ref.getArgList(),
                     "Split component requires only one integer argument for input bit width");
-            int split = requiresIntegerValue(ref.getArgList().get("n", 0)).toInt();
+            int split = requiresVectorValue(ref.getArgList().get("n", 0)).toInt();
 
             var result = instantiate(parent, ref);
             var entity = newWire(result, "entity", BitType.of(split));
@@ -726,7 +722,7 @@ public final class Evaluator {
             } else {
                 Utils.requireEqSize(1, ref.getArgList(),
                         "Cast component requires one integer argument for bit width");
-                int width = requiresIntegerValue(ref.getArgList().get("width", 0)).toInt();
+                int width = requiresVectorValue(ref.getArgList().get("width", 0)).toInt();
                 result.addInput(newWire(result, "i"));
                 result.addOutput(newWire(result, "o", BitType.of(width)));
             }
@@ -764,7 +760,7 @@ public final class Evaluator {
             if (!ref.getArgList().isEmpty()) {
                 Utils.requireEqSize(1, ref.getArgList(),
                         "Multi-input component requires only one integer argument for number of inputs");
-                ports = requiresIntegerValue(ref.getArgList().get("n", 0)).toInt();
+                ports = requiresVectorValue(ref.getArgList().get("n", 0)).toInt();
             } else {
                 ports = argNumHint;
             }

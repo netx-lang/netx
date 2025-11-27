@@ -180,7 +180,7 @@ public final class Elaborator {
         }
 
         private void buildBranch(BranchNode branch) {
-            var condition = evaluator.evaluateToBoolean(branch.getCondition());
+            var condition = evaluator.evaluateAndCastToBoolean(branch.getCondition());
             if (condition.value()) {
                 buildElement(branch.getThenBranch());
             } else if (branch.getElseBranch() != null) {

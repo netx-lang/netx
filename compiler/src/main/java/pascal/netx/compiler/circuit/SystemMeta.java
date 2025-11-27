@@ -2,8 +2,7 @@ package pascal.netx.compiler.circuit;
 
 import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
 import pascal.netx.compiler.circuit.signal.BooleanValue;
-import pascal.netx.compiler.circuit.signal.Int32Value;
-import pascal.netx.compiler.circuit.signal.IntegerValue;
+import pascal.netx.compiler.circuit.signal.VectorValue;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.lang.Identifier;
@@ -40,16 +39,15 @@ public enum SystemMeta implements Entity {
         }
 
         Entity arg = args.getArguments().getFirst();
-        if (!(arg instanceof IntegerValue value)) {
+        if (!(arg instanceof VectorValue(var value))) {
             Logger.error(loc, "SystemMeta log2 requires a numeric argument, found: {}", arg.getClass().getSimpleName());
             throw new CompileCancellationException();
         }
 
-        var integer = value.toBitVector().toBigInteger();
-        if (integer.compareTo(BigInteger.ZERO) == 0) {
-            return Int32Value.of(0);
+        if (value.isZero()) {
+            return VectorValue.fromInt(0);
         }
-        return Int32Value.of(integer.subtract(BigInteger.ONE).bitLength());
+        return VectorValue.fromInt(value.toBigInteger().subtract(BigInteger.ONE).bitLength());
     }
 
     private static Entity print(SourceLoc ignored, AttrBindList args) {
@@ -89,7 +87,7 @@ public enum SystemMeta implements Entity {
         }
 
         var list = Entities.requiresEList(args.getArguments().getFirst());
-        return Int32Value.of(list.size());
+        return VectorValue.fromInt(list.size());
     }
 
     public Entity apply(SourceLoc loc, AttrBindList parameters) {

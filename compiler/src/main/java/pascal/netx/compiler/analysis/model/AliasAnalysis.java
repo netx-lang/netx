@@ -12,7 +12,6 @@ import pascal.netx.util.collection.UnionFind;
 import pascal.netx.util.lang.BuiltinComponent;
 
 import javax.annotation.Nonnull;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -276,9 +275,9 @@ public final class AliasAnalysis extends ModelAnalysis {
                 var inputA = scope.getInputs().get(0);
                 var inputB = scope.getInputs().get(1);
 
-                if (isHigh(inputA)) {
+                if (allHigh(inputA)) {
                     setAsTo(scope, inputB);
-                } else if (isHigh(inputB)) {
+                } else if (allHigh(inputB)) {
                     setAsTo(scope, inputA);
                 }
             }
@@ -289,9 +288,9 @@ public final class AliasAnalysis extends ModelAnalysis {
                 var inputA = scope.getInputs().get(0);
                 var inputB = scope.getInputs().get(1);
 
-                if (isLow(inputA)) {
+                if (allLow(inputA)) {
                     setAsTo(scope, inputB);
-                } else if (isLow(inputB)) {
+                } else if (allLow(inputB)) {
                     setAsTo(scope, inputA);
                 }
             }
@@ -302,9 +301,9 @@ public final class AliasAnalysis extends ModelAnalysis {
                 var inputA = scope.getInputs().get(0);
                 var inputB = scope.getInputs().get(1);
 
-                if (isHigh(inputA)) {
+                if (allHigh(inputA)) {
                     setAsNot(scope, inputB);
-                } else if (isHigh(inputB)) {
+                } else if (allHigh(inputB)) {
                     setAsNot(scope, inputA);
                 }
             }
@@ -315,9 +314,9 @@ public final class AliasAnalysis extends ModelAnalysis {
                 var inputA = scope.getInputs().get(0);
                 var inputB = scope.getInputs().get(1);
 
-                if (isLow(inputA)) {
+                if (allLow(inputA)) {
                     setAsNot(scope, inputB);
-                } else if (isLow(inputB)) {
+                } else if (allLow(inputB)) {
                     setAsNot(scope, inputA);
                 }
             }
@@ -328,13 +327,13 @@ public final class AliasAnalysis extends ModelAnalysis {
                 var inputA = scope.getInputs().get(0);
                 var inputB = scope.getInputs().get(1);
 
-                if (isLow(inputA)) {
+                if (allLow(inputA)) {
                     setAsTo(scope, inputB);
-                } else if (isHigh(inputA)) {
+                } else if (allHigh(inputA)) {
                     setAsNot(scope, inputB);
-                } else if (isLow(inputB)) {
+                } else if (allLow(inputB)) {
                     setAsTo(scope, inputA);
-                } else if (isHigh(inputB)) {
+                } else if (allHigh(inputB)) {
                     setAsNot(scope, inputA);
                 }
             }
@@ -354,25 +353,23 @@ public final class AliasAnalysis extends ModelAnalysis {
             scope.setIdentifier(builtin.asID());
         }
 
-        private boolean isLow(Signal signal) {
+        private boolean allLow(Signal signal) {
             signal = manager.repOf(signal);
             if (signal instanceof Value value) {
                 return switch (value) {
                     case BooleanValue _ -> false;
-                    case Int32Value v -> v.toInt() == 0;
-                    case BitVectorValue v -> v.value().toBigInteger().equals(BigInteger.ZERO);
+                    case VectorValue v -> v.isZero();
                 };
             }
             return false;
         }
 
-        private boolean isHigh(Signal signal) {
+        private boolean allHigh(Signal signal) {
             signal = manager.repOf(signal);
             if (signal instanceof Value value) {
                 return switch (value) {
                     case BooleanValue _ -> false;
-                    case Int32Value v -> v.toInt() == 0xFFFFFFFF;
-                    case BitVectorValue v -> v.value().not().toBigInteger().equals(BigInteger.ZERO);
+                    case VectorValue v -> v.value().not().isZero();
                 };
             }
             return false;
