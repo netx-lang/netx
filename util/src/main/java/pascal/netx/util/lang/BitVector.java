@@ -55,7 +55,16 @@ public final class BitVector {
     }
 
     public static BitVector fromBigInteger(int size, BigInteger value) {
-        return new BitVector(size, value.toByteArray());
+        var result = new BitVector(size, value.toByteArray());
+        if (value.signum() == -1) {
+            int offset = value.toByteArray().length;
+            if (result.get(offset * 8 - 1)) {
+                for (int i = 0; i < result.data.length - offset; i++) {
+                    result.data[i] = (byte) 0xFF;
+                }
+            }
+        }
+        return result;
     }
 
     public boolean isZero() {
