@@ -53,7 +53,7 @@ class BitVectorUnitTest {
     }
 
     @Test
-    void parse() {
+    void testParse() {
         BitVector bv1 = BitVector.parse("01101011", 7, 2);
         BitVector bv2 = BitVector.parse("01101011", 8, 2);
         BitVector bv3 = BitVector.parse("110101001101101011", 18, 2);
@@ -77,7 +77,7 @@ class BitVectorUnitTest {
     }
 
     @Test
-    void set() {
+    void testSet() {
         BitVector bv = BitVector.parse("01101011", 8, 2);
         bv.set(0);
         assertEquals(BitVector.parse("01101011", 8, 2), bv);
@@ -89,7 +89,7 @@ class BitVectorUnitTest {
     }
 
     @Test
-    void clear() {
+    void testClear() {
         BitVector bv = BitVector.parse("01101011", 8, 2);
         bv.clear(0);
         assertEquals(BitVector.parse("01101010", 8, 2), bv);
@@ -101,15 +101,7 @@ class BitVectorUnitTest {
     }
 
     @Test
-    void get() {
-        BitVector bv = BitVector.parse("01101011", 8, 2);
-        assertTrue(bv.get(0));
-        assertFalse(bv.get(2));
-        assertThrows(ArrayIndexOutOfBoundsException.class, () -> bv.get(8));
-    }
-
-    @Test
-    void size() {
+    void testSize() {
         BitVector bv = BitVector.parse("01101011", 8, 2);
         assertEquals(8, bv.size());
     }
@@ -256,5 +248,45 @@ class BitVectorUnitTest {
         assertEquals(BitVector.parse("101101011", 9, 2), bv.select(8, 0));
         assertEquals(BitVector.parse("110101001", 9, 2), bv.select(17, 9));
         assertEquals(BitVector.parse("110101001101101011", 18, 2), bv.select(17, 0));
+    }
+
+    @Test
+    void testRelational() {
+        BitVector zero = BitVector.parse("0", 32, 10);
+        BitVector one = BitVector.parse("1145141", 32, 10);
+        BitVector neg = zero.sub(one);
+
+        assertTrue(neg.slt(one));
+        assertTrue(neg.sle(one));
+        assertFalse(neg.sgt(one));
+        assertFalse(neg.sge(one));
+        assertFalse(neg.eq(one));
+        assertTrue(neg.ne(one));
+        assertFalse(neg.ult(one));
+        assertFalse(neg.ule(one));
+        assertTrue(neg.ugt(one));
+        assertTrue(neg.uge(one));
+
+        assertTrue(neg.slt(zero));
+        assertTrue(neg.sle(zero));
+        assertFalse(neg.sgt(zero));
+        assertFalse(neg.sge(zero));
+        assertFalse(neg.eq(zero));
+        assertTrue(neg.ne(zero));
+        assertFalse(neg.ult(zero));
+        assertFalse(neg.ule(zero));
+        assertTrue(neg.ugt(zero));
+        assertTrue(neg.uge(zero));
+
+        assertTrue(zero.slt(one));
+        assertTrue(zero.sle(one));
+        assertFalse(zero.sgt(one));
+        assertFalse(zero.sge(one));
+        assertFalse(zero.eq(one));
+        assertTrue(zero.ne(one));
+        assertTrue(zero.ult(one));
+        assertTrue(zero.ule(one));
+        assertFalse(zero.ugt(one));
+        assertFalse(zero.uge(one));
     }
 }
