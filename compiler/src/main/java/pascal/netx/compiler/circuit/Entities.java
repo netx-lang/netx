@@ -76,9 +76,9 @@ public final class Entities {
         }
     }
 
-    public static IntegerValue requiresIntegerValue(Entity entity) {
-        if (entity instanceof IntegerValue integerValue) {
-            return integerValue;
+    public static VectorValue requiresVectorValue(Entity entity) {
+        if (entity instanceof VectorValue value) {
+            return value;
         } else {
             Logger.error("Expected integer rhs but got {}", entity);
             throw new CompileCancellationException();
@@ -97,7 +97,7 @@ public final class Entities {
     public static BooleanValue castToBooleanValue(Entity entity) {
         return switch (entity) {
             case BooleanValue booleanValue -> booleanValue;
-            case IntegerValue integerValue -> BooleanValue.of(integerValue.toInt() != 0);
+            case VectorValue integerValue -> BooleanValue.of(!integerValue.isZero());
             default -> {
                 Logger.error("Cannot cast {} to boolean", entity);
                 throw new CompileCancellationException();

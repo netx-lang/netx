@@ -2,8 +2,12 @@ package pascal.netx.compiler.ast.expr;
 
 import pascal.netx.compiler.ast.ASTListener;
 import pascal.netx.util.collection.BiMap;
+import pascal.netx.util.lang.BitVector;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 
 public final class BinaryExpr extends ExprNode {
     private Operator op;
@@ -81,6 +85,20 @@ public final class BinaryExpr extends ExprNode {
         AND, OR, XOR, XNOR, LOGIC_AND, LOGIC_OR;
 
         public static final BiMap<String, Operator> OP_MAP = new BiMap<>();
+        public static final Map<Operator, BinaryOperator<BitVector>> ARITHMETIC_OPS = Map.of(
+                ADD, BitVector::add, SUB, BitVector::sub, MUL, BitVector::mul,
+                DIV, BitVector::div, MOD, BitVector::mod, POW, BitVector::pow,
+                AND, BitVector::and, OR, BitVector::or, XOR, BitVector::xor, XNOR, BitVector::xnor
+        );
+        public static final Map<Operator, BiFunction<BitVector, BitVector, Boolean>> RELATIONAL_OPS = Map.of(
+                EQ, BitVector::eq, NE, BitVector::ne,
+                SLT, BitVector::slt, SLE, BitVector::sle, SGT, BitVector::sgt, SGE, BitVector::sge,
+                ULT, BitVector::ult, ULE, BitVector::ule, UGT, BitVector::ugt, UGE, BitVector::uge
+        );
+        public static final Map<Operator, BiFunction<BitVector, Integer, BitVector>> SHIFT_OPS = Map.of(
+                ARITH_SHL, BitVector::shl, LOGIC_SHL, BitVector::shl,
+                ARITH_SHR, BitVector::ashr, LOGIC_SHR, BitVector::lshr
+        );
 
         static {
             OP_MAP.put("<>", SEQ);

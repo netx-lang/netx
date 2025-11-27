@@ -58,6 +58,16 @@ public final class BitVector {
         return new BitVector(size, value.toByteArray());
     }
 
+    public boolean isZero() {
+        normalize();
+        for (byte b : data) {
+            if (b != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void set(int index) {
         data[data.length - (index >> 3) - 1] |= (byte) (1 << (index & 7));
     }
@@ -157,10 +167,6 @@ public final class BitVector {
 
     public int toInt() {
         return toBigInteger().intValue();
-    }
-
-    public boolean toBoolean() {
-        return get(0);
     }
 
     public BitVector concat(BitVector that) {

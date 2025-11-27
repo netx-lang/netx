@@ -2,7 +2,7 @@ package pascal.netx.compiler.circuit.scope;
 
 import pascal.netx.compiler.ast.element.*;
 import pascal.netx.compiler.circuit.expr.ImportRef;
-import pascal.netx.compiler.circuit.signal.BitVectorValue;
+import pascal.netx.compiler.circuit.signal.VectorValue;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.exception.ShallNotReachHereError;
@@ -87,7 +87,7 @@ public final class PackageScope extends Scope {
             }
         }
 
-        static private void checkUniqueEnumValues(EnumNode node, Collection<BitVectorValue> values) {
+        static private void checkUniqueEnumValues(EnumNode node, Collection<VectorValue> values) {
             if (values.size() != new HashSet<>(values).size()) {
                 Logger.error(node.getSourceLoc(), "Enum values must be unique, but found duplicates in '{}'",
                         node.getName());
@@ -97,12 +97,12 @@ public final class PackageScope extends Scope {
 
         public void addEnum(EnumNode node) {
             checkUniqueEnumFields(node);
-            Map<Identifier, BitVectorValue> enumMap = new HashMap<>();
+            Map<Identifier, VectorValue> enumMap = new HashMap<>();
             int width = 1;
             if (node.getValues().isEmpty()) {
                 width = BigInteger.valueOf(node.getFields().size() - 1).bitLength();
                 for (int i = 0; i < node.getFields().size(); i++) {
-                    enumMap.put(node.getFields().get(i), BitVectorValue.of(BitVector.fromInt(i, width)));
+                    enumMap.put(node.getFields().get(i), VectorValue.of(BitVector.fromInt(i, width)));
                 }
             } else {
                 for (var number : node.getValues()) {
@@ -115,15 +115,15 @@ public final class PackageScope extends Scope {
                     if (number.size() != width) {
                         number = number.unsigned_ext(width);
                     }
-                    enumMap.put(field, BitVectorValue.of(number));
+                    enumMap.put(field, VectorValue.of(number));
                 }
                 checkUniqueEnumValues(node, enumMap.values());
             }
             enumDef.put(node.getName(), new Enum(node.getName(), width, enumMap));
         }
 
-        public BitVectorValue lookupEnum(Identifier id) {
-            BitVectorValue result = null;
+        public VectorValue lookupEnum(Identifier id) {
+            VectorValue result = null;
             for (var def : enumDef.values()) {
                 if (def.fields().containsKey(id)) {
                     if (result != null) {

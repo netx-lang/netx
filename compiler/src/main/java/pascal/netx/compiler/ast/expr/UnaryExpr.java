@@ -69,13 +69,13 @@ public final class UnaryExpr extends ExprNode {
     }
 
     public enum Operator {
-        ADD, SUB, NOT, BITWISE_NOT, BLOCK_OUT, BLOCK_IN;
+        POS, NEG, NOT, BITWISE_NOT, BLOCK_OUT, BLOCK_IN;
 
         public static final BiMap<String, Operator> OP_MAP = new BiMap<>();
 
         static {
-            OP_MAP.put("+", ADD);
-            OP_MAP.put("-", SUB);
+            OP_MAP.put("+", POS);
+            OP_MAP.put("-", NEG);
             OP_MAP.put("not", NOT);
             OP_MAP.put("~", BITWISE_NOT);
         }

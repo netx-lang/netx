@@ -228,11 +228,7 @@ public final class NxonDumper {
         }
 
         private String dumpValue(Value value) {
-            return switch (value) {
-                case BooleanValue v -> String.valueOf(v.value());
-                case Int32Value v -> String.valueOf(v.value());
-                case BitVectorValue v -> v.value().toString();
-            };
+            return value.toString();
         }
 
         private String dumpAccess(Access access) {

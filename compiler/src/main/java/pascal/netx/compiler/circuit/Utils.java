@@ -6,7 +6,7 @@ import pascal.netx.compiler.circuit.scope.PackageScope;
 import pascal.netx.compiler.circuit.scope.RepoScope;
 import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
 import pascal.netx.compiler.circuit.signal.BooleanValue;
-import pascal.netx.compiler.circuit.signal.IntegerValue;
+import pascal.netx.compiler.circuit.signal.VectorValue;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.exception.ShallNotReachHereError;
@@ -63,14 +63,14 @@ public final class Utils {
                     }
                 }
             }
-            case IntegerValue lhsInt -> {
-                if (rhs instanceof IntegerValue rhsInt) {
-                    return lhsInt.eq(rhsInt).value();
+            case VectorValue lhsInt -> {
+                if (rhs instanceof VectorValue rhsInt) {
+                    return lhsInt.equals(rhsInt);
                 }
             }
             case BooleanValue lhsBool -> {
                 if (rhs instanceof BooleanValue rhsBool) {
-                    return lhsBool.eq(rhsBool).value();
+                    return lhsBool.equals(rhsBool);
                 }
             }
             default -> throw new ShallNotReachHereError();

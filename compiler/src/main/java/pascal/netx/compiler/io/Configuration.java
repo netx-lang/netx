@@ -2,10 +2,9 @@ package pascal.netx.compiler.io;
 
 import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
 import pascal.netx.compiler.circuit.scope.binding.MultiBinding;
-import pascal.netx.compiler.circuit.signal.BitVectorValue;
 import pascal.netx.compiler.circuit.signal.BooleanValue;
-import pascal.netx.compiler.circuit.signal.Int32Value;
 import pascal.netx.compiler.circuit.signal.Value;
+import pascal.netx.compiler.circuit.signal.VectorValue;
 import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.lang.Identifier;
@@ -58,10 +57,10 @@ public record Configuration(@Nullable Identifier topPack,
                 return BooleanValue.of(Boolean.parseBoolean(value));
             } else {
                 try {
-                    return Int32Value.of(Integer.parseInt(value));
+                    return VectorValue.fromInt(Integer.parseInt(value));
                 } catch (NumberFormatException e) {
                     try {
-                        return BitVectorValue.of(BitVector.parse(value));
+                        return VectorValue.of(BitVector.parse(value));
                     } catch (Exception ignored) {
                         Logger.error("Invalid argument rhs: " + value);
                         throw new IllegalArgumentException();
