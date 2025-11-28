@@ -65,11 +65,13 @@ public sealed interface BitVector permits LongBasedBitVector, ArrayBasedBitVecto
 
     BitVector copyOf();
 
-    int toInt();
+    int toUInt();
 
-    long toLong();
+    long toULong();
 
-    BigInteger toBigInteger();
+    BigInteger asSignedBI();
+
+    BigInteger asUnsignedBI();
 
     BitVector concat(BitVector that);
 

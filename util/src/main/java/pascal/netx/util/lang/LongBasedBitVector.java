@@ -4,6 +4,7 @@ import pascal.netx.util.exception.ShallNotReachHereError;
 
 import javax.annotation.Nonnull;
 import java.math.BigInteger;
+import java.util.Objects;
 
 public record LongBasedBitVector(int size, long rep) implements BitVector {
     public LongBasedBitVector(int size, long rep) {
@@ -23,6 +24,18 @@ public record LongBasedBitVector(int size, long rep) implements BitVector {
     @Nonnull
     public String toString() {
         return size + "'h" + Long.toHexString(rep).toUpperCase();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        LongBasedBitVector that = (LongBasedBitVector) o;
+        return eq(that);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(size, rep);
     }
 
     @Override
@@ -89,25 +102,30 @@ public record LongBasedBitVector(int size, long rep) implements BitVector {
     }
 
     @Override
-    public int toInt() {
+    public int toUInt() {
         return Math.toIntExact(rep);
     }
 
     @Override
-    public long toLong() {
+    public long toULong() {
         return rep;
     }
 
     @Override
-    public BigInteger toBigInteger() {
-        return BigInteger.valueOf(rep);
+    public BigInteger asSignedBI() {
+        return BigInteger.valueOf(asJavaLong());
+    }
+
+    @Override
+    public BigInteger asUnsignedBI() {
+        return BigInteger.valueOf(toULong());
     }
 
     @Override
     public BitVector concat(BitVector that) {
         int width = this.size + that.size();
         if (width >= SIZE_THRESHOLD) {
-            return new ArrayBasedBitVector(this.size, BigInteger.valueOf(toLong())).concat(that);
+            return new ArrayBasedBitVector(this.size, BigInteger.valueOf(toULong())).concat(that);
         } else {
             return new LongBasedBitVector(width, rep << that.size() | ((LongBasedBitVector) that).rep);
         }
@@ -170,7 +188,7 @@ public record LongBasedBitVector(int size, long rep) implements BitVector {
 
     @Override
     public LongBasedBitVector pow(BitVector that) {
-        return new LongBasedBitVector(size, Math.powExact(rep, that.toInt()));
+        return new LongBasedBitVector(size, Math.powExact(rep, that.toUInt()));
     }
 
     @Override
@@ -244,20 +262,18 @@ public record LongBasedBitVector(int size, long rep) implements BitVector {
 
     @Override
     public boolean eq(BitVector that) {
-        if (that instanceof LongBasedBitVector(var _size, var _rep)) {
-            assert this.size == _size;
-            return this.rep == _rep;
+        if (size == that.size()) {
+            return switch (that) {
+                case LongBasedBitVector lbv -> this.rep == lbv.rep;
+                case ArrayBasedBitVector abv -> abv.eq(this);
+            };
         }
-        return that.eq(this);
+        return false;
     }
 
     @Override
     public boolean ne(BitVector that) {
-        if (that instanceof LongBasedBitVector(var _size, var _rep)) {
-            assert this.size == _size;
-            return this.rep != _rep;
-        }
-        return that.ne(this);
+        return !eq(that);
     }
 
     @Override
