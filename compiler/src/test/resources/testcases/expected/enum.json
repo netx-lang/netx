@@ -15,7 +15,7 @@
       {"type": "wire", "width": 1, "id": "state@3", "loc": "enum.nx:17:8"},
       {
         "type": "builtin", "id": "EQ", "loc": "enum.nx:19:25",
-        "input": ["i@0", "1'h01"],
+        "input": ["i@0", "1'h1"],
         "output": ["$o@4"]
       },
       {
@@ -48,7 +48,7 @@
           {"type": "wire", "width": 1, "id": "i@7", "loc": "enum.nx:9:40"},
           {
             "type": "builtin", "id": "AND", "loc": "enum.nx:8:12",
-            "input": ["rst@1", "1'h00"],
+            "input": ["rst@1", "1'h0"],
             "output": ["$o@8"],
             "members": [
               {"type": "wire", "width": 1, "id": "$o@8", "loc": "enum.nx:8:12"}

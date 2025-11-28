@@ -102,7 +102,7 @@ public final class PackageScope extends Scope {
             if (node.getValues().isEmpty()) {
                 width = BigInteger.valueOf(node.getFields().size() - 1).bitLength();
                 for (int i = 0; i < node.getFields().size(); i++) {
-                    enumMap.put(node.getFields().get(i), VectorValue.of(BitVector.fromInt(i, width)));
+                    enumMap.put(node.getFields().get(i), VectorValue.of(BitVector.fromInt(width, i)));
                 }
             } else {
                 for (var number : node.getValues()) {
@@ -113,7 +113,7 @@ public final class PackageScope extends Scope {
                     var field = node.getFields().get(i);
                     var number = node.getValues().get(i).getRepresentation();
                     if (number.size() != width) {
-                        number = number.unsigned_ext(width);
+                        number = number.uext(width);
                     }
                     enumMap.put(field, VectorValue.of(number));
                 }

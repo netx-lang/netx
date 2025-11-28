@@ -7,7 +7,7 @@
     "id": "top",
     "loc": "test.nx:1:10",
     "input": ["a@0"],
-    "output": ["b@1", "1'h01"],
+    "output": ["b@1", "1'h1"],
     "members": [
       {"type": "wire", "width": 2, "id": "a@0", "loc": "test.nx:2:7"},
       {"type": "wire", "width": 2, "id": "b@1", "loc": "test.nx:2:10"},
@@ -23,30 +23,22 @@
         "output": ["b@1[0]"]
       },
       {
-          "type": "builtin",
-          "id": "TO",
-          "loc": "",
+        "type": "builtin", "id": "TO", "loc": "",
         "input": ["a@0"],
         "output": ["tmp@2[1:0]"]
       },
       {
-          "type": "builtin",
-          "id": "TO",
-          "loc": "",
-        "input": ["1'h01"],
+        "type": "builtin", "id": "TO", "loc": "",
+        "input": ["1'h1"],
         "output": ["tmp@2[3]"]
       },
       {
-          "type": "builtin",
-          "id": "TO",
-          "loc": "",
+        "type": "builtin", "id": "TO", "loc": "",
         "input": ["b@1[1]"],
         "output": ["tmp@2[2]"]
       },
       {
-          "type": "builtin",
-          "id": "TO",
-          "loc": "",
+        "type": "builtin", "id": "TO", "loc": "",
         "input": ["b@1[0]"],
         "output": ["tmp@2[4]"]
       }

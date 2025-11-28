@@ -106,7 +106,7 @@ module top(
   */
     /*
       COMPONENT "full_adder"; "adder.nx:7:34"
-      input: a@0[0], b@1[0], 1'h00
+      input: a@0[0], b@1[0], 1'h0
       output: c@2[0], cout@3
     */
       /*
@@ -119,10 +119,10 @@ module top(
       /* END "half_adder"; "adder.nx:14:52" */
       /*
         COMPONENT "half_adder"; "adder.nx:14:36"
-        input: c@2[0], 1'h00
+        input: c@2[0], 1'h0
         output: carry@5, c@2[0]
       */
-        assign _5 = _2[0] & 1'h00; // adder.nx:19:18
+        assign _5 = _2[0] & 1'h0; // adder.nx:19:18
       /* END "half_adder"; "adder.nx:14:36" */
       assign _3 = _4 | _5; // adder.nx:14:20
     /* END "full_adder"; "adder.nx:7:34" */

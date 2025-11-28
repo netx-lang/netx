@@ -7,7 +7,7 @@
     "id": "top",
     "loc": "nested_type.nx:12:10",
     "input": ["d@0"],
-    "output": ["2'h00", "2'h03", "b.b[0].left@1", "b.b[0].right@2", "b.b[1].left@3", "b.b[1].right@4", "b.b[2].left@5", "b.b[2].right@6", "b.b[3].left@7", "b.b[3].right@8", "b.c@9"],
+    "output": ["2'h0", "2'h3", "b.b[0].left@1", "b.b[0].right@2", "b.b[1].left@3", "b.b[1].right@4", "b.b[2].left@5", "b.b[2].right@6", "b.b[3].left@7", "b.b[3].right@8", "b.c@9"],
     "members": [
       {"type": "wire", "width": 2, "id": "b.b[0].left@1", "loc": "nested_type.nx:14:11"},
       {"type": "wire", "width": 2, "id": "b.b[0].right@2", "loc": "nested_type.nx:14:11"},
@@ -35,7 +35,7 @@
       },
       {
         "type": "builtin", "id": "ADD", "loc": "nested_type.nx:20:12",
-        "input": ["2'h00", "$o@11"],
+        "input": ["2'h0", "$o@11"],
         "output": ["b.b[0].left@1"]
       },
       {
@@ -48,37 +48,37 @@
       },
       {
         "type": "builtin", "id": "ADD", "loc": "nested_type.nx:21:12",
-        "input": ["2'h00", "$o@12"],
+        "input": ["2'h0", "$o@12"],
         "output": ["b.b[0].right@2"]
       },
       {
         "type": "builtin", "id": "ADD", "loc": "nested_type.nx:20:12",
-        "input": ["2'h01", "$o@11"],
+        "input": ["2'h1", "$o@11"],
         "output": ["b.b[1].left@3"]
       },
       {
         "type": "builtin", "id": "ADD", "loc": "nested_type.nx:21:12",
-        "input": ["2'h01", "$o@12"],
+        "input": ["2'h1", "$o@12"],
         "output": ["b.b[1].right@4"]
       },
       {
         "type": "builtin", "id": "ADD", "loc": "nested_type.nx:20:12",
-        "input": ["2'h02", "$o@11"],
+        "input": ["2'h2", "$o@11"],
         "output": ["b.b[2].left@5"]
       },
       {
         "type": "builtin", "id": "ADD", "loc": "nested_type.nx:21:12",
-        "input": ["2'h02", "$o@12"],
+        "input": ["2'h2", "$o@12"],
         "output": ["b.b[2].right@6"]
       },
       {
         "type": "builtin", "id": "ADD", "loc": "nested_type.nx:20:12",
-        "input": ["2'h03", "$o@11"],
+        "input": ["2'h3", "$o@11"],
         "output": ["b.b[3].left@7"]
       },
       {
         "type": "builtin", "id": "ADD", "loc": "nested_type.nx:21:12",
-        "input": ["2'h03", "$o@12"],
+        "input": ["2'h3", "$o@12"],
         "output": ["b.b[3].right@8"]
       },
       {

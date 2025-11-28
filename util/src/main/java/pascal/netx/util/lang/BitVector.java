@@ -3,28 +3,12 @@ package pascal.netx.util.lang;
 import pascal.netx.util.exception.ShallNotReachHereError;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 
-public final class BitVector {
+public sealed interface BitVector permits LongBasedBitVector, ArrayBasedBitVector {
 
-    private final byte[] data;
+    Integer SIZE_THRESHOLD = 64;
 
-    private final int size;
-
-    public BitVector(int size) {
-        this.size = size;
-        this.data = new byte[(size + 7) / 8];
-    }
-
-    public BitVector(int size, byte[] array) {
-        this.size = size;
-        this.data = new byte[(size + 7) / 8];
-        int length = Math.min(data.length, array.length);
-        System.arraycopy(array, array.length - length, data, data.length - length, length);
-        normalize();
-    }
-
-    public static BitVector parse(String literal) {
+    static BitVector parse(String literal) {
         var parts = literal.toLowerCase().split("'");
         int size = Integer.parseInt(parts[0]);
         int radix = switch (parts[1].charAt(0)) {
@@ -37,306 +21,109 @@ public final class BitVector {
         return BitVector.parse(parts[1].substring(1), size, radix);
     }
 
-    public static BitVector parse(String rep, int size, int radix) {
-        var bigInteger = new BigInteger(rep, radix);
-        return fromBigInteger(size, bigInteger);
+    static BitVector parse(String literal, int size, int radix) {
+        return fromBigInteger(size, new BigInteger(literal, radix));
     }
 
-    public static BitVector fromInt(int value) {
-        return fromInt(value, Integer.SIZE);
+    static BitVector fromInt(int value) {
+        return new LongBasedBitVector(32, value);
     }
 
-    public static BitVector fromInt(int value, int size) {
-        return fromBigInteger(size, BigInteger.valueOf(value));
+    static BitVector fromInt(int size, int value){
+        return new LongBasedBitVector(size, value);
     }
 
-    public static BitVector fromBoolean(boolean value) {
-        return fromInt(value ? 1 : 0, 1);
+    static BitVector fromBoolean(boolean value){
+        return new LongBasedBitVector(1, value ? 1L : 0L);
     }
 
-    public static BitVector fromBigInteger(int size, BigInteger value) {
-        var result = new BitVector(size, value.toByteArray());
-        if (value.signum() == -1) {
-            int offset = value.toByteArray().length;
-            if (result.get(offset * 8 - 1)) {
-                for (int i = 0; i < result.data.length - offset; i++) {
-                    result.data[i] = (byte) 0xFF;
-                }
-            }
-        }
-        return result;
-    }
-
-    public boolean isZero() {
-        normalize();
-        for (byte b : data) {
-            if (b != 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public void set(int index) {
-        data[data.length - (index >> 3) - 1] |= (byte) (1 << (index & 7));
-    }
-
-    public void clear(int index) {
-        data[data.length - (index >> 3) - 1] &= (byte) ~(1 << (index & 7));
-    }
-
-    public boolean get(int index) {
-        return (data[data.length - (index >> 3) - 1] & (1 << (index & 7))) != 0;
-    }
-
-    public boolean msb() {
-        return get(size - 1);
-    }
-
-    public boolean lsb() {
-        return get(0);
-    }
-
-    public BitVector unsigned_ext(int width) {
-        return new BitVector(width, data);
-    }
-
-    public BitVector ext(int width) {
-        if (msb()) {
-            var high = BigInteger.ONE.shiftLeft(width - size + 1).subtract(BigInteger.ONE);
-            return fromBigInteger(width - size, high).concat(this);
+    static BitVector fromBigInteger(int size, BigInteger value) {
+        if (size <= 64) {
+            return new LongBasedBitVector(size, value.longValue());
         } else {
-            return new BitVector(width, data);
+            return new ArrayBasedBitVector(size, value);
         }
     }
 
-    public BitVector truncate(int width) {
-        return new BitVector(width, data);
-    }
+    int size();
 
-    public BitVector select(int msb, int lsb) {
-        if (msb < lsb) {
-            throw new IllegalArgumentException("Invalid range");
-        }
-        int size = msb - lsb + 1;
-        BitVector result = new BitVector(size);
-        for (int i = 0; i < size; i++) {
-            if (get(lsb + i)) {
-                result.set(i);
-            }
-        }
-        return result;
-    }
+    boolean get(int index);
 
-    public BitVector set(int msb, int lsb, BitVector vector) {
-        if (msb < lsb) {
-            throw new IllegalArgumentException("Invalid range");
-        }
-        int size = msb - lsb + 1;
-        if (size != vector.size) {
-            throw new IllegalArgumentException("Invalid vector size");
-        }
-        for (int i = 0; i < size; i++) {
-            if (vector.get(i)) {
-                set(lsb + i);
-            } else {
-                clear(lsb + i);
-            }
-        }
-        return this;
-    }
+    boolean msb();
 
-    public int size() {
-        return size;
-    }
+    boolean lsb();
 
-    public void clear() {
-        setAllBytes((byte) 0);
-    }
+    boolean isZero();
 
-    private void setAllBytes(byte value) {
-        Arrays.fill(data, value);
-    }
+    BitVector uext(int width);
 
-    public BitVector copyOf() {
-        var result = new BitVector(size);
-        System.arraycopy(data, 0, result.data, 0, data.length);
-        return result;
-    }
+    BitVector sext(int width);
 
-    public BigInteger toBigInteger() {
-        normalize();
-        return new BigInteger(data);
-    }
+    BitVector truncate(int width);
 
-    public BigInteger toUnsignedBigInteger() {
-        normalize();
-        return new BigInteger(1, data);
-    }
+    BitVector select(int msb, int lsb);
 
-    public int toInt() {
-        return toBigInteger().intValue();
-    }
+    BitVector copyOf();
 
-    public BitVector concat(BitVector that) {
-        var rep = this.toUnsignedBigInteger().shiftLeft(that.size).or(that.toUnsignedBigInteger());
-        return fromBigInteger(this.size + that.size, rep);
+    int toInt();
 
-    }
+    long toLong();
 
-    public BitVector neg() {
-        return fromBigInteger(size, toUnsignedBigInteger().negate());
-    }
+    BigInteger toBigInteger();
 
-    public BitVector not() {
-        return fromBigInteger(size, toUnsignedBigInteger().not());
-    }
+    BitVector concat(BitVector that);
 
-    public BitVector add(BitVector that) {
-        requiresSameSize(this, that);
-        return fromBigInteger(size, toUnsignedBigInteger().add(that.toUnsignedBigInteger()));
-    }
+    BitVector neg();
 
-    public BitVector sub(BitVector that) {
-        requiresSameSize(this, that);
-        return fromBigInteger(size, toUnsignedBigInteger().subtract(that.toUnsignedBigInteger()));
-    }
+    BitVector not();
 
-    public BitVector mul(BitVector that) {
-        requiresSameSize(this, that);
-        return fromBigInteger(size, toUnsignedBigInteger().multiply(that.toUnsignedBigInteger()));
-    }
+    BitVector add(BitVector that);
 
-    public BitVector div(BitVector that) {
-        requiresSameSize(this, that);
-        return fromBigInteger(size, toUnsignedBigInteger().divide(that.toUnsignedBigInteger()));
-    }
+    BitVector sub(BitVector that);
 
-    public BitVector mod(BitVector that) {
-        requiresSameSize(this, that);
-        return fromBigInteger(size, toUnsignedBigInteger().mod(that.toUnsignedBigInteger()));
-    }
+    BitVector mul(BitVector that);
 
-    public BitVector pow(BitVector that) {
-        return fromBigInteger(size, toUnsignedBigInteger().pow(that.toInt()));
-    }
+    BitVector div(BitVector that);
 
-    public BitVector and(BitVector that) {
-        requiresSameSize(this, that);
-        return fromBigInteger(size, toUnsignedBigInteger().and(that.toUnsignedBigInteger()));
-    }
+    BitVector mod(BitVector that);
 
-    public BitVector nand(BitVector that) {
-        return this.and(that).not();
-    }
+    BitVector pow(BitVector that);
 
-    public BitVector or(BitVector that) {
-        requiresSameSize(this, that);
-        return fromBigInteger(size, toUnsignedBigInteger().or(that.toUnsignedBigInteger()));
-    }
+    BitVector and(BitVector that);
 
-    public BitVector nor(BitVector that) {
-        return this.or(that).not();
-    }
+    BitVector nand(BitVector that);
 
-    public BitVector xor(BitVector that) {
-        requiresSameSize(this, that);
-        return fromBigInteger(size, toUnsignedBigInteger().xor(that.toUnsignedBigInteger()));
-    }
+    BitVector or(BitVector that);
 
-    public BitVector xnor(BitVector that) {
-        requiresSameSize(this, that);
-        return xor(that).not();
-    }
+    BitVector nor(BitVector that);
 
-    public BitVector ashr(int offset) {
-        if (!msb()) {
-            return lshr(offset);
-        } else {
-            var rep = toUnsignedBigInteger();
-            var high = BigInteger.ONE.shiftLeft(size + 1).subtract(BigInteger.ONE);
-            var low = BigInteger.ONE.shiftLeft(size - offset).subtract(BigInteger.ONE);
-            return fromBigInteger(size, rep.shiftRight(offset).or(high.xor(low)));
-        }
-    }
+    BitVector xor(BitVector that);
 
-    public BitVector lshr(int offset) {
-        return fromBigInteger(size, toUnsignedBigInteger().shiftRight(offset));
-    }
+    BitVector xnor(BitVector that);
 
-    public BitVector shl(int offset) {
-        return fromBigInteger(size, toUnsignedBigInteger().shiftLeft(offset));
-    }
+    BitVector ashr(int offset);
 
-    public boolean eq(BitVector that) {
-        return toUnsignedBigInteger().equals(that.toUnsignedBigInteger());
-    }
+    BitVector lshr(int offset);
 
-    public boolean ne(BitVector that) {
-        return !eq(that);
-    }
+    BitVector shl(int offset);
 
-    public boolean sgt(BitVector that) {
-        return toBigInteger().compareTo(that.toBigInteger()) > 0;
-    }
+    boolean eq(BitVector that);
 
-    public boolean sge(BitVector that) {
-        return toBigInteger().compareTo(that.toBigInteger()) >= 0;
-    }
+    boolean ne(BitVector that);
 
-    public boolean slt(BitVector that) {
-        return toBigInteger().compareTo(that.toBigInteger()) < 0;
-    }
+    boolean sgt(BitVector that);
 
-    public boolean sle(BitVector that) {
-        return toBigInteger().compareTo(that.toBigInteger()) <= 0;
-    }
+    boolean sge(BitVector that);
 
-    public boolean ugt(BitVector that) {
-        return toUnsignedBigInteger().compareTo(that.toUnsignedBigInteger()) > 0;
-    }
+    boolean slt(BitVector that);
 
-    public boolean uge(BitVector that) {
-        return toUnsignedBigInteger().compareTo(that.toUnsignedBigInteger()) >= 0;
-    }
+    boolean sle(BitVector that);
 
-    public boolean ult(BitVector that) {
-        return toUnsignedBigInteger().compareTo(that.toUnsignedBigInteger()) < 0;
-    }
+    boolean ugt(BitVector that);
 
-    public boolean ule(BitVector that) {
-        return toUnsignedBigInteger().compareTo(that.toUnsignedBigInteger()) <= 0;
-    }
+    boolean uge(BitVector that);
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        return eq((BitVector) obj);
-    }
+    boolean ult(BitVector that);
 
-    private void normalize() {
-        int offset = 8 - ((data.length << 3) - size);
-        var mask = (byte) ((1 << offset) - 1);
-        data[0] &= mask;
-    }
-
-    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
-
-    @Override
-    public String toString() {
-        char[] hexChars = new char[data.length * 2];
-        for (int j = 0; j < data.length; j++) {
-            int v = data[j] & 0xFF;
-            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
-            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
-        }
-        return size + "'h" + new String(hexChars);
-    }
-
-    private static void requiresSameSize(BitVector a, BitVector b) {
-        if (a.size() != b.size()) {
-            throw new IllegalArgumentException("Bit vectors must have the same size");
-        }
-    }
+    boolean ule(BitVector that);
 }
