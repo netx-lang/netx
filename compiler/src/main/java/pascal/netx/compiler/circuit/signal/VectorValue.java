@@ -4,7 +4,6 @@ import pascal.netx.compiler.ast.expr.BinaryExpr;
 import pascal.netx.compiler.ast.expr.UnaryExpr;
 import pascal.netx.compiler.circuit.signal.type.BitType;
 import pascal.netx.compiler.circuit.signal.type.Type;
-import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BitVector;
 
@@ -52,9 +51,6 @@ public record VectorValue(BitVector value) implements Value {
     }
 
     public int toInt() {
-        if (value.size() > 32) {
-            Logger.warn("Truncating bit vector rhs {} to 32 bits", value);
-        }
         return value.toInt();
     }
 

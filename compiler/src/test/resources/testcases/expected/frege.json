@@ -14,7 +14,7 @@
       {"type": "wire", "width": 1, "id": "result@0", "loc": "frege.nx:3:9"},
       {
         "type": "builtin", "id": "EQ", "loc": "frege.nx:7:33",
-        "input": ["1'h01", "1'h01"],
+        "input": ["1'h1", "1'h1"],
         "output": ["$o@1"],
         "members": [
           {"type": "wire", "width": 1, "id": "$o@1", "loc": "frege.nx:7:33"}
@@ -22,7 +22,7 @@
       },
       {
         "type": "builtin", "id": "EQ", "loc": "frege.nx:8:33",
-        "input": ["1'h01", "1'h00"],
+        "input": ["1'h1", "1'h0"],
         "output": ["$o@2"],
         "members": [
           {"type": "wire", "width": 1, "id": "$o@2", "loc": "frege.nx:8:33"}
@@ -38,7 +38,7 @@
       },
       {
         "type": "builtin", "id": "EQ", "loc": "frege.nx:13:33",
-        "input": ["1'h00", "1'h01"],
+        "input": ["1'h0", "1'h1"],
         "output": ["$o@4"],
         "members": [
           {"type": "wire", "width": 1, "id": "$o@4", "loc": "frege.nx:13:33"}
@@ -46,7 +46,7 @@
       },
       {
         "type": "builtin", "id": "EQ", "loc": "frege.nx:14:33",
-        "input": ["1'h00", "1'h00"],
+        "input": ["1'h0", "1'h0"],
         "output": ["$o@5"],
         "members": [
           {"type": "wire", "width": 1, "id": "$o@5", "loc": "frege.nx:14:33"}

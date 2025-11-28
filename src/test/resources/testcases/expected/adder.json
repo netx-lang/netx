@@ -20,7 +20,7 @@
         "members": [
           {
             "type": "component", "id": "full_adder", "loc": "adder.nx:7:34",
-            "input": ["a@0[0]", "b@1[0]", "1'h00"],
+            "input": ["a@0[0]", "b@1[0]", "1'h0"],
             "output": ["c@2[0]", "cout@3"],
             "members": [
               {"type": "wire", "width": 1, "id": "cout@3", "loc": "adder.nx:13:25"},
@@ -44,13 +44,13 @@
               },
               {
                 "type": "component", "id": "half_adder", "loc": "adder.nx:14:36",
-                "input": ["c@2[0]", "1'h00"],
+                "input": ["c@2[0]", "1'h0"],
                 "output": ["carry@5", "c@2[0]"],
                 "members": [
                   {"type": "wire", "width": 1, "id": "carry@5", "loc": "adder.nx:19:9"},
                   {
                     "type": "builtin", "id": "AND", "loc": "adder.nx:19:18",
-                    "input": ["c@2[0]", "1'h00"],
+                    "input": ["c@2[0]", "1'h0"],
                     "output": ["carry@5"]
                   }
                 ]

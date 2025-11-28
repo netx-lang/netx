@@ -280,7 +280,7 @@
           {"type": "wire", "width": 4, "id": "num@38", "loc": "simple_timer.nx:34:6"},
           {
             "type": "component", "id": "MUX", "loc": "simple_timer.nx:36:9",
-            "input": ["num@38", "7'h40", "7'h79", "7'h24", "7'h30", "7'h19", "7'h12", "7'h02", "7'h78", "7'h00", "7'h10", "7'h08", "7'h03", "7'h46", "7'h21", "7'h06", "7'h0E"],
+            "input": ["num@38", "7'h40", "7'h79", "7'h24", "7'h30", "7'h19", "7'h12", "7'h2", "7'h78", "7'h0", "7'h10", "7'h8", "7'h3", "7'h46", "7'h21", "7'h6", "7'hE"],
             "output": ["hex[0]@1"],
             "attribute": {"width": "4"},
             "members": [
@@ -511,7 +511,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h02", "$o@56"],
+                "input": ["7'h2", "$o@56"],
                 "output": ["$o@57"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@57", "loc": "simple_timer.nx:64:8"}
@@ -543,7 +543,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h00", "$o@60"],
+                "input": ["7'h0", "$o@60"],
                 "output": ["$o@61"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@61", "loc": "simple_timer.nx:64:8"}
@@ -575,7 +575,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h08", "$o@64"],
+                "input": ["7'h8", "$o@64"],
                 "output": ["$o@65"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@65", "loc": "simple_timer.nx:64:8"}
@@ -591,7 +591,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h03", "$o@66"],
+                "input": ["7'h3", "$o@66"],
                 "output": ["$o@67"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@67", "loc": "simple_timer.nx:64:8"}
@@ -639,7 +639,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h06", "$o@72"],
+                "input": ["7'h6", "$o@72"],
                 "output": ["$o@73"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@73", "loc": "simple_timer.nx:64:8"}
@@ -655,7 +655,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h0E", "$o@74"],
+                "input": ["7'hE", "$o@74"],
                 "output": ["$o@75"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@75", "loc": "simple_timer.nx:64:8"}
@@ -699,7 +699,7 @@
           {"type": "wire", "width": 4, "id": "num@78", "loc": "simple_timer.nx:34:6"},
           {
             "type": "component", "id": "MUX", "loc": "simple_timer.nx:36:9",
-            "input": ["num@78", "7'h40", "7'h79", "7'h24", "7'h30", "7'h19", "7'h12", "7'h02", "7'h78", "7'h00", "7'h10", "7'h08", "7'h03", "7'h46", "7'h21", "7'h06", "7'h0E"],
+            "input": ["num@78", "7'h40", "7'h79", "7'h24", "7'h30", "7'h19", "7'h12", "7'h2", "7'h78", "7'h0", "7'h10", "7'h8", "7'h3", "7'h46", "7'h21", "7'h6", "7'hE"],
             "output": ["hex[1]@2"],
             "attribute": {"width": "4"},
             "members": [
@@ -930,7 +930,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h02", "$o@96"],
+                "input": ["7'h2", "$o@96"],
                 "output": ["$o@97"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@97", "loc": "simple_timer.nx:64:8"}
@@ -962,7 +962,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h00", "$o@100"],
+                "input": ["7'h0", "$o@100"],
                 "output": ["$o@101"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@101", "loc": "simple_timer.nx:64:8"}
@@ -994,7 +994,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h08", "$o@104"],
+                "input": ["7'h8", "$o@104"],
                 "output": ["$o@105"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@105", "loc": "simple_timer.nx:64:8"}
@@ -1010,7 +1010,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h03", "$o@106"],
+                "input": ["7'h3", "$o@106"],
                 "output": ["$o@107"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@107", "loc": "simple_timer.nx:64:8"}
@@ -1058,7 +1058,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h06", "$o@112"],
+                "input": ["7'h6", "$o@112"],
                 "output": ["$o@113"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@113", "loc": "simple_timer.nx:64:8"}
@@ -1074,7 +1074,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h0E", "$o@114"],
+                "input": ["7'hE", "$o@114"],
                 "output": ["$o@115"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@115", "loc": "simple_timer.nx:64:8"}
@@ -1118,7 +1118,7 @@
           {"type": "wire", "width": 4, "id": "num@118", "loc": "simple_timer.nx:34:6"},
           {
             "type": "component", "id": "MUX", "loc": "simple_timer.nx:36:9",
-            "input": ["num@118", "7'h40", "7'h79", "7'h24", "7'h30", "7'h19", "7'h12", "7'h02", "7'h78", "7'h00", "7'h10", "7'h08", "7'h03", "7'h46", "7'h21", "7'h06", "7'h0E"],
+            "input": ["num@118", "7'h40", "7'h79", "7'h24", "7'h30", "7'h19", "7'h12", "7'h2", "7'h78", "7'h0", "7'h10", "7'h8", "7'h3", "7'h46", "7'h21", "7'h6", "7'hE"],
             "output": ["hex[2]@3"],
             "attribute": {"width": "4"},
             "members": [
@@ -1349,7 +1349,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h02", "$o@136"],
+                "input": ["7'h2", "$o@136"],
                 "output": ["$o@137"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@137", "loc": "simple_timer.nx:64:8"}
@@ -1381,7 +1381,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h00", "$o@140"],
+                "input": ["7'h0", "$o@140"],
                 "output": ["$o@141"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@141", "loc": "simple_timer.nx:64:8"}
@@ -1413,7 +1413,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h08", "$o@144"],
+                "input": ["7'h8", "$o@144"],
                 "output": ["$o@145"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@145", "loc": "simple_timer.nx:64:8"}
@@ -1429,7 +1429,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h03", "$o@146"],
+                "input": ["7'h3", "$o@146"],
                 "output": ["$o@147"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@147", "loc": "simple_timer.nx:64:8"}
@@ -1477,7 +1477,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h06", "$o@152"],
+                "input": ["7'h6", "$o@152"],
                 "output": ["$o@153"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@153", "loc": "simple_timer.nx:64:8"}
@@ -1493,7 +1493,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h0E", "$o@154"],
+                "input": ["7'hE", "$o@154"],
                 "output": ["$o@155"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@155", "loc": "simple_timer.nx:64:8"}
@@ -1537,7 +1537,7 @@
           {"type": "wire", "width": 4, "id": "num@158", "loc": "simple_timer.nx:34:6"},
           {
             "type": "component", "id": "MUX", "loc": "simple_timer.nx:36:9",
-            "input": ["num@158", "7'h40", "7'h79", "7'h24", "7'h30", "7'h19", "7'h12", "7'h02", "7'h78", "7'h00", "7'h10", "7'h08", "7'h03", "7'h46", "7'h21", "7'h06", "7'h0E"],
+            "input": ["num@158", "7'h40", "7'h79", "7'h24", "7'h30", "7'h19", "7'h12", "7'h2", "7'h78", "7'h0", "7'h10", "7'h8", "7'h3", "7'h46", "7'h21", "7'h6", "7'hE"],
             "output": ["hex[3]@4"],
             "attribute": {"width": "4"},
             "members": [
@@ -1768,7 +1768,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h02", "$o@176"],
+                "input": ["7'h2", "$o@176"],
                 "output": ["$o@177"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@177", "loc": "simple_timer.nx:64:8"}
@@ -1800,7 +1800,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h00", "$o@180"],
+                "input": ["7'h0", "$o@180"],
                 "output": ["$o@181"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@181", "loc": "simple_timer.nx:64:8"}
@@ -1832,7 +1832,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h08", "$o@184"],
+                "input": ["7'h8", "$o@184"],
                 "output": ["$o@185"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@185", "loc": "simple_timer.nx:64:8"}
@@ -1848,7 +1848,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h03", "$o@186"],
+                "input": ["7'h3", "$o@186"],
                 "output": ["$o@187"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@187", "loc": "simple_timer.nx:64:8"}
@@ -1896,7 +1896,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h06", "$o@192"],
+                "input": ["7'h6", "$o@192"],
                 "output": ["$o@193"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@193", "loc": "simple_timer.nx:64:8"}
@@ -1912,7 +1912,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h0E", "$o@194"],
+                "input": ["7'hE", "$o@194"],
                 "output": ["$o@195"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@195", "loc": "simple_timer.nx:64:8"}
@@ -1956,7 +1956,7 @@
           {"type": "wire", "width": 4, "id": "num@198", "loc": "simple_timer.nx:34:6"},
           {
             "type": "component", "id": "MUX", "loc": "simple_timer.nx:36:9",
-            "input": ["num@198", "7'h40", "7'h79", "7'h24", "7'h30", "7'h19", "7'h12", "7'h02", "7'h78", "7'h00", "7'h10", "7'h08", "7'h03", "7'h46", "7'h21", "7'h06", "7'h0E"],
+            "input": ["num@198", "7'h40", "7'h79", "7'h24", "7'h30", "7'h19", "7'h12", "7'h2", "7'h78", "7'h0", "7'h10", "7'h8", "7'h3", "7'h46", "7'h21", "7'h6", "7'hE"],
             "output": ["hex[4]@5"],
             "attribute": {"width": "4"},
             "members": [
@@ -2187,7 +2187,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h02", "$o@216"],
+                "input": ["7'h2", "$o@216"],
                 "output": ["$o@217"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@217", "loc": "simple_timer.nx:64:8"}
@@ -2219,7 +2219,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h00", "$o@220"],
+                "input": ["7'h0", "$o@220"],
                 "output": ["$o@221"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@221", "loc": "simple_timer.nx:64:8"}
@@ -2251,7 +2251,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h08", "$o@224"],
+                "input": ["7'h8", "$o@224"],
                 "output": ["$o@225"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@225", "loc": "simple_timer.nx:64:8"}
@@ -2267,7 +2267,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h03", "$o@226"],
+                "input": ["7'h3", "$o@226"],
                 "output": ["$o@227"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@227", "loc": "simple_timer.nx:64:8"}
@@ -2315,7 +2315,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h06", "$o@232"],
+                "input": ["7'h6", "$o@232"],
                 "output": ["$o@233"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@233", "loc": "simple_timer.nx:64:8"}
@@ -2331,7 +2331,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h0E", "$o@234"],
+                "input": ["7'hE", "$o@234"],
                 "output": ["$o@235"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@235", "loc": "simple_timer.nx:64:8"}
@@ -2375,7 +2375,7 @@
           {"type": "wire", "width": 4, "id": "num@238", "loc": "simple_timer.nx:34:6"},
           {
             "type": "component", "id": "MUX", "loc": "simple_timer.nx:36:9",
-            "input": ["num@238", "7'h40", "7'h79", "7'h24", "7'h30", "7'h19", "7'h12", "7'h02", "7'h78", "7'h00", "7'h10", "7'h08", "7'h03", "7'h46", "7'h21", "7'h06", "7'h0E"],
+            "input": ["num@238", "7'h40", "7'h79", "7'h24", "7'h30", "7'h19", "7'h12", "7'h2", "7'h78", "7'h0", "7'h10", "7'h8", "7'h3", "7'h46", "7'h21", "7'h6", "7'hE"],
             "output": ["hex[5]@6"],
             "attribute": {"width": "4"},
             "members": [
@@ -2606,7 +2606,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h02", "$o@256"],
+                "input": ["7'h2", "$o@256"],
                 "output": ["$o@257"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@257", "loc": "simple_timer.nx:64:8"}
@@ -2638,7 +2638,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h00", "$o@260"],
+                "input": ["7'h0", "$o@260"],
                 "output": ["$o@261"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@261", "loc": "simple_timer.nx:64:8"}
@@ -2670,7 +2670,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h08", "$o@264"],
+                "input": ["7'h8", "$o@264"],
                 "output": ["$o@265"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@265", "loc": "simple_timer.nx:64:8"}
@@ -2686,7 +2686,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h03", "$o@266"],
+                "input": ["7'h3", "$o@266"],
                 "output": ["$o@267"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@267", "loc": "simple_timer.nx:64:8"}
@@ -2734,7 +2734,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h06", "$o@272"],
+                "input": ["7'h6", "$o@272"],
                 "output": ["$o@273"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@273", "loc": "simple_timer.nx:64:8"}
@@ -2750,7 +2750,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h0E", "$o@274"],
+                "input": ["7'hE", "$o@274"],
                 "output": ["$o@275"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@275", "loc": "simple_timer.nx:64:8"}
@@ -2794,7 +2794,7 @@
           {"type": "wire", "width": 4, "id": "num@278", "loc": "simple_timer.nx:34:6"},
           {
             "type": "component", "id": "MUX", "loc": "simple_timer.nx:36:9",
-            "input": ["num@278", "7'h40", "7'h79", "7'h24", "7'h30", "7'h19", "7'h12", "7'h02", "7'h78", "7'h00", "7'h10", "7'h08", "7'h03", "7'h46", "7'h21", "7'h06", "7'h0E"],
+            "input": ["num@278", "7'h40", "7'h79", "7'h24", "7'h30", "7'h19", "7'h12", "7'h2", "7'h78", "7'h0", "7'h10", "7'h8", "7'h3", "7'h46", "7'h21", "7'h6", "7'hE"],
             "output": ["hex[6]@7"],
             "attribute": {"width": "4"},
             "members": [
@@ -3025,7 +3025,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h02", "$o@296"],
+                "input": ["7'h2", "$o@296"],
                 "output": ["$o@297"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@297", "loc": "simple_timer.nx:64:8"}
@@ -3057,7 +3057,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h00", "$o@300"],
+                "input": ["7'h0", "$o@300"],
                 "output": ["$o@301"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@301", "loc": "simple_timer.nx:64:8"}
@@ -3089,7 +3089,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h08", "$o@304"],
+                "input": ["7'h8", "$o@304"],
                 "output": ["$o@305"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@305", "loc": "simple_timer.nx:64:8"}
@@ -3105,7 +3105,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h03", "$o@306"],
+                "input": ["7'h3", "$o@306"],
                 "output": ["$o@307"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@307", "loc": "simple_timer.nx:64:8"}
@@ -3153,7 +3153,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h06", "$o@312"],
+                "input": ["7'h6", "$o@312"],
                 "output": ["$o@313"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@313", "loc": "simple_timer.nx:64:8"}
@@ -3169,7 +3169,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h0E", "$o@314"],
+                "input": ["7'hE", "$o@314"],
                 "output": ["$o@315"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@315", "loc": "simple_timer.nx:64:8"}
@@ -3213,7 +3213,7 @@
           {"type": "wire", "width": 4, "id": "num@318", "loc": "simple_timer.nx:34:6"},
           {
             "type": "component", "id": "MUX", "loc": "simple_timer.nx:36:9",
-            "input": ["num@318", "7'h40", "7'h79", "7'h24", "7'h30", "7'h19", "7'h12", "7'h02", "7'h78", "7'h00", "7'h10", "7'h08", "7'h03", "7'h46", "7'h21", "7'h06", "7'h0E"],
+            "input": ["num@318", "7'h40", "7'h79", "7'h24", "7'h30", "7'h19", "7'h12", "7'h2", "7'h78", "7'h0", "7'h10", "7'h8", "7'h3", "7'h46", "7'h21", "7'h6", "7'hE"],
             "output": ["hex[7]@8"],
             "attribute": {"width": "4"},
             "members": [
@@ -3444,7 +3444,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h02", "$o@336"],
+                "input": ["7'h2", "$o@336"],
                 "output": ["$o@337"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@337", "loc": "simple_timer.nx:64:8"}
@@ -3476,7 +3476,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h00", "$o@340"],
+                "input": ["7'h0", "$o@340"],
                 "output": ["$o@341"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@341", "loc": "simple_timer.nx:64:8"}
@@ -3508,7 +3508,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h08", "$o@344"],
+                "input": ["7'h8", "$o@344"],
                 "output": ["$o@345"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@345", "loc": "simple_timer.nx:64:8"}
@@ -3524,7 +3524,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h03", "$o@346"],
+                "input": ["7'h3", "$o@346"],
                 "output": ["$o@347"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@347", "loc": "simple_timer.nx:64:8"}
@@ -3572,7 +3572,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h06", "$o@352"],
+                "input": ["7'h6", "$o@352"],
                 "output": ["$o@353"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@353", "loc": "simple_timer.nx:64:8"}
@@ -3588,7 +3588,7 @@
               },
               {
                 "type": "builtin", "id": "AND", "loc": "simple_timer.nx:64:8",
-                "input": ["7'h0E", "$o@354"],
+                "input": ["7'hE", "$o@354"],
                 "output": ["$o@355"],
                 "members": [
                   {"type": "wire", "width": 7, "id": "$o@355", "loc": "simple_timer.nx:64:8"}

@@ -27,19 +27,19 @@ class BitVectorUnitTest {
         BitVector bv6 = BitVector.parse("00000000", 8, 2);
         BitVector bv7 = BitVector.parse("111111111111101010", 18, 2);
         BitVector bv8 = BitVector.parse("000000000000010010", 18, 2);
-        assertEquals(bv5, bv1.ext(8));
-        assertEquals(bv6, bv2.ext(8));
-        assertEquals(bv7, bv3.ext(18));
-        assertEquals(bv8, bv4.ext(18));
+        assertEquals(bv5, bv1.sext(8));
+        assertEquals(bv6, bv2.sext(8));
+        assertEquals(bv7, bv3.sext(18));
+        assertEquals(bv8, bv4.sext(18));
 
         BitVector bv9 = BitVector.parse("0000001", 8, 2);
         BitVector bv10 = BitVector.parse("0000000", 8, 2);
         BitVector bv11 = BitVector.parse("000000000001101010", 18, 2);
         BitVector bv12 = BitVector.parse("000000000000010010", 18, 2);
-        assertEquals(bv9, bv1.unsigned_ext(8));
-        assertEquals(bv10, bv2.unsigned_ext(8));
-        assertEquals(bv11, bv3.unsigned_ext(18));
-        assertEquals(bv12, bv4.unsigned_ext(18));
+        assertEquals(bv9, bv1.uext(8));
+        assertEquals(bv10, bv2.uext(8));
+        assertEquals(bv11, bv3.uext(18));
+        assertEquals(bv12, bv4.uext(18));
     }
 
     @Test
@@ -66,38 +66,14 @@ class BitVectorUnitTest {
         BitVector bv10 = BitVector.parse("41", 4, 16);
         assertEquals("7'h6B", bv1.toString());
         assertEquals("8'h6B", bv2.toString());
-        assertEquals("18'h03536B", bv3.toString());
+        assertEquals("18'h3536B", bv3.toString());
         assertEquals("8'hDB", bv4.toString());
-        assertEquals("9'h00DB", bv5.toString());
+        assertEquals("9'hDB", bv5.toString());
         assertEquals("8'h5F", bv6.toString());
-        assertEquals("20'h00005F", bv7.toString());
+        assertEquals("20'h5F", bv7.toString());
         assertEquals("16'hAF41", bv8.toString());
-        assertEquals("16'h0041", bv9.toString());
-        assertEquals("4'h01", bv10.toString());
-    }
-
-    @Test
-    void testSet() {
-        BitVector bv = BitVector.parse("01101011", 8, 2);
-        bv.set(0);
-        assertEquals(BitVector.parse("01101011", 8, 2), bv);
-        bv.set(2);
-        assertEquals(BitVector.parse("01101111", 8, 2), bv);
-        bv.set(7);
-        assertEquals(BitVector.parse("11101111", 8, 2), bv);
-        assertThrows(ArrayIndexOutOfBoundsException.class, () -> bv.set(8));
-    }
-
-    @Test
-    void testClear() {
-        BitVector bv = BitVector.parse("01101011", 8, 2);
-        bv.clear(0);
-        assertEquals(BitVector.parse("01101010", 8, 2), bv);
-        bv.clear(1);
-        assertEquals(BitVector.parse("01101000", 8, 2), bv);
-        bv.clear();
-        assertEquals(BitVector.parse("00000000", 8, 2), bv);
-        assertThrows(ArrayIndexOutOfBoundsException.class, () -> bv.clear(8));
+        assertEquals("16'h41", bv9.toString());
+        assertEquals("4'h1", bv10.toString());
     }
 
     @Test

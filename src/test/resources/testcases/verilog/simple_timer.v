@@ -516,7 +516,7 @@ module top(
   */
     /*
       COMPONENT "MUX"; "simple_timer.nx:36:9"
-      input: num@38, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h02, 7'h78, 7'h00, 7'h10, 7'h08, 7'h03, 7'h46, 7'h21, 7'h06, 7'h0E
+      input: num@38, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h2, 7'h78, 7'h0, 7'h10, 7'h8, 7'h3, 7'h46, 7'h21, 7'h6, 7'hE
       output: hex[0]@1
       attribute: { width: "4" }
     */
@@ -560,25 +560,25 @@ module top(
       assign _54 = $signed(_39[5]); // simple_timer.nx:64:26
       assign _55 = 7'h12 & _54; // simple_timer.nx:64:8
       assign _56 = $signed(_39[6]); // simple_timer.nx:64:26
-      assign _57 = 7'h02 & _56; // simple_timer.nx:64:8
+      assign _57 = 7'h2 & _56; // simple_timer.nx:64:8
       assign _58 = $signed(_39[7]); // simple_timer.nx:64:26
       assign _59 = 7'h78 & _58; // simple_timer.nx:64:8
       assign _60 = $signed(_39[8]); // simple_timer.nx:64:26
-      assign _61 = 7'h00 & _60; // simple_timer.nx:64:8
+      assign _61 = 7'h0 & _60; // simple_timer.nx:64:8
       assign _62 = $signed(_39[9]); // simple_timer.nx:64:26
       assign _63 = 7'h10 & _62; // simple_timer.nx:64:8
       assign _64 = $signed(_39[10]); // simple_timer.nx:64:26
-      assign _65 = 7'h08 & _64; // simple_timer.nx:64:8
+      assign _65 = 7'h8 & _64; // simple_timer.nx:64:8
       assign _66 = $signed(_39[11]); // simple_timer.nx:64:26
-      assign _67 = 7'h03 & _66; // simple_timer.nx:64:8
+      assign _67 = 7'h3 & _66; // simple_timer.nx:64:8
       assign _68 = $signed(_39[12]); // simple_timer.nx:64:26
       assign _69 = 7'h46 & _68; // simple_timer.nx:64:8
       assign _70 = $signed(_39[13]); // simple_timer.nx:64:26
       assign _71 = 7'h21 & _70; // simple_timer.nx:64:8
       assign _72 = $signed(_39[14]); // simple_timer.nx:64:26
-      assign _73 = 7'h06 & _72; // simple_timer.nx:64:8
+      assign _73 = 7'h6 & _72; // simple_timer.nx:64:8
       assign _74 = $signed(_39[15]); // simple_timer.nx:64:26
-      assign _75 = 7'h0E & _74; // simple_timer.nx:64:8
+      assign _75 = 7'hE & _74; // simple_timer.nx:64:8
       assign _1 = _45 | _47 | _49 | _51 | _53 | _55 | _57 | _59 | _61 | _63 | _65 | _67 | _69 | _71 | _73 | _75; // simple_timer.nx:63:11
     /* END "MUX"; "simple_timer.nx:36:9" */
   /* END "hex_trigger"; "simple_timer.nx:13:11" */
@@ -592,7 +592,7 @@ module top(
   */
     /*
       COMPONENT "MUX"; "simple_timer.nx:36:9"
-      input: num@78, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h02, 7'h78, 7'h00, 7'h10, 7'h08, 7'h03, 7'h46, 7'h21, 7'h06, 7'h0E
+      input: num@78, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h2, 7'h78, 7'h0, 7'h10, 7'h8, 7'h3, 7'h46, 7'h21, 7'h6, 7'hE
       output: hex[1]@2
       attribute: { width: "4" }
     */
@@ -636,25 +636,25 @@ module top(
       assign _94 = $signed(_79[5]); // simple_timer.nx:64:26
       assign _95 = 7'h12 & _94; // simple_timer.nx:64:8
       assign _96 = $signed(_79[6]); // simple_timer.nx:64:26
-      assign _97 = 7'h02 & _96; // simple_timer.nx:64:8
+      assign _97 = 7'h2 & _96; // simple_timer.nx:64:8
       assign _98 = $signed(_79[7]); // simple_timer.nx:64:26
       assign _99 = 7'h78 & _98; // simple_timer.nx:64:8
       assign _100 = $signed(_79[8]); // simple_timer.nx:64:26
-      assign _101 = 7'h00 & _100; // simple_timer.nx:64:8
+      assign _101 = 7'h0 & _100; // simple_timer.nx:64:8
       assign _102 = $signed(_79[9]); // simple_timer.nx:64:26
       assign _103 = 7'h10 & _102; // simple_timer.nx:64:8
       assign _104 = $signed(_79[10]); // simple_timer.nx:64:26
-      assign _105 = 7'h08 & _104; // simple_timer.nx:64:8
+      assign _105 = 7'h8 & _104; // simple_timer.nx:64:8
       assign _106 = $signed(_79[11]); // simple_timer.nx:64:26
-      assign _107 = 7'h03 & _106; // simple_timer.nx:64:8
+      assign _107 = 7'h3 & _106; // simple_timer.nx:64:8
       assign _108 = $signed(_79[12]); // simple_timer.nx:64:26
       assign _109 = 7'h46 & _108; // simple_timer.nx:64:8
       assign _110 = $signed(_79[13]); // simple_timer.nx:64:26
       assign _111 = 7'h21 & _110; // simple_timer.nx:64:8
       assign _112 = $signed(_79[14]); // simple_timer.nx:64:26
-      assign _113 = 7'h06 & _112; // simple_timer.nx:64:8
+      assign _113 = 7'h6 & _112; // simple_timer.nx:64:8
       assign _114 = $signed(_79[15]); // simple_timer.nx:64:26
-      assign _115 = 7'h0E & _114; // simple_timer.nx:64:8
+      assign _115 = 7'hE & _114; // simple_timer.nx:64:8
       assign _2 = _85 | _87 | _89 | _91 | _93 | _95 | _97 | _99 | _101 | _103 | _105 | _107 | _109 | _111 | _113 | _115; // simple_timer.nx:63:11
     /* END "MUX"; "simple_timer.nx:36:9" */
   /* END "hex_trigger"; "simple_timer.nx:14:11" */
@@ -668,7 +668,7 @@ module top(
   */
     /*
       COMPONENT "MUX"; "simple_timer.nx:36:9"
-      input: num@118, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h02, 7'h78, 7'h00, 7'h10, 7'h08, 7'h03, 7'h46, 7'h21, 7'h06, 7'h0E
+      input: num@118, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h2, 7'h78, 7'h0, 7'h10, 7'h8, 7'h3, 7'h46, 7'h21, 7'h6, 7'hE
       output: hex[2]@3
       attribute: { width: "4" }
     */
@@ -712,25 +712,25 @@ module top(
       assign _134 = $signed(_119[5]); // simple_timer.nx:64:26
       assign _135 = 7'h12 & _134; // simple_timer.nx:64:8
       assign _136 = $signed(_119[6]); // simple_timer.nx:64:26
-      assign _137 = 7'h02 & _136; // simple_timer.nx:64:8
+      assign _137 = 7'h2 & _136; // simple_timer.nx:64:8
       assign _138 = $signed(_119[7]); // simple_timer.nx:64:26
       assign _139 = 7'h78 & _138; // simple_timer.nx:64:8
       assign _140 = $signed(_119[8]); // simple_timer.nx:64:26
-      assign _141 = 7'h00 & _140; // simple_timer.nx:64:8
+      assign _141 = 7'h0 & _140; // simple_timer.nx:64:8
       assign _142 = $signed(_119[9]); // simple_timer.nx:64:26
       assign _143 = 7'h10 & _142; // simple_timer.nx:64:8
       assign _144 = $signed(_119[10]); // simple_timer.nx:64:26
-      assign _145 = 7'h08 & _144; // simple_timer.nx:64:8
+      assign _145 = 7'h8 & _144; // simple_timer.nx:64:8
       assign _146 = $signed(_119[11]); // simple_timer.nx:64:26
-      assign _147 = 7'h03 & _146; // simple_timer.nx:64:8
+      assign _147 = 7'h3 & _146; // simple_timer.nx:64:8
       assign _148 = $signed(_119[12]); // simple_timer.nx:64:26
       assign _149 = 7'h46 & _148; // simple_timer.nx:64:8
       assign _150 = $signed(_119[13]); // simple_timer.nx:64:26
       assign _151 = 7'h21 & _150; // simple_timer.nx:64:8
       assign _152 = $signed(_119[14]); // simple_timer.nx:64:26
-      assign _153 = 7'h06 & _152; // simple_timer.nx:64:8
+      assign _153 = 7'h6 & _152; // simple_timer.nx:64:8
       assign _154 = $signed(_119[15]); // simple_timer.nx:64:26
-      assign _155 = 7'h0E & _154; // simple_timer.nx:64:8
+      assign _155 = 7'hE & _154; // simple_timer.nx:64:8
       assign _3 = _125 | _127 | _129 | _131 | _133 | _135 | _137 | _139 | _141 | _143 | _145 | _147 | _149 | _151 | _153 | _155; // simple_timer.nx:63:11
     /* END "MUX"; "simple_timer.nx:36:9" */
   /* END "hex_trigger"; "simple_timer.nx:15:11" */
@@ -744,7 +744,7 @@ module top(
   */
     /*
       COMPONENT "MUX"; "simple_timer.nx:36:9"
-      input: num@158, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h02, 7'h78, 7'h00, 7'h10, 7'h08, 7'h03, 7'h46, 7'h21, 7'h06, 7'h0E
+      input: num@158, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h2, 7'h78, 7'h0, 7'h10, 7'h8, 7'h3, 7'h46, 7'h21, 7'h6, 7'hE
       output: hex[3]@4
       attribute: { width: "4" }
     */
@@ -788,25 +788,25 @@ module top(
       assign _174 = $signed(_159[5]); // simple_timer.nx:64:26
       assign _175 = 7'h12 & _174; // simple_timer.nx:64:8
       assign _176 = $signed(_159[6]); // simple_timer.nx:64:26
-      assign _177 = 7'h02 & _176; // simple_timer.nx:64:8
+      assign _177 = 7'h2 & _176; // simple_timer.nx:64:8
       assign _178 = $signed(_159[7]); // simple_timer.nx:64:26
       assign _179 = 7'h78 & _178; // simple_timer.nx:64:8
       assign _180 = $signed(_159[8]); // simple_timer.nx:64:26
-      assign _181 = 7'h00 & _180; // simple_timer.nx:64:8
+      assign _181 = 7'h0 & _180; // simple_timer.nx:64:8
       assign _182 = $signed(_159[9]); // simple_timer.nx:64:26
       assign _183 = 7'h10 & _182; // simple_timer.nx:64:8
       assign _184 = $signed(_159[10]); // simple_timer.nx:64:26
-      assign _185 = 7'h08 & _184; // simple_timer.nx:64:8
+      assign _185 = 7'h8 & _184; // simple_timer.nx:64:8
       assign _186 = $signed(_159[11]); // simple_timer.nx:64:26
-      assign _187 = 7'h03 & _186; // simple_timer.nx:64:8
+      assign _187 = 7'h3 & _186; // simple_timer.nx:64:8
       assign _188 = $signed(_159[12]); // simple_timer.nx:64:26
       assign _189 = 7'h46 & _188; // simple_timer.nx:64:8
       assign _190 = $signed(_159[13]); // simple_timer.nx:64:26
       assign _191 = 7'h21 & _190; // simple_timer.nx:64:8
       assign _192 = $signed(_159[14]); // simple_timer.nx:64:26
-      assign _193 = 7'h06 & _192; // simple_timer.nx:64:8
+      assign _193 = 7'h6 & _192; // simple_timer.nx:64:8
       assign _194 = $signed(_159[15]); // simple_timer.nx:64:26
-      assign _195 = 7'h0E & _194; // simple_timer.nx:64:8
+      assign _195 = 7'hE & _194; // simple_timer.nx:64:8
       assign _4 = _165 | _167 | _169 | _171 | _173 | _175 | _177 | _179 | _181 | _183 | _185 | _187 | _189 | _191 | _193 | _195; // simple_timer.nx:63:11
     /* END "MUX"; "simple_timer.nx:36:9" */
   /* END "hex_trigger"; "simple_timer.nx:16:11" */
@@ -820,7 +820,7 @@ module top(
   */
     /*
       COMPONENT "MUX"; "simple_timer.nx:36:9"
-      input: num@198, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h02, 7'h78, 7'h00, 7'h10, 7'h08, 7'h03, 7'h46, 7'h21, 7'h06, 7'h0E
+      input: num@198, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h2, 7'h78, 7'h0, 7'h10, 7'h8, 7'h3, 7'h46, 7'h21, 7'h6, 7'hE
       output: hex[4]@5
       attribute: { width: "4" }
     */
@@ -864,25 +864,25 @@ module top(
       assign _214 = $signed(_199[5]); // simple_timer.nx:64:26
       assign _215 = 7'h12 & _214; // simple_timer.nx:64:8
       assign _216 = $signed(_199[6]); // simple_timer.nx:64:26
-      assign _217 = 7'h02 & _216; // simple_timer.nx:64:8
+      assign _217 = 7'h2 & _216; // simple_timer.nx:64:8
       assign _218 = $signed(_199[7]); // simple_timer.nx:64:26
       assign _219 = 7'h78 & _218; // simple_timer.nx:64:8
       assign _220 = $signed(_199[8]); // simple_timer.nx:64:26
-      assign _221 = 7'h00 & _220; // simple_timer.nx:64:8
+      assign _221 = 7'h0 & _220; // simple_timer.nx:64:8
       assign _222 = $signed(_199[9]); // simple_timer.nx:64:26
       assign _223 = 7'h10 & _222; // simple_timer.nx:64:8
       assign _224 = $signed(_199[10]); // simple_timer.nx:64:26
-      assign _225 = 7'h08 & _224; // simple_timer.nx:64:8
+      assign _225 = 7'h8 & _224; // simple_timer.nx:64:8
       assign _226 = $signed(_199[11]); // simple_timer.nx:64:26
-      assign _227 = 7'h03 & _226; // simple_timer.nx:64:8
+      assign _227 = 7'h3 & _226; // simple_timer.nx:64:8
       assign _228 = $signed(_199[12]); // simple_timer.nx:64:26
       assign _229 = 7'h46 & _228; // simple_timer.nx:64:8
       assign _230 = $signed(_199[13]); // simple_timer.nx:64:26
       assign _231 = 7'h21 & _230; // simple_timer.nx:64:8
       assign _232 = $signed(_199[14]); // simple_timer.nx:64:26
-      assign _233 = 7'h06 & _232; // simple_timer.nx:64:8
+      assign _233 = 7'h6 & _232; // simple_timer.nx:64:8
       assign _234 = $signed(_199[15]); // simple_timer.nx:64:26
-      assign _235 = 7'h0E & _234; // simple_timer.nx:64:8
+      assign _235 = 7'hE & _234; // simple_timer.nx:64:8
       assign _5 = _205 | _207 | _209 | _211 | _213 | _215 | _217 | _219 | _221 | _223 | _225 | _227 | _229 | _231 | _233 | _235; // simple_timer.nx:63:11
     /* END "MUX"; "simple_timer.nx:36:9" */
   /* END "hex_trigger"; "simple_timer.nx:17:11" */
@@ -896,7 +896,7 @@ module top(
   */
     /*
       COMPONENT "MUX"; "simple_timer.nx:36:9"
-      input: num@238, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h02, 7'h78, 7'h00, 7'h10, 7'h08, 7'h03, 7'h46, 7'h21, 7'h06, 7'h0E
+      input: num@238, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h2, 7'h78, 7'h0, 7'h10, 7'h8, 7'h3, 7'h46, 7'h21, 7'h6, 7'hE
       output: hex[5]@6
       attribute: { width: "4" }
     */
@@ -940,25 +940,25 @@ module top(
       assign _254 = $signed(_239[5]); // simple_timer.nx:64:26
       assign _255 = 7'h12 & _254; // simple_timer.nx:64:8
       assign _256 = $signed(_239[6]); // simple_timer.nx:64:26
-      assign _257 = 7'h02 & _256; // simple_timer.nx:64:8
+      assign _257 = 7'h2 & _256; // simple_timer.nx:64:8
       assign _258 = $signed(_239[7]); // simple_timer.nx:64:26
       assign _259 = 7'h78 & _258; // simple_timer.nx:64:8
       assign _260 = $signed(_239[8]); // simple_timer.nx:64:26
-      assign _261 = 7'h00 & _260; // simple_timer.nx:64:8
+      assign _261 = 7'h0 & _260; // simple_timer.nx:64:8
       assign _262 = $signed(_239[9]); // simple_timer.nx:64:26
       assign _263 = 7'h10 & _262; // simple_timer.nx:64:8
       assign _264 = $signed(_239[10]); // simple_timer.nx:64:26
-      assign _265 = 7'h08 & _264; // simple_timer.nx:64:8
+      assign _265 = 7'h8 & _264; // simple_timer.nx:64:8
       assign _266 = $signed(_239[11]); // simple_timer.nx:64:26
-      assign _267 = 7'h03 & _266; // simple_timer.nx:64:8
+      assign _267 = 7'h3 & _266; // simple_timer.nx:64:8
       assign _268 = $signed(_239[12]); // simple_timer.nx:64:26
       assign _269 = 7'h46 & _268; // simple_timer.nx:64:8
       assign _270 = $signed(_239[13]); // simple_timer.nx:64:26
       assign _271 = 7'h21 & _270; // simple_timer.nx:64:8
       assign _272 = $signed(_239[14]); // simple_timer.nx:64:26
-      assign _273 = 7'h06 & _272; // simple_timer.nx:64:8
+      assign _273 = 7'h6 & _272; // simple_timer.nx:64:8
       assign _274 = $signed(_239[15]); // simple_timer.nx:64:26
-      assign _275 = 7'h0E & _274; // simple_timer.nx:64:8
+      assign _275 = 7'hE & _274; // simple_timer.nx:64:8
       assign _6 = _245 | _247 | _249 | _251 | _253 | _255 | _257 | _259 | _261 | _263 | _265 | _267 | _269 | _271 | _273 | _275; // simple_timer.nx:63:11
     /* END "MUX"; "simple_timer.nx:36:9" */
   /* END "hex_trigger"; "simple_timer.nx:18:11" */
@@ -972,7 +972,7 @@ module top(
   */
     /*
       COMPONENT "MUX"; "simple_timer.nx:36:9"
-      input: num@278, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h02, 7'h78, 7'h00, 7'h10, 7'h08, 7'h03, 7'h46, 7'h21, 7'h06, 7'h0E
+      input: num@278, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h2, 7'h78, 7'h0, 7'h10, 7'h8, 7'h3, 7'h46, 7'h21, 7'h6, 7'hE
       output: hex[6]@7
       attribute: { width: "4" }
     */
@@ -1016,25 +1016,25 @@ module top(
       assign _294 = $signed(_279[5]); // simple_timer.nx:64:26
       assign _295 = 7'h12 & _294; // simple_timer.nx:64:8
       assign _296 = $signed(_279[6]); // simple_timer.nx:64:26
-      assign _297 = 7'h02 & _296; // simple_timer.nx:64:8
+      assign _297 = 7'h2 & _296; // simple_timer.nx:64:8
       assign _298 = $signed(_279[7]); // simple_timer.nx:64:26
       assign _299 = 7'h78 & _298; // simple_timer.nx:64:8
       assign _300 = $signed(_279[8]); // simple_timer.nx:64:26
-      assign _301 = 7'h00 & _300; // simple_timer.nx:64:8
+      assign _301 = 7'h0 & _300; // simple_timer.nx:64:8
       assign _302 = $signed(_279[9]); // simple_timer.nx:64:26
       assign _303 = 7'h10 & _302; // simple_timer.nx:64:8
       assign _304 = $signed(_279[10]); // simple_timer.nx:64:26
-      assign _305 = 7'h08 & _304; // simple_timer.nx:64:8
+      assign _305 = 7'h8 & _304; // simple_timer.nx:64:8
       assign _306 = $signed(_279[11]); // simple_timer.nx:64:26
-      assign _307 = 7'h03 & _306; // simple_timer.nx:64:8
+      assign _307 = 7'h3 & _306; // simple_timer.nx:64:8
       assign _308 = $signed(_279[12]); // simple_timer.nx:64:26
       assign _309 = 7'h46 & _308; // simple_timer.nx:64:8
       assign _310 = $signed(_279[13]); // simple_timer.nx:64:26
       assign _311 = 7'h21 & _310; // simple_timer.nx:64:8
       assign _312 = $signed(_279[14]); // simple_timer.nx:64:26
-      assign _313 = 7'h06 & _312; // simple_timer.nx:64:8
+      assign _313 = 7'h6 & _312; // simple_timer.nx:64:8
       assign _314 = $signed(_279[15]); // simple_timer.nx:64:26
-      assign _315 = 7'h0E & _314; // simple_timer.nx:64:8
+      assign _315 = 7'hE & _314; // simple_timer.nx:64:8
       assign _7 = _285 | _287 | _289 | _291 | _293 | _295 | _297 | _299 | _301 | _303 | _305 | _307 | _309 | _311 | _313 | _315; // simple_timer.nx:63:11
     /* END "MUX"; "simple_timer.nx:36:9" */
   /* END "hex_trigger"; "simple_timer.nx:19:11" */
@@ -1048,7 +1048,7 @@ module top(
   */
     /*
       COMPONENT "MUX"; "simple_timer.nx:36:9"
-      input: num@318, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h02, 7'h78, 7'h00, 7'h10, 7'h08, 7'h03, 7'h46, 7'h21, 7'h06, 7'h0E
+      input: num@318, 7'h40, 7'h79, 7'h24, 7'h30, 7'h19, 7'h12, 7'h2, 7'h78, 7'h0, 7'h10, 7'h8, 7'h3, 7'h46, 7'h21, 7'h6, 7'hE
       output: hex[7]@8
       attribute: { width: "4" }
     */
@@ -1092,25 +1092,25 @@ module top(
       assign _334 = $signed(_319[5]); // simple_timer.nx:64:26
       assign _335 = 7'h12 & _334; // simple_timer.nx:64:8
       assign _336 = $signed(_319[6]); // simple_timer.nx:64:26
-      assign _337 = 7'h02 & _336; // simple_timer.nx:64:8
+      assign _337 = 7'h2 & _336; // simple_timer.nx:64:8
       assign _338 = $signed(_319[7]); // simple_timer.nx:64:26
       assign _339 = 7'h78 & _338; // simple_timer.nx:64:8
       assign _340 = $signed(_319[8]); // simple_timer.nx:64:26
-      assign _341 = 7'h00 & _340; // simple_timer.nx:64:8
+      assign _341 = 7'h0 & _340; // simple_timer.nx:64:8
       assign _342 = $signed(_319[9]); // simple_timer.nx:64:26
       assign _343 = 7'h10 & _342; // simple_timer.nx:64:8
       assign _344 = $signed(_319[10]); // simple_timer.nx:64:26
-      assign _345 = 7'h08 & _344; // simple_timer.nx:64:8
+      assign _345 = 7'h8 & _344; // simple_timer.nx:64:8
       assign _346 = $signed(_319[11]); // simple_timer.nx:64:26
-      assign _347 = 7'h03 & _346; // simple_timer.nx:64:8
+      assign _347 = 7'h3 & _346; // simple_timer.nx:64:8
       assign _348 = $signed(_319[12]); // simple_timer.nx:64:26
       assign _349 = 7'h46 & _348; // simple_timer.nx:64:8
       assign _350 = $signed(_319[13]); // simple_timer.nx:64:26
       assign _351 = 7'h21 & _350; // simple_timer.nx:64:8
       assign _352 = $signed(_319[14]); // simple_timer.nx:64:26
-      assign _353 = 7'h06 & _352; // simple_timer.nx:64:8
+      assign _353 = 7'h6 & _352; // simple_timer.nx:64:8
       assign _354 = $signed(_319[15]); // simple_timer.nx:64:26
-      assign _355 = 7'h0E & _354; // simple_timer.nx:64:8
+      assign _355 = 7'hE & _354; // simple_timer.nx:64:8
       assign _8 = _325 | _327 | _329 | _331 | _333 | _335 | _337 | _339 | _341 | _343 | _345 | _347 | _349 | _351 | _353 | _355; // simple_timer.nx:63:11
     /* END "MUX"; "simple_timer.nx:36:9" */
   /* END "hex_trigger"; "simple_timer.nx:20:11" */
