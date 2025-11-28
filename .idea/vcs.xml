@@ -2,5 +2,8 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/simulator/cmake-build-debug/_deps/cli-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/simulator/cmake-build-release-coverage/_deps/cli-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/simulator/cmake-build-release/_deps/cli-src" vcs="Git" />
   </component>
 </project>

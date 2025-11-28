@@ -47,7 +47,7 @@ public enum SystemMeta implements Entity {
         if (value.isZero()) {
             return VectorValue.fromInt(0);
         }
-        return VectorValue.fromInt(value.toBigInteger().subtract(BigInteger.ONE).bitLength());
+        return VectorValue.fromInt(value.asUnsignedBI().subtract(BigInteger.ONE).bitLength());
     }
 
     private static Entity print(SourceLoc ignored, AttrBindList args) {

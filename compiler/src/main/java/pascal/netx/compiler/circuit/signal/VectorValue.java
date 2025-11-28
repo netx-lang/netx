@@ -45,13 +45,13 @@ public record VectorValue(BitVector value) implements Value {
     @Nonnull
     public String toString() {
         if (value.size() == 32) {
-            return String.valueOf(value.toInt());
+            return String.valueOf(value.toUInt());
         }
         return value.toString();
     }
 
     public int toInt() {
-        return value.toInt();
+        return value.toUInt();
     }
 
     public boolean isZero() {
