@@ -5,8 +5,8 @@ import pascal.netx.util.lang.Identifier;
 
 import java.util.List;
 
-public record Macro(List<Identifier> identifiers, ExprNode expr) implements Entity {
+public record Macro(ExprNode expr, List<Identifier> identifiers) implements Entity {
     public static Macro of(List<Identifier> identifiers, ExprNode body) {
-        return new Macro(identifiers, body);
+        return new Macro(body, identifiers);
     }
 }

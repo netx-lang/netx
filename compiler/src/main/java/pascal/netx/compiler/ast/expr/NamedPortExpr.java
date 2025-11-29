@@ -7,15 +7,15 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 
-public final class PortConnectionExpr extends ExprNode {
+public final class NamedPortExpr extends ExprNode {
     private final List<PortAssign> ports;
 
-    private PortConnectionExpr(List<PortAssign> ports) {
+    private NamedPortExpr(List<PortAssign> ports) {
         this.ports = ports;
     }
 
-    public static PortConnectionExpr of(List<PortAssign> ports) {
-        return new PortConnectionExpr(ports);
+    public static NamedPortExpr of(List<PortAssign> ports) {
+        return new NamedPortExpr(ports);
     }
 
     public List<PortAssign> getPorts() {
@@ -37,8 +37,8 @@ public final class PortConnectionExpr extends ExprNode {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        PortConnectionExpr portConnectionExpr = (PortConnectionExpr) o;
-        return Objects.equals(ports, portConnectionExpr.ports);
+        NamedPortExpr namedPortExpr = (NamedPortExpr) o;
+        return Objects.equals(ports, namedPortExpr.ports);
     }
 
     @Override

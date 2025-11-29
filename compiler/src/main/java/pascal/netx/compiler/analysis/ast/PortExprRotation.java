@@ -3,7 +3,7 @@ package pascal.netx.compiler.analysis.ast;
 import pascal.netx.compiler.ast.ASTListener;
 import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.expr.BinaryExpr;
-import pascal.netx.compiler.ast.expr.PortConnectionExpr;
+import pascal.netx.compiler.ast.expr.NamedPortExpr;
 
 /**
  * Rotates port expressions in sequential connections.
@@ -31,7 +31,7 @@ public final class PortExprRotation extends ASTAnalysis implements ASTListener {
     public void enter(BinaryExpr node) {
         if (node.getOp() == BinaryExpr.Operator.SEQ) {
             if (node.getLhs() instanceof BinaryExpr tail &&
-                    node.getRhs() instanceof PortConnectionExpr) {
+                    node.getRhs() instanceof NamedPortExpr) {
                 node.setLhs(tail.getLhs());
                 node.setRhs(BinaryExpr.of(BinaryExpr.Operator.SEQ, tail.getRhs(), node.getRhs()));
             }

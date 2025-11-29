@@ -4,6 +4,7 @@ import pascal.netx.compiler.analysis.ast.FreeVariableDetector;
 import pascal.netx.compiler.ast.element.BindingNode;
 import pascal.netx.compiler.ast.element.InterfaceNode;
 import pascal.netx.compiler.ast.expr.*;
+import pascal.netx.compiler.ast.expr.NamedPortExpr;
 import pascal.netx.compiler.ast.expr.qualifier.BindingQualifier;
 import pascal.netx.compiler.ast.expr.qualifier.FilterQualifier;
 import pascal.netx.compiler.ast.expr.qualifier.GeneratorQualifier;
@@ -62,29 +63,18 @@ public final class Evaluator {
         return evaluateToVectorValue(expr).toInt();
     }
 
-    private VectorValue evaluateToVectorValue(ExprNode expr) {
-        return requiresVectorValue(evaluate(expr));
-    }
-
     public BooleanValue evaluateAndCastToBoolean(ExprNode expr) {
         return castToBooleanValue(evaluate(expr));
     }
 
     public MonoBinding evaluateBinding(BindingNode binding) {
-        Identifier id;
-        List<Identifier> freeVariables;
-        switch (binding.getHead()) {
-            case CallExpr param -> {
-                id = param.getHead();
-                freeVariables = param.getArguments().stream()
+        Identifier id = binding.getHead().getSymbol();
+        List<Identifier> freeVariables = switch (binding.getHead()) {
+            case CallExpr param -> param.getArguments().stream()
                         .map(IdentifierExpr.class::cast)
                         .map(IdentifierExpr::getIdentifier).toList();
-            }
-            case IdentifierExpr primary -> {
-                id = primary.getIdentifier();
-                freeVariables = List.of();
-            }
-        }
+            case IdentifierExpr _ -> List.of();
+        };
         var macro = Macro.of(freeVariables, binding.getExpr());
         checkClosedMacro(id, macro);
         return MonoBinding.of(id, macro);
@@ -115,7 +105,7 @@ public final class Evaluator {
             case NumberExpr sub -> evaluateNumberExpr(sub);
             case StringExpr sub -> evaluateStringExpr(sub);
             case SymbolExpr sub -> evaluateSymbolExpr(sub);
-            case PortConnectionExpr sub -> evaluatePortExpr(sub);
+            case NamedPortExpr sub -> evaluateNamedPortExpr(sub);
             case ConditionalExpr sub -> evaluateConditionalExpr(sub);
         };
         Logger.exitLoc();
@@ -325,6 +315,10 @@ public final class Evaluator {
         return op.apply(evaluateToVectorValue(expr.getLhs()), evaluateToVectorValue(expr.getRhs()));
     }
 
+    private VectorValue evaluateToVectorValue(ExprNode expr) {
+        return requiresVectorValue(evaluate(expr));
+    }
+
     private BooleanValue evaluateBinaryExpr(BinaryExpr expr, BooleanValue.BinaryOp op) {
         return op.apply(evaluateAndCastToBoolean(expr.getLhs()), evaluateAndCastToBoolean(expr.getRhs()));
     }
@@ -336,8 +330,8 @@ public final class Evaluator {
         return EList.of(result);
     }
 
-    private Entity evaluatePortExpr(PortConnectionExpr expr) {
-        var ports = new NamedPortExpr();
+    private Entity evaluateNamedPortExpr(NamedPortExpr expr) {
+        var ports = new pascal.netx.compiler.circuit.expr.NamedPortExpr();
         for (var assign : expr.getPorts()) {
             var rhs = castToCircuitExpr(evaluate(assign.rhs()));
             if (assign.isDefault()) {
@@ -521,5 +515,4 @@ public final class Evaluator {
     enum EvaluationMode {
         COMMON, FACTORY, DECLARE_IN_PLACE
     }
-
 }
