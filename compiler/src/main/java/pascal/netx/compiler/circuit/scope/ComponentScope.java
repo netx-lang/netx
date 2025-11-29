@@ -1,7 +1,7 @@
 package pascal.netx.compiler.circuit.scope;
 
-import pascal.netx.compiler.analysis.model.AssignManager;
 import pascal.netx.compiler.backend.Evaluator;
+import pascal.netx.compiler.backend.analysis.model.AssignManager;
 import pascal.netx.compiler.circuit.Entity;
 import pascal.netx.compiler.circuit.Signature;
 import pascal.netx.compiler.circuit.SystemMeta;

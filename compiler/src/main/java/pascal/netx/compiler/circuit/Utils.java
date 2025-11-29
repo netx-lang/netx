@@ -7,8 +7,8 @@ import pascal.netx.compiler.circuit.scope.RepoScope;
 import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
 import pascal.netx.compiler.circuit.signal.BooleanValue;
 import pascal.netx.compiler.circuit.signal.VectorValue;
+import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.utils.CompileCancellationException;
-import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.exception.ShallNotReachHereError;
 
 import java.util.List;

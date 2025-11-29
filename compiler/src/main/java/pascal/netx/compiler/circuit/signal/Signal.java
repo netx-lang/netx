@@ -6,8 +6,8 @@ import pascal.netx.compiler.circuit.signal.selector.PartSelector;
 import pascal.netx.compiler.circuit.signal.selector.Selector;
 import pascal.netx.compiler.circuit.signal.type.PolyType;
 import pascal.netx.compiler.circuit.signal.type.Type;
+import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.utils.CompileCancellationException;
-import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.lang.SourceLoc;
 
 import java.util.LinkedList;

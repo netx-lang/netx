@@ -1,4 +1,4 @@
-package pascal.netx.compiler.utils;
+package pascal.netx.compiler.io;
 
 import org.slf4j.LoggerFactory;
 import pascal.netx.util.exception.ShallNotReachHereError;

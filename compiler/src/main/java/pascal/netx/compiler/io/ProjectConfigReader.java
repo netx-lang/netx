@@ -10,7 +10,6 @@ import pascal.netx.compiler.ast.element.ImportNode;
 import pascal.netx.compiler.ast.element.PackageElement;
 import pascal.netx.compiler.circuit.scope.RepoScope;
 import pascal.netx.compiler.utils.CompileCancellationException;
-import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.lang.Identifier;
 
 import java.io.FileInputStream;

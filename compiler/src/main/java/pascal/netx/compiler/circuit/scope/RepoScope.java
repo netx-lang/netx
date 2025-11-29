@@ -1,9 +1,9 @@
 package pascal.netx.compiler.circuit.scope;
 
 import pascal.netx.compiler.NXCompiler;
+import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.io.PackageManager;
 import pascal.netx.compiler.utils.CompileCancellationException;
-import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.exception.ShallNotReachHereError;
 
 import java.util.List;

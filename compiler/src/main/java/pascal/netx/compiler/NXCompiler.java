@@ -1,9 +1,9 @@
 package pascal.netx.compiler;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import pascal.netx.compiler.analysis.model.*;
 import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.backend.Elaborator;
+import pascal.netx.compiler.backend.analysis.model.*;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.scope.PackageScope;
 import pascal.netx.compiler.circuit.scope.RepoScope;

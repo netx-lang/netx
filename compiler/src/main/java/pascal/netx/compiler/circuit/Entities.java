@@ -4,8 +4,8 @@ import pascal.netx.compiler.circuit.expr.Expr;
 import pascal.netx.compiler.circuit.expr.ParallelExpr;
 import pascal.netx.compiler.circuit.expr.SignalRef;
 import pascal.netx.compiler.circuit.signal.*;
+import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.utils.CompileCancellationException;
-import pascal.netx.compiler.utils.Logger;
 
 import java.util.LinkedList;
 import java.util.List;

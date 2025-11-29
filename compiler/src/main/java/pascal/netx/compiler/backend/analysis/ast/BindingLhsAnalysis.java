@@ -1,11 +1,11 @@
-package pascal.netx.compiler.analysis.ast;
+package pascal.netx.compiler.backend.analysis.ast;
 
 import pascal.netx.compiler.ast.ASTListener;
 import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.BindingNode;
 import pascal.netx.compiler.ast.expr.CallExpr;
 import pascal.netx.compiler.ast.expr.IdentifierExpr;
-import pascal.netx.compiler.utils.Logger;
+import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.utils.ParseCancellationException;
 
 /**

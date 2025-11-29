@@ -17,7 +17,6 @@ import pascal.netx.compiler.ast.expr.selector.BitSelector;
 import pascal.netx.compiler.ast.expr.selector.PartSelector;
 import pascal.netx.compiler.ast.expr.selector.Selector;
 import pascal.netx.compiler.utils.CompileCancellationException;
-import pascal.netx.compiler.utils.Logger;
 import pascal.netx.compiler.utils.ParseCancellationException;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BitVector;
