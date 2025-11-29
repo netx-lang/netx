@@ -1,9 +1,6 @@
 package pascal.netx.compiler.elaborator;
 
-import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
-import pascal.netx.compiler.circuit.scope.ComponentScope;
-import pascal.netx.compiler.circuit.scope.PackageScope;
 import pascal.netx.compiler.circuit.signal.Signal;
 import pascal.netx.compiler.circuit.signal.selector.BitSelector;
 import pascal.netx.compiler.io.Configuration;
@@ -17,21 +14,36 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static pascal.netx.compiler.TestUtils.test;
+import static pascal.netx.test.TestUtils.*;
 
 class ElaboratorUnitTest {
-    private static PackageScope loadDesign(String code) {
-        return NXBuilder.from(Configuration.asDefault())
-                .load(CharStreams.fromString(code)).elaborate().getTop();
+    @Test
+    void testEnum() {
+        testGen("enum");
     }
 
-    private static ComponentScope loadSingleComponent(String code) {
-        return loadDesign(code).getTop();
+    @Test
+    void testFrege() {
+        testGen("frege");
+    }
+
+    @Test
+    void testBind() {
+        testGen("bind_1");
+        testGen("bind_2");
+        testGen("bind_3");
+    }
+
+    @Test
+    void testAttr() {
+        testGen("attr_1");
+        testGen("attr_2");
+        testGen("attr_3");
     }
 
     @Test
     void testListComprehension() {
-        var component = loadSingleComponent("""
+        var component = testSingleComponent("""
                 component inverter : [x[i] | i in [0..4]] -> [x[j] | i in [0..4], let j = 3 - i] {
                     wire x of bit(4);
                 }
@@ -59,7 +71,7 @@ class ElaboratorUnitTest {
                     c <> AND <> (a || b);
                 }
                 """;
-        test(expected, actual);
+        testSugar(expected, actual);
     }
 
     @Test
@@ -74,7 +86,7 @@ class ElaboratorUnitTest {
                     ] <> [a[i] | i in [0..4]];
                 }
                 """;
-        assertDoesNotThrow(() -> loadSingleComponent(code));
+        assertDoesNotThrow(() -> testSingleComponent(code));
     }
 
     @Test
@@ -103,7 +115,7 @@ class ElaboratorUnitTest {
                          parametric_comp(b=4, a=3, c = 5) <> i;
                 }
                 """;
-        test(expected, actual);
+        testSugar(expected, actual);
     }
 
     @Test
@@ -116,7 +128,7 @@ class ElaboratorUnitTest {
                     auto o <> NOT <> i;
                 }
                 """;
-        assertDoesNotThrow(() -> loadSingleComponent(code));
+        assertDoesNotThrow(() -> testSingleComponent(code));
     }
 
     @Test
@@ -151,7 +163,7 @@ class ElaboratorUnitTest {
                     e <> AND(4) <> [a, b, c, d];
                 }
                 """;
-        test(expected, actual);
+        testSugar(expected, actual);
     }
 
     @Test
@@ -171,7 +183,7 @@ class ElaboratorUnitTest {
                     ];
                 }
                 """;
-        test(expected, actual);
+        testSugar(expected, actual);
     }
 
     @Test
@@ -194,7 +206,7 @@ class ElaboratorUnitTest {
                     f <> AND <> [a, b, c, d, e];
                 }
                 """;
-        test(expected, actual);
+        testSugar(expected, actual);
     }
 
     @Test
@@ -217,7 +229,7 @@ class ElaboratorUnitTest {
                     c <> AND <> [a, b];
                 }
                 """;
-        test(expected, actual);
+        testSugar(expected, actual);
     }
 
     @Test
@@ -236,7 +248,7 @@ class ElaboratorUnitTest {
                     f;
                 }
                 """;
-        assertDoesNotThrow(() -> loadSingleComponent(good));
-        assertThrows(CompileCancellationException.class, () -> loadSingleComponent(bad));
+        assertDoesNotThrow(() -> testSingleComponent(good));
+        assertThrows(CompileCancellationException.class, () -> testSingleComponent(bad));
     }
 }

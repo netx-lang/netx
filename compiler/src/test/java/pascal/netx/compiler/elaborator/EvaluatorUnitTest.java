@@ -2,7 +2,7 @@ package pascal.netx.compiler.elaborator;
 
 import org.junit.jupiter.api.Test;
 
-import static pascal.netx.compiler.TestUtils.test;
+import static pascal.netx.test.TestUtils.testSugar;
 
 public class EvaluatorUnitTest {
     @Test
@@ -25,7 +25,7 @@ public class EvaluatorUnitTest {
                     auto if (x < y and x < z) then b <> ADD <> [a, a] else b <> MUL <> [a, a];
                 }
                 """;
-        test(expected, actual);
+        testSugar(expected, actual);
     }
 
     @Test
@@ -44,7 +44,7 @@ public class EvaluatorUnitTest {
                     b <> g(f(3)) <> a;
                 }
                 """;
-        test(expected, actual);
+        testSugar(expected, actual);
     }
 
     @Test
@@ -63,6 +63,6 @@ public class EvaluatorUnitTest {
                     o <> AND <> [1, 2];
                 }
                 """;
-        test(expected, actual);
+        testSugar(expected, actual);
     }
 }

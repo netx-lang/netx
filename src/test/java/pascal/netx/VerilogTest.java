@@ -44,7 +44,7 @@ public class VerilogTest {
 
     private static void test(String other) throws IOException {
         var design = NXBuilder.from(Configuration.asDefault())
-                .loadPath(TEST_DIR.resolve(other + ".nx")).compileAndDump();
+                .load(TEST_DIR.resolve(other + ".nx")).compileAndDump();
         if (GENERATE_EXPECTED) {
             var notepad = NotepadWriter.pathOut(EXPECTED_DIR.resolve(other + ".v"));
             new VerilogTransformer(notepad, design).parse();

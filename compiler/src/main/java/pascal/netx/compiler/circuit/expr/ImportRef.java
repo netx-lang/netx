@@ -34,7 +34,7 @@ public final class ImportRef extends PrimaryExpr implements InstantiationRef {
     @Override
     public String toString() {
         var base = String.join(".", references.stream().map(Identifier::name).toList());
-        if (attrBindList != null) {
+        if (hasAttrBind()) {
             return base + attrBindList;
         }
         return base;

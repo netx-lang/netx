@@ -12,4 +12,8 @@ public sealed abstract class PrimaryExpr implements Expr permits BuiltinRef, Com
     public void setArgList(AttrBindList binding) {
         this.attrBindList = binding;
     }
+
+    protected boolean hasAttrBind() {
+        return attrBindList != null && !attrBindList.isEmpty();
+    }
 }

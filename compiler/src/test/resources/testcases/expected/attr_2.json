@@ -1,0 +1,40 @@
+{
+  "totalData": 2,
+  "top_input": [
+  ],
+  "top_output": [
+  ],
+  "design": {
+    "type": "component",
+    "id": "top",
+    "loc": "attr_2.nx:1:10",
+    "input": [
+    ],
+    "output": [
+    ],
+    "members": [
+      {"type": "wire", "width": 32, "id": "a@0", "loc": "attr_2.nx:2:9"},
+      {
+        "type": "component", "id": "sub", "loc": "attr_2.nx:4:9",
+        "input": ["1"],
+        "output": ["a@0"],
+        "attribute": {"op": "AND <> DUP(2)"},
+        "members": [
+          {
+            "type": "builtin", "id": "AND", "loc": "attr_2.nx:3:13",
+            "input": ["1", "1"],
+            "output": ["$o@1"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@1", "loc": "attr_2.nx:3:13"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "attr_2.nx:8:14",
+            "input": ["$o@1", "$o@1"],
+            "output": ["a@0"]
+          }
+        ]
+      }
+    ]
+  }
+}

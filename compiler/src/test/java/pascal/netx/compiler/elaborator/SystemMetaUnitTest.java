@@ -1,9 +1,9 @@
 package pascal.netx.compiler.elaborator;
 
 import org.junit.jupiter.api.Test;
-import pascal.netx.compiler.TestUtils;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXBuilder;
+import pascal.netx.test.TestUtils;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
@@ -24,7 +24,7 @@ public class SystemMetaUnitTest {
                     b <> CONCAT <> [1'b0, a];
                 }
                 """;
-        TestUtils.test(expected, code);
+        TestUtils.testSugar(expected, code);
     }
 
     @Test
@@ -56,7 +56,7 @@ public class SystemMetaUnitTest {
                     $print("yes");
                 }
                 """;
-        TestUtils.test(expected, code);
+        TestUtils.testSugar(expected, code);
     }
 
     @Test
@@ -74,7 +74,7 @@ public class SystemMetaUnitTest {
                     $print("a is empty");
                 }
                 """;
-        TestUtils.test(expected, code);
+        TestUtils.testSugar(expected, code);
     }
 
     @Test
@@ -93,6 +93,6 @@ public class SystemMetaUnitTest {
                     $print("Length of b: ", 0);
                 }
                 """;
-        TestUtils.test(expected, code);
+        TestUtils.testSugar(expected, code);
     }
 }

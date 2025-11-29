@@ -30,7 +30,7 @@ public final class NXBuilder {
         return NXCompiler.forSinglePackage(root, config);
     }
 
-    public NXCompiler loadPath(Path path) throws IOException {
+    public NXCompiler load(Path path) throws IOException {
         path = path.toAbsolutePath().normalize();
         var fileName = path.getFileName().toString();
         var extension = fileName.substring(fileName.lastIndexOf('.') + 1);

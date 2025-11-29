@@ -1,0 +1,79 @@
+{
+  "totalData": 11,
+  "top_input": ["a", "b", "c"],
+  "top_output": ["d"],
+  "design": {
+    "type": "component",
+    "id": "test",
+    "loc": "bind_1.nx:1:10",
+    "input": ["a@0", "b@1", "c@2"],
+    "output": ["d@3"],
+    "members": [
+      {"type": "wire", "width": 1, "id": "a@0", "loc": "bind_1.nx:2:9"},
+      {"type": "wire", "width": 1, "id": "b@1", "loc": "bind_1.nx:2:12"},
+      {"type": "wire", "width": 1, "id": "c@2", "loc": "bind_1.nx:2:15"},
+      {"type": "wire", "width": 1, "id": "d@3", "loc": "bind_1.nx:2:18"},
+      {
+        "type": "builtin", "id": "NOT", "loc": "bind_1.nx:3:30",
+        "input": ["a@0"],
+        "output": ["$o@4"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@4", "loc": "bind_1.nx:3:30"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "bind_1.nx:3:35",
+        "input": ["b@1"],
+        "output": ["$o@5"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@5", "loc": "bind_1.nx:3:35"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "bind_1.nx:3:22",
+        "input": ["$o@4", "$o@5"],
+        "output": ["$o@6"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@6", "loc": "bind_1.nx:3:22"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "bind_1.nx:3:15",
+        "input": ["$o@6"],
+        "output": ["$o@7"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@7", "loc": "bind_1.nx:3:15"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "bind_1.nx:3:30",
+        "input": ["$o@7"],
+        "output": ["$o@8"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@8", "loc": "bind_1.nx:3:30"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "bind_1.nx:3:35",
+        "input": ["c@2"],
+        "output": ["$o@9"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@9", "loc": "bind_1.nx:3:35"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "bind_1.nx:3:22",
+        "input": ["$o@8", "$o@9"],
+        "output": ["$o@10"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@10", "loc": "bind_1.nx:3:22"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "bind_1.nx:3:15",
+        "input": ["$o@10"],
+        "output": ["d@3"]
+      }
+    ]
+  }
+}

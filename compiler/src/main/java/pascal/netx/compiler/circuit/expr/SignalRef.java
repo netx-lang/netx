@@ -19,7 +19,7 @@ public final class SignalRef extends PrimaryExpr {
 
     @Override
     public String toString() {
-        if (attrBindList != null) {
+        if (hasAttrBind()) {
             return signal.toString() + attrBindList.toString();
         }
         return signal.toString();

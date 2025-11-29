@@ -28,6 +28,10 @@ class ArrayBasedBitVectorUnitTest {
         ArrayBasedBitVector bv5 = new ArrayBasedBitVector(128, negValue);
         assertEquals(negValue, bv4.asSignedBI());
         assertEquals(negValue, bv5.asSignedBI());
+
+        BigInteger negValue2 = BigInteger.valueOf(-614231231289L);
+        ArrayBasedBitVector bv6 = new ArrayBasedBitVector(128, negValue2);
+        assertEquals(negValue2, bv6.asSignedBI());
     }
 
     @Test

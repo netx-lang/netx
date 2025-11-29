@@ -1,27 +1,57 @@
 package pascal.netx.compiler.io;
 
+import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
+import pascal.netx.compiler.NXCompiler;
 import pascal.netx.compiler.ast.element.BindingNode;
 import pascal.netx.compiler.ast.expr.*;
 import pascal.netx.compiler.ast.expr.qualifier.BindingQualifier;
 import pascal.netx.compiler.ast.expr.qualifier.GeneratorQualifier;
 import pascal.netx.compiler.ast.expr.selector.BitSelector;
 import pascal.netx.compiler.ast.expr.selector.PartSelector;
+import pascal.netx.compiler.utils.ParseCancellationException;
 import pascal.netx.util.lang.Identifier;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static pascal.netx.test.TestUtils.TEST_DIR;
 
 class NXParserUnitTest {
-    private static final Path TEST_DIR = Path.of("src/test/resources/testcases/");
-
     static NXParser makeParser(String code) {
         return new NXParser(CharStreams.fromString(code), "test.nx");
+    }
+
+    @Test
+    void testInvalidInput() {
+        CharStream charStream = CharStreams.fromString("invalid input");
+        assertThrows(ParseCancellationException.class,
+                () -> NXBuilder.from(Configuration.asDefault()).load(charStream));
+    }
+
+    @Test
+    void loadPathWithInvalidPath() {
+        Path path = Path.of("invalid/path/to/file.nx");
+        assertThrows(IOException.class, () -> NXBuilder.from(Configuration.asDefault()).load(path));
+    }
+
+    @Test
+    void loadWithCharStream() throws IOException {
+        var string = Files.readString(TEST_DIR.resolve("frege.nx"));
+        CharStream charStream = CharStreams.fromString(string);
+        NXCompiler compiler = NXBuilder.from(Configuration.asDefault()).load(charStream);
+        assertNotNull(compiler);
+    }
+
+    @Test
+    void loadPathWithPath() throws IOException {
+        NXCompiler compiler = NXBuilder.from(Configuration.asDefault())
+                .load(TEST_DIR.resolve("frege.nx"));
+        assertNotNull(compiler);
     }
 
     @Test

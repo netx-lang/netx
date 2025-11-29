@@ -1,0 +1,78 @@
+{
+  "totalData": 10,
+  "top_input": [
+  ],
+  "top_output": [
+  ],
+  "design": {
+    "type": "component",
+    "id": "test",
+    "loc": "bind_2.nx:1:10",
+    "input": [
+    ],
+    "output": [
+    ],
+    "members": [
+      {"type": "clock", "id": "clk@0", "loc": "bind_2.nx:2:9"},
+      {"type": "wire", "width": 1, "id": "a@1", "loc": "bind_2.nx:3:9"},
+      {"type": "wire", "width": 1, "id": "out@2", "loc": "bind_2.nx:3:12"},
+      {"type": "wire", "width": 3, "id": "input@3", "loc": "bind_2.nx:4:9"},
+      {
+        "type": "builtin", "id": "AND", "loc": "bind_2.nx:8:44",
+        "input": ["input@3[0]", "a@1"],
+        "output": ["$o@4"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@4", "loc": "bind_2.nx:8:44"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "REGISTER", "loc": "bind_2.nx:8:19",
+        "input": ["clk@0", "$o@4"],
+        "output": ["$o@5"],
+        "attribute": {"pos_edge": "true"},
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@5", "loc": "bind_2.nx:8:19"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "bind_2.nx:8:44",
+        "input": ["input@3[1]", "a@1"],
+        "output": ["$o@6"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@6", "loc": "bind_2.nx:8:44"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "REGISTER", "loc": "bind_2.nx:8:19",
+        "input": ["clk@0", "$o@6"],
+        "output": ["$o@7"],
+        "attribute": {"pos_edge": "true"},
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@7", "loc": "bind_2.nx:8:19"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "bind_2.nx:8:44",
+        "input": ["input@3[2]", "a@1"],
+        "output": ["$o@8"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@8", "loc": "bind_2.nx:8:44"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "REGISTER", "loc": "bind_2.nx:8:19",
+        "input": ["clk@0", "$o@8"],
+        "output": ["$o@9"],
+        "attribute": {"pos_edge": "true"},
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@9", "loc": "bind_2.nx:8:19"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "bind_2.nx:6:11",
+        "input": ["$o@5", "$o@7", "$o@9"],
+        "output": ["out@2"]
+      }
+    ]
+  }
+}

@@ -1,6 +1,5 @@
 package pascal.netx.compiler.analysis;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
 import pascal.netx.compiler.analysis.ast.SourceLocChecker;
@@ -8,42 +7,21 @@ import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXBuilder;
 import pascal.netx.compiler.io.NXParser;
 import pascal.netx.compiler.utils.TypeCheckingException;
-import pascal.netx.util.TestUtils;
-import pascal.netx.util.print.NotepadWriter;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static pascal.netx.compiler.TestUtils.test;
+import static pascal.netx.test.TestUtils.*;
 
 
 class AnalysisTest {
-    private static final Path TEST_DIR = Path.of("src/test/resources/testcases");
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final boolean GENERATE_EXPECTED = false;
-
     @Test
     void testSourceLocChecker() throws IOException {
-        for (var testcase : TestUtils.collectAllFilesUnder(TEST_DIR)) {
+        for (var testcase : collectAllFilesUnder(TEST_DIR)) {
             if (testcase.getFileName().endsWith(".nx")) {
                 var node = new NXParser(CharStreams.fromPath(testcase), "test").parse();
                 new SourceLocChecker(node).analyze();
             }
-        }
-    }
-
-    private static void testEquals(String code, String output) throws IOException {
-        Configuration config = Configuration.asDefault();
-        if (GENERATE_EXPECTED) {
-            var builder = NXBuilder.from(config);
-            var compiler = builder.load(code);
-            builder.printer(NotepadWriter.pathOut(TEST_DIR.resolve(output))).print(compiler.compileAndDump());
-        } else {
-            var compiler = NXBuilder.from(config).load(code);
-            var expected = MAPPER.reader().readTree(Files.readString(TEST_DIR.resolve(output)));
-            assertEquals(expected, compiler.compileAndDump());
         }
     }
 
@@ -173,7 +151,7 @@ class AnalysisTest {
     }
 
     @Test
-    void testDirectAliasA() throws IOException {
+    void testDirectAliasA() {
         var code = """
                 component top : i -> o {
                   wire i of bit(1);
@@ -183,11 +161,11 @@ class AnalysisTest {
                   }
                 }
                 """;
-        testEquals(code, "expected/direct_alias_a.json");
+        testGen(EXPECTED_DIR.resolve("direct_alias_a.json"), code);
     }
 
     @Test
-    void testDirectAliasB() throws IOException {
+    void testDirectAliasB() {
         var code = """
                 component top : i -> o {
                   wire i of bit(5);
@@ -197,11 +175,11 @@ class AnalysisTest {
                   }
                 }
                 """;
-        testEquals(code, "expected/direct_alias_b.json");
+        testGen(EXPECTED_DIR.resolve("direct_alias_b.json"), code);
     }
 
     @Test
-    void testDirectAliasC() throws IOException {
+    void testDirectAliasC() {
         var code = """
                 component top : i -> o {
                   wire i of bit(5);
@@ -209,11 +187,11 @@ class AnalysisTest {
                   o <> i[4];
                 }
                 """;
-        testEquals(code, "expected/direct_alias_c.json");
+        testGen(EXPECTED_DIR.resolve("direct_alias_c.json"), code);
     }
 
     @Test
-    void testDirectAliasD() throws IOException {
+    void testDirectAliasD() {
         var code = """
                 component top : a -> [b, c] {
                   wire a, b of bit(5);
@@ -225,11 +203,11 @@ class AnalysisTest {
                   }
                 }
                 """;
-        testEquals(code, "expected/direct_alias_d.json");
+        testGen(EXPECTED_DIR.resolve("direct_alias_d.json"), code);
     }
 
     @Test
-    void testDirectAliasE() throws IOException {
+    void testDirectAliasE() {
         var code = """
                 component top : a -> [b, c] {
                   wire a, b of bit(2);
@@ -244,7 +222,7 @@ class AnalysisTest {
                   c <> tmp[3];
                 }
                 """;
-        testEquals(code, "expected/direct_alias_e.json");
+        testGen(EXPECTED_DIR.resolve("direct_alias_e.json"), code);
     }
 
     @Test
@@ -261,7 +239,7 @@ class AnalysisTest {
                     b <> a;
                 }
                 """;
-        test(expected, code);
+        testSugar(expected, code);
     }
 
     @Test
@@ -278,7 +256,7 @@ class AnalysisTest {
                     b <> a;
                 }
                 """;
-        test(expected, code);
+        testSugar(expected, code);
     }
 
     @Test
@@ -295,7 +273,7 @@ class AnalysisTest {
                     b <> a;
                 }
                 """;
-        test(expected, code);
+        testSugar(expected, code);
     }
 
     @Test
@@ -312,7 +290,7 @@ class AnalysisTest {
                     b <> NOT <> a;
                 }
                 """;
-        test(expected, code);
+        testSugar(expected, code);
     }
 
     @Test
@@ -329,7 +307,7 @@ class AnalysisTest {
                     b <> NOT <> a;
                 }
                 """;
-        test(expected, code);
+        testSugar(expected, code);
     }
 
     @Test
@@ -346,7 +324,7 @@ class AnalysisTest {
                     b <> NOT <> a;
                 }
                 """;
-        test(expected, code);
+        testSugar(expected, code);
     }
 
     @Test
@@ -368,7 +346,7 @@ class AnalysisTest {
                     b[3] <> a;
                 }
                 """;
-        test(expected, code);
+        testSugar(expected, code);
     }
 
     @Test
@@ -388,6 +366,6 @@ class AnalysisTest {
                     b[3] <> a[0];
                 }
                 """;
-        test(expected, code);
+        testSugar(expected, code);
     }
 }
