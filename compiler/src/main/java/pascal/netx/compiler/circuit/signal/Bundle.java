@@ -5,8 +5,8 @@ import pascal.netx.compiler.circuit.Entity;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.signal.type.InterfaceType;
 import pascal.netx.compiler.circuit.signal.type.Type;
+import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.utils.CompileCancellationException;
-import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.lang.Identifier;
 
 import javax.annotation.Nonnull;

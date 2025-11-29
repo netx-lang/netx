@@ -6,8 +6,8 @@ import pascal.netx.compiler.circuit.expr.*;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.signal.Data;
 import pascal.netx.compiler.circuit.signal.Signal;
+import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.utils.CompileCancellationException;
-import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.lang.SourceLoc;
 
 import java.util.HashMap;
@@ -21,7 +21,7 @@ import static pascal.netx.compiler.circuit.Utils.compilerOf;
 import static pascal.netx.compiler.circuit.Utils.repoOf;
 import static pascal.netx.compiler.circuit.scope.Attributes.from;
 
-class Connector {
+final class Connector {
     private final ComponentScope scope;
     private final BuiltInComponentFactory factory;
     private Integer argNumHint = null;

@@ -4,8 +4,8 @@ import pascal.netx.compiler.NXCompiler;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.signal.type.BitType;
 import pascal.netx.compiler.circuit.signal.type.Type;
+import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.utils.CompileCancellationException;
-import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
 

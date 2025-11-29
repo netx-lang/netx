@@ -1,7 +1,7 @@
-package pascal.netx.compiler.analysis.ast;
+package pascal.netx.compiler.backend.analysis.ast;
 
-import pascal.netx.compiler.analysis.Analysis;
 import pascal.netx.compiler.ast.PackageNode;
+import pascal.netx.compiler.backend.analysis.Analysis;
 
 /**
  * Base class for analyses that operate on the abstract syntax tree (AST).

@@ -1,11 +1,10 @@
 package pascal.netx.compiler.io;
 
 import org.antlr.v4.runtime.*;
-import pascal.netx.compiler.analysis.ast.*;
 import pascal.netx.compiler.antlr.NetXLexer;
 import pascal.netx.compiler.antlr.NetXParser;
 import pascal.netx.compiler.ast.PackageNode;
-import pascal.netx.compiler.utils.Logger;
+import pascal.netx.compiler.backend.analysis.ast.*;
 import pascal.netx.compiler.utils.ParseCancellationException;
 
 import java.io.IOException;

@@ -1,15 +1,15 @@
-package pascal.netx.compiler.analysis.model;
+package pascal.netx.compiler.backend.analysis.model;
 
 import org.jgrapht.Graph;
 import org.jgrapht.graph.SimpleGraph;
-import pascal.netx.compiler.analysis.model.constraint.*;
+import pascal.netx.compiler.backend.analysis.model.constraint.*;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.scope.PackageScope;
 import pascal.netx.compiler.circuit.signal.Signal;
 import pascal.netx.compiler.circuit.signal.type.BitType;
 import pascal.netx.compiler.circuit.signal.type.PolyType;
 import pascal.netx.compiler.circuit.signal.type.Type;
-import pascal.netx.compiler.utils.Logger;
+import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.utils.TypeCheckingException;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;

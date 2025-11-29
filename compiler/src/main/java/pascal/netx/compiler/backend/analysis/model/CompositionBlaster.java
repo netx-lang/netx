@@ -1,4 +1,4 @@
-package pascal.netx.compiler.analysis.model;
+package pascal.netx.compiler.backend.analysis.model;
 
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.scope.PackageScope;

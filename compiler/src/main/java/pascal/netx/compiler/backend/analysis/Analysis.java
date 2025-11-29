@@ -1,4 +1,4 @@
-package pascal.netx.compiler.analysis;
+package pascal.netx.compiler.backend.analysis;
 
 public interface Analysis {
     void analyze();

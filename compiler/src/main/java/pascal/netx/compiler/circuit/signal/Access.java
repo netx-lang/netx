@@ -4,7 +4,7 @@ import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.signal.selector.Selector;
 import pascal.netx.compiler.circuit.signal.type.BitType;
 import pascal.netx.compiler.circuit.signal.type.Type;
-import pascal.netx.compiler.utils.Logger;
+import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.utils.TypeCheckingException;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;

@@ -1,6 +1,5 @@
 package pascal.netx.compiler.backend;
 
-import pascal.netx.compiler.analysis.ast.FreeVariableDetector;
 import pascal.netx.compiler.ast.element.BindingNode;
 import pascal.netx.compiler.ast.element.InterfaceNode;
 import pascal.netx.compiler.ast.expr.*;
@@ -9,6 +8,7 @@ import pascal.netx.compiler.ast.expr.qualifier.BindingQualifier;
 import pascal.netx.compiler.ast.expr.qualifier.FilterQualifier;
 import pascal.netx.compiler.ast.expr.qualifier.GeneratorQualifier;
 import pascal.netx.compiler.ast.expr.qualifier.Qualifier;
+import pascal.netx.compiler.backend.analysis.ast.FreeVariableDetector;
 import pascal.netx.compiler.circuit.*;
 import pascal.netx.compiler.circuit.expr.*;
 import pascal.netx.compiler.circuit.scope.Attributes;
@@ -24,8 +24,8 @@ import pascal.netx.compiler.circuit.signal.selector.PartSelector;
 import pascal.netx.compiler.circuit.signal.selector.Selector;
 import pascal.netx.compiler.circuit.signal.type.BitType;
 import pascal.netx.compiler.circuit.signal.type.PolyType;
+import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.utils.CompileCancellationException;
-import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.lang.Identifier;
 
 import javax.annotation.Nonnull;

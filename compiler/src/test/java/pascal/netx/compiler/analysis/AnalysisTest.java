@@ -2,7 +2,7 @@ package pascal.netx.compiler.analysis;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
-import pascal.netx.compiler.analysis.ast.SourceLocChecker;
+import pascal.netx.compiler.backend.analysis.ast.SourceLocChecker;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXBuilder;
 import pascal.netx.compiler.io.NXParser;

@@ -3,7 +3,6 @@ package pascal.netx.compiler.io;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import pascal.netx.compiler.NXCompiler;
-import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.print.NotepadWriter;
 
 import java.io.IOException;

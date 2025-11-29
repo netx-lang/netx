@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class EList extends LinkedList<Entity> implements Entity {
+public final class EList extends LinkedList<Entity> implements Entity {
     public static EList of(List<Entity> values) {
         var list = new EList();
         list.addAll(values);

@@ -5,7 +5,6 @@ import pascal.netx.compiler.circuit.scope.binding.MultiBinding;
 import pascal.netx.compiler.circuit.signal.BooleanValue;
 import pascal.netx.compiler.circuit.signal.Value;
 import pascal.netx.compiler.circuit.signal.VectorValue;
-import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.lang.Identifier;
 

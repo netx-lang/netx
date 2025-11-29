@@ -1,10 +1,10 @@
-package pascal.netx.compiler.analysis.ast;
+package pascal.netx.compiler.backend.analysis.ast;
 
 import pascal.netx.compiler.ast.ASTListener;
 import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.ComponentInstantiationNode;
 import pascal.netx.compiler.ast.element.InterfaceNode;
-import pascal.netx.compiler.utils.Logger;
+import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.utils.TypeCheckingException;
 
 /**

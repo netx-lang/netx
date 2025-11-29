@@ -1,4 +1,4 @@
-package pascal.netx.compiler.analysis.model.constraint;
+package pascal.netx.compiler.backend.analysis.model.constraint;
 
 import pascal.netx.compiler.circuit.signal.Signal;
 import pascal.netx.compiler.circuit.signal.type.BitType;

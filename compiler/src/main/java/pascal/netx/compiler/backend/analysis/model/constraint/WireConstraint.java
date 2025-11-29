@@ -1,4 +1,4 @@
-package pascal.netx.compiler.analysis.model.constraint;
+package pascal.netx.compiler.backend.analysis.model.constraint;
 
 public sealed interface WireConstraint permits BinaryConstraint, ConcatConstraint, UnaryConstraint {
 

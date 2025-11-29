@@ -6,8 +6,8 @@ import pascal.netx.compiler.circuit.Utils;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.signal.*;
 import pascal.netx.compiler.circuit.signal.type.PolyType;
+import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.utils.CompileCancellationException;
-import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.lang.Identifier;
 
 import java.util.LinkedHashMap;
