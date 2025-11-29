@@ -8,12 +8,12 @@ import pascal.netx.compiler.circuit.signal.type.PolyType;
 import pascal.netx.compiler.circuit.signal.type.Type;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.Logger;
+import pascal.netx.util.lang.SourceLoc;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public sealed interface Signal extends Entity permits Data, Value {
-
     static Signal accessOf(Signal base, Selector selector) {
         switch (base) {
             case Value value -> {
@@ -66,5 +66,7 @@ public sealed interface Signal extends Entity permits Data, Value {
     }
 
     boolean isBuiltin();
+
+    SourceLoc getSourceLoc();
 
 }

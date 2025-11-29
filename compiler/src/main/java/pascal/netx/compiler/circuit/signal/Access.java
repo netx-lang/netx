@@ -8,6 +8,7 @@ import pascal.netx.compiler.utils.Logger;
 import pascal.netx.compiler.utils.TypeCheckingException;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
+import pascal.netx.util.lang.SourceLoc;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -28,6 +29,11 @@ public record Access(Wire base, Selector selector) implements Data {
     @Override
     public boolean isBuiltin() {
         return base.isBuiltin();
+    }
+
+    @Override
+    public SourceLoc getSourceLoc() {
+        return base.getSourceLoc();
     }
 
     @Override

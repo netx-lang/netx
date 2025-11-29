@@ -6,7 +6,6 @@ import pascal.netx.compiler.circuit.signal.VectorValue;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.Logger;
 import pascal.netx.util.lang.Identifier;
-import pascal.netx.util.lang.SourceLoc;
 
 import java.math.BigInteger;
 
@@ -32,15 +31,15 @@ public enum SystemMeta implements Entity {
         }
     }
 
-    private static Entity log2(SourceLoc loc, AttrBindList args) {
+    private static Entity log2(AttrBindList args) {
         if (args.size() != 1) {
-            Logger.error(loc, "SystemMeta log2 requires exactly one argument, found: {}", args.size());
+            Logger.error("SystemMeta log2 requires exactly one argument, found: {}", args.size());
             throw new CompileCancellationException();
         }
 
         Entity arg = args.getArguments().getFirst();
         if (!(arg instanceof VectorValue(var value))) {
-            Logger.error(loc, "SystemMeta log2 requires a numeric argument, found: {}", arg.getClass().getSimpleName());
+            Logger.error("SystemMeta log2 requires a numeric argument, found: {}", arg.getClass().getSimpleName());
             throw new CompileCancellationException();
         }
 
@@ -50,7 +49,7 @@ public enum SystemMeta implements Entity {
         return VectorValue.fromInt(value.asUnsignedBI().subtract(BigInteger.ONE).bitLength());
     }
 
-    private static Entity print(SourceLoc ignored, AttrBindList args) {
+    private static Entity print(AttrBindList args) {
         var sb = new StringBuilder();
         for (var arg : args.getArguments()) {
             sb.append(arg.toString());
@@ -59,9 +58,9 @@ public enum SystemMeta implements Entity {
         return EList.ofEmpty();
     }
 
-    private static Entity contains(SourceLoc loc, AttrBindList args) {
+    private static Entity contains(AttrBindList args) {
         if (args.size() != 2) {
-            Logger.error(loc, "SystemMeta contains requires exactly two attributes, found: {}", args.size());
+            Logger.error("SystemMeta contains requires exactly two attributes, found: {}", args.size());
             throw new CompileCancellationException();
         }
 
@@ -70,9 +69,9 @@ public enum SystemMeta implements Entity {
         return BooleanValue.of(list.contains(element));
     }
 
-    private static Entity empty(SourceLoc loc, AttrBindList args) {
+    private static Entity empty(AttrBindList args) {
         if (args.size() != 1) {
-            Logger.error(loc, "SystemMeta empty requires exactly one argument, found: {}", args.size());
+            Logger.error("SystemMeta empty requires exactly one argument, found: {}", args.size());
             throw new CompileCancellationException();
         }
 
@@ -80,9 +79,9 @@ public enum SystemMeta implements Entity {
         return BooleanValue.of(list.isEmpty());
     }
 
-    private static Entity length(SourceLoc loc, AttrBindList args) {
+    private static Entity length(AttrBindList args) {
         if (args.size() != 1) {
-            Logger.error(loc, "SystemMeta length requires exactly one argument, found: {}", args.size());
+            Logger.error("SystemMeta length requires exactly one argument, found: {}", args.size());
             throw new CompileCancellationException();
         }
 
@@ -90,12 +89,12 @@ public enum SystemMeta implements Entity {
         return VectorValue.fromInt(list.size());
     }
 
-    public Entity apply(SourceLoc loc, AttrBindList parameters) {
-        return function.apply(loc, parameters);
+    public Entity apply(AttrBindList parameters) {
+        return function.apply(parameters);
     }
 
     @FunctionalInterface
     interface SystemMetaFunction {
-        Entity apply(SourceLoc loc, AttrBindList parameters);
+        Entity apply(AttrBindList parameters);
     }
 }

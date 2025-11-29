@@ -5,6 +5,7 @@ import pascal.netx.compiler.ast.element.InterfaceNode;
 import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
+import pascal.netx.util.lang.SourceLoc;
 
 public final class ComponentRef extends PrimaryExpr implements InstantiationRef {
     private final AbstractComponentNode definition;
@@ -35,6 +36,11 @@ public final class ComponentRef extends PrimaryExpr implements InstantiationRef 
 
     public boolean isInterface() {
         return definition instanceof InterfaceNode;
+    }
+
+    @Override
+    public SourceLoc getSourceLoc() {
+        return identifier.getSourceLoc();
     }
 
     @Override

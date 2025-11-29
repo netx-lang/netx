@@ -1,5 +1,7 @@
 package pascal.netx.compiler.circuit.expr;
 
+import pascal.netx.util.lang.SourceLoc;
+
 import javax.annotation.Nonnull;
 
 public record DecoratedExpr(Decorator decorator, Expr operand) implements Expr {
@@ -16,6 +18,11 @@ public record DecoratedExpr(Decorator decorator, Expr operand) implements Expr {
             case BLOCK_OUT -> "#" + operand;
             case NON_BLOCK -> operand.toString();
         };
+    }
+
+    @Override
+    public SourceLoc getSourceLoc() {
+        return operand.getSourceLoc();
     }
 
     public enum Decorator {

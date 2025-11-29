@@ -3,6 +3,7 @@ package pascal.netx.compiler.circuit.signal;
 import pascal.netx.compiler.circuit.signal.type.Type;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BitVector;
+import pascal.netx.util.lang.SourceLoc;
 
 public sealed interface Value extends Signal permits VectorValue, BooleanValue {
     @Override
@@ -13,6 +14,11 @@ public sealed interface Value extends Signal permits VectorValue, BooleanValue {
     @Override
     default boolean isBuiltin() {
         return false;
+    }
+
+    @Override
+    default SourceLoc getSourceLoc() {
+        return SourceLoc.none();
     }
 
     BitVector toBitVector();

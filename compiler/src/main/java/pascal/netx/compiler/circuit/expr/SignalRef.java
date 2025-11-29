@@ -1,6 +1,7 @@
 package pascal.netx.compiler.circuit.expr;
 
 import pascal.netx.compiler.circuit.signal.Signal;
+import pascal.netx.util.lang.SourceLoc;
 
 public final class SignalRef extends PrimaryExpr {
     private final Signal signal;
@@ -15,6 +16,11 @@ public final class SignalRef extends PrimaryExpr {
 
     public Signal getInstance() {
         return signal;
+    }
+
+    @Override
+    public SourceLoc getSourceLoc() {
+        return signal.getSourceLoc();
     }
 
     @Override

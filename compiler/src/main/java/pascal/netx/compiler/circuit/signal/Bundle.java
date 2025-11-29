@@ -66,9 +66,9 @@ public final class Bundle extends Composition {
         private final LinkedHashMap<Identifier, Data.Factory<?>> factories;
         private final InterfaceType type;
 
-        public Factory(Identifier id, NXCompiler compiler,
+        public Factory(Identifier id, NXCompiler.WireIndexer indexer,
                        LinkedHashMap<Identifier, Data.Factory<?>> factories) {
-            super(compiler);
+            super(indexer);
             this.factories = factories;
             this.type = InterfaceType.of(id,
                     factories.values().stream().map(Data.Factory::getType).toList());
@@ -76,7 +76,7 @@ public final class Bundle extends Composition {
 
         @Override
         public Bundle create(ComponentScope parent, Identifier id) {
-            var result = new Bundle(id, type, compiler.nextDataIndex());
+            var result = new Bundle(id, type, indexer.next());
 
             for (var entry : factories.entrySet()) {
                 Identifier fieldID = entry.getKey();
