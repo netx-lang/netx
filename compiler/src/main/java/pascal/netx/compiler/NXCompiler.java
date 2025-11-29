@@ -3,6 +3,7 @@ package pascal.netx.compiler;
 import com.fasterxml.jackson.databind.JsonNode;
 import pascal.netx.compiler.analysis.model.*;
 import pascal.netx.compiler.ast.PackageNode;
+import pascal.netx.compiler.backend.Elaborator;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.scope.PackageScope;
 import pascal.netx.compiler.circuit.scope.RepoScope;
@@ -29,7 +30,7 @@ public final class NXCompiler {
      * During compilation, once a datum is instantiated,
      * it will be assigned with a unique index, which distinguishes it from other data in the repo.
      */
-    private Supplier<Integer> indexer;
+    private WireIndexer indexer;
 
     public NXCompiler(Configuration config, PackageManager manager) {
         this.config = config;
@@ -38,17 +39,17 @@ public final class NXCompiler {
         repo.setManager(manager);
         repo.setCompiler(this);
         manager.setRepo(repo);
-        this.indexer = newIndexer();
+        this.indexer = new WireIndexer(new AtomicInteger(0)::incrementAndGet);
+    }
+
+    public WireIndexer getIndexer() {
+        return indexer;
     }
 
     public static NXCompiler forSinglePackage(PackageNode node, Configuration config) {
         var manager = PackageManager.ofEmpty();
         manager.addPackage(node);
         return new NXCompiler(config, manager);
-    }
-
-    public static Supplier<Integer> newIndexer() {
-        return new AtomicInteger(0)::incrementAndGet;
     }
 
     public void compile() {
@@ -97,8 +98,10 @@ public final class NXCompiler {
         return manager;
     }
 
-    public int nextDataIndex() {
-        return indexer.get();
+    public record WireIndexer(Supplier<Integer> indexer) {
+        public int next() {
+            return indexer.get();
+        }
     }
 
     /**

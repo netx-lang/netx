@@ -19,6 +19,7 @@ public final class ImportRef extends PrimaryExpr implements InstantiationRef {
         return new ImportRef(references, sourceLoc);
     }
 
+    @Override
     public SourceLoc getSourceLoc() {
         return sourceLoc;
     }

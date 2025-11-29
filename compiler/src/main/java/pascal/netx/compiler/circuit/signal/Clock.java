@@ -24,13 +24,13 @@ public final class Clock extends Wire {
 
     public static class Factory extends Data.Factory<Clock> {
 
-        public Factory(NXCompiler compiler) {
-            super(compiler);
+        public Factory(NXCompiler.WireIndexer indexer) {
+            super(indexer);
         }
 
         @Override
         public Clock create(ComponentScope parent, Identifier id) {
-            return new Clock(id, parent, compiler.nextDataIndex());
+            return new Clock(id, parent, indexer.next());
         }
 
         @Override

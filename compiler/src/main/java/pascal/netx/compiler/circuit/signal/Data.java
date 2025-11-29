@@ -14,10 +14,10 @@ public sealed interface Data extends Signal permits Access, Composition, Wire {
     ComponentScope getParent();
 
     abstract class Factory<T extends Data> implements Entity {
-        protected final NXCompiler compiler;
+        protected final NXCompiler.WireIndexer indexer;
 
-        protected Factory(NXCompiler compiler) {
-            this.compiler = compiler;
+        protected Factory(NXCompiler.WireIndexer indexer) {
+            this.indexer = indexer;
         }
 
         abstract public T create(ComponentScope parent, Identifier id);

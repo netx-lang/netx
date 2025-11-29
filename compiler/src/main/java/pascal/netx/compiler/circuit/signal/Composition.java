@@ -3,6 +3,7 @@ package pascal.netx.compiler.circuit.signal;
 import pascal.netx.compiler.circuit.signal.type.Type;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.Identifier;
+import pascal.netx.util.lang.SourceLoc;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -32,6 +33,11 @@ public abstract sealed class Composition implements Data permits Array, Bundle {
             }
         }
         return result;
+    }
+
+    @Override
+    public SourceLoc getSourceLoc() {
+        return id.getSourceLoc();
     }
 
     @Override

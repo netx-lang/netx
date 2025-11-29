@@ -50,8 +50,8 @@ public final class Array extends Composition {
         private final ArrayType type;
         private final int size;
 
-        public Factory(NXCompiler compiler, int size, Data.Factory<?> elementFactory) {
-            super(compiler);
+        public Factory(NXCompiler.WireIndexer indexer, int size, Data.Factory<?> elementFactory) {
+            super(indexer);
             this.size = size;
             this.elementFactory = elementFactory;
             this.type = ArrayType.of(elementFactory.getType(), size);
@@ -59,7 +59,7 @@ public final class Array extends Composition {
 
         @Override
         public Array create(ComponentScope parent, Identifier id) {
-            var result = new Array(id, type, compiler.nextDataIndex());
+            var result = new Array(id, type, indexer.next());
             for (int i = 0; i < size; i++) {
                 var elementID = Identifier.of(String.format("%s[%d]", id.name(), i))
                         .setSourceLoc(id.getSourceLoc());

@@ -22,6 +22,7 @@ public final class BuiltinRef extends PrimaryExpr implements InstantiationRef {
         return builtin;
     }
 
+    @Override
     public SourceLoc getSourceLoc() {
         return sourceLoc;
     }

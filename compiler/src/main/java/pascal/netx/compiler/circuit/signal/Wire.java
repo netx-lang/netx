@@ -48,6 +48,7 @@ public sealed class Wire implements Data permits Clock {
         return id;
     }
 
+    @Override
     public SourceLoc getSourceLoc() {
         return getIdentifier().getSourceLoc();
     }
@@ -83,8 +84,8 @@ public sealed class Wire implements Data permits Clock {
     public static class Factory extends Data.Factory<Wire> {
         private final Type type;
 
-        public Factory(Type type, NXCompiler compiler) {
-            super(compiler);
+        public Factory(Type type, NXCompiler.WireIndexer indexer) {
+            super(indexer);
             if (type instanceof BitType(int width) && width == 0) {
                 Logger.error("Cannot create a wire with zero width");
                 throw new CompileCancellationException();
@@ -94,7 +95,7 @@ public sealed class Wire implements Data permits Clock {
 
         @Override
         public Wire create(ComponentScope parent, Identifier id) {
-            return new Wire(id, parent, type, compiler.nextDataIndex());
+            return new Wire(id, parent, type, indexer.next());
         }
 
         @Override

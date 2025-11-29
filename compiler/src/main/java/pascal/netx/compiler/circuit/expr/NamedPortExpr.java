@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.List;
 
-public final class PortExpr implements Expr {
+public final class NamedPortExpr implements Expr {
     private final List<PortAssign> ports = new LinkedList<>();
     private Expr defaultExpr = null;
     private SourceLoc loc = SourceLoc.none();
@@ -44,6 +44,11 @@ public final class PortExpr implements Expr {
 
     public void addPortAssign(ExprNode port, Expr value) {
         ports.add(PortAssign.of(port, value));
+    }
+
+    @Override
+    public SourceLoc getSourceLoc() {
+        return loc;
     }
 
     public record PortAssign(ExprNode port, Expr expr) {

@@ -1,4 +1,4 @@
-package pascal.netx.compiler;
+package pascal.netx.compiler.backend;
 
 import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.ast.element.*;
@@ -32,37 +32,33 @@ import static pascal.netx.compiler.circuit.Entities.requiresEList;
 import static pascal.netx.compiler.circuit.Utils.compilerOf;
 import static pascal.netx.compiler.circuit.Utils.requireEqSize;
 
-public final class Elaborator {
-    private final PackageNode node;
-    private final PackageScope pack;
-    private final Configuration config;
-
-    public Elaborator(RepoScope parent, PackageNode node, Configuration config) {
-        this.node = node;
-        this.config = config;
-        this.pack = PackageScope.newPackage(parent);
+public record Elaborator(PackageScope scope, PackageNode node, Configuration config) {
+    public Elaborator(RepoScope repo, PackageNode node, Configuration config) {
+        this(PackageScope.newPackage(repo), node, config);
     }
 
     public PackageScope elaborate() {
         Identifier name = node.getPackageInfo().getIdentifier();
         Logger.startPackage(name, node.getSourceLoc());
+
         initializePackageDefs();
         var topNode = findTopNode();
-        var topScope = pack.instantiateTop(topNode.getIdentifier());
+        var topScope = scope.instantiateTop(topNode.getIdentifier());
         bindConfiguredAttributes(topNode, topScope);
         new ComponentElaborator(topScope).build(topNode);
         setSignature(topScope, topNode);
+
         Logger.finishPackage();
-        return pack;
+        return scope;
     }
 
     private void initializePackageDefs() {
         for (var element : node.getElements()) {
             switch (element) {
-                case EnumNode _enum -> pack.defs().addEnum(_enum);
-                case ImportNode _import -> pack.defs().addImport(_import);
-                case ComponentNode _component -> pack.defs().addComponent(_component);
-                case InterfaceNode _interface -> pack.defs().addInterface(_interface);
+                case EnumNode _enum -> scope.defs().addEnum(_enum);
+                case ImportNode _import -> scope.defs().addImport(_import);
+                case ComponentNode _component -> scope.defs().addComponent(_component);
+                case InterfaceNode _interface -> scope.defs().addInterface(_interface);
             }
         }
     }
@@ -123,7 +119,7 @@ public final class Elaborator {
 
         private void buildInterfaceIO(InterfaceNode node) {
             extractIOList(node.getSig()).forEach(scope::addInput);
-            var factory = new Evaluator.InterfaceFactoryCreator(scope).create(node);
+            var factory = new InterfaceFactoryCreator(scope).create(node);
             var product = factory.create(scope, Identifier.of(InterfaceNode.OUTPUT_NAME));
             var productIter = product.getElements().iterator();
             for (var input : scope.getInputs()) {
@@ -155,7 +151,7 @@ public final class Elaborator {
                 case BranchNode branch -> buildBranch(branch);
                 case BindingNode binding -> buildBinding(binding);
                 case DataInstantiationNode data -> buildData(data);
-                case ComponentInstantiationNode instantiation -> buildSubComponent(instantiation);
+                case ComponentInstantiationNode instantiation -> buildComponent(instantiation);
             }
             Logger.exitLoc();
         }
@@ -205,7 +201,7 @@ public final class Elaborator {
                     Collections.reverse(dimensions);
                     for (ExprNode dimension : dimensions) {
                         var size = evaluator.evaluateToInt(dimension);
-                        factory = new Array.Factory(compilerOf(scope), size, factory);
+                        factory = new Array.Factory(compilerOf(scope).getIndexer(), size, factory);
                     }
                 }
                 var id = rest.getIdentifier();
@@ -231,9 +227,8 @@ public final class Elaborator {
             }
         }
 
-        private void buildSubComponent(ComponentInstantiationNode instantiation) {
-            boolean inPlace = instantiation.needDeclareInPlace();
-            evaluator.evaluate(instantiation.getExpr(), inPlace);
+        private void buildComponent(ComponentInstantiationNode instantiation) {
+            evaluator.evaluate(instantiation.getExpr(), instantiation.needDeclareInPlace());
         }
     }
 }
