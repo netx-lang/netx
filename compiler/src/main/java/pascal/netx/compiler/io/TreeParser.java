@@ -336,13 +336,13 @@ public final class TreeParser {
     }
 
     ExprNode parsePortExpr(PortExprContext ctx) {
-        List<PortConnectionExpr.PortAssign> ports = new ArrayList<>();
+        List<NamedPortExpr.PortAssign> ports = new ArrayList<>();
         for (var assign : ctx.port_assign()) {
             var lhs = parseExpr(assign.lhs);
             var rhs = parseExpr(assign.rhs);
-            ports.add(PortConnectionExpr.PortAssign.of(lhs, rhs));
+            ports.add(NamedPortExpr.PortAssign.of(lhs, rhs));
         }
-        return PortConnectionExpr.of(ports);
+        return NamedPortExpr.of(ports);
     }
 
     ExprNode parseUnaryExpr(UnaryExprContext ctx) {
