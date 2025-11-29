@@ -17,7 +17,7 @@ class NXVisualizerTest {
     @Test
     void testCounter() throws IOException {
         var compiler = NXBuilder.from(Configuration.asDefault())
-                .loadPath(TEST_DIR.resolve("adder.nx"));
+                .load(TEST_DIR.resolve("adder.nx"));
 
         var notepad = NotepadWriter.strOut();
         new DotTransformer(notepad, compiler.compileAndDump(), 2).parse();

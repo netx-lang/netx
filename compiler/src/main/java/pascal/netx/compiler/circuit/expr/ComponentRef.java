@@ -39,7 +39,7 @@ public final class ComponentRef extends PrimaryExpr implements InstantiationRef 
 
     @Override
     public String toString() {
-        if (attrBindList != null) {
+        if (hasAttrBind()) {
             return identifier.toString() + attrBindList;
         }
         return identifier.toString();

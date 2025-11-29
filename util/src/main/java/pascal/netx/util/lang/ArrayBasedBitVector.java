@@ -27,26 +27,16 @@ public record ArrayBasedBitVector(int size, byte[] data) implements BitVector {
     ArrayBasedBitVector(int size, BigInteger value) {
         var _data = new byte[arrayIndex(size - 1) + 1];
 
-        var bytes = value.signum() < 0 ? value.negate().toByteArray() : value.toByteArray();
+        var bytes = value.toByteArray();
         int length = Math.min(_data.length, bytes.length);
         for (int i = 0; i < length; i++) {
             _data[i] = bytes[bytes.length - 1 - i];
         }
         if (value.signum() < 0) {
-            boolean carry = true;
-            for (int i = 0; i < _data.length; i++) {
-                byte inverted = (byte) ~_data[i];
-                if (carry) {
-                    if (inverted == (byte) 0xFF) {
-                        _data[i] = 0;
-                    } else {
-                        _data[i] = (byte) (inverted + 1);
-                        carry = false;
-                    }
-                } else {
-                    _data[i] = inverted;
-                }
+            for (int i = length; i < _data.length; i++) {
+                _data[i] = (byte) 0xFF;
             }
+            _data[length - 1] |= (byte) (0xFF << byteOffset(value.bitLength()));
         }
         this(size, normalize(size, _data));
     }

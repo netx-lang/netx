@@ -1,0 +1,54 @@
+{
+  "totalData": 3,
+  "top_input": [
+  ],
+  "top_output": [
+  ],
+  "design": {
+    "type": "component",
+    "id": "top",
+    "loc": "attr_1.nx:1:10",
+    "input": [
+    ],
+    "output": [
+    ],
+    "members": [
+      {"type": "wire", "width": 32, "id": "a@0", "loc": "attr_1.nx:2:9"},
+      {"type": "wire", "width": 32, "id": "b@1", "loc": "attr_1.nx:2:12"},
+      {
+        "type": "component", "id": "sub", "loc": "attr_1.nx:3:9",
+        "input": ["1"],
+        "output": ["a@0"],
+        "attribute": {"op": "TO"},
+        "members": [
+          {
+            "type": "builtin", "id": "OR", "loc": "attr_1.nx:8:14",
+            "input": ["1", "1"],
+            "output": ["a@0"]
+          }
+        ]
+      },
+      {
+        "type": "component", "id": "sub", "loc": "attr_1.nx:4:9",
+        "input": ["1"],
+        "output": ["b@1"],
+        "attribute": {"op": "NOT"},
+        "members": [
+          {
+            "type": "builtin", "id": "NOT", "loc": "attr_1.nx:4:13",
+            "input": ["1"],
+            "output": ["$o@2"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@2", "loc": "attr_1.nx:4:13"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "attr_1.nx:8:14",
+            "input": ["$o@2", "$o@2"],
+            "output": ["b@1"]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -108,7 +108,7 @@ public class Main {
                 return OBJECT_MAPPER.readTree(Files.readString(path));
             } else {
                 var builder = NXBuilder.from(buildConfiguration());
-                return builder.loadPath(path).compileAndDump();
+                return builder.load(path).compileAndDump();
             }
         }
     }
@@ -130,7 +130,7 @@ public class Main {
         public Integer call() {
             return handleExecution(() -> {
                 var builder = NXBuilder.from(buildConfiguration());
-                var node = builder.loadPath(source).compileAndDump();
+                var node = builder.load(source).compileAndDump();
 
                 if (minimal) {
                     if (output == null) {

@@ -1,0 +1,32 @@
+{
+  "totalData": 1,
+  "top_input": [
+  ],
+  "top_output": [
+  ],
+  "design": {
+    "type": "component",
+    "id": "top",
+    "loc": "attr_3.nx:1:10",
+    "input": [
+    ],
+    "output": [
+    ],
+    "members": [
+      {"type": "wire", "width": 32, "id": "a@0", "loc": "attr_3.nx:2:9"},
+      {
+        "type": "component", "id": "sub", "loc": "attr_3.nx:3:9",
+        "input": ["1"],
+        "output": ["a@0"],
+        "attribute": {"op": "1"},
+        "members": [
+          {
+            "type": "builtin", "id": "OR", "loc": "attr_3.nx:7:14",
+            "input": ["1", "1"],
+            "output": ["a@0"]
+          }
+        ]
+      }
+    ]
+  }
+}

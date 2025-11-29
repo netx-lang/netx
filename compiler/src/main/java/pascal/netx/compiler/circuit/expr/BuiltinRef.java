@@ -28,7 +28,7 @@ public final class BuiltinRef extends PrimaryExpr implements InstantiationRef {
 
     @Override
     public String toString() {
-        if (attrBindList != null) {
+        if (hasAttrBind()) {
             return builtin.toString() + attrBindList;
         }
         return builtin.toString();

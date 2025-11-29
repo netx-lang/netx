@@ -79,11 +79,13 @@ public final class Logger {
     private static void log(LogFunction logFunc, SourceLoc loc, String message, Object... args) {
         var sb = new StringBuilder();
         if (!loc.isNone()) {
-            sb.append(loc).append(": ");
+            sb.append(loc).append(": ").append('\n');
+
         }
-        sb.append(message);
-        for (var entry : INSTANCE.stack) {
-            sb.append("\n\t\t\t\t\tin ").append(entry);
+        sb.append('\t').append(message).append('\n');
+
+        for (var entry : INSTANCE.stack.reversed()) {
+            sb.append("\tin ").append(entry).append('\n');
         }
         logFunc.log(sb.toString(), args);
     }

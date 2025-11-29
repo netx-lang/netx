@@ -1,6 +1,7 @@
 plugins {
     `shared-build-conventions`
     `java-library`
+    `java-test-fixtures`
     antlr
 }
 
@@ -14,6 +15,11 @@ dependencies {
     implementation("org.eclipse.jgit:org.eclipse.jgit:7.1.1.202505221757-r")
     implementation("org.eclipse.jgit:org.eclipse.jgit.ssh.apache:7.1.1.202505221757-r")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-toml:2.15.2")
+
+    testFixturesImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    testFixturesImplementation("com.fasterxml.jackson.dataformat:jackson-dataformat-toml:2.15.2")
+    testFixturesImplementation(project(":util"))
+    testFixturesImplementation(project(":compiler"))
 }
 
 tasks.generateGrammarSource {
