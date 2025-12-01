@@ -27,14 +27,6 @@ public final class Identifier {
         return this;
     }
 
-    public boolean isSystemMeta() {
-        return name.startsWith("$");
-    }
-
-    public String asSystemMeta() {
-        return name.substring(1).toUpperCase();
-    }
-
     public static Identifier ofDummy() {
         return new Identifier("ANONYMOUS").setSourceLoc(SourceLoc.none());
     }

@@ -1,7 +1,6 @@
 package pascal.netx.compiler.model.ast.expr;
 
 import pascal.netx.compiler.model.ast.ASTListener;
-import pascal.netx.util.lang.Identifier;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -54,9 +53,6 @@ public final class NamedPortExpr extends ExprNode {
 
     public record PortAssign(ExprNode lhs, ExprNode rhs) {
         public static PortAssign of(ExprNode lhs, ExprNode rhs) {
-            if (lhs.equals(IdentifierExpr.of(Identifier.of("$default")))) {
-                lhs = null;
-            }
             return new PortAssign(lhs, rhs);
         }
 

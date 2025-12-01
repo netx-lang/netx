@@ -4,7 +4,6 @@ import pascal.netx.compiler.backend.Evaluator;
 import pascal.netx.compiler.backend.analysis.model.AssignManager;
 import pascal.netx.compiler.model.circuit.Entity;
 import pascal.netx.compiler.model.circuit.Signature;
-import pascal.netx.compiler.model.circuit.SystemMeta;
 import pascal.netx.compiler.model.circuit.expr.ComponentRef;
 import pascal.netx.compiler.model.circuit.signal.Signal;
 import pascal.netx.util.exception.ShallNotReachHereError;
@@ -66,12 +65,9 @@ public final class ComponentScope extends Scope {
 
     @Nullable
     public Entity resolveIdentifier(Identifier id) {
-        if (id.isSystemMeta()) {
-            return SystemMeta.resolve(id);
-        }
         Entity entity = lookup(id);
         if (entity == null) {
-            return resolveIdentifierInPack(id);
+            entity = resolveIdentifierInPack(id);
         }
         return entity;
     }

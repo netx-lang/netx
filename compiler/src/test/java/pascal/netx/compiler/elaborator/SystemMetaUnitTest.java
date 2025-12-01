@@ -12,8 +12,8 @@ public class SystemMetaUnitTest {
     void testLog2() {
         var code = """
                 component test : [a] -> [b] {
-                    wire a of bit($log2(32));
-                    wire b of bit($log2(64));
+                    wire a of bit(log2(32));
+                    wire b of bit(log2(64));
                     b <> CONCAT <> [1'b0, a];
                 }
                 """;
@@ -33,7 +33,7 @@ public class SystemMetaUnitTest {
                 component test {
                     for (i in [0..4]) {
                         for (j in [0..4]) {
-                            $print("i = ", i, ", ", "j = ", j);
+                            print("i = ", i, ", ", "j = ", j);
                         }
                     }
                 }
@@ -47,13 +47,13 @@ public class SystemMetaUnitTest {
                 component test {
                     let a = [1, 2, 3];
                     let b = [4, 5, 6];
-                    if ($contains(a, 2)) then $print("yes");
-                    if ($contains(b, 2)) then $print("no");
+                    if (contains(a, 2)) then print("yes");
+                    if (contains(b, 2)) then print("no");
                 }
                 """;
         var expected = """
                 component test {
-                    $print("yes");
+                    print("yes");
                 }
                 """;
         TestUtils.testSugar(expected, code);
@@ -65,13 +65,13 @@ public class SystemMetaUnitTest {
                 component test {
                     let a = [];
                     let b = [1, 2, 3];
-                    if ($empty(a)) then $print("a is empty");
-                    if ($empty(b)) then $print("b is empty");
+                    if (empty(a)) then print("a is empty");
+                    if (empty(b)) then print("b is empty");
                 }
                 """;
         var expected = """
                 component test {
-                    $print("a is empty");
+                    print("a is empty");
                 }
                 """;
         TestUtils.testSugar(expected, code);
@@ -83,14 +83,32 @@ public class SystemMetaUnitTest {
                 component test {
                     let a = [1, 2, 3];
                     let b = [];
-                    $print("Length of a: ", $length(a));
-                    $print("Length of b: ", $length(b));
+                    print("Length of a: ", length(a));
+                    print("Length of b: ", length(b));
                 }
                 """;
         var expected = """
                 component test {
-                    $print("Length of a: ", 3);
-                    $print("Length of b: ", 0);
+                    print("Length of a: ", 3);
+                    print("Length of b: ", 0);
+                }
+                """;
+        TestUtils.testSugar(expected, code);
+    }
+
+    @Test
+    void testOverride() {
+        var code = """
+                component test : [a] -> [b] {
+                    let print = 1;
+                    wire a, b of bit(print);
+                    b <> a;
+                }
+                """;
+        var expected = """
+                component test : [a] -> [b] {
+                    wire a, b of bit(1);
+                    b <> a;
                 }
                 """;
         TestUtils.testSugar(expected, code);
