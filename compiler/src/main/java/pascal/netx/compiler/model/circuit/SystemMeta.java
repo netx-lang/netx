@@ -7,6 +7,7 @@ import pascal.netx.compiler.model.circuit.signal.VectorValue;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.util.lang.Identifier;
 
+import javax.annotation.Nullable;
 import java.math.BigInteger;
 
 public enum SystemMeta implements Entity {
@@ -22,12 +23,12 @@ public enum SystemMeta implements Entity {
         this.function = function;
     }
 
+    @Nullable
     public static SystemMeta resolve(Identifier id) {
         try {
-            return SystemMeta.valueOf(id.asSystemMeta());
+            return SystemMeta.valueOf(id.name().toUpperCase());
         } catch (IllegalArgumentException e) {
-            Logger.error(id.getSourceLoc(), "Unknown system meta function: {}", id.name());
-            throw new CompileCancellationException();
+            return null;
         }
     }
 

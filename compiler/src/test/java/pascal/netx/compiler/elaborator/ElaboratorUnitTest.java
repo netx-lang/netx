@@ -233,6 +233,31 @@ class ElaboratorUnitTest {
     }
 
     @Test
+    void testDefaultNamedConnection() {
+        var actual = """
+                component top : [a] -> [d] {
+                    wire a, d of bit(32);
+                    d <> test <> { a : a, default : 0 };
+                }
+                component test : [a, b, c] -> [d] {
+                    wire a, b, c, d of bit(32);
+                    d <> ADD <> [a, b, c];
+                }
+                """;
+        var expected = """
+                component top : [a] -> [d] {
+                    wire a, d of bit(32);
+                    d <> test <> { a : a, b : 0, c : 0 };
+                }
+                component test : [a, b, c] -> [d] {
+                    wire a, b, c, d of bit(32);
+                    d <> ADD <> [a, b, c];
+                }
+                """;
+        testSugar(expected, actual);
+    }
+
+    @Test
     void testClosedMacro() {
         var good = """
                 component top : [] -> [] {

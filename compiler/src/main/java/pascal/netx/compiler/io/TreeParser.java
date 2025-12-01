@@ -337,7 +337,7 @@ public final class TreeParser {
     ExprNode parsePortExpr(PortExprContext ctx) {
         List<NamedPortExpr.PortAssign> ports = new ArrayList<>();
         for (var assign : ctx.port_assign()) {
-            var lhs = parseExpr(assign.lhs);
+            var lhs = assign.lhs == null ? null : parseExpr(assign.lhs);
             var rhs = parseExpr(assign.rhs);
             ports.add(NamedPortExpr.PortAssign.of(lhs, rhs));
         }

@@ -1,6 +1,7 @@
 package pascal.netx.compiler.model.circuit.scope;
 
 import pascal.netx.compiler.model.circuit.Entity;
+import pascal.netx.compiler.model.circuit.SystemMeta;
 import pascal.netx.compiler.model.circuit.expr.BuiltinRef;
 import pascal.netx.compiler.model.circuit.scope.binding.Binding;
 import pascal.netx.compiler.model.circuit.scope.binding.MultiBinding;
@@ -90,6 +91,6 @@ public abstract sealed class Scope permits ComponentScope, PackageScope, RepoSco
         if (BuiltinComponent.isBuiltin(id)) {
             return BuiltinRef.of(BuiltinComponent.of(id), id.getSourceLoc());
         }
-        return null;
+        return SystemMeta.resolve(id);
     }
 }
