@@ -100,7 +100,7 @@ expression
     | lhs=expression op='|' rhs=expression                            # BinaryExpr
     | lhs=expression op='and' rhs=expression                          # BinaryExpr
     | lhs=expression op='or' rhs=expression                           # BinaryExpr
-    | lhs=expression op='::' rhs=expression                           # BinaryExpr
+    | lhs=expression op='++' rhs=expression                           # BinaryExpr
     | lhs=expression op='<>' rhs=expression                           # BinaryExpr
     | lhs=expression op='||' rhs=expression                           # BinaryExpr
     | '{' port_assign (',' port_assign)* '}'                          # PortExpr

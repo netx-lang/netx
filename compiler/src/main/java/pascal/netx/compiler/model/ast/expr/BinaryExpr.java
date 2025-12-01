@@ -103,7 +103,7 @@ public final class BinaryExpr extends ExprNode {
         static {
             OP_MAP.put("<>", SEQ);
             OP_MAP.put("||", PAR);
-            OP_MAP.put("::", CONCAT);
+            OP_MAP.put("++", CONCAT);
             OP_MAP.put("**", POW);
             OP_MAP.put("+", ADD);
             OP_MAP.put("-", SUB);

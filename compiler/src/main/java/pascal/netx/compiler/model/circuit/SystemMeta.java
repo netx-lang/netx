@@ -13,7 +13,7 @@ public enum SystemMeta implements Entity {
     LOG2(SystemMeta::log2),
     PRINT(SystemMeta::print),
     EMPTY(SystemMeta::empty),
-    LENGTH(SystemMeta::length), // Alias for empty
+    LENGTH(SystemMeta::length),
     CONTAINS(SystemMeta::contains);
 
     private final SystemMetaFunction function;
