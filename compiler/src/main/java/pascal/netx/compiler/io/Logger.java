@@ -54,6 +54,8 @@ public final class Logger {
 
     public static void error(SourceLoc loc, String message, Object... args) {
         log(logger::error, loc, message, args);
+        getInstance().stack.clear();
+        getInstance().sourceLocStack.clear();
     }
 
     public static void warn(String message, Object... args) {

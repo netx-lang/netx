@@ -1,9 +1,9 @@
 package pascal.netx.compiler.backend.analysis.ast;
 
-import pascal.netx.compiler.ast.ASTListener;
-import pascal.netx.compiler.ast.PackageNode;
-import pascal.netx.compiler.ast.expr.BinaryExpr;
-import pascal.netx.compiler.ast.expr.NamedPortExpr;
+import pascal.netx.compiler.model.ast.ASTListener;
+import pascal.netx.compiler.model.ast.PackageNode;
+import pascal.netx.compiler.model.ast.expr.BinaryExpr;
+import pascal.netx.compiler.model.ast.expr.NamedPortExpr;
 
 /**
  * Rotates port expressions in sequential connections.

@@ -6,10 +6,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import pascal.netx.compiler.NXCompiler;
-import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.io.NXBuilder;
+import pascal.netx.compiler.model.circuit.scope.ComponentScope;
 import pascal.netx.util.print.NotepadWriter;
 
 import java.io.IOException;

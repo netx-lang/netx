@@ -1,26 +1,26 @@
 package pascal.netx.compiler.backend;
 
 import pascal.netx.compiler.NXCompiler;
-import pascal.netx.compiler.circuit.Entities;
-import pascal.netx.compiler.circuit.Entity;
-import pascal.netx.compiler.circuit.Utils;
-import pascal.netx.compiler.circuit.expr.BuiltinRef;
-import pascal.netx.compiler.circuit.scope.Attributes;
-import pascal.netx.compiler.circuit.scope.ComponentScope;
-import pascal.netx.compiler.circuit.scope.Scope;
-import pascal.netx.compiler.circuit.signal.Clock;
-import pascal.netx.compiler.circuit.signal.Signal;
-import pascal.netx.compiler.circuit.signal.Wire;
-import pascal.netx.compiler.circuit.signal.selector.Selector;
-import pascal.netx.compiler.circuit.signal.type.BitType;
-import pascal.netx.compiler.circuit.signal.type.PolyType;
-import pascal.netx.compiler.circuit.signal.type.Type;
+import pascal.netx.compiler.model.circuit.Entities;
+import pascal.netx.compiler.model.circuit.Entity;
+import pascal.netx.compiler.model.circuit.Utils;
+import pascal.netx.compiler.model.circuit.expr.BuiltinRef;
+import pascal.netx.compiler.model.circuit.scope.Attributes;
+import pascal.netx.compiler.model.circuit.scope.ComponentScope;
+import pascal.netx.compiler.model.circuit.scope.Scope;
+import pascal.netx.compiler.model.circuit.signal.Clock;
+import pascal.netx.compiler.model.circuit.signal.Signal;
+import pascal.netx.compiler.model.circuit.signal.Wire;
+import pascal.netx.compiler.model.circuit.signal.selector.Selector;
+import pascal.netx.compiler.model.type.BitType;
+import pascal.netx.compiler.model.type.Hole;
+import pascal.netx.compiler.model.type.Type;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
 
 import java.util.function.Function;
 
-import static pascal.netx.compiler.circuit.Entities.requiresVectorValue;
+import static pascal.netx.compiler.model.circuit.Entities.requireVectorValue;
 import static pascal.netx.util.lang.BuiltinComponent.REG_CLK_EDGE_ATTR;
 import static pascal.netx.util.lang.BuiltinComponent.TO;
 
@@ -74,7 +74,7 @@ record BuiltInComponentFactory(NXCompiler.WireIndexer indexer) {
                 "Register component requires only one boolean argument for clock edge");
         var result = instantiate(parent, ref);
         var attributes = new Attributes();
-        moveAttribute(attributes, ref, REG_CLK_EDGE_ATTR, 0, Entities::requiresBooleanValue);
+        moveAttribute(attributes, ref, REG_CLK_EDGE_ATTR, 0, Entities::requireBooleanValue);
         result.setAttributes(attributes);
         result.addInput(newClock(result));
         result.addInput(newWire(result, "i"));
@@ -88,9 +88,9 @@ record BuiltInComponentFactory(NXCompiler.WireIndexer indexer) {
                         "boolean clock edge, boolean reset edge, integer reset value");
         var result = instantiate(parent, ref);
         var attributes = new Attributes();
-        moveAttribute(attributes, ref, REG_CLK_EDGE_ATTR, 0, Entities::requiresBooleanValue);
-        moveAttribute(attributes, ref, BuiltinComponent.REG_RST_EDGE_ATTR, 1, Entities::requiresBooleanValue);
-        moveAttribute(attributes, ref, BuiltinComponent.REG_RST_VALUE_ATTR, 2, Entities::requiresVectorValue);
+        moveAttribute(attributes, ref, REG_CLK_EDGE_ATTR, 0, Entities::requireBooleanValue);
+        moveAttribute(attributes, ref, BuiltinComponent.REG_RST_EDGE_ATTR, 1, Entities::requireBooleanValue);
+        moveAttribute(attributes, ref, BuiltinComponent.REG_RST_VALUE_ATTR, 2, Entities::requireVectorValue);
         result.setAttributes(attributes);
         result.addInput(newClock(result));
         result.addInput(newWire(result, "rst", BitType.of(1)));
@@ -102,7 +102,7 @@ record BuiltInComponentFactory(NXCompiler.WireIndexer indexer) {
     private ComponentScope createDupComponent(Scope parent, BuiltinRef ref) {
         Utils.requireEqSize(1, ref.getArgList(),
                 "Dup component requires only one integer argument for number of outputs");
-        int dup = requiresVectorValue(ref.getArgList().get("n", 0)).toInt();
+        int dup = requireVectorValue(ref.getArgList().get("n", 0)).toInt();
 
         var component = instantiate(parent, ref);
         var entity = newWire(component, "entity");
@@ -116,7 +116,7 @@ record BuiltInComponentFactory(NXCompiler.WireIndexer indexer) {
     private ComponentScope createSplitComponent(Scope parent, BuiltinRef ref) {
         Utils.requireEqSize(1, ref.getArgList(),
                 "Split component requires only one integer argument for input bit width");
-        int split = requiresVectorValue(ref.getArgList().get("n", 0)).toInt();
+        int split = requireVectorValue(ref.getArgList().get("n", 0)).toInt();
 
         var result = instantiate(parent, ref);
         var entity = newWire(result, "entity", BitType.of(split));
@@ -135,7 +135,7 @@ record BuiltInComponentFactory(NXCompiler.WireIndexer indexer) {
         } else {
             Utils.requireEqSize(1, ref.getArgList(),
                     "Cast component requires one integer argument for bit width");
-            int width = requiresVectorValue(ref.getArgList().get("width", 0)).toInt();
+            int width = requireVectorValue(ref.getArgList().get("width", 0)).toInt();
             result.addInput(newWire(result, "i"));
             result.addOutput(newWire(result, "o", BitType.of(width)));
         }
@@ -173,7 +173,7 @@ record BuiltInComponentFactory(NXCompiler.WireIndexer indexer) {
         if (!ref.getArgList().isEmpty()) {
             Utils.requireEqSize(1, ref.getArgList(),
                     "Multi-input component requires only one integer argument for number of inputs");
-            ports = requiresVectorValue(ref.getArgList().get("n", 0)).toInt();
+            ports = requireVectorValue(ref.getArgList().get("n", 0)).toInt();
         } else {
             ports = argNumHint;
         }
@@ -195,7 +195,7 @@ record BuiltInComponentFactory(NXCompiler.WireIndexer indexer) {
     }
 
     private Wire newWire(ComponentScope result, String name) {
-        return newWire(result, name, PolyType.getInstance());
+        return newWire(result, name, new Hole());
     }
 
     private Clock newClock(ComponentScope result) {

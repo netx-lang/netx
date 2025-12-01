@@ -3,13 +3,13 @@ package pascal.netx.compiler.backend.analysis.model;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.SimpleGraph;
 import pascal.netx.compiler.backend.analysis.model.constraint.*;
-import pascal.netx.compiler.circuit.scope.ComponentScope;
-import pascal.netx.compiler.circuit.scope.PackageScope;
-import pascal.netx.compiler.circuit.signal.Signal;
-import pascal.netx.compiler.circuit.signal.type.BitType;
-import pascal.netx.compiler.circuit.signal.type.PolyType;
-import pascal.netx.compiler.circuit.signal.type.Type;
 import pascal.netx.compiler.io.Logger;
+import pascal.netx.compiler.model.circuit.scope.ComponentScope;
+import pascal.netx.compiler.model.circuit.scope.PackageScope;
+import pascal.netx.compiler.model.circuit.signal.Signal;
+import pascal.netx.compiler.model.type.BitType;
+import pascal.netx.compiler.model.type.Hole;
+import pascal.netx.compiler.model.type.Type;
 import pascal.netx.compiler.utils.TypeCheckingException;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
@@ -145,7 +145,7 @@ public final class WireTypeInference extends ModelAnalysis {
     }
 
     private void setTypeFor(Signal signal, Type type) {
-        if (type instanceof PolyType) {
+        if (type instanceof Hole) {
             throw new ShallNotReachHereError();
         }
         signal.setType(type);

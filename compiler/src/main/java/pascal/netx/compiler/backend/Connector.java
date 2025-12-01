@@ -1,12 +1,12 @@
 package pascal.netx.compiler.backend;
 
-import pascal.netx.compiler.circuit.Signature;
-import pascal.netx.compiler.circuit.Utils;
-import pascal.netx.compiler.circuit.expr.*;
-import pascal.netx.compiler.circuit.scope.ComponentScope;
-import pascal.netx.compiler.circuit.signal.Data;
-import pascal.netx.compiler.circuit.signal.Signal;
 import pascal.netx.compiler.io.Logger;
+import pascal.netx.compiler.model.circuit.Signature;
+import pascal.netx.compiler.model.circuit.Utils;
+import pascal.netx.compiler.model.circuit.expr.*;
+import pascal.netx.compiler.model.circuit.scope.ComponentScope;
+import pascal.netx.compiler.model.circuit.signal.Data;
+import pascal.netx.compiler.model.circuit.signal.Signal;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.util.lang.SourceLoc;
 
@@ -16,10 +16,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import static pascal.netx.compiler.circuit.Entities.requiresMutable;
-import static pascal.netx.compiler.circuit.Utils.compilerOf;
-import static pascal.netx.compiler.circuit.Utils.repoOf;
-import static pascal.netx.compiler.circuit.scope.Attributes.from;
+import static pascal.netx.compiler.model.circuit.Entities.requireMutable;
+import static pascal.netx.compiler.model.circuit.Utils.compilerOf;
+import static pascal.netx.compiler.model.circuit.Utils.repoOf;
+import static pascal.netx.compiler.model.circuit.scope.Attributes.from;
 
 final class Connector {
     private final ComponentScope scope;
@@ -118,7 +118,7 @@ final class Connector {
                 throw new CompileCancellationException();
             }
             var port = inst.getEvaluator().evaluate(entry.port());
-            assigns.put(requiresMutable(port), conn);
+            assigns.put(requireMutable(port), conn);
         }
 
         Port defaultPort = null;

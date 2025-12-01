@@ -1,21 +1,25 @@
 package pascal.netx.compiler.backend;
 
-import pascal.netx.compiler.ast.PackageNode;
-import pascal.netx.compiler.ast.element.*;
-import pascal.netx.compiler.ast.expr.ExprNode;
-import pascal.netx.compiler.circuit.EList;
-import pascal.netx.compiler.circuit.Signature;
-import pascal.netx.compiler.circuit.expr.ComponentRef;
-import pascal.netx.compiler.circuit.scope.ComponentScope;
-import pascal.netx.compiler.circuit.scope.PackageScope;
-import pascal.netx.compiler.circuit.scope.RepoScope;
-import pascal.netx.compiler.circuit.scope.binding.MonoBinding;
-import pascal.netx.compiler.circuit.scope.binding.MultiBinding;
-import pascal.netx.compiler.circuit.scope.binding.OrderedAttrBindList;
-import pascal.netx.compiler.circuit.signal.Array;
-import pascal.netx.compiler.circuit.signal.Signal;
+import pascal.netx.compiler.backend.analysis.ast.FreeVariableDetector;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.Logger;
+import pascal.netx.compiler.model.ast.PackageNode;
+import pascal.netx.compiler.model.ast.element.*;
+import pascal.netx.compiler.model.ast.expr.CallExpr;
+import pascal.netx.compiler.model.ast.expr.ExprNode;
+import pascal.netx.compiler.model.ast.expr.IdentifierExpr;
+import pascal.netx.compiler.model.circuit.EList;
+import pascal.netx.compiler.model.circuit.Macro;
+import pascal.netx.compiler.model.circuit.Signature;
+import pascal.netx.compiler.model.circuit.expr.ComponentRef;
+import pascal.netx.compiler.model.circuit.scope.ComponentScope;
+import pascal.netx.compiler.model.circuit.scope.PackageScope;
+import pascal.netx.compiler.model.circuit.scope.RepoScope;
+import pascal.netx.compiler.model.circuit.scope.binding.MonoBinding;
+import pascal.netx.compiler.model.circuit.scope.binding.MultiBinding;
+import pascal.netx.compiler.model.circuit.scope.binding.OrderedAttrBindList;
+import pascal.netx.compiler.model.circuit.signal.Array;
+import pascal.netx.compiler.model.circuit.signal.Signal;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.util.lang.Identifier;
 
@@ -25,9 +29,9 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
-import static pascal.netx.compiler.circuit.Entities.requiresEList;
-import static pascal.netx.compiler.circuit.Utils.compilerOf;
-import static pascal.netx.compiler.circuit.Utils.requireEqSize;
+import static pascal.netx.compiler.model.circuit.Entities.requireEList;
+import static pascal.netx.compiler.model.circuit.Utils.compilerOf;
+import static pascal.netx.compiler.model.circuit.Utils.requireEqSize;
 
 public record Elaborator(PackageScope scope, PackageNode node, Configuration config) {
     public Elaborator(RepoScope repo, PackageNode node, Configuration config) {
@@ -49,6 +53,30 @@ public record Elaborator(PackageScope scope, PackageNode node, Configuration con
         return scope;
     }
 
+    public static MonoBinding evaluateBinding(BindingNode binding, ComponentScope scope) {
+        Identifier id = binding.getHead().getSymbol();
+        List<Identifier> freeVariables = switch (binding.getHead()) {
+            case CallExpr param -> param.getArguments().stream()
+                    .map(IdentifierExpr.class::cast)
+                    .map(IdentifierExpr::getIdentifier).toList();
+            case IdentifierExpr _ -> List.of();
+        };
+        var macro = Macro.of(freeVariables, binding.getExpr());
+
+        // Check whether the macro is closed under the current scope
+        var frees = FreeVariableDetector.detect(macro.expr());
+        macro.identifiers().forEach(frees::remove);
+        frees.remove(id);
+        for (var id1 : frees) {
+            if (scope.resolveIdentifier(id1) == null) {
+                Logger.error("Macro {} is not closed, missing variable {}", macro.expr(), id1);
+                throw new CompileCancellationException();
+            }
+        }
+
+        return MonoBinding.of(id, macro);
+    }
+
     private void initializePackageDefs() {
         for (var element : node.getElements()) {
             switch (element) {
@@ -64,7 +92,8 @@ public record Elaborator(PackageScope scope, PackageNode node, Configuration con
         return node.getComponents().stream()
                 .filter(node -> config.topName().equals(node.getIdentifier()))
                 .findAny().orElseGet(() -> {
-                    Logger.warn("No component named '{}' found, using the first component as top", config.topName().name());
+                    Logger.warn("No component named '{}' found, using the first component as top",
+                            config.topName().name());
                     return node.getComponents().getFirst();
                 });
     }
@@ -109,7 +138,7 @@ public record Elaborator(PackageScope scope, PackageNode node, Configuration con
         }
 
         private void buildComponentIO(ComponentNode node) {
-            var signature = node.getSig();
+            var signature = node.getSignature();
             extractIOList(signature.getInput()).forEach(scope::addInput);
             extractIOList(signature.getOutput()).forEach(scope::addOutput);
         }
@@ -118,7 +147,7 @@ public record Elaborator(PackageScope scope, PackageNode node, Configuration con
             var factory = new FactoryCreator(scope).createFor(node);
             var product = factory.create(scope, Identifier.of(InterfaceNode.OUTPUT_NAME));
 
-            extractIOList(node.getSig()).forEach(scope::addInput);
+            extractIOList(node.getSignature()).forEach(scope::addInput);
             var productIter = product.getElements().iterator();
             for (var input : scope.getInputs()) {
                 scope.assigns().add(productIter.next(), input);
@@ -160,7 +189,7 @@ public record Elaborator(PackageScope scope, PackageNode node, Configuration con
 
         private void buildLoop(LoopNode loop) {
             var generator = loop.getGenerator();
-            for (var entity : requiresEList(evaluator.evaluate(generator.getFrom()))) {
+            for (var entity : requireEList(evaluator.evaluate(generator.getFrom()))) {
                 int count = scope.getBindingCount();
                 scope.overrideBindings(MonoBinding.of(generator.getHead(), entity));
                 buildElement(loop.getElement());
@@ -183,7 +212,7 @@ public record Elaborator(PackageScope scope, PackageNode node, Configuration con
         }
 
         private void buildBinding(BindingNode binding) {
-            scope.overrideBindings(evaluator.evaluateBinding(binding));
+            scope.overrideBindings(evaluateBinding(binding, scope));
         }
 
         private void buildData(DataInstantiationNode node) {

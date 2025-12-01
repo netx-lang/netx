@@ -1,13 +1,13 @@
 package pascal.netx.compiler.backend.analysis.model;
 
-import pascal.netx.compiler.circuit.Entity;
-import pascal.netx.compiler.circuit.scope.ComponentScope;
-import pascal.netx.compiler.circuit.scope.PackageScope;
-import pascal.netx.compiler.circuit.signal.Access;
-import pascal.netx.compiler.circuit.signal.selector.BitSelector;
-import pascal.netx.compiler.circuit.signal.selector.PartSelector;
-import pascal.netx.compiler.circuit.signal.type.BitType;
 import pascal.netx.compiler.io.Logger;
+import pascal.netx.compiler.model.circuit.Entity;
+import pascal.netx.compiler.model.circuit.scope.ComponentScope;
+import pascal.netx.compiler.model.circuit.scope.PackageScope;
+import pascal.netx.compiler.model.circuit.signal.Access;
+import pascal.netx.compiler.model.circuit.signal.selector.BitSelector;
+import pascal.netx.compiler.model.circuit.signal.selector.PartSelector;
+import pascal.netx.compiler.model.type.BitType;
 import pascal.netx.compiler.utils.TypeCheckingException;
 
 /**

@@ -1,16 +1,16 @@
 package pascal.netx.compiler;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import pascal.netx.compiler.ast.PackageNode;
 import pascal.netx.compiler.backend.Elaborator;
 import pascal.netx.compiler.backend.analysis.model.*;
-import pascal.netx.compiler.circuit.scope.ComponentScope;
-import pascal.netx.compiler.circuit.scope.PackageScope;
-import pascal.netx.compiler.circuit.scope.RepoScope;
-import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NxonDumper;
 import pascal.netx.compiler.io.PackageManager;
+import pascal.netx.compiler.model.ast.PackageNode;
+import pascal.netx.compiler.model.circuit.scope.ComponentScope;
+import pascal.netx.compiler.model.circuit.scope.PackageScope;
+import pascal.netx.compiler.model.circuit.scope.RepoScope;
+import pascal.netx.compiler.model.circuit.scope.binding.AttrBindList;
 import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
 

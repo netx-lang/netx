@@ -1,11 +1,11 @@
 package pascal.netx.compiler.backend.analysis.ast;
 
 
-import pascal.netx.compiler.ast.ASTListener;
-import pascal.netx.compiler.ast.expr.CallExpr;
-import pascal.netx.compiler.ast.expr.ExprNode;
-import pascal.netx.compiler.ast.expr.IdentifierExpr;
-import pascal.netx.compiler.ast.expr.LetExpr;
+import pascal.netx.compiler.model.ast.ASTListener;
+import pascal.netx.compiler.model.ast.expr.CallExpr;
+import pascal.netx.compiler.model.ast.expr.ExprNode;
+import pascal.netx.compiler.model.ast.expr.IdentifierExpr;
+import pascal.netx.compiler.model.ast.expr.LetExpr;
 import pascal.netx.util.lang.Identifier;
 
 import java.util.HashSet;

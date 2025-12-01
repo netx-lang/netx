@@ -1,6 +1,6 @@
 package pascal.netx.compiler.backend.analysis.model.constraint;
 
-import pascal.netx.compiler.circuit.signal.Signal;
+import pascal.netx.compiler.model.circuit.signal.Signal;
 
 public abstract sealed class UnaryConstraint implements WireConstraint permits ClockConstraint {
     protected final Signal inst;
