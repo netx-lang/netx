@@ -1,7 +1,6 @@
 package pascal.netx.compiler.circuit.signal;
 
 import pascal.netx.compiler.NXCompiler;
-import pascal.netx.compiler.circuit.Entity;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.signal.type.Type;
 import pascal.netx.util.lang.Identifier;
@@ -13,7 +12,7 @@ public sealed interface Data extends Signal permits Access, Composition, Wire {
 
     ComponentScope getParent();
 
-    abstract class Factory<T extends Data> implements Entity {
+    abstract class Factory<T extends Data> {
         protected final NXCompiler.WireIndexer indexer;
 
         protected Factory(NXCompiler.WireIndexer indexer) {

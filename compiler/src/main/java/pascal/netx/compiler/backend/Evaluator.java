@@ -1,7 +1,6 @@
 package pascal.netx.compiler.backend;
 
 import pascal.netx.compiler.ast.element.BindingNode;
-import pascal.netx.compiler.ast.element.InterfaceNode;
 import pascal.netx.compiler.ast.expr.*;
 import pascal.netx.compiler.ast.expr.NamedPortExpr;
 import pascal.netx.compiler.ast.expr.qualifier.BindingQualifier;
@@ -11,7 +10,6 @@ import pascal.netx.compiler.ast.expr.qualifier.Qualifier;
 import pascal.netx.compiler.backend.analysis.ast.FreeVariableDetector;
 import pascal.netx.compiler.circuit.*;
 import pascal.netx.compiler.circuit.expr.*;
-import pascal.netx.compiler.circuit.scope.Attributes;
 import pascal.netx.compiler.circuit.scope.ComponentScope;
 import pascal.netx.compiler.circuit.scope.PackageScope;
 import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
@@ -22,14 +20,16 @@ import pascal.netx.compiler.circuit.signal.*;
 import pascal.netx.compiler.circuit.signal.selector.BitSelector;
 import pascal.netx.compiler.circuit.signal.selector.PartSelector;
 import pascal.netx.compiler.circuit.signal.selector.Selector;
-import pascal.netx.compiler.circuit.signal.type.BitType;
 import pascal.netx.compiler.circuit.signal.type.PolyType;
 import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.util.lang.Identifier;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import static pascal.netx.compiler.circuit.Entities.*;
@@ -110,18 +110,6 @@ public final class Evaluator {
         };
         Logger.exitLoc();
         return result;
-    }
-
-    public Data.Factory<?> evaluateToMutableFactory(ExprNode expr) {
-        Data.Factory<?> factory;
-        if (expr == null) {
-            factory = new Wire.Factory(PolyType.getInstance(), compilerOf(pack).getIndexer());
-        } else {
-            mode = EvaluationMode.FACTORY;
-            factory = requiresMutableFactory(evaluate(expr));
-            mode = EvaluationMode.COMMON;
-        }
-        return factory;
     }
 
     private Entity evaluateFieldExpr(FieldExpr expr) {
@@ -352,10 +340,7 @@ public final class Evaluator {
     private Entity evaluateSymbolExpr(SymbolExpr expr) {
         return switch (expr) {
             case IdentifierExpr sub -> evaluatePrimarySymbolExpr(sub);
-            case CallExpr sub -> switch (mode) {
-                case FACTORY -> evaluateVariableFactory(sub);
-                case COMMON, DECLARE_IN_PLACE -> evaluateCallExpr(sub);
-            };
+            case CallExpr sub -> evaluateCallExpr(sub);
         };
     }
 
@@ -392,13 +377,16 @@ public final class Evaluator {
 
     @Nonnull Entity resolveIdentifier(Identifier id) {
         var entity = scope.resolveIdentifier(id);
-        return Objects.requireNonNullElseGet(entity, () -> {
-            if (mode == Evaluator.EvaluationMode.DECLARE_IN_PLACE) {
-                return declareDataInPlace(id);
+        if (entity == null) {
+            switch (mode) {
+                case COMMON -> {
+                    Logger.error("Cannot resolve identifier " + id);
+                    throw new CompileCancellationException();
+                }
+                case DECLARE_IN_PLACE -> entity = declareDataInPlace(id);
             }
-            Logger.error("Unresolved identifier {}", id);
-            throw new CompileCancellationException();
-        });
+        }
+        return entity;
     }
 
     @Nonnull
@@ -426,7 +414,7 @@ public final class Evaluator {
         };
     }
 
-    private AttrBindList evaluateArguments(CallExpr expr) {
+    AttrBindList evaluateArguments(CallExpr expr) {
         if (expr.getAssigns().isEmpty() || expr.getAssigns().getFirst().first() == null) {
             var result = OrderedAttrBindList.ofEmpty();
             for (var argument : expr.getArguments()) {
@@ -444,75 +432,16 @@ public final class Evaluator {
     }
 
     private Entity evaluatePrimarySymbolExpr(IdentifierExpr expr) {
-        var id = expr.getIdentifier();
-        if (mode == EvaluationMode.FACTORY) {
-            if (id.name().equals("clock")) {
-                return evaluateClockFactory(List.of());
-            }
-
-            var pack = scope.getPackage();
-            if (pack.defs().hasInterface(id)) {
-                return evaluateInterfaceFactory(
-                        pack.defs().getInterface(id), AttrBindList.ofEmpty());
-            } else if (pack.defs().hasEnum(id)) {
-                return new Wire.Factory(BitType.of(pack.defs().getEnum(id).width()), compilerOf(pack).getIndexer());
-            } else {
-                Logger.error("Unknown interface type {}", id);
-                throw new CompileCancellationException();
-            }
-        } else {
-            Entity entity = resolveIdentifier(id);
-            if (entity instanceof Macro macro) {
-                return evaluateMacroExpr(macro, AttrBindList.ofEmpty());
-            } else if (entity instanceof SystemMeta meta) {
-                return evaluateSystemMetaExpr(meta, AttrBindList.ofEmpty());
-            }
-            return entity;
+        Entity entity = resolveIdentifier(expr.getIdentifier());
+        if (entity instanceof Macro macro) {
+            return evaluateMacroExpr(macro, AttrBindList.ofEmpty());
+        } else if (entity instanceof SystemMeta meta) {
+            return evaluateSystemMetaExpr(meta, AttrBindList.ofEmpty());
         }
-    }
-
-    private Data.Factory<?> evaluateVariableFactory(CallExpr expr) {
-        return switch (expr.getHead().name()) {
-            case "bit" -> evaluateWireFactory(expr.getArguments());
-            case "clock" -> evaluateClockFactory(expr.getArguments());
-            default -> {
-                if (pack.defs().hasInterface(expr.getHead())) {
-                    var def = pack.defs().getInterface(expr.getHead());
-                    yield evaluateInterfaceFactory(def, evaluateArguments(expr));
-                }
-                Logger.error("Unknown data type {}", expr);
-                throw new CompileCancellationException();
-            }
-        };
-    }
-
-    private Bundle.Factory evaluateInterfaceFactory(InterfaceNode node, AttrBindList arguments) {
-        var component = ComponentScope.newInterface(scope, node.getIdentifier(), false);
-        var attributes = Attributes.from(node, arguments);
-        for (var bind : attributes.entrySet()) {
-            component.bind(bind.getKey(), bind.getValue());
-        }
-        return new InterfaceFactoryCreator(component).create(node);
-    }
-
-    private Wire.Factory evaluateWireFactory(List<ExprNode> arguments) {
-        Utils.requireEqSize(1, arguments, "Wire factory requires one argument");
-        mode = EvaluationMode.COMMON;
-        var bitType = BitType.of(evaluateToInt(arguments.getFirst()));
-        mode = EvaluationMode.FACTORY;
-        return new Wire.Factory(bitType, compilerOf(pack).getIndexer());
-    }
-
-    private Clock.Factory evaluateClockFactory(List<ExprNode> arguments) {
-        if (arguments.isEmpty()) {
-            return new Clock.Factory(compilerOf(pack).getIndexer());
-        } else {
-            Logger.error("Unexpected specification for component type clock: {}", arguments);
-            throw new CompileCancellationException();
-        }
+        return entity;
     }
 
     enum EvaluationMode {
-        COMMON, FACTORY, DECLARE_IN_PLACE
+        COMMON, DECLARE_IN_PLACE
     }
 }

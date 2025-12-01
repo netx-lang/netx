@@ -67,15 +67,6 @@ public final class Entities {
         }
     }
 
-    public static Data.Factory<?> requiresMutableFactory(Entity entity) {
-        if (entity instanceof Data.Factory<?> factory) {
-            return factory;
-        } else {
-            Logger.error("Expected component factory but got {}", entity);
-            throw new CompileCancellationException();
-        }
-    }
-
     public static VectorValue requiresVectorValue(Entity entity) {
         if (entity instanceof VectorValue value) {
             return value;
