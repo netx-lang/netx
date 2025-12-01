@@ -14,9 +14,6 @@ import pascal.netx.compiler.circuit.scope.binding.MultiBinding;
 import pascal.netx.compiler.circuit.scope.binding.OrderedAttrBindList;
 import pascal.netx.compiler.circuit.signal.Array;
 import pascal.netx.compiler.circuit.signal.Signal;
-import pascal.netx.compiler.circuit.signal.type.ArrayType;
-import pascal.netx.compiler.circuit.signal.type.InterfaceType;
-import pascal.netx.compiler.circuit.signal.type.Type;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.utils.CompileCancellationException;
@@ -118,9 +115,10 @@ public record Elaborator(PackageScope scope, PackageNode node, Configuration con
         }
 
         private void buildInterfaceIO(InterfaceNode node) {
-            extractIOList(node.getSig()).forEach(scope::addInput);
-            var factory = new InterfaceFactoryCreator(scope).create(node);
+            var factory = new FactoryCreator(scope).createFor(node);
             var product = factory.create(scope, Identifier.of(InterfaceNode.OUTPUT_NAME));
+
+            extractIOList(node.getSig()).forEach(scope::addInput);
             var productIter = product.getElements().iterator();
             for (var input : scope.getInputs()) {
                 scope.assigns().add(productIter.next(), input);
@@ -189,11 +187,7 @@ public record Elaborator(PackageScope scope, PackageNode node, Configuration con
         }
 
         private void buildData(DataInstantiationNode node) {
-            var baseFactory = evaluator.evaluateToMutableFactory(node.getType());
-            switch (node.getKind()) {
-                case BUNDLE -> checkFactoryLegality(baseFactory.getType(), true);
-                case WIRE -> checkFactoryLegality(baseFactory.getType(), false);
-            }
+            var baseFactory = new FactoryCreator(scope).createFor(node);
             for (var rest : node.getDataRests()) {
                 var factory = baseFactory;
                 if (!rest.getDimensions().isEmpty()) {
@@ -206,24 +200,6 @@ public record Elaborator(PackageScope scope, PackageNode node, Configuration con
                 }
                 var id = rest.getIdentifier();
                 scope.bind(id, factory.create(scope, id));
-            }
-        }
-
-        private void checkFactoryLegality(Type type, boolean isBundle) {
-            if (type instanceof ArrayType arrayType) {
-                checkFactoryLegality(arrayType.baseType(), isBundle);
-            } else {
-                if (isBundle) {
-                    if (!(type instanceof InterfaceType)) {
-                        Logger.error("Expected bundle type but got {}", type);
-                        throw new CompileCancellationException();
-                    }
-                } else {
-                    if (type instanceof InterfaceType) {
-                        Logger.error("Expected wire type but got {}", type);
-                        throw new CompileCancellationException();
-                    }
-                }
             }
         }
 

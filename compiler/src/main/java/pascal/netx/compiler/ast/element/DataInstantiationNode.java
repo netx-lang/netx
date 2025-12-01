@@ -2,7 +2,6 @@ package pascal.netx.compiler.ast.element;
 
 import pascal.netx.compiler.ast.ASTListener;
 import pascal.netx.compiler.ast.ASTNode;
-import pascal.netx.compiler.ast.expr.ExprNode;
 import pascal.netx.compiler.ast.expr.SymbolExpr;
 
 import java.util.List;
@@ -11,12 +10,12 @@ import java.util.Objects;
 public final class DataInstantiationNode extends ASTNode implements ComponentElement {
     private final List<DataRestNode> dataRests;
     private final Kind kind;
-    private SymbolExpr type;
+    private SymbolExpr factory;
 
-    private DataInstantiationNode(Kind kind, List<DataRestNode> dataRests, SymbolExpr type) {
+    private DataInstantiationNode(Kind kind, List<DataRestNode> dataRests, SymbolExpr factory) {
         this.dataRests = dataRests;
         this.kind = kind;
-        this.type = type;
+        this.factory = factory;
     }
 
     public static DataInstantiationNode of(Kind kind, List<DataRestNode> ids, SymbolExpr type) {
@@ -27,8 +26,8 @@ public final class DataInstantiationNode extends ASTNode implements ComponentEle
     public void walk(ASTListener listener) {
         listener.enter(this);
         dataRests.forEach(symbol -> symbol.walk(listener));
-        if (type != null) {
-            type.walk(listener);
+        if (factory != null) {
+            factory.walk(listener);
         }
         listener.exit(this);
     }
@@ -37,12 +36,16 @@ public final class DataInstantiationNode extends ASTNode implements ComponentEle
         return dataRests;
     }
 
-    public ExprNode getType() {
-        return type;
+    public SymbolExpr getFactory() {
+        return factory;
     }
 
-    public void setType(SymbolExpr type) {
-        this.type = type;
+    public void setFactory(SymbolExpr factory) {
+        this.factory = factory;
+    }
+
+    public boolean isAutoFactory() {
+        return factory == null;
     }
 
     public Kind getKind() {
@@ -55,12 +58,12 @@ public final class DataInstantiationNode extends ASTNode implements ComponentEle
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (DataInstantiationNode) obj;
         return Objects.equals(this.dataRests, that.dataRests) &&
-                Objects.equals(this.type, that.type);
+                Objects.equals(this.factory, that.factory);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dataRests, type);
+        return Objects.hash(dataRests, factory);
     }
 
     @Override
@@ -75,7 +78,7 @@ public final class DataInstantiationNode extends ASTNode implements ComponentEle
             sb.append(", ").append(dataRests.get(i));
         }
         sb.append(" of ");
-        sb.append(Objects.requireNonNullElse(type, "auto"));
+        sb.append(Objects.requireNonNullElse(factory, "auto"));
         return sb.toString();
     }
 
