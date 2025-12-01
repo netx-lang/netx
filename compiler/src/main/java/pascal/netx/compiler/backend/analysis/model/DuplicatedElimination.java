@@ -1,12 +1,12 @@
 package pascal.netx.compiler.backend.analysis.model;
 
-import pascal.netx.compiler.circuit.Entity;
-import pascal.netx.compiler.circuit.scope.ComponentScope;
-import pascal.netx.compiler.circuit.scope.PackageScope;
-import pascal.netx.compiler.circuit.signal.Access;
-import pascal.netx.compiler.circuit.signal.Data;
-import pascal.netx.compiler.circuit.signal.Signal;
-import pascal.netx.compiler.circuit.signal.Value;
+import pascal.netx.compiler.model.circuit.Entity;
+import pascal.netx.compiler.model.circuit.scope.ComponentScope;
+import pascal.netx.compiler.model.circuit.scope.PackageScope;
+import pascal.netx.compiler.model.circuit.signal.Access;
+import pascal.netx.compiler.model.circuit.signal.Data;
+import pascal.netx.compiler.model.circuit.signal.Signal;
+import pascal.netx.compiler.model.circuit.signal.Value;
 import pascal.netx.util.collection.UnionFind;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;

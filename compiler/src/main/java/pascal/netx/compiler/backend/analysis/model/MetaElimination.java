@@ -1,8 +1,8 @@
 package pascal.netx.compiler.backend.analysis.model;
 
-import pascal.netx.compiler.circuit.scope.PackageScope;
-import pascal.netx.compiler.circuit.signal.Composition;
-import pascal.netx.compiler.circuit.signal.Signal;
+import pascal.netx.compiler.model.circuit.scope.PackageScope;
+import pascal.netx.compiler.model.circuit.signal.Composition;
+import pascal.netx.compiler.model.circuit.signal.Signal;
 
 import java.util.function.Predicate;
 

@@ -4,12 +4,12 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
 import pascal.netx.compiler.NXCompiler;
-import pascal.netx.compiler.ast.element.BindingNode;
-import pascal.netx.compiler.ast.expr.*;
-import pascal.netx.compiler.ast.expr.qualifier.BindingQualifier;
-import pascal.netx.compiler.ast.expr.qualifier.GeneratorQualifier;
-import pascal.netx.compiler.ast.expr.selector.BitSelector;
-import pascal.netx.compiler.ast.expr.selector.PartSelector;
+import pascal.netx.compiler.model.ast.element.BindingNode;
+import pascal.netx.compiler.model.ast.expr.*;
+import pascal.netx.compiler.model.ast.expr.qualifier.BindingQualifier;
+import pascal.netx.compiler.model.ast.expr.qualifier.GeneratorQualifier;
+import pascal.netx.compiler.model.ast.expr.selector.BitSelector;
+import pascal.netx.compiler.model.ast.expr.selector.PartSelector;
 import pascal.netx.compiler.utils.ParseCancellationException;
 import pascal.netx.util.lang.Identifier;
 

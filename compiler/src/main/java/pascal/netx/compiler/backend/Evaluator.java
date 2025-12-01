@@ -1,27 +1,25 @@
 package pascal.netx.compiler.backend;
 
-import pascal.netx.compiler.ast.element.BindingNode;
-import pascal.netx.compiler.ast.expr.*;
-import pascal.netx.compiler.ast.expr.NamedPortExpr;
-import pascal.netx.compiler.ast.expr.qualifier.BindingQualifier;
-import pascal.netx.compiler.ast.expr.qualifier.FilterQualifier;
-import pascal.netx.compiler.ast.expr.qualifier.GeneratorQualifier;
-import pascal.netx.compiler.ast.expr.qualifier.Qualifier;
-import pascal.netx.compiler.backend.analysis.ast.FreeVariableDetector;
-import pascal.netx.compiler.circuit.*;
-import pascal.netx.compiler.circuit.expr.*;
-import pascal.netx.compiler.circuit.scope.ComponentScope;
-import pascal.netx.compiler.circuit.scope.PackageScope;
-import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
-import pascal.netx.compiler.circuit.scope.binding.MonoBinding;
-import pascal.netx.compiler.circuit.scope.binding.MultiBinding;
-import pascal.netx.compiler.circuit.scope.binding.OrderedAttrBindList;
-import pascal.netx.compiler.circuit.signal.*;
-import pascal.netx.compiler.circuit.signal.selector.BitSelector;
-import pascal.netx.compiler.circuit.signal.selector.PartSelector;
-import pascal.netx.compiler.circuit.signal.selector.Selector;
-import pascal.netx.compiler.circuit.signal.type.PolyType;
 import pascal.netx.compiler.io.Logger;
+import pascal.netx.compiler.model.ast.expr.*;
+import pascal.netx.compiler.model.ast.expr.NamedPortExpr;
+import pascal.netx.compiler.model.ast.expr.qualifier.BindingQualifier;
+import pascal.netx.compiler.model.ast.expr.qualifier.FilterQualifier;
+import pascal.netx.compiler.model.ast.expr.qualifier.GeneratorQualifier;
+import pascal.netx.compiler.model.ast.expr.qualifier.Qualifier;
+import pascal.netx.compiler.model.circuit.*;
+import pascal.netx.compiler.model.circuit.expr.*;
+import pascal.netx.compiler.model.circuit.scope.ComponentScope;
+import pascal.netx.compiler.model.circuit.scope.PackageScope;
+import pascal.netx.compiler.model.circuit.scope.binding.AttrBindList;
+import pascal.netx.compiler.model.circuit.scope.binding.MonoBinding;
+import pascal.netx.compiler.model.circuit.scope.binding.MultiBinding;
+import pascal.netx.compiler.model.circuit.scope.binding.OrderedAttrBindList;
+import pascal.netx.compiler.model.circuit.signal.*;
+import pascal.netx.compiler.model.circuit.signal.selector.BitSelector;
+import pascal.netx.compiler.model.circuit.signal.selector.PartSelector;
+import pascal.netx.compiler.model.circuit.signal.selector.Selector;
+import pascal.netx.compiler.model.type.Hole;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.util.lang.Identifier;
 
@@ -32,9 +30,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static pascal.netx.compiler.circuit.Entities.*;
-import static pascal.netx.compiler.circuit.Utils.compilerOf;
-import static pascal.netx.compiler.circuit.signal.VectorValue.dispatchUnaryOp;
+import static pascal.netx.compiler.backend.Elaborator.evaluateBinding;
+import static pascal.netx.compiler.model.circuit.Entities.*;
+import static pascal.netx.compiler.model.circuit.Utils.compilerOf;
+import static pascal.netx.compiler.model.circuit.signal.VectorValue.dispatchUnaryOp;
 
 public final class Evaluator {
     private final PackageScope pack;
@@ -67,32 +66,6 @@ public final class Evaluator {
         return castToBooleanValue(evaluate(expr));
     }
 
-    public MonoBinding evaluateBinding(BindingNode binding) {
-        Identifier id = binding.getHead().getSymbol();
-        List<Identifier> freeVariables = switch (binding.getHead()) {
-            case CallExpr param -> param.getArguments().stream()
-                        .map(IdentifierExpr.class::cast)
-                        .map(IdentifierExpr::getIdentifier).toList();
-            case IdentifierExpr _ -> List.of();
-        };
-        var macro = Macro.of(freeVariables, binding.getExpr());
-        checkClosedMacro(id, macro);
-        return MonoBinding.of(id, macro);
-    }
-
-    private void checkClosedMacro(Identifier name, Macro macro) {
-        var freeVariables = FreeVariableDetector.detect(macro.expr());
-        macro.identifiers().forEach(freeVariables::remove);
-        for (var id : freeVariables) {
-            if (!name.equals(id)) { // Not a recursive macro
-                if (scope.resolveIdentifier(id) == null) {
-                    Logger.error("Macro {} is not closed, missing variable {}", macro.expr(), id);
-                    throw new CompileCancellationException();
-                }
-            }
-        }
-    }
-
     public Entity evaluate(ExprNode expr) {
         Logger.enterLoc(expr.getSourceLoc());
         var result = switch (expr) {
@@ -119,7 +92,7 @@ public final class Evaluator {
                 return pack.defs().getEnum(id).fields().get(expr.getField());
             }
         }
-        var bundle = requiresDataBundle(evaluate(expr.getBase()));
+        var bundle = requireDataBundle(evaluate(expr.getBase()));
         return bundle.getField(expr.getField());
     }
 
@@ -151,11 +124,11 @@ public final class Evaluator {
         };
     }
 
-    private Selector evaluateSelector(pascal.netx.compiler.ast.expr.selector.Selector selector) {
+    private Selector evaluateSelector(pascal.netx.compiler.model.ast.expr.selector.Selector selector) {
         return switch (selector) {
-            case pascal.netx.compiler.ast.expr.selector.BitSelector bitSelector ->
+            case pascal.netx.compiler.model.ast.expr.selector.BitSelector bitSelector ->
                     new BitSelector(evaluateToInt(bitSelector.getIndex()));
-            case pascal.netx.compiler.ast.expr.selector.PartSelector partSelector -> new PartSelector(
+            case pascal.netx.compiler.model.ast.expr.selector.PartSelector partSelector -> new PartSelector(
                             evaluateToInt(partSelector.getStart()),
                             evaluateToInt(partSelector.getEnd()));
         };
@@ -202,7 +175,7 @@ public final class Evaluator {
         } else {
             switch (qualifiers.pop()) {
                 case GeneratorQualifier generator -> {
-                    for (var entity : requiresEList(evaluate(generator.getFrom()))) {
+                    for (var entity : requireEList(evaluate(generator.getFrom()))) {
                         scope.overrideBindings(MonoBinding.of(generator.getHead(), entity));
                         result.addAll(doListComprehension(head, new LinkedList<>(qualifiers)));
                         scope.restoreBindings();
@@ -216,7 +189,7 @@ public final class Evaluator {
                 }
                 case BindingQualifier qualifier -> {
                     var binding = qualifier.getBinding();
-                    scope.overrideBindings(evaluateBinding(binding));
+                    scope.overrideBindings(evaluateBinding(binding, scope));
                     result.addAll(doListComprehension(head, new LinkedList<>(qualifiers)));
                     scope.restoreBindings();
                 }
@@ -233,7 +206,7 @@ public final class Evaluator {
     }
 
     private Entity evaluateLetExpr(LetExpr expr) {
-        var binding = evaluateBinding(expr.getBinding());
+        var binding = evaluateBinding(expr.getBinding(), scope);
         scope.overrideBindings(binding);
         var result = evaluate(expr.getBody());
         scope.restoreBindings();
@@ -304,7 +277,7 @@ public final class Evaluator {
     }
 
     private VectorValue evaluateToVectorValue(ExprNode expr) {
-        return requiresVectorValue(evaluate(expr));
+        return requireVectorValue(evaluate(expr));
     }
 
     private BooleanValue evaluateBinaryExpr(BinaryExpr expr, BooleanValue.BinaryOp op) {
@@ -319,7 +292,7 @@ public final class Evaluator {
     }
 
     private Entity evaluateNamedPortExpr(NamedPortExpr expr) {
-        var ports = new pascal.netx.compiler.circuit.expr.NamedPortExpr();
+        var ports = new pascal.netx.compiler.model.circuit.expr.NamedPortExpr();
         for (var assign : expr.getPorts()) {
             var rhs = castToCircuitExpr(evaluate(assign.rhs()));
             if (assign.isDefault()) {
@@ -345,8 +318,8 @@ public final class Evaluator {
     }
 
     private Value evaluateEqualityExpr(BinaryExpr expr) {
-        var lhs = requiresListedValue(evaluate(expr.getLhs()));
-        var rhs = requiresListedValue(evaluate(expr.getRhs()));
+        var lhs = requireListedValue(evaluate(expr.getLhs()));
+        var rhs = requireListedValue(evaluate(expr.getRhs()));
         boolean isEqual = Utils.isEqualListedValue(lhs, rhs);
         boolean needEqual = expr.getOp() == BinaryExpr.Operator.EQ;
         return BooleanValue.of(needEqual == isEqual);
@@ -391,7 +364,7 @@ public final class Evaluator {
 
     @Nonnull
     private Entity declareDataInPlace(Identifier id) {
-        var factory = new Wire.Factory(PolyType.getInstance(), compilerOf(pack).getIndexer());
+        var factory = new Wire.Factory(new Hole(), compilerOf(pack).getIndexer());
         var data = factory.create(scope, id);
         scope.bind(id, data);
         return data;

@@ -1,8 +1,8 @@
 package pascal.netx.compiler.backend.analysis.model;
 
-import pascal.netx.compiler.circuit.scope.ComponentScope;
-import pascal.netx.compiler.circuit.scope.PackageScope;
-import pascal.netx.compiler.circuit.signal.Value;
+import pascal.netx.compiler.model.circuit.scope.ComponentScope;
+import pascal.netx.compiler.model.circuit.scope.PackageScope;
+import pascal.netx.compiler.model.circuit.signal.Value;
 import pascal.netx.util.lang.BuiltinComponent;
 
 import java.util.Stack;

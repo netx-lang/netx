@@ -1,7 +1,7 @@
 package pascal.netx.compiler.io;
 
 import org.junit.jupiter.api.Test;
-import pascal.netx.compiler.circuit.scope.RepoScope;
+import pascal.netx.compiler.model.circuit.scope.RepoScope;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

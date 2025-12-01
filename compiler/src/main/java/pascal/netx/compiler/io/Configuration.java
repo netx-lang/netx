@@ -1,10 +1,10 @@
 package pascal.netx.compiler.io;
 
-import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
-import pascal.netx.compiler.circuit.scope.binding.MultiBinding;
-import pascal.netx.compiler.circuit.signal.BooleanValue;
-import pascal.netx.compiler.circuit.signal.Value;
-import pascal.netx.compiler.circuit.signal.VectorValue;
+import pascal.netx.compiler.model.circuit.scope.binding.AttrBindList;
+import pascal.netx.compiler.model.circuit.scope.binding.MultiBinding;
+import pascal.netx.compiler.model.circuit.signal.BooleanValue;
+import pascal.netx.compiler.model.circuit.signal.Value;
+import pascal.netx.compiler.model.circuit.signal.VectorValue;
 import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.lang.Identifier;
 

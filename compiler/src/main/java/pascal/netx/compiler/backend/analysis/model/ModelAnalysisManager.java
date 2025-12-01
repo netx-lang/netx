@@ -1,8 +1,8 @@
 package pascal.netx.compiler.backend.analysis.model;
 
-import pascal.netx.compiler.circuit.scope.PackageScope;
-import pascal.netx.compiler.circuit.scope.RepoScope;
 import pascal.netx.compiler.io.Logger;
+import pascal.netx.compiler.model.circuit.scope.PackageScope;
+import pascal.netx.compiler.model.circuit.scope.RepoScope;
 import pascal.netx.util.exception.ShallNotReachHereError;
 
 /**

@@ -3,13 +3,13 @@ package pascal.netx.compiler.io;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import pascal.netx.compiler.circuit.scope.Attributes;
-import pascal.netx.compiler.circuit.scope.ComponentScope;
-import pascal.netx.compiler.circuit.scope.PackageScope;
-import pascal.netx.compiler.circuit.scope.Scope;
-import pascal.netx.compiler.circuit.signal.*;
-import pascal.netx.compiler.circuit.signal.type.BitType;
-import pascal.netx.compiler.circuit.signal.type.PolyType;
+import pascal.netx.compiler.model.circuit.scope.Attributes;
+import pascal.netx.compiler.model.circuit.scope.ComponentScope;
+import pascal.netx.compiler.model.circuit.scope.PackageScope;
+import pascal.netx.compiler.model.circuit.scope.Scope;
+import pascal.netx.compiler.model.circuit.signal.*;
+import pascal.netx.compiler.model.type.BitType;
+import pascal.netx.compiler.model.type.Hole;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -189,7 +189,7 @@ public final class NxonDumper {
             setType(result, "wire");
             switch (wire.getType()) {
                 case BitType type -> result.put("width", type.width());
-                case PolyType ignored -> throw new ShallNotReachHereError();
+                case Hole ignored -> throw new ShallNotReachHereError();
                 default -> {
                     // do nothing for ArrayType and InterfaceType
                 }

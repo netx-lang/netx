@@ -1,25 +1,25 @@
 package pascal.netx.compiler.backend;
 
 import pascal.netx.compiler.NXCompiler;
-import pascal.netx.compiler.ast.element.DataInstantiationNode;
-import pascal.netx.compiler.ast.element.InterfaceNode;
-import pascal.netx.compiler.ast.expr.CallExpr;
-import pascal.netx.compiler.ast.expr.ExprNode;
-import pascal.netx.compiler.ast.expr.IdentifierExpr;
-import pascal.netx.compiler.circuit.Utils;
-import pascal.netx.compiler.circuit.scope.Attributes;
-import pascal.netx.compiler.circuit.scope.ComponentScope;
-import pascal.netx.compiler.circuit.scope.binding.AttrBindList;
-import pascal.netx.compiler.circuit.signal.*;
-import pascal.netx.compiler.circuit.signal.type.*;
 import pascal.netx.compiler.io.Logger;
+import pascal.netx.compiler.model.ast.element.DataInstantiationNode;
+import pascal.netx.compiler.model.ast.element.InterfaceNode;
+import pascal.netx.compiler.model.ast.expr.CallExpr;
+import pascal.netx.compiler.model.ast.expr.ExprNode;
+import pascal.netx.compiler.model.ast.expr.IdentifierExpr;
+import pascal.netx.compiler.model.circuit.Utils;
+import pascal.netx.compiler.model.circuit.scope.Attributes;
+import pascal.netx.compiler.model.circuit.scope.ComponentScope;
+import pascal.netx.compiler.model.circuit.scope.binding.AttrBindList;
+import pascal.netx.compiler.model.circuit.signal.*;
+import pascal.netx.compiler.model.type.*;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.util.lang.Identifier;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static pascal.netx.compiler.circuit.Utils.compilerOf;
+import static pascal.netx.compiler.model.circuit.Utils.compilerOf;
 
 public final class FactoryCreator {
     private final ComponentScope scope;
@@ -35,7 +35,7 @@ public final class FactoryCreator {
     public Data.Factory<?> createFor(DataInstantiationNode node) {
         Data.Factory<?> factory;
         if (node.isAutoFactory()) {
-            factory = new Wire.Factory(PolyType.getInstance(), indexer);
+            factory = new Wire.Factory(new Hole(), indexer);
         } else {
             factory = switch (node.getFactory()) {
                 case CallExpr expr -> createFromCallExpr(expr);
@@ -49,7 +49,7 @@ public final class FactoryCreator {
     public Bundle.Factory createFor(InterfaceNode node) {
         var elaborator = new Elaborator.ComponentElaborator(scope);
         node.getElements().forEach(elaborator::buildElement);
-        var fields = elaborator.extractIOList(node.getSig());
+        var fields = elaborator.extractIOList(node.getSignature());
         LinkedHashMap<Identifier, Data.Factory<?>> factories = new LinkedHashMap<>();
         for (var inst : fields) {
             if (!(inst instanceof Data data)) {
@@ -146,7 +146,7 @@ public final class FactoryCreator {
         return switch (data) {
             case Clock _ -> new Clock.Factory(indexer);
             case Wire wire -> {
-                if (wire.getType() instanceof PolyType) {
+                if (wire.getType() instanceof Hole) {
                     Logger.error("Interface shall not contain auto-typed instance: {}", wire);
                     throw new CompileCancellationException();
                 }

@@ -1,0 +1,19 @@
+package pascal.netx.compiler.model.circuit.expr;
+
+import pascal.netx.compiler.model.circuit.scope.binding.AttrBindList;
+
+public sealed abstract class PrimaryExpr implements Expr permits BuiltinRef, ComponentRef, ImportRef, SignalRef {
+    protected AttrBindList attrBindList;
+
+    public AttrBindList getArgList() {
+        return attrBindList;
+    }
+
+    public void setArgList(AttrBindList binding) {
+        this.attrBindList = binding;
+    }
+
+    protected boolean hasAttrBind() {
+        return attrBindList != null && !attrBindList.isEmpty();
+    }
+}

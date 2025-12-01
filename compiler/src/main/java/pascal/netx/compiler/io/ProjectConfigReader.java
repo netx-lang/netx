@@ -5,10 +5,10 @@ import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import pascal.netx.compiler.NXCompiler;
-import pascal.netx.compiler.ast.PackageNode;
-import pascal.netx.compiler.ast.element.ImportNode;
-import pascal.netx.compiler.ast.element.PackageElement;
-import pascal.netx.compiler.circuit.scope.RepoScope;
+import pascal.netx.compiler.model.ast.PackageNode;
+import pascal.netx.compiler.model.ast.element.ImportNode;
+import pascal.netx.compiler.model.ast.element.PackageElement;
+import pascal.netx.compiler.model.circuit.scope.RepoScope;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.util.lang.Identifier;
 

@@ -1,9 +1,9 @@
 package pascal.netx.compiler.backend.analysis.ast;
 
-import pascal.netx.compiler.ast.ASTListener;
-import pascal.netx.compiler.ast.ASTNode;
-import pascal.netx.compiler.ast.PackageNode;
-import pascal.netx.compiler.ast.expr.IdentifierExpr;
+import pascal.netx.compiler.model.ast.ASTListener;
+import pascal.netx.compiler.model.ast.ASTNode;
+import pascal.netx.compiler.model.ast.PackageNode;
+import pascal.netx.compiler.model.ast.expr.IdentifierExpr;
 
 import java.util.Objects;
 

@@ -3,19 +3,19 @@ package pascal.netx.compiler.io;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import pascal.netx.compiler.antlr.NetXParser.*;
-import pascal.netx.compiler.ast.ASTListener;
-import pascal.netx.compiler.ast.ASTNode;
-import pascal.netx.compiler.ast.PackageInfoNode;
-import pascal.netx.compiler.ast.PackageNode;
-import pascal.netx.compiler.ast.element.*;
-import pascal.netx.compiler.ast.expr.*;
-import pascal.netx.compiler.ast.expr.qualifier.BindingQualifier;
-import pascal.netx.compiler.ast.expr.qualifier.FilterQualifier;
-import pascal.netx.compiler.ast.expr.qualifier.GeneratorQualifier;
-import pascal.netx.compiler.ast.expr.qualifier.Qualifier;
-import pascal.netx.compiler.ast.expr.selector.BitSelector;
-import pascal.netx.compiler.ast.expr.selector.PartSelector;
-import pascal.netx.compiler.ast.expr.selector.Selector;
+import pascal.netx.compiler.model.ast.ASTListener;
+import pascal.netx.compiler.model.ast.ASTNode;
+import pascal.netx.compiler.model.ast.PackageInfoNode;
+import pascal.netx.compiler.model.ast.PackageNode;
+import pascal.netx.compiler.model.ast.element.*;
+import pascal.netx.compiler.model.ast.expr.*;
+import pascal.netx.compiler.model.ast.expr.qualifier.BindingQualifier;
+import pascal.netx.compiler.model.ast.expr.qualifier.FilterQualifier;
+import pascal.netx.compiler.model.ast.expr.qualifier.GeneratorQualifier;
+import pascal.netx.compiler.model.ast.expr.qualifier.Qualifier;
+import pascal.netx.compiler.model.ast.expr.selector.BitSelector;
+import pascal.netx.compiler.model.ast.expr.selector.PartSelector;
+import pascal.netx.compiler.model.ast.expr.selector.Selector;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.ParseCancellationException;
 import pascal.netx.util.exception.ShallNotReachHereError;
@@ -180,9 +180,9 @@ public final class TreeParser {
                 .map(this::parseIdentifier).toList();
     }
 
-    ComponentSigNode parseComponentType(Component_sigContext ctx, SourceLoc sourceLoc) {
+    ComponentSignatureNode parseComponentType(Component_sigContext ctx, SourceLoc sourceLoc) {
         if (ctx == null) {
-            var result = ComponentSigNode.of(CommonList.ofEmpty(), CommonList.ofEmpty());
+            var result = ComponentSignatureNode.of(CommonList.ofEmpty(), CommonList.ofEmpty());
             result.walk(new ASTListener() {
                 @Override
                 public void enterDefault(ASTNode node) {
@@ -191,7 +191,7 @@ public final class TreeParser {
             });
             return result;
         } else {
-            return ComponentSigNode.of(parseExpr(ctx.from), parseExpr(ctx.to))
+            return ComponentSignatureNode.of(parseExpr(ctx.from), parseExpr(ctx.to))
                     .setSourceLoc(locationOf(ctx.getStart()));
         }
     }

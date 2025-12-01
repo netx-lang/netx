@@ -1,11 +1,11 @@
 package pascal.netx.compiler.backend.analysis.model;
 
-import pascal.netx.compiler.circuit.Utils;
-import pascal.netx.compiler.circuit.scope.ComponentScope;
-import pascal.netx.compiler.circuit.signal.Composition;
-import pascal.netx.compiler.circuit.signal.Data;
-import pascal.netx.compiler.circuit.signal.Signal;
-import pascal.netx.compiler.circuit.signal.Wire;
+import pascal.netx.compiler.model.circuit.Utils;
+import pascal.netx.compiler.model.circuit.scope.ComponentScope;
+import pascal.netx.compiler.model.circuit.signal.Composition;
+import pascal.netx.compiler.model.circuit.signal.Data;
+import pascal.netx.compiler.model.circuit.signal.Signal;
+import pascal.netx.compiler.model.circuit.signal.Wire;
 
 import java.util.ArrayList;
 import java.util.Collections;
