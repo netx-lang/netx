@@ -54,7 +54,7 @@ component hex_trigger: [num] -> [code] {
 	];
 }
 
-component MUX(width) : [code] :: [input[i] | i in [0..W]] -> [out] {
+component MUX(width) : [code] ++ [input[i] | i in [0..W]] -> [out] {
     let W = 2**width;
     wire code of bit(width);
     wire mask of bit(W);
