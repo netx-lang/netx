@@ -156,7 +156,7 @@ class AnalysisTest {
                 component top : i -> o {
                   wire i of bit(1);
                   wire o of bit(5);
-                  for (index in [0..5]) {
+                  for index in [0..5] {
                     o[index] <> i;
                   }
                 }
@@ -170,7 +170,7 @@ class AnalysisTest {
                 component top : i -> o {
                   wire i of bit(5);
                   wire o of bit(5);
-                  for (index in [0..5]) {
+                  for index in [0..5] {
                     o[4 - index] <> i[index];
                   }
                 }
@@ -198,7 +198,7 @@ class AnalysisTest {
                   wire c of bit(2);
                   c[0] <> b[0];
                   c[1] <> b[1];
-                  for (index in [0..5]) {
+                  for index in [0..5] {
                     b[index] <> a[index];
                   }
                 }

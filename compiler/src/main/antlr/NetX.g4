@@ -57,7 +57,7 @@ element
     | data_declaration ';'                    # DataDeclaration
     | 'auto' expression ';'                   # MixedInstantiation
     | expression ';'                          # ComponentInstantiation
-    | 'for' '(' iterator ')' element          # Loop
+    | 'for' iterator element                  # Loop
     | 'if' cond=expression
       'then' thenBranch=element
       ('else' elseBranch=element)?            # Branch

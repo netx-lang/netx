@@ -69,7 +69,7 @@ component DECODER(width) : [code] -> [out] {
     let W = 2**width;
     wire code of bit(width);
     wire out  of bit(W);
-    for (i in [0..W]) {
+    for i in [0..W] {
         out[i] <> AND(width) <> [port |
             j in [0..width],
             let port = if i & (1 << j) then TO else NOT
