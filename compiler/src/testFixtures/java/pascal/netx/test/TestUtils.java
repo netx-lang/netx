@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestUtils {
     public static final Path TEST_DIR = Path.of("src/test/resources/testcases/");
@@ -59,6 +60,7 @@ public class TestUtils {
             }
         } catch (Exception e) {
             Logger.error("Error during testGen for " + expected.getFileName() + ": " + e.getMessage());
+            fail();
         }
     }
 

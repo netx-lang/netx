@@ -31,8 +31,8 @@ public class SystemMetaUnitTest {
     void testPrint() {
         var code = """
                 component test {
-                    for (i in [0..4]) {
-                        for (j in [0..4]) {
+                    for i in [0..4] {
+                        for j in [0..4] {
                             print("i = ", i, ", ", "j = ", j);
                         }
                     }

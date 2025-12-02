@@ -12,7 +12,7 @@ component top {
 component many_ports : [input[i] | i in [0..4]] -> [output[i] | i in [0..4]] {
     wire input of bit(4);
     wire output of bit(4);
-    for (i in [0..4]) {
+    for i in [0..4] {
         output[(i + 1) % 4] <> input[i];
     }
 }

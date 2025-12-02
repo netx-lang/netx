@@ -15,7 +15,7 @@ component top: [d] -> [b] {
     bundle aa[4] of A;
     wire c, d of bit(1);
     c <> NOT <> d;
-    for (i in [0..4]) {
+    for i in [0..4] {
         aa[i] <> A <> [
             ADD <> [CAST <> i, CAST <> c],
             ADD <> [CAST <> i, CAST <> d]];
