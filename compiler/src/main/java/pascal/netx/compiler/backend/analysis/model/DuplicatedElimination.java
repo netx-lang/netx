@@ -9,13 +9,9 @@ import pascal.netx.compiler.model.circuit.signal.Signal;
 import pascal.netx.compiler.model.circuit.signal.Value;
 import pascal.netx.util.collection.UnionFind;
 import pascal.netx.util.lang.BuiltinComponent;
-import pascal.netx.util.lang.Identifier;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static pascal.netx.util.lang.BuiltinComponent.TO;
@@ -59,20 +55,24 @@ public final class DuplicatedElimination extends ModelAnalysis {
     public static class DuplicatedManager {
         private final UnionFind<Signal> set = new UnionFind<>();
         private final Map<Signal, Signal> rep = new HashMap<>();
+        private final Map<ComponentScope, Integer> hashCache = new HashMap<>();
+
+        private int hashOf(ComponentScope scope) {
+            return hashCache.computeIfAbsent(scope, o -> Objects.hash(
+                    o.getInputs(), o.getAttributes(), o.getInputs()
+            ));
+        }
 
         public void collectDuplicatedComponents(ComponentScope scope) {
-            Map<Identifier, List<ComponentScope>> idGroups = scope.getChildren().stream()
+            var hashGroups = scope.getChildren().stream()
                     .map(ComponentScope.class::cast)
-                    .collect(Collectors.groupingBy(ComponentScope::getIdentifier));
-
+                    .collect(Collectors.groupingBy(this::hashOf));
             List<ComponentScope> toRemove = collectDuplicatedTo(scope);
-            for (var entry : idGroups.entrySet()) {
-                var idGroup = entry.getValue();
-                for (int i = 0; i < idGroup.size(); i++) {
-                    for (int j = i + 1; j < idGroup.size(); j++) {
-                        ComponentScope a = idGroup.get(i), b = idGroup.get(j);
+            for (var group : hashGroups.values()) {
+                for (int i = 0; i < group.size(); i++) {
+                    for (int j = i + 1; j < group.size(); j++) {
+                        ComponentScope a = group.get(i), b = group.get(j);
                         if (isDuplicated(a, b)) {
-                            // TODO: Check whether the components is combinational
                             var iterator = b.getOutputs().iterator();
                             for (var rep : a.getOutputs()) {
                                 set.union(iterator.next(), rep);

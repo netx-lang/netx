@@ -17,7 +17,7 @@ import java.util.stream.IntStream;
 public final class Utils {
     public static int requireEqSize(List<?> target, List<?> source, String message) {
         if (target.size() != source.size()) {
-            Logger.error("{}\nMismatched component size: {} vs {}", message, target.size(), source.size());
+            Logger.error("{}\n\tMismatched component size: {} vs {}", message, target.size(), source.size());
             throw new CompileCancellationException();
         }
         return target.size();
@@ -25,14 +25,14 @@ public final class Utils {
 
     public static void requireEqSize(int expected, List<?> actual, String message) {
         if (expected != actual.size()) {
-            Logger.error("{}\nExpected list of size {} but got {}", message, expected, actual.size());
+            Logger.error("{}\n\tExpected list of size {} but got {}", message, expected, actual.size());
             throw new CompileCancellationException();
         }
     }
 
     public static void requireEqSize(int expected, AttrBindList actual, String message) {
         if (expected != actual.size()) {
-            Logger.error("{}\nExpected list of size {} but got {}", message, expected, actual.size());
+            Logger.error("{}\n\tExpected list of size {} but got {}", message, expected, actual.size());
             throw new CompileCancellationException();
         }
     }

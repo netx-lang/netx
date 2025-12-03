@@ -276,4 +276,43 @@ class ElaboratorUnitTest {
         assertDoesNotThrow(() -> testSingleComponent(good));
         assertThrows(CompileCancellationException.class, () -> testSingleComponent(bad));
     }
+
+    @Test
+    void testNestedAccess() {
+        var expected = """
+                interface Matrix(n) : [mat] {
+                    wire mat[n][n] of bit(32);
+                }
+                component top : [a, b] -> [product] {
+                    let n = 16;
+                    bundle a, b, product of Matrix(n);
+                    for i in [0..n] {
+                        for j in [0..n] {
+                            product.mat[i][j] <> ADD <> [
+                                MUL <> [
+                                    a.mat[i][k], b.mat[k][j]
+                                ] | k in [0..n]
+                            ];
+                        }
+                    }
+                }
+                """;
+        var actual = """
+                interface Matrix(n) : [mat] {
+                    wire mat[n][n] of bit(32);
+                }
+                component top : [a, b] -> [product] {
+                    let n = 16;
+                    bundle a, b, product of Matrix(n);
+                    product <> Matrix(n) <> [
+                        ADD <> [
+                            MUL <> [
+                                a.mat[i][k], b.mat[k][j]
+                            ] | k in [0..n]
+                        ] | i in [0..n], j in [0..n]
+                    ];
+                }
+                """;
+        testSugar(expected, actual);
+    }
 }
