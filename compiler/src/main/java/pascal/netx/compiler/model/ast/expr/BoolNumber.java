@@ -5,7 +5,7 @@ import pascal.netx.compiler.model.ast.ASTListener;
 import java.util.Objects;
 
 public final class BoolNumber extends NumberExpr {
-    private boolean value;
+    private final boolean value;
 
     private BoolNumber(boolean value) {
         this.value = value;
@@ -23,10 +23,6 @@ public final class BoolNumber extends NumberExpr {
 
     public boolean getValue() {
         return value;
-    }
-
-    public void setValue(boolean value) {
-        this.value = value;
     }
 
     @Override

@@ -359,6 +359,7 @@ public final class AliasAnalysis extends ModelAnalysis {
                 return switch (value) {
                     case BooleanValue _ -> false;
                     case VectorValue v -> v.isZero();
+                    case FloatValue v -> v.toBitVector().isZero();
                 };
             }
             return false;
@@ -370,6 +371,7 @@ public final class AliasAnalysis extends ModelAnalysis {
                 return switch (value) {
                     case BooleanValue _ -> false;
                     case VectorValue v -> v.value().not().isZero();
+                    case FloatValue v -> v.toBitVector().not().isZero();
                 };
             }
             return false;

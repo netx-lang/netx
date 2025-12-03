@@ -33,7 +33,6 @@ import java.util.stream.IntStream;
 import static pascal.netx.compiler.backend.Elaborator.evaluateBinding;
 import static pascal.netx.compiler.model.circuit.Entities.*;
 import static pascal.netx.compiler.model.circuit.Utils.compilerOf;
-import static pascal.netx.compiler.model.circuit.signal.VectorValue.dispatchUnaryOp;
 
 public final class Evaluator {
     private final PackageScope pack;
@@ -59,7 +58,7 @@ public final class Evaluator {
     }
 
     public int evaluateToInt(ExprNode expr) {
-        return evaluateToVectorValue(expr).toInt();
+        return Entities.requireVectorValue(evaluate(expr)).toInt();
     }
 
     public BooleanValue evaluateAndCastToBoolean(ExprNode expr) {
@@ -215,9 +214,10 @@ public final class Evaluator {
 
     private Entity evaluateNumberExpr(NumberExpr expr) {
         return switch (expr) {
-            case BitVectorNumber bitVectorNumber -> VectorValue.of(bitVectorNumber.getRepresentation());
-            case BoolNumber boolNumber -> BooleanValue.of(boolNumber.getValue());
-            case IntNumber intNumber -> VectorValue.fromInt(intNumber.getValue());
+            case BitVectorNumber bitVector -> VectorValue.of(bitVector.getRepresentation());
+            case FloatNumber _float -> FloatValue.of(_float.getSize(), _float.getValue());
+            case BoolNumber _bool -> BooleanValue.of(_bool.getValue());
+            case IntNumber _int -> VectorValue.fromInt(_int.getValue());
         };
     }
 
@@ -227,8 +227,11 @@ public final class Evaluator {
 
     private Entity evaluateUnaryExpr(UnaryExpr expr) {
         return switch (expr.getOp()) {
-            case POS, NEG, NOT, BITWISE_NOT
-                    -> dispatchUnaryOp(expr.getOp()).apply(evaluateToVectorValue(expr.getOperand()));
+            case POS, NEG, NOT, BITWISE_NOT -> switch (requireValue(evaluate(expr.getOperand()))) {
+                case FloatValue _float -> FloatValue.dispatchUnaryOp(expr.getOp()).apply(_float);
+                case VectorValue _vector -> VectorValue.dispatchUnaryOp(expr.getOp()).apply(_vector);
+                case BooleanValue _boolean -> BooleanValue.dispatchUnaryOp(expr.getOp()).apply(_boolean);
+            };
             case BLOCK_OUT -> evaluateDecoratedExpr(DecoratedExpr.Decorator.BLOCK_OUT, expr.getOperand());
             case BLOCK_IN -> evaluateDecoratedExpr(DecoratedExpr.Decorator.BLOCK_IN, expr.getOperand());
         };
@@ -266,18 +269,23 @@ public final class Evaluator {
             case ADD, SUB, MUL, DIV, MOD, POW, AND, OR, XOR, XNOR,
                  ULT, ULE, UGT, UGE, SLT, SLE, SGT, SGE,
                  ARITH_SHR, ARITH_SHL, LOGIC_SHR, LOGIC_SHL ->
-                    evaluateBinaryExpr(expr, VectorValue.dispatchBinaryOp(expr.getOp()));
+                    evaluateBinaryExpr(expr, expr.getOp());
             case LOGIC_OR, LOGIC_AND ->
                     evaluateBinaryExpr(expr, BooleanValue.dispatchBinaryOp(expr.getOp()));
         };
     }
 
-    private Value evaluateBinaryExpr(BinaryExpr expr, VectorValue.BinaryOp op) {
-        return op.apply(evaluateToVectorValue(expr.getLhs()), evaluateToVectorValue(expr.getRhs()));
-    }
-
-    private VectorValue evaluateToVectorValue(ExprNode expr) {
-        return requireVectorValue(evaluate(expr));
+    private Value evaluateBinaryExpr(BinaryExpr expr, BinaryExpr.Operator op) {
+        var lhs = requireValue(evaluate(expr.getLhs()));
+        var rhs = requireValue(evaluate(expr.getRhs()));
+        if (lhs instanceof FloatValue || rhs instanceof FloatValue) {
+            int size = Math.max(
+                    lhs instanceof FloatValue(int _size, var _) ? _size : 32,
+                    rhs instanceof FloatValue(int _size, var _) ? _size : 32);
+            return FloatValue.dispatchBinaryOp(op).apply(castToFloat(size, lhs), castToFloat(size, rhs));
+        } else {
+            return VectorValue.dispatchBinaryOp(op).apply(requireVectorValue(lhs), requireVectorValue(rhs));
+        }
     }
 
     private BooleanValue evaluateBinaryExpr(BinaryExpr expr, BooleanValue.BinaryOp op) {

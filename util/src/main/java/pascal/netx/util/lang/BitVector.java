@@ -30,7 +30,15 @@ public sealed interface BitVector permits LongBasedBitVector, ArrayBasedBitVecto
     }
 
     static BitVector fromInt(int size, int value){
-        return new LongBasedBitVector(size, value);
+        if (size < SIZE_THRESHOLD) {
+            return new LongBasedBitVector(size, value);
+        } else {
+            return fromBigInteger(size, BigInteger.valueOf(value));
+        }
+    }
+
+    static BitVector fromLong(int size, long value){
+        return fromBigInteger(size, BigInteger.valueOf(value));
     }
 
     static BitVector fromBoolean(boolean value){
@@ -38,7 +46,7 @@ public sealed interface BitVector permits LongBasedBitVector, ArrayBasedBitVecto
     }
 
     static BitVector fromBigInteger(int size, BigInteger value) {
-        if (size <= 64) {
+        if (size < SIZE_THRESHOLD) {
             return new LongBasedBitVector(size, value.longValue());
         } else {
             return new ArrayBasedBitVector(size, value);
@@ -93,11 +101,7 @@ public sealed interface BitVector permits LongBasedBitVector, ArrayBasedBitVecto
 
     BitVector and(BitVector that);
 
-    BitVector nand(BitVector that);
-
     BitVector or(BitVector that);
-
-    BitVector nor(BitVector that);
 
     BitVector xor(BitVector that);
 

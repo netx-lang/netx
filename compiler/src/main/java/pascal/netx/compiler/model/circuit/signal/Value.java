@@ -5,7 +5,7 @@ import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.lang.SourceLoc;
 
-public sealed interface Value extends Signal permits VectorValue, BooleanValue {
+public sealed interface Value extends Signal permits BooleanValue, FloatValue, VectorValue {
     @Override
     default void setType(Type type) {
         throw new ShallNotReachHereError();

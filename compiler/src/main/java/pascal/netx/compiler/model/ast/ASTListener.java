@@ -154,6 +154,14 @@ public interface ASTListener {
         exitDefault(node);
     }
 
+    default void enter(FloatNumber node) {
+        enterDefault(node);
+    }
+
+    default void exit(FloatNumber node) {
+        exitDefault(node);
+    }
+
     default void enter(BoolNumber node) {
         enterDefault(node);
     }

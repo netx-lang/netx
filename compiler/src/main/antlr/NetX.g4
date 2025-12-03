@@ -156,6 +156,8 @@ port_assign
 number
     : UNSIGNED_INTEGER # IntNumber
     | BOOLEAN          # BoolNumber
+    | FLOAT            # FloatNumber
+    | SIZED_FLOAT      # FloatNumber
     | BIN_NUMBER       # BitVectorNumber
     | HEX_NUMBER       # BitVectorNumber
     | OCT_NUMBER       # BitVectorNumber
@@ -172,6 +174,9 @@ OCT_NUMBER : UNSIGNED_INTEGER '\'' [oO] [0-7] [0-7_]*;
 DEC_NUMBER : UNSIGNED_INTEGER '\'' [dD] [0-9] [0-9_]*;
 
 UNSIGNED_INTEGER : [0-9] [0-9_]*;
+
+FLOAT : UNSIGNED_INTEGER ('.' UNSIGNED_INTEGER)?;
+SIZED_FLOAT : UNSIGNED_INTEGER '\'' [fF] FLOAT;
 
 ID : [a-zA-Z_][a-zA-Z_0-9]*;
 

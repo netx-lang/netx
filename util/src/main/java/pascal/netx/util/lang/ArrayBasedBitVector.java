@@ -304,11 +304,6 @@ public record ArrayBasedBitVector(int size, byte[] data) implements BitVector {
     }
 
     @Override
-    public ArrayBasedBitVector nand(BitVector that) {
-        return this.and(that).not();
-    }
-
-    @Override
     public ArrayBasedBitVector or(BitVector that) {
         if (that instanceof ArrayBasedBitVector(int _size, var _data)) {
             assert size == _size;
@@ -319,11 +314,6 @@ public record ArrayBasedBitVector(int size, byte[] data) implements BitVector {
             return new ArrayBasedBitVector(size, normalize(size, result));
         }
         throw new ShallNotReachHereError();
-    }
-
-    @Override
-    public ArrayBasedBitVector nor(BitVector that) {
-        return this.or(that).not();
     }
 
     @Override

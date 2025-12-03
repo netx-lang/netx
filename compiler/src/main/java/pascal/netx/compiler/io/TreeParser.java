@@ -374,6 +374,7 @@ public final class TreeParser {
         return switch (n) {
             case IntNumberContext sub -> IntNumber.of(Integer.parseUnsignedInt(sub.UNSIGNED_INTEGER().getText()));
             case BoolNumberContext sub -> BoolNumber.of(Boolean.parseBoolean(sub.BOOLEAN().getText()));
+            case FloatNumberContext sub -> FloatNumber.of(sub.getText());
             case BitVectorNumberContext sub -> parseBitVectorNumber(sub);
             default -> throw new ShallNotReachHereError();
         };
