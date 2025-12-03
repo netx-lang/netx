@@ -5,7 +5,7 @@ import pascal.netx.compiler.model.ast.ASTListener;
 import java.util.Objects;
 
 public final class IntNumber extends NumberExpr {
-    private int value;
+    private final int value;
 
     private IntNumber(int value) {
         this.value = value;
@@ -23,10 +23,6 @@ public final class IntNumber extends NumberExpr {
 
     public int getValue() {
         return value;
-    }
-
-    public void setValue(int value) {
-        this.value = value;
     }
 
     @Override

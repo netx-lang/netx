@@ -6,7 +6,7 @@ import pascal.netx.util.lang.BitVector;
 import java.util.Objects;
 
 public final class BitVectorNumber extends NumberExpr {
-    private BitVector representation;
+    private final BitVector representation;
 
     private BitVectorNumber(BitVector representation) {
         this.representation = representation;
@@ -24,10 +24,6 @@ public final class BitVectorNumber extends NumberExpr {
 
     public BitVector getRepresentation() {
         return representation;
-    }
-
-    public void setRepresentation(BitVector representation) {
-        this.representation = representation;
     }
 
     @Override

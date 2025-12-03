@@ -201,28 +201,10 @@ public record LongBasedBitVector(int size, long rep) implements BitVector {
     }
 
     @Override
-    public LongBasedBitVector nand(BitVector that) {
-        if (that instanceof LongBasedBitVector(var _size, var _rep)) {
-            assert this.size == _size;
-            return new LongBasedBitVector(size, ~(this.rep & _rep));
-        }
-        throw new ShallNotReachHereError();
-    }
-
-    @Override
     public LongBasedBitVector or(BitVector that) {
         if (that instanceof LongBasedBitVector(var _size, var _rep)) {
             assert this.size == _size;
             return new LongBasedBitVector(size, this.rep | _rep);
-        }
-        throw new ShallNotReachHereError();
-    }
-
-    @Override
-    public LongBasedBitVector nor(BitVector that) {
-        if (that instanceof LongBasedBitVector(var _size, var _rep)) {
-            assert this.size == _size;
-            return new LongBasedBitVector(size, ~(this.rep | _rep));
         }
         throw new ShallNotReachHereError();
     }

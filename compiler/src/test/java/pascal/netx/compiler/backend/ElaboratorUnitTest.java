@@ -1,4 +1,4 @@
-package pascal.netx.compiler.elaborator;
+package pascal.netx.compiler.backend;
 
 import org.junit.jupiter.api.Test;
 import pascal.netx.compiler.io.Configuration;

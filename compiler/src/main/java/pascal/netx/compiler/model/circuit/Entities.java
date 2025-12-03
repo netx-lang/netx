@@ -7,6 +7,7 @@ import pascal.netx.compiler.model.circuit.expr.SignalRef;
 import pascal.netx.compiler.model.circuit.signal.*;
 import pascal.netx.compiler.utils.CompileCancellationException;
 
+import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -56,6 +57,17 @@ public final class Entities {
             Logger.error("Expected value but got {}", entity);
             throw new CompileCancellationException();
         }
+    }
+
+    public static FloatValue castToFloat(int size, Value value) {
+        return switch (value) {
+            case FloatValue(int _, var _value) -> FloatValue.of(size, _value);
+            case VectorValue(var _value) -> FloatValue.of(size, new BigDecimal(_value.asUnsignedBI()));
+            default -> {
+                Logger.error("Cannot cast {} to float", value);
+                throw new CompileCancellationException();
+            }
+        };
     }
 
     public static Data requireMutable(Entity entity) {

@@ -1,4 +1,4 @@
-package pascal.netx.compiler.elaborator;
+package pascal.netx.compiler.backend;
 
 import org.junit.jupiter.api.Test;
 
@@ -48,6 +48,25 @@ public class EvaluatorUnitTest {
     }
 
     @Test
+    void testRecursionSigned() {
+        var expected = """
+                component top : a -> b {
+                    wire a, b of bit(4);
+                    b <> NOT <> NOT <> NOT <> NOT <> NOT <> NOT <> NOT <> TO <> a;
+                }
+                """;
+        var actual = """
+                component top : a -> b {
+                    wire a, b of bit(4);
+                    let f(x) = if x == 0 then 1 else x * f(x - 1);
+                    let g(x) = if x < 0 then TO else NOT <> g(x - 1);
+                    b <> g(f(3)) <> a;
+                }
+                """;
+        testSugar(expected, actual);
+    }
+
+    @Test
     void testLetExpr() {
         var expected = """
                 component top : [] -> [o] {
@@ -61,6 +80,42 @@ public class EvaluatorUnitTest {
                 component top : [] -> [o] {
                     wire o of bit(32);
                     o <> AND <> [1, 2];
+                }
+                """;
+        testSugar(expected, actual);
+    }
+
+    @Test
+    void testFloatRep() {
+        var expected = """
+                component top : a -> b {
+                    wire a, b of bit(32);
+                    b <> ADD <> [a, 32'h40490FDB];
+                }
+                """;
+        var actual = """
+                component top : a -> b {
+                    wire a, b of bit(32);
+                    let pi = 3.14159265 in b <> ADD <> [a, pi];
+                }
+                """;
+        testSugar(expected, actual);
+    }
+
+    @Test
+    void testFloatOp() {
+        var expected = """
+                component top : a -> b {
+                    wire a, b of bit(64);
+                    b <> MUL <> [a, 64'h4066A80000000000];
+                }
+                """;
+        var actual = """
+                component top : a -> b {
+                    wire a, b of bit(64);
+                    let x = 2.0 in
+                    let y = 64'F12.5 in
+                    b <> MUL <> [a, (x + y) * y];
                 }
                 """;
         testSugar(expected, actual);
