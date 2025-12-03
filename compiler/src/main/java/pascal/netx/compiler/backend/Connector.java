@@ -5,6 +5,7 @@ import pascal.netx.compiler.model.circuit.Signature;
 import pascal.netx.compiler.model.circuit.Utils;
 import pascal.netx.compiler.model.circuit.expr.*;
 import pascal.netx.compiler.model.circuit.scope.ComponentScope;
+import pascal.netx.compiler.model.circuit.signal.Composition;
 import pascal.netx.compiler.model.circuit.signal.Data;
 import pascal.netx.compiler.model.circuit.signal.Signal;
 import pascal.netx.compiler.utils.CompileCancellationException;
@@ -15,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static pascal.netx.compiler.model.circuit.Entities.requireMutable;
 import static pascal.netx.compiler.model.circuit.Utils.compilerOf;
@@ -101,8 +103,11 @@ final class Connector {
         for (int i = 0; i < size; ++i) {
             scope.assigns().add(lhs.input().get(i), rhs.output().get(i));
         }
+
         return new Port(rhs.input(), lhs.output());
     }
+
+
 
     private Port doPortConnection(ComponentScope inst, NamedPortExpr connection, boolean isInput) {
         var instPort = Port.of(inst);
@@ -230,12 +235,29 @@ final class Connector {
     }
 
     private record Port(List<Signal> input, List<Signal> output) {
+        public Port(List<Signal> input, List<Signal> output) {
+            this.input = flatten(input);
+            this.output = flatten(output);
+        }
+
         public static Port of(ComponentScope scope) {
             return new Port(scope.getInputs(), scope.getOutputs());
         }
 
         public static Port ofEmpty() {
             return new Port(List.of(), List.of());
+        }
+
+        private static List<Signal> flatten(List<Signal> input) {
+            return input.stream().flatMap(
+                    sig -> {
+                        if (sig instanceof Composition arr) {
+                            return arr.flatten().stream();
+                        } else {
+                            return Stream.of(sig);
+                        }
+                    }
+            ).toList();
         }
     }
 }
