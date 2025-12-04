@@ -1,5 +1,5 @@
 {
-  "totalData": 12,
+  "total": 12,
   "top_input": ["i", "rst", "clk"],
   "top_output": ["state"],
   "design": {

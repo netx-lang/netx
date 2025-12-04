@@ -54,7 +54,7 @@ public final class NxonDumper {
         var result = createObjectNode();
         var design_node = dumperOf(design.getTop()).dump();
 
-        result.put("totalData", indexer.size());
+        result.put("total", indexer.size());
         var input = makeArrayIn(result, "top_input");
         var output = makeArrayIn(result, "top_output");
         var signature = design.getTop().getSignature();

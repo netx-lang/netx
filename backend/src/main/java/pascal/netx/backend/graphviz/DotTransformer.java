@@ -65,7 +65,7 @@ public final class DotTransformer extends AbstractNxonTransformer {
 
     @Override
     public void parse() {
-        int total = json.get("totalData").intValue();
+        int total = json.get("total").intValue();
         double ranksep = Math.min(10.0, Math.max(0.5, total / 200.0 * depthThreshold));
         notepad.println("digraph {");
         notepad.incIndent();

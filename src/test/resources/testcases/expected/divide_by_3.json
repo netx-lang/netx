@@ -1,5 +1,5 @@
 {
-  "totalData": 8,
+  "total": 8,
   "top_input": ["clk"],
   "top_output": ["clk_3"],
   "design": {
