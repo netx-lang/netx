@@ -1,5 +1,5 @@
 {
-  "totalData": 34,
+  "total": 34,
   "top_input": ["a", "b"],
   "top_output": ["c"],
   "design": {

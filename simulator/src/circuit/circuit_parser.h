@@ -627,7 +627,7 @@ namespace nxon {
     }
 
     inline void parse_circuit_json(parse_context &context, const nlohmann::json &json, const native_map &native_map) {
-        context.members_total = json["totalData"];
+        context.members_total = json["total"];
         auto &design = json["design"];
         impl::parse_circuit_io(design, context);
         impl::parse_circuit_io_alias(context, json);
