@@ -2,7 +2,7 @@ package pascal.netx.compiler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import pascal.netx.compiler.backend.Elaborator;
-import pascal.netx.compiler.backend.analysis.model.*;
+import pascal.netx.compiler.backend.analysis.circuit.*;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NxonDumper;
 import pascal.netx.compiler.io.PackageManager;
@@ -54,7 +54,7 @@ public final class NXCompiler {
 
     public void compile() {
         elaborate();
-        var manager = new ModelAnalysisManager(repo);
+        var manager = new CircuitAnalysisManager(repo);
         manager.analyze(BindingFlattener.class);
         manager.analyze(MetaElimination.class);
         manager.analyze(WireTypeInference.class);

@@ -1,4 +1,4 @@
-package pascal.netx.compiler.backend.analysis.model;
+package pascal.netx.compiler.backend.analysis.circuit;
 
 import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.model.circuit.Entity;
@@ -14,7 +14,7 @@ import pascal.netx.compiler.utils.TypeCheckingException;
  * Checks the validity of access operations in the design.
  * This includes ensuring that indices and ranges used in access operations.
  */
-public final class AccessChecker extends ModelAnalysis {
+public final class AccessChecker extends CircuitAnalysis {
 
     public AccessChecker(PackageScope design) {
         super(design);

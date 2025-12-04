@@ -1,4 +1,4 @@
-package pascal.netx.compiler.backend.analysis.model;
+package pascal.netx.compiler.backend.analysis.circuit;
 
 import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.model.circuit.scope.ComponentScope;
@@ -18,7 +18,7 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class IOAnalysis extends ModelAnalysis {
+public final class IOAnalysis extends CircuitAnalysis {
     private final Map<Wire, WireCoverage> def = new HashMap<>();
     private final Map<Wire, WireCoverage> use = new HashMap<>();
 

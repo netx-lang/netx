@@ -22,6 +22,10 @@ public enum BuiltinComponent {
     public static final Map<BuiltinComponent, String> VERILOG_OP;
     public static final Set<String> VALUES;
 
+    public boolean isCombinational() {
+        return this != REGISTER && this != ASYNC_REGISTER;
+    }
+
     static {
         VALUES = new LinkedHashSet<>();
         for (var value : values()) {

@@ -5,7 +5,7 @@ import pascal.netx.compiler.model.circuit.Signature;
 import pascal.netx.compiler.model.circuit.Utils;
 import pascal.netx.compiler.model.circuit.expr.*;
 import pascal.netx.compiler.model.circuit.scope.ComponentScope;
-import pascal.netx.compiler.model.circuit.signal.Composition;
+import pascal.netx.compiler.model.circuit.signal.Array;
 import pascal.netx.compiler.model.circuit.signal.Data;
 import pascal.netx.compiler.model.circuit.signal.Signal;
 import pascal.netx.compiler.utils.CompileCancellationException;
@@ -107,8 +107,6 @@ final class Connector {
         return new Port(rhs.input(), lhs.output());
     }
 
-
-
     private Port doPortConnection(ComponentScope inst, NamedPortExpr connection, boolean isInput) {
         var instPort = Port.of(inst);
 
@@ -118,10 +116,10 @@ final class Connector {
         Map<Data, Port> assigns = new HashMap<>();
         for (var entry : connection.getPorts()) {
             var conn = connect(entry.expr());
-            if (!(getter.apply(conn).size() == 1)) {
-                Logger.error("Expect exactly one output of {} but got", entry.expr(), conn.output());
-                throw new CompileCancellationException();
-            }
+//            if (!(getter.apply(conn).size() == 1)) {
+//                Logger.error("Expect exactly one output of {} but got", entry.expr(), conn.output());
+//                throw new CompileCancellationException();
+//            }
             var port = inst.getEvaluator().evaluate(entry.port());
             assigns.put(requireMutable(port), conn);
         }
@@ -236,8 +234,8 @@ final class Connector {
 
     private record Port(List<Signal> input, List<Signal> output) {
         public Port(List<Signal> input, List<Signal> output) {
-            this.input = flatten(input);
-            this.output = flatten(output);
+            this.input = blast(input);
+            this.output = blast(output);
         }
 
         public static Port of(ComponentScope scope) {
@@ -248,16 +246,16 @@ final class Connector {
             return new Port(List.of(), List.of());
         }
 
-        private static List<Signal> flatten(List<Signal> input) {
-            return input.stream().flatMap(
-                    sig -> {
-                        if (sig instanceof Composition arr) {
-                            return arr.flatten().stream();
-                        } else {
-                            return Stream.of(sig);
-                        }
-                    }
-            ).toList();
+        private static List<Signal> blast(List<Signal> input) {
+            return input.stream().flatMap(Port::blast).toList();
+        }
+
+        private static Stream<Signal> blast(Signal sig) {
+            if (sig instanceof Array arr) {
+                return arr.getElements().stream().flatMap(Port::blast);
+            } else {
+                return Stream.of(sig);
+            }
         }
     }
 }

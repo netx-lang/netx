@@ -6,6 +6,7 @@ import pascal.netx.compiler.backend.analysis.ast.SourceLocChecker;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXBuilder;
 import pascal.netx.compiler.io.NXParser;
+import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.TypeCheckingException;
 
 import java.io.IOException;
@@ -367,5 +368,18 @@ class AnalysisTest {
                 }
                 """;
         testSugar(expected, code);
+    }
+
+    @Test
+    void testCombinationalLoop() {
+        var code = """
+                component top {
+                    wire a, b, c, d of bit(1);
+                    a <> AND <> [b, c];
+                    d <> OR <> [a, b];
+                    c <> NOT <> d;
+                }
+                """;
+        assertThrows(CompileCancellationException.class, () -> compileSingleComponent(code));
     }
 }
