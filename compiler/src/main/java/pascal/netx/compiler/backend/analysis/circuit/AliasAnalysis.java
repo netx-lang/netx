@@ -1,5 +1,9 @@
-package pascal.netx.compiler.backend.analysis.model;
+package pascal.netx.compiler.backend.analysis.circuit;
 
+import org.jgrapht.Graph;
+import org.jgrapht.alg.cycle.CycleDetector;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleDirectedGraph;
 import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.model.circuit.Entity;
 import pascal.netx.compiler.model.circuit.scope.ComponentScope;
@@ -20,7 +24,7 @@ import java.util.function.Predicate;
  * Analyzes alias relations in a package, propagating the intra-component alias relations to other components.
  * This is used for expanded dump of the design, where component instantiations are expanded.
  */
-public final class AliasAnalysis extends ModelAnalysis {
+public final class AliasAnalysis extends CircuitAnalysis {
     private final AliasManager manager = new AliasManager();
 
     public AliasAnalysis(PackageScope design) {
@@ -34,6 +38,7 @@ public final class AliasAnalysis extends ModelAnalysis {
         new BuiltinAnalysis().analyze();
         manager.sourceRep.clear();
         manager.resolveRepresentatives();
+        new CombinationalLoopAnalysis().analyze();
         pack.forEachSubComponent(scope -> {
             scope.getBinding().releaseIf(Predicate.not(manager::needDump));
             scope.getInputs().replaceAll(manager::repOf);
@@ -232,8 +237,7 @@ public final class AliasAnalysis extends ModelAnalysis {
         public void analyze() {
             pack.forEachSubComponent(scope -> {
                 if (scope.isBuiltin()) {
-                    var builtinRef = BuiltinComponent.of(scope.getIdentifier());
-                    switch (builtinRef) {
+                    switch (scope.asBuiltin()) {
                         case CAST, UCAST -> extractFromCast(scope);
                         case CONCAT -> extractFromConcat(scope);
                         case OR -> extractFromOr(scope);
@@ -429,6 +433,44 @@ public final class AliasAnalysis extends ModelAnalysis {
 
         private boolean isToDummy(Signal var) {
             return var instanceof Wire wire && wire.getIdentifier().name().equals("$TO_DUMMY");
+        }
+    }
+
+    public final class CombinationalLoopAnalysis {
+        private final Graph<Data, DefaultEdge> graph = new SimpleDirectedGraph<>(DefaultEdge.class);
+
+        public void analyze() {
+            pack.forEachSubComponent(scope -> {
+                if (scope.isBuiltin() && scope.asBuiltin().isCombinational()) {
+                    List<Data> inputs = scope.getInputs().stream()
+                            .map(manager::repOf)
+                            .filter(Data.class::isInstance)
+                            .map(Data.class::cast)
+                            .toList();
+                    List<Data> outputs = scope.getOutputs().stream()
+                            .map(manager::repOf)
+                            .filter(Data.class::isInstance)
+                            .map(Data.class::cast).toList();
+                    for (var inVar : inputs) {
+                        graph.addVertex(inVar);
+                    }
+                    for (var outVar : outputs) {
+                        graph.addVertex(outVar);
+                    }
+                    for (var inVar : inputs) {
+                        for (var outVar : outputs) {
+                            if (!inVar.equals(outVar)) {
+                                graph.addEdge(inVar, outVar);
+                            }
+                        }
+                    }
+                }
+            });
+            var detector = new CycleDetector<>(graph);
+            if (detector.detectCycles()) {
+                Logger.error("Combinational loop detected, involving wires: {}", detector.findCycles());
+                throw new CompileCancellationException();
+            }
         }
     }
 }

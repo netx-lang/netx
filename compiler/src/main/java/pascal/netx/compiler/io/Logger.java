@@ -82,7 +82,6 @@ public final class Logger {
         var sb = new StringBuilder();
         if (!loc.isNone()) {
             sb.append(loc).append(": ").append('\n');
-
         }
         sb.append('\t').append(message).append('\n');
 

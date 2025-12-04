@@ -1,4 +1,4 @@
-package pascal.netx.compiler.backend.analysis.model;
+package pascal.netx.compiler.backend.analysis.circuit;
 
 import pascal.netx.compiler.model.circuit.scope.ComponentScope;
 import pascal.netx.compiler.model.circuit.scope.PackageScope;
@@ -6,7 +6,7 @@ import pascal.netx.compiler.model.circuit.scope.binding.Binding;
 
 import java.util.Stack;
 
-public final class BindingFlattener extends ModelAnalysis {
+public final class BindingFlattener extends CircuitAnalysis {
     public BindingFlattener(PackageScope pack) {
         super(pack);
     }

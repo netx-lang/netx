@@ -43,7 +43,7 @@ class ElaboratorUnitTest {
 
     @Test
     void testListComprehension() {
-        var component = testSingleComponent("""
+        var component = elaborateSingleComponent("""
                 component inverter : [x[i] | i in [0..4]] -> [x[j] | i in [0..4], let j = 3 - i] {
                     wire x of bit(4);
                 }
@@ -86,7 +86,7 @@ class ElaboratorUnitTest {
                     ] <> [a[i] | i in [0..4]];
                 }
                 """;
-        assertDoesNotThrow(() -> testSingleComponent(code));
+        assertDoesNotThrow(() -> elaborateSingleComponent(code));
     }
 
     @Test
@@ -128,7 +128,7 @@ class ElaboratorUnitTest {
                     auto o <> NOT <> i;
                 }
                 """;
-        assertDoesNotThrow(() -> testSingleComponent(code));
+        assertDoesNotThrow(() -> elaborateSingleComponent(code));
     }
 
     @Test
@@ -273,8 +273,8 @@ class ElaboratorUnitTest {
                     f;
                 }
                 """;
-        assertDoesNotThrow(() -> testSingleComponent(good));
-        assertThrows(CompileCancellationException.class, () -> testSingleComponent(bad));
+        assertDoesNotThrow(() -> elaborateSingleComponent(good));
+        assertThrows(CompileCancellationException.class, () -> elaborateSingleComponent(bad));
     }
 
     @Test

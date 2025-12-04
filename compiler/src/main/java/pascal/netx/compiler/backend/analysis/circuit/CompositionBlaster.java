@@ -1,4 +1,4 @@
-package pascal.netx.compiler.backend.analysis.model;
+package pascal.netx.compiler.backend.analysis.circuit;
 
 import pascal.netx.compiler.model.circuit.scope.ComponentScope;
 import pascal.netx.compiler.model.circuit.scope.PackageScope;
@@ -15,7 +15,7 @@ import java.util.Objects;
  * CompositeDataBlaster is an analysis that flattens composite data types
  * (like Bundles and Arrays) in the inputs and outputs of components.
  */
-public final class CompositionBlaster extends ModelAnalysis {
+public final class CompositionBlaster extends CircuitAnalysis {
     public CompositionBlaster(PackageScope design) {
         super(design);
     }

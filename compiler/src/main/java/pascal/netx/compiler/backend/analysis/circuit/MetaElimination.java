@@ -1,4 +1,4 @@
-package pascal.netx.compiler.backend.analysis.model;
+package pascal.netx.compiler.backend.analysis.circuit;
 
 import pascal.netx.compiler.model.circuit.scope.PackageScope;
 import pascal.netx.compiler.model.circuit.signal.Composition;
@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 /**
  * MetaElimination is an analysis that removes meta variables from the design.
  */
-public final class MetaElimination extends ModelAnalysis {
+public final class MetaElimination extends CircuitAnalysis {
     public MetaElimination(PackageScope design) {
         super(design);
     }

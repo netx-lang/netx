@@ -1,4 +1,4 @@
-package pascal.netx.compiler.backend.analysis.model;
+package pascal.netx.compiler.backend.analysis.circuit;
 
 import pascal.netx.compiler.model.circuit.scope.ComponentScope;
 import pascal.netx.compiler.model.circuit.scope.PackageScope;
@@ -11,7 +11,7 @@ import java.util.Stack;
  * RedundantElimination is an analysis that removes redundant components from the design.
  * It specifically targets built-in components like CAST and CONCAT that can be simplified.
  */
-public final class RedundantElimination extends ModelAnalysis {
+public final class RedundantElimination extends CircuitAnalysis {
     public RedundantElimination(PackageScope pack) {
         super(pack);
     }
@@ -36,8 +36,7 @@ public final class RedundantElimination extends ModelAnalysis {
 
     private boolean isRedundant(ComponentScope scope) {
         if (scope.isBuiltin()) {
-            var builtinRef = BuiltinComponent.of(scope.getIdentifier());
-            return switch (builtinRef) {
+            return switch (scope.asBuiltin()) {
                 case UCAST, CAST -> isRedundantCast(scope);
                 case CONCAT -> isRedundantConcat(scope);
                 case SPLIT, DUP -> true;

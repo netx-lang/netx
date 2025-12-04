@@ -68,9 +68,14 @@ public class TestUtils {
         testGen(EXPECTED_DIR.resolve(filename + ".json"), TEST_DIR.resolve(filename + ".nx"));
     }
 
-    public static ComponentScope testSingleComponent(String code) {
+    public static ComponentScope elaborateSingleComponent(String code) {
         return NXBuilder.from(Configuration.asDefault())
                 .load(CharStreams.fromString(code)).elaborate().getTop().getTop();
+    }
+
+    public static void compileSingleComponent(String code) {
+        NXBuilder.from(Configuration.asDefault())
+                .load(CharStreams.fromString(code)).compileAndDump();
     }
 
     private static JsonNode eliminateSource(JsonNode node) {

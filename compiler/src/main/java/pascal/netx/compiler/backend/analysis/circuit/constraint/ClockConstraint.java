@@ -1,4 +1,4 @@
-package pascal.netx.compiler.backend.analysis.model.constraint;
+package pascal.netx.compiler.backend.analysis.circuit.constraint;
 
 import pascal.netx.compiler.model.circuit.signal.Clock;
 import pascal.netx.compiler.model.circuit.signal.Signal;

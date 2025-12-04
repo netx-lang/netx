@@ -1,4 +1,4 @@
-package pascal.netx.compiler.backend.analysis.model;
+package pascal.netx.compiler.backend.analysis.circuit;
 
 import pascal.netx.compiler.model.circuit.Entity;
 import pascal.netx.compiler.model.circuit.scope.ComponentScope;
@@ -8,7 +8,6 @@ import pascal.netx.compiler.model.circuit.signal.Data;
 import pascal.netx.compiler.model.circuit.signal.Signal;
 import pascal.netx.compiler.model.circuit.signal.Value;
 import pascal.netx.util.collection.UnionFind;
-import pascal.netx.util.lang.BuiltinComponent;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -24,7 +23,7 @@ import static pascal.netx.util.lang.BuiltinComponent.TO;
  * Used for expanded dump of the design, where component instantiations are not expanded
  * and duplication introduced by them is considered.
  */
-public final class DuplicatedElimination extends ModelAnalysis {
+public final class DuplicatedElimination extends CircuitAnalysis {
     private final DuplicatedManager manager = new DuplicatedManager();
 
     public DuplicatedElimination(PackageScope design) {
@@ -112,7 +111,7 @@ public final class DuplicatedElimination extends ModelAnalysis {
             List<ComponentScope> toRemove = new ArrayList<>();
             for (var child : scope.getChildren()) {
                 var component = (ComponentScope) child;
-                if (component.isBuiltin() && BuiltinComponent.of(component.getIdentifier()) == TO) {
+                if (component.isBuiltin() && component.asBuiltin() == TO) {
                     var input = component.getInputs().getFirst();
                     var output = component.getOutputs().getFirst();
                     if (input.equals(output)) {

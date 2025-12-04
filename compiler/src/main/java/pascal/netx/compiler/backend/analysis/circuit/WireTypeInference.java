@@ -1,8 +1,8 @@
-package pascal.netx.compiler.backend.analysis.model;
+package pascal.netx.compiler.backend.analysis.circuit;
 
 import org.jgrapht.Graph;
 import org.jgrapht.graph.SimpleGraph;
-import pascal.netx.compiler.backend.analysis.model.constraint.*;
+import pascal.netx.compiler.backend.analysis.circuit.constraint.*;
 import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.model.circuit.scope.ComponentScope;
 import pascal.netx.compiler.model.circuit.scope.PackageScope;
@@ -12,7 +12,6 @@ import pascal.netx.compiler.model.type.Hole;
 import pascal.netx.compiler.model.type.Type;
 import pascal.netx.compiler.utils.TypeCheckingException;
 import pascal.netx.util.exception.ShallNotReachHereError;
-import pascal.netx.util.lang.BuiltinComponent;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +23,7 @@ import java.util.stream.Stream;
  * It collects type constraints from the design and infers types for all data variables.
  * If a variable cannot be inferred, it will throw a TypeCheckingException.
  */
-public final class WireTypeInference extends ModelAnalysis {
+public final class WireTypeInference extends CircuitAnalysis {
     private final Graph<Signal, BinaryConstraint> graph = new SimpleGraph<>(BinaryConstraint.class);
     private final List<WireConstraint> constraints = new LinkedList<>();
     private final Queue<Signal> workList = new LinkedList<>();
@@ -52,7 +51,7 @@ public final class WireTypeInference extends ModelAnalysis {
     }
 
     private void collectConstraintsInBuiltin(ComponentScope component) {
-        switch (BuiltinComponent.of(component.getIdentifier())) {
+        switch (component.asBuiltin()) {
             case OR, NOT, AND, XOR, NOR, NAND, XNOR, ADD, SUB, MUL, DIV, MOD -> addAllEqualConstraints(component);
             case CONCAT -> addConstraintForConcat(component);
             case REGISTER -> addContainsForRegister(component);

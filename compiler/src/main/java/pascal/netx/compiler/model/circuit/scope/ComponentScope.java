@@ -1,7 +1,7 @@
 package pascal.netx.compiler.model.circuit.scope;
 
 import pascal.netx.compiler.backend.Evaluator;
-import pascal.netx.compiler.backend.analysis.model.AssignManager;
+import pascal.netx.compiler.backend.analysis.circuit.AssignManager;
 import pascal.netx.compiler.model.circuit.Entity;
 import pascal.netx.compiler.model.circuit.Signature;
 import pascal.netx.compiler.model.circuit.expr.ComponentRef;
@@ -174,6 +174,13 @@ public final class ComponentScope extends Scope {
 
     public boolean isBuiltin() {
         return BuiltinComponent.isBuiltin(identifier);
+    }
+
+    public BuiltinComponent asBuiltin() {
+        if (!isBuiltin()) {
+            throw new ShallNotReachHereError();
+        }
+        return BuiltinComponent.of(identifier);
     }
 
     public record Alias(Signal lhs, Signal rhs) {
