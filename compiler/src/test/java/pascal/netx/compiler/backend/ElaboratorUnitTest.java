@@ -315,4 +315,33 @@ class ElaboratorUnitTest {
                 """;
         testSugar(expected, actual);
     }
+
+    @Test
+    void testNamedArrayConnection() {
+        var expected = """
+                component top : [arr] -> [b] {
+                    wire arr[4] of bit(1);
+                    wire b of bit(1);
+                    b <> sub <> [arr[0], arr[1], arr[2], arr[3]];
+                }
+                component sub : [arr] -> [b] {
+                    wire arr[4] of bit(1);
+                    wire b of bit(1);
+                    b <> AND <> [arr[0], arr[1], arr[2], arr[3]];
+                }
+                """;
+        var actual = """
+                component top : [arr] -> [b] {
+                    wire arr[4] of bit(1);
+                    wire b of bit(1);
+                    b <> sub <> { arr: arr, b: b };
+                }
+                component sub : [arr] -> [b] {
+                    wire arr[4] of bit(1);
+                    wire b of bit(1);
+                    b <> AND <> [arr[0], arr[1], arr[2], arr[3]];
+                }
+                """;
+        testSugar(expected, actual);
+    }
 }

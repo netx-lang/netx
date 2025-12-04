@@ -70,7 +70,7 @@ public final class Entities {
         };
     }
 
-    public static Data requireMutable(Entity entity) {
+    public static Data requireData(Entity entity) {
         if (entity instanceof Data instance) {
             return instance;
         } else {
