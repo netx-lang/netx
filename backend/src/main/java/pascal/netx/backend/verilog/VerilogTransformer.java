@@ -9,13 +9,42 @@ import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.nxon.NxonType;
 import pascal.netx.util.print.NotepadWriter;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public final class VerilogTransformer extends AbstractNxonTransformer {
 
     private static final String BAR = "=".repeat(30);
+
+    public static final Set<String> VERILOG_KEYWORDS;
+
+    static {
+        VERILOG_KEYWORDS = new HashSet<>();
+        VERILOG_KEYWORDS.addAll(Arrays.asList(
+                "always", "and", "assign", "automatic", "begin", "buf", "bufif0", "bufif1",
+                "case", "casex", "casez", "cell", "cmos", "config", "deassign", "default",
+                "defparam", "design", "disable", "edge", "else", "end", "endcase", "endconfig",
+                "endfunction", "endgenerate", "endmodule", "endprimitive", "endspecify", "endtable", "endtask", "event",
+                "for", "force", "forever", "fork", "function", "generate", "genvar", "highz0",
+                "highz1", "if", "ifnone", "incdir", "include", "initial", "inout", "input",
+                "instance", "integer", "join", "large", "liblist", "library", "localparam", "macromodule",
+                "medium", "module", "nand", "negedge", "nmos", "nor", "noshowcancelled", "not",
+                "notif0", "notif1", "or", "output", "parameter", "pmos", "posedge", "primitive",
+                "pull0", "pull1", "pulldown", "pullup", "pulsestyle_onevent", "pulsestyle_ondetect", "rcmos", "real",
+                "realtime", "reg", "release", "repeat", "rnmos", "rpmos", "rtran", "rtranif0",
+                "rtranif1", "scalared", "showcancelled", "signed", "small", "specify", "specparam", "strong0",
+                "strong1", "supply0", "supply1", "table", "task", "time", "tran", "tranif0",
+                "tranif1", "tri", "tri0", "tri1", "triand", "trior", "trireg", "unsigned",
+                "use", "uwire", "vectored", "wait", "wand", "weak0", "weak1", "while",
+                "wire", "wor", "xnor", "xor"
+        ));
+    }
+
+    public static String escape(String str) {
+        if (!VERILOG_KEYWORDS.contains(str)) {
+            return str;
+        }
+        return "\\" + str + " ";
+    }
 
     private final HashSet<Integer> globalIn = new HashSet<>();
     private final HashSet<Integer> globalOut = new HashSet<>();
@@ -49,7 +78,7 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
     }
 
     private void prepareGlobalIO(JsonNode node) {
-        notepad.print(NxonParseUtils.escape(json.get("design").get("id").textValue()));
+        notepad.print(escape(json.get("design").get("id").textValue()));
         notepad.println("(");
         notepad.incIndent();
         List<String> io = new ArrayList<>();
