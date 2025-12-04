@@ -6,19 +6,16 @@ import pascal.netx.compiler.model.circuit.Utils;
 import pascal.netx.compiler.model.circuit.expr.*;
 import pascal.netx.compiler.model.circuit.scope.ComponentScope;
 import pascal.netx.compiler.model.circuit.signal.Array;
+import pascal.netx.compiler.model.circuit.signal.Composition;
 import pascal.netx.compiler.model.circuit.signal.Data;
 import pascal.netx.compiler.model.circuit.signal.Signal;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.util.lang.SourceLoc;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
+import java.util.*;
 import java.util.stream.Stream;
 
-import static pascal.netx.compiler.model.circuit.Entities.requireMutable;
+import static pascal.netx.compiler.model.circuit.Entities.requireData;
 import static pascal.netx.compiler.model.circuit.Utils.compilerOf;
 import static pascal.netx.compiler.model.circuit.Utils.repoOf;
 import static pascal.netx.compiler.model.circuit.scope.Attributes.from;
@@ -60,33 +57,33 @@ final class Connector {
     private Port connectDecoratedExpr(DecoratedExpr expr) {
         var port = connect(expr.operand());
         return switch (expr.decorator()) {
-            case BLOCK_IN -> new Port(List.of(), port.output);
-            case BLOCK_OUT -> new Port(port.input, List.of());
+            case BLOCK_IN -> Port.ofBlast(List.of(), port.output);
+            case BLOCK_OUT -> Port.ofBlast(port.input, List.of());
             case NON_BLOCK -> port;
         };
     }
 
     private Port connectPrimaryExpr(PrimaryExpr expr) {
         return switch (expr) {
-            case ComponentRef ref -> Port.of(instantiateComponentRef(ref));
-            case BuiltinRef ref -> Port.of(instantiateBuiltinRef(ref));
-            case ImportRef ref -> Port.of(instantiateImportRef(ref));
+            case ComponentRef ref -> Port.ofBlast(instantiateComponentRef(ref));
+            case BuiltinRef ref -> Port.ofBlast(instantiateBuiltinRef(ref));
+            case ImportRef ref -> Port.ofBlast(instantiateImportRef(ref));
             case SignalRef ref -> connectInstanceRef(ref);
         };
     }
 
     private Port connectSequentialExpr(SequentialExpr expr) {
         if (expr.rhs() instanceof NamedPortExpr port) {
-            return doPortConnection(instantiateScope(expr.lhs()), port, true);
+            return connectByName(instantiateScope(expr.lhs()), port, true);
         }
         if (expr.lhs() instanceof NamedPortExpr lhs) {
             if (expr.rhs() instanceof SequentialExpr(Expr mid, NamedPortExpr rhs)) {
                 var midInst = instantiateScope(mid);
-                doPortConnection(midInst, rhs, true);
-                doPortConnection(midInst, lhs, false);
+                connectByName(midInst, rhs, true);
+                connectByName(midInst, lhs, false);
                 return Port.ofEmpty();
             } else {
-                return doPortConnection(instantiateScope(expr.rhs()), lhs, false);
+                return connectByName(instantiateScope(expr.rhs()), lhs, false);
             }
         }
 
@@ -104,54 +101,11 @@ final class Connector {
             scope.assigns().add(lhs.input().get(i), rhs.output().get(i));
         }
 
-        return new Port(rhs.input(), lhs.output());
+        return Port.ofBlast(rhs.input(), lhs.output());
     }
 
-    private Port doPortConnection(ComponentScope inst, NamedPortExpr connection, boolean isInput) {
-        var instPort = Port.of(inst);
-
-        Function<Port, List<Signal>> getter =
-                (Port port) -> (isInput ? port.output : port.input);
-
-        Map<Data, Port> assigns = new HashMap<>();
-        for (var entry : connection.getPorts()) {
-            var conn = connect(entry.expr());
-//            if (!(getter.apply(conn).size() == 1)) {
-//                Logger.error("Expect exactly one output of {} but got", entry.expr(), conn.output());
-//                throw new CompileCancellationException();
-//            }
-            var port = inst.getEvaluator().evaluate(entry.port());
-            assigns.put(requireMutable(port), conn);
-        }
-
-        Port defaultPort = null;
-        var port = isInput ? instPort.input() : instPort.output();
-        if (!connection.hasDefault()) {
-            Utils.requireEqSize(assigns.size(), port,
-                    "Port connection requires all ports to be connected or provide a default connection");
-        } else {
-            defaultPort = connect(connection.getDefaultExpr());
-        }
-
-        for (var variable : port) {
-            if (!(variable instanceof Data data)) {
-                Logger.error("Expected mutable variable but got {}", variable);
-                throw new CompileCancellationException();
-            }
-
-            var expr = assigns.getOrDefault(data, defaultPort);
-            if (isInput) {
-                scope.assigns().add(data, getter.apply(expr).getFirst());
-            } else {
-                scope.assigns().add(getter.apply(expr).getFirst(), data);
-            }
-        }
-
-        if (isInput) {
-            return new Port(List.of(), instPort.output);
-        } else {
-            return new Port(instPort.input, List.of());
-        }
+    private Port connectByName(ComponentScope inst, NamedPortExpr connection, boolean isInput) {
+        return new NamedPortConnector(inst, connection, isInput).connect();
     }
 
     private Port connectParallelExpr(ParallelExpr parallelExpr) {
@@ -161,7 +115,7 @@ final class Connector {
             output.addAll(port.output());
             input.addAll(port.input());
         }
-        return new Port(input, output);
+        return Port.ofBlast(input, output);
     }
 
     private Port connectInstanceRef(SignalRef ref) {
@@ -171,9 +125,35 @@ final class Connector {
             throw new CompileCancellationException();
         }
         if (ref.getInstance() instanceof Data) {
-            return new Port(inst, inst);
+            return Port.ofBlast(inst, inst);
         } else {
-            return new Port(List.of(), inst);
+            return Port.ofBlast(List.of(), inst);
+        }
+    }
+
+    private record Port(List<Signal> input, List<Signal> output) {
+        public static Port ofBlast(List<Signal> input, List<Signal> output) {
+            return new Port(blast(input), blast(output));
+        }
+
+        public static Port ofBlast(ComponentScope scope) {
+            return new Port(scope.getInputs(), scope.getOutputs());
+        }
+
+        public static Port ofEmpty() {
+            return new Port(List.of(), List.of());
+        }
+
+        private static List<Signal> blast(List<Signal> input) {
+            return input.stream().flatMap(Port::blast).toList();
+        }
+
+        private static Stream<Signal> blast(Signal sig) {
+            if (sig instanceof Array arr) {
+                return arr.getElements().stream().flatMap(Port::blast);
+            } else {
+                return Stream.of(sig);
+            }
         }
     }
 
@@ -232,30 +212,113 @@ final class Connector {
         return component;
     }
 
-    private record Port(List<Signal> input, List<Signal> output) {
-        public Port(List<Signal> input, List<Signal> output) {
-            this.input = blast(input);
-            this.output = blast(output);
+    private final class NamedPortConnector {
+        private final ComponentScope inst;
+        private final NamedPortExpr connection;
+        private final boolean isInput;
+
+        private final Port defaultPort;
+        private final Map<Signal, Signal> assigns = new HashMap<>();
+        private final Map<Composition, List<Signal>> compAssigns = new HashMap<>();
+
+        private NamedPortConnector(ComponentScope inst, NamedPortExpr connection, boolean isInput) {
+            this.inst = inst;
+            this.connection = connection;
+            this.isInput = isInput;
+            buildAssignMap();
+            this.defaultPort = resolveDefaultPort();
         }
 
-        public static Port of(ComponentScope scope) {
-            return new Port(scope.getInputs(), scope.getOutputs());
-        }
-
-        public static Port ofEmpty() {
-            return new Port(List.of(), List.of());
-        }
-
-        private static List<Signal> blast(List<Signal> input) {
-            return input.stream().flatMap(Port::blast).toList();
-        }
-
-        private static Stream<Signal> blast(Signal sig) {
-            if (sig instanceof Array arr) {
-                return arr.getElements().stream().flatMap(Port::blast);
-            } else {
-                return Stream.of(sig);
+        public Port connect() {
+            var instPort = Port.ofBlast(inst);
+            for (var sig : isInput ? instPort.input() : instPort.output()) {
+                if (sig instanceof Composition composition) {
+                    assignForComposition(composition);
+                } else {
+                    assignForSingleton(sig);
+                }
             }
+            if (isInput) {
+                return Port.ofBlast(List.of(), instPort.output);
+            } else {
+                return Port.ofBlast(instPort.input, List.of());
+            }
+        }
+
+        private void buildAssignMap() {
+            for (var entry : connection.getPorts()) {
+                var conn = Connector.this.connect(entry.expr());
+                var namedPort = requireData(inst.getEvaluator().evaluate(entry.port()));
+
+                if (namedPort instanceof Composition composition) {
+                    compAssigns.put(composition, Port.blast(targetOf(conn)));
+                } else {
+                    assigns.put(requireData(namedPort), exactTargetOf(conn));
+                }
+            }
+        }
+
+        private void assign(Signal port, Signal target) {
+            if (isInput) {
+                scope.assigns().add(port, target);
+            } else {
+                scope.assigns().add(target, port);
+            }
+        }
+
+        private Port resolveDefaultPort() {
+            Port defaultPort = null;
+            if (connection.hasDefault()) {
+                defaultPort = Connector.this.connect(connection.getDefaultExpr());
+            }
+            return defaultPort;
+        }
+
+        private void assignForComposition(Composition composition) {
+            var targetList = getListOrDefault(composition);
+            var portList = Port.blast(composition).toList();
+            int size = Utils.requireEqSize(portList, targetList,
+                    "Bundle or array port with size mismatch for " + composition);
+            for (int i = 0; i < size; ++i) {
+                assign(portList.get(i), targetList.get(i));
+            }
+        }
+
+        private void assignForSingleton(Signal signal) {
+            assign(signal, getOrDefault(signal));
+        }
+
+        private List<Signal> getListOrDefault(Composition composition) {
+            return Optional.ofNullable(compAssigns.get(composition)).orElseGet(() -> {
+                if (defaultPort == null) {
+                    Logger.error("No assignment found for port {}", composition);
+                    throw new CompileCancellationException();
+                }
+                return targetOf(defaultPort);
+            });
+        }
+
+        private Signal getOrDefault(Signal signal) {
+            return Optional.ofNullable(assigns.get(signal)).orElseGet(() -> {
+                if (defaultPort == null) {
+                    Logger.error("No assignment found for port {}", signal);
+                    throw new CompileCancellationException();
+                }
+                return exactTargetOf(defaultPort);
+            });
+        }
+
+        private List<Signal> targetOf(Port port) {
+            return isInput ? port.output : port.input;
+        }
+
+        private Signal exactTargetOf(Port port) {
+            var targets = targetOf(port);
+            if (targets.size() != 1) {
+                Logger.error("Expected exactly one target signal but got {}", targets);
+                throw new CompileCancellationException();
+            }
+            return targets.getFirst();
         }
     }
 }
