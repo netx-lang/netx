@@ -440,37 +440,37 @@ public final class AliasAnalysis extends CircuitAnalysis {
         private final Graph<Data, DefaultEdge> graph = new SimpleDirectedGraph<>(DefaultEdge.class);
 
         public void analyze() {
-            pack.forEachSubComponent(scope -> {
-                if (scope.isBuiltin() && scope.asBuiltin().isCombinational()) {
-                    List<Data> inputs = scope.getInputs().stream()
-                            .map(manager::repOf)
-                            .filter(Data.class::isInstance)
-                            .map(Data.class::cast)
-                            .toList();
-                    List<Data> outputs = scope.getOutputs().stream()
-                            .map(manager::repOf)
-                            .filter(Data.class::isInstance)
-                            .map(Data.class::cast).toList();
-                    for (var inVar : inputs) {
-                        graph.addVertex(inVar);
-                    }
-                    for (var outVar : outputs) {
-                        graph.addVertex(outVar);
-                    }
-                    for (var inVar : inputs) {
-                        for (var outVar : outputs) {
-                            if (!inVar.equals(outVar)) {
-                                graph.addEdge(inVar, outVar);
-                            }
-                        }
-                    }
-                }
-            });
+            pack.forEachSubComponent(this::analyze);
             var detector = new CycleDetector<>(graph);
             if (detector.detectCycles()) {
                 Logger.error("Combinational loop detected, involving wires: {}", detector.findCycles());
                 throw new CompileCancellationException();
             }
+        }
+
+        private void analyze(ComponentScope scope) {
+            if (scope.isBuiltin() && scope.asBuiltin().isCombinational()) {
+                var inputs = collectVertices(scope.getInputs());
+                var outputs = collectVertices(scope.getOutputs());
+                for (var source : inputs) {
+                    for (var target : outputs) {
+                        if (!source.equals(target)) {
+                            graph.addEdge(source, target);
+                        }
+                    }
+                }
+            }
+        }
+
+        private List<Data> collectVertices(List<Signal> signals) {
+            List<Data> result = signals.stream()
+                    .map(manager::repOf)
+                    .filter(Data.class::isInstance)
+                    .map(Data.class::cast).toList();
+            for (var vertex : result) {
+                graph.addVertex(vertex);
+            }
+            return result;
         }
     }
 }
