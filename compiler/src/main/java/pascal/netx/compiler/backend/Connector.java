@@ -137,7 +137,7 @@ final class Connector {
         }
 
         public static Port ofBlast(ComponentScope scope) {
-            return new Port(scope.getInputs(), scope.getOutputs());
+            return ofBlast(scope.getInputs(), scope.getOutputs());
         }
 
         public static Port ofEmpty() {
@@ -230,8 +230,7 @@ final class Connector {
         }
 
         public Port connect() {
-            var instPort = Port.ofBlast(inst);
-            for (var sig : isInput ? instPort.input() : instPort.output()) {
+            for (var sig : isInput ? inst.getInputs() : inst.getOutputs()) {
                 if (sig instanceof Composition composition) {
                     assignForComposition(composition);
                 } else {
@@ -239,9 +238,9 @@ final class Connector {
                 }
             }
             if (isInput) {
-                return Port.ofBlast(List.of(), instPort.output);
+                return Port.ofBlast(List.of(), inst.getOutputs());
             } else {
-                return Port.ofBlast(instPort.input, List.of());
+                return Port.ofBlast(inst.getInputs(), List.of());
             }
         }
 

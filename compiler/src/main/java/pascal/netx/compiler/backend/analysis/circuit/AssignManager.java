@@ -25,7 +25,6 @@ public final class AssignManager {
         define(lhs);
         if (lhs instanceof Composition lhsComposite && rhs instanceof Composition rhsComposite) {
             List<Wire> lhsFlatten = lhsComposite.flatten(), rhsFlatten = rhsComposite.flatten();
-            // TODO: add type checking
             int size = Utils.requireEqSize(lhsFlatten, rhsFlatten, "TODO");
             for (int i = 0; i < size; i++) {
                 define(lhsFlatten.get(i));
