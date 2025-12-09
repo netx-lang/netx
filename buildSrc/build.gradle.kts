@@ -2,7 +2,7 @@ plugins {
     `kotlin-dsl`
 }
 
-// Remember to remove this line after upgrade to Gradle 9.3.0
+// Remember to remove this line after upgrading Gradle
 kotlin.jvmToolchain(21)
 
 repositories {
