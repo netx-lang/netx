@@ -10,7 +10,6 @@ import pascal.netx.compiler.model.circuit.signal.Composition;
 import pascal.netx.compiler.model.circuit.signal.Data;
 import pascal.netx.compiler.model.circuit.signal.Signal;
 import pascal.netx.compiler.utils.CompileCancellationException;
-import pascal.netx.util.lang.SourceLoc;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -170,10 +169,8 @@ final class Connector {
     }
 
     private ComponentScope instantiateImportRef(ImportRef ref) {
-        SourceLoc sourceLoc = ref.getSourceLoc();
-
-        var compiler = repoOf(scope).getManager().dispatchCompiler(sourceLoc, ref);
-        var pack = compiler.getPackManager().resolvePackage(sourceLoc, ref.packageRef());
+        var compiler = repoOf(scope).getManager().dispatchCompiler(ref);
+        var pack = compiler.getPackManager().resolvePackage(ref.packageRef());
         var component = compiler.elaborateComponent(pack, ref.componentRef(), ref.getArgList());
 
         if (ref.getArgList() != null) {
