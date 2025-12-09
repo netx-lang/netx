@@ -12,7 +12,6 @@ import pascal.netx.compiler.model.circuit.scope.PackageScope;
 import pascal.netx.compiler.model.circuit.scope.RepoScope;
 import pascal.netx.compiler.model.circuit.scope.binding.AttrBindList;
 import pascal.netx.util.lang.Identifier;
-import pascal.netx.util.lang.SourceLoc;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -78,7 +77,7 @@ public final class NXCompiler {
     public RepoScope elaborate() {
         PackageNode topPack;
         if (config.topPack() != null) {
-            topPack = manager.resolvePackage(SourceLoc.none(), config.topPack());
+            topPack = manager.resolvePackage(config.topPack());
         } else {
             topPack = manager.inferTopPack();
         }
