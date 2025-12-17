@@ -2,9 +2,9 @@ package pascal.netx.backend.graphviz;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import pascal.netx.backend.AbstractNxonTransformer;
-import pascal.netx.backend.model.Reference;
-import pascal.netx.backend.model.ValueReference;
-import pascal.netx.backend.model.WireReference;
+import pascal.netx.backend.Reference;
+import pascal.netx.backend.ValueReference;
+import pascal.netx.backend.WireReference;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.print.NotepadWriter;
 import pascal.netx.util.type.Pair;

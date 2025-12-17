@@ -1,4 +1,4 @@
-package pascal.netx.backend.model;
+package pascal.netx.backend;
 
 public record WireReference(String name, Integer id, String selector) implements Reference {
 
