@@ -39,6 +39,18 @@ public final class Graph {
         equivalence.union(a, b);
     }
 
+    public void replaceAndRemove(Vertex oldVertex, Vertex newVertex) {
+        for (var entry : adjacency.entrySet()) {
+            var targets = entry.getValue();
+            for (int i = 0; i < targets.size(); i++) {
+                if (targets.get(i).equals(oldVertex)) {
+                    targets.set(i, newVertex);
+                }
+            }
+        }
+        remove(oldVertex);
+    }
+
     public List<Vertex> inputsOf(Vertex vertex) {
         return adjacency.getOrDefault(vertex, List.of());
     }

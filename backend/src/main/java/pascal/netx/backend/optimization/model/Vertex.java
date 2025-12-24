@@ -1,6 +1,6 @@
 package pascal.netx.backend.optimization.model;
 
-public interface Vertex {
+public sealed interface Vertex permits AbstractVertex {
     int index();
 
     String name();
