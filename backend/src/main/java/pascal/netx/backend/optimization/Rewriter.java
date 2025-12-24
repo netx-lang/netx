@@ -1,32 +1,39 @@
 package pascal.netx.backend.optimization;
 
-import pascal.netx.backend.optimization.model.Component;
-import pascal.netx.backend.optimization.model.Constant;
-import pascal.netx.backend.optimization.model.Graph;
-import pascal.netx.backend.optimization.model.Vertex;
+import pascal.netx.backend.optimization.model.*;
+import pascal.netx.util.exception.ShallNotReachHereError;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public final class Rewriter {
     private final Graph graph;
+    private final Supplier<Integer> indexer;
 
-    public Rewriter(Graph graph) {
+    private final HashSet<Vertex> regPulled = new HashSet<>();
+
+    public Rewriter(Graph graph, Supplier<Integer> indexer) {
         this.graph = graph;
+        this.indexer = indexer;
     }
 
     public void rewrite() {
-        for (var vertex : graph.components()) {
-            boolean changed;
-            do {
-                changed = rewriteIdempotent(vertex);
+        boolean changed = true;
+        do {
+            changed = false;
+            for (var vertex : graph.components()) {
+                changed |= rewriteIdempotent(vertex);
                 changed |= rewriteConstant(vertex);
                 changed |= rewriteSingleton(vertex);
                 changed |= rewriteShrinkAssoc(vertex);
                 changed |= rewriteDoubleNegation(vertex);
-            } while (changed);
-        }
+                changed |= rewritePullRegister(vertex);
+            }
+        } while (changed);
     }
 
     public boolean rewriteIdempotent(Component vertex) {
@@ -52,10 +59,8 @@ public final class Rewriter {
                 var inputs = graph.inputsOf(vertex);
                 if (inputs.size() == 1) {
                     var only = inputs.getFirst();
-                    if (!graph.equivalent(only, vertex)) {
-                        graph.union(vertex, only);
-                        yield true;
-                    }
+                    graph.replaceAndRemove(vertex, only);
+                    yield true;
                 }
                 yield false;
             }
@@ -116,4 +121,63 @@ public final class Rewriter {
         }
         return false;
     }
+
+    public boolean rewritePullRegister(Component vertex) {
+        return switch (vertex.label()) {
+            case REGISTER, ASYNC_REGISTER -> false;
+            default -> {
+                if (!regPulled.contains(vertex) && pullable(vertex)) {
+                    var clock = pullClock(vertex);
+                    if (clock.isPresent()) {
+                        var pulled = new Component(indexer.get(), Component.Label.REGISTER);
+                        var compute = new Component(indexer.get(), vertex.label());
+                        graph.add(pulled);
+                        graph.add(compute);
+                        graph.addEdge(pulled, clock.get());
+                        graph.addEdge(pulled, compute);
+                        for (var input : graph.inputsOf(vertex)) {
+                            switch (input) {
+                                case Constant constant -> graph.addEdge(compute, constant);
+                                case Component register -> graph.addEdge(compute, graph.inputsOf(register).get(1));
+                                default -> throw new ShallNotReachHereError();
+                            }
+                        }
+                        graph.union(pulled, vertex);
+                        regPulled.add(vertex);
+                        yield true;
+                    }
+                }
+                yield false;
+            }
+        };
+    }
+
+    private boolean pullable(Component vertex) {
+        var inputs = graph.inputsOf(vertex);
+        boolean hasReg = inputs.stream().anyMatch(Component.class::isInstance);
+        return hasReg && inputs.stream().allMatch(input ->
+                switch (input) {
+                    case Component comp -> comp.label() == Component.Label.REGISTER;
+                    case Constant _ -> true;
+                    default -> false;
+                }
+        );
+    }
+
+    private Optional<Wire> pullClock(Component vertex) {
+        Wire result = null;
+        for (var input : graph.inputsOf(vertex)) {
+            if (input instanceof Component comp && comp.label() == Component.Label.REGISTER) {
+                var clock = (Wire) graph.inputsOf(comp).getFirst();
+                if (result != null && !graph.equivalent(result, clock)) {
+                    return Optional.empty();
+                } else {
+                    result = clock;
+                }
+            }
+        }
+        assert result != null;
+        return Optional.of(result);
+    }
+
 }

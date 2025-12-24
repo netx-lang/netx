@@ -8,6 +8,11 @@ public final class Component extends AbstractVertex {
         this.label = Label.valueOf(label.toUpperCase());
     }
 
+    public Component(int index, Label label) {
+        super(index);
+        this.label = label;
+    }
+
     public Label label() {
         return label;
     }
