@@ -27,6 +27,10 @@ public final class Graph {
         equivalence.union(a, b);
     }
 
+    public Collection<Vertex> vertices() {
+        return Collections.unmodifiableCollection(vertices);
+    }
+
     public void dump(NotepadWriter writer) {
         var ordered = new ArrayList<>(vertices);
         ordered.sort(Comparator.comparingInt(Vertex::index));
@@ -53,7 +57,7 @@ public final class Graph {
             writer.println("style=dashed;");
             for (var v : members) {
                 var name = "v" + v.index();
-                var label = quote(v.label());
+                var label = quote(v.name());
                 writer.printf("%s [label=%s];", name, label);
                 writer.newLine();
                 emitted.add(v);
@@ -67,7 +71,7 @@ public final class Graph {
         for (var v : ordered) {
             if (emitted.contains(v)) continue;
             var name = "v" + v.index();
-            var label = quote(v.label());
+            var label = quote(v.name());
             writer.printf("%s [label=%s];", name, label);
             writer.newLine();
         }

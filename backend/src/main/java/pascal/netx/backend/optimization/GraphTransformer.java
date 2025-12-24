@@ -5,8 +5,7 @@ import pascal.netx.backend.AbstractNxonTransformer;
 import pascal.netx.backend.Reference;
 import pascal.netx.backend.ValueReference;
 import pascal.netx.backend.WireReference;
-import pascal.netx.backend.optimization.model.Graph;
-import pascal.netx.backend.optimization.model.Vertex;
+import pascal.netx.backend.optimization.model.*;
 import pascal.netx.util.nxon.NxonType;
 import pascal.netx.util.print.NotepadWriter;
 
@@ -27,9 +26,9 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         super(notepad, json);
     }
 
-    private final Map<ValueReference, Vertex> constDefs = new HashMap<>();
+    private final Map<ValueReference, Wire> constDefs = new HashMap<>();
     private final Map<WireReference, Vertex> wireDefs = new HashMap<>();
-    private final Map<JsonNode, Vertex> compDefs = new HashMap<>();
+    private final Map<JsonNode, Component> compDefs = new HashMap<>();
 
     private final Supplier<Integer> indexer = new AtomicInteger(0)::getAndIncrement;
 
@@ -38,6 +37,10 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         buildWires();
         buildComponents();
         buildConnections();
+    }
+
+    public void rewrite() {
+        new Rewriter(graph).rewrite();
     }
 
     private void buildWires() {
@@ -52,7 +55,7 @@ public final class GraphTransformer extends AbstractNxonTransformer {
                     var label = node.get("id").textValue();
                     var ref = (WireReference) Reference.from(label);
                     if (inputs.contains(ref)) {
-                        var vertex = new Vertex(indexer.get(), label);
+                        var vertex = new Wire(indexer.get(), label);
                         wireDefs.put(ref, vertex);
                         graph.add(vertex);
                     }
@@ -67,7 +70,7 @@ public final class GraphTransformer extends AbstractNxonTransformer {
             if (Objects.requireNonNull(NxonType.typeOf(node)) == NxonType.BUILTIN) {
                 var output = node.get("output").get(0);
                 var ref = (WireReference) Reference.from(output.textValue());
-                var vertex = new Vertex(indexer.get(), node.get("id").textValue());
+                var vertex = new Component(indexer.get(), node.get("id").textValue());
                 wireDefs.put(ref, vertex);
                 compDefs.put(node, vertex);
                 graph.add(vertex);
@@ -89,9 +92,9 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         });
     }
 
-    private Vertex buildConstant(ValueReference ref) {
+    private Wire buildConstant(ValueReference ref) {
         return constDefs.computeIfAbsent(ref, k -> {
-            var vertex = new Vertex(indexer.get(), ref.constant());
+            var vertex = new Wire(indexer.get(), ref.constant());
             graph.add(vertex);
             return vertex;
         });
