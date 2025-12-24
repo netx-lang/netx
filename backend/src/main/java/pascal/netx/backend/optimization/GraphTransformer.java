@@ -41,7 +41,7 @@ public final class GraphTransformer extends AbstractNxonTransformer {
     }
 
     public void rewrite() {
-        new Rewriter(graph).rewrite();
+        new Rewriter(graph, indexer).rewrite();
     }
 
     private void buildWires() {
