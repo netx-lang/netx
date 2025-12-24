@@ -14,6 +14,7 @@ public final class Rewriter {
     private final Graph graph;
     private final Supplier<Integer> indexer;
 
+    private final HashSet<Vertex> regPushed = new HashSet<>();
     private final HashSet<Vertex> regPulled = new HashSet<>();
 
     public Rewriter(Graph graph, Supplier<Integer> indexer) {
@@ -32,6 +33,7 @@ public final class Rewriter {
                 changed |= rewriteShrinkAssoc(vertex);
                 changed |= rewriteDoubleNegation(vertex);
                 changed |= rewritePullRegister(vertex);
+                changed |= rewritePushRegister(vertex);
             }
         } while (changed);
     }
@@ -123,33 +125,33 @@ public final class Rewriter {
     }
 
     public boolean rewritePullRegister(Component vertex) {
-        return switch (vertex.label()) {
-            case REGISTER, ASYNC_REGISTER -> false;
-            default -> {
-                if (!regPulled.contains(vertex) && pullable(vertex)) {
-                    var clock = pullClock(vertex);
-                    if (clock.isPresent()) {
-                        var pulled = new Component(indexer.get(), Component.Label.REGISTER);
-                        var compute = new Component(indexer.get(), vertex.label());
-                        graph.add(pulled);
-                        graph.add(compute);
-                        graph.addEdge(pulled, clock.get());
-                        graph.addEdge(pulled, compute);
-                        for (var input : graph.inputsOf(vertex)) {
-                            switch (input) {
-                                case Constant constant -> graph.addEdge(compute, constant);
-                                case Component register -> graph.addEdge(compute, graph.inputsOf(register).get(1));
-                                default -> throw new ShallNotReachHereError();
-                            }
-                        }
-                        graph.union(pulled, vertex);
-                        regPulled.add(vertex);
-                        yield true;
+        if (isRegister(vertex)) {
+            return false;
+        }
+
+        if (!regPulled.contains(vertex) && pullable(vertex)) {
+            var clock = pullClock(vertex);
+            if (clock.isPresent()) {
+                var pulled = new Component(indexer.get(), Component.Label.REGISTER);
+                var compute = new Component(indexer.get(), vertex.label());
+                graph.add(pulled);
+                graph.add(compute);
+                graph.addEdge(pulled, clock.get());
+                graph.addEdge(pulled, compute);
+                for (var input : graph.inputsOf(vertex)) {
+                    switch (input) {
+                        case Constant constant -> graph.addEdge(compute, constant);
+                        case Component register -> graph.addEdge(compute, graph.inputsOf(register).get(1));
+                        default -> throw new ShallNotReachHereError();
                     }
                 }
-                yield false;
+                graph.union(pulled, vertex);
+                regPulled.add(vertex);
+                regPushed.add(compute);
+                return true;
             }
-        };
+        }
+        return false;
     }
 
     private boolean pullable(Component vertex) {
@@ -180,4 +182,38 @@ public final class Rewriter {
         return Optional.of(result);
     }
 
+
+    public boolean rewritePushRegister(Component vertex) {
+        if (vertex.label() != Component.Label.REGISTER) {
+            return false;
+        }
+
+        var inputs = graph.inputsOf(vertex);
+        var clock = (Wire) inputs.get(0);
+        if (inputs.get(1) instanceof Component component) {
+            if (isRegister(component) || regPushed.contains(component)) {
+                return false;
+            }
+
+            var compute = new Component(indexer.get(), component.label());
+            graph.add(compute);
+            graph.union(compute, vertex);
+            for (var input : graph.inputsOf(component)) {
+                var pushed = new Component(indexer.get(), Component.Label.REGISTER);
+                graph.add(pushed);
+                graph.addEdge(compute, pushed);
+                graph.addEdge(pushed, clock);
+                graph.addEdge(pushed, input);
+            }
+            regPushed.add(component);
+            regPulled.add(compute);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isRegister(Vertex vertex) {
+        return vertex instanceof Component comp &&
+                (comp.label() == Component.Label.REGISTER || comp.label() == Component.Label.ASYNC_REGISTER);
+    }
 }
