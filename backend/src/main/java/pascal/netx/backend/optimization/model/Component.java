@@ -17,7 +17,6 @@ public final class Component extends AbstractVertex {
         return label.name();
     }
 
-
     public enum Label {
         REGISTER, ASYNC_REGISTER,
         CONCAT, OR, NOT, AND, XOR, NOR, NAND, XNOR,

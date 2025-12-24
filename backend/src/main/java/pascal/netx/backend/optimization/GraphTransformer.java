@@ -6,6 +6,7 @@ import pascal.netx.backend.Reference;
 import pascal.netx.backend.ValueReference;
 import pascal.netx.backend.WireReference;
 import pascal.netx.backend.optimization.model.*;
+import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.nxon.NxonType;
 import pascal.netx.util.print.NotepadWriter;
 
@@ -26,7 +27,7 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         super(notepad, json);
     }
 
-    private final Map<ValueReference, Wire> constDefs = new HashMap<>();
+    private final Map<ValueReference, Constant> constDefs = new HashMap<>();
     private final Map<WireReference, Vertex> wireDefs = new HashMap<>();
     private final Map<JsonNode, Component> compDefs = new HashMap<>();
 
@@ -92,9 +93,9 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         });
     }
 
-    private Wire buildConstant(ValueReference ref) {
+    private Constant buildConstant(ValueReference ref) {
         return constDefs.computeIfAbsent(ref, k -> {
-            var vertex = new Wire(indexer.get(), ref.constant());
+            var vertex = new Constant(indexer.get(), BitVector.parse(ref.constant()));
             graph.add(vertex);
             return vertex;
         });
