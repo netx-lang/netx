@@ -18,10 +18,12 @@ class GraphTransformerTest {
     @Test
     void sampleTest() throws IOException {
         var notepad = NotepadWriter.pathOut(Path.of("/home/nairen/tmp/test.dot"));
+//        var notepad = NotepadWriter.stdOut();
         var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve("opt.json")));
         var transformer = new GraphTransformer(notepad, json);
         transformer.parse();
         transformer.rewrite();
         transformer.dump();
+        notepad.flush();
     }
 }

@@ -16,19 +16,39 @@ public final class Graph {
     public void add(Vertex vertex) {
         vertices.add(vertex);
         equivalence.add(vertex);
-        adjacency.putIfAbsent(vertex, new ArrayList<>());
+        adjacency.putIfAbsent(vertex, new LinkedList<>());
+    }
+
+    public void remove(Vertex vertex) {
+        vertices.remove(vertex);
+        adjacency.remove(vertex);
+        for (var targets : adjacency.values()) {
+            targets.remove(vertex);
+        }
     }
 
     public void addEdge(Vertex from, Vertex to) {
         adjacency.get(from).add(to);
     }
 
+    public boolean equivalent(Vertex a, Vertex b) {
+        return equivalence.find(a) == equivalence.find(b);
+    }
+
     public void union(Vertex a, Vertex b) {
         equivalence.union(a, b);
     }
 
-    public Collection<Vertex> vertices() {
-        return Collections.unmodifiableCollection(vertices);
+    public List<Vertex> inputsOf(Vertex vertex) {
+        return adjacency.getOrDefault(vertex, List.of());
+    }
+
+    public Collection<Component> components() {
+        return vertices.stream().filter(Component.class::isInstance).map(Component.class::cast).toList();
+    }
+
+    public Collection<Wire> wires() {
+        return vertices.stream().filter(Wire.class::isInstance).map(Wire.class::cast).toList();
     }
 
     public void dump(NotepadWriter writer) {
@@ -84,7 +104,7 @@ public final class Graph {
             var targets = adjacency.getOrDefault(v, List.of());
             for (var t : targets) {
                 var toName = "v" + t.index();
-                writer.printf("%s -> %s;", fromName, toName);
+                writer.printf("%s -> %s;", toName, fromName);
                 writer.newLine();
             }
         }
