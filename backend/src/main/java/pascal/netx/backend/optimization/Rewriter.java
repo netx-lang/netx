@@ -16,6 +16,7 @@ public final class Rewriter {
 
     private final HashSet<Vertex> regPushed = new HashSet<>();
     private final HashSet<Vertex> regPulled = new HashSet<>();
+    private final HashSet<Vertex> doubleNegWritten = new HashSet<>();
 
     public Rewriter(Graph graph, Supplier<Integer> indexer) {
         this.graph = graph;
@@ -23,29 +24,45 @@ public final class Rewriter {
     }
 
     public void rewrite() {
-        for (var vertex : graph.wires()) {
-            rewriteSelection(vertex);
-        }
-        for (var vertex : graph.components()) {
-            rewriteIdentity(vertex);
-        }
+        onePassRewrite();
+
+        List<Predicate<Component>> rules = List.of(
+                this::rewriteIdempotent,
+                this::rewriteConstant,
+                this::rewriteSingleton,
+                this::rewriteShrinkAssoc,
+                this::rewriteDoubleNegation,
+                this::rewritePullRegister,
+                this::rewritePushRegister
+        );
 
         boolean changed;
         do {
             changed = false;
             for (var vertex : graph.components()) {
-                changed |= rewriteIdempotent(vertex);
-                changed |= rewriteConstant(vertex);
-                changed |= rewriteSingleton(vertex);
-                changed |= rewriteShrinkAssoc(vertex);
-                changed |= rewriteDoubleNegation(vertex);
-                changed |= rewritePullRegister(vertex);
-                changed |= rewritePushRegister(vertex);
+                for (var rule : rules) {
+                    if (rule.test(vertex)) {
+                        changed = true;
+                        break;
+                    }
+                }
+                if (changed) {
+                    break;
+                }
             }
         } while (changed);
     }
 
-    public void rewriteIdentity(Component vertex) {
+    private void onePassRewrite() {
+        for (var vertex : graph.components()) {
+            onePassRewriteIdentity(vertex);
+        }
+        for (var vertex : graph.wires()) {
+            onPassRewriteSelection(vertex);
+        }
+    }
+
+    private void onePassRewriteIdentity(Component vertex) {
         if (vertex.label() == Component.Label.TO) {
             var input = graph.inputsOf(vertex).getFirst();
             var output = graph.outputsOf(vertex).getFirst();
@@ -54,7 +71,7 @@ public final class Rewriter {
         }
     }
 
-    public void rewriteSelection(Wire vertex) {
+    private void onPassRewriteSelection(Wire vertex) {
         var inputs = graph.inputsOf(vertex).stream()
                 .filter(Select.class::isInstance).map(Select.class::cast).toList();
         var outputs = graph.outputsOf(vertex).stream()
@@ -101,11 +118,13 @@ public final class Rewriter {
     }
 
     public boolean rewriteDoubleNegation(Component vertex) {
-        if (vertex.label() == Component.Label.NOT) {
+        if (vertex.label() == Component.Label.NOT && !doubleNegWritten.contains(vertex)) {
             var neg = graph.inputsOf(vertex).getFirst();
             if (neg instanceof Component comp && comp.label() == Component.Label.NOT) {
                 var only = graph.inputsOf(neg).getFirst();
                 graph.union(vertex, only);
+                doubleNegWritten.add(vertex);
+                return true;
             }
         }
         return false;
@@ -135,7 +154,9 @@ public final class Rewriter {
                 List<Vertex> flattened = new LinkedList<>();
                 List<Vertex> toRemove = new LinkedList<>();
                 for (var input : graph.inputsOf(vertex)) {
-                    if (input instanceof Component comp && comp.label() == vertex.label()) {
+                    if (input instanceof Component comp
+                            && comp.label() == vertex.label()
+                            && graph.outputsOf(comp).size() == 1) {
                         rewriteShrinkAssoc(comp);
                         flattened.addAll(graph.inputsOf(comp));
                         toRemove.add(comp);

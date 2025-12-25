@@ -113,6 +113,7 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         graph.add(select);
         graph.addEdge(select, wire);
         graph.addEdge(vertex, select);
+        graph.union(vertex, select);
     }
 
     private void buildReadSelect(WireReference ref, Component vertex) {
@@ -148,7 +149,7 @@ public final class GraphTransformer extends AbstractNxonTransformer {
 
     private Constant buildConstant(ValueReference ref) {
         return constRefs.computeIfAbsent(ref, k -> {
-            var vertex = new Constant(indexer.get(), BitVector.parse(ref.constant()));
+            var vertex = new Constant(indexer.get(), BitVector.parse(k.constant()));
             graph.add(vertex);
             return vertex;
         });
