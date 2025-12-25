@@ -24,6 +24,7 @@ public final class Component extends AbstractVertex {
 
     public enum Label {
         REGISTER, ASYNC_REGISTER,
+        CAST, UCAST, TO,
         CONCAT, OR, NOT, AND, XOR, NOR, NAND, XNOR,
         EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE,
         ADD, SUB, SHL, MUL, DIV, MOD, ASHR, LSHR;
