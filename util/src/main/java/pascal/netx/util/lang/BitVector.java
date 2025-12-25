@@ -10,6 +10,9 @@ public sealed interface BitVector permits LongBasedBitVector, ArrayBasedBitVecto
 
     static BitVector parse(String literal) {
         var parts = literal.toLowerCase().split("'");
+        if (parts.length != 2) {
+            return BitVector.fromLong(32, Long.parseLong(literal));
+        }
         int size = Integer.parseInt(parts[0]);
         int radix = switch (parts[1].charAt(0)) {
             case 'b' -> 2;

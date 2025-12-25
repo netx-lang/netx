@@ -9,26 +9,33 @@ import static pascal.netx.backend.NxonParseUtils.quote;
 
 public final class Graph {
     private final Set<Vertex> vertices = new HashSet<>();
-    private final Map<Vertex, List<Vertex>> adjacency = new HashMap<>();
+    private final Map<Vertex, List<Vertex>> inputs = new HashMap<>();
+    private final Map<Vertex, List<Vertex>> outputs = new HashMap<>();
 
     private final UnionFind<Vertex> equivalence = new UnionFind<>();
 
     public void add(Vertex vertex) {
         vertices.add(vertex);
         equivalence.add(vertex);
-        adjacency.putIfAbsent(vertex, new LinkedList<>());
+        inputs.putIfAbsent(vertex, new LinkedList<>());
+        outputs.putIfAbsent(vertex, new LinkedList<>());
     }
 
     public void remove(Vertex vertex) {
         vertices.remove(vertex);
-        adjacency.remove(vertex);
-        for (var targets : adjacency.values()) {
+        inputs.remove(vertex);
+        outputs.remove(vertex);
+        for (var targets : inputs.values()) {
+            targets.remove(vertex);
+        }
+        for (var targets : outputs.values()) {
             targets.remove(vertex);
         }
     }
 
     public void addEdge(Vertex from, Vertex to) {
-        adjacency.get(from).add(to);
+        outputs.get(from).add(to);
+        inputs.get(to).add(from);
     }
 
     public boolean equivalent(Vertex a, Vertex b) {
@@ -40,19 +47,21 @@ public final class Graph {
     }
 
     public void replaceAndRemove(Vertex oldVertex, Vertex newVertex) {
-        for (var entry : adjacency.entrySet()) {
-            var targets = entry.getValue();
-            for (int i = 0; i < targets.size(); i++) {
-                if (targets.get(i).equals(oldVertex)) {
-                    targets.set(i, newVertex);
-                }
-            }
+        for (var entry : inputs.entrySet()) {
+            entry.getValue().replaceAll(value -> value.equals(oldVertex) ? newVertex : value);
+        }
+        for (var entry : outputs.entrySet()) {
+            entry.getValue().replaceAll(value -> value.equals(oldVertex) ? newVertex : value);
         }
         remove(oldVertex);
     }
 
     public List<Vertex> inputsOf(Vertex vertex) {
-        return adjacency.getOrDefault(vertex, List.of());
+        return inputs.getOrDefault(vertex, List.of());
+    }
+
+    public List<Vertex> outputsOf(Vertex vertex) {
+        return outputs.getOrDefault(vertex, List.of());
     }
 
     public Collection<Component> components() {
@@ -113,7 +122,7 @@ public final class Graph {
         // Emit edges
         for (var v : ordered) {
             var fromName = "v" + v.index();
-            var targets = adjacency.getOrDefault(v, List.of());
+            var targets = inputs.getOrDefault(v, List.of());
             for (var t : targets) {
                 var toName = "v" + t.index();
                 writer.printf("%s -> %s;", toName, fromName);
