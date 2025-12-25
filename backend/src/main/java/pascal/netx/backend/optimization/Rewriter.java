@@ -17,6 +17,7 @@ public final class Rewriter {
     private final HashSet<Vertex> regPushed = new HashSet<>();
     private final HashSet<Vertex> regPulled = new HashSet<>();
     private final HashSet<Vertex> doubleNegWritten = new HashSet<>();
+    private final HashSet<Vertex> deMorganWritten = new HashSet<>();
 
     public Rewriter(Graph graph, Supplier<Integer> indexer) {
         this.graph = graph;
@@ -31,6 +32,7 @@ public final class Rewriter {
                 this::rewriteConstant,
                 this::rewriteSingleton,
                 this::rewriteShrinkAssoc,
+                this::rewriteDeMorgan,
                 this::rewriteDoubleNegation,
                 this::rewritePullRegister,
                 this::rewritePushRegister
@@ -86,7 +88,7 @@ public final class Rewriter {
         }
     }
 
-    public boolean rewriteIdempotent(Component vertex) {
+    private boolean rewriteIdempotent(Component vertex) {
         return switch (vertex.label()) {
             case AND, OR, XOR, NAND, NOR, XNOR -> {
                 var inputs = graph.inputsOf(vertex);
@@ -102,7 +104,7 @@ public final class Rewriter {
         };
     }
 
-    public boolean rewriteSingleton(Component vertex) {
+    private boolean rewriteSingleton(Component vertex) {
         return switch (vertex.label()) {
             case REGISTER, ASYNC_REGISTER, CAST, NOT, TO -> false;
             default -> {
@@ -117,7 +119,7 @@ public final class Rewriter {
         };
     }
 
-    public boolean rewriteDoubleNegation(Component vertex) {
+    private boolean rewriteDoubleNegation(Component vertex) {
         if (vertex.label() == Component.Label.NOT && !doubleNegWritten.contains(vertex)) {
             var neg = graph.inputsOf(vertex).getFirst();
             if (neg instanceof Component comp && comp.label() == Component.Label.NOT) {
@@ -130,7 +132,59 @@ public final class Rewriter {
         return false;
     }
 
-    public boolean rewriteConstant(Component vertex) {
+    private boolean rewriteDeMorgan(Component vertex) {
+        if (deMorganWritten.contains(vertex)) {
+            return false;
+        }
+
+        switch (vertex.label()) {
+            case NOT -> {
+                var input = graph.inputsOf(vertex).getFirst();
+                if (input instanceof Component comp) {
+                    switch (comp.label()) {
+                        case AND -> {
+                            var orComp = new Component(indexer.get(), Component.Label.OR);
+                            applyDeMorgan(vertex, comp, orComp);
+                            deMorganWritten.add(vertex);
+                            return true;
+                        }
+                        case OR -> {
+                            var andComp = new Component(indexer.get(), Component.Label.AND);
+                            applyDeMorgan(vertex, comp, andComp);
+                            deMorganWritten.add(vertex);
+                            return true;
+                        }
+                    }
+                }
+            }
+            case NOR -> {
+                var andComp = new Component(indexer.get(), Component.Label.AND);
+                applyDeMorgan(vertex, vertex, andComp);
+                deMorganWritten.add(vertex);
+                return true;
+            }
+            case NAND ->  {
+                var orComp = new Component(indexer.get(), Component.Label.OR);
+                applyDeMorgan(vertex, vertex, orComp);
+                deMorganWritten.add(vertex);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void applyDeMorgan(Component vertex, Component origin, Component dual) {
+        graph.add(dual);
+        for (var in : graph.inputsOf(origin)) {
+            var notIn = new Component(indexer.get(), Component.Label.NOT);
+            graph.add(notIn);
+            graph.addEdge(in, notIn);
+            graph.addEdge(notIn, dual);
+        }
+        graph.union(vertex, dual);
+    }
+
+    private boolean rewriteConstant(Component vertex) {
         return switch (vertex.label()) {
             case AND -> rewriteConstant(vertex, Constant::isMersenne);
             case OR -> rewriteConstant(vertex, Constant::isZero);
@@ -147,7 +201,7 @@ public final class Rewriter {
         });
     }
 
-    public boolean rewriteShrinkAssoc(Component vertex) {
+    private boolean rewriteShrinkAssoc(Component vertex) {
         switch (vertex.label()) {
             case AND, OR, XOR, ADD, MUL -> {
                 boolean changed = false;
@@ -176,7 +230,7 @@ public final class Rewriter {
         return false;
     }
 
-    public boolean rewritePullRegister(Component vertex) {
+    private boolean rewritePullRegister(Component vertex) {
         if (isRegister(vertex)) {
             return false;
         }
@@ -234,8 +288,7 @@ public final class Rewriter {
         return Optional.of(result);
     }
 
-
-    public boolean rewritePushRegister(Component vertex) {
+    private boolean rewritePushRegister(Component vertex) {
         if (vertex.label() != Component.Label.REGISTER) {
             return false;
         }
