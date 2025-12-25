@@ -27,8 +27,10 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         super(notepad, json);
     }
 
-    private final Map<ValueReference, Constant> constDefs = new HashMap<>();
-    private final Map<WireReference, Vertex> wireDefs = new HashMap<>();
+    private final Map<ValueReference, Constant> constRefs = new HashMap<>();
+    private final Map<WireReference, Vertex> wireRefs = new HashMap<>();
+
+    private final Map<WireReference, JsonNode> wireDefs = new HashMap<>();
     private final Map<JsonNode, Component> compDefs = new HashMap<>();
 
     private final Supplier<Integer> indexer = new AtomicInteger(0)::getAndIncrement;
@@ -57,9 +59,10 @@ public final class GraphTransformer extends AbstractNxonTransformer {
                     var ref = (WireReference) Reference.from(label);
                     if (inputs.contains(ref)) {
                         var vertex = new Wire(indexer.get(), label);
-                        wireDefs.put(ref, vertex);
+                        wireRefs.put(ref, vertex);
                         graph.add(vertex);
                     }
+                    wireDefs.put(ref, node);
                 }
                 case BUILTIN, COMPONENT -> { /* ignored */ }
             }
@@ -71,10 +74,15 @@ public final class GraphTransformer extends AbstractNxonTransformer {
             if (Objects.requireNonNull(NxonType.typeOf(node)) == NxonType.BUILTIN) {
                 var output = node.get("output").get(0);
                 var ref = (WireReference) Reference.from(output.textValue());
+
                 var vertex = new Component(indexer.get(), node.get("id").textValue());
-                wireDefs.put(ref, vertex);
                 compDefs.put(node, vertex);
                 graph.add(vertex);
+                if (!ref.selector().isEmpty()) {
+                    buildWriteSelect(ref, vertex);
+                } else {
+                    wireRefs.put(ref, vertex);
+                }
             }
         });
     }
@@ -82,19 +90,64 @@ public final class GraphTransformer extends AbstractNxonTransformer {
     private void buildConnections() {
         iterate(json.get("design"), node -> {
             if (Objects.requireNonNull(NxonType.typeOf(node)) == NxonType.BUILTIN) {
+                var vertex = compDefs.get(node);
                 for (var input: node.get("input")) {
-                    var vertex = compDefs.get(node);
                     switch (Reference.from(input.textValue())) {
-                        case WireReference ref -> graph.addEdge(vertex, wireDefs.get(ref));
-                        case ValueReference ref -> graph.addEdge(vertex, buildConstant(ref));
+                        case WireReference ref -> {
+                            if (wireRefs.containsKey(ref)) {
+                                graph.addEdge(wireRefs.get(ref), vertex);
+                            } else {
+                                buildReadSelect(ref, vertex);
+                            }
+                        }
+                        case ValueReference ref -> graph.addEdge(buildConstant(ref), vertex);
                     }
                 }
             }
         });
     }
 
+    private void buildWriteSelect(WireReference ref, Component vertex) {
+        var wire = buildWireWithSelector(ref);
+        var select = buildSelect(ref);
+        graph.add(select);
+        graph.addEdge(select, wire);
+        graph.addEdge(vertex, select);
+    }
+
+    private void buildReadSelect(WireReference ref, Component vertex) {
+        var wire = buildWireWithSelector(ref);
+        var select = buildSelect(ref);
+        graph.add(select);
+        graph.addEdge(wire, select);
+        graph.addEdge(select, vertex);
+        wireRefs.put(ref, select);
+    }
+
+    private Vertex buildWireWithSelector(WireReference ref) {
+        return wireRefs.computeIfAbsent(
+                ref.withoutSelector(), key -> {
+                    var result = new Wire(indexer.get(), wireDefs.get(key).get("id").textValue());
+                    graph.add(result);
+                    return result;
+                });
+    }
+
+    private Select buildSelect(WireReference ref) {
+        String literal = ref.selector().substring(1, ref.selector().length() - 1);
+        if (literal.contains(":")) {
+            var array = literal.split(":");
+            int msb = Integer.parseInt(array[0]);
+            int lsb = Integer.parseInt(array[1]);
+            return new Select(indexer.get(), msb, lsb);
+        } else {
+            int index = Integer.parseInt(literal);
+            return new Select(indexer.get(), index, index);
+        }
+    }
+
     private Constant buildConstant(ValueReference ref) {
-        return constDefs.computeIfAbsent(ref, k -> {
+        return constRefs.computeIfAbsent(ref, k -> {
             var vertex = new Constant(indexer.get(), BitVector.parse(ref.constant()));
             graph.add(vertex);
             return vertex;

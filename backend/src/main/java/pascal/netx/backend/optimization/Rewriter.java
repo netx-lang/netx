@@ -23,7 +23,14 @@ public final class Rewriter {
     }
 
     public void rewrite() {
-        boolean changed = true;
+        for (var vertex : graph.wires()) {
+            rewriteSelection(vertex);
+        }
+        for (var vertex : graph.components()) {
+            rewriteIdentity(vertex);
+        }
+
+        boolean changed;
         do {
             changed = false;
             for (var vertex : graph.components()) {
@@ -36,6 +43,30 @@ public final class Rewriter {
                 changed |= rewritePushRegister(vertex);
             }
         } while (changed);
+    }
+
+    public void rewriteIdentity(Component vertex) {
+        if (vertex.label() == Component.Label.TO) {
+            var input = graph.inputsOf(vertex).getFirst();
+            var output = graph.outputsOf(vertex).getFirst();
+            graph.replaceAndRemove(output, input);
+            graph.replaceAndRemove(vertex, input);
+        }
+    }
+
+    public void rewriteSelection(Wire vertex) {
+        var inputs = graph.inputsOf(vertex).stream()
+                .filter(Select.class::isInstance).map(Select.class::cast).toList();
+        var outputs = graph.outputsOf(vertex).stream()
+                .filter(Select.class::isInstance).map(Select.class::cast).toList();
+
+        for (var selOut : outputs) {
+            for (var selIn : inputs) {
+                if (selIn.msb() == selOut.msb() && selIn.lsb() == selOut.lsb()) {
+                    graph.replaceAndRemove(selOut, selIn);
+                }
+            }
+        }
     }
 
     public boolean rewriteIdempotent(Component vertex) {
@@ -56,7 +87,7 @@ public final class Rewriter {
 
     public boolean rewriteSingleton(Component vertex) {
         return switch (vertex.label()) {
-            case REGISTER, ASYNC_REGISTER -> false;
+            case REGISTER, ASYNC_REGISTER, CAST, NOT, TO -> false;
             default -> {
                 var inputs = graph.inputsOf(vertex);
                 if (inputs.size() == 1) {
@@ -136,12 +167,12 @@ public final class Rewriter {
                 var compute = new Component(indexer.get(), vertex.label());
                 graph.add(pulled);
                 graph.add(compute);
-                graph.addEdge(pulled, clock.get());
-                graph.addEdge(pulled, compute);
+                graph.addEdge(clock.get(), pulled);
+                graph.addEdge(compute, pulled);
                 for (var input : graph.inputsOf(vertex)) {
                     switch (input) {
-                        case Constant constant -> graph.addEdge(compute, constant);
-                        case Component register -> graph.addEdge(compute, graph.inputsOf(register).get(1));
+                        case Constant constant -> graph.addEdge(constant, compute);
+                        case Component register -> graph.addEdge(graph.inputsOf(register).get(1), compute);
                         default -> throw new ShallNotReachHereError();
                     }
                 }
@@ -201,9 +232,9 @@ public final class Rewriter {
             for (var input : graph.inputsOf(component)) {
                 var pushed = new Component(indexer.get(), Component.Label.REGISTER);
                 graph.add(pushed);
-                graph.addEdge(compute, pushed);
-                graph.addEdge(pushed, clock);
-                graph.addEdge(pushed, input);
+                graph.addEdge(pushed, compute);
+                graph.addEdge(clock, pushed);
+                graph.addEdge(input, pushed);
             }
             regPushed.add(component);
             regPulled.add(compute);
