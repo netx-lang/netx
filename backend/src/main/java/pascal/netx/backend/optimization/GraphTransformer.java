@@ -13,9 +13,7 @@ import pascal.netx.util.print.NotepadWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static pascal.netx.backend.NxonParseUtils.streamOf;
@@ -33,8 +31,6 @@ public final class GraphTransformer extends AbstractNxonTransformer {
     private final Map<WireReference, JsonNode> wireDefs = new HashMap<>();
     private final Map<JsonNode, Component> compDefs = new HashMap<>();
 
-    private final Supplier<Integer> indexer = new AtomicInteger(0)::getAndIncrement;
-
     @Override
     public void parse() {
         buildWires();
@@ -43,7 +39,7 @@ public final class GraphTransformer extends AbstractNxonTransformer {
     }
 
     public void rewrite() {
-        new Rewriter(graph, indexer).rewrite();
+        new Rewriter(graph).rewrite();
     }
 
     private void buildWires() {
@@ -58,9 +54,8 @@ public final class GraphTransformer extends AbstractNxonTransformer {
                     var label = node.get("id").textValue();
                     var ref = (WireReference) Reference.from(label);
                     if (inputs.contains(ref)) {
-                        var vertex = new Wire(indexer.get(), label);
+                        var vertex = graph.newWire(label);
                         wireRefs.put(ref, vertex);
-                        graph.add(vertex);
                     }
                     wireDefs.put(ref, node);
                 }
@@ -75,9 +70,8 @@ public final class GraphTransformer extends AbstractNxonTransformer {
                 var output = node.get("output").get(0);
                 var ref = (WireReference) Reference.from(output.textValue());
 
-                var vertex = new Component(indexer.get(), node.get("id").textValue());
+                var vertex = graph.newComponent(node.get("id").textValue());
                 compDefs.put(node, vertex);
-                graph.add(vertex);
                 if (!ref.selector().isEmpty()) {
                     buildWriteSelect(ref, vertex);
                 } else {
@@ -110,7 +104,6 @@ public final class GraphTransformer extends AbstractNxonTransformer {
     private void buildWriteSelect(WireReference ref, Component vertex) {
         var wire = buildWireWithSelector(ref);
         var select = buildSelect(ref);
-        graph.add(select);
         graph.addEdge(select, wire);
         graph.addEdge(vertex, select);
         graph.union(vertex, select);
@@ -119,7 +112,6 @@ public final class GraphTransformer extends AbstractNxonTransformer {
     private void buildReadSelect(WireReference ref, Component vertex) {
         var wire = buildWireWithSelector(ref);
         var select = buildSelect(ref);
-        graph.add(select);
         graph.addEdge(wire, select);
         graph.addEdge(select, vertex);
         wireRefs.put(ref, select);
@@ -127,11 +119,7 @@ public final class GraphTransformer extends AbstractNxonTransformer {
 
     private Vertex buildWireWithSelector(WireReference ref) {
         return wireRefs.computeIfAbsent(
-                ref.withoutSelector(), key -> {
-                    var result = new Wire(indexer.get(), wireDefs.get(key).get("id").textValue());
-                    graph.add(result);
-                    return result;
-                });
+                ref.withoutSelector(), key -> graph.newWire(wireDefs.get(key).get("id").textValue()));
     }
 
     private Select buildSelect(WireReference ref) {
@@ -140,19 +128,15 @@ public final class GraphTransformer extends AbstractNxonTransformer {
             var array = literal.split(":");
             int msb = Integer.parseInt(array[0]);
             int lsb = Integer.parseInt(array[1]);
-            return new Select(indexer.get(), msb, lsb);
+            return graph.newSelect(msb, lsb);
         } else {
             int index = Integer.parseInt(literal);
-            return new Select(indexer.get(), index, index);
+            return graph.newSelect(index, index);
         }
     }
 
     private Constant buildConstant(ValueReference ref) {
-        return constRefs.computeIfAbsent(ref, k -> {
-            var vertex = new Constant(indexer.get(), BitVector.parse(k.constant()));
-            graph.add(vertex);
-            return vertex;
-        });
+        return constRefs.computeIfAbsent(ref, k -> graph.newConstant(BitVector.parse(k.constant())));
     }
 
     public void dump() {

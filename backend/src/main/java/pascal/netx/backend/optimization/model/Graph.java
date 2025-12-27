@@ -4,6 +4,7 @@ import pascal.netx.util.collection.UnionFind;
 import pascal.netx.util.print.NotepadWriter;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static pascal.netx.backend.NxonParseUtils.quote;
 
@@ -13,6 +14,7 @@ public final class Graph {
     private final Map<Vertex, List<Vertex>> outputs = new HashMap<>();
 
     private final UnionFind<Vertex> equivalence = new UnionFind<>();
+    private final AtomicInteger indexer = new AtomicInteger();
 
     public void add(Vertex vertex) {
         vertices.add(vertex);
@@ -44,6 +46,40 @@ public final class Graph {
 
     public void union(Vertex a, Vertex b) {
         equivalence.union(a, b);
+    }
+
+    private int nextIndex() {
+        return indexer.getAndIncrement();
+    }
+
+    public Wire newWire(String label) {
+        var wire = new Wire(nextIndex(), label);
+        add(wire);
+        return wire;
+    }
+
+    public Select newSelect(int msb, int lsb) {
+        var select = new Select(nextIndex(), msb, lsb);
+        add(select);
+        return select;
+    }
+
+    public Component newComponent(Component.Label label) {
+        var component = new Component(nextIndex(), label);
+        add(component);
+        return component;
+    }
+
+    public Component newComponent(String label) {
+        var component = new Component(nextIndex(), label);
+        add(component);
+        return component;
+    }
+
+    public Constant newConstant(pascal.netx.util.lang.BitVector value) {
+        var constant = new Constant(nextIndex(), value);
+        add(constant);
+        return constant;
     }
 
     public void replaceAndRemove(Vertex oldVertex, Vertex newVertex) {
@@ -80,7 +116,7 @@ public final class Graph {
         Map<Vertex, List<Vertex>> groups = new LinkedHashMap<>();
         for (var v : ordered) {
             var rep = equivalence.find(v);
-            groups.computeIfAbsent(rep, k -> new ArrayList<>()).add(v);
+            groups.computeIfAbsent(rep, _ -> new ArrayList<>()).add(v);
         }
 
         writer.println("digraph G {");
