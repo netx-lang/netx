@@ -1,6 +1,7 @@
 package pascal.netx.backend.optimization.model;
 
 import pascal.netx.util.collection.UnionFind;
+import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.print.NotepadWriter;
 
 import java.util.*;
@@ -9,14 +10,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static pascal.netx.backend.NxonParseUtils.quote;
 
 public final class Graph {
+    private final AtomicInteger indexer = new AtomicInteger();
+    private final Map<BitVector, Constant> constantCache = new HashMap<>();
+
     private final Set<Vertex> vertices = new HashSet<>();
     private final Map<Vertex, List<Vertex>> inputs = new HashMap<>();
     private final Map<Vertex, List<Vertex>> outputs = new HashMap<>();
 
     private final UnionFind<Vertex> equivalence = new UnionFind<>();
-    private final AtomicInteger indexer = new AtomicInteger();
 
-    public void add(Vertex vertex) {
+    private void add(Vertex vertex) {
         vertices.add(vertex);
         equivalence.add(vertex);
         inputs.putIfAbsent(vertex, new LinkedList<>());
@@ -76,10 +79,15 @@ public final class Graph {
         return component;
     }
 
-    public Constant newConstant(pascal.netx.util.lang.BitVector value) {
-        var constant = new Constant(nextIndex(), value);
-        add(constant);
-        return constant;
+    public Constant newConstant(BitVector value) {
+        if (constantCache.containsKey(value)) {
+            return constantCache.get(value);
+        } else {
+            var constant = new Constant(nextIndex(), value);
+            constantCache.put(value, constant);
+            add(constant);
+            return constant;
+        }
     }
 
     public void replaceAndRemove(Vertex oldVertex, Vertex newVertex) {
