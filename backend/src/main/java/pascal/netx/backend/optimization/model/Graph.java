@@ -116,6 +116,19 @@ public final class Graph {
         return vertices.stream().filter(Wire.class::isInstance).map(Wire.class::cast).toList();
     }
 
+    public Collection<Vertex> vertices() {
+        return Collections.unmodifiableSet(vertices);
+    }
+
+    public Map<Vertex, List<Vertex>> equivalenceClasses() {
+        Map<Vertex, List<Vertex>> result = new LinkedHashMap<>();
+        for (var v : vertices) {
+            var rep = equivalence.find(v);
+            result.computeIfAbsent(rep, _ -> new ArrayList<>()).add(v);
+        }
+        return result;
+    }
+
     public void dump(NotepadWriter writer) {
         var ordered = new ArrayList<>(vertices);
         ordered.sort(Comparator.comparingInt(Vertex::index));
@@ -176,5 +189,9 @@ public final class Graph {
 
         writer.decIndent();
         writer.println("}");
+    }
+
+    public Vertex eqRepOf(Vertex vertex) {
+        return equivalence.find(vertex);
     }
 }
