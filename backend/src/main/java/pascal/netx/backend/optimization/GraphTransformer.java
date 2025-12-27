@@ -42,6 +42,19 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         new Rewriter(graph).rewrite();
     }
 
+    public Measurer.Metrics measure() {
+        return new Measurer(graph).evaluate();
+    }
+
+    public void saturate(int areaWeight, int delayWeight) {
+        var outputs = streamOf(json.get("design"), "output")
+                .map(JsonNode::textValue).map(Reference::from)
+                .map(WireReference.class::cast)
+                .map(wireRefs::get)
+                .collect(Collectors.toSet());
+        new Saturator(graph, outputs, areaWeight, delayWeight).saturate();
+    }
+
     private void buildWires() {
         var inputs = streamOf(json.get("design"), "input")
                 .map(JsonNode::textValue)

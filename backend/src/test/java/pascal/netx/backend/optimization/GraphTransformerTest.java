@@ -18,7 +18,12 @@ class GraphTransformerTest {
         var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve("rv32i.json")));
         var transformer = new GraphTransformer(notepad, json);
         transformer.parse();
+        System.out.printf("Before optimization: %s\n", transformer.measure());
+
         transformer.rewrite();
+        transformer.saturate(1, 1);
+        System.out.printf(" After optimization: %s\n", transformer.measure());
+
         transformer.dump();
         notepad.flush();
     }
