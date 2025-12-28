@@ -2,7 +2,7 @@ package pascal.netx.backend.optimization;
 
 import pascal.netx.backend.optimization.model.Component;
 import pascal.netx.backend.optimization.model.Graph;
-import pascal.netx.backend.optimization.model.Select;
+import pascal.netx.backend.optimization.model.WriteSelect;
 import pascal.netx.backend.optimization.model.Vertex;
 
 import javax.annotation.Nonnull;
@@ -73,25 +73,16 @@ public final class Measurer {
     public static final class Weights {
         private final Map<Component.Label, Double> area;
         private final Map<Component.Label, Double> delay;
-        private final double selectArea;
-        private final double selectDelay;
 
         public Weights(Map<Component.Label, Double> area,
-                       Map<Component.Label, Double> delay,
-                       double selectArea,
-                       double selectDelay) {
+                       Map<Component.Label, Double> delay) {
             this.area = area;
             this.delay = delay;
-            this.selectArea = selectArea;
-            this.selectDelay = selectDelay;
         }
 
         public double area(Vertex v) {
             if (v instanceof Component c) {
                 return area.getOrDefault(c.label(), 1.0);
-            }
-            if (v instanceof Select) {
-                return selectArea;
             }
             return 0.0;
         }
@@ -99,9 +90,6 @@ public final class Measurer {
         public double delay(Vertex v) {
             if (v instanceof Component c) {
                 return delay.getOrDefault(c.label(), 1.0);
-            }
-            if (v instanceof Select) {
-                return selectDelay;
             }
             return 0.0;
         }
@@ -114,32 +102,35 @@ public final class Measurer {
                 delayBase.put(label, 1.0);
             }
 
+            delayBase.put(Component.Label.TO, 0.0);
+            delayBase.put(Component.Label.CAST, 0.0);
+            delayBase.put(Component.Label.UCAST, 0.0);
+            delayBase.put(Component.Label.CONCAT, 0.0);
             delayBase.put(Component.Label.REGISTER, 0.0);
             delayBase.put(Component.Label.ASYNC_REGISTER, 0.0);
             addCommonDefault(delayBase);
 
+            areaBase.put(Component.Label.TO, 0.0);
+            areaBase.put(Component.Label.CAST, 0.5);
+            areaBase.put(Component.Label.UCAST, 0.5);
+            areaBase.put(Component.Label.CONCAT, 0.5);
             areaBase.put(Component.Label.REGISTER, 1.0);
             areaBase.put(Component.Label.ASYNC_REGISTER, 1.0);
             addCommonDefault(areaBase);
 
-            double selectCost = 0.5;
-            return new Weights(areaBase, delayBase, selectCost, selectCost);
+            return new Weights(areaBase, delayBase);
         }
 
-        private static void addCommonDefault(EnumMap<Component.Label, Double> areaBase) {
-            areaBase.put(Component.Label.NOT, 0.5);
-            areaBase.put(Component.Label.CAST, 0.5);
-            areaBase.put(Component.Label.UCAST, 0.5);
-            areaBase.put(Component.Label.TO, 0.5);
-            areaBase.put(Component.Label.ADD, 1.5);
-            areaBase.put(Component.Label.SUB, 1.5);
-            areaBase.put(Component.Label.SHL, 1.5);
-            areaBase.put(Component.Label.ASHR, 1.5);
-            areaBase.put(Component.Label.LSHR, 1.5);
-            areaBase.put(Component.Label.CONCAT, 1.2);
-            areaBase.put(Component.Label.MUL, 3.0);
-            areaBase.put(Component.Label.DIV, 4.0);
-            areaBase.put(Component.Label.MOD, 4.0);
+        private static void addCommonDefault(EnumMap<Component.Label, Double> map) {
+            map.put(Component.Label.NOT, 0.5);
+            map.put(Component.Label.ADD, 1.5);
+            map.put(Component.Label.SUB, 1.5);
+            map.put(Component.Label.SHL, 1.5);
+            map.put(Component.Label.ASHR, 1.5);
+            map.put(Component.Label.LSHR, 1.5);
+            map.put(Component.Label.MUL, 3.0);
+            map.put(Component.Label.DIV, 4.0);
+            map.put(Component.Label.MOD, 4.0);
         }
     }
 }
