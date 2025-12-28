@@ -23,6 +23,11 @@ public final class Constant extends AbstractVertex{
     }
 
     @Override
+    public int outWidth() {
+        return value.size();
+    }
+
+    @Override
     public String name() {
         return value.toString();
     }

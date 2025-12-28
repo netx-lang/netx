@@ -19,6 +19,11 @@ public final class WriteSelect extends AbstractVertex {
     }
 
     @Override
+    public int outWidth() {
+        return selector.width();
+    }
+
+    @Override
     public String name() {
         return label + selector.toString();
     }

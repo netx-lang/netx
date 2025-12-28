@@ -55,8 +55,8 @@ public final class Graph {
         return indexer.getAndIncrement();
     }
 
-    public Wire newWire(String label) {
-        var wire = new Wire(nextIndex(), label);
+    public Wire newWire(String label, int width) {
+        var wire = new Wire(nextIndex(), label, width);
         add(wire);
         return wire;
     }
@@ -73,14 +73,14 @@ public final class Graph {
         return select;
     }
 
-    public Component newComponent(Component.Label label) {
-        var component = new Component(nextIndex(), label);
+    public Component newComponent(Component.Label label, int width) {
+        var component = new Component(nextIndex(), label, width);
         add(component);
         return component;
     }
 
-    public Component newComponent(String label) {
-        var component = new Component(nextIndex(), label);
+    public Component newComponent(String label, int width) {
+        var component = new Component(nextIndex(), label, width);
         add(component);
         return component;
     }

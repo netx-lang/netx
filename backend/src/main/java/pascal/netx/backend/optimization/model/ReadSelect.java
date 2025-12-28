@@ -8,12 +8,13 @@ public final class ReadSelect extends AbstractVertex {
         this.selector = selector;
     }
 
-    public int msb() {
-        return selector.msb();
+    public Selector selector() {
+        return selector;
     }
 
-    public int lsb() {
-        return selector.lsb();
+    @Override
+    public int outWidth() {
+        return selector.width();
     }
 
     @Override
