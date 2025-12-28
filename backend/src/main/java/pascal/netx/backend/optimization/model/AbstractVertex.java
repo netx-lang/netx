@@ -2,7 +2,7 @@ package pascal.netx.backend.optimization.model;
 
 import java.util.Objects;
 
-public sealed abstract class AbstractVertex implements Vertex permits Component, Constant, Select, Wire {
+public sealed abstract class AbstractVertex implements Vertex permits Component, Constant, ReadSelect, Wire, WriteSelect {
     protected final int index;
 
     public AbstractVertex(int index) {

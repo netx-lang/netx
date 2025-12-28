@@ -45,32 +45,12 @@ public final class Rewriter {
         for (var vertex : graph.components()) {
             onePassRewriteIdentity(vertex);
         }
-        for (var vertex : graph.wires()) {
-            onPassRewriteSelection(vertex);
-        }
     }
 
     private void onePassRewriteIdentity(Component vertex) {
         if (vertex.label() == Component.Label.TO) {
             var input = graph.inputsOf(vertex).getFirst();
-            var output = graph.outputsOf(vertex).getFirst();
-            graph.replaceAndRemove(output, input);
             graph.replaceAndRemove(vertex, input);
-        }
-    }
-
-    private void onPassRewriteSelection(Wire vertex) {
-        var inputs = graph.inputsOf(vertex).stream()
-                .filter(Select.class::isInstance).map(Select.class::cast).toList();
-        var outputs = graph.outputsOf(vertex).stream()
-                .filter(Select.class::isInstance).map(Select.class::cast).toList();
-
-        for (var selOut : outputs) {
-            for (var selIn : inputs) {
-                if (selIn.msb() == selOut.msb() && selIn.lsb() == selOut.lsb()) {
-                    graph.replaceAndRemove(selOut, selIn);
-                }
-            }
         }
     }
 }

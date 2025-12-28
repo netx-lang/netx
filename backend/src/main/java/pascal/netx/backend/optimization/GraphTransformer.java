@@ -6,13 +6,13 @@ import pascal.netx.backend.Reference;
 import pascal.netx.backend.ValueReference;
 import pascal.netx.backend.WireReference;
 import pascal.netx.backend.optimization.model.*;
+import pascal.netx.util.collection.BiMap;
+import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.nxon.NxonType;
 import pascal.netx.util.print.NotepadWriter;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -95,6 +95,17 @@ public final class GraphTransformer extends AbstractNxonTransformer {
     }
 
     private void buildConnections() {
+        for (var entry : definedSelects.entrySet()) {
+            var wireRef = entry.getKey();
+            var selects = entry.getValue();
+            selects.sort(Comparator.comparing(WriteSelect::selector).reversed());
+            var concat = graph.newComponent(Component.Label.CONCAT);
+            for (var select : selects) {
+                graph.addEdge(select, concat);
+            }
+            wireRefs.put(wireRef, concat);
+        }
+
         iterate(json.get("design"), node -> {
             if (Objects.requireNonNull(NxonType.typeOf(node)) == NxonType.BUILTIN) {
                 var vertex = compDefs.get(node);
@@ -114,37 +125,38 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         });
     }
 
+    private final Map<WireReference, List<WriteSelect>> definedSelects = new HashMap<>();
+
     private void buildWriteSelect(WireReference ref, Component vertex) {
-        var wire = buildWireWithSelector(ref);
-        var select = buildSelect(ref);
-        graph.addEdge(select, wire);
+        var key = ref.withoutSelector();
+        if (wireRefs.containsKey(key)) {
+            throw new ShallNotReachHereError();
+        }
+
+        var label = wireDefs.get(key).get("id").textValue();
+        var select = graph.newWriteSelect(label, parseSelector(ref.selector()));
+        definedSelects.computeIfAbsent(key, _ -> new LinkedList<>()).add(select);
         graph.addEdge(vertex, select);
-        graph.union(vertex, select);
     }
 
     private void buildReadSelect(WireReference ref, Component vertex) {
-        var wire = buildWireWithSelector(ref);
-        var select = buildSelect(ref);
-        graph.addEdge(wire, select);
+        var base = Objects.requireNonNull(wireRefs.get(ref.withoutSelector()));
+        var select = graph.newReadSelect(parseSelector(ref.selector()));
+        graph.addEdge(base, select);
         graph.addEdge(select, vertex);
         wireRefs.put(ref, select);
     }
 
-    private Vertex buildWireWithSelector(WireReference ref) {
-        return wireRefs.computeIfAbsent(
-                ref.withoutSelector(), key -> graph.newWire(wireDefs.get(key).get("id").textValue()));
-    }
-
-    private Select buildSelect(WireReference ref) {
-        String literal = ref.selector().substring(1, ref.selector().length() - 1);
+    Selector parseSelector(String selector) {
+        String literal = selector.substring(1, selector.length() - 1);
         if (literal.contains(":")) {
             var array = literal.split(":");
             int msb = Integer.parseInt(array[0]);
             int lsb = Integer.parseInt(array[1]);
-            return graph.newSelect(msb, lsb);
+            return new Selector(msb, lsb);
         } else {
             int index = Integer.parseInt(literal);
-            return graph.newSelect(index, index);
+            return new Selector(index, index);
         }
     }
 

@@ -61,8 +61,14 @@ public final class Graph {
         return wire;
     }
 
-    public Select newSelect(int msb, int lsb) {
-        var select = new Select(nextIndex(), msb, lsb);
+    public WriteSelect newWriteSelect(String label, Selector selector) {
+        var select = new WriteSelect(nextIndex(), label, selector);
+        add(select);
+        return select;
+    }
+
+    public ReadSelect newReadSelect(Selector selector) {
+        var select = new ReadSelect(nextIndex(), selector);
         add(select);
         return select;
     }

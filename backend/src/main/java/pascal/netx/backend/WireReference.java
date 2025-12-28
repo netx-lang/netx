@@ -10,6 +10,10 @@ public record WireReference(String name, Integer id, String selector) implements
         return new WireReference(name, id, "");
     }
 
+    public WireReference withSelector(String selector) {
+        return new WireReference(name, id, selector);
+    }
+
     @Override
     public String dump() {
         return "_" + id + selector;
