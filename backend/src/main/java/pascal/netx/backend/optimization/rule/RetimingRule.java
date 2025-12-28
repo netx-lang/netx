@@ -24,10 +24,11 @@ public final class RetimingRule extends BidiMemRule {
         }
 
         var clock = (Wire) inputs.getFirst();
-        var dual = graph.newComponent(compute.label());
+        int width = compute.outWidth();
+        var dual = graph.newComponent(compute.label(), width);
         graph.union(dual, vertex);
         for (var input : graph.inputsOf(compute)) {
-            var pushed = graph.newComponent(Component.Label.REGISTER);
+            var pushed = graph.newComponent(Component.Label.REGISTER, width);
             graph.addEdge(pushed, dual);
             graph.addEdge(clock, pushed);
             graph.addEdge(input, pushed);
@@ -48,8 +49,9 @@ public final class RetimingRule extends BidiMemRule {
             return false;
         }
 
-        var pulled = graph.newComponent(Component.Label.REGISTER);
-        var dual = graph.newComponent(vertex.label());
+        int width = vertex.outWidth();
+        var pulled = graph.newComponent(Component.Label.REGISTER, width);
+        var dual = graph.newComponent(vertex.label(), width);
         graph.addEdge(clock.get(), pulled);
         graph.addEdge(dual, pulled);
         for (var input : graph.inputsOf(vertex)) {
