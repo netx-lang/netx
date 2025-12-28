@@ -6,7 +6,6 @@ import pascal.netx.backend.Reference;
 import pascal.netx.backend.ValueReference;
 import pascal.netx.backend.WireReference;
 import pascal.netx.backend.optimization.model.*;
-import pascal.netx.util.collection.BiMap;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.nxon.NxonType;
@@ -67,7 +66,7 @@ public final class GraphTransformer extends AbstractNxonTransformer {
                     var label = node.get("id").textValue();
                     var ref = (WireReference) Reference.from(label);
                     if (inputs.contains(ref)) {
-                        var vertex = graph.newWire(label);
+                        var vertex = graph.newWire(label, definedWithOf(node));
                         wireRefs.put(ref, vertex);
                     }
                     wireDefs.put(ref, node);
@@ -77,13 +76,27 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         });
     }
 
+    private static int definedWithOf(JsonNode node) {
+        int width = 1;
+        if (node.has("width")) {
+            width = node.get("width").intValue();
+        }
+        return width;
+    }
+
     private void buildComponents() {
         iterate(json.get("design"), node -> {
             if (Objects.requireNonNull(NxonType.typeOf(node)) == NxonType.BUILTIN) {
                 var output = node.get("output").get(0);
                 var ref = (WireReference) Reference.from(output.textValue());
+                int width;
+                if (wireDefs.containsKey(ref)) {
+                    width = wireDefs.get(ref).get("width").intValue();
+                } else {
+                    width = parseSelector(ref.selector()).width();
+                }
 
-                var vertex = graph.newComponent(node.get("id").textValue());
+                var vertex = graph.newComponent(node.get("id").textValue(), width);
                 compDefs.put(node, vertex);
                 if (!ref.selector().isEmpty()) {
                     buildWriteSelect(ref, vertex);
@@ -99,7 +112,8 @@ public final class GraphTransformer extends AbstractNxonTransformer {
             var wireRef = entry.getKey();
             var selects = entry.getValue();
             selects.sort(Comparator.comparing(WriteSelect::selector).reversed());
-            var concat = graph.newComponent(Component.Label.CONCAT);
+            int width = wireDefs.get(wireRef).get("width").intValue();
+            var concat = graph.newComponent(Component.Label.CONCAT, width);
             for (var select : selects) {
                 graph.addEdge(select, concat);
             }
