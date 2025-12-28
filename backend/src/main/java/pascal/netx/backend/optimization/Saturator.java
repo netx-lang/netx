@@ -106,7 +106,7 @@ public final class Saturator {
                 default -> 2;
             };
             case Wire _, Constant _ -> 0;
-            case Select _ -> 100;
+            case ReadSelect _, WriteSelect _ -> 100;
         };
         return areaWeight * areaCost + delayWeight * delayCost;
     }
