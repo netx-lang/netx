@@ -19,12 +19,7 @@
       {
         "type": "builtin", "id": "TO", "loc": "",
         "input": ["i@0"],
-        "output": ["o@1[1]"]
-      },
-      {
-        "type": "builtin", "id": "TO", "loc": "",
-        "input": ["i@0"],
-        "output": ["o@1[2]"]
+        "output": ["o@1[4]"]
       },
       {
         "type": "builtin", "id": "TO", "loc": "",
@@ -34,7 +29,12 @@
       {
         "type": "builtin", "id": "TO", "loc": "",
         "input": ["i@0"],
-        "output": ["o@1[4]"]
+        "output": ["o@1[2]"]
+      },
+      {
+        "type": "builtin", "id": "TO", "loc": "",
+        "input": ["i@0"],
+        "output": ["o@1[1]"]
       }
     ]
   }

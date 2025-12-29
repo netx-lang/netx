@@ -41,6 +41,14 @@ public final class DuplicatedElimination extends CircuitAnalysis {
         scope.getBinding().releaseIf(manager::needRemove);
         scope.getInputs().replaceAll(manager::repOf);
         scope.getOutputs().replaceAll(manager::repOf);
+
+        var newAlias = new HashSet<ComponentScope.Alias>();
+        for (var alias : scope.getAliases()) {
+            newAlias.add(new ComponentScope.Alias(manager.repOf(alias.lhs()), manager.repOf(alias.rhs())));
+        }
+        scope.getAliases().clear();
+        scope.getAliases().addAll(newAlias);
+
         if (scope.hasAttributes()) {
             scope.getAttributes().replaceAllVariable(manager::repOf);
         }

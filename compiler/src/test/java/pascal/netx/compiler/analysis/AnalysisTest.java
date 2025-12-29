@@ -382,4 +382,25 @@ class AnalysisTest {
                 """;
         assertThrows(CompileCancellationException.class, () -> compileSingleComponent(code));
     }
+
+    @Test
+    void testComplexAccessAlias() {
+        var code = """
+                component top: [x, y] -> [z, w, v] {
+                    wire x, y, z, w of bit(1);
+                    wire a, v of bit(4);
+                
+                    a[0] <> NOT <> x;
+                    a[1] <> NOT <> y;
+                    a[2] <> ADD <> [a[0], a[1]];
+                    a[3] <> NOT <> a[2];
+                    z <> NOT <> a[2];
+                    w <> NOT <> a[3];
+                    for i in [0..4] {
+                        v[i] <> a[3 - i];
+                    }
+                }
+                """;
+        testGen(EXPECTED_DIR.resolve("complex_access_alias.json"), code);
+    }
 }
