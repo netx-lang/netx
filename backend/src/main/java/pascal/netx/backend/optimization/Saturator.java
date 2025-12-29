@@ -104,7 +104,7 @@ public final class Saturator {
     private List<Vertex> classMembers(Vertex rep) {
         var members = classes.get(rep);
         if (members != null) {
-            return members;
+            return members.stream().filter(graph.vertices()::contains).toList();
         }
         List<Vertex> collected = new ArrayList<>();
         for (var v : graph.vertices()) {

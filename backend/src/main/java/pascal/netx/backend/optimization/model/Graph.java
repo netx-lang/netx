@@ -122,6 +122,8 @@ public final class Graph {
         for (var entry : outEdges.entrySet()) {
             entry.getValue().replaceAll(value -> value.equals(oldVertex) ? newVertex : value);
         }
+        inputs.replaceAll(value -> value.equals(oldVertex) ? newVertex : value);
+        outputs.replaceAll(value -> value.equals(oldVertex) ? newVertex : value);
         remove(oldVertex);
     }
 
