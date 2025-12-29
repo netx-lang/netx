@@ -14,6 +14,7 @@ import pascal.netx.util.print.NotepadWriter;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static pascal.netx.backend.NxonParseUtils.streamOf;
 
@@ -35,6 +36,16 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         buildWires();
         buildComponents();
         buildConnections();
+        graph.setInputs(extractIOVertices(streamOf(json.get("design"), "input")));
+        graph.setOutputs(extractIOVertices(streamOf(json.get("design"), "output")));
+    }
+
+    private List<Vertex> extractIOVertices(Stream<JsonNode> stream) {
+        return stream.map(JsonNode::textValue)
+                .map(Reference::from)
+                .map(WireReference.class::cast)
+                .map(wireRefs::get)
+                .toList();
     }
 
     public void rewrite() {
@@ -46,12 +57,7 @@ public final class GraphTransformer extends AbstractNxonTransformer {
     }
 
     public void saturate(int areaWeight, int delayWeight) {
-        var outputs = streamOf(json.get("design"), "output")
-                .map(JsonNode::textValue).map(Reference::from)
-                .map(WireReference.class::cast)
-                .map(wireRefs::get)
-                .collect(Collectors.toSet());
-        new Saturator(graph, outputs, areaWeight, delayWeight).saturate();
+        new Saturator(graph, areaWeight, delayWeight).saturate();
     }
 
     private void buildWires() {
