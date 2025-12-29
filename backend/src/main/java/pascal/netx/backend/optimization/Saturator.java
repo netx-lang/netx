@@ -19,6 +19,9 @@ public final class Saturator {
 
     private final Map<Vertex, Cost> costs = new HashMap<>();
 
+    private final Map<Vertex, Boolean> selfInputForbidden = new HashMap<>();
+    private final Set<Vertex> ancestorVisiting = new HashSet<>();
+
     public Saturator(Graph graph, double areaWeight, double delayWeight) {
         this.graph = graph;
         this.areaWeight = areaWeight;
@@ -28,6 +31,7 @@ public final class Saturator {
         this.inputs = new HashSet<>(graph.inputs());
 
         costs.putAll(new SubtreeCostCalculator().computeAll());
+        graph.vertices().forEach(this::computeSelfInputForbidden); // preprocess ancestor search
     }
 
     public void saturate() {
@@ -126,13 +130,33 @@ public final class Saturator {
     }
 
     private boolean forbiddenBySelfInput(Vertex v) {
+        return selfInputForbidden.getOrDefault(v, false);
+    }
+
+    private boolean computeSelfInputForbidden(Vertex v) {
+        var cached = selfInputForbidden.get(v);
+        if (cached != null) {
+            return cached;
+        }
+        if (!ancestorVisiting.add(v)) {
+            selfInputForbidden.put(v, false);
+            return false;
+        }
         var rep = graph.eqRepOf(v);
+        boolean result = false;
         for (var in : graph.inputsOf(v)) {
             if (graph.eqRepOf(in) == rep) {
-                return true;
+                result = true;
+                break;
+            }
+            if (!isRegister(in) && computeSelfInputForbidden(in)) {
+                result = true;
+                break;
             }
         }
-        return false;
+        ancestorVisiting.remove(v);
+        selfInputForbidden.put(v, result);
+        return result;
     }
 
     private boolean isRegister(Vertex v) {

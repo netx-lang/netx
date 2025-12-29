@@ -71,7 +71,7 @@ public final class Rewriter {
             for (var output : graph.outputsOf(vertex)) {
                 if (output instanceof ReadSelect select) {
                     if (inputs.containsKey(select.selector())) {
-                        graph.union(output, inputs.get(select.selector()));
+                        graph.replaceAndRemove(output, inputs.get(select.selector()));
                     }
                 }
             }
