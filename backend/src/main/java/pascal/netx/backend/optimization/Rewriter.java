@@ -21,7 +21,8 @@ public final class Rewriter {
                 new DeMorganRule(graph),
                 new DoubleNegationRule(graph),
                 new RetimingRule(graph),
-                new AbsorptionRule(graph)
+                new AbsorptionRule(graph),
+                new DistributivityRule(graph)
         );
     }
 
