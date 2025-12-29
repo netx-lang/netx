@@ -3,9 +3,12 @@ package pascal.netx.backend.optimization;
 import pascal.netx.backend.optimization.model.*;
 import pascal.netx.backend.optimization.rule.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public final class Rewriter {
     private final Graph graph;
@@ -46,34 +49,56 @@ public final class Rewriter {
     }
 
     private void onePassRewrite() {
-        for (var vertex : graph.components()) {
-            onePassRewriteIdentity(vertex);
-            onePassConcat(vertex);
-        }
+        onePassRewriteIdentity();
+        onePassRewriteConcat();
     }
 
-    private void onePassRewriteIdentity(Component vertex) {
-        if (vertex.label() == Component.Label.TO) {
-            var input = graph.inputsOf(vertex).getFirst();
-            graph.replaceAndRemove(vertex, input);
-        }
-    }
+    private void onePassRewriteIdentity() {
+        List<Component> removalOrder = new ArrayList<>();
+        Set<Component> visited = new HashSet<>();
+        graph.components().stream()
+                .filter(component -> component.label() == Component.Label.TO)
+                .forEach(to -> resolveOrder(removalOrder, visited, to));
 
-    private void onePassConcat(Component vertex) {
-        if (vertex.label() == Component.Label.CONCAT) {
-            Map<Selector, Vertex> inputs = new HashMap<>();
-            int index = 0;
-            for (var input : graph.inputsOf(vertex).reversed()) {
-                int width = input.outWidth();
-                Selector selector = new Selector(index, index + width - 1);
-                inputs.put(selector, input);
-                index += width;
+        for (var to : removalOrder) {
+            if (!graph.vertices().contains(to)) {
+                continue;
             }
 
-            for (var output : graph.outputsOf(vertex)) {
-                if (output instanceof ReadSelect select) {
-                    if (inputs.containsKey(select.selector())) {
-                        graph.replaceAndRemove(output, inputs.get(select.selector()));
+            graph.replaceAndRemove(to, graph.inputsOf(to).getFirst());
+        }
+    }
+
+    private void resolveOrder(List<Component> order, Set<Component> visited, Component current) {
+        if (!visited.add(current)) {
+            return;
+        }
+        
+        for (var out : graph.inputsOf(current)) {
+            if (out instanceof Component next && next.label() == Component.Label.TO) {
+                resolveOrder(order, visited, next);
+            }
+        }
+        order.add(current);
+    }
+
+    private void onePassRewriteConcat() {
+        for (var vertex : graph.components()) {
+            if (vertex.label() == Component.Label.CONCAT) {
+                Map<Selector, Vertex> inputs = new HashMap<>();
+                int index = 0;
+                for (var input : graph.inputsOf(vertex).reversed()) {
+                    int width = input.outWidth();
+                    Selector selector = new Selector(index, index + width - 1);
+                    inputs.put(selector, input);
+                    index += width;
+                }
+
+                for (var output : graph.outputsOf(vertex)) {
+                    if (output instanceof ReadSelect select) {
+                        if (inputs.containsKey(select.selector())) {
+                            graph.replaceAndRemove(output, inputs.get(select.selector()));
+                        }
                     }
                 }
             }
