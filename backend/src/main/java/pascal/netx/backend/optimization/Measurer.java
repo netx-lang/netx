@@ -41,9 +41,10 @@ public final class Measurer {
     private double computeDelay() {
         Map<Vertex, Double> dist = new HashMap<>();
         Deque<Vertex> queue = new ArrayDeque<>();
+        Set<Vertex> inputs = new HashSet<>(graph.inputs());
         var visited = new HashSet<Vertex>();
         for (var v : graph.vertices()) {
-            if (isRegister(v)) {
+            if (isRegister(v) || inputs.contains(v)) {
                 queue.add(v);
                 dist.put(v, 0.0);
             }

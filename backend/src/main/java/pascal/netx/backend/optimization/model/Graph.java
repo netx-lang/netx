@@ -10,37 +10,56 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static pascal.netx.backend.NxonParseUtils.quote;
 
 public final class Graph {
+    private final List<Vertex> inputs = new ArrayList<>();
+    private final List<Vertex> outputs = new ArrayList<>();
+
+    private final Set<Vertex> vertices = new HashSet<>();
+    private final Map<Vertex, List<Vertex>> inEdges = new HashMap<>();
+    private final Map<Vertex, List<Vertex>> outEdges = new HashMap<>();
+
+    private final UnionFind<Vertex> equivalence = new UnionFind<>();
+
     private final AtomicInteger indexer = new AtomicInteger();
     private final Map<BitVector, Constant> constantCache = new HashMap<>();
 
-    private final Set<Vertex> vertices = new HashSet<>();
-    private final Map<Vertex, List<Vertex>> inputs = new HashMap<>();
-    private final Map<Vertex, List<Vertex>> outputs = new HashMap<>();
+    public void setInputs(List<Vertex> inputs) {
+        this.inputs.addAll(inputs);
+    }
 
-    private final UnionFind<Vertex> equivalence = new UnionFind<>();
+    public void setOutputs(List<Vertex> outputs) {
+        this.outputs.addAll(outputs);
+    }
+
+    public List<Vertex> outputs() {
+        return outputs;
+    }
+
+    public List<Vertex> inputs() {
+        return inputs;
+    }
 
     private void add(Vertex vertex) {
         vertices.add(vertex);
         equivalence.add(vertex);
-        inputs.putIfAbsent(vertex, new LinkedList<>());
-        outputs.putIfAbsent(vertex, new LinkedList<>());
+        inEdges.putIfAbsent(vertex, new LinkedList<>());
+        outEdges.putIfAbsent(vertex, new LinkedList<>());
     }
 
     public void remove(Vertex vertex) {
         vertices.remove(vertex);
-        inputs.remove(vertex);
-        outputs.remove(vertex);
-        for (var targets : inputs.values()) {
+        inEdges.remove(vertex);
+        outEdges.remove(vertex);
+        for (var targets : inEdges.values()) {
             targets.remove(vertex);
         }
-        for (var targets : outputs.values()) {
+        for (var targets : outEdges.values()) {
             targets.remove(vertex);
         }
     }
 
     public void addEdge(Vertex from, Vertex to) {
-        outputs.get(from).add(to);
-        inputs.get(to).add(from);
+        outEdges.get(from).add(to);
+        inEdges.get(to).add(from);
     }
 
     public boolean equivalent(Vertex a, Vertex b) {
@@ -97,21 +116,21 @@ public final class Graph {
     }
 
     public void replaceAndRemove(Vertex oldVertex, Vertex newVertex) {
-        for (var entry : inputs.entrySet()) {
+        for (var entry : inEdges.entrySet()) {
             entry.getValue().replaceAll(value -> value.equals(oldVertex) ? newVertex : value);
         }
-        for (var entry : outputs.entrySet()) {
+        for (var entry : outEdges.entrySet()) {
             entry.getValue().replaceAll(value -> value.equals(oldVertex) ? newVertex : value);
         }
         remove(oldVertex);
     }
 
     public List<Vertex> inputsOf(Vertex vertex) {
-        return inputs.getOrDefault(vertex, List.of());
+        return inEdges.getOrDefault(vertex, List.of());
     }
 
     public List<Vertex> outputsOf(Vertex vertex) {
-        return outputs.getOrDefault(vertex, List.of());
+        return outEdges.getOrDefault(vertex, List.of());
     }
 
     public Collection<Component> components() {
@@ -185,7 +204,7 @@ public final class Graph {
         // Emit edges
         for (var v : ordered) {
             var fromName = "v" + v.index();
-            var targets = inputs.getOrDefault(v, List.of());
+            var targets = inEdges.getOrDefault(v, List.of());
             for (var t : targets) {
                 var toName = "v" + t.index();
                 writer.printf("%s -> %s;", toName, fromName);

@@ -1,25 +1,33 @@
 package pascal.netx.backend.optimization;
 
 import pascal.netx.backend.optimization.model.*;
+import pascal.netx.util.exception.ShallNotReachHereError;
 
 import java.util.*;
+import java.util.function.Function;
 
 public final class Saturator {
     private final Graph graph;
+
     private final double areaWeight;
     private final double delayWeight;
+    private final Measurer.Weights weights = Measurer.Weights.defaults();
 
-    private final Set<Vertex> outputs;
+    private final Set<Vertex> inputs;
     private final Map<Vertex, List<Vertex>> classes;
-
     private final Map<Vertex, Vertex> chosen = new HashMap<>(); // class rep -> chosen vertex
 
-    public Saturator(Graph graph, Set<Vertex> outputs, double areaWeight, double delayWeight) {
+    private final Map<Vertex, Cost> costs = new HashMap<>();
+
+    public Saturator(Graph graph, double areaWeight, double delayWeight) {
         this.graph = graph;
         this.areaWeight = areaWeight;
         this.delayWeight = delayWeight;
-        this.outputs = outputs;
+
         this.classes = graph.equivalenceClasses();
+        this.inputs = new HashSet<>(graph.inputs());
+
+        costs.putAll(new SubtreeCostCalculator().computeAll());
     }
 
     public void saturate() {
@@ -28,7 +36,7 @@ public final class Saturator {
         Map<Vertex, List<Vertex>> newInputs = new HashMap<>();
 
         // Seed with outputs, ensuring a chosen representative per equivalence class
-        for (var out : outputs) {
+        for (var out : graph.outputs()) {
             var rep = graph.eqRepOf(out);
             var pick = chooseRepresentative(rep);
             workList.add(pick);
@@ -74,13 +82,19 @@ public final class Saturator {
             return existing;
         }
         var members = classMembers(rep);
-        var best = members.stream()
+        var filtered = members.stream().filter(v -> !forbiddenBySelfInput(v));
+        var best = filtered
                 .min(Comparator
-                        .comparing((Vertex v) -> outputs.contains(v) ? 0 : 1)
-                        .thenComparingDouble(this::heuristicCost))
-                .orElse(rep);
+                        .comparing(this::preferInput)
+                        .thenComparing(this::preferWriteSelect)
+                        .thenComparingDouble(this::scoreOf))
+                .orElseThrow(ShallNotReachHereError::new);
         chosen.put(rep, best);
         return best;
+    }
+
+    private int preferInput(Vertex v) {
+        return inputs.contains(v) ? 0 : 1;
     }
 
     private List<Vertex> classMembers(Vertex rep) {
@@ -97,17 +111,126 @@ public final class Saturator {
         return collected.isEmpty() ? List.of(rep) : collected;
     }
 
-    private double heuristicCost(Vertex v) {
-        int areaCost = (v instanceof Component c && c.label() != Component.Label.REGISTER && c.label() != Component.Label.ASYNC_REGISTER) ? 1 : 0;
-        int delayCost = switch (v) {
-            case Component c -> switch (c.label()) {
-                case REGISTER, ASYNC_REGISTER -> 0;
-                case NOT, TO, CAST, UCAST -> 1;
-                default -> 2;
-            };
-            case Wire _, Constant _ -> 0;
-            case ReadSelect _, WriteSelect _ -> 100;
-        };
-        return areaWeight * areaCost + delayWeight * delayCost;
+    private double scoreOf(Vertex v) {
+        var cost = costs.get(v);
+        if (cost == null) {
+            return 0.0;
+        }
+        return cost.score(areaWeight, delayWeight);
+    }
+
+    private int preferWriteSelect(Vertex v) {
+        if (v instanceof WriteSelect) return 0;
+        if (v instanceof ReadSelect) return 1;
+        return 0; // neutral for others
+    }
+
+    private boolean forbiddenBySelfInput(Vertex v) {
+        var rep = graph.eqRepOf(v);
+        for (var in : graph.inputsOf(v)) {
+            if (graph.eqRepOf(in) == rep) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isRegister(Vertex v) {
+        return v instanceof Component c && (
+                c.label() == Component.Label.REGISTER ||
+                c.label() == Component.Label.ASYNC_REGISTER
+        );
+    }
+
+    private record Cost(double area, double delay) {
+        double score(double areaWeight, double delayWeight) {
+            return areaWeight * area + delayWeight * delay;
+        }
+
+        static Cost zero() {
+            return new Cost(0.0, 0.0);
+        }
+    }
+
+    private final class SubtreeCostCalculator {
+        private final Map<Vertex, Cost> combCost = new HashMap<>();
+        private final Map<Vertex, Cost> finalCost = new HashMap<>();
+        private final Set<Vertex> visiting = new HashSet<>();
+
+        Map<Vertex, Cost> computeAll() {
+            graph.vertices().forEach(this::computeCombinational);
+            graph.vertices().forEach(this::computeSequential);
+            return finalCost;
+        }
+
+        private Cost computeCombinational(Vertex v) {
+            var cached = combCost.get(v);
+            if (cached != null) {
+                return cached;
+            }
+            if (!visiting.add(v)) {
+                return baseCost(v);
+            }
+
+            double area = 0.0, delay = 0.0;
+            if (!isRegister(v)) { // break cycles at registers
+                for (var in : graph.inputsOf(v)) {
+                    var cost = minCostInEqClass(in, this::computeCombinational);
+                    delay = Math.max(delay, cost.delay());
+                    area += cost.area();
+                }
+            }
+
+            visiting.remove(v);
+            var result = new Cost(area, delay);
+            combCost.put(v, result);
+            return result;
+        }
+
+        private Cost computeSequential(Vertex v) {
+            var cached = finalCost.get(v);
+            if (cached != null) {
+                return cached;
+            }
+            if (!visiting.add(v)) {
+                return combCost.getOrDefault(v, baseCost(v));
+            }
+
+            var comb = combCost.getOrDefault(v, Cost.zero());
+            double area = comb.area(), delay = comb.delay();
+            for (var in : graph.inputsOf(v)) {
+                if (isRegister(in)) {
+                    var cost = minCostInEqClass(in, this::computeSequential);
+                    delay = Math.max(delay, cost.delay());
+                    area += cost.area();
+                }
+            }
+
+            visiting.remove(v);
+            var base = baseCost(v);
+            var result = new Cost(area + base.area, delay + base.delay);
+            finalCost.put(v, result);
+            return result;
+        }
+
+        private Cost minCostInEqClass(Vertex v, Function<Vertex, Cost> evaluator) {
+            var rep = graph.eqRepOf(v);
+            List<Vertex> candidates = classes.getOrDefault(rep, List.of(v));
+            Cost best = baseCost(v);
+            double bestScore = Double.POSITIVE_INFINITY;
+            for (var candidate : candidates) {
+                var c = evaluator.apply(candidate);
+                double score = c.score(areaWeight, delayWeight);
+                if (score < bestScore) {
+                    best = c;
+                    bestScore = score;
+                }
+            }
+            return best;
+        }
+
+        private Cost baseCost(Vertex v) {
+            return new Cost(weights.area(v), weights.delay(v));
+        }
     }
 }
