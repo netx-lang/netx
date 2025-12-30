@@ -196,14 +196,16 @@ public final class Saturator {
                 return baseCost(v);
             }
 
-            double area = 0.0, delay = 0.0;
-            if (!isRegister(v)) { // break cycles at registers
-                for (var in : graph.inputsOf(v)) {
+            double area = weights.area(v), delay = weights.delay(v);
+            double childDelay = 0.0;
+            for (var in : graph.inputsOf(v)) {
+                if (!isRegister(in)) { // break cycles at registers
                     var cost = minCostInEqClass(in, this::computeCombinational);
-                    delay = Math.max(delay, cost.delay());
+                    childDelay = Math.max(childDelay, cost.delay());
                     area += cost.area();
                 }
             }
+            delay += childDelay;
 
             visiting.remove(v);
             var result = new Cost(area, delay);
@@ -211,30 +213,16 @@ public final class Saturator {
             return result;
         }
 
-        private Cost computeSequential(Vertex v) {
-            var cached = finalCost.get(v);
-            if (cached != null) {
-                return cached;
-            }
-            if (!visiting.add(v)) {
-                return combCost.getOrDefault(v, baseCost(v));
-            }
-
-            var comb = combCost.getOrDefault(v, Cost.zero());
-            double area = comb.area(), delay = comb.delay();
+        private void computeSequential(Vertex v) {
+            double area = weights.area(v), delay = weights.delay(v);
+            double childDelay = 0.0;
             for (var in : graph.inputsOf(v)) {
-                if (isRegister(in)) {
-                    var cost = minCostInEqClass(in, this::computeSequential);
-                    delay = Math.max(delay, cost.delay());
-                    area += cost.area();
-                }
+                var cost = combCost.getOrDefault(in, baseCost(in));
+                area += cost.area();
+                childDelay = Math.max(childDelay, cost.delay());
             }
-
-            visiting.remove(v);
-            var base = baseCost(v);
-            var result = new Cost(area + base.area, delay + base.delay);
-            finalCost.put(v, result);
-            return result;
+            delay += childDelay;
+            finalCost.put(v, new Cost(area, delay));
         }
 
         private Cost minCostInEqClass(Vertex v, Function<Vertex, Cost> evaluator) {
