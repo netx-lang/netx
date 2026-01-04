@@ -21,12 +21,12 @@ public final class DeMorganRule extends BidiMemRule {
                 if (input instanceof Component comp) {
                     switch (comp.label()) {
                         case AND -> {
-                            var orComp = graph.newComponent(Component.Label.OR, width);
+                            var orComp = graph.factory().component(Component.Label.OR, width);
                             pushDeMorgan(vertex, comp, orComp);
                             return true;
                         }
                         case OR -> {
-                            var andComp = graph.newComponent(Component.Label.AND, width);
+                            var andComp = graph.factory().component(Component.Label.AND, width);
                             pushDeMorgan(vertex, comp, andComp);
                             return true;
                         }
@@ -34,12 +34,12 @@ public final class DeMorganRule extends BidiMemRule {
                 }
             }
             case NOR -> {
-                var andComp = graph.newComponent(Component.Label.AND, width);
+                var andComp = graph.factory().component(Component.Label.AND, width);
                 pushDeMorgan(vertex, vertex, andComp);
                 return true;
             }
             case NAND ->  {
-                var orComp = graph.newComponent(Component.Label.OR, width);
+                var orComp = graph.factory().component(Component.Label.OR, width);
                 pushDeMorgan(vertex, vertex, orComp);
                 return true;
             }
@@ -49,7 +49,8 @@ public final class DeMorganRule extends BidiMemRule {
 
     private void pushDeMorgan(Component vertex, Component origin, Component dual) {
         for (var in : graph.inputsOf(origin)) {
-            var notIn = graph.newComponent(Component.Label.NOT, in.outWidth());
+            int width = in.outWidth();
+            var notIn = graph.factory().component(Component.Label.NOT, width);
             graph.addEdge(in, notIn);
             graph.addEdge(notIn, dual);
         }
@@ -68,14 +69,14 @@ public final class DeMorganRule extends BidiMemRule {
             int width = vertex.outWidth();
             switch (vertex.label()) {
                 case AND -> {
-                    var notComp = graph.newComponent(Component.Label.NOT, width);
-                    var orComp = graph.newComponent(Component.Label.OR, width);
+                    var notComp = graph.factory().component(Component.Label.NOT, width);
+                    var orComp = graph.factory().component(Component.Label.OR, width);
                     pullDeMorgan(vertex, notComp, orComp);
                     return true;
                 }
                 case OR -> {
-                    var notComp = graph.newComponent(Component.Label.NOT, width);
-                    var andComp = graph.newComponent(Component.Label.AND, width);
+                    var notComp = graph.factory().component(Component.Label.NOT, width);
+                    var andComp = graph.factory().component(Component.Label.AND, width);
                     pullDeMorgan(vertex, notComp, andComp);
                     return true;
                 }

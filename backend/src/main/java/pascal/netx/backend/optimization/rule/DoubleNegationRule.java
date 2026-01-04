@@ -14,9 +14,14 @@ public final class DoubleNegationRule extends UniMemRule {
             return false;
         }
         var neg = graph.inputsOf(vertex).getFirst();
-        if (neg instanceof Component comp && comp.label() == Component.Label.NOT) {
-            var only = graph.inputsOf(neg).getFirst();
-            graph.union(vertex, only);
+        var only = graph.eqClassOf(neg).stream()
+                .filter(Component.class::isInstance)
+                .map(Component.class::cast)
+                .filter(comp -> comp.label() == Component.Label.NOT)
+                .findAny();
+
+        if (only.isPresent()) {
+            graph.union(vertex, only.get());
             markSeen(vertex);
             return true;
         }

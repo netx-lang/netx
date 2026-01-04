@@ -21,11 +21,11 @@ public final class Rewriter {
                 new IdentityRule(graph),
                 new SingletonRule(graph),
                 new ShrinkAssocRule(graph),
-                new DeMorganRule(graph),
-                new DoubleNegationRule(graph),
-                new RetimingRule(graph),
                 new AbsorptionRule(graph),
-                new DistributivityRule(graph)
+                new DoubleNegationRule(graph)
+//                new DeMorganRule(graph),
+//                new RetimingRule(graph),
+//                new DistributivityRule(graph)
         );
     }
 
@@ -65,7 +65,7 @@ public final class Rewriter {
                 continue;
             }
 
-            graph.replaceAndRemove(to, graph.inputsOf(to).getFirst());
+            graph.union(graph.inputsOf(to).getFirst(), to);
         }
     }
 
@@ -97,7 +97,7 @@ public final class Rewriter {
                 for (var output : graph.outputsOf(vertex)) {
                     if (output instanceof ReadSelect select) {
                         if (inputs.containsKey(select.selector())) {
-                            graph.replaceAndRemove(output, inputs.get(select.selector()));
+                            graph.union(output, inputs.get(select.selector()));
                         }
                     }
                 }

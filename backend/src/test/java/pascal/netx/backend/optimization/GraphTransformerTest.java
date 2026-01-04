@@ -14,13 +14,13 @@ class GraphTransformerTest {
 
     @Test
     void sampleTest() throws IOException {
-        var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve("select.json")));
+        var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve("opt.json")));
         var transformer = new GraphTransformer(NotepadWriter.stdOut(), json);
         transformer.parse();
         System.out.printf("Before optimization: %s\n", transformer.measure());
 
-        transformer.rewrite();
-        transformer.saturate(1, 1);
+//        transformer.rewrite();
+//        transformer.saturate(1, 1);
         System.out.printf(" After optimization: %s\n", transformer.measure());
 
         transformer.dump();

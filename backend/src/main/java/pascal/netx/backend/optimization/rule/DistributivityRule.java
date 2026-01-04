@@ -36,11 +36,11 @@ public final class DistributivityRule extends UniMemRule {
         }
 
         int width = vertex.outWidth();
-        var dual = graph.newComponent(over, width);
+        var dual = graph.factory().component(over, width);
         common.forEach(elem -> graph.addEdge(elem, dual));
         for (var in : graph.inputsOf(vertex)) {
             var mul = (Component) in;
-            var remainder = graph.newComponent(vertex.label(), width);
+            var remainder = graph.factory().component(vertex.label(), width);
             for (var mulIn : graph.inputsOf(mul)) {
                 if (!common.contains(mulIn)) {
                     graph.addEdge(mulIn, remainder);

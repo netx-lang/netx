@@ -72,7 +72,8 @@ public final class GraphTransformer extends AbstractNxonTransformer {
                     var label = node.get("id").textValue();
                     var ref = (WireReference) Reference.from(label);
                     if (inputs.contains(ref)) {
-                        var vertex = graph.newWire(label, definedWithOf(node));
+                        int width = definedWithOf(node);
+                        var vertex = graph.factory().wire(label, width);
                         wireRefs.put(ref, vertex);
                     }
                     wireDefs.put(ref, node);
@@ -102,7 +103,8 @@ public final class GraphTransformer extends AbstractNxonTransformer {
                     width = parseSelector(ref.selector()).width();
                 }
 
-                var vertex = graph.newComponent(node.get("id").textValue(), width);
+                String label = node.get("id").textValue();
+                var vertex = graph.factory().component(label, width);
                 compDefs.put(node, vertex);
                 if (!ref.selector().isEmpty()) {
                     buildWriteSelect(ref, vertex);
@@ -119,7 +121,7 @@ public final class GraphTransformer extends AbstractNxonTransformer {
             var selects = entry.getValue();
             selects.sort(Comparator.comparing(WriteSelect::selector).reversed());
             int width = wireDefs.get(wireRef).get("width").intValue();
-            var concat = graph.newComponent(Component.Label.CONCAT, width);
+            var concat = graph.factory().component(Component.Label.CONCAT, width);
             for (var select : selects) {
                 graph.addEdge(select, concat);
             }
@@ -154,14 +156,16 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         }
 
         var label = wireDefs.get(key).get("id").textValue();
-        var select = graph.newWriteSelect(label, parseSelector(ref.selector()));
+        Selector selector = parseSelector(ref.selector());
+        var select = graph.factory().writeSelect(label, selector);
         definedSelects.computeIfAbsent(key, _ -> new LinkedList<>()).add(select);
         graph.addEdge(vertex, select);
     }
 
     private void buildReadSelect(WireReference ref, Component vertex) {
         var base = Objects.requireNonNull(wireRefs.get(ref.withoutSelector()));
-        var select = graph.newReadSelect(parseSelector(ref.selector()));
+        Selector selector = parseSelector(ref.selector());
+        var select = graph.factory().readSelect(selector);
         graph.addEdge(base, select);
         graph.addEdge(select, vertex);
         wireRefs.put(ref, select);
@@ -181,7 +185,10 @@ public final class GraphTransformer extends AbstractNxonTransformer {
     }
 
     private Constant buildConstant(ValueReference ref) {
-        return constRefs.computeIfAbsent(ref, k -> graph.newConstant(BitVector.parse(k.constant())));
+        return constRefs.computeIfAbsent(ref, k -> {
+            BitVector value = BitVector.parse(k.constant());
+            return graph.factory().constant(value);
+        });
     }
 
     public void dump() {

@@ -5,15 +5,21 @@ import pascal.netx.backend.optimization.model.Constant;
 import pascal.netx.backend.optimization.model.Graph;
 import pascal.netx.backend.optimization.model.Vertex;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 
-public final class IdentityRule extends StatelessRule {
+public final class IdentityRule extends UniMemRule {
     public IdentityRule(Graph graph) {
         super(graph);
     }
 
     @Override
     public boolean apply(Component vertex) {
+        if (hasSeen(vertex)) {
+            return false;
+        }
+
         return switch (vertex.label()) {
             case AND -> rewriteConstant(vertex, Constant::isMersenne);
             case OR -> rewriteConstant(vertex, Constant::isZero);
@@ -21,7 +27,22 @@ public final class IdentityRule extends StatelessRule {
         };
     }
 
-    private boolean rewriteConstant(Vertex vertex, Predicate<Constant> predicate) {
-        return graph.inputsOf(vertex).removeIf(v -> v instanceof Constant constant && predicate.test(constant));
+    private boolean rewriteConstant(Component vertex, Predicate<Constant> predicate) {
+        boolean should = false;
+        List<Vertex> newInputs = new ArrayList<>();
+        for (var input : graph.inputsOf(vertex)) {
+            if (graph.eqClassOf(input).contains(Constant.class, predicate)) {
+                should = true;
+            } else {
+                newInputs.add(input);
+            }
+        }
+        if (should) {
+            var dual = graph.factory().component(vertex.label(), vertex.outWidth());
+            newInputs.forEach(v -> graph.addEdge(v, dual));
+            graph.union(vertex, dual);
+            markSeen(vertex);
+        }
+        return should;
     }
 }

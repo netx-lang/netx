@@ -6,39 +6,81 @@ import pascal.netx.backend.optimization.model.Vertex;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 
-public final class ShrinkAssocRule extends StatelessRule {
+public final class ShrinkAssocRule extends UniMemRule {
     public ShrinkAssocRule(Graph graph) {
         super(graph);
     }
 
     @Override
     public boolean apply(Component vertex) {
-        switch (vertex.label()) {
-            case AND, OR, XOR, ADD, MUL -> {
-                boolean changed = false;
-                List<Vertex> flattened = new LinkedList<>();
-                List<Vertex> toRemove = new LinkedList<>();
-                for (var input : graph.inputsOf(vertex)) {
-                    if (input instanceof Component comp
-                            && comp.label() == vertex.label()
-                            && graph.outputsOf(comp).size() == 1) {
-                        apply(comp);
-                        flattened.addAll(graph.inputsOf(comp));
-                        toRemove.add(comp);
-                        changed = true;
-                    } else {
-                        flattened.add(input);
-                    }
+        if (hasSeen(vertex)) {
+            return false;
+        }
+
+        return switch (vertex.label()) {
+            case AND, OR, XOR, ADD, MUL -> new ShrinkContext(vertex).shrink();
+            default -> false;
+        };
+    }
+
+    private final class ShrinkContext {
+        final Component origin;
+        final List<Vertex> inputs;
+        final List<List<Component>> candidates;
+        final LinkedList<Vertex> chosen = new LinkedList<>();
+
+        ShrinkContext(Component origin) {
+            this.origin = origin;
+            this.inputs = graph.inputsOf(origin);
+            this.candidates = inputs.stream()
+                    .map(graph::eqClassOf)
+                    .map(eq -> findMatched(eq, origin.label()))
+                    .toList();
+        }
+
+        boolean shrink() {
+            if (candidates.stream().anyMatch(Predicate.not(List::isEmpty))) {
+                shrink(0);
+                markSeen(origin);
+                return true;
+            }
+            return false;
+        }
+
+        private void shrink(int index) {
+            if (index == candidates.size()) {
+                var dual = graph.factory().component(origin.label(), origin.outWidth());
+                for (var vertex : chosen) {
+                    graph.addEdge(vertex, dual);
                 }
-                if (changed) {
-                    graph.inputsOf(vertex).clear();
-                    graph.inputsOf(vertex).addAll(flattened);
-                    toRemove.forEach(graph::remove);
-                    return true;
+                graph.union(origin, dual);
+            } else {
+                if (candidates.get(index).isEmpty()) {
+                    chosen.add(origin);
+                    shrink(index + 1);
+                    chosen.removeLast();
+                } else {
+                    for (var candidate : candidates.get(index)) {
+                        var toShrink = graph.inputsOf(candidate);
+                        chosen.addAll(toShrink);
+                        shrink(index + 1);
+                        for (int i = 0; i < toShrink.size(); i++) {
+                            chosen.removeLast();
+                        }
+                    }
                 }
             }
         }
-        return false;
+    }
+
+    private List<Component> findMatched(Graph.EqClass eqClass, Component.Label label) {
+        return eqClass.stream()
+                .filter(Component.class::isInstance)
+                .map(Component.class::cast)
+                .filter(comp -> comp.label() == label)
+                .toList();
     }
 }
