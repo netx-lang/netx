@@ -4,8 +4,11 @@ import pascal.netx.util.collection.UnionFind;
 import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.print.NotepadWriter;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static pascal.netx.backend.NxonParseUtils.quote;
 
@@ -17,10 +20,11 @@ public final class Graph {
     private final Map<Vertex, List<Vertex>> inEdges = new HashMap<>();
     private final Map<Vertex, List<Vertex>> outEdges = new HashMap<>();
 
-    private final UnionFind<Vertex> equivalence = new UnionFind<>();
+    private final UnionFind<Vertex> unionFind = new UnionFind<>();
+    private final Map<Vertex, EqClass> equivalence = new HashMap<>();
 
-    private final AtomicInteger indexer = new AtomicInteger();
-    private final Map<BitVector, Constant> constantCache = new HashMap<>();
+    private final CausalityManager causality = new CausalityManager();
+    private final VertexFactory vertexFactory = new VertexFactory();
 
     public void setInputs(List<Vertex> inputs) {
         this.inputs.addAll(inputs);
@@ -40,107 +44,57 @@ public final class Graph {
 
     private void add(Vertex vertex) {
         vertices.add(vertex);
-        equivalence.add(vertex);
+        unionFind.add(vertex);
+        causality.init(vertex);
+        equivalence.put(vertex, new EqClass(vertex));
+
         inEdges.putIfAbsent(vertex, new LinkedList<>());
         outEdges.putIfAbsent(vertex, new LinkedList<>());
-    }
-
-    public void remove(Vertex vertex) {
-        vertices.remove(vertex);
-        inEdges.remove(vertex);
-        outEdges.remove(vertex);
-        for (var targets : inEdges.values()) {
-            targets.remove(vertex);
-        }
-        for (var targets : outEdges.values()) {
-            targets.remove(vertex);
-        }
     }
 
     public void addEdge(Vertex from, Vertex to) {
         outEdges.get(from).add(to);
         inEdges.get(to).add(from);
+        causality.addEdge(from, to);
     }
 
     public boolean equivalent(Vertex a, Vertex b) {
-        return equivalence.find(a) == equivalence.find(b);
+        return unionFind.find(a) == unionFind.find(b);
+    }
+
+    public EqClass eqClassOf(Vertex vertex) {
+        return equivalence.get(unionFind.find(vertex));
     }
 
     public void union(Vertex a, Vertex b) {
-        equivalence.union(a, b);
-    }
-
-    private int nextIndex() {
-        return indexer.getAndIncrement();
-    }
-
-    public Wire newWire(String label, int width) {
-        var wire = new Wire(nextIndex(), label, width);
-        add(wire);
-        return wire;
-    }
-
-    public WriteSelect newWriteSelect(String label, Selector selector) {
-        var select = new WriteSelect(nextIndex(), label, selector);
-        add(select);
-        return select;
-    }
-
-    public ReadSelect newReadSelect(Selector selector) {
-        var select = new ReadSelect(nextIndex(), selector);
-        add(select);
-        return select;
-    }
-
-    public Component newComponent(Component.Label label, int width) {
-        var component = new Component(nextIndex(), label, width);
-        add(component);
-        return component;
-    }
-
-    public Component newComponent(String label, int width) {
-        var component = new Component(nextIndex(), label, width);
-        add(component);
-        return component;
-    }
-
-    public Constant newConstant(BitVector value) {
-        if (constantCache.containsKey(value)) {
-            return constantCache.get(value);
-        } else {
-            var constant = new Constant(nextIndex(), value);
-            constantCache.put(value, constant);
-            add(constant);
-            return constant;
+        if (!equivalent(a, b)) {
+            var set = new EqClass();
+            set.union(equivalence.remove(unionFind.find(a)));
+            set.union(equivalence.remove(unionFind.find(b)));
+            set.canonicalize();
+            unionFind.union(a, b);
+            equivalence.put(unionFind.find(a), set);
         }
     }
 
-    public void replaceAndRemove(Vertex oldVertex, Vertex newVertex) {
-        for (var entry : inEdges.entrySet()) {
-            entry.getValue().replaceAll(value -> value.equals(oldVertex) ? newVertex : value);
-        }
-        for (var entry : outEdges.entrySet()) {
-            entry.getValue().replaceAll(value -> value.equals(oldVertex) ? newVertex : value);
-        }
-        inputs.replaceAll(value -> value.equals(oldVertex) ? newVertex : value);
-        outputs.replaceAll(value -> value.equals(oldVertex) ? newVertex : value);
-        remove(oldVertex);
+    public VertexFactory factory() {
+        return vertexFactory;
     }
 
     public List<Vertex> inputsOf(Vertex vertex) {
-        return inEdges.getOrDefault(vertex, List.of());
+        return Collections.unmodifiableList(inEdges.getOrDefault(vertex, List.of()));
     }
 
     public List<Vertex> outputsOf(Vertex vertex) {
-        return outEdges.getOrDefault(vertex, List.of());
+        return Collections.unmodifiableList(outEdges.getOrDefault(vertex, List.of()));
+    }
+
+    public Vertex eqRepOf(Vertex vertex) {
+        return unionFind.find(vertex);
     }
 
     public Collection<Component> components() {
         return vertices.stream().filter(Component.class::isInstance).map(Component.class::cast).toList();
-    }
-
-    public Collection<Wire> wires() {
-        return vertices.stream().filter(Wire.class::isInstance).map(Wire.class::cast).toList();
     }
 
     public Collection<Vertex> vertices() {
@@ -150,7 +104,7 @@ public final class Graph {
     public Map<Vertex, List<Vertex>> equivalenceClasses() {
         Map<Vertex, List<Vertex>> result = new LinkedHashMap<>();
         for (var v : vertices) {
-            var rep = equivalence.find(v);
+            var rep = unionFind.find(v);
             result.computeIfAbsent(rep, _ -> new ArrayList<>()).add(v);
         }
         return result;
@@ -163,7 +117,7 @@ public final class Graph {
         // Group vertices by their union-find representative in a stable order
         Map<Vertex, List<Vertex>> groups = new LinkedHashMap<>();
         for (var v : ordered) {
-            var rep = equivalence.find(v);
+            var rep = unionFind.find(v);
             groups.computeIfAbsent(rep, _ -> new ArrayList<>()).add(v);
         }
 
@@ -218,7 +172,132 @@ public final class Graph {
         writer.println("}");
     }
 
-    public Vertex eqRepOf(Vertex vertex) {
-        return equivalence.find(vertex);
+    public static final class CausalityManager {
+        private final Map<Vertex, Set<Vertex>> preds = new HashMap<>();
+        private final Map<Vertex, Set<Vertex>> succs = new HashMap<>();
+
+        void init(Vertex vertex) {
+            preds.put(vertex, new HashSet<>(Set.of(vertex)));
+            succs.put(vertex, new HashSet<>(Set.of(vertex)));
+        }
+
+        void addEdge(Vertex from, Vertex to) {
+            for (var vertex : preds.get(from)) {
+                succs.get(vertex).addAll(succs.get(to));
+            }
+            for (var vertex : succs.get(to)) {
+                preds.get(vertex).addAll(preds.get(from));
+            }
+        }
+
+        boolean test(Vertex u, Vertex v) {
+            return succs.getOrDefault(u, Set.of()).contains(v);
+        }
+    }
+
+    public class EqClass implements Iterable<Vertex> {
+        private final Set<Vertex> elements;
+
+        EqClass(Vertex element) {
+            this.elements = new HashSet<>(Set.of(element));
+        }
+
+        EqClass() {
+            this.elements = new HashSet<>();
+        }
+
+        void union(EqClass other) {
+            elements.addAll(other.elements);
+        }
+
+        void canonicalize() {
+            if (elements.size() <= 1) return;
+            Set<Vertex> classMembers = Set.copyOf(elements);
+            Set<Vertex> toRemove = new HashSet<>();
+            for (var v : classMembers) {
+                for (var u : classMembers) {
+                    if (u == v) continue;
+                    if (causality.test(u, v)) {
+                        toRemove.add(v);
+                        break;
+                    }
+                }
+            }
+            elements.removeAll(toRemove);
+        }
+
+        @Override
+        @Nonnull
+        public Iterator<Vertex> iterator() {
+            return elements.iterator();
+        }
+
+        public Stream<Vertex> stream() {
+            return elements.stream();
+        }
+
+        public Vertex getAny() {
+            return elements.iterator().next();
+        }
+
+        public <T extends Vertex> boolean contains(Class<T> cls, Predicate<T> predicate) {
+            for (var vertex : elements) {
+                if (cls.isInstance(vertex)) {
+                    if (predicate.test(cls.cast(vertex))) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
+    public final class VertexFactory {
+        private final Map<BitVector, Constant> constantCache = new HashMap<>();
+        private final AtomicInteger indexer = new AtomicInteger();
+
+        private int nextIndex() {
+            return indexer.getAndIncrement();
+        }
+
+        public Wire wire(String label, int width) {
+            var wire = new Wire(nextIndex(), label, width);
+            add(wire);
+            return wire;
+        }
+        public WriteSelect writeSelect(String label, Selector selector) {
+            var select = new WriteSelect(nextIndex(), label, selector);
+            add(select);
+            return select;
+        }
+
+        public ReadSelect readSelect(Selector selector) {
+            var select = new ReadSelect(nextIndex(), selector);
+            add(select);
+            return select;
+        }
+
+        public Component component(Component.Label label, int width) {
+            var component = new Component(nextIndex(), label, width);
+            add(component);
+            return component;
+        }
+
+        public Component component(String label, int width) {
+            var component = new Component(nextIndex(), label, width);
+            add(component);
+            return component;
+        }
+
+        public Constant constant(BitVector value) {
+            if (constantCache.containsKey(value)) {
+                return constantCache.get(value);
+            }
+            var constant = new Constant(nextIndex(), value);
+            constantCache.put(value, constant);
+            add(constant);
+            return constant;
+        }
     }
 }
+

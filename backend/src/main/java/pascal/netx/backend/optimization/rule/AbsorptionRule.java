@@ -4,18 +4,19 @@ import pascal.netx.backend.optimization.model.Component;
 import pascal.netx.backend.optimization.model.Graph;
 import pascal.netx.backend.optimization.model.Vertex;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-public final class AbsorptionRule extends StatelessRule {
+public final class AbsorptionRule extends UniMemRule {
     public AbsorptionRule(Graph graph) {
         super(graph);
     }
 
     @Override
     public boolean apply(Component vertex) {
+        if (hasSeen(vertex)) {
+            return false;
+        }
+
         return switch (vertex.label()) {
             case OR -> absorb(vertex, Component.Label.AND);
             case AND -> absorb(vertex, Component.Label.OR);
@@ -27,14 +28,16 @@ public final class AbsorptionRule extends StatelessRule {
         var inputs = graph.inputsOf(parent);
         Set<Vertex> direct = new HashSet<>();
         for (var input : inputs) {
-            if (!(input instanceof Component c && c.label() == absorbLabel)) {
+            if (findInEqClass(input, absorbLabel).isEmpty()) {
                 direct.add(graph.eqRepOf(input));
             }
         }
 
         List<Component> absorbed = new ArrayList<>();
         for (var input : inputs) {
-            if (input instanceof Component candidate && candidate.label() == absorbLabel) {
+            var optional = findInEqClass(input, absorbLabel);
+            if (optional.isPresent()) {
+                var candidate = optional.get();
                 if (containsAny(candidate, direct)) {
                     absorbed.add(candidate);
                 }
@@ -45,10 +48,20 @@ public final class AbsorptionRule extends StatelessRule {
             return false;
         }
 
-        inputs.removeAll(absorbed);
-        dropOutgoing(parent, absorbed);
-        cleanupAbsorbed(absorbed);
+        var dual = graph.factory().component(parent.label(), parent.outWidth());
+        absorbed.forEach(vertex -> direct.addAll(graph.inputsOf(vertex)));
+        direct.forEach(vertex -> graph.addEdge(vertex, dual));
+        graph.union(parent, dual);
+        markSeen(parent);
         return true;
+    }
+
+    private Optional<Component> findInEqClass(Vertex vertex, Component.Label label) {
+        return graph.eqClassOf(vertex).stream()
+                .filter(Component.class::isInstance)
+                .map(Component.class::cast)
+                .filter(comp -> comp.label() == label)
+                .findAny();
     }
 
     private boolean containsAny(Component candidate, Set<Vertex> direct) {
@@ -58,19 +71,5 @@ public final class AbsorptionRule extends StatelessRule {
             }
         }
         return false;
-    }
-
-    private void dropOutgoing(Component parent, List<Component> absorbed) {
-        for (var comp : absorbed) {
-            graph.outputsOf(comp).remove(parent);
-        }
-    }
-
-    private void cleanupAbsorbed(List<Component> absorbed) {
-        for (var comp : absorbed) {
-            if (graph.outputsOf(comp).isEmpty()) {
-                graph.remove(comp);
-            }
-        }
     }
 }

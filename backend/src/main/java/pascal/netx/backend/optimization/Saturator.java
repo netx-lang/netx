@@ -72,11 +72,11 @@ public final class Saturator {
         }
 
         // Prune everything not retained
-        for (var v : List.copyOf(graph.vertices())) {
-            if (!retain.contains(v)) {
-                graph.remove(v);
-            }
-        }
+//        for (var v : List.copyOf(graph.vertices())) {
+//            if (!retain.contains(v)) {
+//                graph.remove(v);
+//            }
+//        }
     }
 
     private Vertex chooseRepresentative(Vertex clsRep) {
