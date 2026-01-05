@@ -14,19 +14,19 @@ public abstract class BidiMemRule extends GraphRule {
         super(graph);
     }
 
-    protected final boolean hasPulled(Component vertex) {
+    protected final boolean hasPulled(Vertex vertex) {
         return pulled.contains(vertex);
     }
 
-    protected final boolean hasPushed(Component vertex) {
+    protected final boolean hasPushed(Vertex vertex) {
         return pushed.contains(vertex);
     }
 
-    protected final void markPulled(Component vertex) {
+    protected final void markPulled(Vertex vertex) {
         pulled.add(vertex);
     }
 
-    protected final void markPushed(Component vertex) {
+    protected final void markPushed(Vertex vertex) {
         pushed.add(vertex);
     }
 
