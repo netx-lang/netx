@@ -8,7 +8,6 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static pascal.netx.backend.NxonParseUtils.quote;
@@ -93,10 +92,6 @@ public final class Graph {
 
     public List<Vertex> outputsOf(Vertex vertex) {
         return Collections.unmodifiableList(outEdges.getOrDefault(vertex, List.of()));
-    }
-
-    public List<Vertex> mutOutputsOf(Vertex vertex) {
-        return outEdges.getOrDefault(vertex, new LinkedList<>());
     }
 
     public Vertex eqRepOf(Vertex vertex) {

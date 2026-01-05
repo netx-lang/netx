@@ -23,8 +23,8 @@ public final class Rewriter {
                 new ShrinkAssocRule(graph),
                 new AbsorptionRule(graph),
                 new DoubleNegationRule(graph),
-                new DeMorganRule(graph)
-//                new RetimingRule(graph),
+                new DeMorganRule(graph),
+                new RetimingRule(graph)
 //                new DistributivityRule(graph)
         );
     }

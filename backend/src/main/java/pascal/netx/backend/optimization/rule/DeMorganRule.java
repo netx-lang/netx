@@ -2,8 +2,6 @@ package pascal.netx.backend.optimization.rule;
 
 import pascal.netx.backend.optimization.model.Component;
 import pascal.netx.backend.optimization.model.Graph;
-import pascal.netx.backend.optimization.model.Vertex;
-import pascal.netx.backend.optimization.model.Vertices;
 
 import static pascal.netx.backend.optimization.model.Vertices.hasLabel;
 

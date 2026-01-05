@@ -6,7 +6,6 @@ import pascal.netx.backend.optimization.model.Vertex;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 
 public final class ShrinkAssocRule extends UniMemRule {
