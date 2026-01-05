@@ -59,7 +59,7 @@ public final class ShrinkAssocRule extends UniMemRule {
                 graph.union(origin, dual);
             } else {
                 if (candidates.get(index).isEmpty()) {
-                    chosen.add(origin);
+                    chosen.add(inputs.get(index));
                     shrink(index + 1);
                     chosen.removeLast();
                 } else {

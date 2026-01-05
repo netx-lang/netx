@@ -193,6 +193,7 @@ public final class GraphTransformer extends AbstractNxonTransformer {
 
     public void dump() {
         graph.dump(notepad);
+        notepad.flush();
     }
 
     private void iterate(JsonNode node, Consumer<JsonNode> action) {

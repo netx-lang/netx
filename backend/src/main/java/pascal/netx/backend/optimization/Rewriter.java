@@ -22,8 +22,8 @@ public final class Rewriter {
                 new SingletonRule(graph),
                 new ShrinkAssocRule(graph),
                 new AbsorptionRule(graph),
-                new DoubleNegationRule(graph)
-//                new DeMorganRule(graph),
+                new DoubleNegationRule(graph),
+                new DeMorganRule(graph)
 //                new RetimingRule(graph),
 //                new DistributivityRule(graph)
         );
@@ -34,15 +34,11 @@ public final class Rewriter {
         boolean changed;
         do {
             changed = false;
-            for (var vertex : graph.components()) {
-                for (var rule : rules) {
+            for (var rule : rules) {
+                for (var vertex : graph.components()) {
                     if (rule.apply(vertex)) {
                         changed = true;
-                        break;
                     }
-                }
-                if (changed) {
-                    break;
                 }
             }
         } while (changed);

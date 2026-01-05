@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static pascal.netx.backend.NxonParseUtils.quote;
@@ -73,6 +74,7 @@ public final class Graph {
             set.union(equivalence.remove(unionFind.find(b)));
             set.canonicalize();
             unionFind.union(a, b);
+            causality.union(a, b);
             equivalence.put(unionFind.find(a), set);
         }
     }
@@ -85,8 +87,16 @@ public final class Graph {
         return Collections.unmodifiableList(inEdges.getOrDefault(vertex, List.of()));
     }
 
+    public List<Vertex> mutInputsOf(Vertex vertex) {
+        return inEdges.getOrDefault(vertex, new LinkedList<>());
+    }
+
     public List<Vertex> outputsOf(Vertex vertex) {
         return Collections.unmodifiableList(outEdges.getOrDefault(vertex, List.of()));
+    }
+
+    public List<Vertex> mutOutputsOf(Vertex vertex) {
+        return outEdges.getOrDefault(vertex, new LinkedList<>());
     }
 
     public Vertex eqRepOf(Vertex vertex) {
@@ -99,6 +109,10 @@ public final class Graph {
 
     public Collection<Vertex> vertices() {
         return Collections.unmodifiableSet(vertices);
+    }
+
+    public Collection<Vertex> mutVertices() {
+        return vertices;
     }
 
     public Map<Vertex, List<Vertex>> equivalenceClasses() {
@@ -157,7 +171,6 @@ public final class Graph {
 
         writer.newLine();
 
-        // Emit edges
         for (var v : ordered) {
             var fromName = "v" + v.index();
             var targets = inEdges.getOrDefault(v, List.of());
@@ -190,8 +203,15 @@ public final class Graph {
             }
         }
 
+        void union(Vertex u, Vertex v) {
+            preds.get(u).addAll(preds.get(v));
+            succs.get(u).addAll(succs.get(v));
+            preds.get(v).addAll(preds.get(u));
+            succs.get(v).addAll(succs.get(u));
+        }
+
         boolean test(Vertex u, Vertex v) {
-            return succs.getOrDefault(u, Set.of()).contains(v);
+            return succs.get(u).contains(v);
         }
     }
 
@@ -212,18 +232,17 @@ public final class Graph {
 
         void canonicalize() {
             if (elements.size() <= 1) return;
-            Set<Vertex> classMembers = Set.copyOf(elements);
-            Set<Vertex> toRemove = new HashSet<>();
-            for (var v : classMembers) {
-                for (var u : classMembers) {
+            List<Vertex> toRemove = new LinkedList<>();
+            for (var v : elements) {
+                for (var u : elements) {
                     if (u == v) continue;
-                    if (causality.test(u, v)) {
+                    if (causality.test(u, v) && Vertices.isCombinational(v)) {
                         toRemove.add(v);
                         break;
                     }
                 }
             }
-            elements.removeAll(toRemove);
+            toRemove.forEach(elements::remove);
         }
 
         @Override
@@ -249,6 +268,17 @@ public final class Graph {
                 }
             }
             return false;
+        }
+
+        public <T extends Vertex> T get(Class<T> cls, Predicate<T> predicate) {
+            for (var vertex : elements) {
+                if (cls.isInstance(vertex)) {
+                    if (predicate.test(cls.cast(vertex))) {
+                        return cls.cast(vertex);
+                    }
+                }
+            }
+            return null;
         }
     }
 
