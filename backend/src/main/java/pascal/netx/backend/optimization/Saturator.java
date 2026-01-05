@@ -19,9 +19,6 @@ public final class Saturator {
 
     private final Map<Vertex, Cost> costs = new HashMap<>();
 
-    private final Map<Vertex, Boolean> selfInputForbidden = new HashMap<>();
-    private final Set<Vertex> ancestorVisiting = new HashSet<>();
-
     public Saturator(Graph graph, double areaWeight, double delayWeight) {
         this.graph = graph;
         this.areaWeight = areaWeight;
@@ -31,7 +28,6 @@ public final class Saturator {
         this.inputs = new HashSet<>(graph.inputs());
 
         costs.putAll(new SubtreeCostCalculator().computeAll());
-        graph.vertices().forEach(this::computeSelfInputForbidden); // preprocess ancestor search
     }
 
     public void saturate() {
@@ -41,8 +37,7 @@ public final class Saturator {
 
         // Seed with outputs, ensuring a chosen representative per equivalence class
         for (var out : graph.outputs()) {
-            var rep = graph.eqRepOf(out);
-            var pick = chooseRepresentative(rep);
+            var pick = chooseRepresentative(out);
             workList.add(pick);
         }
 
@@ -54,8 +49,7 @@ public final class Saturator {
             }
             List<Vertex> mappedInputs = new ArrayList<>();
             for (var in : graph.inputsOf(u)) {
-                var repIn = graph.eqRepOf(in);
-                var chosenIn = chooseRepresentative(repIn);
+                var chosenIn = chooseRepresentative(in);
                 mappedInputs.add(chosenIn);
                 if (!retain.contains(chosenIn)) {
                     workList.add(chosenIn);
@@ -66,17 +60,17 @@ public final class Saturator {
 
         // Rewire inputs of retained vertices to the chosen representatives
         for (var entry : newInputs.entrySet()) {
-            var inputs = graph.inputsOf(entry.getKey());
+            var inputs = graph.mutInputsOf(entry.getKey());
             inputs.clear();
             inputs.addAll(entry.getValue());
         }
 
         // Prune everything not retained
-//        for (var v : List.copyOf(graph.vertices())) {
-//            if (!retain.contains(v)) {
-//                graph.remove(v);
-//            }
-//        }
+        for (var v : List.copyOf(graph.vertices())) {
+            if (!retain.contains(v)) {
+                graph.mutVertices().remove(v);
+            }
+        }
     }
 
     private Vertex chooseRepresentative(Vertex clsRep) {
@@ -85,9 +79,8 @@ public final class Saturator {
         if (existing != null) {
             return existing;
         }
-        var members = classMembers(rep);
-        var filtered = members.stream().filter(v -> !forbiddenBySelfInput(v));
-        var best = filtered
+        var members = graph.eqClassOf(rep);
+        var best = members.stream()
                 .min(Comparator
                         .comparing(this::preferInput)
                         .thenComparing(this::preferWriteSelect)
@@ -99,20 +92,6 @@ public final class Saturator {
 
     private int preferInput(Vertex v) {
         return inputs.contains(v) ? 0 : 1;
-    }
-
-    private List<Vertex> classMembers(Vertex rep) {
-        var members = classes.get(rep);
-        if (members != null) {
-            return members.stream().filter(graph.vertices()::contains).toList();
-        }
-        List<Vertex> collected = new ArrayList<>();
-        for (var v : graph.vertices()) {
-            if (graph.eqRepOf(v) == rep) {
-                collected.add(v);
-            }
-        }
-        return collected.isEmpty() ? List.of(rep) : collected;
     }
 
     private double scoreOf(Vertex v) {
@@ -129,50 +108,9 @@ public final class Saturator {
         return 0; // neutral for others
     }
 
-    private boolean forbiddenBySelfInput(Vertex v) {
-        return selfInputForbidden.getOrDefault(v, false);
-    }
-
-    private boolean computeSelfInputForbidden(Vertex v) {
-        var cached = selfInputForbidden.get(v);
-        if (cached != null) {
-            return cached;
-        }
-        if (!ancestorVisiting.add(v)) {
-            selfInputForbidden.put(v, false);
-            return false;
-        }
-        var rep = graph.eqRepOf(v);
-        boolean result = false;
-        for (var in : graph.inputsOf(v)) {
-            if (graph.eqRepOf(in) == rep) {
-                result = true;
-                break;
-            }
-            if (!isRegister(in) && computeSelfInputForbidden(in)) {
-                result = true;
-                break;
-            }
-        }
-        ancestorVisiting.remove(v);
-        selfInputForbidden.put(v, result);
-        return result;
-    }
-
-    private boolean isRegister(Vertex v) {
-        return v instanceof Component c && (
-                c.label() == Component.Label.REGISTER ||
-                c.label() == Component.Label.ASYNC_REGISTER
-        );
-    }
-
     private record Cost(double area, double delay) {
         double score(double areaWeight, double delayWeight) {
             return areaWeight * area + delayWeight * delay;
-        }
-
-        static Cost zero() {
-            return new Cost(0.0, 0.0);
         }
     }
 
@@ -199,7 +137,7 @@ public final class Saturator {
             double area = weights.area(v), delay = weights.delay(v);
             double childDelay = 0.0;
             for (var in : graph.inputsOf(v)) {
-                if (!isRegister(in)) { // break cycles at registers
+                if (Vertices.isCombinational(in)) { // break cycles at registers
                     var cost = minCostInEqClass(in, this::computeCombinational);
                     childDelay = Math.max(childDelay, cost.delay());
                     area += cost.area();
