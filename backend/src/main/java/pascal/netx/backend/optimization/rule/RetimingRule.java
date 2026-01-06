@@ -2,11 +2,13 @@ package pascal.netx.backend.optimization.rule;
 
 import pascal.netx.backend.optimization.model.*;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 import static pascal.netx.backend.optimization.model.Vertices.hasLabel;
 
-public final class RetimingRule extends BidiMemRule {
+public final class RetimingRule extends BidiRule {
     public RetimingRule(Graph graph) {
         super(graph);
     }
@@ -51,33 +53,66 @@ public final class RetimingRule extends BidiMemRule {
                 || !isPullable(vertex)) {
             return false;
         }
-
-        var clock = resolveClock(vertex);
-        if (clock.isEmpty()) {
-            return false;
-        }
-
-        int width = vertex.outWidth();
-        var pulled = graph.factory().component(Component.Label.REGISTER, width);
-        var dual = graph.factory().component(vertex.label(), width);
-        graph.addEdge(clock.get(), pulled);
-        graph.addEdge(dual, pulled);
-        for (var input : graph.inputsOf(vertex)) {
-            var reg = graph.eqClassOf(input).get(Component.class, hasLabel(Component.Label.REGISTER));
-            graph.addEdge(graph.inputsOf(reg).get(1), dual);
-        }
-        graph.union(pulled, vertex);
-        markPulled(vertex);
-        markPushed(dual);
-        return true;
+        return new PullRetimingContext(vertex).pull();
     }
 
-    private Optional<Vertex> resolveClock(Component vertex) {
-        Vertex result = null;
-        for (var input : graph.inputsOf(vertex)) {
-            var reg = graph.eqClassOf(input).get(Component.class, hasLabel(Component.Label.REGISTER));
-            var clock = graph.inputsOf(reg).getFirst();
-            if (result != null && !graph.equivalent(result, clock)) {
+    private final class PullRetimingContext {
+        final Component origin;
+        final List<Vertex> inputs;
+        final List<List<Component>> candidates;
+        final List<Vertex> chosen = new LinkedList<>();
+        boolean changed = false;
+
+        PullRetimingContext(Component origin) {
+            this.origin = origin;
+            this.inputs = graph.inputsOf(origin);
+            this.candidates = inputs.stream()
+                    .map(graph::eqClassOf)
+                    .map(cls -> cls.filter(Component.class, hasLabel(Component.Label.REGISTER)))
+                    .toList();
+        }
+
+        boolean pull() {
+            pull(0);
+            if (changed) {
+                markPulled(origin);
+            }
+            return changed;
+        }
+
+        void pull(int index) {
+            if (index == candidates.size()) {
+                var clock = resolveClock(chosen);
+                if (clock.isEmpty()) {
+                    return;
+                }
+
+                int width = origin.outWidth();
+                var pulled = graph.factory().component(Component.Label.REGISTER, width);
+                var dual = graph.factory().component(origin.label(), width);
+                graph.addEdge(clock.get().getAny(), pulled);
+                graph.addEdge(dual, pulled);
+                for (var input : chosen) {
+                    graph.addEdge(graph.inputsOf(input).get(1), dual);
+                }
+                graph.union(pulled, origin);
+                markPulled(origin);
+                markPushed(dual);
+            } else {
+                for (var candidate : candidates.get(index)) {
+                    chosen.add(candidate);
+                    pull(index + 1);
+                    chosen.removeLast();
+                }
+            }
+        }
+    }
+
+    private Optional<Graph.EqClass> resolveClock(List<Vertex> registers) {
+        Graph.EqClass result = null;
+        for (var input : registers) {
+            var clock = graph.eqClassOf(graph.inputsOf(input).getFirst());
+            if (result != null && !result.equals(clock)) {
                 return Optional.empty();
             } else {
                 result = clock;

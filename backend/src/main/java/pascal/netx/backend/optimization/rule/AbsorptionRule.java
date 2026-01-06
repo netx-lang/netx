@@ -6,7 +6,7 @@ import pascal.netx.backend.optimization.model.Vertex;
 
 import java.util.*;
 
-public final class AbsorptionRule extends UniMemRule {
+public final class AbsorptionRule extends UniRule {
     public AbsorptionRule(Graph graph) {
         super(graph);
     }

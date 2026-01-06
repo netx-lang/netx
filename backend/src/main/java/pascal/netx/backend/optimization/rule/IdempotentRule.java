@@ -3,7 +3,7 @@ package pascal.netx.backend.optimization.rule;
 import pascal.netx.backend.optimization.model.Component;
 import pascal.netx.backend.optimization.model.Graph;
 
-public final class IdempotentRule extends UniMemRule {
+public final class IdempotentRule extends UniRule {
     public IdempotentRule(Graph graph) {
         super(graph);
     }

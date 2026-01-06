@@ -6,10 +6,10 @@ import pascal.netx.backend.optimization.model.Vertex;
 
 import java.util.HashSet;
 
-public abstract class UniMemRule extends GraphRule {
+public abstract class UniRule extends GraphRule {
     private final HashSet<Vertex> rewritten = new HashSet<>();
 
-    protected UniMemRule(Graph graph) {
+    protected UniRule(Graph graph) {
         super(graph);
     }
 

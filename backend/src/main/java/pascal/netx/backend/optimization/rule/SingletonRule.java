@@ -3,7 +3,7 @@ package pascal.netx.backend.optimization.rule;
 import pascal.netx.backend.optimization.model.Component;
 import pascal.netx.backend.optimization.model.Graph;
 
-public final class SingletonRule extends UniMemRule {
+public final class SingletonRule extends UniRule {
     public SingletonRule(Graph graph) {
         super(graph);
     }
