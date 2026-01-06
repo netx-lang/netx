@@ -8,5 +8,6 @@ public abstract class GraphRule implements Rule {
     protected GraphRule(Graph graph) {
         this.graph = graph;
     }
+
 }
 

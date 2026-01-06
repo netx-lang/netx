@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-public final class IdentityRule extends UniMemRule {
-    public IdentityRule(Graph graph) {
+public final class RedundantConstRule extends UniRule {
+    public RedundantConstRule(Graph graph) {
         super(graph);
     }
 
@@ -21,8 +21,8 @@ public final class IdentityRule extends UniMemRule {
         }
 
         return switch (vertex.label()) {
-            case AND -> rewriteConstant(vertex, Constant::isMersenne);
-            case OR -> rewriteConstant(vertex, Constant::isZero);
+            case NAND, AND -> rewriteConstant(vertex, Constant::isMersenne);
+            case NOR, XNOR, OR, XOR -> rewriteConstant(vertex, Constant::isZero);
             default -> false;
         };
     }
@@ -40,7 +40,8 @@ public final class IdentityRule extends UniMemRule {
         if (should) {
             var dual = graph.factory().component(vertex.label(), vertex.outWidth());
             newInputs.forEach(v -> graph.addEdge(v, dual));
-            graph.union(vertex, dual);
+            var cls = graph.union(vertex, dual);
+            cls.remove(vertex); // Always prefer the dual component
             markSeen(vertex);
         }
         return should;

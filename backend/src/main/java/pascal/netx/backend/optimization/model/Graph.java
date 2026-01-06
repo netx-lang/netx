@@ -66,7 +66,7 @@ public final class Graph {
         return equivalence.get(unionFind.find(vertex));
     }
 
-    public void union(Vertex a, Vertex b) {
+    public EqClass union(Vertex a, Vertex b) {
         if (!equivalent(a, b)) {
             var set = new EqClass();
             set.union(equivalence.remove(unionFind.find(a)));
@@ -76,6 +76,7 @@ public final class Graph {
             causality.union(a, b);
             equivalence.put(unionFind.find(a), set);
         }
+        return eqClassOf(a);
     }
 
     public VertexFactory factory() {
@@ -254,6 +255,10 @@ public final class Graph {
             return elements.iterator().next();
         }
 
+        public void remove(Vertex v) {
+            elements.remove(v);
+        }
+
         public <T extends Vertex> boolean contains(Class<T> cls, Predicate<T> predicate) {
             for (var vertex : elements) {
                 if (cls.isInstance(vertex)) {
@@ -265,15 +270,16 @@ public final class Graph {
             return false;
         }
 
-        public <T extends Vertex> T get(Class<T> cls, Predicate<T> predicate) {
+        public <T extends Vertex> List<T> filter(Class<T> cls, Predicate<T> predicate) {
+            List<T> result = new LinkedList<>();
             for (var vertex : elements) {
                 if (cls.isInstance(vertex)) {
                     if (predicate.test(cls.cast(vertex))) {
-                        return cls.cast(vertex);
+                        result.add(cls.cast(vertex));
                     }
                 }
             }
-            return null;
+            return result;
         }
     }
 

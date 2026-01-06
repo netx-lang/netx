@@ -18,14 +18,14 @@ public final class Rewriter {
         this.graph = graph;
         this.rules = List.of(
                 new IdempotentRule(graph),
-                new IdentityRule(graph),
+                new RedundantConstRule(graph),
                 new SingletonRule(graph),
                 new ShrinkAssocRule(graph),
                 new AbsorptionRule(graph),
                 new DoubleNegationRule(graph),
+                new DistributivityRule(graph),
                 new DeMorganRule(graph),
                 new RetimingRule(graph)
-//                new DistributivityRule(graph)
         );
     }
 

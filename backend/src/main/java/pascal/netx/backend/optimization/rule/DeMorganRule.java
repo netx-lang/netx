@@ -2,10 +2,14 @@ package pascal.netx.backend.optimization.rule;
 
 import pascal.netx.backend.optimization.model.Component;
 import pascal.netx.backend.optimization.model.Graph;
+import pascal.netx.backend.optimization.model.Vertex;
+
+import java.util.LinkedList;
+import java.util.List;
 
 import static pascal.netx.backend.optimization.model.Vertices.hasLabel;
 
-public final class DeMorganRule extends BidiMemRule {
+public final class DeMorganRule extends BidiRule {
     public DeMorganRule(Graph graph) {
         super(graph);
     }
@@ -21,14 +25,17 @@ public final class DeMorganRule extends BidiMemRule {
             case NOT -> {
                 var input = graph.eqClassOf(graph.inputsOf(vertex).getFirst());
                 if (input.contains(Component.class, hasLabel(Component.Label.AND))) {
-                    var comp = input.get(Component.class, hasLabel(Component.Label.AND));
-                    var orComp = graph.factory().component(Component.Label.OR, width);
-                    pushDeMorgan(vertex, comp, orComp);
+                    for (var comp : input.filter(Component.class, hasLabel(Component.Label.AND))) {
+                        var orComp = graph.factory().component(Component.Label.OR, width);
+                        pushDeMorgan(vertex, comp, orComp);
+                    }
                     return true;
-                } else if (input.contains(Component.class, hasLabel(Component.Label.OR))) {
-                    var comp = input.get(Component.class, hasLabel(Component.Label.OR));
-                    var andComp = graph.factory().component(Component.Label.AND, width);
-                    pushDeMorgan(vertex, comp, andComp);
+                }
+                if (input.contains(Component.class, hasLabel(Component.Label.OR))) {
+                    for (var comp : input.filter(Component.class, hasLabel(Component.Label.OR))) {
+                        var andComp = graph.factory().component(Component.Label.AND, width);
+                        pushDeMorgan(vertex, comp, andComp);
+                    }
                     return true;
                 }
             }
@@ -65,16 +72,13 @@ public final class DeMorganRule extends BidiMemRule {
         }
 
         if (isPullable(vertex)) {
-            int width = vertex.outWidth();
             switch (vertex.label()) {
                 case AND -> {
-                    var nor = graph.factory().component(Component.Label.NOR, width);
-                    pullDeMorgan(vertex, nor);
+                    pullDeMorgan(vertex, Component.Label.NOR);
                     return true;
                 }
                 case OR -> {
-                    var nand = graph.factory().component(Component.Label.NAND, width);
-                    pullDeMorgan(vertex, nand);
+                    pullDeMorgan(vertex, Component.Label.NAND);
                     return true;
                 }
             }
@@ -82,15 +86,45 @@ public final class DeMorganRule extends BidiMemRule {
         return false;
     }
 
-    private void pullDeMorgan(Component vertex, Component dual) {
-        for (var input : graph.inputsOf(vertex)) {
-            var not = graph.eqClassOf(input).get(Component.class, hasLabel(Component.Label.NOT));
-            var in = graph.inputsOf(not).getFirst();
-            graph.addEdge(in, dual);
-        }
-        graph.union(vertex, dual);
+    private void pullDeMorgan(Component vertex, Component.Label dualLabel) {
+        new PullDeMorganContext(vertex, dualLabel).pull(0);
         markPulled(vertex);
-        markPushed(dual);
+    }
+
+    private final class PullDeMorganContext {
+        final Component origin;
+        final Component.Label dualLabel;
+        final List<Vertex> inputs;
+        final List<List<Component>> candidates;
+        final List<Vertex> chosen = new LinkedList<>();
+
+        PullDeMorganContext(Component origin, Component.Label dualLabel) {
+            this.origin = origin;
+            this.inputs = graph.inputsOf(origin);
+            this.dualLabel = dualLabel;
+            this.candidates = inputs.stream()
+                    .map(graph::eqClassOf)
+                    .map(cls -> cls.filter(Component.class, hasLabel(Component.Label.NOT)))
+                    .toList();
+        }
+
+        private void pull(int index) {
+            if (index == candidates.size()) {
+                var dual = graph.factory().component(dualLabel, origin.outWidth());
+                for (var input : chosen) {
+                    var in = graph.eqClassOf(graph.inputsOf(input).getFirst()).getAny();
+                    graph.addEdge(in, dual);
+                }
+                graph.union(origin, dual);
+                markPushed(dual);
+            } else {
+                for (var candidate : candidates.get(index)) {
+                    chosen.add(candidate);
+                    pull(index + 1);
+                    chosen.removeLast();
+                }
+            }
+        }
     }
 
 

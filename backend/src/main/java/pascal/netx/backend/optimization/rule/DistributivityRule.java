@@ -2,11 +2,12 @@ package pascal.netx.backend.optimization.rule;
 
 import pascal.netx.backend.optimization.model.Component;
 import pascal.netx.backend.optimization.model.Graph;
-import pascal.netx.backend.optimization.model.Vertex;
 
 import java.util.*;
 
-public final class DistributivityRule extends UniMemRule {
+import static pascal.netx.backend.optimization.model.Vertices.hasLabel;
+
+public final class DistributivityRule extends UniRule {
     public DistributivityRule(Graph graph) {
         super(graph);
     }
@@ -18,53 +19,86 @@ public final class DistributivityRule extends UniMemRule {
         }
 
         return switch (vertex.label()) {
-            case ADD -> pull(vertex, Component.Label.MUL);
-            case AND -> pull(vertex, Component.Label.OR);
-            case OR -> pull(vertex, Component.Label.AND);
+            case ADD -> apply(vertex, Component.Label.MUL);
+            case AND -> apply(vertex, Component.Label.OR);
+            case OR -> apply(vertex, Component.Label.AND);
             default -> false;
         };
     }
 
-    private boolean pull(Component vertex, Component.Label over) {
-        if (!allInMatch(vertex, over)) {
+    private boolean apply(Component vertex, Component.Label over) {
+        if (!applicable(vertex, over)) {
             return false;
         }
 
-        var common = commonParts(graph.inputsOf(vertex));
-        if (common.isEmpty()) {
-            return false;
+        var candidates = graph.inputsOf(vertex).stream()
+                .map(graph::eqClassOf)
+                .map(cls -> cls.filter(Component.class, hasLabel(over)))
+                .toList();
+        return new DistributivityContext(vertex, over, candidates).distribute();
+    }
+
+    class DistributivityContext {
+        private final Component vertex;
+        private final Component.Label over;
+        private final List<List<Component>> candidates;
+
+        boolean changed = false;
+        private final Set<Graph.EqClass> common = new HashSet<>();
+        private final List<Component> selected = new LinkedList<>();
+
+        DistributivityContext(Component vertex, Component.Label over, List<List<Component>> candidates) {
+            this.vertex = vertex;
+            this.over = over;
+            this.candidates = candidates;
         }
 
-        int width = vertex.outWidth();
-        var dual = graph.factory().component(over, width);
-        common.forEach(elem -> graph.addEdge(elem, dual));
-        for (var in : graph.inputsOf(vertex)) {
-            var mul = (Component) in;
-            var remainder = graph.factory().component(vertex.label(), width);
-            for (var mulIn : graph.inputsOf(mul)) {
-                if (!common.contains(mulIn)) {
-                    graph.addEdge(mulIn, remainder);
+        boolean distribute() {
+            distribute(0);
+            return changed;
+        }
+
+        void distribute(int index) {
+            if (index == candidates.size()) {
+                int width = vertex.outWidth();
+                var dual = graph.factory().component(over, width);
+                common.forEach(elem -> graph.addEdge(elem.getAny(), dual));
+                for (var in : selected) {
+                    var remainder = graph.factory().component(vertex.label(), width);
+                    for (var mulIn : graph.inputsOf(in)) {
+                        if (!common.contains(graph.eqClassOf(mulIn))) {
+                            graph.addEdge(mulIn, remainder);
+                        }
+                    }
+                    graph.addEdge(remainder, dual);
+                }
+                graph.union(vertex, dual);
+                markSeen(vertex);
+                changed = true;
+            } else {
+                for (var candidate : candidates.get(index)) {
+                    var inputs = graph.inputsOf(candidate).stream().map(graph::eqClassOf).toList();
+                    if (common.isEmpty()) {
+                        common.addAll(inputs);
+                    } else {
+                        common.retainAll(inputs);
+                    }
+
+                    if (!common.isEmpty()) {
+                        selected.add(candidate);
+                        distribute(index + 1);
+                        selected.removeLast();
+                    }
                 }
             }
-            graph.addEdge(remainder, dual);
         }
-        graph.union(vertex, dual);
-        markSeen(vertex);
-        return true;
+
     }
 
-    private Set<Vertex> commonParts(List<Vertex> components) {
-        var result = new HashSet<>(graph.inputsOf(components.getFirst()));
-        for (int i = 1; i < components.size(); i++) {
-            result.retainAll(graph.inputsOf(components.get(i)));
-        }
-        return result;
-    }
-
-    private boolean allInMatch(Component vertex, Component.Label label) {
+    private boolean applicable(Component vertex, Component.Label label) {
         var inputs = graph.inputsOf(vertex);
-        return inputs.size() >= 2 && inputs.stream().allMatch(
-                in -> in instanceof Component c && c.label() == label
-        );
+        return inputs.size() >= 2 && inputs.stream()
+                .map(graph::eqClassOf)
+                .allMatch(cls -> cls.contains(Component.class, hasLabel(label)));
     }
 }

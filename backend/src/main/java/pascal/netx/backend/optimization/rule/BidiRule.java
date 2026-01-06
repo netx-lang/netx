@@ -6,11 +6,11 @@ import pascal.netx.backend.optimization.model.Vertex;
 
 import java.util.HashSet;
 
-public abstract class BidiMemRule extends GraphRule {
+public abstract class BidiRule extends GraphRule {
     private final HashSet<Vertex> pulled = new HashSet<>();
     private final HashSet<Vertex> pushed = new HashSet<>();
 
-    protected BidiMemRule(Graph graph) {
+    protected BidiRule(Graph graph) {
         super(graph);
     }
 
