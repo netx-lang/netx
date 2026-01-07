@@ -55,8 +55,7 @@ public final class DeMorganRule extends BidiRule {
 
     private void pushDeMorgan(Component vertex, Component origin, Component dual) {
         for (var in : graph.inputsOf(origin)) {
-            int width = in.getAny().outWidth();
-            var notIn = graph.factory().component(Component.Label.NOT, width);
+            var notIn = graph.factory().component(Component.Label.NOT, in.width());
             graph.addEdge(in, notIn);
             graph.addEdge(notIn, dual);
         }

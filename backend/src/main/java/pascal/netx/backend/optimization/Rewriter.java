@@ -51,7 +51,7 @@ public final class Rewriter {
                 Map<Selector, Graph.EqClass> inputs = new HashMap<>();
                 int index = 0;
                 for (var input : graph.inputsOf(vertex).reversed()) {
-                    int width = input.getAny().outWidth();
+                    int width = input.width();
                     Selector selector = new Selector(index, index + width - 1);
                     inputs.put(selector, input);
                     index += width;

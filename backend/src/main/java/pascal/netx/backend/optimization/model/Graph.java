@@ -22,7 +22,6 @@ public final class Graph {
 
     private final VertexManager veq = new VertexManager();
     private final VertexFactory vFact = new VertexFactory();
-    private final CausalityManager causality = new CausalityManager();
 
     public void setInputs(List<Vertex> inputs) {
         this.inputs.addAll(inputs);
@@ -45,7 +44,6 @@ public final class Graph {
     }
 
     private void add(Vertex vertex) {
-        causality.init(vertex);
         veq.register(vertex);
         inEdges.putIfAbsent(vertex, new LinkedList<>());
         outEdges.putIfAbsent(veq.resolve(vertex), new LinkedList<>());
@@ -54,13 +52,11 @@ public final class Graph {
     public void addEdge(Vertex from, Vertex to) {
         inEdges.get(to).add(veq.resolve(from));
         outEdges.get(veq.resolve(from)).add(to);
-        causality.addEdge(from, to);
     }
 
     public void addEdge(EqClass from, Vertex to) {
         inEdges.get(to).add(from);
         outEdges.get(from).add(to);
-        from.stream().forEach(vertex -> causality.addEdge(vertex, to));
     }
 
     public EqClass eqClassOf(Vertex vertex) {
@@ -69,7 +65,6 @@ public final class Graph {
 
     public EqClass union(Vertex a, Vertex b) {
         if (!veq.equivalent(a, b)) {
-            causality.union(a, b);
             veq.union(a, b);
         }
         return eqClassOf(a);
@@ -78,7 +73,6 @@ public final class Graph {
     public EqClass union(Vertex a, EqClass e) {
         if (!e.elements.contains(a)) {
             veq.union(a, e);
-            causality.union(a, e.getAny());
         }
         return eqClassOf(a);
     }
@@ -174,7 +168,6 @@ public final class Graph {
 
             set.union(uCls);
             set.union(vCls);
-            set.canonicalize();
 
             inEdges.values().forEach(list -> list.replaceAll(cls -> (cls == uCls || cls == vCls) ? set : cls));
 
@@ -192,7 +185,6 @@ public final class Graph {
             var set = new EqClass();
             set.union(equivalence.remove(unionFind.find(u)));
             set.union(e);
-            set.canonicalize();
             unionFind.union(u, e.getAny());
             equivalence.put(unionFind.find(u), set);
         }
@@ -202,37 +194,7 @@ public final class Graph {
         }
     }
 
-    public static final class CausalityManager {
-        private final Map<Vertex, Set<Vertex>> preds = new HashMap<>();
-        private final Map<Vertex, Set<Vertex>> succs = new HashMap<>();
-
-        void init(Vertex vertex) {
-//            preds.put(vertex, new HashSet<>(Set.of(vertex)));
-//            succs.put(vertex, new HashSet<>(Set.of(vertex)));
-        }
-
-        void addEdge(Vertex from, Vertex to) {
-//            for (var vertex : preds.get(from)) {
-//                succs.get(vertex).addAll(succs.get(to));
-//            }
-//            for (var vertex : succs.get(to)) {
-//                preds.get(vertex).addAll(preds.get(from));
-//            }
-        }
-
-        void union(Vertex u, Vertex v) {
-//            preds.get(u).addAll(preds.get(v));
-//            succs.get(u).addAll(succs.get(v));
-//            preds.get(v).addAll(preds.get(u));
-//            succs.get(v).addAll(succs.get(u));
-        }
-
-        boolean test(Vertex u, Vertex v) {
-            return succs.get(u).contains(v);
-        }
-    }
-
-    public class EqClass implements Iterable<Vertex> {
+    public static class EqClass implements Iterable<Vertex> {
         private final Set<Vertex> elements;
 
         EqClass(Vertex element) {
@@ -245,21 +207,6 @@ public final class Graph {
 
         void union(EqClass other) {
             elements.addAll(other.elements);
-        }
-
-        void canonicalize() {
-//            if (elements.size() <= 1) return;
-//            List<Vertex> toRemove = new LinkedList<>();
-//            for (var v : elements) {
-//                for (var u : elements) {
-//                    if (u == v) continue;
-//                    if (causality.test(u, v) && Vertices.isCombinational(v)) {
-//                        toRemove.add(v);
-//                        break;
-//                    }
-//                }
-//            }
-//            toRemove.forEach(elements::remove);
         }
 
         public void retain(Set<Vertex> retained) {
@@ -276,8 +223,12 @@ public final class Graph {
             return elements.stream();
         }
 
-        public Vertex getAny() {
+        private Vertex getAny() {
             return elements.iterator().next();
+        }
+
+        public int width() {
+            return getAny().outWidth();
         }
 
         public void remove(Vertex v) {

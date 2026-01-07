@@ -61,7 +61,7 @@ public final class DistributivityRule extends UniRule {
             if (index == candidates.size()) {
                 int width = vertex.outWidth();
                 var dual = graph.factory().component(over, width);
-                common.forEach(elem -> graph.addEdge(elem.getAny(), dual));
+                common.forEach(elem -> graph.addEdge(elem, dual));
                 for (var in : selected) {
                     var remainder = graph.factory().component(vertex.label(), width);
                     for (var mulIn : graph.inputsOf(in)) {
