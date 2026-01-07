@@ -14,7 +14,7 @@ public final class DoubleNegationRule extends UniRule {
             return false;
         }
         var neg = graph.inputsOf(vertex).getFirst();
-        var only = graph.eqClassOf(neg).stream()
+        var only = neg.stream()
                 .filter(Component.class::isInstance)
                 .map(Component.class::cast)
                 .filter(comp -> comp.label() == Component.Label.NOT)

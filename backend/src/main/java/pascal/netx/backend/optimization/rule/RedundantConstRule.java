@@ -29,9 +29,9 @@ public final class RedundantConstRule extends UniRule {
 
     private boolean rewriteConstant(Component vertex, Predicate<Constant> predicate) {
         boolean should = false;
-        List<Vertex> newInputs = new ArrayList<>();
+        List<Graph.EqClass> newInputs = new ArrayList<>();
         for (var input : graph.inputsOf(vertex)) {
-            if (graph.eqClassOf(input).contains(Constant.class, predicate)) {
+            if (input.contains(Constant.class, predicate)) {
                 should = true;
             } else {
                 newInputs.add(input);

@@ -27,15 +27,14 @@ public final class ShrinkAssocRule extends UniRule {
 
     private final class ShrinkContext {
         final Component origin;
-        final List<Vertex> inputs;
+        final List<Graph.EqClass> inputs;
         final List<List<Component>> candidates;
-        final LinkedList<Vertex> chosen = new LinkedList<>();
+        final LinkedList<Graph.EqClass> chosen = new LinkedList<>();
 
         ShrinkContext(Component origin) {
             this.origin = origin;
             this.inputs = graph.inputsOf(origin);
             this.candidates = inputs.stream()
-                    .map(graph::eqClassOf)
                     .map(eq -> findMatched(eq, origin.label()))
                     .toList();
         }

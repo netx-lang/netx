@@ -1,24 +1,27 @@
 package pascal.netx.backend.optimization;
 
-import pascal.netx.backend.optimization.model.Component;
-import pascal.netx.backend.optimization.model.Graph;
-import pascal.netx.backend.optimization.model.WriteSelect;
-import pascal.netx.backend.optimization.model.Vertex;
+import pascal.netx.backend.optimization.model.*;
 
 import javax.annotation.Nonnull;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public final class Measurer {
+    private final Set<Vertex> vertices;
     private final Graph graph;
     private final Weights weights;
 
     public Measurer(Graph graph) {
-        this(graph, Weights.defaults());
+        this(graph, Weights.defaults(graph));
     }
 
     public Measurer(Graph graph, Weights weights) {
         this.graph = graph;
         this.weights = weights;
+        this.vertices = graph.vertices().stream()
+                .map(graph::eqClassOf)
+                .flatMap(Graph.EqClass::stream)
+                .collect(Collectors.toSet());
     }
 
     public Metrics evaluate() {
@@ -33,7 +36,7 @@ public final class Measurer {
     }
 
     private double computeArea() {
-        return graph.vertices().stream()
+        return vertices.stream()
                 .map(weights::area)
                 .reduce(Double::sum).orElseThrow();
     }
@@ -43,8 +46,8 @@ public final class Measurer {
         Deque<Vertex> queue = new ArrayDeque<>();
         Set<Vertex> inputs = new HashSet<>(graph.inputs());
         var visited = new HashSet<Vertex>();
-        for (var v : graph.vertices()) {
-            if (isRegister(v) || inputs.contains(v)) {
+        for (var v : vertices) {
+            if (!Vertices.isCombinational(v) || inputs.contains(v)) {
                 queue.add(v);
                 dist.put(v, 0.0);
             }
@@ -53,7 +56,7 @@ public final class Measurer {
             var v = queue.removeFirst();
             double base = dist.getOrDefault(v, 0.0);
             for (var out : graph.outputsOf(v)) {
-                if (isRegister(out)) {
+                if (!Vertices.isCombinational(v)) {
                     dist.put(out, Math.max(dist.getOrDefault(out, 0.0), base));
                     continue;
                 }
@@ -64,38 +67,47 @@ public final class Measurer {
                 dist.put(out, Math.max(dist.getOrDefault(out, 0.0), candidate));
             }
         }
-        return dist.values().stream().max(Double::compareTo).orElse(0.0);
+        return dist.entrySet().stream()
+                .filter(entry -> vertices.contains(entry.getKey()))
+                .map(Map.Entry::getValue)
+                .max(Double::compareTo).orElse(0.0);
     }
 
-    private boolean isRegister(Vertex v) {
-        return v instanceof Component c && (c.label() == Component.Label.REGISTER || c.label() == Component.Label.ASYNC_REGISTER);
-    }
 
     public static final class Weights {
+        private final Graph graph;
         private final Map<Component.Label, Double> area;
         private final Map<Component.Label, Double> delay;
 
-        public Weights(Map<Component.Label, Double> area,
+        public Weights(Graph graph,
+                       Map<Component.Label, Double> area,
                        Map<Component.Label, Double> delay) {
+            this.graph = graph;
             this.area = area;
             this.delay = delay;
         }
 
+        private static double log2(int n) {
+            return Math.log(n) / Math.log(2);
+        }
+
         public double area(Vertex v) {
+            int size = graph.inputsOf(v).size();
             if (v instanceof Component c) {
-                return area.getOrDefault(c.label(), 1.0);
+                return area.getOrDefault(c.label(), 1.0) * Math.max(1, log2(size));
             }
             return 0.0;
         }
 
         public double delay(Vertex v) {
+            int size = graph.inputsOf(v).size();
             if (v instanceof Component c) {
-                return delay.getOrDefault(c.label(), 1.0);
+                return delay.getOrDefault(c.label(), 1.0) * Math.max(1, log2(size));
             }
             return 0.0;
         }
 
-        public static Weights defaults() {
+        public static Weights defaults(Graph graph) {
             var areaBase = new EnumMap<Component.Label, Double>(Component.Label.class);
             var delayBase = new EnumMap<Component.Label, Double>(Component.Label.class);
             for (var label : Component.Label.values()) {
@@ -119,7 +131,7 @@ public final class Measurer {
             areaBase.put(Component.Label.ASYNC_REGISTER, 1.0);
             addCommonDefault(areaBase);
 
-            return new Weights(areaBase, delayBase);
+            return new Weights(graph, areaBase, delayBase);
         }
 
         private static void addCommonDefault(EnumMap<Component.Label, Double> map) {

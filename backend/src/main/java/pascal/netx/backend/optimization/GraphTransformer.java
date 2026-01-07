@@ -131,16 +131,32 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         iterate(json.get("design"), node -> {
             if (Objects.requireNonNull(NxonType.typeOf(node)) == NxonType.BUILTIN) {
                 var vertex = compDefs.get(node);
+                boolean isEq = node.get("id").textValue().equals("TO");
                 for (var input: node.get("input")) {
-                    switch (Reference.from(input.textValue())) {
+                    var inVertex = switch (Reference.from(input.textValue())) {
                         case WireReference ref -> {
                             if (wireRefs.containsKey(ref)) {
-                                graph.addEdge(wireRefs.get(ref), vertex);
+                                var result = wireRefs.get(ref);
+                                graph.addEdge(result, vertex);
+                                yield result;
                             } else {
-                                buildReadSelect(ref, vertex);
+                                var base = Objects.requireNonNull(wireRefs.get(ref.withoutSelector()));
+                                Selector selector = parseSelector(ref.selector());
+                                var select = graph.factory().readSelect(selector);
+                                graph.addEdge(base, select);
+                                graph.addEdge(select, vertex);
+                                wireRefs.put(ref, select);
+                                yield select;
                             }
                         }
-                        case ValueReference ref -> graph.addEdge(buildConstant(ref), vertex);
+                        case ValueReference ref -> {
+                            var constant = buildConstant(ref);
+                            graph.addEdge(constant, vertex);
+                            yield constant;
+                        }
+                    };
+                    if (isEq) {
+                        graph.union(inVertex, vertex);
                     }
                 }
             }
@@ -160,15 +176,6 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         var select = graph.factory().writeSelect(label, selector);
         definedSelects.computeIfAbsent(key, _ -> new LinkedList<>()).add(select);
         graph.addEdge(vertex, select);
-    }
-
-    private void buildReadSelect(WireReference ref, Component vertex) {
-        var base = Objects.requireNonNull(wireRefs.get(ref.withoutSelector()));
-        Selector selector = parseSelector(ref.selector());
-        var select = graph.factory().readSelect(selector);
-        graph.addEdge(base, select);
-        graph.addEdge(select, vertex);
-        wireRefs.put(ref, select);
     }
 
     Selector parseSelector(String selector) {
@@ -194,6 +201,7 @@ public final class GraphTransformer extends AbstractNxonTransformer {
     public void dump() {
         graph.dump(notepad);
         notepad.flush();
+        notepad.close();
     }
 
     private void iterate(JsonNode node, Consumer<JsonNode> action) {
