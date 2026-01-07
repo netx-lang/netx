@@ -89,7 +89,7 @@ public final class RetimingRule extends BidiRule {
                 int width = origin.outWidth();
                 var pulled = graph.factory().component(Component.Label.REGISTER, width);
                 var dual = graph.factory().component(origin.label(), width);
-                graph.addEdge(clock.get().getAny(), pulled);
+                graph.addEdge(clock.get(), pulled);
                 graph.addEdge(dual, pulled);
                 for (var input : chosen) {
                     graph.addEdge(graph.inputsOf(input).get(1), dual);
