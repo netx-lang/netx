@@ -3,12 +3,9 @@ package pascal.netx.backend.optimization;
 import pascal.netx.backend.optimization.model.*;
 import pascal.netx.backend.optimization.rule.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public final class Rewriter {
     private final Graph graph;
@@ -45,46 +42,16 @@ public final class Rewriter {
     }
 
     private void onePassRewrite() {
-        onePassRewriteIdentity();
         onePassRewriteConcat();
-    }
-
-    private void onePassRewriteIdentity() {
-        List<Component> removalOrder = new ArrayList<>();
-        Set<Component> visited = new HashSet<>();
-        graph.components().stream()
-                .filter(component -> component.label() == Component.Label.TO)
-                .forEach(to -> resolveOrder(removalOrder, visited, to));
-
-        for (var to : removalOrder) {
-            if (!graph.vertices().contains(to)) {
-                continue;
-            }
-
-            graph.union(graph.inputsOf(to).getFirst(), to);
-        }
-    }
-
-    private void resolveOrder(List<Component> order, Set<Component> visited, Component current) {
-        if (!visited.add(current)) {
-            return;
-        }
-        
-        for (var out : graph.inputsOf(current)) {
-            if (out instanceof Component next && next.label() == Component.Label.TO) {
-                resolveOrder(order, visited, next);
-            }
-        }
-        order.add(current);
     }
 
     private void onePassRewriteConcat() {
         for (var vertex : graph.components()) {
             if (vertex.label() == Component.Label.CONCAT) {
-                Map<Selector, Vertex> inputs = new HashMap<>();
+                Map<Selector, Graph.EqClass> inputs = new HashMap<>();
                 int index = 0;
                 for (var input : graph.inputsOf(vertex).reversed()) {
-                    int width = input.outWidth();
+                    int width = input.getAny().outWidth();
                     Selector selector = new Selector(index, index + width - 1);
                     inputs.put(selector, input);
                     index += width;

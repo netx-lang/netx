@@ -23,7 +23,7 @@ public final class RetimingRule extends BidiRule {
         var clock = inputs.getFirst();
 
         boolean result = false;
-        for (var eqIn : graph.eqClassOf(inputs.get(1))) {
+        for (var eqIn : inputs.get(1)) {
             if (!(eqIn instanceof Component compute) ||
                     compute.label() == Component.Label.REGISTER || hasPushed(compute)) {
                 continue;
@@ -58,7 +58,7 @@ public final class RetimingRule extends BidiRule {
 
     private final class PullRetimingContext {
         final Component origin;
-        final List<Vertex> inputs;
+        final List<Graph.EqClass> inputs;
         final List<List<Component>> candidates;
         final List<Vertex> chosen = new LinkedList<>();
         boolean changed = false;
@@ -67,7 +67,6 @@ public final class RetimingRule extends BidiRule {
             this.origin = origin;
             this.inputs = graph.inputsOf(origin);
             this.candidates = inputs.stream()
-                    .map(graph::eqClassOf)
                     .map(cls -> cls.filter(Component.class, hasLabel(Component.Label.REGISTER)))
                     .toList();
         }
@@ -111,7 +110,7 @@ public final class RetimingRule extends BidiRule {
     private Optional<Graph.EqClass> resolveClock(List<Vertex> registers) {
         Graph.EqClass result = null;
         for (var input : registers) {
-            var clock = graph.eqClassOf(graph.inputsOf(input).getFirst());
+            var clock = graph.inputsOf(input).getFirst();
             if (result != null && !result.equals(clock)) {
                 return Optional.empty();
             } else {
@@ -124,7 +123,6 @@ public final class RetimingRule extends BidiRule {
 
     private boolean isPullable(Component vertex) {
         return graph.inputsOf(vertex).stream()
-                .map(graph::eqClassOf)
                 .allMatch(input -> input.contains(Component.class, hasLabel(Component.Label.REGISTER)));
     }
 }

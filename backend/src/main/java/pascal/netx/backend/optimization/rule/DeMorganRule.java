@@ -23,7 +23,7 @@ public final class DeMorganRule extends BidiRule {
         int width = vertex.outWidth();
         switch (vertex.label()) {
             case NOT -> {
-                var input = graph.eqClassOf(graph.inputsOf(vertex).getFirst());
+                var input = graph.inputsOf(vertex).getFirst();
                 if (input.contains(Component.class, hasLabel(Component.Label.AND))) {
                     for (var comp : input.filter(Component.class, hasLabel(Component.Label.AND))) {
                         var orComp = graph.factory().component(Component.Label.OR, width);
@@ -55,7 +55,7 @@ public final class DeMorganRule extends BidiRule {
 
     private void pushDeMorgan(Component vertex, Component origin, Component dual) {
         for (var in : graph.inputsOf(origin)) {
-            int width = in.outWidth();
+            int width = in.getAny().outWidth();
             var notIn = graph.factory().component(Component.Label.NOT, width);
             graph.addEdge(in, notIn);
             graph.addEdge(notIn, dual);
@@ -94,7 +94,7 @@ public final class DeMorganRule extends BidiRule {
     private final class PullDeMorganContext {
         final Component origin;
         final Component.Label dualLabel;
-        final List<Vertex> inputs;
+        final List<Graph.EqClass> inputs;
         final List<List<Component>> candidates;
         final List<Vertex> chosen = new LinkedList<>();
 
@@ -103,7 +103,6 @@ public final class DeMorganRule extends BidiRule {
             this.inputs = graph.inputsOf(origin);
             this.dualLabel = dualLabel;
             this.candidates = inputs.stream()
-                    .map(graph::eqClassOf)
                     .map(cls -> cls.filter(Component.class, hasLabel(Component.Label.NOT)))
                     .toList();
         }
@@ -112,8 +111,7 @@ public final class DeMorganRule extends BidiRule {
             if (index == candidates.size()) {
                 var dual = graph.factory().component(dualLabel, origin.outWidth());
                 for (var input : chosen) {
-                    var in = graph.eqClassOf(graph.inputsOf(input).getFirst()).getAny();
-                    graph.addEdge(in, dual);
+                    graph.addEdge(graph.inputsOf(input).getFirst(), dual);
                 }
                 graph.union(origin, dual);
                 markPushed(dual);
@@ -130,7 +128,6 @@ public final class DeMorganRule extends BidiRule {
 
     private boolean isPullable(Component vertex) {
         return graph.inputsOf(vertex).stream()
-                .map(graph::eqClassOf)
                 .allMatch(ec -> ec.contains(Component.class, hasLabel(Component.Label.NOT)));
     }
 }

@@ -2,9 +2,10 @@ package pascal.netx.backend.optimization.rule;
 
 import pascal.netx.backend.optimization.model.Component;
 import pascal.netx.backend.optimization.model.Graph;
-import pascal.netx.backend.optimization.model.Vertex;
 
 import java.util.*;
+
+import static pascal.netx.backend.optimization.model.Vertices.hasLabel;
 
 public final class AbsorptionRule extends UniRule {
     public AbsorptionRule(Graph graph) {
@@ -26,50 +27,34 @@ public final class AbsorptionRule extends UniRule {
 
     private boolean absorb(Component parent, Component.Label absorbLabel) {
         var inputs = graph.inputsOf(parent);
-        Set<Vertex> direct = new HashSet<>();
+        Set<Graph.EqClass> direct = new HashSet<>();
         for (var input : inputs) {
-            if (findInEqClass(input, absorbLabel).isEmpty()) {
-                direct.add(graph.eqRepOf(input));
+            if (!input.contains(Component.class, hasLabel(absorbLabel))) {
+                direct.add(input);
             }
         }
 
-        List<Component> absorbed = new ArrayList<>();
+        List<Graph.EqClass> retained = new ArrayList<>();
         for (var input : inputs) {
-            var optional = findInEqClass(input, absorbLabel);
-            if (optional.isPresent()) {
-                var candidate = optional.get();
-                if (containsAny(candidate, direct)) {
-                    absorbed.add(candidate);
+            boolean canAbsorb = false;
+            for (var eqIn : input.filter(Component.class, hasLabel(absorbLabel))) {
+                if (graph.inputsOf(eqIn).stream().anyMatch(direct::contains)) {
+                    canAbsorb = true;
                 }
             }
+            if (!canAbsorb) {
+                retained.add(input);
+            }
         }
 
-        if (absorbed.isEmpty()) {
+        if (retained.size() == inputs.size()) {
             return false;
         }
 
         var dual = graph.factory().component(parent.label(), parent.outWidth());
-        absorbed.forEach(vertex -> direct.addAll(graph.inputsOf(vertex)));
-        direct.forEach(vertex -> graph.addEdge(vertex, dual));
+        retained.forEach(cls -> graph.addEdge(cls, dual));
         graph.union(parent, dual);
         markSeen(parent);
         return true;
-    }
-
-    private Optional<Component> findInEqClass(Vertex vertex, Component.Label label) {
-        return graph.eqClassOf(vertex).stream()
-                .filter(Component.class::isInstance)
-                .map(Component.class::cast)
-                .filter(comp -> comp.label() == label)
-                .findAny();
-    }
-
-    private boolean containsAny(Component candidate, Set<Vertex> direct) {
-        for (var in : graph.inputsOf(candidate)) {
-            if (direct.contains(graph.eqRepOf(in))) {
-                return true;
-            }
-        }
-        return false;
     }
 }

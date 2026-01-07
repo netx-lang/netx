@@ -32,7 +32,6 @@ public final class DistributivityRule extends UniRule {
         }
 
         var candidates = graph.inputsOf(vertex).stream()
-                .map(graph::eqClassOf)
                 .map(cls -> cls.filter(Component.class, hasLabel(over)))
                 .toList();
         return new DistributivityContext(vertex, over, candidates).distribute();
@@ -66,7 +65,7 @@ public final class DistributivityRule extends UniRule {
                 for (var in : selected) {
                     var remainder = graph.factory().component(vertex.label(), width);
                     for (var mulIn : graph.inputsOf(in)) {
-                        if (!common.contains(graph.eqClassOf(mulIn))) {
+                        if (!common.contains(mulIn)) {
                             graph.addEdge(mulIn, remainder);
                         }
                     }
@@ -77,7 +76,7 @@ public final class DistributivityRule extends UniRule {
                 changed = true;
             } else {
                 for (var candidate : candidates.get(index)) {
-                    var inputs = graph.inputsOf(candidate).stream().map(graph::eqClassOf).toList();
+                    var inputs = graph.inputsOf(candidate);
                     if (common.isEmpty()) {
                         common.addAll(inputs);
                     } else {
@@ -98,7 +97,6 @@ public final class DistributivityRule extends UniRule {
     private boolean applicable(Component vertex, Component.Label label) {
         var inputs = graph.inputsOf(vertex);
         return inputs.size() >= 2 && inputs.stream()
-                .map(graph::eqClassOf)
                 .allMatch(cls -> cls.contains(Component.class, hasLabel(label)));
     }
 }

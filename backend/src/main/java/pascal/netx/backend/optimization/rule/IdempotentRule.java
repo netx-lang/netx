@@ -17,14 +17,12 @@ public final class IdempotentRule extends UniRule {
         return switch (vertex.label()) {
             case AND, OR, NAND, NOR -> {
                 var inputs = graph.inputsOf(vertex);
-                var seen = inputs.stream().map(graph::eqRepOf).distinct().toList();
+                var seen = inputs.stream().distinct().toList();
                 if (seen.size() < inputs.size()) {
                     var dual = graph.factory().component(vertex.label(), vertex.outWidth());
-                    seen.stream()
-                            .map(graph::eqClassOf)
-                            .map(Graph.EqClass::getAny)
-                            .forEach(v -> graph.addEdge(v, dual));
-                    graph.union(vertex, dual);
+                    seen.forEach(v -> graph.addEdge(v, dual));
+                    var cls = graph.union(vertex, dual);
+                    cls.remove(vertex); // Always prefer the dual component
                     markSeen(vertex);
                     yield true;
                 }

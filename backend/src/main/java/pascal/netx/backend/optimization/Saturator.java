@@ -11,11 +11,10 @@ public final class Saturator {
 
     private final double areaWeight;
     private final double delayWeight;
-    private final Measurer.Weights weights = Measurer.Weights.defaults();
+    private final Measurer.Weights weights;
 
     private final Set<Vertex> inputs;
-    private final Map<Vertex, List<Vertex>> classes;
-    private final Map<Vertex, Vertex> chosen = new HashMap<>(); // class rep -> chosen vertex
+    private final Map<Graph.EqClass, Vertex> chosen = new HashMap<>(); // class rep -> chosen vertex
 
     private final Map<Vertex, Cost> costs = new HashMap<>();
 
@@ -23,21 +22,19 @@ public final class Saturator {
         this.graph = graph;
         this.areaWeight = areaWeight;
         this.delayWeight = delayWeight;
+        this.weights = Measurer.Weights.defaults(graph);
 
-        this.classes = graph.equivalenceClasses();
         this.inputs = new HashSet<>(graph.inputs());
-
         costs.putAll(new SubtreeCostCalculator().computeAll());
     }
 
     public void saturate() {
         Deque<Vertex> workList = new ArrayDeque<>();
         Set<Vertex> retain = new HashSet<>();
-        Map<Vertex, List<Vertex>> newInputs = new HashMap<>();
 
         // Seed with outputs, ensuring a chosen representative per equivalence class
         for (var out : graph.outputs()) {
-            var pick = chooseRepresentative(out);
+            var pick = chooseRepresentative(graph.eqClassOf(out));
             workList.add(pick);
         }
 
@@ -47,46 +44,29 @@ public final class Saturator {
             if (!retain.add(u)) {
                 continue;
             }
-            List<Vertex> mappedInputs = new ArrayList<>();
             for (var in : graph.inputsOf(u)) {
                 var chosenIn = chooseRepresentative(in);
-                mappedInputs.add(chosenIn);
                 if (!retain.contains(chosenIn)) {
                     workList.add(chosenIn);
                 }
             }
-            newInputs.put(u, mappedInputs);
         }
 
-        // Rewire inputs of retained vertices to the chosen representatives
-        for (var entry : newInputs.entrySet()) {
-            var inputs = graph.mutInputsOf(entry.getKey());
-            inputs.clear();
-            inputs.addAll(entry.getValue());
-        }
-
-        // Prune everything not retained
-        for (var v : List.copyOf(graph.vertices())) {
-            if (!retain.contains(v)) {
-                graph.mutVertices().remove(v);
-            }
-        }
+        graph.retain(retain);
     }
 
-    private Vertex chooseRepresentative(Vertex clsRep) {
-        var rep = graph.eqRepOf(clsRep);
-        var existing = chosen.get(rep);
+    private Vertex chooseRepresentative(Graph.EqClass cls) {
+        var existing = chosen.get(cls);
         if (existing != null) {
             return existing;
         }
-        var members = graph.eqClassOf(rep);
-        var best = members.stream()
+        var best = cls.stream()
                 .min(Comparator
                         .comparing(this::preferInput)
                         .thenComparing(this::preferWriteSelect)
                         .thenComparingDouble(this::scoreOf))
                 .orElseThrow(ShallNotReachHereError::new);
-        chosen.put(rep, best);
+        chosen.put(cls, best);
         return best;
     }
 
@@ -137,11 +117,9 @@ public final class Saturator {
             double area = weights.area(v), delay = weights.delay(v);
             double childDelay = 0.0;
             for (var in : graph.inputsOf(v)) {
-                if (Vertices.isCombinational(in)) { // break cycles at registers
-                    var cost = minCostInEqClass(in, this::computeCombinational);
-                    childDelay = Math.max(childDelay, cost.delay());
-                    area += cost.area();
-                }
+                var cost = minCostInEqClass(in);
+                childDelay = Math.max(childDelay, cost.delay());
+                area += cost.area();
             }
             delay += childDelay;
 
@@ -154,8 +132,17 @@ public final class Saturator {
         private void computeSequential(Vertex v) {
             double area = weights.area(v), delay = weights.delay(v);
             double childDelay = 0.0;
-            for (var in : graph.inputsOf(v)) {
-                var cost = combCost.getOrDefault(in, baseCost(in));
+            for (var cls : graph.inputsOf(v)) {
+                var best = Double.POSITIVE_INFINITY;
+                var cost = new Cost(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+                for (var in : cls) {
+                    var c = combCost.getOrDefault(in, baseCost(in));
+                    double score = c.score(areaWeight, delayWeight);
+                    if (score < best) {
+                        best = score;
+                        cost = c;
+                    }
+                }
                 area += cost.area();
                 childDelay = Math.max(childDelay, cost.delay());
             }
@@ -163,17 +150,17 @@ public final class Saturator {
             finalCost.put(v, new Cost(area, delay));
         }
 
-        private Cost minCostInEqClass(Vertex v, Function<Vertex, Cost> evaluator) {
-            var rep = graph.eqRepOf(v);
-            List<Vertex> candidates = classes.getOrDefault(rep, List.of(v));
-            Cost best = baseCost(v);
+        private Cost minCostInEqClass(Graph.EqClass cls) {
+            Cost best = new Cost(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
             double bestScore = Double.POSITIVE_INFINITY;
-            for (var candidate : candidates) {
-                var c = evaluator.apply(candidate);
-                double score = c.score(areaWeight, delayWeight);
-                if (score < bestScore) {
-                    best = c;
-                    bestScore = score;
+            for (var candidate : cls) {
+                if (Vertices.isCombinational(candidate)) { // break cycles at registers
+                    var c = computeCombinational(candidate);
+                    double score = c.score(areaWeight, delayWeight);
+                    if (score < bestScore) {
+                        best = c;
+                        bestScore = score;
+                    }
                 }
             }
             return best;
