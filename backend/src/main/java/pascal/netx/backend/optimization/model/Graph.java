@@ -8,46 +8,46 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static pascal.netx.backend.NxonParseUtils.quote;
 
 public final class Graph {
-    private final List<Vertex> inputs = new ArrayList<>();
-    private final List<Vertex> outputs = new ArrayList<>();
+    private final List<Vertex> globalIn = new ArrayList<>();
+    private final List<Vertex> globalOut = new ArrayList<>();
 
     private final Map<Vertex, List<EqClass>> inEdges = new HashMap<>();
-
-    private final VertexManager veq = new VertexManager();
-    private final VertexFactory vFact = new VertexFactory();
-
-    public void setInputs(List<Vertex> inputs) {
-        this.inputs.addAll(inputs);
-    }
-
-    public void setOutputs(List<Vertex> outputs) {
-        this.outputs.addAll(outputs);
-    }
-
-    public List<Vertex> outputs() {
-        return outputs;
-    }
-
-    public List<Vertex> inputs() {
-        return inputs;
-    }
-
-    public void retain(Set<Vertex> vertices) {
-        veq.retain(vertices);
-    }
+    private final VertexManager manager = new VertexManager();
+    private final VertexFactory factory = new VertexFactory();
 
     private void add(Vertex vertex) {
-        veq.register(vertex);
+        manager.register(vertex);
         inEdges.putIfAbsent(vertex, new LinkedList<>());
     }
 
+    public void setGlobalIn(List<Vertex> globalIn) {
+        this.globalIn.addAll(globalIn);
+    }
+
+    public void setGlobalOut(List<Vertex> globalOut) {
+        this.globalOut.addAll(globalOut);
+    }
+
+    public List<Vertex> globalOut() {
+        return globalOut;
+    }
+
+    public List<Vertex> globalIn() {
+        return globalIn;
+    }
+
+    public void retain(Set<Vertex> vertices) {
+        manager.retain(vertices);
+    }
+
     public void addEdge(Vertex from, Vertex to) {
-        inEdges.get(to).add(veq.resolve(from));
+        inEdges.get(to).add(manager.resolve(from));
     }
 
     public void addEdge(EqClass from, Vertex to) {
@@ -55,21 +55,19 @@ public final class Graph {
     }
 
     public EqClass eqClassOf(Vertex vertex) {
-        return veq.resolve(vertex);
+        return manager.resolve(vertex);
     }
 
-    public void union(Vertex a, Vertex b) {
-        if (!veq.equivalent(a, b)) {
-            veq.union(a, b);
-        }
+    public Collection<EqClass> eqClasses() {
+        return vertices().stream().map(this::eqClassOf).collect(Collectors.toSet());
     }
 
-    public void replace(Vertex u, Vertex v) {
-        veq.replace(u, v);
+    public VertexManager manager() {
+        return manager;
     }
 
     public VertexFactory factory() {
-        return vFact;
+        return factory;
     }
 
     public List<EqClass> inputsOf(Vertex vertex) {
@@ -77,16 +75,16 @@ public final class Graph {
     }
 
     public Collection<Component> components() {
-        return veq.vertices.stream().filter(Component.class::isInstance).map(Component.class::cast).toList();
+        return manager.vertices.stream().filter(Component.class::isInstance).map(Component.class::cast).toList();
     }
 
     public Collection<Vertex> vertices() {
-        return Collections.unmodifiableSet(veq.vertices);
+        return Collections.unmodifiableSet(manager.vertices);
     }
 
     public void dump(NotepadWriter writer) {
-        var classes = new ArrayList<>(veq.vertices.stream().map(this::eqClassOf).distinct().toList());
-        var ordered = new ArrayList<>(classes.stream().flatMap(EqClass::stream).toList());
+        var classes = new ArrayList<>(eqClasses());
+        var ordered = new ArrayList<>(vertices());
 
         ordered.sort(Comparator.comparingInt(Vertex::index));
 
@@ -126,56 +124,6 @@ public final class Graph {
 
         writer.decIndent();
         writer.println("}");
-    }
-
-    private final class VertexManager {
-        private final Set<Vertex> vertices = new HashSet<>();
-        private final UnionFind<Vertex> unionFind = new UnionFind<>();
-        private final Map<Vertex, EqClass> equivalence = new HashMap<>();
-
-        void register(Vertex vertex) {
-            vertices.add(vertex);
-            unionFind.add(vertex);
-            equivalence.put(vertex, new EqClass(vertex));
-        }
-
-        boolean equivalent(Vertex u, Vertex v) {
-            return unionFind.find(u) == unionFind.find(v);
-        }
-
-        void retain(Set<Vertex> retained) {
-            vertices.retainAll(retained);
-            equivalence.values().forEach(cls -> cls.retain(vertices));
-        }
-
-        void union(Vertex u, Vertex v) {
-            var set = new EqClass();
-            var uCls = equivalence.remove(unionFind.find(u));
-            var vCls = equivalence.remove(unionFind.find(v));
-
-            set.union(uCls);
-            set.union(vCls);
-
-            inEdges.values().forEach(list -> list.replaceAll(cls -> (cls == uCls || cls == vCls) ? set : cls));
-
-            unionFind.union(u, v);
-            equivalence.put(unionFind.find(u), set);
-        }
-
-        void replace(Vertex u, Vertex v) {
-            if (vertices.remove(u)) {
-                vertices.add(v);
-            }
-            unionFind.replace(u, v);
-            equivalence.values().forEach(cls -> cls.replace(u, v));
-            if (equivalence.containsKey(u)) {
-                equivalence.put(v, equivalence.remove(u));
-            }
-        }
-
-        EqClass resolve(Vertex vertex) {
-            return equivalence.get(unionFind.find(vertex));
-        }
     }
 
     public static class EqClass implements Iterable<Vertex> {
@@ -252,6 +200,60 @@ public final class Graph {
         @Override
         public int hashCode() {
             return Objects.hashCode(elements);
+        }
+    }
+
+    public final class VertexManager {
+        private final Set<Vertex> vertices = new HashSet<>();
+        private final UnionFind<Vertex> unionFind = new UnionFind<>();
+        private final Map<Vertex, EqClass> equivalence = new HashMap<>();
+
+        public void union(Vertex u, Vertex v) {
+            if (equivalent(u, v)) {
+                return;
+            }
+
+            var set = new EqClass();
+            var uCls = equivalence.remove(unionFind.find(u));
+            var vCls = equivalence.remove(unionFind.find(v));
+            set.union(uCls);
+            set.union(vCls);
+
+            inEdges.values().forEach(
+                    list -> list.replaceAll(
+                            cls -> (cls == uCls || cls == vCls) ? set : cls));
+            unionFind.union(u, v);
+            equivalence.put(unionFind.find(u), set);
+        }
+
+        public void replace(Vertex u, Vertex v) {
+            if (vertices.remove(u)) {
+                vertices.add(v);
+            }
+            unionFind.replace(u, v);
+            equivalence.values().forEach(cls -> cls.replace(u, v));
+            if (equivalence.containsKey(u)) {
+                equivalence.put(v, equivalence.remove(u));
+            }
+        }
+
+        private void register(Vertex vertex) {
+            vertices.add(vertex);
+            unionFind.add(vertex);
+            equivalence.put(vertex, new EqClass(vertex));
+        }
+
+        private boolean equivalent(Vertex u, Vertex v) {
+            return unionFind.find(u) == unionFind.find(v);
+        }
+
+        private void retain(Set<Vertex> retained) {
+            vertices.retainAll(retained);
+            equivalence.values().forEach(cls -> cls.retain(vertices));
+        }
+
+        private EqClass resolve(Vertex vertex) {
+            return equivalence.get(unionFind.find(vertex));
         }
     }
 

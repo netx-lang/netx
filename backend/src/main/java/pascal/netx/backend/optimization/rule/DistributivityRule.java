@@ -3,7 +3,10 @@ package pascal.netx.backend.optimization.rule;
 import pascal.netx.backend.optimization.model.Component;
 import pascal.netx.backend.optimization.model.Graph;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import static pascal.netx.backend.optimization.model.Vertices.hasLabel;
 
@@ -71,7 +74,7 @@ public final class DistributivityRule extends UniRule {
                     }
                     graph.addEdge(remainder, dual);
                 }
-                graph.union(vertex, dual);
+                graph.manager().union(vertex, dual);
                 markSeen(vertex);
                 changed = true;
             } else {

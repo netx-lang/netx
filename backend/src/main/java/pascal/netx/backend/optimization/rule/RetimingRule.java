@@ -1,8 +1,12 @@
 package pascal.netx.backend.optimization.rule;
 
-import pascal.netx.backend.optimization.model.*;
+import pascal.netx.backend.optimization.model.Component;
+import pascal.netx.backend.optimization.model.Graph;
+import pascal.netx.backend.optimization.model.Vertex;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 
 import static pascal.netx.backend.optimization.model.Vertices.hasLabel;
 
@@ -32,7 +36,7 @@ public final class RetimingRule extends BidiRule {
 
             int width = compute.outWidth();
             var dual = graph.factory().component(compute.label(), width);
-            graph.union(dual, vertex);
+            graph.manager().union(dual, vertex);
             for (var input : graph.inputsOf(compute)) {
                 var pushed = graph.factory().component(Component.Label.REGISTER, width);
                 graph.addEdge(pushed, dual);
@@ -95,7 +99,7 @@ public final class RetimingRule extends BidiRule {
                 for (var input : chosen) {
                     graph.addEdge(graph.inputsOf(input).get(1), dual);
                 }
-                graph.union(pulled, origin);
+                graph.manager().union(pulled, origin);
                 markPulled(origin);
                 markPushed(dual);
             } else {

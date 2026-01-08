@@ -24,7 +24,7 @@ public final class Saturator {
         this.delayWeight = delayWeight;
         this.weights = Measurer.Weights.defaults(graph);
 
-        this.inputs = new HashSet<>(graph.inputs());
+        this.inputs = new HashSet<>(graph.globalIn());
         costs.putAll(new SubtreeCostCalculator().computeAll());
         for (var v : graph.vertices()) {
             computeCausalityPreds(v);
@@ -36,7 +36,7 @@ public final class Saturator {
         Set<Vertex> retain = new HashSet<>();
 
         // Seed with outputs, ensuring a chosen representative per equivalence class
-        for (var out : graph.outputs()) {
+        for (var out : graph.globalOut()) {
             var pick = chooseRepresentative(graph.eqClassOf(out));
             workList.add(pick);
         }

@@ -3,6 +3,7 @@ package pascal.netx.backend.optimization.rule;
 import pascal.netx.backend.optimization.model.Component;
 import pascal.netx.backend.optimization.model.Graph;
 import pascal.netx.backend.optimization.model.ReadSelect;
+import pascal.netx.backend.optimization.model.Vertex;
 
 import static pascal.netx.backend.optimization.model.Vertices.hasLabel;
 
@@ -26,7 +27,8 @@ public class ConcatShortcutRule extends UniRule {
                     for (var element : graph.inputsOf(concat).reversed()) {
                         if (offset == select.selector().lsb()) {
                             if (element.width() == select.selector().width()) {
-                                graph.replace(select, element.getAny());
+                                Vertex v = element.getAny();
+                                graph.manager().replace(select, v);
                                 markSeen(vertex);
                                 changed = true;
                             }

@@ -36,8 +36,8 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         buildWires();
         buildComponents();
         buildConnections();
-        graph.setInputs(extractIOVertices(streamOf(json.get("design"), "input")));
-        graph.setOutputs(extractIOVertices(streamOf(json.get("design"), "output")));
+        graph.setGlobalIn(extractIOVertices(streamOf(json.get("design"), "input")));
+        graph.setGlobalOut(extractIOVertices(streamOf(json.get("design"), "output")));
     }
 
     private List<Vertex> extractIOVertices(Stream<JsonNode> stream) {
@@ -155,8 +155,9 @@ public final class GraphTransformer extends AbstractNxonTransformer {
                             yield constant;
                         }
                     };
+
                     if (isEq) {
-                        graph.replace(vertex, inVertex);
+                        graph.manager().replace(vertex, inVertex);
                     }
                 }
             }

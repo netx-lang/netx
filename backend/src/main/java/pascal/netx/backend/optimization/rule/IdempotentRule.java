@@ -21,7 +21,7 @@ public final class IdempotentRule extends UniRule {
                 if (seen.size() < inputs.size()) {
                     var dual = graph.factory().component(vertex.label(), vertex.outWidth());
                     seen.forEach(v -> graph.addEdge(v, dual));
-                    graph.replace(vertex, dual);
+                    graph.manager().replace(vertex, dual);
                     markSeen(vertex);
                     yield true;
                 }

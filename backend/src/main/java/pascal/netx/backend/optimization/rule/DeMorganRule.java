@@ -59,7 +59,7 @@ public final class DeMorganRule extends BidiRule {
             graph.addEdge(in, notIn);
             graph.addEdge(notIn, dual);
         }
-        graph.union(vertex, dual);
+        graph.manager().union(vertex, dual);
         markPushed(vertex);
         markPulled(dual);
     }
@@ -112,7 +112,7 @@ public final class DeMorganRule extends BidiRule {
                 for (var input : chosen) {
                     graph.addEdge(graph.inputsOf(input).getFirst(), dual);
                 }
-                graph.union(origin, dual);
+                graph.manager().union(origin, dual);
                 markPushed(dual);
             } else {
                 for (var candidate : candidates.get(index)) {
