@@ -2,7 +2,6 @@ package pascal.netx.backend.optimization.rule;
 
 import pascal.netx.backend.optimization.model.Component;
 import pascal.netx.backend.optimization.model.Graph;
-import pascal.netx.backend.optimization.model.Vertex;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -54,7 +53,7 @@ public final class ShrinkAssocRule extends UniRule {
                 for (var vertex : chosen) {
                     graph.addEdge(vertex, dual);
                 }
-                graph.union(origin, dual);
+                graph.replace(origin, dual);
             } else {
                 if (candidates.get(index).isEmpty()) {
                     chosen.add(inputs.get(index));

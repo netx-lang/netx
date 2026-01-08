@@ -156,7 +156,7 @@ public final class GraphTransformer extends AbstractNxonTransformer {
                         }
                     };
                     if (isEq) {
-                        graph.union(inVertex, vertex);
+                        graph.replace(vertex, inVertex);
                     }
                 }
             }

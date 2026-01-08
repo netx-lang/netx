@@ -55,21 +55,21 @@ public final class Measurer {
         while (!queue.isEmpty()) {
             var v = queue.removeFirst();
             double base = dist.getOrDefault(v, 0.0);
-            for (var out : graph.outputsOf(v)) {
-                if (!Vertices.isCombinational(v)) {
-                    dist.put(out, Math.max(dist.getOrDefault(out, 0.0), base));
-                    continue;
+            for (var inCls : graph.inputsOf(v)) {
+                for (var in : inCls) {
+                    if (!Vertices.isCombinational(in)) {
+                        continue;
+                    }
+
+                    if (visited.add(in)) {
+                        queue.addLast(in);
+                    }
+                    double candidate = base + weights.delay(in);
+                    dist.put(in, Math.max(dist.getOrDefault(in, 0.0), candidate));
                 }
-                if (visited.add(out)) {
-                    queue.addLast(out);
-                }
-                double candidate = base + weights.delay(out);
-                dist.put(out, Math.max(dist.getOrDefault(out, 0.0), candidate));
             }
         }
-        return dist.entrySet().stream()
-                .filter(entry -> vertices.contains(entry.getKey()))
-                .map(Map.Entry::getValue)
+        return dist.values().stream()
                 .max(Double::compareTo).orElse(0.0);
     }
 

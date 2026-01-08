@@ -4,7 +4,6 @@ import pascal.netx.backend.optimization.model.*;
 import pascal.netx.util.exception.ShallNotReachHereError;
 
 import java.util.*;
-import java.util.function.Function;
 
 public final class Saturator {
     private final Graph graph;
@@ -17,6 +16,7 @@ public final class Saturator {
     private final Map<Graph.EqClass, Vertex> chosen = new HashMap<>(); // class rep -> chosen vertex
 
     private final Map<Vertex, Cost> costs = new HashMap<>();
+    private final Map<Vertex, Set<Vertex>> causality = new HashMap<>(); // vertex -> combinational predecessors
 
     public Saturator(Graph graph, double areaWeight, double delayWeight) {
         this.graph = graph;
@@ -26,6 +26,9 @@ public final class Saturator {
 
         this.inputs = new HashSet<>(graph.inputs());
         costs.putAll(new SubtreeCostCalculator().computeAll());
+        for (var v : graph.vertices()) {
+            computeCausalityPreds(v);
+        }
     }
 
     public void saturate() {
@@ -55,12 +58,35 @@ public final class Saturator {
         graph.retain(retain);
     }
 
+    private void computeCausalityPreds(Vertex v) {
+        if (!Vertices.isCombinational(v)) {
+            causality.put(v, Set.of());
+            return;
+        }
+
+        if (causality.containsKey(v)) {
+            return;
+        }
+
+        var set = new HashSet<Vertex>();
+        causality.put(v, set);
+        for (var cls : graph.inputsOf(v)) {
+             for (var pred : cls) {
+                 computeCausalityPreds(pred);
+                 set.addAll(causality.get(pred));
+                 set.add(pred);
+             }
+        }
+    }
+
     private Vertex chooseRepresentative(Graph.EqClass cls) {
         var existing = chosen.get(cls);
         if (existing != null) {
             return existing;
         }
+
         var best = cls.stream()
+                .filter(u -> cls.stream().noneMatch(causality.get(u)::contains))
                 .min(Comparator
                         .comparing(this::preferInput)
                         .thenComparing(this::preferWriteSelect)

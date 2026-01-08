@@ -15,12 +15,12 @@ public final class SingletonRule extends UniRule {
         }
 
         return switch (vertex.label()) {
-            case REGISTER, ASYNC_REGISTER, CAST, NOT, TO -> false;
+            case REGISTER, ASYNC_REGISTER, CAST, NOT, TO, SELECT -> false;
             default -> {
                 var inputs = graph.inputsOf(vertex);
                 if (inputs.size() == 1) {
                     var only = inputs.getFirst();
-                    graph.union(vertex, only);
+                    graph.replace(vertex, only.getAny());
                     markSeen(vertex);
                     yield true;
                 }
