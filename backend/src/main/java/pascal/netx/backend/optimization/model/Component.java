@@ -33,9 +33,9 @@ public sealed class Component extends AbstractVertex permits ReadSelect {
     public enum Label {
         REGISTER, ASYNC_REGISTER,
         CAST, UCAST, TO,
-        CONCAT, OR, NOT, AND, XOR, NOR, NAND, XNOR,
+        CONCAT, SELECT,
+        OR, NOT, AND, XOR, NOR, NAND, XNOR,
         EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE,
-        ADD, SUB, SHL, MUL, DIV, MOD, ASHR, LSHR,
-        SELECT
+        ADD, SUB, SHL, MUL, DIV, MOD, ASHR, LSHR
     }
 }
