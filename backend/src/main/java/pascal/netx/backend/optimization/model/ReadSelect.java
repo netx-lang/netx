@@ -1,20 +1,15 @@
 package pascal.netx.backend.optimization.model;
 
-public final class ReadSelect extends AbstractVertex {
+public final class ReadSelect extends Component {
     private final Selector selector;
 
     public ReadSelect(int index, Selector selector) {
-        super(index);
+        super(index, Label.SELECT, selector.width());
         this.selector = selector;
     }
 
     public Selector selector() {
         return selector;
-    }
-
-    @Override
-    public int outWidth() {
-        return selector.width();
     }
 
     @Override

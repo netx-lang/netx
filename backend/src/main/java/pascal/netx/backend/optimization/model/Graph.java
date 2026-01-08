@@ -1,7 +1,6 @@
 package pascal.netx.backend.optimization.model;
 
 import pascal.netx.util.collection.UnionFind;
-import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.print.NotepadWriter;
 
@@ -18,7 +17,6 @@ public final class Graph {
     private final List<Vertex> outputs = new ArrayList<>();
 
     private final Map<Vertex, List<EqClass>> inEdges = new HashMap<>();
-    private final Map<EqClass, List<Vertex>> outEdges = new HashMap<>();
 
     private final VertexManager veq = new VertexManager();
     private final VertexFactory vFact = new VertexFactory();
@@ -46,35 +44,28 @@ public final class Graph {
     private void add(Vertex vertex) {
         veq.register(vertex);
         inEdges.putIfAbsent(vertex, new LinkedList<>());
-        outEdges.putIfAbsent(veq.resolve(vertex), new LinkedList<>());
     }
 
     public void addEdge(Vertex from, Vertex to) {
         inEdges.get(to).add(veq.resolve(from));
-        outEdges.get(veq.resolve(from)).add(to);
     }
 
     public void addEdge(EqClass from, Vertex to) {
         inEdges.get(to).add(from);
-        outEdges.get(from).add(to);
     }
 
     public EqClass eqClassOf(Vertex vertex) {
         return veq.resolve(vertex);
     }
 
-    public EqClass union(Vertex a, Vertex b) {
+    public void union(Vertex a, Vertex b) {
         if (!veq.equivalent(a, b)) {
             veq.union(a, b);
         }
-        return eqClassOf(a);
     }
 
-    public EqClass union(Vertex a, EqClass e) {
-        if (!e.elements.contains(a)) {
-            veq.union(a, e);
-        }
-        return eqClassOf(a);
+    public void replace(Vertex u, Vertex v) {
+        veq.replace(u, v);
     }
 
     public VertexFactory factory() {
@@ -83,10 +74,6 @@ public final class Graph {
 
     public List<EqClass> inputsOf(Vertex vertex) {
         return Collections.unmodifiableList(inEdges.getOrDefault(vertex, List.of()));
-    }
-
-    public List<Vertex> outputsOf(Vertex vertex) {
-        return Collections.unmodifiableList(outEdges.getOrDefault(veq.resolve(vertex), List.of()));
     }
 
     public Collection<Component> components() {
@@ -171,22 +158,19 @@ public final class Graph {
 
             inEdges.values().forEach(list -> list.replaceAll(cls -> (cls == uCls || cls == vCls) ? set : cls));
 
-            outEdges.put(set, new LinkedList<>());
-            outEdges.get(set).addAll(outEdges.getOrDefault(uCls, List.of()));
-            outEdges.get(set).addAll(outEdges.getOrDefault(vCls, List.of()));
-            outEdges.remove(uCls);
-            outEdges.remove(vCls);
-
             unionFind.union(u, v);
             equivalence.put(unionFind.find(u), set);
         }
 
-        void union(Vertex u, EqClass e) {
-            var set = new EqClass();
-            set.union(equivalence.remove(unionFind.find(u)));
-            set.union(e);
-            unionFind.union(u, e.getAny());
-            equivalence.put(unionFind.find(u), set);
+        void replace(Vertex u, Vertex v) {
+            if (vertices.remove(u)) {
+                vertices.add(v);
+            }
+            unionFind.replace(u, v);
+            equivalence.values().forEach(cls -> cls.replace(u, v));
+            if (equivalence.containsKey(u)) {
+                equivalence.put(v, equivalence.remove(u));
+            }
         }
 
         EqClass resolve(Vertex vertex) {
@@ -209,6 +193,16 @@ public final class Graph {
             elements.addAll(other.elements);
         }
 
+        void replace(Vertex u, Vertex v) {
+            if (elements.remove(u)) {
+                elements.add(v);
+            }
+        }
+
+        public Vertex getAny() {
+            return elements.iterator().next();
+        }
+
         public void retain(Set<Vertex> retained) {
             elements.retainAll(retained);
         }
@@ -223,16 +217,8 @@ public final class Graph {
             return elements.stream();
         }
 
-        private Vertex getAny() {
-            return elements.iterator().next();
-        }
-
         public int width() {
             return getAny().outWidth();
-        }
-
-        public void remove(Vertex v) {
-//            elements.remove(v);
         }
 
         public <T extends Vertex> boolean contains(Class<T> cls, Predicate<T> predicate) {

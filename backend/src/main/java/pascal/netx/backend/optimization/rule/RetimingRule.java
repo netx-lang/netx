@@ -2,9 +2,7 @@ package pascal.netx.backend.optimization.rule;
 
 import pascal.netx.backend.optimization.model.*;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static pascal.netx.backend.optimization.model.Vertices.hasLabel;
 
@@ -22,10 +20,13 @@ public final class RetimingRule extends BidiRule {
         var inputs = graph.inputsOf(vertex);
         var clock = inputs.getFirst();
 
+        if (inputs.get(1).contains(Component.class, hasLabel(Component.Label.REGISTER))) {
+            return false;
+        }
+
         boolean result = false;
         for (var eqIn : inputs.get(1)) {
-            if (!(eqIn instanceof Component compute) ||
-                    compute.label() == Component.Label.REGISTER || hasPushed(compute)) {
+            if (!(eqIn instanceof Component compute) || hasPushed(compute)) {
                 continue;
             }
 
@@ -122,7 +123,8 @@ public final class RetimingRule extends BidiRule {
     }
 
     private boolean isPullable(Component vertex) {
-        return graph.inputsOf(vertex).stream()
-                .allMatch(input -> input.contains(Component.class, hasLabel(Component.Label.REGISTER)));
+        return !graph.inputsOf(vertex).isEmpty()
+                && graph.inputsOf(vertex).stream().allMatch(
+                        input -> input.contains(Component.class, hasLabel(Component.Label.REGISTER)));
     }
 }

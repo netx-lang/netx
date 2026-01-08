@@ -1,6 +1,6 @@
 package pascal.netx.backend.optimization.model;
 
-public final class Component extends AbstractVertex {
+public sealed class Component extends AbstractVertex permits ReadSelect {
     private final Label label;
     private final int width;
 
@@ -35,6 +35,7 @@ public final class Component extends AbstractVertex {
         CAST, UCAST, TO,
         CONCAT, OR, NOT, AND, XOR, NOR, NAND, XNOR,
         EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE,
-        ADD, SUB, SHL, MUL, DIV, MOD, ASHR, LSHR
+        ADD, SUB, SHL, MUL, DIV, MOD, ASHR, LSHR,
+        SELECT
     }
 }

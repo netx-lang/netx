@@ -53,7 +53,7 @@ public final class AbsorptionRule extends UniRule {
 
         var dual = graph.factory().component(parent.label(), parent.outWidth());
         retained.forEach(cls -> graph.addEdge(cls, dual));
-        graph.union(parent, dual);
+        graph.replace(parent, dual);
         markSeen(parent);
         return true;
     }

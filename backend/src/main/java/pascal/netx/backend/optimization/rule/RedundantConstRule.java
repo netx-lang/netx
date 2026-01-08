@@ -3,7 +3,6 @@ package pascal.netx.backend.optimization.rule;
 import pascal.netx.backend.optimization.model.Component;
 import pascal.netx.backend.optimization.model.Constant;
 import pascal.netx.backend.optimization.model.Graph;
-import pascal.netx.backend.optimization.model.Vertex;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,8 +39,7 @@ public final class RedundantConstRule extends UniRule {
         if (should) {
             var dual = graph.factory().component(vertex.label(), vertex.outWidth());
             newInputs.forEach(v -> graph.addEdge(v, dual));
-            var cls = graph.union(vertex, dual);
-            cls.remove(vertex); // Always prefer the dual component
+            graph.replace(vertex, dual);
             markSeen(vertex);
         }
         return should;

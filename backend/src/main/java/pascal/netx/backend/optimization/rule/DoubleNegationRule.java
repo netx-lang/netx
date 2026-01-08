@@ -21,7 +21,7 @@ public final class DoubleNegationRule extends UniRule {
                 .findAny();
 
         if (only.isPresent()) {
-            graph.union(vertex, only.get());
+            graph.replace(vertex, only.get());
             markSeen(vertex);
             return true;
         }
