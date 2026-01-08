@@ -41,37 +41,8 @@ public final class Measurer {
     }
 
     private double computeDelay() {
-        Map<Vertex, Double> dist = new HashMap<>();
-        Deque<Vertex> queue = new ArrayDeque<>();
-        Set<Vertex> inputs = new HashSet<>(graph.globalIn());
-        var visited = new HashSet<Vertex>();
-        for (var v : vertices) {
-            if (!Vertices.isCombinational(v) || inputs.contains(v)) {
-                queue.add(v);
-                dist.put(v, 0.0);
-            }
-        }
-        while (!queue.isEmpty()) {
-            var v = queue.removeFirst();
-            double base = dist.getOrDefault(v, 0.0);
-            for (var inCls : graph.inputsOf(v)) {
-                for (var in : inCls) {
-                    if (!Vertices.isCombinational(in)) {
-                        continue;
-                    }
-
-                    if (visited.add(in)) {
-                        queue.addLast(in);
-                    }
-                    double candidate = base + weights.delay(in);
-                    dist.put(in, Math.max(dist.getOrDefault(in, 0.0), candidate));
-                }
-            }
-        }
-        return dist.values().stream()
-                .max(Double::compareTo).orElse(0.0);
+        return new DelayComputer().compute();
     }
-
 
     public static final class Weights {
         private final Graph graph;
@@ -86,25 +57,6 @@ public final class Measurer {
             this.delay = delay;
         }
 
-        private static double log2(int n) {
-            return Math.log(n) / Math.log(2);
-        }
-
-        public double area(Vertex v) {
-            int size = graph.inputsOf(v).size();
-            if (v instanceof Component c) {
-                return area.getOrDefault(c.label(), 1.0) * Math.max(1, log2(size));
-            }
-            return 0.0;
-        }
-
-        public double delay(Vertex v) {
-            int size = graph.inputsOf(v).size();
-            if (v instanceof Component c) {
-                return delay.getOrDefault(c.label(), 1.0) * Math.max(1, log2(size));
-            }
-            return 0.0;
-        }
 
         public static Weights defaults(Graph graph) {
             var areaBase = new EnumMap<Component.Label, Double>(Component.Label.class);
@@ -117,6 +69,7 @@ public final class Measurer {
             delayBase.put(Component.Label.TO, 0.0);
             delayBase.put(Component.Label.CAST, 0.0);
             delayBase.put(Component.Label.UCAST, 0.0);
+            delayBase.put(Component.Label.SELECT, 0.0);
             delayBase.put(Component.Label.CONCAT, 0.0);
             delayBase.put(Component.Label.REGISTER, 0.0);
             delayBase.put(Component.Label.ASYNC_REGISTER, 0.0);
@@ -125,12 +78,33 @@ public final class Measurer {
             areaBase.put(Component.Label.TO, 0.0);
             areaBase.put(Component.Label.CAST, 0.5);
             areaBase.put(Component.Label.UCAST, 0.5);
+            areaBase.put(Component.Label.SELECT, 0.0);
             areaBase.put(Component.Label.CONCAT, 0.5);
             areaBase.put(Component.Label.REGISTER, 1.0);
             areaBase.put(Component.Label.ASYNC_REGISTER, 1.0);
             addCommonDefault(areaBase);
 
             return new Weights(graph, areaBase, delayBase);
+        }
+
+        public double area(Vertex v) {
+            if (v instanceof Component c) {
+                int fanin = graph.inputsOf(v).size();
+                return area.getOrDefault(c.label(), 0.0) * Math.max(1, fanin - 1);
+            }
+            return 0.0;
+        }
+
+        int multiFaninDelayCoefficient(int size) {
+            return Integer.toBinaryString(size - 1).length();
+        }
+
+        public double delay(Vertex v) {
+            if (v instanceof Component c) {
+                int fanin = graph.inputsOf(v).size();
+                return delay.getOrDefault(c.label(), 0.0) * multiFaninDelayCoefficient(fanin);
+            }
+            return 0.0;
         }
 
         private static void addCommonDefault(EnumMap<Component.Label, Double> map) {
@@ -143,6 +117,35 @@ public final class Measurer {
             map.put(Component.Label.MUL, 3.0);
             map.put(Component.Label.DIV, 4.0);
             map.put(Component.Label.MOD, 4.0);
+        }
+    }
+
+    private class DelayComputer {
+        Map<Vertex, Double> dist = new HashMap<>();
+
+        DelayComputer() {
+            Set<Vertex> inputs = new HashSet<>(graph.globalIn());
+            for (var vertex : vertices) {
+                if (!Vertices.isCombinational(vertex) || inputs.contains(vertex)) {
+                    dist.put(vertex, 0.0);
+                }
+            }
+        }
+
+        double compute() {
+            return vertices.stream().map(this::compute).reduce(0.0, Math::max);
+        }
+
+        double compute(Vertex v) {
+            if (dist.containsKey(v)) {
+                return dist.get(v);
+            }
+            double inDelay = graph.inputsOf(v).stream()
+                    .flatMap(Graph.EqClass::stream)
+                    .map(this::compute)
+                    .reduce(0.0, Math::max);
+            dist.put(v, inDelay + weights.delay(v));
+            return dist.get(v);
         }
     }
 }
