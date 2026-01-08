@@ -39,7 +39,7 @@ public final class RedundantConstRule extends UniRule {
         if (should) {
             var dual = graph.factory().component(vertex.label(), vertex.outWidth());
             newInputs.forEach(v -> graph.addEdge(v, dual));
-            graph.replace(vertex, dual);
+            graph.manager().replace(vertex, dual);
             markSeen(vertex);
         }
         return should;

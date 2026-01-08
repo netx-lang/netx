@@ -1,10 +1,12 @@
 package pascal.netx.backend.optimization;
 
-import pascal.netx.backend.optimization.model.*;
+import pascal.netx.backend.optimization.model.Component;
+import pascal.netx.backend.optimization.model.Graph;
+import pascal.netx.backend.optimization.model.Vertex;
+import pascal.netx.backend.optimization.model.Vertices;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public final class Measurer {
     private final Set<Vertex> vertices;
@@ -18,10 +20,7 @@ public final class Measurer {
     public Measurer(Graph graph, Weights weights) {
         this.graph = graph;
         this.weights = weights;
-        this.vertices = graph.vertices().stream()
-                .map(graph::eqClassOf)
-                .flatMap(Graph.EqClass::stream)
-                .collect(Collectors.toSet());
+        this.vertices = new HashSet<>(graph.vertices());
     }
 
     public Metrics evaluate() {
@@ -44,7 +43,7 @@ public final class Measurer {
     private double computeDelay() {
         Map<Vertex, Double> dist = new HashMap<>();
         Deque<Vertex> queue = new ArrayDeque<>();
-        Set<Vertex> inputs = new HashSet<>(graph.inputs());
+        Set<Vertex> inputs = new HashSet<>(graph.globalIn());
         var visited = new HashSet<Vertex>();
         for (var v : vertices) {
             if (!Vertices.isCombinational(v) || inputs.contains(v)) {

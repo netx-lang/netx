@@ -19,8 +19,8 @@ class GraphTransformerTest {
         transformer.parse();
         System.out.printf("Before optimization: %s\n", transformer.measure());
 
-//        transformer.rewrite();
-//        transformer.saturate(1, 1);
+        transformer.rewrite();
+        transformer.saturate(1, 1);
         System.out.printf(" After optimization: %s\n", transformer.measure());
 
         transformer.dump();

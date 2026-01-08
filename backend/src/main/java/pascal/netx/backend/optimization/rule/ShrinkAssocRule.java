@@ -53,7 +53,7 @@ public final class ShrinkAssocRule extends UniRule {
                 for (var vertex : chosen) {
                     graph.addEdge(vertex, dual);
                 }
-                graph.replace(origin, dual);
+                graph.manager().replace(origin, dual);
             } else {
                 if (candidates.get(index).isEmpty()) {
                     chosen.add(inputs.get(index));

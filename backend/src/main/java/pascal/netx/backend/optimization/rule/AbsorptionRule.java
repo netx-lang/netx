@@ -3,7 +3,10 @@ package pascal.netx.backend.optimization.rule;
 import pascal.netx.backend.optimization.model.Component;
 import pascal.netx.backend.optimization.model.Graph;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static pascal.netx.backend.optimization.model.Vertices.hasLabel;
 
@@ -53,7 +56,7 @@ public final class AbsorptionRule extends UniRule {
 
         var dual = graph.factory().component(parent.label(), parent.outWidth());
         retained.forEach(cls -> graph.addEdge(cls, dual));
-        graph.replace(parent, dual);
+        graph.manager().replace(parent, dual);
         markSeen(parent);
         return true;
     }

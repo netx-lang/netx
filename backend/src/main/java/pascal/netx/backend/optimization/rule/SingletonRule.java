@@ -2,6 +2,7 @@ package pascal.netx.backend.optimization.rule;
 
 import pascal.netx.backend.optimization.model.Component;
 import pascal.netx.backend.optimization.model.Graph;
+import pascal.netx.backend.optimization.model.Vertex;
 
 public final class SingletonRule extends UniRule {
     public SingletonRule(Graph graph) {
@@ -20,7 +21,8 @@ public final class SingletonRule extends UniRule {
                 var inputs = graph.inputsOf(vertex);
                 if (inputs.size() == 1) {
                     var only = inputs.getFirst();
-                    graph.replace(vertex, only.getAny());
+                    Vertex v = only.getAny();
+                    graph.manager().replace(vertex, v);
                     markSeen(vertex);
                     yield true;
                 }
