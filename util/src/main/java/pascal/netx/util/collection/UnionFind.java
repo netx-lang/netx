@@ -97,7 +97,6 @@ public class UnionFind<E> {
                 entry.setValue(v);
             }
         }
-        parent.remove(u);
     }
 
     public Collection<E> representatives() {
