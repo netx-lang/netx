@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 class GraphTransformerTest {
     private static final Path TEST_DIR = Path.of("src/test/resources/");
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -23,6 +25,22 @@ class GraphTransformerTest {
         transformer.saturate(1, 1);
         System.out.printf(" After optimization: %s\n", transformer.measure());
 
-        transformer.dump();
+        transformer.dumpDot();
+    }
+
+    @Test
+    void testDumpNxonRoundTrip() throws IOException {
+        testRoundTrip("opt.json");
+        testRoundTrip("select.json");
+    }
+
+    private void testRoundTrip(String filename) throws IOException {
+        var notepad = NotepadWriter.strOut();
+        var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve(filename)));
+        var transformer = new GraphTransformer(notepad, json);
+        transformer.parse();
+        transformer.rewrite();
+        transformer.saturate(1, 1);
+        assertDoesNotThrow(() -> new GraphTransformer(notepad, transformer.dumpNxon()).parse());
     }
 }
