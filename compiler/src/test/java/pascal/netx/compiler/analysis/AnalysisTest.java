@@ -386,9 +386,9 @@ class AnalysisTest {
     @Test
     void testComplexAccessAlias() {
         var code = """
-                component top: [x, y] -> [z, w, v] {
+                component top: [x, y] -> [z, w, v, u] {
                     wire x, y, z, w of bit(1);
-                    wire a, v of bit(4);
+                    wire a, v, u of bit(4);
                 
                     a[0] <> NOT <> x;
                     a[1] <> NOT <> y;
@@ -399,6 +399,7 @@ class AnalysisTest {
                     for i in [0..4] {
                         v[i] <> a[3 - i];
                     }
+                    u <> ADD <> [a, v];
                 }
                 """;
         testGen(EXPECTED_DIR.resolve("complex_access_alias.json"), code);
