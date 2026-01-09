@@ -141,10 +141,8 @@ public final class Graph {
             elements.addAll(other.elements);
         }
 
-        void replace(Vertex u, Vertex v) {
-            if (elements.remove(u)) {
-                elements.add(v);
-            }
+        void remove(Vertex u) {
+            elements.remove(u);
         }
 
         public Vertex getAny() {
@@ -231,11 +229,10 @@ public final class Graph {
         }
 
         public void replace(Vertex u, Vertex v) {
-            if (vertices.remove(u)) {
-                vertices.add(v);
-            }
+            union(u, v);
+            vertices.remove(u);
             unionFind.replace(u, v);
-            equivalence.values().forEach(cls -> cls.replace(u, v));
+            equivalence.values().forEach(cls -> cls.remove(u));
             if (equivalence.containsKey(u)) {
                 equivalence.put(v, equivalence.remove(u));
             }
