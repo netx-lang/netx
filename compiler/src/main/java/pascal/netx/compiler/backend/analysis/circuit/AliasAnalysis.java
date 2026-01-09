@@ -19,6 +19,9 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import static pascal.netx.util.lang.BuiltinComponent.TO;
 
 /**
  * Analyzes alias relations in a package, propagating the intra-component alias relations to other components.
@@ -36,9 +39,16 @@ public final class AliasAnalysis extends CircuitAnalysis {
         pack.forEachSubComponent(manager::addAliasForScope);
         manager.resolveRepresentatives();
         new BuiltinAnalysis().analyze();
-        manager.sourceRep.clear();
         manager.resolveRepresentatives();
         new CombinationalLoopAnalysis().analyze();
+        rewrite();
+
+        new DuplicationAnalysis().analyze();
+        manager.resolveRepresentatives();
+        rewrite();
+    }
+
+    private void rewrite() {
         pack.forEachSubComponent(scope -> {
             scope.getBinding().releaseIf(Predicate.not(manager::needDump));
             scope.getInputs().replaceAll(manager::repOf);
@@ -122,6 +132,7 @@ public final class AliasAnalysis extends CircuitAnalysis {
                     }
                 }
             }
+            newAlias.removeIf(alias -> alias.lhs().equals(alias.rhs()));
             scope.getAliases().clear();
             scope.getAliases().addAll(newAlias);
         }
@@ -137,6 +148,7 @@ public final class AliasAnalysis extends CircuitAnalysis {
         }
 
         void resolveRepresentatives() {
+            sourceRep.clear();
             for (var element : set.elements()) {
                 // Set user-defined instances as the representatives for the generated instances
                 if (element.isUserDefined()) {
@@ -211,6 +223,93 @@ public final class AliasAnalysis extends CircuitAnalysis {
                 return Objects.requireNonNullElse(sourceRep.get(result), result);
             }
             return inst;
+        }
+    }
+
+    /**
+     * Manages the detection and resolution of duplicated components in a design.
+     * Duplicated components are those have the same identifier, inputs, and attributes,
+     * by which we can infer their outputs are actually alias.
+     */
+    public class DuplicationAnalysis {
+        private final Map<ComponentScope, Integer> hashCache = new HashMap<>();
+
+        private void analyze() {
+            pack.forEachSubComponent(this::analyze);
+        }
+
+        private void analyze(ComponentScope scope) {
+            var hashGroups = scope.getChildren().stream()
+                    .map(ComponentScope.class::cast)
+                    .collect(Collectors.groupingBy(this::hashOf));
+            List<ComponentScope> toRemove = collectDuplicatedTo(scope);
+            for (var group : hashGroups.values()) {
+                for (int i = 0; i < group.size(); i++) {
+                    for (int j = i + 1; j < group.size(); j++) {
+                        ComponentScope a = group.get(i), b = group.get(j);
+                        if (isDuplicated(a, b)) {
+                            var iterator = b.getOutputs().iterator();
+                            for (var rhs : a.getOutputs()) {
+                                var lhs = iterator.next();
+                                scope.getAliases().add(new ComponentScope.Alias(rhs, lhs));
+                                manager.set.union(lhs, rhs);
+                            }
+                            toRemove.add(b);
+                        }
+                    }
+                }
+            }
+            for (var child : toRemove) {
+                scope.getBinding().bind(child.getBinding());
+                scope.getChildren().remove(child);
+            }
+        }
+
+        private int hashOf(ComponentScope scope) {
+            return hashCache.computeIfAbsent(scope, o -> Objects.hash(
+                    o.getInputs(), o.getAttributes(), o.getInputs()
+            ));
+        }
+
+        List<ComponentScope> collectDuplicatedTo(ComponentScope scope) {
+            List<ComponentScope> toRemove = new ArrayList<>();
+            for (var child : scope.getChildren()) {
+                var component = (ComponentScope) child;
+                if (component.isBuiltin() && component.asBuiltin() == TO) {
+                    var input = component.getInputs().getFirst();
+                    var output = component.getOutputs().getFirst();
+                    if (input.equals(output)) {
+                        toRemove.add(component);
+                    }
+                }
+            }
+            return toRemove;
+        }
+
+        boolean isDuplicated(ComponentScope a, ComponentScope b) {
+            if (a.getIdentifier().equals(b.getIdentifier())) {
+                if (hasSameAttribute(a, b)) {
+                    if (a.getInputs().equals(b.getInputs())) {
+                        var aoIter = a.getOutputs().iterator();
+                        var boIter = b.getOutputs().iterator();
+                        while (aoIter.hasNext() && boIter.hasNext()) {
+                            if (!aoIter.next().getType().equals(boIter.next().getType())) {
+                                return false;
+                            }
+                        }
+                        return !(aoIter.hasNext() || boIter.hasNext());
+                    }
+                }
+            }
+            return false;
+        }
+
+        boolean hasSameAttribute(ComponentScope a, ComponentScope b) {
+            if (a.hasAttributes()) {
+                return a.getAttributes().equals(b.getAttributes());
+            } else {
+                return !b.hasAttributes();
+            }
         }
     }
 

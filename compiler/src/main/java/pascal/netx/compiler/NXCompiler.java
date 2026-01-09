@@ -61,7 +61,6 @@ public final class NXCompiler {
         manager.analyze(CompositionBlaster.class);
         manager.analyze(IOAnalysis.class);
         manager.analyze(AliasAnalysis.class);
-        manager.analyze(DuplicatedElimination.class);
         manager.analyze(RedundantElimination.class);
     }
 
