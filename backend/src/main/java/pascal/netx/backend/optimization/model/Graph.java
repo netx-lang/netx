@@ -82,7 +82,7 @@ public final class Graph {
         return Collections.unmodifiableSet(manager.vertices);
     }
 
-    public void dump(NotepadWriter writer) {
+    public void dumpDot(NotepadWriter writer) {
         var classes = new ArrayList<>(eqClasses());
         var ordered = new ArrayList<>(vertices());
 
@@ -190,6 +190,10 @@ public final class Graph {
                 }
             }
             return result;
+        }
+
+        public boolean isSingleton() {
+            return elements.size() == 1;
         }
 
         @Override

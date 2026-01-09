@@ -1,6 +1,7 @@
 package pascal.netx.backend.optimization;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import pascal.netx.backend.AbstractNxonTransformer;
 import pascal.netx.backend.Reference;
 import pascal.netx.backend.ValueReference;
@@ -12,7 +13,9 @@ import pascal.netx.util.nxon.NxonType;
 import pascal.netx.util.print.NotepadWriter;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -199,8 +202,12 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         });
     }
 
-    public void dump() {
-        graph.dump(notepad);
+    public JsonNode dumpNxon() {
+        return new NxonDumper().dump();
+    }
+
+    public void dumpDot() {
+        graph.dumpDot(notepad);
         notepad.flush();
         notepad.close();
     }
@@ -210,6 +217,132 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         if (node.has("members")) {
             for (var member : node.get("members")) {
                 iterate(member, action);
+            }
+        }
+    }
+
+    private final class NxonDumper {
+        private static final ObjectMapper MAPPER = new ObjectMapper();
+
+        private final Map<Vertex, String> references = new HashMap<>();
+        private final List<WireDef> definitions = new LinkedList<>();
+        private final List<JsonNode> components = new LinkedList<>();
+
+        private final Supplier<Integer> indexer = new AtomicInteger(0)::getAndIncrement;
+
+        JsonNode dump() {
+            for (var vertex : graph.globalOut()) {
+                dump(vertex);
+            }
+            var root = MAPPER.createObjectNode();
+            var design = MAPPER.createObjectNode();
+
+            design.put("type", "component");
+            design.put("id", "top");
+            design.put("loc", "");
+
+            var members = MAPPER.createArrayNode();
+            for (var def : definitions) {
+                members.add(def.asNxon());
+            }
+            for (var component : components) {
+                members.add(component);
+            }
+
+            var inputs = MAPPER.createArrayNode();
+            var outputs = MAPPER.createArrayNode();
+            for (var input : graph.globalIn()) {
+                inputs.add(references.get(input));
+            }
+            for (var output : graph.globalOut()) {
+                outputs.add(references.get(output));
+            }
+            design.set("input", inputs);
+            design.set("output", outputs);
+
+            design.set("members", members);
+
+            root.put("total", wireDefs.size());
+            root.set("top_input", json.get("top_input"));
+            root.set("top_output", json.get("top_output"));
+            root.set("design", design);
+            return root;
+        }
+
+        void dump(Vertex vertex) {
+            switch (vertex) {
+                case Wire wire -> {
+                    var name = wire.name().substring(0, wire.name().indexOf('@'));
+                    var def = new WireDef(name, indexer.get(), wire.outWidth());
+                    definitions.add(def);
+                    references.put(wire, def.asReference());
+                }
+                case Constant constant -> references.put(constant, constant.name());
+                case WriteSelect select -> {
+                    assert graph.inputsOf(vertex).size() == 1;
+                    var cls = graph.inputsOf(vertex).getFirst();
+                    assert cls.isSingleton();
+                    var input = cls.getAny();
+
+                    if (!references.containsKey(input)) {
+                        dump(input);
+                    }
+                    references.put(select, references.get(input));
+                }
+                case ReadSelect select -> {
+                    assert graph.inputsOf(vertex).size() == 1;
+                    var cls = graph.inputsOf(vertex).getFirst();
+                    assert cls.isSingleton();
+                    var input = cls.getAny();
+
+                    if (!references.containsKey(input)) {
+                        dump(input);
+                    }
+                    references.put(select, references.get(input) + select.selector().toString());
+                }
+                case Component component -> {
+                    var node = MAPPER.createObjectNode();
+                    var inputs = MAPPER.createArrayNode();
+                    var outputs = MAPPER.createArrayNode();
+
+                    node.put("type", "builtin");
+                    node.put("id", component.name());
+                    node.put("loc", "");
+
+                    var def = new WireDef("$o", indexer.get(), component.outWidth());
+                    var ref = def.asReference();
+                    outputs.add(ref);
+                    definitions.add(def);
+                    references.put(component, ref);
+
+                    for (var cls : graph.inputsOf(vertex)) {
+                        assert cls.isSingleton();
+                        var input = cls.getAny();
+                        if (!references.containsKey(input)) {
+                            dump(input);
+                        }
+                        inputs.add(references.get(input));
+                    }
+
+                    node.set("input", inputs);
+                    node.set("output", outputs);
+                    components.add(node);
+                }
+            }
+        }
+
+        private record WireDef(String name, int index, int width) {
+            String asReference() {
+                return name + "@" + index;
+            }
+
+            JsonNode asNxon() {
+                var node = MAPPER.createObjectNode();
+                node.put("type", "wire");
+                node.put("id", asReference());
+                node.put("width", width);
+                node.put("loc", "");
+                return node;
             }
         }
     }
