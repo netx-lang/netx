@@ -188,7 +188,6 @@ public final class Graph {
             return false;
         }
 
-
         public <T extends Vertex> List<T> filter(Class<T> cls, Predicate<T> predicate) {
             List<T> result = new LinkedList<>();
             for (var vertex : elements) {
@@ -196,6 +195,16 @@ public final class Graph {
                     if (predicate.test(cls.cast(vertex))) {
                         result.add(cls.cast(vertex));
                     }
+                }
+            }
+            return result;
+        }
+
+        public <T extends Vertex> List<T> filter(Class<T> cls) {
+            List<T> result = new LinkedList<>();
+            for (var vertex : elements) {
+                if (cls.isInstance(vertex)) {
+                    result.add(cls.cast(vertex));
                 }
             }
             return result;
