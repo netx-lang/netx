@@ -1,6 +1,6 @@
 package pascal.netx.backend.optimization;
 
-import pascal.netx.backend.optimization.model.*;
+import pascal.netx.backend.optimization.model.Graph;
 import pascal.netx.backend.optimization.rule.*;
 
 import java.util.List;
@@ -20,6 +20,7 @@ public final class Rewriter {
                 new AbsorptionRule(graph),
                 new DoubleNegationRule(graph),
                 new DistributivityRule(graph),
+                new ConstantPropRule(graph),
                 new DeMorganRule(graph),
                 new RetimingRule(graph)
         );
@@ -29,10 +30,11 @@ public final class Rewriter {
         boolean changed;
         do {
             changed = false;
-            for (var rule : rules) {
-                for (var vertex : graph.components()) {
+            for (var vertex : graph.components()) {
+                for (var rule : rules) {
                     if (rule.apply(vertex)) {
                         changed = true;
+                        break;
                     }
                 }
             }
