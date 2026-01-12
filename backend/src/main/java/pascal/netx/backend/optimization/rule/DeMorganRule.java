@@ -8,6 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static pascal.netx.backend.optimization.model.Vertices.hasLabel;
+import static pascal.netx.backend.optimization.rule.GraphRule.Marker.DE_MORGAN_PULL;
+import static pascal.netx.backend.optimization.rule.GraphRule.Marker.DE_MORGAN_PUSH;
 
 public final class DeMorganRule extends BidiRule {
     public DeMorganRule(Graph graph) {
@@ -16,7 +18,7 @@ public final class DeMorganRule extends BidiRule {
 
     @Override
     boolean push(Component vertex) {
-        if (hasPushed(vertex)) {
+        if (hasMarker(vertex, DE_MORGAN_PUSH)) {
             return false;
         }
 
@@ -60,13 +62,14 @@ public final class DeMorganRule extends BidiRule {
             graph.addEdge(notIn, dual);
         }
         graph.manager().union(vertex, dual);
-        markPushed(vertex);
-        markPulled(dual);
+        mark(vertex, DE_MORGAN_PUSH);
+        mark(dual, DE_MORGAN_PULL);
+        migrateMarkers(vertex, dual);
     }
 
     @Override
     boolean pull(Component vertex) {
-        if (hasPulled(vertex)) {
+        if (hasMarker(vertex, DE_MORGAN_PULL)) {
             return false;
         }
 
@@ -86,8 +89,8 @@ public final class DeMorganRule extends BidiRule {
     }
 
     private void pullDeMorgan(Component vertex, Component.Label dualLabel) {
+        mark(vertex, DE_MORGAN_PULL);
         new PullDeMorganContext(vertex, dualLabel).pull(0);
-        markPulled(vertex);
     }
 
     private final class PullDeMorganContext {
@@ -113,7 +116,8 @@ public final class DeMorganRule extends BidiRule {
                     graph.addEdge(graph.inputsOf(input).getFirst(), dual);
                 }
                 graph.manager().union(origin, dual);
-                markPushed(dual);
+                mark(dual, DE_MORGAN_PUSH);
+                migrateMarkers(origin, dual);
             } else {
                 for (var candidate : candidates.get(index)) {
                     chosen.add(candidate);

@@ -15,10 +15,6 @@ public final class RedundantConstRule extends UniRule {
 
     @Override
     public boolean apply(Component vertex) {
-        if (hasSeen(vertex)) {
-            return false;
-        }
-
         return switch (vertex.label()) {
             case NAND, AND -> rewriteConstant(vertex, Constant::isMersenne);
             case NOR, XNOR, OR, XOR -> rewriteConstant(vertex, Constant::isZero);
@@ -40,7 +36,6 @@ public final class RedundantConstRule extends UniRule {
             var dual = graph.factory().component(vertex.label(), vertex.outWidth());
             newInputs.forEach(v -> graph.addEdge(v, dual));
             graph.manager().replace(vertex, dual);
-            markSeen(vertex);
         }
         return should;
     }

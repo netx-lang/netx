@@ -1,0 +1,114 @@
+{
+    "total": 6,
+    "top_input": [
+        "a",
+        "clk"
+    ],
+    "top_output": [
+        "b"
+    ],
+    "design": {
+        "type": "component",
+        "id": "top",
+        "loc": "test.nx:1:10",
+        "input": [
+            "a@0",
+            "clk@1"
+        ],
+        "output": [
+            "b@2"
+        ],
+        "members": [
+            {
+                "type": "wire",
+                "width": 4,
+                "id": "a@0",
+                "loc": "test.nx:2:9"
+            },
+            {
+                "type": "wire",
+                "width": 4,
+                "id": "b@2",
+                "loc": "test.nx:2:12"
+            },
+            {
+                "type": "clock",
+                "id": "clk@1",
+                "loc": "test.nx:3:9"
+            },
+            {
+                "type": "builtin",
+                "id": "NOT",
+                "loc": "test.nx:6:31",
+                "input": [
+                    "a@0"
+                ],
+                "output": [
+                    "$o@3"
+                ],
+                "members": [
+                    {
+                        "type": "wire",
+                        "width": 4,
+                        "id": "$o@3",
+                        "loc": "test.nx:6:31"
+                    }
+                ]
+            },
+            {
+                "type": "builtin",
+                "id": "AND",
+                "loc": "test.nx:6:23",
+                "input": [
+                    "$o@3",
+                    "b@2"
+                ],
+                "output": [
+                    "$o@4"
+                ],
+                "members": [
+                    {
+                        "type": "wire",
+                        "width": 4,
+                        "id": "$o@4",
+                        "loc": "test.nx:6:23"
+                    }
+                ]
+            },
+            {
+                "type": "builtin",
+                "id": "REGISTER",
+                "loc": "test.nx:5:14",
+                "input": [
+                    "clk@1",
+                    "$o@4"
+                ],
+                "output": [
+                    "$o@5"
+                ],
+                "attribute": {
+                    "pos_edge": "true"
+                },
+                "members": [
+                    {
+                        "type": "wire",
+                        "width": 4,
+                        "id": "$o@5",
+                        "loc": "test.nx:5:14"
+                    }
+                ]
+            },
+            {
+                "type": "builtin",
+                "id": "NOT",
+                "loc": "test.nx:6:9",
+                "input": [
+                    "$o@5"
+                ],
+                "output": [
+                    "b@2"
+                ]
+            }
+        ]
+    }
+}

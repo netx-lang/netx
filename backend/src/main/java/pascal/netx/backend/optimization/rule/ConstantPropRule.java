@@ -12,15 +12,10 @@ public final class ConstantPropRule extends UniRule {
 
     @Override
     public boolean apply(Component vertex) {
-        if (hasSeen(vertex)) {
-            return false;
-        }
-
         if (vertex instanceof Register reg) {
             var input = graph.inputsOf(reg).get(1);
             if (input.contains(Constant.class)) {
                 graph.manager().replace(reg, input.filter(Constant.class).getFirst());
-                markSeen(vertex);
                 return true;
             }
         }
@@ -78,7 +73,6 @@ public final class ConstantPropRule extends UniRule {
             if (result != null) {
                 var constVertex = graph.factory().constant(result);
                 graph.manager().replace(vertex, constVertex);
-                markSeen(vertex);
                 return true;
             }
         }

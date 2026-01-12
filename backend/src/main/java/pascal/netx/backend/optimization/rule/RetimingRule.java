@@ -3,13 +3,12 @@ package pascal.netx.backend.optimization.rule;
 import pascal.netx.backend.optimization.model.Component;
 import pascal.netx.backend.optimization.model.Graph;
 import pascal.netx.backend.optimization.model.Register;
-import pascal.netx.backend.optimization.model.Vertex;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import static pascal.netx.backend.optimization.model.Vertices.hasLabel;
+import static pascal.netx.backend.optimization.rule.GraphRule.Marker.*;
 
 public final class RetimingRule extends BidiRule {
     public RetimingRule(Graph graph) {
@@ -31,7 +30,7 @@ public final class RetimingRule extends BidiRule {
 
         boolean result = false;
         for (var eqIn : inputs.get(1)) {
-            if (!(eqIn instanceof Component compute) || hasPushed(compute)) {
+            if (!(eqIn instanceof Component compute) || hasMarker(compute, RETIMING_PUSH)) {
                 continue;
             }
 
@@ -39,12 +38,14 @@ public final class RetimingRule extends BidiRule {
             graph.manager().union(dual, vertex);
             for (var input : graph.inputsOf(compute)) {
                 var pushed = graph.factory().register(input.width(), reg.isPosEdge());
+                migrateMarkers(reg, pushed);
                 graph.addEdge(pushed, dual);
                 graph.addEdge(clock, pushed);
                 graph.addEdge(input, pushed);
             }
-            markPushed(compute);
-            markPulled(dual);
+            mark(compute, RETIMING_PUSH);
+            mark(dual, DE_MORGAN_PULL);
+            migrateMarkers(compute, dual);
             result = true;
         }
 
@@ -54,28 +55,27 @@ public final class RetimingRule extends BidiRule {
     @Override
     boolean pull(Component vertex) {
         if (vertex instanceof Register
-                || hasPulled(vertex)
+                || hasMarker(vertex, RETIMING_PULL)
                 || !isPullable(vertex)) {
             return false;
         }
         return new PullRetimingContext(vertex).pull();
     }
 
-    private Optional<Boolean> resolveEdge(List<Vertex> registers) {
+    private Optional<Boolean> resolveEdge(List<Register> registers) {
         Boolean isPosEdge = null;
         for (var input : registers) {
-            var reg = (Register) input;
-            if (isPosEdge != null && isPosEdge != reg.isPosEdge()) {
+            if (isPosEdge != null && isPosEdge != input.isPosEdge()) {
                 return Optional.empty();
             } else {
-                isPosEdge = reg.isPosEdge();
+                isPosEdge = input.isPosEdge();
             }
         }
         assert isPosEdge != null;
         return Optional.of(isPosEdge);
     }
 
-    private Optional<Graph.EqClass> resolveClock(List<Vertex> registers) {
+    private Optional<Graph.EqClass> resolveClock(List<Register> registers) {
         Graph.EqClass result = null;
         for (var input : registers) {
             var clock = graph.inputsOf(input).getFirst();
@@ -89,25 +89,31 @@ public final class RetimingRule extends BidiRule {
         return Optional.of(result);
     }
 
+    private boolean isPullable(Component vertex) {
+        return !graph.inputsOf(vertex).isEmpty()
+                && graph.inputsOf(vertex).stream().allMatch(
+                input -> input.contains(Register.class));
+    }
+
     private final class PullRetimingContext {
         final Component origin;
         final List<Graph.EqClass> inputs;
-        final List<List<Component>> candidates;
-        final List<Vertex> chosen = new LinkedList<>();
+        final List<List<Register>> candidates;
+        final List<Register> chosen = new LinkedList<>();
         boolean changed = false;
 
         PullRetimingContext(Component origin) {
             this.origin = origin;
             this.inputs = graph.inputsOf(origin);
             this.candidates = inputs.stream()
-                    .map(cls -> cls.filter(Component.class, hasLabel(Component.Label.REGISTER)))
+                    .map(cls -> cls.filter(Register.class))
                     .toList();
         }
 
         boolean pull() {
             pull(0);
             if (changed) {
-                markPulled(origin);
+                mark(origin, RETIMING_PULL);
             }
             return changed;
         }
@@ -127,10 +133,12 @@ public final class RetimingRule extends BidiRule {
                 graph.addEdge(dual, pulled);
                 for (var input : chosen) {
                     graph.addEdge(graph.inputsOf(input).get(1), dual);
+                    migrateMarkers(input, pulled);
                 }
                 graph.manager().union(pulled, origin);
-                markPulled(origin);
-                markPushed(dual);
+                mark(origin, RETIMING_PULL);
+                mark(dual, RETIMING_PUSH);
+                migrateMarkers(origin, dual);
             } else {
                 for (var candidate : candidates.get(index)) {
                     chosen.add(candidate);
@@ -139,11 +147,5 @@ public final class RetimingRule extends BidiRule {
                 }
             }
         }
-    }
-
-    private boolean isPullable(Component vertex) {
-        return !graph.inputsOf(vertex).isEmpty()
-                && graph.inputsOf(vertex).stream().allMatch(
-                        input -> input.contains(Component.class, hasLabel(Component.Label.REGISTER)));
     }
 }

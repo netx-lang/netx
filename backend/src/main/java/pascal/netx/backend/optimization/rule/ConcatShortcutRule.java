@@ -14,10 +14,6 @@ public class ConcatShortcutRule extends UniRule {
 
     @Override
     public boolean apply(Component vertex) {
-        if (hasSeen(vertex)) {
-            return false;
-        }
-
         boolean changed = false;
         if (vertex instanceof ReadSelect select) {
             var input = graph.inputsOf(select).getFirst();
@@ -29,7 +25,6 @@ public class ConcatShortcutRule extends UniRule {
                             if (element.width() == select.selector().width()) {
                                 Vertex v = element.getAny();
                                 graph.manager().replace(select, v);
-                                markSeen(vertex);
                                 changed = true;
                             }
                             break;

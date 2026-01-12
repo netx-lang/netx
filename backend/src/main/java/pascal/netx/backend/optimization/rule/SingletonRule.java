@@ -11,10 +11,6 @@ public final class SingletonRule extends UniRule {
 
     @Override
     public boolean apply(Component vertex) {
-        if (hasSeen(vertex)) {
-            return false;
-        }
-
         return switch (vertex.label()) {
             case REGISTER, ASYNC_REGISTER, CAST, UCAST, NOT, TO, SELECT -> false;
             default -> {
@@ -23,7 +19,6 @@ public final class SingletonRule extends UniRule {
                     var only = inputs.getFirst();
                     Vertex v = only.getAny();
                     graph.manager().replace(vertex, v);
-                    markSeen(vertex);
                     yield true;
                 }
                 yield false;
