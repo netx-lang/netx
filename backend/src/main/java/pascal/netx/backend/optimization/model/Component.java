@@ -1,14 +1,8 @@
 package pascal.netx.backend.optimization.model;
 
-public sealed class Component extends AbstractVertex permits ReadSelect {
+public sealed class Component extends AbstractVertex permits ReadSelect, Register {
     private final Label label;
     private final int width;
-
-    public Component(int index, String label, int width) {
-        super(index);
-        this.label = Label.valueOf(label.toUpperCase());
-        this.width = width;
-    }
 
     public Component(int index, Label label, int width) {
         super(index);
