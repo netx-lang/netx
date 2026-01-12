@@ -16,7 +16,7 @@ public final class SingletonRule extends UniRule {
         }
 
         return switch (vertex.label()) {
-            case REGISTER, ASYNC_REGISTER, CAST, NOT, TO, SELECT -> false;
+            case REGISTER, ASYNC_REGISTER, CAST, UCAST, NOT, TO, SELECT -> false;
             default -> {
                 var inputs = graph.inputsOf(vertex);
                 if (inputs.size() == 1) {

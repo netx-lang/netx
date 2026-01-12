@@ -1,6 +1,7 @@
 package pascal.netx.backend.optimization.model;
 
 import pascal.netx.util.collection.UnionFind;
+import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.print.NotepadWriter;
 
@@ -178,6 +179,16 @@ public final class Graph {
             return false;
         }
 
+        public <T extends Vertex> boolean contains(Class<T> cls) {
+            for (var vertex : elements) {
+                if (cls.isInstance(vertex)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
         public <T extends Vertex> List<T> filter(Class<T> cls, Predicate<T> predicate) {
             List<T> result = new LinkedList<>();
             for (var vertex : elements) {
@@ -284,15 +295,23 @@ public final class Graph {
         }
 
         public Component component(Component.Label label, int width) {
-            var component = new Component(nextIndex(), label, width);
-            add(component);
-            return component;
+            if (label == Component.Label.REGISTER) {
+                throw new ShallNotReachHereError();
+            } else {
+                var component = new Component(nextIndex(), label, width);
+                add(component);
+                return component;
+            }
+        }
+
+        public Register register(int width, boolean isPosEdge) {
+            var register = new Register(nextIndex(), width, isPosEdge);
+            add(register);
+            return register;
         }
 
         public Component component(String label, int width) {
-            var component = new Component(nextIndex(), label, width);
-            add(component);
-            return component;
+            return component(Component.Label.valueOf(label.toUpperCase()), width);
         }
 
         public Constant constant(BitVector value) {

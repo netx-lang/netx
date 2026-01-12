@@ -87,11 +87,10 @@ public final class GraphTransformer extends AbstractNxonTransformer {
     }
 
     private static int definedWithOf(JsonNode node) {
-        int width = 1;
-        if (node.has("width")) {
-            width = node.get("width").intValue();
+        if (NxonType.typeOf(node) == NxonType.CLOCK) {
+            return 1;
         }
-        return width;
+        return node.get("width").intValue();
     }
 
     private void buildComponents() {
@@ -107,7 +106,13 @@ public final class GraphTransformer extends AbstractNxonTransformer {
                 }
 
                 String label = node.get("id").textValue();
-                var vertex = graph.factory().component(label, width);
+                Component vertex;
+                if (label.equals("REGISTER")) {
+                    boolean isPosEdge = node.get("attribute").get("pos_edge").textValue().equals("true");
+                    vertex = graph.factory().register(width, isPosEdge);
+                } else {
+                    vertex = graph.factory().component(label, width);
+                }
                 compDefs.put(node, vertex);
                 if (!ref.selector().isEmpty()) {
                     buildWriteSelect(ref, vertex);
@@ -262,7 +267,7 @@ public final class GraphTransformer extends AbstractNxonTransformer {
 
             design.set("members", members);
 
-            root.put("total", wireDefs.size());
+            root.put("total", definitions.size());
             root.set("top_input", json.get("top_input"));
             root.set("top_output", json.get("top_output"));
             root.set("design", design);
@@ -326,6 +331,17 @@ public final class GraphTransformer extends AbstractNxonTransformer {
 
                     node.set("input", inputs);
                     node.set("output", outputs);
+
+                    if (component instanceof Register reg) {
+                        var attribute = MAPPER.createObjectNode();
+                        if (reg.isPosEdge()) {
+                            attribute.put("pos_edge", "true");
+                        } else {
+                            attribute.put("pos_edge", "false");
+                        }
+                        node.set("attribute", attribute);
+                    }
+
                     components.add(node);
                 }
             }

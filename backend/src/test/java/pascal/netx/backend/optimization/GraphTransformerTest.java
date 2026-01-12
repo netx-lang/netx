@@ -32,6 +32,7 @@ class GraphTransformerTest {
     void testDumpNxonRoundTrip() throws IOException {
         testRoundTrip("opt.json");
         testRoundTrip("select.json");
+        testRoundTrip("rv32i.json");
     }
 
     private void testRoundTrip(String filename) throws IOException {
@@ -41,6 +42,7 @@ class GraphTransformerTest {
         transformer.parse();
         transformer.rewrite();
         transformer.saturate(1, 1);
-        assertDoesNotThrow(() -> new GraphTransformer(notepad, transformer.dumpNxon()).parse());
+        var dumped = transformer.dumpNxon();
+        assertDoesNotThrow(() -> new GraphTransformer(notepad, dumped).parse());
     }
 }

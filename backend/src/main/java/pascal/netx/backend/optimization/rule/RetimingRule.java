@@ -2,6 +2,7 @@ package pascal.netx.backend.optimization.rule;
 
 import pascal.netx.backend.optimization.model.Component;
 import pascal.netx.backend.optimization.model.Graph;
+import pascal.netx.backend.optimization.model.Register;
 import pascal.netx.backend.optimization.model.Vertex;
 
 import java.util.LinkedList;
@@ -17,14 +18,14 @@ public final class RetimingRule extends BidiRule {
 
     @Override
     boolean push(Component vertex) {
-        if (vertex.label() != Component.Label.REGISTER) {
+        if (!(vertex instanceof Register reg)) {
             return false;
         }
 
         var inputs = graph.inputsOf(vertex);
         var clock = inputs.getFirst();
 
-        if (inputs.get(1).contains(Component.class, hasLabel(Component.Label.REGISTER))) {
+        if (inputs.get(1).contains(Register.class)) {
             return false;
         }
 
@@ -34,11 +35,10 @@ public final class RetimingRule extends BidiRule {
                 continue;
             }
 
-            int width = compute.outWidth();
-            var dual = graph.factory().component(compute.label(), width);
+            var dual = graph.factory().component(compute.label(), compute.outWidth());
             graph.manager().union(dual, vertex);
             for (var input : graph.inputsOf(compute)) {
-                var pushed = graph.factory().component(Component.Label.REGISTER, width);
+                var pushed = graph.factory().register(input.width(), reg.isPosEdge());
                 graph.addEdge(pushed, dual);
                 graph.addEdge(clock, pushed);
                 graph.addEdge(input, pushed);
@@ -53,12 +53,40 @@ public final class RetimingRule extends BidiRule {
 
     @Override
     boolean pull(Component vertex) {
-        if (vertex.label() == Component.Label.REGISTER
+        if (vertex instanceof Register
                 || hasPulled(vertex)
                 || !isPullable(vertex)) {
             return false;
         }
         return new PullRetimingContext(vertex).pull();
+    }
+
+    private Optional<Boolean> resolveEdge(List<Vertex> registers) {
+        Boolean isPosEdge = null;
+        for (var input : registers) {
+            var reg = (Register) input;
+            if (isPosEdge != null && isPosEdge != reg.isPosEdge()) {
+                return Optional.empty();
+            } else {
+                isPosEdge = reg.isPosEdge();
+            }
+        }
+        assert isPosEdge != null;
+        return Optional.of(isPosEdge);
+    }
+
+    private Optional<Graph.EqClass> resolveClock(List<Vertex> registers) {
+        Graph.EqClass result = null;
+        for (var input : registers) {
+            var clock = graph.inputsOf(input).getFirst();
+            if (result != null && !result.equals(clock)) {
+                return Optional.empty();
+            } else {
+                result = clock;
+            }
+        }
+        assert result != null;
+        return Optional.of(result);
     }
 
     private final class PullRetimingContext {
@@ -87,12 +115,13 @@ public final class RetimingRule extends BidiRule {
         void pull(int index) {
             if (index == candidates.size()) {
                 var clock = resolveClock(chosen);
-                if (clock.isEmpty()) {
+                var isPosEdge = resolveEdge(chosen);
+                if (clock.isEmpty() || isPosEdge.isEmpty()) {
                     return;
                 }
 
                 int width = origin.outWidth();
-                var pulled = graph.factory().component(Component.Label.REGISTER, width);
+                var pulled = graph.factory().register(width, isPosEdge.get());
                 var dual = graph.factory().component(origin.label(), width);
                 graph.addEdge(clock.get(), pulled);
                 graph.addEdge(dual, pulled);
@@ -110,20 +139,6 @@ public final class RetimingRule extends BidiRule {
                 }
             }
         }
-    }
-
-    private Optional<Graph.EqClass> resolveClock(List<Vertex> registers) {
-        Graph.EqClass result = null;
-        for (var input : registers) {
-            var clock = graph.inputsOf(input).getFirst();
-            if (result != null && !result.equals(clock)) {
-                return Optional.empty();
-            } else {
-                result = clock;
-            }
-        }
-        assert result != null;
-        return Optional.of(result);
     }
 
     private boolean isPullable(Component vertex) {
