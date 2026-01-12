@@ -14,10 +14,6 @@ public final class ShrinkAssocRule extends UniRule {
 
     @Override
     public boolean apply(Component vertex) {
-        if (hasSeen(vertex)) {
-            return false;
-        }
-
         return switch (vertex.label()) {
             case AND, OR, XOR, ADD, MUL -> new ShrinkContext(vertex).shrink();
             default -> false;
@@ -41,7 +37,6 @@ public final class ShrinkAssocRule extends UniRule {
         boolean shrink() {
             if (candidates.stream().anyMatch(Predicate.not(List::isEmpty))) {
                 shrink(0);
-                markSeen(origin);
                 return true;
             }
             return false;

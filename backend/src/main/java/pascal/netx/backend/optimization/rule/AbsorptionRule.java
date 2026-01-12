@@ -17,10 +17,6 @@ public final class AbsorptionRule extends UniRule {
 
     @Override
     public boolean apply(Component vertex) {
-        if (hasSeen(vertex)) {
-            return false;
-        }
-
         return switch (vertex.label()) {
             case OR -> absorb(vertex, Component.Label.AND);
             case AND -> absorb(vertex, Component.Label.OR);
@@ -57,7 +53,6 @@ public final class AbsorptionRule extends UniRule {
         var dual = graph.factory().component(parent.label(), parent.outWidth());
         retained.forEach(cls -> graph.addEdge(cls, dual));
         graph.manager().replace(parent, dual);
-        markSeen(parent);
         return true;
     }
 }

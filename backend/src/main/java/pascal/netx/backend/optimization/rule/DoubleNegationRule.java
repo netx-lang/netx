@@ -10,7 +10,7 @@ public final class DoubleNegationRule extends UniRule {
 
     @Override
     public boolean apply(Component vertex) {
-        if (vertex.label() != Component.Label.NOT || hasSeen(vertex)) {
+        if (vertex.label() != Component.Label.NOT) {
             return false;
         }
         var neg = graph.inputsOf(vertex).getFirst();
@@ -22,7 +22,6 @@ public final class DoubleNegationRule extends UniRule {
 
         if (only.isPresent()) {
             graph.manager().replace(vertex, only.get());
-            markSeen(vertex);
             return true;
         }
         return false;

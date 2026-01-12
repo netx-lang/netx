@@ -10,10 +10,6 @@ public final class IdempotentRule extends UniRule {
 
     @Override
     public boolean apply(Component vertex) {
-        if (hasSeen(vertex)) {
-            return false;
-        }
-
         return switch (vertex.label()) {
             case AND, OR, NAND, NOR -> {
                 var inputs = graph.inputsOf(vertex);
@@ -22,7 +18,6 @@ public final class IdempotentRule extends UniRule {
                     var dual = graph.factory().component(vertex.label(), vertex.outWidth());
                     seen.forEach(v -> graph.addEdge(v, dual));
                     graph.manager().replace(vertex, dual);
-                    markSeen(vertex);
                     yield true;
                 }
                 yield false;

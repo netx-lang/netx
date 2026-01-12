@@ -2,32 +2,10 @@ package pascal.netx.backend.optimization.rule;
 
 import pascal.netx.backend.optimization.model.Component;
 import pascal.netx.backend.optimization.model.Graph;
-import pascal.netx.backend.optimization.model.Vertex;
-
-import java.util.HashSet;
 
 public abstract class BidiRule extends GraphRule {
-    private final HashSet<Vertex> pulled = new HashSet<>();
-    private final HashSet<Vertex> pushed = new HashSet<>();
-
     protected BidiRule(Graph graph) {
         super(graph);
-    }
-
-    protected final boolean hasPulled(Vertex vertex) {
-        return pulled.contains(vertex);
-    }
-
-    protected final boolean hasPushed(Vertex vertex) {
-        return pushed.contains(vertex);
-    }
-
-    protected final void markPulled(Vertex vertex) {
-        pulled.add(vertex);
-    }
-
-    protected final void markPushed(Vertex vertex) {
-        pushed.add(vertex);
     }
 
     @Override

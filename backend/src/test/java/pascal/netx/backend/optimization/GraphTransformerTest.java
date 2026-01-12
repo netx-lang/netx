@@ -32,6 +32,7 @@ class GraphTransformerTest {
     void testDumpNxonRoundTrip() throws IOException {
         testRoundTrip("opt.json");
         testRoundTrip("select.json");
+        testRoundTrip("motivating.json");
         testRoundTrip("rv32i.json");
     }
 
