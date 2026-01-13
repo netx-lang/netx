@@ -117,13 +117,15 @@ public final class Saturator {
         private final Map<Vertex, Double> area = new HashMap<>();
         private final Map<Vertex, Double> delay = new HashMap<>();
 
-        private final Set<Graph.EqClass> visiting = new HashSet<>();
+        private static final int MAX_AREA_UPDATES = 5;
+        private final Map<Vertex, Integer> areaUpdates = new HashMap<>();
 
+        private final Set<Graph.EqClass> visiting = new HashSet<>();
 
         Map<Vertex, Cost> computeAll() {
             var result = new HashMap<Vertex, Cost>();
             graph.globalOut().stream()
-                    .map(graph::eqClassOf).distinct()
+                    .map(graph::eqClassOf)
                     .flatMap(Graph.EqClass::stream).distinct()
                     .forEach(this::computeArea);
             area.forEach((k, v) -> result.put(k, new Cost(v, 0)));
@@ -131,6 +133,9 @@ public final class Saturator {
         }
 
         private double computeArea(Vertex vertex) {
+            if (areaUpdates.computeIfAbsent(vertex, _ -> 0) == MAX_AREA_UPDATES) {
+                return area.get(vertex);
+            }
             var curr = graph.eqClassOf(vertex);
             visiting.add(curr);
 
@@ -144,14 +149,16 @@ public final class Saturator {
                     result += best;
                 }
             }
+
             if (area.containsKey(vertex)) {
                 area.merge(vertex, result, Double::min);
             } else {
                 area.put(vertex, result);
             }
+            areaUpdates.merge(vertex, 1, Integer::sum);
 
             visiting.remove(curr);
-            return result;
+            return area.get(vertex);
         }
 
         private void computeDelay(Vertex vertex) {
