@@ -3,6 +3,8 @@ package pascal.netx.backend.optimization.rule;
 import pascal.netx.backend.optimization.model.Component;
 import pascal.netx.backend.optimization.model.Graph;
 
+import static pascal.netx.backend.optimization.model.Vertices.hasLabel;
+
 public final class DoubleNegationRule extends UniRule {
     public DoubleNegationRule(Graph graph) {
         super(graph);
@@ -14,14 +16,10 @@ public final class DoubleNegationRule extends UniRule {
             return false;
         }
         var neg = graph.inputsOf(vertex).getFirst();
-        var only = neg.stream()
-                .filter(Component.class::isInstance)
-                .map(Component.class::cast)
-                .filter(comp -> comp.label() == Component.Label.NOT)
-                .findAny();
-
-        if (only.isPresent()) {
-            graph.manager().replace(vertex, only.get());
+        if (neg.contains(Component.class, hasLabel(Component.Label.NOT))) {
+            var negIn = neg.filter(Component.class, hasLabel(Component.Label.NOT)).getFirst();
+            var eq = graph.inputsOf(negIn).getFirst();
+            graph.manager().replace(vertex, eq.getAny());
             return true;
         }
         return false;
