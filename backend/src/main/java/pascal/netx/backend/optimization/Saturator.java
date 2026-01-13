@@ -1,6 +1,8 @@
 package pascal.netx.backend.optimization;
 
-import pascal.netx.backend.optimization.model.*;
+import pascal.netx.backend.optimization.model.Graph;
+import pascal.netx.backend.optimization.model.Vertex;
+import pascal.netx.backend.optimization.model.Vertices;
 import pascal.netx.util.exception.ShallNotReachHereError;
 
 import java.util.*;
@@ -25,7 +27,7 @@ public final class Saturator {
         this.weights = Measurer.Weights.defaults(graph);
 
         this.inputs = new HashSet<>(graph.globalIn());
-        costs.putAll(new SubtreeCostCalculator().computeAll());
+        costs.putAll(new CostCalculator().computeAll());
         for (var v : graph.vertices()) {
             computeCausalityPreds(v);
         }
@@ -71,11 +73,11 @@ public final class Saturator {
         var set = new HashSet<Vertex>();
         causality.put(v, set);
         for (var cls : graph.inputsOf(v)) {
-             for (var pred : cls) {
-                 computeCausalityPreds(pred);
-                 set.addAll(causality.get(pred));
-                 set.add(pred);
-             }
+            for (var pred : cls) {
+                computeCausalityPreds(pred);
+                set.addAll(causality.get(pred));
+                set.add(pred);
+            }
         }
     }
 
@@ -87,10 +89,7 @@ public final class Saturator {
 
         var best = cls.stream()
                 .filter(u -> cls.stream().noneMatch(causality.get(u)::contains))
-                .min(Comparator
-                        .comparing(this::preferInput)
-                        .thenComparing(this::preferWriteSelect)
-                        .thenComparingDouble(this::scoreOf))
+                .min(Comparator.comparing(this::preferInput).thenComparingDouble(this::scoreOf))
                 .orElseThrow(ShallNotReachHereError::new);
         chosen.put(cls, best);
         return best;
@@ -108,92 +107,55 @@ public final class Saturator {
         return cost.score(areaWeight, delayWeight);
     }
 
-    private int preferWriteSelect(Vertex v) {
-        if (v instanceof WriteSelect) return 0;
-        if (v instanceof ReadSelect) return 1;
-        return 0; // neutral for others
-    }
-
     private record Cost(double area, double delay) {
         double score(double areaWeight, double delayWeight) {
             return areaWeight * area + delayWeight * delay;
         }
     }
 
-    private final class SubtreeCostCalculator {
-        private final Map<Vertex, Cost> combCost = new HashMap<>();
-        private final Map<Vertex, Cost> finalCost = new HashMap<>();
-        private final Set<Vertex> visiting = new HashSet<>();
+    private final class CostCalculator {
+        private final Map<Vertex, Double> area = new HashMap<>();
+        private final Map<Vertex, Double> delay = new HashMap<>();
+
+        private final Set<Graph.EqClass> visiting = new HashSet<>();
+
 
         Map<Vertex, Cost> computeAll() {
-            graph.vertices().forEach(this::computeCombinational);
-            graph.vertices().forEach(this::computeSequential);
-            return finalCost;
-        }
-
-        private Cost computeCombinational(Vertex v) {
-            var cached = combCost.get(v);
-            if (cached != null) {
-                return cached;
-            }
-            if (!visiting.add(v)) {
-                return baseCost(v);
-            }
-
-            double area = weights.area(v), delay = weights.delay(v);
-            double childDelay = 0.0;
-            for (var in : graph.inputsOf(v)) {
-                var cost = minCostInEqClass(in);
-                childDelay = Math.max(childDelay, cost.delay());
-                area += cost.area();
-            }
-            delay += childDelay;
-
-            visiting.remove(v);
-            var result = new Cost(area, delay);
-            combCost.put(v, result);
+            var result = new HashMap<Vertex, Cost>();
+            graph.globalOut().stream()
+                    .map(graph::eqClassOf).distinct()
+                    .flatMap(Graph.EqClass::stream).distinct()
+                    .forEach(this::computeArea);
+            area.forEach((k, v) -> result.put(k, new Cost(v, 0)));
             return result;
         }
 
-        private void computeSequential(Vertex v) {
-            double area = weights.area(v), delay = weights.delay(v);
-            double childDelay = 0.0;
-            for (var cls : graph.inputsOf(v)) {
-                var best = Double.POSITIVE_INFINITY;
-                var cost = new Cost(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-                for (var in : cls) {
-                    var c = combCost.getOrDefault(in, baseCost(in));
-                    double score = c.score(areaWeight, delayWeight);
-                    if (score < best) {
-                        best = score;
-                        cost = c;
-                    }
-                }
-                area += cost.area();
-                childDelay = Math.max(childDelay, cost.delay());
-            }
-            delay += childDelay;
-            finalCost.put(v, new Cost(area, delay));
-        }
+        private double computeArea(Vertex vertex) {
+            var curr = graph.eqClassOf(vertex);
+            visiting.add(curr);
 
-        private Cost minCostInEqClass(Graph.EqClass cls) {
-            Cost best = new Cost(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-            double bestScore = Double.POSITIVE_INFINITY;
-            for (var candidate : cls) {
-                if (Vertices.isCombinational(candidate)) { // break cycles at registers
-                    var c = computeCombinational(candidate);
-                    double score = c.score(areaWeight, delayWeight);
-                    if (score < bestScore) {
-                        best = c;
-                        bestScore = score;
+            double result = weights.area(vertex);
+            for (var cls : graph.inputsOf(vertex)) {
+                if (!visiting.contains(cls)) {
+                    double best = Double.MAX_VALUE;
+                    for (var pred : cls) {
+                        best = Math.min(best, computeArea(pred));
                     }
+                    result += best;
                 }
             }
-            return best;
+            if (area.containsKey(vertex)) {
+                area.merge(vertex, result, Double::min);
+            } else {
+                area.put(vertex, result);
+            }
+
+            visiting.remove(curr);
+            return result;
         }
 
-        private Cost baseCost(Vertex v) {
-            return new Cost(weights.area(v), weights.delay(v));
+        private void computeDelay(Vertex vertex) {
+
         }
     }
 }
