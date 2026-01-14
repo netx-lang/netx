@@ -1,9 +1,11 @@
 package pascal.netx.backend.optimization;
 
 import pascal.netx.backend.optimization.model.Graph;
+import pascal.netx.backend.optimization.model.Vertex;
+import pascal.netx.backend.optimization.model.Vertices;
 import pascal.netx.backend.optimization.rule.*;
 
-import java.util.List;
+import java.util.*;
 
 public final class Rewriter {
     private final Graph graph;
@@ -26,6 +28,8 @@ public final class Rewriter {
         );
     }
 
+    private final Map<Vertex, Set<Vertex>> causality = new HashMap<>();
+
     public void rewrite() {
         boolean changed;
         do {
@@ -39,7 +43,29 @@ public final class Rewriter {
                 }
             }
         } while (changed);
+
+        graph.vertices().forEach(this::computeCausalityPreds);
+        graph.manager().canonicalize(causality);
     }
 
+    private void computeCausalityPreds(Vertex v) {
+        if (!Vertices.isCombinational(v)) {
+            causality.put(v, Set.of());
+            return;
+        }
 
+        if (causality.containsKey(v)) {
+            return;
+        }
+
+        var set = new HashSet<Vertex>();
+        causality.put(v, set);
+        for (var cls : graph.inputsOf(v)) {
+            for (var pred : cls) {
+                computeCausalityPreds(pred);
+                set.addAll(causality.get(pred));
+                set.add(pred);
+            }
+        }
+    }
 }

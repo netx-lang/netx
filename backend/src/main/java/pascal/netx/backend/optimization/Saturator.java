@@ -2,7 +2,6 @@ package pascal.netx.backend.optimization;
 
 import pascal.netx.backend.optimization.model.Graph;
 import pascal.netx.backend.optimization.model.Vertex;
-import pascal.netx.backend.optimization.model.Vertices;
 import pascal.netx.util.exception.ShallNotReachHereError;
 
 import java.util.*;
@@ -15,22 +14,17 @@ public final class Saturator {
     private final Measurer.Weights weights;
 
     private final Set<Vertex> inputs;
-    private final Map<Graph.EqClass, Vertex> chosen = new HashMap<>(); // class rep -> chosen vertex
+    private final Map<Graph.EqClass, Vertex> chosen = new HashMap<>();
 
     private final Map<Vertex, Cost> costs = new HashMap<>();
-    private final Map<Vertex, Set<Vertex>> causality = new HashMap<>(); // vertex -> combinational predecessors
 
     public Saturator(Graph graph, double areaWeight, double delayWeight) {
         this.graph = graph;
         this.areaWeight = areaWeight;
         this.delayWeight = delayWeight;
         this.weights = Measurer.Weights.defaults(graph);
-
         this.inputs = new HashSet<>(graph.globalIn());
         costs.putAll(new CostCalculator().computeAll());
-        for (var v : graph.vertices()) {
-            computeCausalityPreds(v);
-        }
     }
 
     public void saturate() {
@@ -60,27 +54,6 @@ public final class Saturator {
         graph.retain(retain);
     }
 
-    private void computeCausalityPreds(Vertex v) {
-        if (!Vertices.isCombinational(v)) {
-            causality.put(v, Set.of());
-            return;
-        }
-
-        if (causality.containsKey(v)) {
-            return;
-        }
-
-        var set = new HashSet<Vertex>();
-        causality.put(v, set);
-        for (var cls : graph.inputsOf(v)) {
-            for (var pred : cls) {
-                computeCausalityPreds(pred);
-                set.addAll(causality.get(pred));
-                set.add(pred);
-            }
-        }
-    }
-
     private Vertex chooseRepresentative(Graph.EqClass cls) {
         var existing = chosen.get(cls);
         if (existing != null) {
@@ -88,7 +61,6 @@ public final class Saturator {
         }
 
         var best = cls.stream()
-                .filter(u -> cls.stream().noneMatch(causality.get(u)::contains))
                 .min(Comparator.comparing(this::preferInput).thenComparingDouble(this::scoreOf))
                 .orElseThrow(ShallNotReachHereError::new);
         chosen.put(cls, best);
@@ -117,10 +89,11 @@ public final class Saturator {
         private final Map<Vertex, Double> area = new HashMap<>();
         private final Map<Vertex, Double> delay = new HashMap<>();
 
-        private static final int MAX_AREA_UPDATES = 5;
-        private final Map<Vertex, Integer> areaUpdates = new HashMap<>();
+        private static final int MEM_THRESHOLD = 10;
+        private final Map<Vertex, Integer> areaUpdCount = new HashMap<>();
 
         private final Set<Graph.EqClass> visiting = new HashSet<>();
+        private final Map<Vertex, Integer> rank = new HashMap<>();
 
         Map<Vertex, Cost> computeAll() {
             var result = new HashMap<Vertex, Cost>();
@@ -128,12 +101,16 @@ public final class Saturator {
                     .map(graph::eqClassOf)
                     .flatMap(Graph.EqClass::stream).distinct()
                     .forEach(this::computeArea);
-            area.forEach((k, v) -> result.put(k, new Cost(v, 0)));
+            computeRank();
+            graph.vertices().stream().filter(rank::containsKey).forEach(this::computeDelay);
+            for (var key : area.keySet()) {
+                result.put(key, new Cost(area.get(key), delay.get(key)));
+            }
             return result;
         }
 
         private double computeArea(Vertex vertex) {
-            if (areaUpdates.computeIfAbsent(vertex, _ -> 0) == MAX_AREA_UPDATES) {
+            if (areaUpdCount.computeIfAbsent(vertex, _ -> 0) == MEM_THRESHOLD) {
                 return area.get(vertex);
             }
             var curr = graph.eqClassOf(vertex);
@@ -151,18 +128,60 @@ public final class Saturator {
             }
 
             if (area.containsKey(vertex)) {
-                area.merge(vertex, result, Double::min);
+                if (result == area.get(vertex)) {
+                    areaUpdCount.merge(vertex, 1, Integer::sum);
+                } else {
+                    area.merge(vertex, result, Double::min);
+                }
             } else {
                 area.put(vertex, result);
             }
-            areaUpdates.merge(vertex, 1, Integer::sum);
 
             visiting.remove(curr);
             return area.get(vertex);
         }
 
-        private void computeDelay(Vertex vertex) {
+        private void computeRank() {
+            Queue<Vertex> queue = new LinkedList<>();
+            graph.globalOut().stream()
+                    .map(graph::eqClassOf)
+                    .flatMap(Graph.EqClass::stream).distinct()
+                    .peek(queue::offer)
+                    .forEach(v -> rank.put(v, 0));
 
+            while (!queue.isEmpty()) {
+                var vertex = queue.poll();
+                for (var cls : graph.inputsOf(vertex)) {
+                    for (var pred : cls) {
+                        if (!rank.containsKey(pred)) {
+                            rank.put(pred, rank.get(vertex) + 1);
+                            queue.add(pred);
+                        }
+                    }
+                }
+            }
+        }
+
+        private double computeDelay(Vertex vertex) {
+            if (delay.containsKey(vertex)) {
+                return delay.get(vertex);
+            }
+
+            double result = 0d;
+            for (var cls : graph.inputsOf(vertex)) {
+                double best = Double.MAX_VALUE;
+                for (var pred : cls) {
+                    if (rank.get(pred) > rank.get(vertex)) {
+                        best = Math.min(best, computeDelay(pred));
+                    }
+                }
+                if (best != Double.MAX_VALUE) {
+                    result = Math.max(result, best);
+                }
+            }
+            result += weights.delay(vertex);
+            delay.put(vertex, result);
+            return result;
         }
     }
 }

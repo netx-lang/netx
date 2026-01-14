@@ -276,6 +276,13 @@ public final class Graph {
         private EqClass resolve(Vertex vertex) {
             return equivalence.get(unionFind.find(vertex));
         }
+
+        public void canonicalize(Map<Vertex, Set<Vertex>> causality) {
+            for (var cls : equivalence.values()) {
+                var elements = Set.copyOf(cls.elements);
+                cls.elements.removeIf(u -> elements.stream().anyMatch(causality.get(u)::contains));
+            }
+        }
     }
 
     public final class VertexFactory {
