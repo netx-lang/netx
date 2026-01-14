@@ -29,7 +29,7 @@ public final class Rewriter {
         );
     }
 
-    private final Map<Vertex, Set<Vertex>> causality = new HashMap<>();
+    private final Map<Vertex, BitSet> causality = new HashMap<>();
 
     public void rewrite() {
         boolean changed;
@@ -85,7 +85,7 @@ public final class Rewriter {
 
     private void computeCausalityPreds(Vertex v) {
         if (!Vertices.isCombinational(v)) {
-            causality.put(v, Set.of());
+            causality.put(v, new BitSet());
             return;
         }
 
@@ -93,13 +93,16 @@ public final class Rewriter {
             return;
         }
 
-        var set = new HashSet<Vertex>();
-        causality.put(v, set);
+        var bitSet = new BitSet();
+        causality.put(v, bitSet);
         for (var cls : graph.inputsOf(v)) {
             for (var pred : cls) {
                 computeCausalityPreds(pred);
-                set.addAll(causality.get(pred));
-                set.add(pred);
+                var predBits = causality.get(pred);
+                if (predBits != null) {
+                    bitSet.or(predBits);
+                }
+                bitSet.set(pred.index());
             }
         }
     }
