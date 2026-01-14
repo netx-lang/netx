@@ -7,7 +7,7 @@ import pascal.netx.backend.optimization.model.Vertex;
 
 import static pascal.netx.backend.optimization.model.Vertices.hasLabel;
 
-public class ConcatShortcutRule extends UniRule {
+public final class ConcatShortcutRule extends UniRule {
     public ConcatShortcutRule(Graph graph) {
         super(graph);
     }
