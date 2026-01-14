@@ -128,6 +128,8 @@ public final class Graph {
     }
 
     public static class EqClass implements Iterable<Vertex> {
+        private static final AtomicInteger NEXT_ID = new AtomicInteger(0);
+        private final int id = NEXT_ID.getAndIncrement();
         private final Set<Vertex> elements;
 
         EqClass(Vertex element) {
@@ -216,12 +218,14 @@ public final class Graph {
 
         @Override
         public boolean equals(Object o) {
-            return this == o;
+            if (o == null || getClass() != o.getClass()) return false;
+            EqClass vertices = (EqClass) o;
+            return id == vertices.id;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(elements);
+            return Objects.hashCode(id);
         }
     }
 
