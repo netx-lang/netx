@@ -22,6 +22,8 @@ public final class Graph {
     private final VertexManager manager = new VertexManager();
     private final VertexFactory factory = new VertexFactory();
 
+    private final Map<Vertex, BitSet> rewriteRecord = new HashMap<>();
+
     private void add(Vertex vertex) {
         manager.register(vertex);
         inEdges.putIfAbsent(vertex, new LinkedList<>());
@@ -81,6 +83,10 @@ public final class Graph {
 
     public Collection<Vertex> vertices() {
         return Collections.unmodifiableSet(manager.vertices);
+    }
+
+    public Map<Vertex, BitSet> rewriteRecord() {
+        return rewriteRecord;
     }
 
     public void dumpDot(NotepadWriter writer) {

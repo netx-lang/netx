@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import static pascal.netx.backend.optimization.model.Vertices.hasLabel;
-import static pascal.netx.backend.optimization.rule.GraphRule.Marker.DISTRIBUTIVITY_PULL;
+import static pascal.netx.backend.optimization.rule.GraphRule.Marker.DISTRIBUTIVITY;
 
 public final class DistributivityRule extends UniRule {
     public DistributivityRule(Graph graph) {
@@ -18,7 +18,7 @@ public final class DistributivityRule extends UniRule {
 
     @Override
     public boolean apply(Component vertex) {
-        if (hasMarker(vertex, DISTRIBUTIVITY_PULL)) {
+        if (hasMarker(vertex, DISTRIBUTIVITY)) {
             return false;
         }
 
@@ -76,7 +76,7 @@ public final class DistributivityRule extends UniRule {
                     graph.addEdge(remainder, dual);
                 }
                 graph.manager().union(vertex, dual);
-                mark(vertex, DISTRIBUTIVITY_PULL);
+                mark(vertex, DISTRIBUTIVITY);
                 changed = true;
             } else {
                 for (var candidate : candidates.get(index)) {
