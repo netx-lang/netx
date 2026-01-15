@@ -1,16 +1,20 @@
 package pascal.netx.compiler.io;
 
+import pascal.netx.compiler.model.circuit.EList;
+import pascal.netx.compiler.model.circuit.Entity;
 import pascal.netx.compiler.model.circuit.scope.binding.AttrBindList;
 import pascal.netx.compiler.model.circuit.scope.binding.MultiBinding;
 import pascal.netx.compiler.model.circuit.signal.BooleanValue;
-import pascal.netx.compiler.model.circuit.signal.Value;
 import pascal.netx.compiler.model.circuit.signal.VectorValue;
+import pascal.netx.compiler.utils.ParseCancellationException;
 import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.lang.Identifier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public record Configuration(@Nullable Identifier topPack,
                             @Nonnull  Identifier topName,
@@ -51,22 +55,36 @@ public record Configuration(@Nullable Identifier topPack,
             return this;
         }
 
-        private static Value parseValue(String value) {
-            if ("true".equals(value) || "false".equals(value)) {
-                return BooleanValue.of(Boolean.parseBoolean(value));
-            } else {
-                try {
-                    return VectorValue.fromInt(Integer.parseInt(value));
-                } catch (NumberFormatException e) {
-                    try {
-                        return VectorValue.of(BitVector.parse(value));
-                    } catch (Exception ignored) {
-                        Logger.error("Invalid argument rhs: " + value);
-                        throw new IllegalArgumentException();
-                    }
+        private static final Pattern[] VALUE_PATTERNS = {
+                Pattern.compile("true|false"),                           // Boolean
+                Pattern.compile("-?\\d+"),                               // Integer
+                Pattern.compile("([0-9]+)?'[hHoOdDbB]([0-9a-fA-F?_]+)"), // BitVector
+                Pattern.compile("\\[(.)+]"),                             // EList
+        };
+
+        private static Entity parseValue(String value) {
+            value = value.strip();
+            for (int i = 0; i != VALUE_PATTERNS.length; ++i) {
+                var matcher = VALUE_PATTERNS[i].matcher(value);
+                if (matcher.matches()) {
+                    return VALUE_PARSERS[i].parse(value);
                 }
             }
+            Logger.error("Invalid attr '{}' in configuration", value);
+            throw new ParseCancellationException();
         }
+
+        interface ValueParser {
+            Entity parse(String value);
+        }
+
+        private static final ValueParser[] VALUE_PARSERS = {
+                value -> BooleanValue.of(Boolean.parseBoolean(value)),
+                value -> VectorValue.fromInt(Integer.parseInt(value)),
+                value -> VectorValue.of(BitVector.parse(value)),
+                value -> EList.of(Arrays.stream(value.substring(1, value.length() - 1).split(","))
+                        .map(Builder::parseValue).toList()),
+        };
 
         public Builder withArgs(List<String> literal) {
             var bindings = MultiBinding.ofEmpty();
