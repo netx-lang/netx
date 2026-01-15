@@ -4,15 +4,15 @@ import pascal.netx.backend.optimization.model.Graph;
 import pascal.netx.backend.optimization.model.Vertex;
 
 import java.util.BitSet;
-import java.util.HashMap;
 import java.util.Map;
 
 public abstract class GraphRule implements Rule {
     protected final Graph graph;
-    protected static final Map<Vertex, BitSet> record = new HashMap<>();
+    protected final Map<Vertex, BitSet> record;
 
     protected GraphRule(Graph graph) {
         this.graph = graph;
+        this.record = graph.rewriteRecord();
     }
 
     protected boolean hasMarker(Vertex vertex, Marker marker) {
@@ -34,8 +34,8 @@ public abstract class GraphRule implements Rule {
         DE_MORGAN_PULL,
         RETIMING_PUSH,
         RETIMING_PULL,
-        DISTRIBUTIVITY_PULL,
-        ;
+        ConstMulti,
+        DISTRIBUTIVITY;
 
         static int size() {
             return Marker.values().length;

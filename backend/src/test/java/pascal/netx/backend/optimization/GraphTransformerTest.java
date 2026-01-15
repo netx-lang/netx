@@ -46,4 +46,27 @@ class GraphTransformerTest {
         var dumped = transformer.dumpNxon();
         assertDoesNotThrow(() -> new GraphTransformer(notepad, dumped).parse());
     }
+
+    @Test
+    void testBenchmark() throws IOException {
+        testBenchmarkCase("MCM_3_7_21");
+        testBenchmarkCase("MCM_5_93");
+        testBenchmarkCase("MCM_7_19_31");
+    }
+
+    private void testBenchmarkCase(String name) throws IOException {
+        Path path = TEST_DIR.resolve("benchmark").resolve(name + ".json");
+        System.out.println("======== " + path.getFileName() + " ========");
+        var json = MAPPER.readTree(Files.readString(path));
+        var transformer = new GraphTransformer(NotepadWriter.stdOut(), json);
+        transformer.parse();
+        System.out.printf("  Before optimization: %s\n", transformer.measure());
+        double time = System.currentTimeMillis();
+        transformer.rewrite();
+        transformer.saturate(1, 1);
+        time = System.currentTimeMillis() - time;
+        System.out.printf("   After optimization: %s\n", transformer.measure());
+        System.out.println("Time Elapsed: " + time + " ms");
+        System.out.println();
+    }
 }

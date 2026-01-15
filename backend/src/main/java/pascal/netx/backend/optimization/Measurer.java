@@ -59,32 +59,53 @@ public final class Measurer {
 
 
         public static Weights defaults(Graph graph) {
-            var areaBase = new EnumMap<Component.Label, Double>(Component.Label.class);
-            var delayBase = new EnumMap<Component.Label, Double>(Component.Label.class);
+            var area = new EnumMap<Component.Label, Double>(Component.Label.class);
+            var delay = new EnumMap<Component.Label, Double>(Component.Label.class);
             for (var label : Component.Label.values()) {
-                areaBase.put(label, 1.0);
-                delayBase.put(label, 1.0);
+                area.put(label, 1.0);
+                delay.put(label, 1.0);
             }
 
-            delayBase.put(Component.Label.TO, 0.0);
-            delayBase.put(Component.Label.CAST, 0.0);
-            delayBase.put(Component.Label.UCAST, 0.0);
-            delayBase.put(Component.Label.SELECT, 0.0);
-            delayBase.put(Component.Label.CONCAT, 0.0);
-            delayBase.put(Component.Label.REGISTER, 0.0);
-            delayBase.put(Component.Label.ASYNC_REGISTER, 0.0);
-            addCommonDefault(delayBase);
+            area.put(Component.Label.TO, 0.0);
+            area.put(Component.Label.CAST, 0.5);
+            area.put(Component.Label.UCAST, 0.5);
+            area.put(Component.Label.SELECT, 0.0);
+            area.put(Component.Label.CONCAT, 0.5);
+            delay.put(Component.Label.TO, 0.0);
+            delay.put(Component.Label.CAST, 0.0);
+            delay.put(Component.Label.UCAST, 0.0);
+            delay.put(Component.Label.SELECT, 0.0);
+            delay.put(Component.Label.CONCAT, 0.0);
 
-            areaBase.put(Component.Label.TO, 0.0);
-            areaBase.put(Component.Label.CAST, 0.5);
-            areaBase.put(Component.Label.UCAST, 0.5);
-            areaBase.put(Component.Label.SELECT, 0.0);
-            areaBase.put(Component.Label.CONCAT, 0.5);
-            areaBase.put(Component.Label.REGISTER, 1.0);
-            areaBase.put(Component.Label.ASYNC_REGISTER, 1.0);
-            addCommonDefault(areaBase);
+            area.put(Component.Label.REGISTER, 1.0);
+            area.put(Component.Label.ASYNC_REGISTER, 1.0);
+            delay.put(Component.Label.REGISTER, 0.0);
+            delay.put(Component.Label.ASYNC_REGISTER, 0.0);
 
-            return new Weights(graph, areaBase, delayBase);
+            area.put(Component.Label.NOT, 0.5);
+            delay.put(Component.Label.NOT, 0.5);
+
+            area.put(Component.Label.SHL, 6.0);
+            area.put(Component.Label.ASHR, 6.0);
+            area.put(Component.Label.LSHR, 6.0);
+            delay.put(Component.Label.SHL, 2.0);
+            delay.put(Component.Label.ASHR, 2.0);
+            delay.put(Component.Label.LSHR, 2.0);
+
+            area.put(Component.Label.ADD, 4.0);
+            area.put(Component.Label.SUB, 4.0);
+            delay.put(Component.Label.ADD, 4.0);
+            delay.put(Component.Label.SUB, 4.0);
+
+            area.put(Component.Label.MUL, 40.0);
+            delay.put(Component.Label.MUL, 15.0);
+
+            area.put(Component.Label.DIV, 60.0);
+            area.put(Component.Label.MOD, 60.0);
+            delay.put(Component.Label.DIV, 25.0);
+            delay.put(Component.Label.MOD, 25.0);
+
+            return new Weights(graph, area, delay);
         }
 
         public double area(Vertex v) {
@@ -107,17 +128,6 @@ public final class Measurer {
             return 0.0;
         }
 
-        private static void addCommonDefault(EnumMap<Component.Label, Double> map) {
-            map.put(Component.Label.NOT, 0.5);
-            map.put(Component.Label.ADD, 1.5);
-            map.put(Component.Label.SUB, 1.5);
-            map.put(Component.Label.SHL, 1.5);
-            map.put(Component.Label.ASHR, 1.5);
-            map.put(Component.Label.LSHR, 1.5);
-            map.put(Component.Label.MUL, 3.0);
-            map.put(Component.Label.DIV, 4.0);
-            map.put(Component.Label.MOD, 4.0);
-        }
     }
 
     private class DelayComputer {

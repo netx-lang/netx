@@ -59,7 +59,7 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         return new Measurer(graph).evaluate();
     }
 
-    public void saturate(int areaWeight, int delayWeight) {
+    public void saturate(double areaWeight, double delayWeight) {
         new Saturator(graph, areaWeight, delayWeight).saturate();
     }
 
