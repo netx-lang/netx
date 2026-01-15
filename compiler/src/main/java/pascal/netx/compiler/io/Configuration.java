@@ -59,11 +59,11 @@ public record Configuration(@Nullable Identifier topPack,
                 Pattern.compile("true|false"),                           // Boolean
                 Pattern.compile("-?\\d+"),                               // Integer
                 Pattern.compile("([0-9]+)?'[hHoOdDbB]([0-9a-fA-F?_]+)"), // BitVector
-                Pattern.compile("\\[(.)+]"),                    // EList
-                Pattern.compile("(.+)") // Fallback
+                Pattern.compile("\\[(.)+]"),                             // EList
         };
 
         private static Entity parseValue(String value) {
+            value = value.strip();
             for (int i = 0; i != VALUE_PATTERNS.length; ++i) {
                 var matcher = VALUE_PATTERNS[i].matcher(value);
                 if (matcher.matches()) {
@@ -76,15 +76,15 @@ public record Configuration(@Nullable Identifier topPack,
 
         interface ValueParser {
             Entity parse(String value);
-        }        private static final ValueParser[] VALUE_PARSERS = {
+        }
+
+        private static final ValueParser[] VALUE_PARSERS = {
                 value -> BooleanValue.of(Boolean.parseBoolean(value)),
                 value -> VectorValue.fromInt(Integer.parseInt(value)),
                 value -> VectorValue.of(BitVector.parse(value)),
                 value -> EList.of(Arrays.stream(value.substring(1, value.length() - 1).split(","))
                         .map(Builder::parseValue).toList()),
         };
-
-
 
         public Builder withArgs(List<String> literal) {
             var bindings = MultiBinding.ofEmpty();

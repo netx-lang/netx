@@ -72,7 +72,12 @@ public class Main {
         @CommandLine.Option(
                 names = {"-a", "--attrs"},
                 arity = "1..*",
-                description = "attributes to pass to the top component (e.g., --attrs a=true b=2 c=2'b01)"
+                description = """
+                        attributes to pass to the top component
+                        Examples:
+                          --attrs width=32 rst=32'hDEADBEAF
+                          --attrs "list = [3, 7, 21]"
+                        Note: Use quotes around values containing [] or spaces"""
         )
         protected List<String> args;
 
