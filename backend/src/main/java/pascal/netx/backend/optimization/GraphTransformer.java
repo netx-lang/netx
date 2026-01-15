@@ -24,7 +24,7 @@ import static pascal.netx.backend.NxonParseUtils.streamOf;
 public final class GraphTransformer extends AbstractNxonTransformer {
     private final Graph graph = new Graph();
 
-    GraphTransformer(NotepadWriter notepad, JsonNode json) {
+    public GraphTransformer(NotepadWriter notepad, JsonNode json) {
         super(notepad, json);
     }
 
@@ -237,7 +237,7 @@ public final class GraphTransformer extends AbstractNxonTransformer {
 
         JsonNode dump() {
             for (var vertex : graph.globalOut()) {
-                dump(vertex);
+                dump(graph.eqClassOf(vertex).getAny());
             }
             var root = MAPPER.createObjectNode();
             var design = MAPPER.createObjectNode();
@@ -257,10 +257,10 @@ public final class GraphTransformer extends AbstractNxonTransformer {
             var inputs = MAPPER.createArrayNode();
             var outputs = MAPPER.createArrayNode();
             for (var input : graph.globalIn()) {
-                inputs.add(references.get(input));
+                inputs.add(references.get(graph.eqClassOf(input).getAny()));
             }
             for (var output : graph.globalOut()) {
-                outputs.add(references.get(output));
+                outputs.add(references.get(graph.eqClassOf(output).getAny()));
             }
             design.set("input", inputs);
             design.set("output", outputs);
