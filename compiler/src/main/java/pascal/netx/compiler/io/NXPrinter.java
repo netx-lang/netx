@@ -15,7 +15,7 @@ public final class NXPrinter {
     private final int componentHead;
     private final NotepadWriter writer;
 
-    NXPrinter(NotepadWriter writer) {
+    public NXPrinter(NotepadWriter writer) {
         this.writer = writer;
         this.componentHead = 3;
     }
