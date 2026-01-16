@@ -29,6 +29,6 @@ component MUX : [sel, a, b] -> [out] {
 
     out <> OR <> [
         AND <> [a, CAST <> sel],
-        AND <> [b, CAST <> NOT <> sel]
+        AND <> [b, NOT <> CAST <> sel]
     ];
 }
