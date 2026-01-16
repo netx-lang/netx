@@ -4,6 +4,9 @@ import pascal.netx.backend.optimization.model.*;
 import pascal.netx.util.lang.BitVector;
 
 import java.util.List;
+import java.util.Set;
+
+import static pascal.netx.backend.optimization.model.Component.Label.*;
 
 public final class ConstantPropRule extends UniRule {
     public ConstantPropRule(Graph graph) {
@@ -18,6 +21,7 @@ public final class ConstantPropRule extends UniRule {
                 graph.manager().replace(reg, input.filter(Constant.class).getFirst());
                 return true;
             }
+            return false;
         }
 
         boolean allConst = true;
@@ -74,6 +78,50 @@ public final class ConstantPropRule extends UniRule {
                 var constVertex = graph.factory().constant(result);
                 graph.manager().replace(vertex, constVertex);
                 return true;
+            }
+        } else {
+            if (Set.of(SHL, ASHR, LSHR).contains(vertex.label())) {
+                var amountCls = graph.inputsOf(vertex).get(1);
+                if (amountCls.contains(Constant.class)) {
+                    int amount = amountCls.filter(Constant.class).getFirst().value().toUInt();
+                    if (amount == 0) {
+                        var valueCls = graph.inputsOf(vertex).getFirst();
+                        graph.manager().replace(vertex, valueCls.getAny());
+                        return true;
+                    } else {
+                        int width = vertex.outWidth();
+                        var input = graph.inputsOf(vertex).getFirst();
+                        var dual = graph.factory().component(CONCAT, width);
+                        switch (vertex.label()) {
+                            case SHL -> {
+                                var select = graph.factory().readSelect(new Selector(width - amount - 1, 0));
+                                var zeros = graph.factory().constant(BitVector.fromInt(amount, 0));
+                                graph.addEdge(input, select);
+                                graph.addEdge(select, dual);
+                                graph.addEdge(zeros, dual);
+                            }
+                            case LSHR -> {
+                                var select = graph.factory().readSelect(new Selector(width - 1, amount));
+                                var zeros = graph.factory().constant(BitVector.fromInt(amount, 0));
+                                graph.addEdge(input, select);
+                                graph.addEdge(zeros, dual);
+                                graph.addEdge(select, dual);
+                            }
+                            case ASHR -> {
+                                var select = graph.factory().readSelect(new Selector(width - 1, amount));
+                                var signSelect = graph.factory().readSelect(new Selector(width - 1, width - 1));
+                                var signs = graph.factory().component(CAST, amount);
+                                graph.addEdge(input, signSelect);
+                                graph.addEdge(input, select);
+                                graph.addEdge(signSelect, signs);
+
+                                graph.addEdge(signs, dual);
+                                graph.addEdge(select, dual);
+                            }
+                        }
+                        graph.manager().replace(vertex, dual);
+                    }
+                }
             }
         }
         return false;
