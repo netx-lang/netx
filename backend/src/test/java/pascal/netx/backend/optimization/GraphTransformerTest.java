@@ -49,6 +49,7 @@ class GraphTransformerTest {
 
     @Test
     void testBenchmark() throws IOException {
+        testBenchmarkCase("ADPCM");
         testBenchmarkCase("MCM_3_7_21");
         testBenchmarkCase("MCM_5_93");
         testBenchmarkCase("MCM_7_19_31");
