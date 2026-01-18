@@ -1,0 +1,1718 @@
+{
+  "total": 195,
+  "top_input": ["a", "b"],
+  "top_output": ["y"],
+  "design": {
+    "type": "component",
+    "id": "SMUL",
+    "loc": "SMUL.nx:1:10",
+    "input": ["a@0", "b@1"],
+    "output": ["y@2"],
+    "members": [
+      {"type": "wire", "width": 32, "id": "a@0", "loc": "SMUL.nx:2:9"},
+      {"type": "wire", "width": 32, "id": "b@1", "loc": "SMUL.nx:2:12"},
+      {"type": "wire", "width": 32, "id": "y@2", "loc": "SMUL.nx:2:15"},
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[0]", "a@0", "0"],
+        "output": ["out@3"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@3", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[0]"],
+            "output": ["$o@4"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@4", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@4"],
+            "output": ["$o@5"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@5", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@4"],
+            "output": ["$o@6"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@6", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@6"],
+            "output": ["$o@7"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@7", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@5", "$o@7"],
+            "output": ["out@3"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@3", "0"],
+        "output": ["$o@8"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@8", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[1]", "a@0", "0"],
+        "output": ["out@9"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@9", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[1]"],
+            "output": ["$o@10"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@10", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@10"],
+            "output": ["$o@11"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@11", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@10"],
+            "output": ["$o@12"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@12", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@12"],
+            "output": ["$o@13"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@13", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@11", "$o@13"],
+            "output": ["out@9"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@9", "1"],
+        "output": ["$o@14"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@14", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[2]", "a@0", "0"],
+        "output": ["out@15"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@15", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[2]"],
+            "output": ["$o@16"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@16", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@16"],
+            "output": ["$o@17"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@17", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@16"],
+            "output": ["$o@18"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@18", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@18"],
+            "output": ["$o@19"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@19", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@17", "$o@19"],
+            "output": ["out@15"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@15", "2"],
+        "output": ["$o@20"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@20", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[3]", "a@0", "0"],
+        "output": ["out@21"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@21", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[3]"],
+            "output": ["$o@22"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@22", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@22"],
+            "output": ["$o@23"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@23", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@22"],
+            "output": ["$o@24"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@24", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@24"],
+            "output": ["$o@25"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@25", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@23", "$o@25"],
+            "output": ["out@21"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@21", "3"],
+        "output": ["$o@26"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@26", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[4]", "a@0", "0"],
+        "output": ["out@27"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@27", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[4]"],
+            "output": ["$o@28"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@28", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@28"],
+            "output": ["$o@29"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@29", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@28"],
+            "output": ["$o@30"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@30", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@30"],
+            "output": ["$o@31"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@31", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@29", "$o@31"],
+            "output": ["out@27"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@27", "4"],
+        "output": ["$o@32"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@32", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[5]", "a@0", "0"],
+        "output": ["out@33"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@33", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[5]"],
+            "output": ["$o@34"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@34", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@34"],
+            "output": ["$o@35"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@35", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@34"],
+            "output": ["$o@36"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@36", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@36"],
+            "output": ["$o@37"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@37", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@35", "$o@37"],
+            "output": ["out@33"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@33", "5"],
+        "output": ["$o@38"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@38", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[6]", "a@0", "0"],
+        "output": ["out@39"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@39", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[6]"],
+            "output": ["$o@40"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@40", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@40"],
+            "output": ["$o@41"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@41", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@40"],
+            "output": ["$o@42"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@42", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@42"],
+            "output": ["$o@43"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@43", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@41", "$o@43"],
+            "output": ["out@39"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@39", "6"],
+        "output": ["$o@44"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@44", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[7]", "a@0", "0"],
+        "output": ["out@45"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@45", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[7]"],
+            "output": ["$o@46"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@46", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@46"],
+            "output": ["$o@47"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@47", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@46"],
+            "output": ["$o@48"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@48", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@48"],
+            "output": ["$o@49"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@49", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@47", "$o@49"],
+            "output": ["out@45"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@45", "7"],
+        "output": ["$o@50"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@50", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[8]", "a@0", "0"],
+        "output": ["out@51"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@51", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[8]"],
+            "output": ["$o@52"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@52", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@52"],
+            "output": ["$o@53"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@53", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@52"],
+            "output": ["$o@54"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@54", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@54"],
+            "output": ["$o@55"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@55", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@53", "$o@55"],
+            "output": ["out@51"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@51", "8"],
+        "output": ["$o@56"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@56", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[9]", "a@0", "0"],
+        "output": ["out@57"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@57", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[9]"],
+            "output": ["$o@58"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@58", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@58"],
+            "output": ["$o@59"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@59", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@58"],
+            "output": ["$o@60"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@60", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@60"],
+            "output": ["$o@61"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@61", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@59", "$o@61"],
+            "output": ["out@57"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@57", "9"],
+        "output": ["$o@62"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@62", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[10]", "a@0", "0"],
+        "output": ["out@63"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@63", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[10]"],
+            "output": ["$o@64"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@64", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@64"],
+            "output": ["$o@65"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@65", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@64"],
+            "output": ["$o@66"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@66", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@66"],
+            "output": ["$o@67"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@67", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@65", "$o@67"],
+            "output": ["out@63"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@63", "10"],
+        "output": ["$o@68"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@68", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[11]", "a@0", "0"],
+        "output": ["out@69"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@69", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[11]"],
+            "output": ["$o@70"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@70", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@70"],
+            "output": ["$o@71"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@71", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@70"],
+            "output": ["$o@72"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@72", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@72"],
+            "output": ["$o@73"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@73", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@71", "$o@73"],
+            "output": ["out@69"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@69", "11"],
+        "output": ["$o@74"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@74", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[12]", "a@0", "0"],
+        "output": ["out@75"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@75", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[12]"],
+            "output": ["$o@76"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@76", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@76"],
+            "output": ["$o@77"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@77", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@76"],
+            "output": ["$o@78"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@78", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@78"],
+            "output": ["$o@79"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@79", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@77", "$o@79"],
+            "output": ["out@75"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@75", "12"],
+        "output": ["$o@80"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@80", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[13]", "a@0", "0"],
+        "output": ["out@81"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@81", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[13]"],
+            "output": ["$o@82"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@82", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@82"],
+            "output": ["$o@83"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@83", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@82"],
+            "output": ["$o@84"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@84", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@84"],
+            "output": ["$o@85"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@85", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@83", "$o@85"],
+            "output": ["out@81"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@81", "13"],
+        "output": ["$o@86"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@86", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[14]", "a@0", "0"],
+        "output": ["out@87"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@87", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[14]"],
+            "output": ["$o@88"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@88", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@88"],
+            "output": ["$o@89"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@89", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@88"],
+            "output": ["$o@90"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@90", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@90"],
+            "output": ["$o@91"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@91", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@89", "$o@91"],
+            "output": ["out@87"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@87", "14"],
+        "output": ["$o@92"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@92", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[15]", "a@0", "0"],
+        "output": ["out@93"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@93", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[15]"],
+            "output": ["$o@94"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@94", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@94"],
+            "output": ["$o@95"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@95", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@94"],
+            "output": ["$o@96"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@96", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@96"],
+            "output": ["$o@97"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@97", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@95", "$o@97"],
+            "output": ["out@93"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@93", "15"],
+        "output": ["$o@98"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@98", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[16]", "a@0", "0"],
+        "output": ["out@99"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@99", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[16]"],
+            "output": ["$o@100"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@100", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@100"],
+            "output": ["$o@101"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@101", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@100"],
+            "output": ["$o@102"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@102", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@102"],
+            "output": ["$o@103"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@103", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@101", "$o@103"],
+            "output": ["out@99"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@99", "16"],
+        "output": ["$o@104"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@104", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[17]", "a@0", "0"],
+        "output": ["out@105"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@105", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[17]"],
+            "output": ["$o@106"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@106", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@106"],
+            "output": ["$o@107"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@107", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@106"],
+            "output": ["$o@108"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@108", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@108"],
+            "output": ["$o@109"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@109", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@107", "$o@109"],
+            "output": ["out@105"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@105", "17"],
+        "output": ["$o@110"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@110", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[18]", "a@0", "0"],
+        "output": ["out@111"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@111", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[18]"],
+            "output": ["$o@112"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@112", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@112"],
+            "output": ["$o@113"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@113", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@112"],
+            "output": ["$o@114"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@114", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@114"],
+            "output": ["$o@115"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@115", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@113", "$o@115"],
+            "output": ["out@111"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@111", "18"],
+        "output": ["$o@116"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@116", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[19]", "a@0", "0"],
+        "output": ["out@117"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@117", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[19]"],
+            "output": ["$o@118"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@118", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@118"],
+            "output": ["$o@119"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@119", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@118"],
+            "output": ["$o@120"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@120", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@120"],
+            "output": ["$o@121"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@121", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@119", "$o@121"],
+            "output": ["out@117"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@117", "19"],
+        "output": ["$o@122"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@122", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[20]", "a@0", "0"],
+        "output": ["out@123"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@123", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[20]"],
+            "output": ["$o@124"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@124", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@124"],
+            "output": ["$o@125"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@125", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@124"],
+            "output": ["$o@126"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@126", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@126"],
+            "output": ["$o@127"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@127", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@125", "$o@127"],
+            "output": ["out@123"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@123", "20"],
+        "output": ["$o@128"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@128", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[21]", "a@0", "0"],
+        "output": ["out@129"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@129", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[21]"],
+            "output": ["$o@130"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@130", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@130"],
+            "output": ["$o@131"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@131", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@130"],
+            "output": ["$o@132"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@132", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@132"],
+            "output": ["$o@133"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@133", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@131", "$o@133"],
+            "output": ["out@129"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@129", "21"],
+        "output": ["$o@134"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@134", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[22]", "a@0", "0"],
+        "output": ["out@135"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@135", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[22]"],
+            "output": ["$o@136"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@136", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@136"],
+            "output": ["$o@137"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@137", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@136"],
+            "output": ["$o@138"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@138", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@138"],
+            "output": ["$o@139"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@139", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@137", "$o@139"],
+            "output": ["out@135"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@135", "22"],
+        "output": ["$o@140"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@140", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[23]", "a@0", "0"],
+        "output": ["out@141"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@141", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[23]"],
+            "output": ["$o@142"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@142", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@142"],
+            "output": ["$o@143"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@143", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@142"],
+            "output": ["$o@144"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@144", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@144"],
+            "output": ["$o@145"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@145", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@143", "$o@145"],
+            "output": ["out@141"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@141", "23"],
+        "output": ["$o@146"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@146", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[24]", "a@0", "0"],
+        "output": ["out@147"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@147", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[24]"],
+            "output": ["$o@148"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@148", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@148"],
+            "output": ["$o@149"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@149", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@148"],
+            "output": ["$o@150"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@150", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@150"],
+            "output": ["$o@151"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@151", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@149", "$o@151"],
+            "output": ["out@147"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@147", "24"],
+        "output": ["$o@152"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@152", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[25]", "a@0", "0"],
+        "output": ["out@153"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@153", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[25]"],
+            "output": ["$o@154"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@154", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@154"],
+            "output": ["$o@155"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@155", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@154"],
+            "output": ["$o@156"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@156", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@156"],
+            "output": ["$o@157"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@157", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@155", "$o@157"],
+            "output": ["out@153"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@153", "25"],
+        "output": ["$o@158"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@158", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[26]", "a@0", "0"],
+        "output": ["out@159"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@159", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[26]"],
+            "output": ["$o@160"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@160", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@160"],
+            "output": ["$o@161"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@161", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@160"],
+            "output": ["$o@162"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@162", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@162"],
+            "output": ["$o@163"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@163", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@161", "$o@163"],
+            "output": ["out@159"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@159", "26"],
+        "output": ["$o@164"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@164", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[27]", "a@0", "0"],
+        "output": ["out@165"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@165", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[27]"],
+            "output": ["$o@166"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@166", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@166"],
+            "output": ["$o@167"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@167", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@166"],
+            "output": ["$o@168"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@168", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@168"],
+            "output": ["$o@169"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@169", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@167", "$o@169"],
+            "output": ["out@165"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@165", "27"],
+        "output": ["$o@170"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@170", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[28]", "a@0", "0"],
+        "output": ["out@171"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@171", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[28]"],
+            "output": ["$o@172"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@172", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@172"],
+            "output": ["$o@173"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@173", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@172"],
+            "output": ["$o@174"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@174", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@174"],
+            "output": ["$o@175"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@175", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@173", "$o@175"],
+            "output": ["out@171"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@171", "28"],
+        "output": ["$o@176"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@176", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[29]", "a@0", "0"],
+        "output": ["out@177"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@177", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[29]"],
+            "output": ["$o@178"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@178", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@178"],
+            "output": ["$o@179"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@179", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@178"],
+            "output": ["$o@180"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@180", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@180"],
+            "output": ["$o@181"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@181", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@179", "$o@181"],
+            "output": ["out@177"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@177", "29"],
+        "output": ["$o@182"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@182", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[30]", "a@0", "0"],
+        "output": ["out@183"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@183", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[30]"],
+            "output": ["$o@184"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@184", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@184"],
+            "output": ["$o@185"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@185", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@184"],
+            "output": ["$o@186"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@186", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@186"],
+            "output": ["$o@187"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@187", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@185", "$o@187"],
+            "output": ["out@183"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@183", "30"],
+        "output": ["$o@188"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@188", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "SMUL.nx:5:12",
+        "input": ["b@1[31]", "a@0", "0"],
+        "output": ["out@189"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "out@189", "loc": "SMUL.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "SMUL.nx:15:19",
+            "input": ["b@1[31]"],
+            "output": ["$o@190"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@190", "loc": "SMUL.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:15:8",
+            "input": ["a@0", "$o@190"],
+            "output": ["$o@191"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@191", "loc": "SMUL.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "SMUL.nx:16:19",
+            "input": ["$o@190"],
+            "output": ["$o@192"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@192", "loc": "SMUL.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "SMUL.nx:16:8",
+            "input": ["0", "$o@192"],
+            "output": ["$o@193"],
+            "members": [
+              {"type": "wire", "width": 32, "id": "$o@193", "loc": "SMUL.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "SMUL.nx:14:11",
+            "input": ["$o@191", "$o@193"],
+            "output": ["out@189"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "SMUL.nx:4:8",
+        "input": ["out@189", "31"],
+        "output": ["$o@194"],
+        "members": [
+          {"type": "wire", "width": 32, "id": "$o@194", "loc": "SMUL.nx:4:8"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "ADD", "loc": "SMUL.nx:3:9",
+        "input": ["$o@8", "$o@14", "$o@20", "$o@26", "$o@32", "$o@38", "$o@44", "$o@50", "$o@56", "$o@62", "$o@68", "$o@74", "$o@80", "$o@86", "$o@92", "$o@98", "$o@104", "$o@110", "$o@116", "$o@122", "$o@128", "$o@134", "$o@140", "$o@146", "$o@152", "$o@158", "$o@164", "$o@170", "$o@176", "$o@182", "$o@188", "$o@194"],
+        "output": ["y@2"]
+      }
+    ]
+  }
+}

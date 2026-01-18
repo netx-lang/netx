@@ -35,6 +35,7 @@ public abstract class GraphRule implements Rule {
         RETIMING_PUSH,
         RETIMING_PULL,
         ConstMulti,
+        SelectProp,
         DISTRIBUTIVITY;
 
         static int size() {

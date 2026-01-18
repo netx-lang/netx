@@ -1,0 +1,18 @@
+component FMA : [a, b, c] -> [y] {
+    wire a, b, c, y of bit(16);
+    y <> ADD <> [
+        SHL <> [
+            MUX <> [b[i], a, 16'd0], i
+        ] | i in [0..16]
+    ] ++ [c];
+}
+
+component MUX : [sel, a, b] -> [out] {
+    wire a, b, out of bit(16);
+    wire sel       of bit(1);
+
+    out <> OR <> [
+        AND <> [a, CAST <> sel],
+        AND <> [b, NOT <> CAST <> sel]
+    ];
+}

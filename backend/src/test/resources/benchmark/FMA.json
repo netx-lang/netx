@@ -1,0 +1,871 @@
+{
+  "total": 100,
+  "top_input": ["a", "b", "c"],
+  "top_output": ["y"],
+  "design": {
+    "type": "component",
+    "id": "FMA",
+    "loc": "FMA.nx:1:10",
+    "input": ["a@0", "b@1", "c@2"],
+    "output": ["y@3"],
+    "members": [
+      {"type": "wire", "width": 16, "id": "a@0", "loc": "FMA.nx:2:9"},
+      {"type": "wire", "width": 16, "id": "b@1", "loc": "FMA.nx:2:12"},
+      {"type": "wire", "width": 16, "id": "c@2", "loc": "FMA.nx:2:15"},
+      {"type": "wire", "width": 16, "id": "y@3", "loc": "FMA.nx:2:18"},
+      {
+        "type": "component", "id": "MUX", "loc": "FMA.nx:5:12",
+        "input": ["b@1[0]", "a@0", "16'h0"],
+        "output": ["out@4"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "out@4", "loc": "FMA.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "FMA.nx:15:19",
+            "input": ["b@1[0]"],
+            "output": ["$o@5"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@5", "loc": "FMA.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:15:8",
+            "input": ["a@0", "$o@5"],
+            "output": ["$o@6"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@6", "loc": "FMA.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "FMA.nx:16:19",
+            "input": ["$o@5"],
+            "output": ["$o@7"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@7", "loc": "FMA.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:16:8",
+            "input": ["16'h0", "$o@7"],
+            "output": ["$o@8"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@8", "loc": "FMA.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "FMA.nx:14:11",
+            "input": ["$o@6", "$o@8"],
+            "output": ["out@4"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "FMA.nx:4:8",
+        "input": ["out@4", "0"],
+        "output": ["$o@9"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "$o@9", "loc": "FMA.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "FMA.nx:5:12",
+        "input": ["b@1[1]", "a@0", "16'h0"],
+        "output": ["out@10"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "out@10", "loc": "FMA.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "FMA.nx:15:19",
+            "input": ["b@1[1]"],
+            "output": ["$o@11"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@11", "loc": "FMA.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:15:8",
+            "input": ["a@0", "$o@11"],
+            "output": ["$o@12"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@12", "loc": "FMA.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "FMA.nx:16:19",
+            "input": ["$o@11"],
+            "output": ["$o@13"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@13", "loc": "FMA.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:16:8",
+            "input": ["16'h0", "$o@13"],
+            "output": ["$o@14"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@14", "loc": "FMA.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "FMA.nx:14:11",
+            "input": ["$o@12", "$o@14"],
+            "output": ["out@10"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "FMA.nx:4:8",
+        "input": ["out@10", "1"],
+        "output": ["$o@15"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "$o@15", "loc": "FMA.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "FMA.nx:5:12",
+        "input": ["b@1[2]", "a@0", "16'h0"],
+        "output": ["out@16"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "out@16", "loc": "FMA.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "FMA.nx:15:19",
+            "input": ["b@1[2]"],
+            "output": ["$o@17"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@17", "loc": "FMA.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:15:8",
+            "input": ["a@0", "$o@17"],
+            "output": ["$o@18"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@18", "loc": "FMA.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "FMA.nx:16:19",
+            "input": ["$o@17"],
+            "output": ["$o@19"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@19", "loc": "FMA.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:16:8",
+            "input": ["16'h0", "$o@19"],
+            "output": ["$o@20"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@20", "loc": "FMA.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "FMA.nx:14:11",
+            "input": ["$o@18", "$o@20"],
+            "output": ["out@16"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "FMA.nx:4:8",
+        "input": ["out@16", "2"],
+        "output": ["$o@21"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "$o@21", "loc": "FMA.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "FMA.nx:5:12",
+        "input": ["b@1[3]", "a@0", "16'h0"],
+        "output": ["out@22"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "out@22", "loc": "FMA.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "FMA.nx:15:19",
+            "input": ["b@1[3]"],
+            "output": ["$o@23"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@23", "loc": "FMA.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:15:8",
+            "input": ["a@0", "$o@23"],
+            "output": ["$o@24"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@24", "loc": "FMA.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "FMA.nx:16:19",
+            "input": ["$o@23"],
+            "output": ["$o@25"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@25", "loc": "FMA.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:16:8",
+            "input": ["16'h0", "$o@25"],
+            "output": ["$o@26"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@26", "loc": "FMA.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "FMA.nx:14:11",
+            "input": ["$o@24", "$o@26"],
+            "output": ["out@22"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "FMA.nx:4:8",
+        "input": ["out@22", "3"],
+        "output": ["$o@27"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "$o@27", "loc": "FMA.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "FMA.nx:5:12",
+        "input": ["b@1[4]", "a@0", "16'h0"],
+        "output": ["out@28"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "out@28", "loc": "FMA.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "FMA.nx:15:19",
+            "input": ["b@1[4]"],
+            "output": ["$o@29"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@29", "loc": "FMA.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:15:8",
+            "input": ["a@0", "$o@29"],
+            "output": ["$o@30"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@30", "loc": "FMA.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "FMA.nx:16:19",
+            "input": ["$o@29"],
+            "output": ["$o@31"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@31", "loc": "FMA.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:16:8",
+            "input": ["16'h0", "$o@31"],
+            "output": ["$o@32"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@32", "loc": "FMA.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "FMA.nx:14:11",
+            "input": ["$o@30", "$o@32"],
+            "output": ["out@28"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "FMA.nx:4:8",
+        "input": ["out@28", "4"],
+        "output": ["$o@33"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "$o@33", "loc": "FMA.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "FMA.nx:5:12",
+        "input": ["b@1[5]", "a@0", "16'h0"],
+        "output": ["out@34"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "out@34", "loc": "FMA.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "FMA.nx:15:19",
+            "input": ["b@1[5]"],
+            "output": ["$o@35"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@35", "loc": "FMA.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:15:8",
+            "input": ["a@0", "$o@35"],
+            "output": ["$o@36"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@36", "loc": "FMA.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "FMA.nx:16:19",
+            "input": ["$o@35"],
+            "output": ["$o@37"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@37", "loc": "FMA.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:16:8",
+            "input": ["16'h0", "$o@37"],
+            "output": ["$o@38"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@38", "loc": "FMA.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "FMA.nx:14:11",
+            "input": ["$o@36", "$o@38"],
+            "output": ["out@34"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "FMA.nx:4:8",
+        "input": ["out@34", "5"],
+        "output": ["$o@39"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "$o@39", "loc": "FMA.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "FMA.nx:5:12",
+        "input": ["b@1[6]", "a@0", "16'h0"],
+        "output": ["out@40"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "out@40", "loc": "FMA.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "FMA.nx:15:19",
+            "input": ["b@1[6]"],
+            "output": ["$o@41"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@41", "loc": "FMA.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:15:8",
+            "input": ["a@0", "$o@41"],
+            "output": ["$o@42"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@42", "loc": "FMA.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "FMA.nx:16:19",
+            "input": ["$o@41"],
+            "output": ["$o@43"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@43", "loc": "FMA.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:16:8",
+            "input": ["16'h0", "$o@43"],
+            "output": ["$o@44"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@44", "loc": "FMA.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "FMA.nx:14:11",
+            "input": ["$o@42", "$o@44"],
+            "output": ["out@40"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "FMA.nx:4:8",
+        "input": ["out@40", "6"],
+        "output": ["$o@45"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "$o@45", "loc": "FMA.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "FMA.nx:5:12",
+        "input": ["b@1[7]", "a@0", "16'h0"],
+        "output": ["out@46"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "out@46", "loc": "FMA.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "FMA.nx:15:19",
+            "input": ["b@1[7]"],
+            "output": ["$o@47"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@47", "loc": "FMA.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:15:8",
+            "input": ["a@0", "$o@47"],
+            "output": ["$o@48"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@48", "loc": "FMA.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "FMA.nx:16:19",
+            "input": ["$o@47"],
+            "output": ["$o@49"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@49", "loc": "FMA.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:16:8",
+            "input": ["16'h0", "$o@49"],
+            "output": ["$o@50"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@50", "loc": "FMA.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "FMA.nx:14:11",
+            "input": ["$o@48", "$o@50"],
+            "output": ["out@46"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "FMA.nx:4:8",
+        "input": ["out@46", "7"],
+        "output": ["$o@51"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "$o@51", "loc": "FMA.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "FMA.nx:5:12",
+        "input": ["b@1[8]", "a@0", "16'h0"],
+        "output": ["out@52"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "out@52", "loc": "FMA.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "FMA.nx:15:19",
+            "input": ["b@1[8]"],
+            "output": ["$o@53"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@53", "loc": "FMA.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:15:8",
+            "input": ["a@0", "$o@53"],
+            "output": ["$o@54"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@54", "loc": "FMA.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "FMA.nx:16:19",
+            "input": ["$o@53"],
+            "output": ["$o@55"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@55", "loc": "FMA.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:16:8",
+            "input": ["16'h0", "$o@55"],
+            "output": ["$o@56"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@56", "loc": "FMA.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "FMA.nx:14:11",
+            "input": ["$o@54", "$o@56"],
+            "output": ["out@52"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "FMA.nx:4:8",
+        "input": ["out@52", "8"],
+        "output": ["$o@57"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "$o@57", "loc": "FMA.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "FMA.nx:5:12",
+        "input": ["b@1[9]", "a@0", "16'h0"],
+        "output": ["out@58"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "out@58", "loc": "FMA.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "FMA.nx:15:19",
+            "input": ["b@1[9]"],
+            "output": ["$o@59"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@59", "loc": "FMA.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:15:8",
+            "input": ["a@0", "$o@59"],
+            "output": ["$o@60"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@60", "loc": "FMA.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "FMA.nx:16:19",
+            "input": ["$o@59"],
+            "output": ["$o@61"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@61", "loc": "FMA.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:16:8",
+            "input": ["16'h0", "$o@61"],
+            "output": ["$o@62"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@62", "loc": "FMA.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "FMA.nx:14:11",
+            "input": ["$o@60", "$o@62"],
+            "output": ["out@58"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "FMA.nx:4:8",
+        "input": ["out@58", "9"],
+        "output": ["$o@63"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "$o@63", "loc": "FMA.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "FMA.nx:5:12",
+        "input": ["b@1[10]", "a@0", "16'h0"],
+        "output": ["out@64"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "out@64", "loc": "FMA.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "FMA.nx:15:19",
+            "input": ["b@1[10]"],
+            "output": ["$o@65"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@65", "loc": "FMA.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:15:8",
+            "input": ["a@0", "$o@65"],
+            "output": ["$o@66"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@66", "loc": "FMA.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "FMA.nx:16:19",
+            "input": ["$o@65"],
+            "output": ["$o@67"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@67", "loc": "FMA.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:16:8",
+            "input": ["16'h0", "$o@67"],
+            "output": ["$o@68"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@68", "loc": "FMA.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "FMA.nx:14:11",
+            "input": ["$o@66", "$o@68"],
+            "output": ["out@64"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "FMA.nx:4:8",
+        "input": ["out@64", "10"],
+        "output": ["$o@69"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "$o@69", "loc": "FMA.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "FMA.nx:5:12",
+        "input": ["b@1[11]", "a@0", "16'h0"],
+        "output": ["out@70"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "out@70", "loc": "FMA.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "FMA.nx:15:19",
+            "input": ["b@1[11]"],
+            "output": ["$o@71"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@71", "loc": "FMA.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:15:8",
+            "input": ["a@0", "$o@71"],
+            "output": ["$o@72"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@72", "loc": "FMA.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "FMA.nx:16:19",
+            "input": ["$o@71"],
+            "output": ["$o@73"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@73", "loc": "FMA.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:16:8",
+            "input": ["16'h0", "$o@73"],
+            "output": ["$o@74"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@74", "loc": "FMA.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "FMA.nx:14:11",
+            "input": ["$o@72", "$o@74"],
+            "output": ["out@70"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "FMA.nx:4:8",
+        "input": ["out@70", "11"],
+        "output": ["$o@75"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "$o@75", "loc": "FMA.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "FMA.nx:5:12",
+        "input": ["b@1[12]", "a@0", "16'h0"],
+        "output": ["out@76"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "out@76", "loc": "FMA.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "FMA.nx:15:19",
+            "input": ["b@1[12]"],
+            "output": ["$o@77"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@77", "loc": "FMA.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:15:8",
+            "input": ["a@0", "$o@77"],
+            "output": ["$o@78"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@78", "loc": "FMA.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "FMA.nx:16:19",
+            "input": ["$o@77"],
+            "output": ["$o@79"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@79", "loc": "FMA.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:16:8",
+            "input": ["16'h0", "$o@79"],
+            "output": ["$o@80"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@80", "loc": "FMA.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "FMA.nx:14:11",
+            "input": ["$o@78", "$o@80"],
+            "output": ["out@76"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "FMA.nx:4:8",
+        "input": ["out@76", "12"],
+        "output": ["$o@81"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "$o@81", "loc": "FMA.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "FMA.nx:5:12",
+        "input": ["b@1[13]", "a@0", "16'h0"],
+        "output": ["out@82"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "out@82", "loc": "FMA.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "FMA.nx:15:19",
+            "input": ["b@1[13]"],
+            "output": ["$o@83"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@83", "loc": "FMA.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:15:8",
+            "input": ["a@0", "$o@83"],
+            "output": ["$o@84"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@84", "loc": "FMA.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "FMA.nx:16:19",
+            "input": ["$o@83"],
+            "output": ["$o@85"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@85", "loc": "FMA.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:16:8",
+            "input": ["16'h0", "$o@85"],
+            "output": ["$o@86"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@86", "loc": "FMA.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "FMA.nx:14:11",
+            "input": ["$o@84", "$o@86"],
+            "output": ["out@82"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "FMA.nx:4:8",
+        "input": ["out@82", "13"],
+        "output": ["$o@87"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "$o@87", "loc": "FMA.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "FMA.nx:5:12",
+        "input": ["b@1[14]", "a@0", "16'h0"],
+        "output": ["out@88"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "out@88", "loc": "FMA.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "FMA.nx:15:19",
+            "input": ["b@1[14]"],
+            "output": ["$o@89"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@89", "loc": "FMA.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:15:8",
+            "input": ["a@0", "$o@89"],
+            "output": ["$o@90"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@90", "loc": "FMA.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "FMA.nx:16:19",
+            "input": ["$o@89"],
+            "output": ["$o@91"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@91", "loc": "FMA.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:16:8",
+            "input": ["16'h0", "$o@91"],
+            "output": ["$o@92"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@92", "loc": "FMA.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "FMA.nx:14:11",
+            "input": ["$o@90", "$o@92"],
+            "output": ["out@88"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "FMA.nx:4:8",
+        "input": ["out@88", "14"],
+        "output": ["$o@93"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "$o@93", "loc": "FMA.nx:4:8"}
+        ]
+      },
+      {
+        "type": "component", "id": "MUX", "loc": "FMA.nx:5:12",
+        "input": ["b@1[15]", "a@0", "16'h0"],
+        "output": ["out@94"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "out@94", "loc": "FMA.nx:11:15"},
+          {
+            "type": "builtin", "id": "CAST", "loc": "FMA.nx:15:19",
+            "input": ["b@1[15]"],
+            "output": ["$o@95"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@95", "loc": "FMA.nx:15:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:15:8",
+            "input": ["a@0", "$o@95"],
+            "output": ["$o@96"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@96", "loc": "FMA.nx:15:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "NOT", "loc": "FMA.nx:16:19",
+            "input": ["$o@95"],
+            "output": ["$o@97"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@97", "loc": "FMA.nx:16:19"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "FMA.nx:16:8",
+            "input": ["16'h0", "$o@97"],
+            "output": ["$o@98"],
+            "members": [
+              {"type": "wire", "width": 16, "id": "$o@98", "loc": "FMA.nx:16:8"}
+            ]
+          },
+          {
+            "type": "builtin", "id": "OR", "loc": "FMA.nx:14:11",
+            "input": ["$o@96", "$o@98"],
+            "output": ["out@94"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "SHL", "loc": "FMA.nx:4:8",
+        "input": ["out@94", "15"],
+        "output": ["$o@99"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "$o@99", "loc": "FMA.nx:4:8"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "ADD", "loc": "FMA.nx:3:9",
+        "input": ["$o@9", "$o@15", "$o@21", "$o@27", "$o@33", "$o@39", "$o@45", "$o@51", "$o@57", "$o@63", "$o@69", "$o@75", "$o@81", "$o@87", "$o@93", "$o@99", "c@2"],
+        "output": ["y@3"]
+      }
+    ]
+  }
+}
