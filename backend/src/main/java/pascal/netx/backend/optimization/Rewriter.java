@@ -25,7 +25,6 @@ public final class Rewriter {
                 new DoubleNegationRule(graph),
                 new DistributivityRule(graph),
                 new ConstantPropRule(graph),
-                new SelectPropagateRule(graph),
                 new DeMorganRule(graph),
                 new RetimingRule(graph)
         );
