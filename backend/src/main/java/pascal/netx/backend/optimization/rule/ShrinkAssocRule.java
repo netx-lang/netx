@@ -44,7 +44,7 @@ public final class ShrinkAssocRule extends UniRule {
 
         private void shrink(int index) {
             if (index == candidates.size()) {
-                var dual = graph.factory().component(origin.label(), origin.outWidth());
+                var dual = graph.factory().copy(origin);
                 for (var vertex : chosen) {
                     graph.addEdge(vertex, dual);
                 }

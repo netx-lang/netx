@@ -33,7 +33,7 @@ public final class RedundantConstRule extends UniRule {
             }
         }
         if (should) {
-            var dual = graph.factory().component(vertex.label(), vertex.outWidth());
+            var dual = graph.factory().copy(vertex);
             newInputs.forEach(v -> graph.addEdge(v, dual));
             graph.manager().replace(vertex, dual);
         }

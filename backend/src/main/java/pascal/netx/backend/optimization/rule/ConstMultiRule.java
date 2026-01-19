@@ -54,14 +54,17 @@ public class ConstMultiRule extends UniRule {
         var coef = constants.stream().map(Constant::value).reduce(BitVector::mul).orElseThrow().toULong();
 
         mark(vertex, Marker.ConstMulti);
-        if (isPowerOfTwo(coef)) {
+        if (coef == 0) {
+            var zeroConst = graph.factory().constant(BitVector.fromLong(vertex.outWidth(), 0L));
+            graph.manager().replace(vertex, zeroConst);
+        } else if (isPowerOfTwo(coef)) {
             var shiftDual = graph.factory().component(Component.Label.SHL, vertex.outWidth());
             int shiftAmount = Long.numberOfTrailingZeros(coef);
             var shiftConst = graph.factory().constant(BitVector.fromLong(vertex.outWidth(), shiftAmount));
             graph.addEdge(variable, shiftDual);
             graph.addEdge(shiftConst, shiftDual);
             graph.manager().union(shiftDual, vertex);
-        } else {
+        } else if (coef < 20) {
             var repeatedDual = graph.factory().component(Component.Label.ADD, vertex.outWidth());
             for (int i = 0; i < coef; i++) {
                 graph.addEdge(variable, repeatedDual);

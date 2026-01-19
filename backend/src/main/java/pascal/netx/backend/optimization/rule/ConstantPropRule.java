@@ -38,8 +38,8 @@ public final class ConstantPropRule extends UniRule {
                     .map(Constant::value).toList();
 
             BitVector result = switch (vertex.label()) {
-                case CAST -> inputs.getFirst().sext(vertex.outWidth());
-                case UCAST -> inputs.getFirst().uext(vertex.outWidth());
+                case CAST -> cast(inputs.getFirst(), true);
+                case UCAST -> cast(inputs.getFirst(), false);
                 case TO -> inputs.getFirst();
                 case CONCAT -> inputs.stream().reduce(BitVector::concat).orElseThrow();
                 case SELECT -> {
@@ -80,50 +80,71 @@ public final class ConstantPropRule extends UniRule {
                 return true;
             }
         } else {
-            if (Set.of(SHL, ASHR, LSHR).contains(vertex.label())) {
-                var amountCls = graph.inputsOf(vertex).get(1);
-                if (amountCls.contains(Constant.class)) {
-                    int amount = amountCls.filter(Constant.class).getFirst().value().toUInt();
-                    if (amount == 0) {
-                        var valueCls = graph.inputsOf(vertex).getFirst();
-                        graph.manager().replace(vertex, valueCls.getAny());
-                        return true;
-                    } else {
-                        int width = vertex.outWidth();
-                        var input = graph.inputsOf(vertex).getFirst();
-                        var dual = graph.factory().component(CONCAT, width);
-                        switch (vertex.label()) {
-                            case SHL -> {
-                                var select = graph.factory().readSelect(new Selector(width - amount - 1, 0));
-                                var zeros = graph.factory().constant(BitVector.fromInt(amount, 0));
-                                graph.addEdge(input, select);
-                                graph.addEdge(select, dual);
-                                graph.addEdge(zeros, dual);
-                            }
-                            case LSHR -> {
-                                var select = graph.factory().readSelect(new Selector(width - 1, amount));
-                                var zeros = graph.factory().constant(BitVector.fromInt(amount, 0));
-                                graph.addEdge(input, select);
-                                graph.addEdge(zeros, dual);
-                                graph.addEdge(select, dual);
-                            }
-                            case ASHR -> {
-                                var select = graph.factory().readSelect(new Selector(width - 1, amount));
-                                var signSelect = graph.factory().readSelect(new Selector(width - 1, width - 1));
-                                var signs = graph.factory().component(CAST, amount);
-                                graph.addEdge(input, signSelect);
-                                graph.addEdge(input, select);
-                                graph.addEdge(signSelect, signs);
+            return propagateShift(vertex);
+        }
+        return false;
+    }
 
-                                graph.addEdge(signs, dual);
-                                graph.addEdge(select, dual);
-                            }
+    private boolean propagateShift(Component vertex) {
+        if (Set.of(SHL, ASHR, LSHR).contains(vertex.label())) {
+            var amountCls = graph.inputsOf(vertex).get(1);
+            if (amountCls.contains(Constant.class)) {
+                int amount = amountCls.filter(Constant.class).getFirst().value().toUInt();
+                if (amount == 0) {
+                    var valueCls = graph.inputsOf(vertex).getFirst();
+                    graph.manager().replace(vertex, valueCls.getAny());
+                    return true;
+                } else {
+                    int width = vertex.outWidth();
+                    var input = graph.inputsOf(vertex).getFirst();
+                    var dual = graph.factory().component(CONCAT, width);
+                    switch (vertex.label()) {
+                        case SHL -> {
+                            var select = graph.factory().readSelect(new Selector(width - amount - 1, 0));
+                            var zeros = graph.factory().constant(BitVector.fromInt(amount, 0));
+                            graph.addEdge(input, select);
+                            graph.addEdge(select, dual);
+                            graph.addEdge(zeros, dual);
                         }
-                        graph.manager().replace(vertex, dual);
+                        case LSHR -> {
+                            var select = graph.factory().readSelect(new Selector(width - 1, amount));
+                            var zeros = graph.factory().constant(BitVector.fromInt(amount, 0));
+                            graph.addEdge(input, select);
+                            graph.addEdge(zeros, dual);
+                            graph.addEdge(select, dual);
+                        }
+                        case ASHR -> {
+                            var select = graph.factory().readSelect(new Selector(width - 1, amount));
+                            var signSelect = graph.factory().readSelect(new Selector(width - 1, width - 1));
+                            var signs = graph.factory().component(CAST, amount);
+                            graph.addEdge(input, signSelect);
+                            graph.addEdge(input, select);
+                            graph.addEdge(signSelect, signs);
+
+                            graph.addEdge(signs, dual);
+                            graph.addEdge(select, dual);
+                        }
                     }
+                    graph.manager().replace(vertex, dual);
                 }
             }
         }
         return false;
+    }
+
+    private BitVector cast(BitVector value, boolean signed) {
+        int inW = value.size();
+        int outW = value.size();
+        if (inW == outW) {
+            return value;
+        } else if (inW < outW) {
+            if (signed) {
+                return value.sext(outW);
+            } else {
+                return value.uext(outW);
+            }
+        } else {
+            return value.truncate(outW);
+        }
     }
 }

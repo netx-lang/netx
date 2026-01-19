@@ -30,24 +30,33 @@ process_json() {
     local opted_json="${work_dir}/${basename}_opted.json"
     local opted_v="${work_dir}/${basename}_opted.v"
 
-    echo "[1/5] Origin Verilog: ${basename}"
     nx dump verilog "$json_file" --output "$origin_v" >/dev/null
+    echo "[1/5] Origin Verilog: ${basename}"
 
-    echo "[2/5] Optimize: ${basename}"
     nx opt "$json_file" -o "$opted_json" >/dev/null
+    echo "[2/5] Optimize: ${basename}"
 
-    echo "[3/5] Opted Verilog: ${basename}"
     nx dump verilog "$opted_json" --output "$opted_v" >/dev/null
+    echo "[3/5] Opted Verilog: ${basename}"
 
+    # Run synthesis and timing analysis in parallel for origin and opted
+    synthesize_design "$origin_v" "${work_dir}/${basename}_origin" &
+    local synth_origin_pid=$!
+    synthesize_design "$opted_v" "${work_dir}/${basename}_opted" &
+    local synth_opted_pid=$!
+    
+    wait "$synth_origin_pid" "$synth_opted_pid"
     echo "[4/5] Yosys synthesis: ${basename}"
-    synthesize_design "$origin_v" "${work_dir}/${basename}_origin"
-    synthesize_design "$opted_v" "${work_dir}/${basename}_opted"
 
+    analyze_timing "$origin_v" "${work_dir}/${basename}_origin" &
+    local sta_origin_pid=$!
+    analyze_timing "$opted_v" "${work_dir}/${basename}_opted" &
+    local sta_opted_pid=$!
+    
+    wait "$sta_origin_pid" "$sta_opted_pid"
     echo "[5/5] OpenSTA analysis: ${basename}"
-    analyze_timing "$origin_v" "${work_dir}/${basename}_origin"
-    analyze_timing "$opted_v" "${work_dir}/${basename}_opted"
 }
-
+  
 main() {
     mkdir -p "$BUILD_DIR"
     local json_files=()
