@@ -48,6 +48,8 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
 
     private final HashSet<Integer> globalIn = new HashSet<>();
     private final HashSet<Integer> globalOut = new HashSet<>();
+    private final List<String> extraDeclarations = new ArrayList<>();
+    private final List<String> extraAssignments = new ArrayList<>();
 
     public VerilogTransformer(NotepadWriter notepad, JsonNode json) {
         super(notepad, json);
@@ -68,10 +70,12 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
         notepad.newLine();
         notepad.println("/*%s DATA %s*/".formatted(BAR, BAR));
         notepad.newLine();
+        extraDeclarations.forEach(notepad::println);
         parseComponent(node, ParseMode.DATA);
         notepad.newLine();
         notepad.println("/*%s CONNECTION %s*/".formatted(BAR, BAR));
         notepad.newLine();
+        extraAssignments.forEach(notepad::println);
         parseComponent(node, ParseMode.CONNECTION);
         notepad.println("endmodule");
         notepad.flush();
@@ -94,11 +98,42 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
                 .map(JsonNode::textValue)
                 .map(Reference::from)
                 .forEach(ref -> {
-                    io.add(ref.dump());
-                    if (ref instanceof WireReference dataRef) {
-                        globalSet.add(dataRef.id());
+                    if (ref instanceof WireReference wireRef && wireRef.hasSelector()) {
+                        String selector = wireRef.selector();
+                        int width = parseSelectorWidth(selector);
+                        String tempName = "io" + wireRef.dump().replaceAll("[\\[\\].:]", "_");
+                        io.add(tempName);
+
+                        String decl = "%s wire %s%s;".formatted(
+                                portType.equals("input") ? "input" : "output",
+                                parseWidth(width),
+                                tempName
+                        );
+                        extraDeclarations.add(decl);
+
+                        if (portType.equals("input")) {
+                            extraAssignments.add("assign %s = %s;".formatted(wireRef.dump(), tempName));
+                        } else {
+                            extraAssignments.add("assign %s = %s;".formatted(tempName, wireRef.dump()));
+                        }
+                    } else {
+                        io.add(ref.dump());
+                        if (ref instanceof WireReference dataRef) {
+                            globalSet.add(dataRef.id());
+                        }
                     }
                 });
+    }
+
+    private int parseSelectorWidth(String selector) {
+        String content = selector.replace("[", "").replace("]", "");
+        if (content.contains(":")) {
+            String[] parts = content.split(":");
+            int msb = Integer.parseInt(parts[0].trim());
+            int lsb = Integer.parseInt(parts[1].trim());
+            return Math.abs(msb - lsb) + 1;
+        }
+        return 1;
     }
 
     private void parseComponent(JsonNode node, ParseMode mode) {
