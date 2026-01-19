@@ -9,17 +9,20 @@ import sys
 import re
 from datetime import datetime
 
-def extract_cells_from_area_file(area_file):
-    """Extract number of cells from area.txt file."""
+def extract_chip_area_from_area_file(area_file):
+    """Extract chip area in µm^2 from area.txt file."""
     if not os.path.exists(area_file):
         return None
-    
+
     with open(area_file, 'r') as f:
         for line in f:
-            if 'Number of cells:' in line:
-                match = re.search(r'Number of cells:\s+(\d+)', line)
-                if match:
-                    return match.group(1)
+            # Match lines like "   Chip area for module '\CORE': 693.395640"
+            match = re.search(r"Chip area for module '\\[^']+':\s+([0-9]+\.[0-9]+)", line)
+            if match:
+                try:
+                    return float(match.group(1))
+                except ValueError:
+                    return None
     return None
 
 def extract_timing_from_timing_file(timing_file):
@@ -28,25 +31,31 @@ def extract_timing_from_timing_file(timing_file):
         return None
     
     with open(timing_file, 'r') as f:
+        # Read all lines and find the last occurrence of "data arrival time"
+        # which is the critical path (not intermediate values)
+        last_timing = None
         for line in f:
-            if 'data arrival time' in line and line.strip().endswith('data arrival time'):
+            if 'data arrival time' in line:
                 parts = line.split()
                 if len(parts) >= 1:
                     try:
-                        return f"{float(parts[0]):.3f}"
+                        timing_value = float(parts[0])
+                        # Only consider non-zero positive values
+                        if timing_value > 0:
+                            last_timing = f"{timing_value:.3f}"
                     except ValueError:
                         pass
-    return None
+        return last_timing
 
 def extract_metrics_from_design(design_dir, design_name):
     """Extract metrics from a single design's log files."""
     area_file = os.path.join(design_dir, f"{design_name}_area.txt")
     timing_file = os.path.join(design_dir, f"{design_name}_timing.txt")
     
-    cells = extract_cells_from_area_file(area_file)
+    area = extract_chip_area_from_area_file(area_file)
     timing = extract_timing_from_timing_file(timing_file)
     
-    return cells, timing
+    return area, timing
 
 def collect_all_results(build_dir):
     """Collect results from all design directories in build folder."""
@@ -67,26 +76,26 @@ def collect_all_results(build_dir):
         if not os.path.isdir(origin_dir) or not os.path.isdir(opted_dir):
             continue
         
-        origin_cells, origin_time = extract_metrics_from_design(origin_dir, f"{design_name}_origin")
-        opted_cells, opted_time = extract_metrics_from_design(opted_dir, f"{design_name}_opted")
+        origin_area, origin_time = extract_metrics_from_design(origin_dir, f"{design_name}_origin")
+        opted_area, opted_time = extract_metrics_from_design(opted_dir, f"{design_name}_opted")
         
-        if origin_cells and opted_cells and origin_time and opted_time:
+        if origin_area is not None and opted_area is not None and origin_time and opted_time:
             try:
-                origin_cells_int = int(origin_cells)
-                opted_cells_int = int(opted_cells)
+                origin_area_float = float(origin_area)
+                opted_area_float = float(opted_area)
                 origin_time_float = float(origin_time)
                 opted_time_float = float(opted_time)
                 
-                cell_delta = ((opted_cells_int - origin_cells_int) / origin_cells_int * 100) if origin_cells_int > 0 else 0
+                area_delta = ((opted_area_float - origin_area_float) / origin_area_float * 100) if origin_area_float > 0 else 0
                 time_delta = ((opted_time_float - origin_time_float) / origin_time_float * 100) if origin_time_float > 0 else 0
                 
                 results.append({
                     'design': design_name,
-                    'origin_cells': origin_cells,
+                    'origin_area': f"{origin_area_float:.3f}",
                     'origin_time': origin_time,
-                    'opted_cells': opted_cells,
+                    'opted_area': f"{opted_area_float:.3f}",
                     'opted_time': opted_time,
-                    'cell_delta': f"{cell_delta:.1f}%",
+                    'area_delta': f"{area_delta:.1f}%",
                     'time_delta': f"{time_delta:.1f}%"
                 })
             except (ValueError, ZeroDivisionError):
@@ -98,22 +107,27 @@ def generate_table(results, output_file=None):
     """Generate formatted table from results."""
     lines = []
     
-    lines.append("=" * 105)
-    lines.append(f"{'Design':<20} {'Origin_Cells':>12} {'Origin_Time':>12} {'Opted_Cells':>12} {'Opted_Time':>12} {'Cell_Δ':>10} {'Time_Δ':>10}")
-    lines.append("=" * 105)
+    lines.append("=" * 100)
+    lines.append(
+        f"{'Design':<20} "
+        f"{'Origin_Area':>12} {'Origin_Time':>12} "
+        f"{'Opted_Area':>12} {'Opted_Time':>12} "
+        f"{'Area_Δ':>10} {'Time_Δ':>10}"
+    )
+    lines.append("=" * 100)
     
     for result in results:
         lines.append(
             f"{result['design']:<20} "
-            f"{result['origin_cells']:>12} "
+            f"{result['origin_area']:>12} "
             f"{result['origin_time']:>12} "
-            f"{result['opted_cells']:>12} "
+            f"{result['opted_area']:>12} "
             f"{result['opted_time']:>12} "
-            f"{result['cell_delta']:>10} "
+            f"{result['area_delta']:>10} "
             f"{result['time_delta']:>10}"
         )
     
-    lines.append("=" * 105)
+    lines.append("=" * 100)
     
     output_text = '\n'.join(lines)
     

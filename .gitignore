@@ -59,8 +59,4 @@ cpp-build/
 .idea/copilot.data.migration.edit.xml
 
 ### ASAP 7nm Cell Lib ###
-/backend/src/test/resources/benchmark/asap7/asap7sc7p5t_AO_LVT_TT_ccs_211120.lib
-/backend/src/test/resources/benchmark/asap7/asap7sc7p5t_INVBUF_LVT_TT_ccs_220122.lib
-/backend/src/test/resources/benchmark/asap7/asap7sc7p5t_OA_LVT_TT_ccs_211120.lib
-/backend/src/test/resources/benchmark/asap7/asap7sc7p5t_SEQ_LVT_TT_ccs_220123.lib
-/backend/src/test/resources/benchmark/asap7/asap7sc7p5t_SIMPLE_LVT_TT_ccs_211120.lib
+/backend/src/test/resources/benchmark/asap7sc7p5t_28/
