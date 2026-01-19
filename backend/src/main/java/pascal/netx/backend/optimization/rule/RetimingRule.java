@@ -34,7 +34,7 @@ public final class RetimingRule extends BidiRule {
                 continue;
             }
 
-            var dual = graph.factory().component(compute.label(), compute.outWidth());
+            var dual = graph.factory().copy(compute);
             graph.manager().union(dual, vertex);
             for (var input : graph.inputsOf(compute)) {
                 var pushed = graph.factory().register(input.width(), reg.isPosEdge());
@@ -128,7 +128,7 @@ public final class RetimingRule extends BidiRule {
 
                 int width = origin.outWidth();
                 var pulled = graph.factory().register(width, isPosEdge.get());
-                var dual = graph.factory().component(origin.label(), width);
+                var dual = graph.factory().copy(origin);
                 graph.addEdge(clock.get(), pulled);
                 graph.addEdge(dual, pulled);
                 for (var input : chosen) {

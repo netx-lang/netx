@@ -11,12 +11,12 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class GraphTransformerTest {
-    private static final Path TEST_DIR = Path.of("src/test/resources/benchmark/");
+    private static final Path TEST_DIR = Path.of("src/test/resources/");
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Test
     void sampleTest() throws IOException {
-        var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve("opt.json")));
+        var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve("fft.json")));
         var transformer = new GraphTransformer(NotepadWriter.stdOut(), json);
         transformer.parse();
         System.out.printf("Before optimization: %s\n", transformer.measure());
@@ -31,6 +31,7 @@ class GraphTransformerTest {
     @Test
     void testDumpNxonRoundTrip() throws IOException {
         testRoundTrip("opt");
+        testRoundTrip("fft");
         testRoundTrip("rv32i");
         testRoundTrip("ADPCM");
         testRoundTrip("FIR_8");
@@ -43,7 +44,8 @@ class GraphTransformerTest {
 
     private void testRoundTrip(String filename) throws IOException {
         var notepad = NotepadWriter.strOut();
-        var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve(filename + ".json")));
+        var json = MAPPER.readTree(Files.readString(
+                TEST_DIR.resolve("benchmark").resolve(filename + ".json")));
         var transformer = new GraphTransformer(notepad, json);
         transformer.parse();
         transformer.rewrite();
@@ -55,6 +57,7 @@ class GraphTransformerTest {
     @Test
     void testBenchmark() throws IOException {
         testBenchmarkCase("opt");
+        testBenchmarkCase("fft");
         testBenchmarkCase("rv32i");
         testBenchmarkCase("ADPCM");
         testBenchmarkCase("FIR_8");
@@ -66,7 +69,7 @@ class GraphTransformerTest {
     }
 
     private void testBenchmarkCase(String name) throws IOException {
-        Path path = TEST_DIR.resolve(name + ".json");
+        Path path = TEST_DIR.resolve("benchmark").resolve(name + ".json");
         System.out.println("======== " + path.getFileName() + " ========");
         var json = MAPPER.readTree(Files.readString(path));
         var transformer = new GraphTransformer(NotepadWriter.stdOut(), json);

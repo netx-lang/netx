@@ -1,10 +1,10 @@
 component FMA : [a, b, c] -> [y] {
     wire a, b, c, y of bit(16);
-    y <> ADD <> [
+    y <> ADD <> [c] ++ [
         SHL <> [
             MUX <> [b[i], a, 16'd0], i
         ] | i in [0..16]
-    ] ++ [c];
+    ];
 }
 
 component MUX : [sel, a, b] -> [out] {

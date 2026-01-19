@@ -303,11 +303,22 @@ public final class Graph {
             return indexer.getAndIncrement();
         }
 
+        public Vertex copy(Vertex vertex) {
+            return switch (vertex) {
+                case WriteSelect ws -> writeSelect(ws.label(), ws.selector());
+                case ReadSelect rs -> readSelect(rs.selector());
+                case Register reg -> register(reg.outWidth(), reg.isPosEdge());
+                case Component comp -> component(comp.label(), comp.outWidth());
+                default -> throw new ShallNotReachHereError();
+            };
+        }
+
         public Wire wire(String label, int width) {
             var wire = new Wire(nextIndex(), label, width);
             add(wire);
             return wire;
         }
+
         public WriteSelect writeSelect(String label, Selector selector) {
             var select = new WriteSelect(nextIndex(), label, selector);
             add(select);
@@ -321,7 +332,7 @@ public final class Graph {
         }
 
         public Component component(Component.Label label, int width) {
-            if (label == Component.Label.REGISTER) {
+            if (label == Component.Label.REGISTER || label == Component.Label.SELECT) {
                 throw new ShallNotReachHereError();
             } else {
                 var component = new Component(nextIndex(), label, width);
