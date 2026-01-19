@@ -4,6 +4,7 @@ LIB_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE_ROOT="$(cd "${LIB_SCRIPT_DIR}/.." && pwd)"
 
 : ${CLOCK_PERIOD:=10.0}
+: ${OPENROAD_DOCKER:=openroad}
 
 analyze_timing() {
     local design=$1
@@ -14,5 +15,12 @@ analyze_timing() {
     export TOP_MODULE=$(grep "^module" "$NETLIST_FILE" | head -1 | awk '{print $2}' | sed 's/(.*$//')
     export CLOCK_PERIOD=${CLOCK_PERIOD}
 
-    (cd "$WORKSPACE_ROOT" && sta "${LIB_SCRIPT_DIR}/timing.tcl" > "${output_dir}/${basename}_timing.txt" 2>&1) >/dev/null 2>&1 || true
+    docker run --rm \
+        -v "${WORKSPACE_ROOT}:${WORKSPACE_ROOT}" \
+        -w "${WORKSPACE_ROOT}" \
+        -e NETLIST_FILE="${NETLIST_FILE}" \
+        -e TOP_MODULE="${TOP_MODULE}" \
+        -e CLOCK_PERIOD="${CLOCK_PERIOD}" \
+        "${OPENROAD_DOCKER}" \
+        openroad "${LIB_SCRIPT_DIR}/timing.tcl" > "${output_dir}/${basename}_timing.txt" 2>&1 || true
 }

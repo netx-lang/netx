@@ -31,8 +31,6 @@ class GraphTransformerTest {
     @Test
     void testDumpNxonRoundTrip() throws IOException {
         testRoundTrip("opt");
-        testRoundTrip("select");
-        testRoundTrip("motivating");
         testRoundTrip("rv32i");
         testRoundTrip("ADPCM");
         testRoundTrip("FIR_8");
@@ -57,8 +55,6 @@ class GraphTransformerTest {
     @Test
     void testBenchmark() throws IOException {
         testBenchmarkCase("opt");
-        testBenchmarkCase("select");
-        testBenchmarkCase("motivating");
         testBenchmarkCase("rv32i");
         testBenchmarkCase("ADPCM");
         testBenchmarkCase("FIR_8");

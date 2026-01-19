@@ -11,8 +11,10 @@ component MUX : [sel, a, b] -> [out] {
     wire a, b, out of bit(16);
     wire sel       of bit(1);
 
-    out <> OR <> [
-        AND <> [a, CAST <> sel],
-        AND <> [b, NOT <> CAST <> sel]
-    ];
+    for i in [0..16] {
+        out[i] <> OR <> [
+            AND <> [a[i], sel],
+            AND <> [b[i], NOT <> sel]
+        ];
+    }
 }

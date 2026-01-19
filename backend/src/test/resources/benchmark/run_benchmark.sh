@@ -5,6 +5,8 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPTS_DIR="${ROOT_DIR}/scripts"
 BUILD_DIR="${ROOT_DIR}/build"
 
+MAX_JOBS=${MAX_JOBS:-$(nproc 2>/dev/null || echo 4)}
+
 usage() {
     cat <<EOF
 Usage: $(basename "$0") [benchmark]
@@ -28,8 +30,6 @@ process_json() {
     local opted_json="${work_dir}/${basename}_opted.json"
     local opted_v="${work_dir}/${basename}_opted.v"
 
-    echo "========== Processing benchmark: ${basename} =========="
-
     echo "[1/5] Origin Verilog: ${basename}"
     nx dump verilog "$json_file" --output "$origin_v" >/dev/null
 
@@ -46,22 +46,26 @@ process_json() {
     echo "[5/5] OpenSTA analysis: ${basename}"
     analyze_timing "$origin_v" "${work_dir}/${basename}_origin"
     analyze_timing "$opted_v" "${work_dir}/${basename}_opted"
-    
-    echo ""
 }
 
 main() {
     mkdir -p "$BUILD_DIR"
     local json_files=()
+    local single_benchmark=""
 
+    # Parse arguments
     if [ "$#" -gt 0 ]; then
-        local candidate="$1"
+        single_benchmark="$1"
+    fi
+
+    if [ -n "$single_benchmark" ]; then
+        local candidate="$single_benchmark"
         if [[ "$candidate" != *.json ]]; then
             candidate="${candidate}.json"
         fi
 
         if [ ! -f "$candidate" ]; then
-            echo "Error: benchmark '$1' not found (expected $candidate)" >&2
+            echo "Error: benchmark '$single_benchmark' not found (expected $candidate)" >&2
             usage
             exit 1
         fi
@@ -75,8 +79,25 @@ main() {
         exit 1
     fi
 
+    local pids=()
     for json_file in "${json_files[@]}"; do
-        process_json "$json_file"
+        while [ "${#pids[@]}" -ge "$MAX_JOBS" ]; do
+            for i in "${!pids[@]}"; do
+                if ! kill -0 "${pids[$i]}" 2>/dev/null; then
+                    wait "${pids[$i]}" 2>/dev/null || true
+                    unset 'pids[$i]'
+                fi
+            done
+            pids=("${pids[@]}")
+            [ "${#pids[@]}" -ge "$MAX_JOBS" ] && sleep 0.1
+        done
+        
+        process_json "$json_file" &
+        pids+=($!)
+    done
+
+    for pid in "${pids[@]}"; do
+        wait "$pid" 2>/dev/null || true
     done
 
     python3 "${SCRIPTS_DIR}/generate_batch_report.py" "$BUILD_DIR" "${BUILD_DIR}/summary.txt"
