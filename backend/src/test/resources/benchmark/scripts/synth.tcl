@@ -11,7 +11,7 @@ proc; fsm; opt; memory; opt; techmap; flatten; opt -full
 
 dfflibmap -liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_SEQ_LVT_TT_ccs_220123.lib
 
-abc -dff \
+abc ABC_FLAGS_PLACEHOLDER \
     -liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_AO_LVT_TT_ccs_211120.lib \
     -liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_INVBUF_LVT_TT_ccs_220122.lib \
     -liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_OA_LVT_TT_ccs_211120.lib \
