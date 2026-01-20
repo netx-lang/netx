@@ -110,7 +110,11 @@ public final class AliasAnalysis extends CircuitAnalysis {
             Set<ComponentScope.Alias> newAlias = new LinkedHashSet<>();
             Consumer<ComponentScope.Alias> addNew = (alias) -> {
                 if (!newAlias.contains(alias) && !newAlias.contains(alias.flip())) {
-                    newAlias.add(alias);
+                    if (alias.lhs() instanceof Value) {
+                        newAlias.add(alias.flip());
+                    } else {
+                        newAlias.add(alias);
+                    }
                 }
             };
             for (var alias : scope.getAliases()) {
@@ -120,7 +124,7 @@ public final class AliasAnalysis extends CircuitAnalysis {
                     } else if (isNotIdentity(repOf(alias.rhs()), access)) {
                         addNew.accept(new ComponentScope.Alias(access, repOf(alias.rhs())));
                     }
-                } else if (alias.rhs() instanceof Access access){
+                } else if (alias.rhs() instanceof Access access) {
                     var lhs = repOf(alias.lhs());
                     if (isValidDump(alias.rhs()) && isNotIdentity(lhs, access)) {
                         addNew.accept(new ComponentScope.Alias(lhs, alias.rhs()));
