@@ -7,6 +7,7 @@ Reads data directly from area and timing log files and generates a formatted tab
 import os
 import sys
 import re
+import math
 from datetime import datetime
 
 def extract_chip_area_from_area_file(area_file):
@@ -96,12 +97,27 @@ def collect_all_results(build_dir):
                     'opted_area': f"{opted_area_float:.3f}",
                     'opted_time': opted_time,
                     'area_delta': f"{area_delta:.1f}%",
-                    'time_delta': f"{time_delta:.1f}%"
+                    'time_delta': f"{time_delta:.1f}%",
+                    'area_delta_raw': area_delta,
+                    'time_delta_raw': time_delta
                 })
             except (ValueError, ZeroDivisionError):
                 pass
     
     return results
+
+def compute_geomean(values):
+    """Compute geometric mean of a list of values."""
+    if not values:
+        return 1.0
+    
+    product = 1.0
+    for v in values:
+        product *= v
+    
+    geomean = product ** (1.0 / len(values))
+    
+    return geomean
 
 def generate_table(results, output_file=None):
     """Generate formatted table from results."""
@@ -116,6 +132,12 @@ def generate_table(results, output_file=None):
     )
     lines.append("=" * 100)
     
+    # Collect raw values for geomean calculation
+    origin_areas = []
+    opted_areas = []
+    origin_times = []
+    opted_times = []
+    
     for result in results:
         lines.append(
             f"{result['design']:<20} "
@@ -126,7 +148,31 @@ def generate_table(results, output_file=None):
             f"{result['area_delta']:>10} "
             f"{result['time_delta']:>10}"
         )
+        origin_areas.append(float(result['origin_area']))
+        opted_areas.append(float(result['opted_area']))
+        origin_times.append(float(result['origin_time']))
+        opted_times.append(float(result['opted_time']))
     
+    # Compute geometric means of absolute values
+    origin_area_geomean = compute_geomean(origin_areas)
+    opted_area_geomean = compute_geomean(opted_areas)
+    origin_time_geomean = compute_geomean(origin_times)
+    opted_time_geomean = compute_geomean(opted_times)
+    
+    # Compute delta from geomeans
+    area_delta_geomean = ((opted_area_geomean - origin_area_geomean) / origin_area_geomean * 100) if origin_area_geomean > 0 else 0
+    time_delta_geomean = ((opted_time_geomean - origin_time_geomean) / origin_time_geomean * 100) if origin_time_geomean > 0 else 0
+    
+    lines.append("=" * 100)
+    lines.append(
+        f"{'GEOMEAN':<20} "
+        f"{origin_area_geomean:>12.3f} "
+        f"{origin_time_geomean:>12.3f} "
+        f"{opted_area_geomean:>12.3f} "
+        f"{opted_time_geomean:>12.3f} "
+        f"{area_delta_geomean:>9.1f}% "
+        f"{time_delta_geomean:>9.1f}%"
+    )
     lines.append("=" * 100)
     
     output_text = '\n'.join(lines)

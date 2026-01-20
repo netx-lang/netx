@@ -26,4 +26,5 @@ tee -o OUTPUT_STATS_PLACEHOLDER stat \
     -liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_OA_LVT_TT_ccs_211120.lib \
     -liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_SIMPLE_LVT_TT_ccs_211120.lib \
     -liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_SEQ_LVT_TT_ccs_220123.lib
-write_verilog OUTPUT_VERILOG_PLACEHOLDER
+
+write_verilog -noattr -simple-lhs OUTPUT_VERILOG_PLACEHOLDER

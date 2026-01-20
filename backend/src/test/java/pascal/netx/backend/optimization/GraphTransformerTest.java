@@ -16,13 +16,14 @@ class GraphTransformerTest {
 
     @Test
     void sampleTest() throws IOException {
-        var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve("fft.json")));
-        var transformer = new GraphTransformer(NotepadWriter.stdOut(), json);
+        var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve("benchmark/bar.json")));
+        var transformer = new GraphTransformer(NotepadWriter.pathOut(Path.of("/home/nairen/tmp/test.dot")), json);
         transformer.parse();
         System.out.printf("Before optimization: %s\n", transformer.measure());
 
         transformer.rewrite();
-        transformer.saturate(1, 1);
+        transformer.saturate(0, 1);
+        transformer.dumpDot();
         System.out.printf(" After optimization: %s\n", transformer.measure());
 
         transformer.dumpDot();
@@ -30,7 +31,6 @@ class GraphTransformerTest {
 
     @Test
     void testDumpNxonRoundTrip() throws IOException {
-        testRoundTrip("opt");
         testRoundTrip("fft");
         testRoundTrip("rv32i");
         testRoundTrip("ADPCM");
@@ -56,7 +56,6 @@ class GraphTransformerTest {
 
     @Test
     void testBenchmark() throws IOException {
-        testBenchmarkCase("opt");
         testBenchmarkCase("fft");
         testBenchmarkCase("rv32i");
         testBenchmarkCase("ADPCM");

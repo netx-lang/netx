@@ -1,7 +1,3 @@
-read_lef asap7sc7p5t_28/techlef_misc/asap7_tech_1x_201209.lef
-
-read_lef asap7sc7p5t_28/LEF/asap7sc7p5t_28_L_1x_220121a.lef
-
 read_liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_AO_LVT_TT_ccs_211120.lib
 read_liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_INVBUF_LVT_TT_ccs_220122.lib
 read_liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_OA_LVT_TT_ccs_211120.lib
@@ -9,6 +5,8 @@ read_liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_SEQ_LVT_TT_ccs_220123.lib
 read_liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_SIMPLE_LVT_TT_ccs_211120.lib
 
 read_verilog $::env(NETLIST_FILE)
+
+set clock_period_ns [expr {double($::env(CLOCK_PERIOD))}]
 
 link_design $::env(TOP_MODULE)
 # Parse the netlist to find which input ports drive .CLK signals on flip-flops
@@ -39,20 +37,20 @@ if {[llength $clock_ports] > 0} {
     foreach clk_port $clock_ports {
         set port_name [get_name $clk_port]
         set clock_name "clk_[regsub -all {[^a-zA-Z0-9_]} $port_name _]"
-        puts "Creating clock: $clock_name on port: $port_name with period 10.0ns"
-        create_clock -name $clock_name -period 10.0 $clk_port
+        puts "Creating clock: $clock_name on port: $port_name with period ${clock_period_ns}ns"
+        create_clock -name $clock_name -period $clock_period_ns $clk_port
     }
     puts "Number of clocks created: [llength $clock_ports]"
 } else {
     puts "No clock ports detected - treating as combinational design"
 }
 
-set input_ports [get_ports -filter "direction == in"]
+set input_ports [all_inputs]
 if {[llength $input_ports] > 0} {
-    set_driving_cell -lib_cell INVx1_ASAP7_75t_R $input_ports
+    set_driving_cell -lib_cell INVx1_ASAP7_75t_L $input_ports
 }
 
-set output_ports [get_ports -filter "direction == out"]
+set output_ports [all_outputs]
 if {[llength $output_ports] > 0} {
     set_load 0.00 $output_ports
 }

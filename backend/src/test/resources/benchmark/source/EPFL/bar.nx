@@ -1,0 +1,27 @@
+component BARREL_SHIFTER(stage) : [din, shamt] -> [dout] {
+  let width = 2 ** stage;
+
+  wire din, dout  of bit(width);
+  wire shamt      of bit(stage);
+
+  wire result[stage] of bit(width);
+  for i in [0..stage] {
+    for j in [0..width] {
+      let offset = 2 ** i;
+      let last = (if i == 0 then din else result[i - 1]);
+      let next_right = if j + offset < width then last[j + offset] else 1'b0;
+      result[i][j] <> MUX <> [shamt[i], next_right, last[j]];
+    }
+  }
+  dout <> result[stage - 1];
+}
+
+component MUX : [sel, a, b] -> [out] {
+  wire a, b, out of bit(1);
+  wire sel       of bit(1);
+
+  out <> OR <> [
+    AND <> [a, sel],
+    AND <> [b, NOT <> sel]
+  ];
+}

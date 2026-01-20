@@ -3,10 +3,7 @@ package pascal.netx.backend.optimization;
 import pascal.netx.backend.optimization.model.Graph;
 import pascal.netx.backend.optimization.model.Vertex;
 import pascal.netx.backend.optimization.model.Vertices;
-import pascal.netx.backend.optimization.rule.ConstMultiRule;
-import pascal.netx.backend.optimization.rule.ConstantPropRule;
-import pascal.netx.backend.optimization.rule.RetimingRule;
-import pascal.netx.backend.optimization.rule.Rule;
+import pascal.netx.backend.optimization.rule.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,18 +15,18 @@ public final class Rewriter {
     public Rewriter(Graph graph) {
         this.graph = graph;
         this.rules = List.of(
-//                new ConcatShortcutRule(graph),
+                new ConcatShortcutRule(graph),
                 new ConstMultiRule(graph),
-//                new IdempotentRule(graph),
-//                new RedundantConstRule(graph),
-//                new SingletonRule(graph),
-//                new ShrinkAssocRule(graph),
-//                new AbsorptionRule(graph),
-//                new DoubleNegationRule(graph),
-//                new DistributivityRule(graph),
+                new IdempotentRule(graph),
+                new RedundantConstRule(graph),
+                new SingletonRule(graph),
+                new ShrinkAssocRule(graph),
+                new AbsorptionRule(graph),
+                new DoubleNegationRule(graph),
+                new DistributivityRule(graph),
                 new ConstantPropRule(graph),
-//                new DeMorganRule(graph),
-                new RetimingRule(graph)
+                new DeMorganRule(graph)
+//                new RetimingRule(graph)
         );
     }
 

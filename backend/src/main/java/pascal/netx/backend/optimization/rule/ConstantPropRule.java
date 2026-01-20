@@ -4,9 +4,10 @@ import pascal.netx.backend.optimization.model.*;
 import pascal.netx.util.lang.BitVector;
 
 import java.util.List;
-import java.util.Set;
+import java.util.function.Predicate;
 
-import static pascal.netx.backend.optimization.model.Component.Label.*;
+import static pascal.netx.backend.optimization.model.Component.Label.CAST;
+import static pascal.netx.backend.optimization.model.Component.Label.CONCAT;
 
 public final class ConstantPropRule extends UniRule {
     public ConstantPropRule(Graph graph) {
@@ -80,56 +81,72 @@ public final class ConstantPropRule extends UniRule {
                 return true;
             }
         } else {
-            return propagateShift(vertex);
+            return switch (vertex.label()) {
+                case SHL, ASHR, LSHR -> propagateShift(vertex);
+                case OR -> propagateAbsorbing(vertex, Constant::isMersenne, false);
+                case NOR -> propagateAbsorbing(vertex, Constant::isMersenne, true);
+                case NAND -> propagateAbsorbing(vertex, Constant::isZero, false);
+                case MUL, AND -> propagateAbsorbing(vertex, Constant::isZero, true);
+                default -> false;
+            };
         }
         return false;
     }
 
-    private boolean propagateShift(Component vertex) {
-        if (Set.of(SHL, ASHR, LSHR).contains(vertex.label())) {
-            var amountCls = graph.inputsOf(vertex).get(1);
-            if (amountCls.contains(Constant.class)) {
-                int amount = amountCls.filter(Constant.class).getFirst().value().toUInt();
-                if (amount == 0) {
-                    var valueCls = graph.inputsOf(vertex).getFirst();
-                    graph.manager().replace(vertex, valueCls.getAny());
-                    return true;
-                } else {
-                    int width = vertex.outWidth();
-                    var input = graph.inputsOf(vertex).getFirst();
-                    var dual = graph.factory().component(CONCAT, width);
-                    switch (vertex.label()) {
-                        case SHL -> {
-                            var select = graph.factory().readSelect(new Selector(width - amount - 1, 0));
-                            var zeros = graph.factory().constant(BitVector.fromInt(amount, 0));
-                            graph.addEdge(input, select);
-                            graph.addEdge(select, dual);
-                            graph.addEdge(zeros, dual);
-                        }
-                        case LSHR -> {
-                            var select = graph.factory().readSelect(new Selector(width - 1, amount));
-                            var zeros = graph.factory().constant(BitVector.fromInt(amount, 0));
-                            graph.addEdge(input, select);
-                            graph.addEdge(zeros, dual);
-                            graph.addEdge(select, dual);
-                        }
-                        case ASHR -> {
-                            var select = graph.factory().readSelect(new Selector(width - 1, amount));
-                            var signSelect = graph.factory().readSelect(new Selector(width - 1, width - 1));
-                            var signs = graph.factory().component(CAST, amount);
-                            graph.addEdge(input, signSelect);
-                            graph.addEdge(input, select);
-                            graph.addEdge(signSelect, signs);
+    private boolean propagateAbsorbing(Component vertex, Predicate<Constant> matcher, boolean zero) {
+        boolean replace = graph.inputsOf(vertex).stream().anyMatch(cls -> cls.contains(Constant.class, matcher));
+        if (replace) {
+            var val = BitVector.fromLong(vertex.outWidth(), 0L);
+            if (!zero) val = val.not();
+            var result = graph.factory().constant(val);
+            graph.manager().replace(vertex, result);
+        }
+        return replace;
+    }
 
-                            graph.addEdge(signs, dual);
-                            graph.addEdge(select, dual);
-                        }
-                    }
-                    graph.manager().replace(vertex, dual);
+    private boolean propagateShift(Component vertex) {
+        var amountCls = graph.inputsOf(vertex).get(1);
+        if (!amountCls.contains(Constant.class)) {
+            return false;
+        }
+        int amount = amountCls.filter(Constant.class).getFirst().value().toUInt();
+        if (amount == 0) {
+            var valueCls = graph.inputsOf(vertex).getFirst();
+            graph.manager().replace(vertex, valueCls.getAny());
+        } else {
+            int width = vertex.outWidth();
+            var input = graph.inputsOf(vertex).getFirst();
+            var dual = graph.factory().component(CONCAT, width);
+            switch (vertex.label()) {
+                case SHL -> {
+                    var select = graph.factory().readSelect(new Selector(width - amount - 1, 0));
+                    var zeros = graph.factory().constant(BitVector.fromInt(amount, 0));
+                    graph.addEdge(input, select);
+                    graph.addEdge(select, dual);
+                    graph.addEdge(zeros, dual);
+                }
+                case LSHR -> {
+                    var select = graph.factory().readSelect(new Selector(width - 1, amount));
+                    var zeros = graph.factory().constant(BitVector.fromInt(amount, 0));
+                    graph.addEdge(input, select);
+                    graph.addEdge(zeros, dual);
+                    graph.addEdge(select, dual);
+                }
+                case ASHR -> {
+                    var select = graph.factory().readSelect(new Selector(width - 1, amount));
+                    var signSelect = graph.factory().readSelect(new Selector(width - 1, width - 1));
+                    var signs = graph.factory().component(CAST, amount);
+                    graph.addEdge(input, signSelect);
+                    graph.addEdge(input, select);
+                    graph.addEdge(signSelect, signs);
+
+                    graph.addEdge(signs, dual);
+                    graph.addEdge(select, dual);
                 }
             }
+            graph.manager().replace(vertex, dual);
         }
-        return false;
+        return true;
     }
 
     private BitVector cast(BitVector value, boolean signed) {

@@ -2,6 +2,7 @@
 
 LIB_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE_ROOT="$(cd "${LIB_SCRIPT_DIR}/.." && pwd)"
+ABC_CONFIG="${LIB_SCRIPT_DIR}/abc_config.conf"
 
 synthesize_design() {
     local design=$1
@@ -12,10 +13,21 @@ synthesize_design() {
     local output_file="${output_dir}/${basename}_synth.v"
     local stat_file="${output_dir}/${basename}_area.txt"
 
-    # Determine abc flags based on benchmark name
+    local delay_constraint=""
+    if [[ -f "$ABC_CONFIG" ]]; then
+        local config_key="${basename%_origin}"
+        config_key="${config_key%_opted}"
+        
+        local config_value=$(grep "^${config_key}=" "$ABC_CONFIG" 2>/dev/null | cut -d'=' -f2)
+        delay_constraint="$config_value"
+    fi
+
     local abc_flags="-dff"
+    if [[ -n "$delay_constraint" ]]; then
+        abc_flags+=" -D ${delay_constraint}"
+    fi
     if [[ "$basename" == *"fft"* ]]; then
-        abc_flags="-dff -fast"
+        abc_flags+=" -fast"
     fi
 
     sed -e "s|INPUT_VERILOG_PLACEHOLDER|$design|g" \

@@ -111,13 +111,13 @@ public final class Measurer {
         public double area(Vertex v) {
             if (v instanceof Component c) {
                 int fanin = graph.inputsOf(v).size();
-                return area.getOrDefault(c.label(), 0.0) * Math.max(1, fanin - 1);
+                return area.getOrDefault(c.label(), 0.0) * Math.max(1, fanin - 3);
             }
             return 0.0;
         }
 
         int multiFaninDelayCoefficient(int size) {
-            return Integer.toBinaryString(size - 1).length();
+            return Integer.toBinaryString(Math.max(0, size - 3)).length();
         }
 
         public double delay(Vertex v) {

@@ -17,15 +17,21 @@ public final class RedundantConstRule extends UniRule {
     public boolean apply(Component vertex) {
         return switch (vertex.label()) {
             case NAND, AND -> rewriteConstant(vertex, Constant::isMersenne);
-            case NOR, XNOR, OR, XOR -> rewriteConstant(vertex, Constant::isZero);
+            case NOR, XNOR, OR, XOR, ADD -> rewriteConstant(vertex, Constant::isZero);
             default -> false;
         };
     }
 
     private boolean rewriteConstant(Component vertex, Predicate<Constant> predicate) {
+        var inputs = graph.inputsOf(vertex);
+
+        if (inputs.size() <= 1) {
+            return false;
+        }
+
         boolean should = false;
         List<Graph.EqClass> newInputs = new ArrayList<>();
-        for (var input : graph.inputsOf(vertex)) {
+        for (var input : inputs) {
             if (input.contains(Constant.class, predicate)) {
                 should = true;
             } else {

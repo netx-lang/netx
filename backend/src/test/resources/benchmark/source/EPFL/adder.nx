@@ -1,0 +1,32 @@
+component ADDER : [a, b] -> [f, cout] {
+  wire a, b, f of bit(128);
+  wire cout    of bit(1);
+
+  let add_bit(i) = 
+    [#f[i], TO] <> FA <> [a[i]#, b[i]#, TO];
+  
+  let chain(n) = 
+    if n == 0 then 
+      add_bit(0) <> 1'b0
+    else 
+      add_bit(n) <> chain(n - 1);
+    
+  cout <> chain(127);
+}
+
+component FA : [a, b, cin] -> [s, cout] {
+  wire a, b, cin of bit(1);
+  wire s, cout   of bit(1);
+
+  [s, cout] 
+   <> [TO, OR] 
+   <> [HA, TO] 
+   <> [TO, HA] <> [a, b, cin];
+}
+
+component HA : [a, b] -> [s, c] {
+  wire a, b of bit(1);
+  wire s, c of bit(1);
+  s <> XOR <> [a, b];
+  c <> AND <> [a, b];
+}
