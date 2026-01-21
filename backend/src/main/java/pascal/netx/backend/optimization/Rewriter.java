@@ -24,8 +24,7 @@ public final class Rewriter {
                 new AbsorptionRule(graph),
                 new DoubleNegationRule(graph),
                 new DistributivityRule(graph),
-                new ConstantPropRule(graph),
-                new DeMorganRule(graph)
+                new ConstantPropRule(graph)
 //                new RetimingRule(graph)
         );
     }

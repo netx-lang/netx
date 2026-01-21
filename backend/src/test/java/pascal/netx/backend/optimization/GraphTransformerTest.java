@@ -16,14 +16,13 @@ class GraphTransformerTest {
 
     @Test
     void sampleTest() throws IOException {
-        var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve("benchmark/bar.json")));
+        var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve("benchmark/max.json")));
         var transformer = new GraphTransformer(NotepadWriter.pathOut(Path.of("/home/nairen/tmp/test.dot")), json);
         transformer.parse();
         System.out.printf("Before optimization: %s\n", transformer.measure());
 
         transformer.rewrite();
-        transformer.saturate(0, 1);
-        transformer.dumpDot();
+        transformer.saturate(1, 1);
         System.out.printf(" After optimization: %s\n", transformer.measure());
 
         transformer.dumpDot();

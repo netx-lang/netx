@@ -21,6 +21,7 @@ public final class ShrinkAssocRule extends UniRule {
     }
 
     private final class ShrinkContext {
+        boolean changed = false;
         final Component origin;
         final List<Graph.EqClass> inputs;
         final List<List<Component>> candidates;
@@ -37,18 +38,21 @@ public final class ShrinkAssocRule extends UniRule {
         boolean shrink() {
             if (candidates.stream().anyMatch(Predicate.not(List::isEmpty))) {
                 shrink(0);
-                return true;
+                return changed;
             }
             return false;
         }
 
         private void shrink(int index) {
             if (index == candidates.size()) {
-                var dual = graph.factory().copy(origin);
-                for (var vertex : chosen) {
-                    graph.addEdge(vertex, dual);
+                if (chosen.size() < 16) {
+                    var dual = graph.factory().copy(origin);
+                    for (var vertex : chosen) {
+                        graph.addEdge(vertex, dual);
+                    }
+                    graph.manager().replace(origin, dual);
+                    changed = true;
                 }
-                graph.manager().replace(origin, dual);
             } else {
                 if (candidates.get(index).isEmpty()) {
                     chosen.add(inputs.get(index));

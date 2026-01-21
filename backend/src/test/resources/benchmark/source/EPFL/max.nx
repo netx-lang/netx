@@ -1,0 +1,63 @@
+component MAX : [In] -> [out, pos] {
+  wire In[4], out of bit(128);
+  wire pos        of bit(2);
+
+  auto s0 <> LT <> [In[2], In[0]];
+  auto r0 <> MUX(128) <> [s0, In[0], In[2]];
+
+  auto s1 <> LT <> [In[3], In[1]];
+  auto r1 <> MUX(128) <> [s1, In[1], In[3]];
+
+  auto s2 <> LT <> [r1, r0];
+  out <> MUX(128) <> [s2, r1, r0];
+
+  pos <> CONCAT <> [
+    MUX(1) <> [s2, s1, s0], s2
+  ];
+}
+
+component LT : [a, b] -> [result] {
+  wire a, b   of bit(128);
+  wire result of bit(1);
+
+  wire lt4[32], eq4[32] of bit(1);
+  for g in [0..32] {
+    [lt4[g], eq4[g]] <> CMP <> [
+      a[4 * g + 3 : 4 * g], 
+      b[4 * g + 3 : 4 * g]
+    ];
+  }
+
+  let upper_eq(g) = 
+    if g == 31 then 1'b1 
+    else AND <> [eq4[j] | j in [g+1..32]];
+  result <> OR <> [AND <> [lt4[g], upper_eq(g)] | g in [0..32]];
+}
+
+component CMP : [a, b] -> [lt, eq] {
+  wire a, b   of bit(4);
+  wire lt, eq of bit(1);
+
+  eq <> AND <> [
+    XNOR <> [a[i], b[i]] | i in [0..4]
+  ];
+
+  lt <> OR <> [
+    AND <> (
+      [NOT <> a[i], b[i]] 
+      ++ [XNOR <> [a[j], b[j]] | j in [i+1..4]]
+    ) | i in [0..4]
+  ];
+}
+
+component MUX(n) : [sel, a, b] -> [out] {
+  wire a, b, out of bit(n);
+  wire sel       of bit(1);
+
+  for i in [0..n] {
+    out[i] <> OR <> [
+        AND <> [a[i], sel],
+        AND <> [b[i], NOT <> sel]
+    ];
+  }
+}
