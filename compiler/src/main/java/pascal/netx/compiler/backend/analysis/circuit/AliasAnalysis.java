@@ -183,6 +183,12 @@ public final class AliasAnalysis extends CircuitAnalysis {
             } else if (now instanceof Value) {
                 return true;
             } else {
+                if (old instanceof Access(var base, var _) && base.equals(now)) {
+                    return true;
+                }
+                if (now instanceof Access(var base, var _) && base.equals(old)) {
+                    return false;
+                }
                 return ((Data) now).getIndex() < ((Data) old).getIndex();
             }
         }
