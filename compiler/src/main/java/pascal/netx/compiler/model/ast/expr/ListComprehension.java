@@ -23,8 +23,8 @@ public final class ListComprehension extends ListExpr {
     @Override
     public void walk(ASTListener listener) {
         listener.enter(this);
-        head.walk(listener);
         qualifiers.forEach(qualifier -> qualifier.walk(listener));
+        head.walk(listener);
         listener.exit(this);
     }
 
