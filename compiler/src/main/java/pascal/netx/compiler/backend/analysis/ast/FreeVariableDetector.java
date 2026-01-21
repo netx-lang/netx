@@ -33,8 +33,18 @@ public final class FreeVariableDetector implements ASTListener {
 
     @Override
     public void enter(LetExpr node) {
-        var id = node.getBinding().getHead().getSymbol();
-        boundVariables.push(id);
+        var head = node.getBinding().getHead();
+        switch (head) {
+            case IdentifierExpr id -> boundVariables.push(id.getSymbol());
+            case CallExpr call -> {
+                boundVariables.push(call.getSymbol());
+                for (var arg : call.getArguments()) {
+                    if (arg instanceof IdentifierExpr ident) {
+                        boundVariables.push(ident.getSymbol());
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -77,6 +87,15 @@ public final class FreeVariableDetector implements ASTListener {
                 case FilterQualifier _ -> {
                     // Do nothing
                 }
+            }
+        }
+    }
+
+    @Override
+    public void exit(NamedPortExpr node) {
+        for (var assign : node.getPorts()) {
+            if (assign.lhs() != null) {
+                freeVariables.removeAll(detect(assign.lhs()));
             }
         }
     }
