@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static pascal.netx.util.lang.BuiltinComponent.CAST;
 import static pascal.netx.util.lang.BuiltinComponent.TO;
 
 /**
@@ -49,6 +50,7 @@ public final class AliasAnalysis extends CircuitAnalysis {
     }
 
     private void rewrite() {
+        List<ComponentScope> toRemove = new ArrayList<>();
         pack.forEachSubComponent(scope -> {
             scope.getBinding().releaseIf(Predicate.not(manager::needDump));
             scope.getInputs().replaceAll(manager::repOf);
@@ -57,7 +59,16 @@ public final class AliasAnalysis extends CircuitAnalysis {
                 scope.getAttributes().replaceAllVariable(manager::repOf);
             }
             manager.clearIn(scope);
+
+            if (scope.isBuiltin() && scope.asBuiltin() == CAST) {
+                var input = scope.getInputs().getFirst();
+                var output = scope.getOutputs().getFirst();
+                if (output instanceof Access(var base, var _) && base.equals(input)) {
+                    toRemove.add(scope);
+                }
+            }
         });
+        toRemove.forEach(scope -> scope.getParent().getChildren().remove(scope));
     }
 
     /**

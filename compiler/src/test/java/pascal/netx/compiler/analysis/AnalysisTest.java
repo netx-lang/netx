@@ -404,4 +404,29 @@ class AnalysisTest {
                 """;
         testGen(EXPECTED_DIR.resolve("complex_access_alias.json"), code);
     }
+
+    @Test
+    void testTruncate() {
+        var code = """
+                component top: [clk, input] -> [output] {
+                    wire clk of clock;
+                    wire input of bit(4);
+                    wire output of bit(8);
+                    output <> REGISTER(pos_edge=true) <> [
+                      clk, CAST <> AND <> [input, CAST <> output]
+                    ];
+                }
+                """;
+        var expected = """
+                component top: [clk, input] -> [output] {
+                    wire clk of clock;
+                    wire input of bit(4);
+                    wire output of bit(8);
+                    output <> REGISTER(pos_edge=true) <> [
+                      clk, CAST <> AND <> [input, output[3:0]]
+                    ];
+                }
+                """;
+        testSugar(expected, code);
+    }
 }
