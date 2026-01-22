@@ -88,7 +88,7 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
         List<String> io = new ArrayList<>();
         processIOPorts(node, "input", io, globalIn);
         processIOPorts(node, "output", io, globalOut);
-        notepad.println(String.join(", ", io));
+        notepad.println(String.join(", ", io.stream().distinct().toList()));
         notepad.decIndent();
         notepad.println(");");
     }
