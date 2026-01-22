@@ -1,0 +1,137 @@
+component FA : [a, b, cin] -> [s, cout] {
+  wire a, b, cin of bit(1);
+  wire s, cout   of bit(1);
+  [s, cout] 
+   <> [TO, OR] 
+   <> [HA, TO] 
+   <> [TO, HA] <> [a, b, cin];
+}
+
+component HA : [a, b] -> [s, c] {
+  wire a, b of bit(1);
+  wire s, c of bit(1);
+  s <> XOR <> [a, b];
+  c <> AND <> [a, b];
+}
+
+component U_SP_5_5 : [In1, In2] -> [P0, P1, P2, P3, P4, P5, P6, P7, P8] {
+    wire In1, In2 of bit(5);
+    wire P0 of bit(1);
+    wire P1 of bit(2);
+    wire P2 of bit(3);
+    wire P3 of bit(4);
+    wire P4 of bit(5);
+    wire P5 of bit(4);
+    wire P6 of bit(3);
+    wire P7 of bit(2);
+    wire P8 of bit(1);
+
+    P0[0] <> AND <> [In1[0], In2[0]];
+    P1[0] <> AND <> [In1[0], In2[1]];
+    P2[0] <> AND <> [In1[0], In2[2]];
+    P3[0] <> AND <> [In1[0], In2[3]];
+    P4[0] <> AND <> [In1[0], In2[4]];
+    P1[1] <> AND <> [In1[1], In2[0]];
+    P2[1] <> AND <> [In1[1], In2[1]];
+    P3[1] <> AND <> [In1[1], In2[2]];
+    P4[1] <> AND <> [In1[1], In2[3]];
+    P5[0] <> AND <> [In1[1], In2[4]];
+    P2[2] <> AND <> [In1[2], In2[0]];
+    P3[2] <> AND <> [In1[2], In2[1]];
+    P4[2] <> AND <> [In1[2], In2[2]];
+    P5[1] <> AND <> [In1[2], In2[3]];
+    P6[0] <> AND <> [In1[2], In2[4]];
+    P3[3] <> AND <> [In1[3], In2[0]];
+    P4[3] <> AND <> [In1[3], In2[1]];
+    P5[2] <> AND <> [In1[3], In2[2]];
+    P6[1] <> AND <> [In1[3], In2[3]];
+    P7[0] <> AND <> [In1[3], In2[4]];
+    P4[4] <> AND <> [In1[4], In2[0]];
+    P5[3] <> AND <> [In1[4], In2[1]];
+    P6[2] <> AND <> [In1[4], In2[2]];
+    P7[1] <> AND <> [In1[4], In2[3]];
+    P8[0] <> AND <> [In1[4], In2[4]];
+}
+
+component AR : [In0, In1, In2, In3, In4, In5, In6, In7, In8] -> [Out1, Out2] {
+    wire In0 of bit(1);
+    wire In1 of bit(2);
+    wire In2 of bit(3);
+    wire In3 of bit(4);
+    wire In4 of bit(5);
+    wire In5 of bit(4);
+    wire In6 of bit(3);
+    wire In7 of bit(2);
+    wire In8 of bit(1);
+
+    wire Out1 of bit(9);
+    wire Out2 of bit(4);
+
+    wire w26, w27, w28, w29, w30, 
+         w31, w32, w34, w35, w36, 
+         w37, w38, w39, w40, w42, 
+         w43, w44, w45, w46, w47, 
+         w48, w50, w52, w54       of bit(1);
+
+    [Out1[1], w26] <> HA <> [In1[0], In1[1]];
+    [Out1[2], w34] <> HA <> [w27, In2[2]];
+    [Out1[3], w42] <> HA <> [w35, In3[3]];
+    [Out1[4], w50] <> HA <> [w43, In4[4]];
+    [w27, w28] <> FA <> [w26, In2[0], In2[1]];
+    [w29, w30] <> FA <> [w28, In3[0], In3[1]];
+    [w31, w32] <> FA <> [w30, In4[0], In4[1]];
+    [w35, w36] <> FA <> [w34, w29, In3[2]];
+    [w37, w38] <> FA <> [w36, w31, In4[2]];
+    [w39, w40] <> FA <> [w38, w32, In5[0]];
+    [w43, w44] <> FA <> [w42, w37, In4[3]];
+    [w45, w46] <> FA <> [w44, w39, In5[1]];
+    [w47, w48] <> FA <> [w46, w40, In6[0]];
+    [Out1[5], w52] <> FA <> [w50, w45, In5[2]];
+    [Out1[6], w54] <> FA <> [w52, w47, In6[1]];
+    [Out1[7], Out1[8]] <> FA <> [w54, w48, In7[0]];
+    Out1[0] <> In0[0];
+    Out2[0] <> In5[3];
+    Out2[1] <> In6[2];
+    Out2[2] <> In7[1];
+    Out2[3] <> In8[0];
+}
+
+component RC_4_4 : [In1, In2] -> [Out] {
+    wire In1, In2 of bit(4);
+    wire Out of bit(8);
+
+    wire w9, w11, w13 of bit(1);
+    [Out[0], w9] <> HA <> [In1[0], In2[0]];
+    [Out[1], w11] <> FA <> [In1[1], In2[1], w9];
+    [Out[2], w13] <> FA <> [In1[2], In2[2], w11];
+    [Out[3], Out[4]] <> FA <> [In1[3], In2[3], w13];
+}
+
+component Mult_5_5 : [In1, In2] -> [Out] {
+    wire In1, In2 of bit(5);
+    wire Out of bit(10);
+
+    wire P0 of bit(1);
+    wire P1 of bit(2);
+    wire P2 of bit(3);
+    wire P3 of bit(4);
+    wire P4 of bit(5);
+    wire P5 of bit(4);
+    wire P6 of bit(3);
+    wire P7 of bit(2);
+    wire P8 of bit(1);
+
+    wire R1 of bit(9);
+    wire R2 of bit(4);
+
+    wire aOut of bit(10);
+
+    [P0, P1, P2, P3, P4, P5, P6, P7, P8] <> U_SP_5_5 <> [In1, In2];
+    [R1, R2] <> AR <> [P0, P1, P2, P3, P4, P5, P6, P7, P8];
+    aOut[0] <> R1[0];
+    aOut[1] <> R1[1];
+    aOut[2] <> R1[2];
+    aOut[3] <> R1[3];
+    aOut[4] <> R1[4];
+    Out <> aOut[9:0];
+}

@@ -1,0 +1,87 @@
+component FA : [a, b, cin] -> [s, cout] {
+  wire a, b, cin of bit(1);
+  wire s, cout   of bit(1);
+  [s, cout] 
+   <> [TO, OR] 
+   <> [HA, TO] 
+   <> [TO, HA] <> [a, b, cin];
+}
+
+component HA : [a, b] -> [s, c] {
+  wire a, b of bit(1);
+  wire s, c of bit(1);
+  s <> XOR <> [a, b];
+  c <> AND <> [a, b];
+}
+
+component U_SP_3_3 : [In1, In2] -> [P0, P1, P2, P3, P4] {
+    wire In1, In2 of bit(3);
+    wire P0 of bit(1);
+    wire P1 of bit(2);
+    wire P2 of bit(3);
+    wire P3 of bit(2);
+    wire P4 of bit(1);
+
+    P0[0] <> AND <> [In1[0], In2[0]];
+    P1[0] <> AND <> [In1[0], In2[1]];
+    P2[0] <> AND <> [In1[0], In2[2]];
+    P1[1] <> AND <> [In1[1], In2[0]];
+    P2[1] <> AND <> [In1[1], In2[1]];
+    P3[0] <> AND <> [In1[1], In2[2]];
+    P2[2] <> AND <> [In1[2], In2[0]];
+    P3[1] <> AND <> [In1[2], In2[1]];
+    P4[0] <> AND <> [In1[2], In2[2]];
+}
+
+component AR : [In0, In1, In2, In3, In4] -> [Out1, Out2] {
+    wire In0 of bit(1);
+    wire In1 of bit(2);
+    wire In2 of bit(3);
+    wire In3 of bit(2);
+    wire In4 of bit(1);
+
+    wire Out1 of bit(5);
+    wire Out2 of bit(2);
+
+    wire w10, w11, w12, w14 of bit(1);
+    [Out1[1], w10] <> HA <> [In1[0], In1[1]];
+
+    [w11, w12] <> FA <> [w10, In2[0], In2[1]];
+    [Out1[2], w14] <> HA <> [w11, In2[2]];
+    [Out1[3], Out1[4]] <> FA <> [w14, w12, In3[0]];
+    Out1[0] <> In0[0];
+    Out2[0] <> In3[1];
+    Out2[1] <> In4[0];
+}
+
+component RC_2_2 : [In1, In2] -> [Out] {
+    wire In1, In2 of bit(2);
+    wire Out of bit(3);
+
+    wire w5 of bit(1);
+    [Out[0], w5] <> HA <> [In1[0], In2[0]];
+    [Out[1], Out[2]] <> FA <> [In1[1], In2[1], w5];
+}
+
+component Mult_3_3 : [In1, In2] -> [Out] {
+    wire In1, In2 of bit(3);
+    wire Out of bit(6);
+
+    wire P0 of bit(1);
+    wire P1 of bit(2);
+    wire P2 of bit(3);
+    wire P3 of bit(2);
+    wire P4 of bit(1);
+
+    wire R1 of bit(5);
+    wire R2 of bit(2);
+    wire aOut of bit(6);
+
+    [P0, P1, P2, P3, P4] <> U_SP_3_3 <> [In1, In2];
+    [R1, R2] <> AR <> [P0, P1, P2, P3, P4];
+    aOut[5:3] <> RC_2_2 <> [R1[4:3], R2];
+    aOut[0] <> R1[0];
+    aOut[1] <> R1[1];
+    aOut[2] <> R1[2];
+    Out <> aOut;
+}

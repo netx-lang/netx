@@ -1,0 +1,897 @@
+{
+  "total": 74,
+  "top_input": ["In1", "In2"],
+  "top_output": ["Out"],
+  "design": {
+    "type": "component",
+    "id": "Mult_5_5",
+    "loc": "genmul_5_5.nx:110:10",
+    "input": ["In1@0", "In2@1"],
+    "output": ["Out@2"],
+    "members": [
+      {"type": "wire", "width": 5, "id": "In1@0", "loc": "genmul_5_5.nx:111:9"},
+      {"type": "wire", "width": 5, "id": "In2@1", "loc": "genmul_5_5.nx:111:14"},
+      {"type": "wire", "width": 10, "id": "Out@2", "loc": "genmul_5_5.nx:112:9"},
+      {"type": "wire", "width": 1, "id": "P0@3", "loc": "genmul_5_5.nx:114:9"},
+      {"type": "wire", "width": 2, "id": "P1@4", "loc": "genmul_5_5.nx:115:9"},
+      {"type": "wire", "width": 3, "id": "P2@5", "loc": "genmul_5_5.nx:116:9"},
+      {"type": "wire", "width": 4, "id": "P3@6", "loc": "genmul_5_5.nx:117:9"},
+      {"type": "wire", "width": 5, "id": "P4@7", "loc": "genmul_5_5.nx:118:9"},
+      {"type": "wire", "width": 4, "id": "P5@8", "loc": "genmul_5_5.nx:119:9"},
+      {"type": "wire", "width": 3, "id": "P6@9", "loc": "genmul_5_5.nx:120:9"},
+      {"type": "wire", "width": 2, "id": "P7@10", "loc": "genmul_5_5.nx:121:9"},
+      {"type": "wire", "width": 1, "id": "P8@11", "loc": "genmul_5_5.nx:122:9"},
+      {"type": "wire", "width": 9, "id": "R1@12", "loc": "genmul_5_5.nx:124:9"},
+      {"type": "wire", "width": 4, "id": "R2@13", "loc": "genmul_5_5.nx:125:9"},
+      {
+        "type": "component", "id": "U_SP_5_5", "loc": "genmul_5_5.nx:129:44",
+        "input": ["In1@0", "In2@1"],
+        "output": ["P0@3", "P1@4", "P2@5", "P3@6", "P4@7", "P5@8", "P6@9", "P7@10", "P8@11"],
+        "members": [
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:29:13",
+            "input": ["In1@0[0]", "In2@1[0]"],
+            "output": ["P0@3"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:30:13",
+            "input": ["In1@0[0]", "In2@1[1]"],
+            "output": ["P1@4[0]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:31:13",
+            "input": ["In1@0[0]", "In2@1[2]"],
+            "output": ["P2@5[0]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:32:13",
+            "input": ["In1@0[0]", "In2@1[3]"],
+            "output": ["P3@6[0]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:33:13",
+            "input": ["In1@0[0]", "In2@1[4]"],
+            "output": ["P4@7[0]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:34:13",
+            "input": ["In1@0[1]", "In2@1[0]"],
+            "output": ["P1@4[1]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:35:13",
+            "input": ["In1@0[1]", "In2@1[1]"],
+            "output": ["P2@5[1]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:36:13",
+            "input": ["In1@0[1]", "In2@1[2]"],
+            "output": ["P3@6[1]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:37:13",
+            "input": ["In1@0[1]", "In2@1[3]"],
+            "output": ["P4@7[1]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:38:13",
+            "input": ["In1@0[1]", "In2@1[4]"],
+            "output": ["P5@8[0]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:39:13",
+            "input": ["In1@0[2]", "In2@1[0]"],
+            "output": ["P2@5[2]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:40:13",
+            "input": ["In1@0[2]", "In2@1[1]"],
+            "output": ["P3@6[2]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:41:13",
+            "input": ["In1@0[2]", "In2@1[2]"],
+            "output": ["P4@7[2]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:42:13",
+            "input": ["In1@0[2]", "In2@1[3]"],
+            "output": ["P5@8[1]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:43:13",
+            "input": ["In1@0[2]", "In2@1[4]"],
+            "output": ["P6@9[0]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:44:13",
+            "input": ["In1@0[3]", "In2@1[0]"],
+            "output": ["P3@6[3]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:45:13",
+            "input": ["In1@0[3]", "In2@1[1]"],
+            "output": ["P4@7[3]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:46:13",
+            "input": ["In1@0[3]", "In2@1[2]"],
+            "output": ["P5@8[2]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:47:13",
+            "input": ["In1@0[3]", "In2@1[3]"],
+            "output": ["P6@9[1]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:48:13",
+            "input": ["In1@0[3]", "In2@1[4]"],
+            "output": ["P7@10[0]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:49:13",
+            "input": ["In1@0[4]", "In2@1[0]"],
+            "output": ["P4@7[4]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:50:13",
+            "input": ["In1@0[4]", "In2@1[1]"],
+            "output": ["P5@8[3]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:51:13",
+            "input": ["In1@0[4]", "In2@1[2]"],
+            "output": ["P6@9[2]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:52:13",
+            "input": ["In1@0[4]", "In2@1[3]"],
+            "output": ["P7@10[1]"]
+          },
+          {
+            "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:53:13",
+            "input": ["In1@0[4]", "In2@1[4]"],
+            "output": ["P8@11"]
+          }
+        ]
+      },
+      {
+        "type": "component", "id": "AR", "loc": "genmul_5_5.nx:130:16",
+        "input": ["P0@3", "P1@4", "P2@5", "P3@6", "P4@7", "P5@8", "P6@9", "P7@10", "P8@11"],
+        "output": ["R1@12", "R2@13"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "w26@14", "loc": "genmul_5_5.nx:70:9"},
+          {"type": "wire", "width": 1, "id": "w27@15", "loc": "genmul_5_5.nx:70:14"},
+          {"type": "wire", "width": 1, "id": "w28@16", "loc": "genmul_5_5.nx:70:19"},
+          {"type": "wire", "width": 1, "id": "w29@17", "loc": "genmul_5_5.nx:70:24"},
+          {"type": "wire", "width": 1, "id": "w30@18", "loc": "genmul_5_5.nx:70:29"},
+          {"type": "wire", "width": 1, "id": "w31@19", "loc": "genmul_5_5.nx:71:9"},
+          {"type": "wire", "width": 1, "id": "w32@20", "loc": "genmul_5_5.nx:71:14"},
+          {"type": "wire", "width": 1, "id": "w34@21", "loc": "genmul_5_5.nx:71:19"},
+          {"type": "wire", "width": 1, "id": "w35@22", "loc": "genmul_5_5.nx:71:24"},
+          {"type": "wire", "width": 1, "id": "w36@23", "loc": "genmul_5_5.nx:71:29"},
+          {"type": "wire", "width": 1, "id": "w37@24", "loc": "genmul_5_5.nx:72:9"},
+          {"type": "wire", "width": 1, "id": "w38@25", "loc": "genmul_5_5.nx:72:14"},
+          {"type": "wire", "width": 1, "id": "w39@26", "loc": "genmul_5_5.nx:72:19"},
+          {"type": "wire", "width": 1, "id": "w40@27", "loc": "genmul_5_5.nx:72:24"},
+          {"type": "wire", "width": 1, "id": "w42@28", "loc": "genmul_5_5.nx:72:29"},
+          {"type": "wire", "width": 1, "id": "w43@29", "loc": "genmul_5_5.nx:73:9"},
+          {"type": "wire", "width": 1, "id": "w44@30", "loc": "genmul_5_5.nx:73:14"},
+          {"type": "wire", "width": 1, "id": "w45@31", "loc": "genmul_5_5.nx:73:19"},
+          {"type": "wire", "width": 1, "id": "w46@32", "loc": "genmul_5_5.nx:73:24"},
+          {"type": "wire", "width": 1, "id": "w47@33", "loc": "genmul_5_5.nx:73:29"},
+          {"type": "wire", "width": 1, "id": "w48@34", "loc": "genmul_5_5.nx:74:9"},
+          {"type": "wire", "width": 1, "id": "w50@35", "loc": "genmul_5_5.nx:74:14"},
+          {"type": "wire", "width": 1, "id": "w52@36", "loc": "genmul_5_5.nx:74:19"},
+          {"type": "wire", "width": 1, "id": "w54@37", "loc": "genmul_5_5.nx:74:24"},
+          {
+            "type": "component", "id": "HA", "loc": "genmul_5_5.nx:76:22",
+            "input": ["P1@4[0]", "P1@4[1]"],
+            "output": ["R1@12[1]", "w26@14"],
+            "members": [
+              {
+                "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                "input": ["P1@4[0]", "P1@4[1]"],
+                "output": ["R1@12[1]"]
+              },
+              {
+                "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                "input": ["P1@4[0]", "P1@4[1]"],
+                "output": ["w26@14"]
+              }
+            ]
+          },
+          {
+            "type": "component", "id": "HA", "loc": "genmul_5_5.nx:77:22",
+            "input": ["w27@15", "P2@5[2]"],
+            "output": ["R1@12[2]", "w34@21"],
+            "members": [
+              {
+                "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                "input": ["w27@15", "P2@5[2]"],
+                "output": ["R1@12[2]"]
+              },
+              {
+                "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                "input": ["w27@15", "P2@5[2]"],
+                "output": ["w34@21"]
+              }
+            ]
+          },
+          {
+            "type": "component", "id": "HA", "loc": "genmul_5_5.nx:78:22",
+            "input": ["w35@22", "P3@6[3]"],
+            "output": ["R1@12[3]", "w42@28"],
+            "members": [
+              {
+                "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                "input": ["w35@22", "P3@6[3]"],
+                "output": ["R1@12[3]"]
+              },
+              {
+                "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                "input": ["w35@22", "P3@6[3]"],
+                "output": ["w42@28"]
+              }
+            ]
+          },
+          {
+            "type": "component", "id": "HA", "loc": "genmul_5_5.nx:79:22",
+            "input": ["w43@29", "P4@7[4]"],
+            "output": ["R1@12[4]", "w50@35"],
+            "members": [
+              {
+                "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                "input": ["w43@29", "P4@7[4]"],
+                "output": ["R1@12[4]"]
+              },
+              {
+                "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                "input": ["w43@29", "P4@7[4]"],
+                "output": ["w50@35"]
+              }
+            ]
+          },
+          {
+            "type": "component", "id": "FA", "loc": "genmul_5_5.nx:80:18",
+            "input": ["w26@14", "P2@5[0]", "P2@5[1]"],
+            "output": ["w27@15", "w28@16"],
+            "members": [
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:7:11",
+                "input": ["P2@5[0]", "P2@5[1]"],
+                "output": ["s@38", "c@39"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "s@38", "loc": "genmul_5_5.nx:12:7"},
+                  {"type": "wire", "width": 1, "id": "c@39", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["P2@5[0]", "P2@5[1]"],
+                    "output": ["s@38"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["P2@5[0]", "P2@5[1]"],
+                    "output": ["c@39"]
+                  }
+                ]
+              },
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:6:7",
+                "input": ["w26@14", "s@38"],
+                "output": ["w27@15", "c@40"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "c@40", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w26@14", "s@38"],
+                    "output": ["w27@15"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w26@14", "s@38"],
+                    "output": ["c@40"]
+                  }
+                ]
+              },
+              {
+                "type": "builtin", "id": "OR", "loc": "genmul_5_5.nx:5:11",
+                "input": ["c@40", "c@39"],
+                "output": ["w28@16"]
+              }
+            ]
+          },
+          {
+            "type": "component", "id": "FA", "loc": "genmul_5_5.nx:81:18",
+            "input": ["w28@16", "P3@6[0]", "P3@6[1]"],
+            "output": ["w29@17", "w30@18"],
+            "members": [
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:7:11",
+                "input": ["P3@6[0]", "P3@6[1]"],
+                "output": ["s@41", "c@42"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "s@41", "loc": "genmul_5_5.nx:12:7"},
+                  {"type": "wire", "width": 1, "id": "c@42", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["P3@6[0]", "P3@6[1]"],
+                    "output": ["s@41"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["P3@6[0]", "P3@6[1]"],
+                    "output": ["c@42"]
+                  }
+                ]
+              },
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:6:7",
+                "input": ["w28@16", "s@41"],
+                "output": ["w29@17", "c@43"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "c@43", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w28@16", "s@41"],
+                    "output": ["w29@17"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w28@16", "s@41"],
+                    "output": ["c@43"]
+                  }
+                ]
+              },
+              {
+                "type": "builtin", "id": "OR", "loc": "genmul_5_5.nx:5:11",
+                "input": ["c@43", "c@42"],
+                "output": ["w30@18"]
+              }
+            ]
+          },
+          {
+            "type": "component", "id": "FA", "loc": "genmul_5_5.nx:82:18",
+            "input": ["w30@18", "P4@7[0]", "P4@7[1]"],
+            "output": ["w31@19", "w32@20"],
+            "members": [
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:7:11",
+                "input": ["P4@7[0]", "P4@7[1]"],
+                "output": ["s@44", "c@45"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "s@44", "loc": "genmul_5_5.nx:12:7"},
+                  {"type": "wire", "width": 1, "id": "c@45", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["P4@7[0]", "P4@7[1]"],
+                    "output": ["s@44"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["P4@7[0]", "P4@7[1]"],
+                    "output": ["c@45"]
+                  }
+                ]
+              },
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:6:7",
+                "input": ["w30@18", "s@44"],
+                "output": ["w31@19", "c@46"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "c@46", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w30@18", "s@44"],
+                    "output": ["w31@19"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w30@18", "s@44"],
+                    "output": ["c@46"]
+                  }
+                ]
+              },
+              {
+                "type": "builtin", "id": "OR", "loc": "genmul_5_5.nx:5:11",
+                "input": ["c@46", "c@45"],
+                "output": ["w32@20"]
+              }
+            ]
+          },
+          {
+            "type": "component", "id": "FA", "loc": "genmul_5_5.nx:83:18",
+            "input": ["w34@21", "w29@17", "P3@6[2]"],
+            "output": ["w35@22", "w36@23"],
+            "members": [
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:7:11",
+                "input": ["w29@17", "P3@6[2]"],
+                "output": ["s@47", "c@48"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "s@47", "loc": "genmul_5_5.nx:12:7"},
+                  {"type": "wire", "width": 1, "id": "c@48", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w29@17", "P3@6[2]"],
+                    "output": ["s@47"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w29@17", "P3@6[2]"],
+                    "output": ["c@48"]
+                  }
+                ]
+              },
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:6:7",
+                "input": ["w34@21", "s@47"],
+                "output": ["w35@22", "c@49"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "c@49", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w34@21", "s@47"],
+                    "output": ["w35@22"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w34@21", "s@47"],
+                    "output": ["c@49"]
+                  }
+                ]
+              },
+              {
+                "type": "builtin", "id": "OR", "loc": "genmul_5_5.nx:5:11",
+                "input": ["c@49", "c@48"],
+                "output": ["w36@23"]
+              }
+            ]
+          },
+          {
+            "type": "component", "id": "FA", "loc": "genmul_5_5.nx:84:18",
+            "input": ["w36@23", "w31@19", "P4@7[2]"],
+            "output": ["w37@24", "w38@25"],
+            "members": [
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:7:11",
+                "input": ["w31@19", "P4@7[2]"],
+                "output": ["s@50", "c@51"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "s@50", "loc": "genmul_5_5.nx:12:7"},
+                  {"type": "wire", "width": 1, "id": "c@51", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w31@19", "P4@7[2]"],
+                    "output": ["s@50"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w31@19", "P4@7[2]"],
+                    "output": ["c@51"]
+                  }
+                ]
+              },
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:6:7",
+                "input": ["w36@23", "s@50"],
+                "output": ["w37@24", "c@52"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "c@52", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w36@23", "s@50"],
+                    "output": ["w37@24"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w36@23", "s@50"],
+                    "output": ["c@52"]
+                  }
+                ]
+              },
+              {
+                "type": "builtin", "id": "OR", "loc": "genmul_5_5.nx:5:11",
+                "input": ["c@52", "c@51"],
+                "output": ["w38@25"]
+              }
+            ]
+          },
+          {
+            "type": "component", "id": "FA", "loc": "genmul_5_5.nx:85:18",
+            "input": ["w38@25", "w32@20", "P5@8[0]"],
+            "output": ["w39@26", "w40@27"],
+            "members": [
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:7:11",
+                "input": ["w32@20", "P5@8[0]"],
+                "output": ["s@53", "c@54"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "s@53", "loc": "genmul_5_5.nx:12:7"},
+                  {"type": "wire", "width": 1, "id": "c@54", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w32@20", "P5@8[0]"],
+                    "output": ["s@53"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w32@20", "P5@8[0]"],
+                    "output": ["c@54"]
+                  }
+                ]
+              },
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:6:7",
+                "input": ["w38@25", "s@53"],
+                "output": ["w39@26", "c@55"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "c@55", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w38@25", "s@53"],
+                    "output": ["w39@26"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w38@25", "s@53"],
+                    "output": ["c@55"]
+                  }
+                ]
+              },
+              {
+                "type": "builtin", "id": "OR", "loc": "genmul_5_5.nx:5:11",
+                "input": ["c@55", "c@54"],
+                "output": ["w40@27"]
+              }
+            ]
+          },
+          {
+            "type": "component", "id": "FA", "loc": "genmul_5_5.nx:86:18",
+            "input": ["w42@28", "w37@24", "P4@7[3]"],
+            "output": ["w43@29", "w44@30"],
+            "members": [
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:7:11",
+                "input": ["w37@24", "P4@7[3]"],
+                "output": ["s@56", "c@57"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "s@56", "loc": "genmul_5_5.nx:12:7"},
+                  {"type": "wire", "width": 1, "id": "c@57", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w37@24", "P4@7[3]"],
+                    "output": ["s@56"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w37@24", "P4@7[3]"],
+                    "output": ["c@57"]
+                  }
+                ]
+              },
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:6:7",
+                "input": ["w42@28", "s@56"],
+                "output": ["w43@29", "c@58"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "c@58", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w42@28", "s@56"],
+                    "output": ["w43@29"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w42@28", "s@56"],
+                    "output": ["c@58"]
+                  }
+                ]
+              },
+              {
+                "type": "builtin", "id": "OR", "loc": "genmul_5_5.nx:5:11",
+                "input": ["c@58", "c@57"],
+                "output": ["w44@30"]
+              }
+            ]
+          },
+          {
+            "type": "component", "id": "FA", "loc": "genmul_5_5.nx:87:18",
+            "input": ["w44@30", "w39@26", "P5@8[1]"],
+            "output": ["w45@31", "w46@32"],
+            "members": [
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:7:11",
+                "input": ["w39@26", "P5@8[1]"],
+                "output": ["s@59", "c@60"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "s@59", "loc": "genmul_5_5.nx:12:7"},
+                  {"type": "wire", "width": 1, "id": "c@60", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w39@26", "P5@8[1]"],
+                    "output": ["s@59"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w39@26", "P5@8[1]"],
+                    "output": ["c@60"]
+                  }
+                ]
+              },
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:6:7",
+                "input": ["w44@30", "s@59"],
+                "output": ["w45@31", "c@61"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "c@61", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w44@30", "s@59"],
+                    "output": ["w45@31"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w44@30", "s@59"],
+                    "output": ["c@61"]
+                  }
+                ]
+              },
+              {
+                "type": "builtin", "id": "OR", "loc": "genmul_5_5.nx:5:11",
+                "input": ["c@61", "c@60"],
+                "output": ["w46@32"]
+              }
+            ]
+          },
+          {
+            "type": "component", "id": "FA", "loc": "genmul_5_5.nx:88:18",
+            "input": ["w46@32", "w40@27", "P6@9[0]"],
+            "output": ["w47@33", "w48@34"],
+            "members": [
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:7:11",
+                "input": ["w40@27", "P6@9[0]"],
+                "output": ["s@62", "c@63"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "s@62", "loc": "genmul_5_5.nx:12:7"},
+                  {"type": "wire", "width": 1, "id": "c@63", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w40@27", "P6@9[0]"],
+                    "output": ["s@62"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w40@27", "P6@9[0]"],
+                    "output": ["c@63"]
+                  }
+                ]
+              },
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:6:7",
+                "input": ["w46@32", "s@62"],
+                "output": ["w47@33", "c@64"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "c@64", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w46@32", "s@62"],
+                    "output": ["w47@33"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w46@32", "s@62"],
+                    "output": ["c@64"]
+                  }
+                ]
+              },
+              {
+                "type": "builtin", "id": "OR", "loc": "genmul_5_5.nx:5:11",
+                "input": ["c@64", "c@63"],
+                "output": ["w48@34"]
+              }
+            ]
+          },
+          {
+            "type": "component", "id": "FA", "loc": "genmul_5_5.nx:89:22",
+            "input": ["w50@35", "w45@31", "P5@8[2]"],
+            "output": ["R1@12[5]", "w52@36"],
+            "members": [
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:7:11",
+                "input": ["w45@31", "P5@8[2]"],
+                "output": ["s@65", "c@66"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "s@65", "loc": "genmul_5_5.nx:12:7"},
+                  {"type": "wire", "width": 1, "id": "c@66", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w45@31", "P5@8[2]"],
+                    "output": ["s@65"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w45@31", "P5@8[2]"],
+                    "output": ["c@66"]
+                  }
+                ]
+              },
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:6:7",
+                "input": ["w50@35", "s@65"],
+                "output": ["R1@12[5]", "c@67"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "c@67", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w50@35", "s@65"],
+                    "output": ["R1@12[5]"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w50@35", "s@65"],
+                    "output": ["c@67"]
+                  }
+                ]
+              },
+              {
+                "type": "builtin", "id": "OR", "loc": "genmul_5_5.nx:5:11",
+                "input": ["c@67", "c@66"],
+                "output": ["w52@36"]
+              }
+            ]
+          },
+          {
+            "type": "component", "id": "FA", "loc": "genmul_5_5.nx:90:22",
+            "input": ["w52@36", "w47@33", "P6@9[1]"],
+            "output": ["R1@12[6]", "w54@37"],
+            "members": [
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:7:11",
+                "input": ["w47@33", "P6@9[1]"],
+                "output": ["s@68", "c@69"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "s@68", "loc": "genmul_5_5.nx:12:7"},
+                  {"type": "wire", "width": 1, "id": "c@69", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w47@33", "P6@9[1]"],
+                    "output": ["s@68"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w47@33", "P6@9[1]"],
+                    "output": ["c@69"]
+                  }
+                ]
+              },
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:6:7",
+                "input": ["w52@36", "s@68"],
+                "output": ["R1@12[6]", "c@70"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "c@70", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w52@36", "s@68"],
+                    "output": ["R1@12[6]"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w52@36", "s@68"],
+                    "output": ["c@70"]
+                  }
+                ]
+              },
+              {
+                "type": "builtin", "id": "OR", "loc": "genmul_5_5.nx:5:11",
+                "input": ["c@70", "c@69"],
+                "output": ["w54@37"]
+              }
+            ]
+          },
+          {
+            "type": "component", "id": "FA", "loc": "genmul_5_5.nx:91:26",
+            "input": ["w54@37", "w48@34", "P7@10[0]"],
+            "output": ["R1@12[7]", "R1@12[8]"],
+            "members": [
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:7:11",
+                "input": ["w48@34", "P7@10[0]"],
+                "output": ["s@71", "c@72"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "s@71", "loc": "genmul_5_5.nx:12:7"},
+                  {"type": "wire", "width": 1, "id": "c@72", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w48@34", "P7@10[0]"],
+                    "output": ["s@71"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w48@34", "P7@10[0]"],
+                    "output": ["c@72"]
+                  }
+                ]
+              },
+              {
+                "type": "component", "id": "HA", "loc": "genmul_5_5.nx:6:7",
+                "input": ["w54@37", "s@71"],
+                "output": ["R1@12[7]", "c@73"],
+                "members": [
+                  {"type": "wire", "width": 1, "id": "c@73", "loc": "genmul_5_5.nx:12:10"},
+                  {
+                    "type": "builtin", "id": "XOR", "loc": "genmul_5_5.nx:13:7",
+                    "input": ["w54@37", "s@71"],
+                    "output": ["R1@12[7]"]
+                  },
+                  {
+                    "type": "builtin", "id": "AND", "loc": "genmul_5_5.nx:14:7",
+                    "input": ["w54@37", "s@71"],
+                    "output": ["c@73"]
+                  }
+                ]
+              },
+              {
+                "type": "builtin", "id": "OR", "loc": "genmul_5_5.nx:5:11",
+                "input": ["c@73", "c@72"],
+                "output": ["R1@12[8]"]
+              }
+            ]
+          },
+          {
+            "type": "builtin", "id": "TO", "loc": "",
+            "input": ["P0@3"],
+            "output": ["R1@12[0]"]
+          },
+          {
+            "type": "builtin", "id": "TO", "loc": "",
+            "input": ["P5@8[3]"],
+            "output": ["R2@13[0]"]
+          },
+          {
+            "type": "builtin", "id": "TO", "loc": "",
+            "input": ["P6@9[2]"],
+            "output": ["R2@13[1]"]
+          },
+          {
+            "type": "builtin", "id": "TO", "loc": "",
+            "input": ["P7@10[1]"],
+            "output": ["R2@13[2]"]
+          },
+          {
+            "type": "builtin", "id": "TO", "loc": "",
+            "input": ["P8@11"],
+            "output": ["R2@13[3]"]
+          }
+        ]
+      },
+      {
+        "type": "builtin", "id": "TO", "loc": "",
+        "input": ["R1@12[0]"],
+        "output": ["Out@2[0]"]
+      },
+      {
+        "type": "builtin", "id": "TO", "loc": "",
+        "input": ["R1@12[1]"],
+        "output": ["Out@2[1]"]
+      },
+      {
+        "type": "builtin", "id": "TO", "loc": "",
+        "input": ["R1@12[2]"],
+        "output": ["Out@2[2]"]
+      },
+      {
+        "type": "builtin", "id": "TO", "loc": "",
+        "input": ["R1@12[3]"],
+        "output": ["Out@2[3]"]
+      },
+      {
+        "type": "builtin", "id": "TO", "loc": "",
+        "input": ["R1@12[4]"],
+        "output": ["Out@2[4]"]
+      }
+    ]
+  }
+}
