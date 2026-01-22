@@ -1,0 +1,148 @@
+component qdiv : [dividend, divisor, start, clk, rst] -> [quotient, complete, overflow] {
+  let Q = 15;
+  let N = 32;
+
+  wire dividend, divisor, quotient of bit(N);
+  wire start, complete, overflow   of bit(1);
+  wire clk, rst                    of clock;
+
+  wire reg_working_quotient, reg_working_divisor of bit(2 * N + Q - 2);
+  wire reg_working_dividend of bit(N + Q - 1);
+  wire reg_quotient of bit(N);
+  wire reg_count of bit(N);
+
+  wire reg_done of bit(1);
+  wire reg_sign of bit(1);
+  wire reg_overflow of bit(1);
+
+
+  let REG(init) = REGISTER(pos_edge = true) <> [clk#, 
+    MUX(1) <> [rst#, TO, CAST <> init]
+  ];
+
+  let zero_count = NOR <> [reg_count[i] | i in [0..N]];
+
+  reg_done <> REG(1) <> MUX(1) <> {
+    sel : reg_done,
+    case[0] : MUX(1) <> [zero_count, reg_done, 1'b1],
+    case[1] : MUX(1) <> [start, reg_done, 1'b0]
+  };
+
+  reg_count <> REG(0) <> MUX(1) <> {
+    sel : reg_done,
+    case[0] : MUX(1) <> [zero_count, SUB <> [reg_count, 1], reg_count],
+    case[1] : MUX(1) <> [start, reg_count, CAST <> N + Q - 1]
+  };
+
+  reg_working_divisor <> REG(0) <> MUX(1) <> {
+    sel : reg_done,
+    case[0] : 
+      LSHR <> [reg_working_divisor, 1],
+    case[1] : MUX(1) <> [start, 
+      reg_working_divisor,
+      CONCAT <> [divisor[N-1:0], CAST(N+Q-2) <> 0]
+    ]
+  };
+
+  reg_working_quotient <> REG(0) <> MUX(1) <> {
+    sel : reg_done,
+    case[0] : MUX(1) <> {
+      sel : SGE <> [reg_working_dividend, reg_working_divisor[45:0]],
+      case[0] : reg_working_quotient,
+      case[1] : setk <> [reg_working_quotient, reg_count, 1'b1]
+    },
+    case[1] : MUX(1) <> [start, reg_working_quotient, CAST <> 0]
+  };
+  
+  reg_working_dividend <> REG(0) <> MUX(1) <> {
+    sel : reg_done,
+    case[0] : MUX(1) <> {
+      sel : SGE <> [reg_working_dividend, reg_working_divisor[45:0]],
+      case[0] : reg_working_dividend,
+      case[1] : SUB <> [reg_working_dividend, reg_working_divisor[45:0]]
+    },
+    case[1] : MUX(1) <> [start, 
+      reg_working_dividend, 
+      CONCAT <> [dividend[N-1:0], CAST(Q-1) <> 0]
+    ]
+  };
+  
+  reg_overflow <> REG(0) <> MUX(1) <> {
+    sel : reg_done,
+    case[0] : MUX(1) <> {
+      sel : AND <> [zero_count, SGE <> [reg_working_quotient[2*N+Q-3:N], CAST(N+Q-2) <> 0]],
+      case[0] : reg_overflow,
+      case[1] : 1'b1
+    },
+    case[1] : MUX(1) <> [start, reg_overflow, 1'b0]
+  };
+
+  reg_sign <> REG(0) <> MUX(1) <> {
+    sel : reg_done,
+    case[0] : reg_sign,
+    case[1] : MUX(1) <> [start, reg_sign, XOR <> [dividend[N-1], divisor[N-1]]]
+  };
+
+  reg_quotient <> REG(0) <> MUX(1) <> {
+    sel : AND <> [NOT <> reg_done, zero_count],
+    case[0] : reg_working_quotient[N-1:0],
+    case[1] : reg_quotient
+  };
+
+
+  quotient <> CONCAT <> [reg_sign, reg_quotient[N-2:0]];
+  complete <> reg_done;
+  overflow <> reg_overflow;
+}
+
+component setk : [input, index, digit] -> [output] {
+  let Q = 15;
+  let N = 32;
+
+  let size = 2 * N + Q - 2;
+  
+  wire input, output of bit(size);
+  wire index         of bit(N);
+  wire digit         of bit(1);
+
+  let bound(i, n) = 
+    if i >= n then i
+    else bound(i * 2, n);
+  let size_b = bound(1, size);
+
+  output <> MUX(log2(size_b)) <> [CAST <> index] ++ [
+     if i + 1 == size then
+       CONCAT <> [digit, input[size-2:0]]
+     else if i == 0 then
+       CONCAT <> [input[size-1:1], digit]
+     else 
+       CONCAT <> [input[size-1:i+1], digit, input[i-1:0]]
+    | i in [0..size]
+  ] ++ [input | i in [size..size_b]];
+}
+
+
+component MUX(width) : [sel] ++ [case[i] | i in [0..W]] -> [output] {
+  let W = 2**width;
+  wire sel  of bit(width);
+  wire mask of bit(W);
+  auto case[W], output;
+
+  mask <> DECODER(width) <> sel;
+  output <> OR(W) <> [
+    AND <> [case[i], CAST <> mask[i]] | i in [0..W]
+  ];
+}
+
+component DECODER(width) : [input] -> [output] {
+  let W = 2**width;
+  wire input  of bit(width);
+  wire output of bit(W);
+  
+  for i in [0..W] {
+    output[i] <> AND(width) <> [port |
+      j in [0..width],
+      let port = if (i >> j) & 1 then TO else NOT
+    ] <> [input[j] | j in [0..width]];
+  }
+}
