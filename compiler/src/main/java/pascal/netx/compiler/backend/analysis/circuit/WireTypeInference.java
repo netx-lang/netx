@@ -53,8 +53,16 @@ public final class WireTypeInference extends CircuitAnalysis {
     private void collectConstraintsInBuiltin(ComponentScope component) {
         switch (component.asBuiltin()) {
             case OR, NOT, AND, XOR, NOR, NAND, XNOR, ADD, SUB, MUL, DIV, MOD -> addAllEqualConstraints(component);
+            case SGE, SGT, SLE, SLT, UGE, UGT, ULE, ULT, EQ, NE -> addInputEqualConstraints(component);
             case CONCAT -> addConstraintForConcat(component);
             case REGISTER -> addContainsForRegister(component);
+        }
+    }
+
+    private void addInputEqualConstraints(ComponentScope component) {
+        var inputs = component.getInputs();
+        for (int i = 0; i < inputs.size() - 1; i++) {
+            addConstraint(new EqualTypeConstraint(inputs.get(i), inputs.get(i + 1)));
         }
     }
 
