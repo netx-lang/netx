@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPTS_DIR="${ROOT_DIR}/scripts"
 BUILD_DIR="${ROOT_DIR}/build"
 
-MAX_JOBS=${MAX_JOBS:-$(nproc 2>/dev/null || echo 4)}
+MAX_JOBS=12
 
 usage() {
     cat <<EOF
@@ -18,7 +18,7 @@ EOF
 }
 
 source "${SCRIPTS_DIR}/lib_synth.sh"
-source "${SCRIPTS_DIR}/lib_sta.sh"
+source "${SCRIPTS_DIR}/lib_or.sh"
 
 process_json() {
     local json_file="$1"
@@ -39,7 +39,7 @@ process_json() {
     nx dump verilog "$opted_json" --output "$opted_v" >/dev/null
     echo "[3/5] Opted Verilog: ${basename}"
 
-    # Run synthesis and timing analysis in parallel for origin and opted
+    # Run synthesis in parallel for origin and opted
     synthesize_design "$origin_v" "${work_dir}/${basename}_origin" &
     local synth_origin_pid=$!
     synthesize_design "$opted_v" "${work_dir}/${basename}_opted" &
@@ -48,13 +48,14 @@ process_json() {
     wait "$synth_origin_pid" "$synth_opted_pid"
     echo "[4/5] Yosys synthesis: ${basename}"
 
-    analyze_timing "$origin_v" "${work_dir}/${basename}_origin" &
-    local sta_origin_pid=$!
-    analyze_timing "$opted_v" "${work_dir}/${basename}_opted" &
-    local sta_opted_pid=$!
+    # Run OpenROAD optimization and timing in parallel for origin and opted
+    repair_design "${work_dir}/${basename}_origin/${basename}_origin_synth.v" "${work_dir}/${basename}_origin" &
+    local or_origin_pid=$!
+    repair_design "${work_dir}/${basename}_opted/${basename}_opted_synth.v" "${work_dir}/${basename}_opted" &
+    local or_opted_pid=$!
     
-    wait "$sta_origin_pid" "$sta_opted_pid"
-    echo "[5/5] OpenSTA analysis: ${basename}"
+    wait "$or_origin_pid" "$or_opted_pid"
+    echo "[5/5] OpenROAD timing: ${basename}"
 }
   
 main() {

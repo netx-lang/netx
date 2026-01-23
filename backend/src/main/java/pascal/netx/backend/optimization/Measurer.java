@@ -77,8 +77,8 @@ public final class Measurer {
             delay.put(Component.Label.SELECT, 0.0);
             delay.put(Component.Label.CONCAT, 0.0);
 
-            area.put(Component.Label.REGISTER, 1.0);
-            area.put(Component.Label.ASYNC_REGISTER, 1.0);
+            area.put(Component.Label.REGISTER, 4.0);
+            area.put(Component.Label.ASYNC_REGISTER, 4.0);
             delay.put(Component.Label.REGISTER, 0.0);
             delay.put(Component.Label.ASYNC_REGISTER, 0.0);
 

@@ -26,16 +26,17 @@ def extract_chip_area_from_area_file(area_file):
                     return None
     return None
 
-def extract_timing_from_timing_file(timing_file):
-    """Extract critical path timing from timing.txt file."""
-    if not os.path.exists(timing_file):
+def extract_timing_from_log_file(log_file):
+    """Extract critical path timing from OpenROAD log file."""
+    if not os.path.exists(log_file):
         return None
     
-    with open(timing_file, 'r') as f:
+    with open(log_file, 'r') as f:
         # Read all lines and find the last occurrence of "data arrival time"
-        # which is the critical path (not intermediate values)
+        # which appears in the OpenROAD timing report section
         last_timing = None
         for line in f:
+            # Look for lines like "           905.9808   data arrival time"
             if 'data arrival time' in line:
                 parts = line.split()
                 if len(parts) >= 1:
@@ -51,10 +52,10 @@ def extract_timing_from_timing_file(timing_file):
 def extract_metrics_from_design(design_dir, design_name):
     """Extract metrics from a single design's log files."""
     area_file = os.path.join(design_dir, f"{design_name}_area.txt")
-    timing_file = os.path.join(design_dir, f"{design_name}_timing.txt")
+    or_log_file = os.path.join(design_dir, f"{design_name}_or.log")
     
     area = extract_chip_area_from_area_file(area_file)
-    timing = extract_timing_from_timing_file(timing_file)
+    timing = extract_timing_from_log_file(or_log_file)
     
     return area, timing
 

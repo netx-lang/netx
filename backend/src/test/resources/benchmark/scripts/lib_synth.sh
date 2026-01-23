@@ -24,16 +24,18 @@ synthesize_design() {
 
     local abc_flags="-dff"
     if [[ -n "$delay_constraint" ]]; then
-        abc_flags+=" -D ${delay_constraint}"
-    fi
-    if [[ "$basename" == *"fft"* ]]; then
-        abc_flags+=" -fast"
+        abc_flags+=" -script +strash;,ifraig;,scorr;,dc2;,dretime;,retime,-o,-D,${delay_constraint};,strash;,&get,-n;,&dch,-f;,&nf,-D,${delay_constraint};,&put;,buffer;,upsize,-D,${delay_constraint};,dnsize,-D,${delay_constraint};,stime"
+    else
+        abc_flags+=" -script +strash;,ifraig;,scorr;,dc2;,dretime;,retime,-o,-D,500;,strash;,&get,-n;,&dch,-f;,&nf,-D,500;,&put;,buffer;,upsize,-D,500;,dnsize,-D,500;,stime"
     fi
 
+    # Escape & in abc_flags for sed replacement
+    abc_flags_escaped=$(printf '%s\n' "$abc_flags" | sed -e 's/[\/&]/\\&/g')
+    
     sed -e "s|INPUT_VERILOG_PLACEHOLDER|$design|g" \
         -e "s|OUTPUT_VERILOG_PLACEHOLDER|$output_file|g" \
         -e "s|OUTPUT_STATS_PLACEHOLDER|$stat_file|g" \
-        -e "s|ABC_FLAGS_PLACEHOLDER|$abc_flags|g" \
+        -e "s|ABC_FLAGS_PLACEHOLDER|$abc_flags_escaped|g" \
         "${LIB_SCRIPT_DIR}/synth.tcl" > "${output_dir}/synth_run.tcl"
 
     (cd "$WORKSPACE_ROOT" && yosys -s "${output_dir}/synth_run.tcl") >/dev/null 2>&1
