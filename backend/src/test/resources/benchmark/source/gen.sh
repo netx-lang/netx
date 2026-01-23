@@ -28,3 +28,6 @@ python3 ../scripts/verilog_to_nx.py ISCAS85/c2670.v
 python3 ../scripts/verilog_to_nx.py ISCAS85/c7552.v
 nx compile ISCAS85/c2670.nx --top c2670 --output ../c2670.json
 nx compile ISCAS85/c7552.nx --top c7552 --output ../c7552.json
+
+nx compile opencore/qdiv.nx --top qdiv --output ../qdiv.json
+nx compile ITC99/b12.nx --top b12 --output ../b12.json
