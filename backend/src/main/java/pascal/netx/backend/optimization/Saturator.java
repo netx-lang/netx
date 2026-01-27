@@ -61,7 +61,7 @@ public final class Saturator {
         }
 
         var best = cls.stream()
-                .min(Comparator.comparing(this::preferInput).thenComparingDouble(this::scoreOf))
+                .min(Comparator.comparing(this::preferInput).thenComparingDouble(this::scoreOf).thenComparing(Vertex::index))
                 .orElseThrow(ShallNotReachHereError::new);
         chosen.put(cls, best);
         return best;
@@ -74,6 +74,7 @@ public final class Saturator {
     private double scoreOf(Vertex v) {
         var cost = costs.get(v);
         if (cost == null) {
+            System.out.println("shit");
             return 0.0;
         }
         return cost.score(areaWeight, delayWeight);
@@ -89,56 +90,20 @@ public final class Saturator {
         private final Map<Vertex, Double> area = new HashMap<>();
         private final Map<Vertex, Double> delay = new HashMap<>();
 
-        private static final int MEM_THRESHOLD = 10;
-        private final Map<Vertex, Integer> areaUpdCount = new HashMap<>();
-
-        private final Set<Graph.EqClass> visiting = new HashSet<>();
         private final Map<Vertex, Integer> rank = new HashMap<>();
 
         Map<Vertex, Cost> computeAll() {
             var result = new HashMap<Vertex, Cost>();
+            computeRank();
             graph.globalOut().stream()
                     .map(graph::eqClassOf)
                     .flatMap(Graph.EqClass::stream).distinct()
-                    .forEach(this::computeArea);
-            computeRank();
-            graph.vertices().stream().filter(rank::containsKey).forEach(this::computeDelay);
+                    .peek(this::computeArea)
+                    .forEach(this::computeDelay);
             for (var key : area.keySet()) {
                 result.put(key, new Cost(area.get(key), delay.get(key)));
             }
             return result;
-        }
-
-        private double computeArea(Vertex vertex) {
-            if (areaUpdCount.computeIfAbsent(vertex, _ -> 0) == MEM_THRESHOLD) {
-                return area.get(vertex);
-            }
-            var curr = graph.eqClassOf(vertex);
-            visiting.add(curr);
-
-            double result = weights.area(vertex);
-            for (var cls : graph.inputsOf(vertex)) {
-                if (!visiting.contains(cls)) {
-                    double best = Double.MAX_VALUE;
-                    for (var pred : cls) {
-                        best = Math.min(best, computeArea(pred));
-                    }
-                    result += best;
-                }
-            }
-
-            if (area.containsKey(vertex)) {
-                if (result == area.get(vertex)) {
-                    areaUpdCount.merge(vertex, 1, Integer::sum);
-                } else {
-                    area.merge(vertex, result, Double::min);
-                }
-            } else {
-                area.put(vertex, result);
-            }
-
-            visiting.remove(curr);
-            return area.get(vertex);
         }
 
         private void computeRank() {
@@ -160,6 +125,28 @@ public final class Saturator {
                     }
                 }
             }
+        }
+
+        private double computeArea(Vertex vertex) {
+            if (area.containsKey(vertex)) {
+                return area.get(vertex);
+            }
+
+            double result = 0d;
+            for (var cls : graph.inputsOf(vertex)) {
+                double best = Double.MAX_VALUE;
+                for (var pred : cls) {
+                    if (rank.get(pred) > rank.get(vertex)) {
+                        best = Math.min(best, computeArea(pred));
+                    }
+                }
+                if (best != Double.MAX_VALUE) {
+                    result += best;
+                }
+            }
+            result += weights.area(vertex);
+            area.put(vertex, result);
+            return result;
         }
 
         private double computeDelay(Vertex vertex) {

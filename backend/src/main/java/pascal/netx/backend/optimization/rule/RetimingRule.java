@@ -8,7 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import static pascal.netx.backend.optimization.rule.GraphRule.Marker.*;
+import static pascal.netx.backend.optimization.rule.GraphRule.Marker.RETIMING_PULL;
+import static pascal.netx.backend.optimization.rule.GraphRule.Marker.RETIMING_PUSH;
 
 public final class RetimingRule extends BidiRule {
     public RetimingRule(Graph graph) {
@@ -42,10 +43,14 @@ public final class RetimingRule extends BidiRule {
                 graph.addEdge(pushed, dual);
                 graph.addEdge(clock, pushed);
                 graph.addEdge(input, pushed);
+                if (dual instanceof Component component
+                        && component.label() == Component.Label.NOT) {
+                    mark(pushed, RETIMING_PUSH);
+                }
             }
-            mark(compute, RETIMING_PUSH);
-            mark(dual, DE_MORGAN_PULL);
             migrateMarkers(compute, dual);
+            mark(compute, RETIMING_PUSH);
+            mark(dual, RETIMING_PULL);
             result = true;
         }
 
@@ -54,7 +59,7 @@ public final class RetimingRule extends BidiRule {
 
     @Override
     boolean pull(Component vertex) {
-        if (vertex instanceof Register
+        if (graph.eqClassOf(vertex).contains(Register.class)
                 || hasMarker(vertex, RETIMING_PULL)
                 || !isPullable(vertex)) {
             return false;
@@ -129,6 +134,7 @@ public final class RetimingRule extends BidiRule {
                 int width = origin.outWidth();
                 var pulled = graph.factory().register(width, isPosEdge.get());
                 var dual = graph.factory().copy(origin);
+                migrateMarkers(origin, dual);
                 graph.addEdge(clock.get(), pulled);
                 graph.addEdge(dual, pulled);
                 for (var input : chosen) {
@@ -136,9 +142,7 @@ public final class RetimingRule extends BidiRule {
                     migrateMarkers(input, pulled);
                 }
                 graph.manager().union(pulled, origin);
-                mark(origin, RETIMING_PULL);
-                mark(dual, RETIMING_PUSH);
-                migrateMarkers(origin, dual);
+                mark(pulled, RETIMING_PUSH);
             } else {
                 for (var candidate : candidates.get(index)) {
                     chosen.add(candidate);

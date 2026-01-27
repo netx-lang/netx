@@ -6,10 +6,10 @@ nx compile MCM.nx --top MCM --attrs 'args=[3, 7, 21]'  --output ../MCM_3_7_21.js
 nx compile MCM.nx --top MCM --attrs 'args=[5, 93]'     --output ../MCM_5_93.json
 nx compile MCM.nx --top MCM --attrs 'args=[7, 19, 31]' --output ../MCM_7_19_31.json
 
-nx compile EPFL/adder.nx --top ADDER --output ../adder.json
-nx compile EPFL/bar.nx --top BARREL_SHIFTER --attrs stage=7 --output ../bar.json
-nx compile EPFL/max.nx --top MAX --output ../max.json
-nx compile EPFL/cavlc.nx --top CAVLC --output ../cavlc.json
+nx compile EPFL/adder.nx --output ../adder.json
+nx compile EPFL/bar.nx --output ../bar.json
+nx compile EPFL/max.nx --output ../max.json
+nx compile EPFL/cavlc.nx --output ../cavlc.json
 
 nx compile genmul/genmul_3_3.nx --top Mult_3_3 --output ../genmul_3_3.json
 nx compile genmul/genmul_5_5.nx --top Mult_5_5 --output ../genmul_5_5.json

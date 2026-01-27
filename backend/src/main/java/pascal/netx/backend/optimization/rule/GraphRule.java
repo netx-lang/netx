@@ -34,8 +34,8 @@ public abstract class GraphRule implements Rule {
         DE_MORGAN_PULL,
         RETIMING_PUSH,
         RETIMING_PULL,
+        ShrinkAssoc,
         ConstMulti,
-        SelectProp,
         DISTRIBUTIVITY;
 
         static int size() {

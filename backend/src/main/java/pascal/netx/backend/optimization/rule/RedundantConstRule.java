@@ -40,6 +40,7 @@ public final class RedundantConstRule extends UniRule {
         }
         if (should) {
             var dual = graph.factory().copy(vertex);
+            migrateMarkers(vertex, dual);
             newInputs.forEach(v -> graph.addEdge(v, dual));
             graph.manager().replace(vertex, dual);
         }

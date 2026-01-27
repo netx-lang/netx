@@ -290,7 +290,8 @@ public final class Graph {
         public void canonicalize(Map<Vertex, BitSet> causality) {
             for (var cls : equivalence.values()) {
                 var elements = Set.copyOf(cls.elements);
-                cls.elements.removeIf(u -> elements.stream().anyMatch(v -> causality.get(u).get(v.index())));
+                cls.elements.removeIf(u -> !(u instanceof Register)
+                        && elements.stream().anyMatch(v -> causality.get(u).get(v.index())));
             }
         }
     }

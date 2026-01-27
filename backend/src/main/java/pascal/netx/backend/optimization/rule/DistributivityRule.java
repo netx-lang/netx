@@ -24,8 +24,8 @@ public final class DistributivityRule extends UniRule {
 
         return switch (vertex.label()) {
             case ADD -> apply(vertex, Component.Label.MUL);
-            case AND -> apply(vertex, Component.Label.OR);
-            case OR -> apply(vertex, Component.Label.AND);
+//            case OR -> apply(vertex, Component.Label.AND);
+//            case AND -> apply(vertex, Component.Label.OR);
             default -> false;
         };
     }
@@ -67,13 +67,16 @@ public final class DistributivityRule extends UniRule {
                 var dual = graph.factory().component(over, width);
                 common.forEach(elem -> graph.addEdge(elem, dual));
                 for (var in : selected) {
-                    var remainder = graph.factory().copy(vertex);
-                    for (var mulIn : graph.inputsOf(in)) {
-                        if (!common.contains(mulIn)) {
-                            graph.addEdge(mulIn, remainder);
+                    if (!common.containsAll(graph.inputsOf(in))) {
+                        var remainder = graph.factory().copy(vertex);
+                        migrateMarkers(vertex, dual);
+                        for (var mulIn : graph.inputsOf(in)) {
+                            if (!common.contains(mulIn)) {
+                                graph.addEdge(mulIn, remainder);
+                            }
                         }
+                        graph.addEdge(remainder, dual);
                     }
-                    graph.addEdge(remainder, dual);
                 }
                 graph.manager().union(vertex, dual);
                 mark(vertex, DISTRIBUTIVITY);

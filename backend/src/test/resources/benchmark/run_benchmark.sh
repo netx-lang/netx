@@ -4,12 +4,17 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPTS_DIR="${ROOT_DIR}/scripts"
 BUILD_DIR="${ROOT_DIR}/build"
+SEQUENTIAL_CONF="${SCRIPTS_DIR}/sequential.conf"
 
-MAX_JOBS=12
+MAX_JOBS=16
 
 usage() {
     cat <<EOF
 Usage: $(basename "$0") [benchmark]
+
+Options:
+    -s, --sequential   Run only the sequential benchmarks listed in scripts/sequential.conf
+    -h, --help         Show this help message
 
 Run all benchmarks in the current directory or a single benchmark when the
 optional argument is provided. The argument can be either the JSON filename
@@ -19,6 +24,20 @@ EOF
 
 source "${SCRIPTS_DIR}/lib_synth.sh"
 source "${SCRIPTS_DIR}/lib_or.sh"
+
+load_sequential_jsons() {
+    local -n _out=$1
+
+    if [ ! -f "$SEQUENTIAL_CONF" ]; then
+        echo "Error: sequential config not found at $SEQUENTIAL_CONF" >&2
+        exit 1
+    fi
+
+    while IFS= read -r line; do
+        [[ -z "$line" || "$line" =~ ^# ]] && continue
+        _out+=("$line")
+    done < "$SEQUENTIAL_CONF"
+}
 
 process_json() {
     local json_file="$1"
@@ -62,13 +81,54 @@ main() {
     mkdir -p "$BUILD_DIR"
     local json_files=()
     local single_benchmark=""
+    local sequential_only=false
 
     # Parse arguments
-    if [ "$#" -gt 0 ]; then
-        single_benchmark="$1"
-    fi
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            -s|--sequential)
+                sequential_only=true
+                shift
+                ;;
+            -h|--help)
+                usage
+                exit 0
+                ;;
+            *)
+                if [ -n "$single_benchmark" ]; then
+                    echo "Error: multiple benchmark arguments provided" >&2
+                    usage
+                    exit 1
+                fi
+                single_benchmark="$1"
+                shift
+                ;;
+        esac
+    done
 
-    if [ -n "$single_benchmark" ]; then
+    if [ "$sequential_only" = true ]; then
+        load_sequential_jsons json_files
+
+        if [ -n "$single_benchmark" ]; then
+            local candidate="$single_benchmark"
+            if [[ "$candidate" != *.json ]]; then
+                candidate="${candidate}.json"
+            fi
+
+            local filtered=()
+            for entry in "${json_files[@]}"; do
+                if [ "$entry" = "$candidate" ]; then
+                    filtered+=("$entry")
+                fi
+            done
+
+            if [ ${#filtered[@]} -eq 0 ]; then
+                echo "Error: benchmark '$single_benchmark' not listed in ${SEQUENTIAL_CONF}" >&2
+                exit 1
+            fi
+            json_files=("${filtered[@]}")
+        fi
+    elif [ -n "$single_benchmark" ]; then
         local candidate="$single_benchmark"
         if [[ "$candidate" != *.json ]]; then
             candidate="${candidate}.json"
@@ -82,6 +142,15 @@ main() {
         json_files=("$candidate")
     else
         json_files=(*.json)
+    fi
+
+    if [ ${#json_files[@]} -gt 0 ]; then
+        for candidate in "${json_files[@]}"; do
+            if [ ! -f "$candidate" ] && [ ! -f "${ROOT_DIR}/${candidate}" ]; then
+                echo "Error: benchmark '$candidate' not found" >&2
+                exit 1
+            fi
+        done
     fi
 
     if [ ${#json_files[@]} -eq 0 ]; then

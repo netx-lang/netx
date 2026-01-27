@@ -45,6 +45,7 @@ public final class Measurer {
     }
 
     public static final class Weights {
+        private final int fanin;
         private final Graph graph;
         private final Map<Component.Label, Double> area;
         private final Map<Component.Label, Double> delay;
@@ -55,6 +56,7 @@ public final class Measurer {
             this.graph = graph;
             this.area = area;
             this.delay = delay;
+            fanin = 4;
         }
 
 
@@ -108,16 +110,29 @@ public final class Measurer {
             return new Weights(graph, area, delay);
         }
 
+        int multiFaninAreaCoefficient(int size) {
+            size--;
+            if (size <= fanin) {
+                return 1;
+            } else {
+                return (int) (Math.ceil((size - fanin - 1.0) / (fanin - 1)) + 2);
+            }
+        }
+
         public double area(Vertex v) {
             if (v instanceof Component c) {
                 int fanin = graph.inputsOf(v).size();
-                return area.getOrDefault(c.label(), 0.0) * Math.max(1, fanin - 3);
+                return area.getOrDefault(c.label(), 0.0) * multiFaninAreaCoefficient(fanin);
             }
             return 0.0;
         }
 
         int multiFaninDelayCoefficient(int size) {
-            return Integer.toBinaryString(Math.max(0, size - 3)).length();
+            size--;
+            if (size <= fanin) {
+                return 1;
+            }
+            return (int) Math.floor(Math.log(size) / Math.log(fanin));
         }
 
         public double delay(Vertex v) {
@@ -127,7 +142,6 @@ public final class Measurer {
             }
             return 0.0;
         }
-
     }
 
     private class DelayComputer {

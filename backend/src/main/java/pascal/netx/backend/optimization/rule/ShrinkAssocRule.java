@@ -36,6 +36,10 @@ public final class ShrinkAssocRule extends UniRule {
         }
 
         boolean shrink() {
+            if (hasMarker(origin, Marker.ShrinkAssoc)) {
+                return false;
+            }
+
             if (candidates.stream().anyMatch(Predicate.not(List::isEmpty))) {
                 shrink(0);
                 return changed;
@@ -45,14 +49,14 @@ public final class ShrinkAssocRule extends UniRule {
 
         private void shrink(int index) {
             if (index == candidates.size()) {
-                if (chosen.size() < 16) {
-                    var dual = graph.factory().copy(origin);
-                    for (var vertex : chosen) {
-                        graph.addEdge(vertex, dual);
-                    }
-                    graph.manager().replace(origin, dual);
-                    changed = true;
+                var dual = graph.factory().copy(origin);
+                for (var vertex : chosen) {
+                    graph.addEdge(vertex, dual);
                 }
+                migrateMarkers(origin, dual);
+                graph.manager().union(origin, dual);
+                mark(origin, Marker.ShrinkAssoc);
+                changed = true;
             } else {
                 if (candidates.get(index).isEmpty()) {
                     chosen.add(inputs.get(index));

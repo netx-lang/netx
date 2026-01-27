@@ -16,6 +16,7 @@ public final class IdempotentRule extends UniRule {
                 var seen = inputs.stream().distinct().toList();
                 if (seen.size() < inputs.size()) {
                     var dual = graph.factory().copy(vertex);
+                    migrateMarkers(vertex, dual);
                     seen.forEach(v -> graph.addEdge(v, dual));
                     graph.manager().replace(vertex, dual);
                     yield true;

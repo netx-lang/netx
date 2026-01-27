@@ -84,12 +84,12 @@ public final class Rewriter {
     }
 
     private void computeCausalityPreds(Vertex v) {
-        if (!Vertices.isCombinational(v)) {
-            causality.put(v, new BitSet());
+        if (causality.containsKey(v)) {
             return;
         }
 
-        if (causality.containsKey(v)) {
+        if (!Vertices.isCombinational(v)) {
+            causality.put(v, new BitSet());
             return;
         }
 
@@ -98,11 +98,10 @@ public final class Rewriter {
         for (var cls : graph.inputsOf(v)) {
             for (var pred : cls) {
                 computeCausalityPreds(pred);
-                var predBits = causality.get(pred);
-                if (predBits != null) {
-                    bitSet.or(predBits);
+                bitSet.or(causality.get(pred));
+                if (Vertices.isCombinational(pred)) {
+                    bitSet.set(pred.index());
                 }
-                bitSet.set(pred.index());
             }
         }
     }

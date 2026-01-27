@@ -10,7 +10,7 @@ repair_design() {
     local output_dir=$2
     local basename=$(basename "$synth_verilog" _synth.v)
     
-    local openroad_cmd="openroad -no_init -exit"
+    local openroad_cmd="openroad -no_init -exit -threads 8"
 
     # Check if openroad is available locally; otherwise use docker with user mapping
     if ! command -v openroad &> /dev/null; then

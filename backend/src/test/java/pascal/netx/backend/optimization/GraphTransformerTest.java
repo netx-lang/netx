@@ -1,5 +1,6 @@
 package pascal.netx.backend.optimization;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import pascal.netx.util.print.NotepadWriter;
@@ -16,16 +17,16 @@ class GraphTransformerTest {
 
     @Test
     void sampleTest() throws IOException {
-        var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve("benchmark/max.json")));
+        var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve("benchmark/adder.json")));
         var transformer = new GraphTransformer(NotepadWriter.pathOut(Path.of("/home/nairen/tmp/test.dot")), json);
         transformer.parse();
         System.out.printf("Before optimization: %s\n", transformer.measure());
 
         transformer.rewrite();
-        transformer.saturate(1, 1);
-        System.out.printf(" After optimization: %s\n", transformer.measure());
-
+        System.out.println("Finished rewriting.");
+        transformer.saturate(1, 0);
         transformer.dumpDot();
+        System.out.printf(" After optimization: %s\n", transformer.measure());
     }
 
     @Test
@@ -55,21 +56,20 @@ class GraphTransformerTest {
 
     @Test
     void testBenchmark() throws IOException {
-        testBenchmarkCase("fft");
-        testBenchmarkCase("rv32i");
-        testBenchmarkCase("ADPCM");
-        testBenchmarkCase("FIR_8");
-        testBenchmarkCase("FMA");
-        testBenchmarkCase("SMUL");
-        testBenchmarkCase("MCM_3_7_21");
-        testBenchmarkCase("MCM_5_93");
-        testBenchmarkCase("MCM_7_19_31");
+        try (var files = Files.list(TEST_DIR.resolve("benchmark"))) {
+            files.filter(file -> file.getFileName().toString().endsWith(".json"))
+                    .forEach(this::testBenchmarkCase);
+        }
     }
 
-    private void testBenchmarkCase(String name) throws IOException {
-        Path path = TEST_DIR.resolve("benchmark").resolve(name + ".json");
+    private void testBenchmarkCase(Path path) {
         System.out.println("======== " + path.getFileName() + " ========");
-        var json = MAPPER.readTree(Files.readString(path));
+        JsonNode json;
+        try {
+            json = MAPPER.readTree(Files.readString(path));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         var transformer = new GraphTransformer(NotepadWriter.stdOut(), json);
         transformer.parse();
         System.out.printf("  Before optimization: %s\n", transformer.measure());
