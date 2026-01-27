@@ -31,7 +31,9 @@ public final class RetimingRule extends BidiRule {
 
         boolean result = false;
         for (var eqIn : inputs.get(1)) {
-            if (!(eqIn instanceof Component compute) || hasMarker(compute, RETIMING_PUSH)) {
+            if (!(eqIn instanceof Component compute)
+                    || hasMarker(compute, RETIMING_PUSH)
+                    || graph.inputsOf(compute).size() > 4) {
                 continue;
             }
 

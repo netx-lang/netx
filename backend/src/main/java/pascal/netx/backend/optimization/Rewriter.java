@@ -20,7 +20,6 @@ public final class Rewriter {
                 new IdempotentRule(graph),
                 new RedundantConstRule(graph),
                 new SingletonRule(graph),
-                new ShrinkAssocRule(graph),
                 new AbsorptionRule(graph),
                 new DoubleNegationRule(graph),
                 new DistributivityRule(graph),
@@ -46,6 +45,16 @@ public final class Rewriter {
 
             if (!changed) {
                 changed = commonSubExpressionElimination();
+            }
+        } while (changed);
+
+        var shrink = new ShrinkAssocRule(graph);
+        do {
+            changed = false;
+            for (var vertex : graph.components()) {
+                if (shrink.apply(vertex)) {
+                    changed = true;
+                }
             }
         } while (changed);
 

@@ -24,8 +24,8 @@ public final class DistributivityRule extends UniRule {
 
         return switch (vertex.label()) {
             case ADD -> apply(vertex, Component.Label.MUL);
-//            case OR -> apply(vertex, Component.Label.AND);
-//            case AND -> apply(vertex, Component.Label.OR);
+            case OR -> apply(vertex, Component.Label.AND);
+            case AND -> apply(vertex, Component.Label.OR);
             default -> false;
         };
     }

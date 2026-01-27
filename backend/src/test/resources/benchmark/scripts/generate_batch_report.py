@@ -10,6 +10,23 @@ import re
 import math
 from datetime import datetime
 
+def read_benchmark_categories(conf_file):
+    """Read benchmark.conf and return a dict mapping design names to categories."""
+    categories = {}
+    if not os.path.exists(conf_file):
+        return categories
+    
+    with open(conf_file, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            if '=' in line:
+                design, category = line.split('=', 1)
+                categories[design.strip()] = category.strip()
+    
+    return categories
+
 def extract_chip_area_from_area_file(area_file):
     """Extract chip area in µm^2 from area.txt file."""
     if not os.path.exists(area_file):
@@ -120,11 +137,12 @@ def compute_geomean(values):
     
     return geomean
 
-def generate_table(results, output_file=None):
-    """Generate formatted table from results."""
+def generate_table_for_category(results, category_name):
+    """Generate formatted table for a specific category."""
     lines = []
     
-    lines.append("=" * 100)
+    lines.append("")
+    lines.append(f"{'='*50} {category_name} {'='*50}")
     lines.append(
         f"{'Design':<20} "
         f"{'Origin_Area':>12} {'Origin_Time':>12} "
@@ -155,26 +173,55 @@ def generate_table(results, output_file=None):
         opted_times.append(float(result['opted_time']))
     
     # Compute geometric means of absolute values
-    origin_area_geomean = compute_geomean(origin_areas)
-    opted_area_geomean = compute_geomean(opted_areas)
-    origin_time_geomean = compute_geomean(origin_times)
-    opted_time_geomean = compute_geomean(opted_times)
+    if origin_areas:
+        origin_area_geomean = compute_geomean(origin_areas)
+        opted_area_geomean = compute_geomean(opted_areas)
+        origin_time_geomean = compute_geomean(origin_times)
+        opted_time_geomean = compute_geomean(opted_times)
+        
+        # Compute delta from geomeans
+        area_delta_geomean = ((opted_area_geomean - origin_area_geomean) / origin_area_geomean * 100) if origin_area_geomean > 0 else 0
+        time_delta_geomean = ((opted_time_geomean - origin_time_geomean) / origin_time_geomean * 100) if origin_time_geomean > 0 else 0
+        
+        lines.append("=" * 100)
+        lines.append(
+            f"{'GEOMEAN':<20} "
+            f"{origin_area_geomean:>12.3f} "
+            f"{origin_time_geomean:>12.3f} "
+            f"{opted_area_geomean:>12.3f} "
+            f"{opted_time_geomean:>12.3f} "
+            f"{area_delta_geomean:>9.1f}% "
+            f"{time_delta_geomean:>9.1f}%"
+        )
+        lines.append("=" * 100)
     
-    # Compute delta from geomeans
-    area_delta_geomean = ((opted_area_geomean - origin_area_geomean) / origin_area_geomean * 100) if origin_area_geomean > 0 else 0
-    time_delta_geomean = ((opted_time_geomean - origin_time_geomean) / origin_time_geomean * 100) if origin_time_geomean > 0 else 0
+    return lines
+
+def generate_table(results, categories, output_file=None):
+    """Generate formatted table from results, split by categories."""
+    lines = []
     
-    lines.append("=" * 100)
-    lines.append(
-        f"{'GEOMEAN':<20} "
-        f"{origin_area_geomean:>12.3f} "
-        f"{origin_time_geomean:>12.3f} "
-        f"{opted_area_geomean:>12.3f} "
-        f"{opted_time_geomean:>12.3f} "
-        f"{area_delta_geomean:>9.1f}% "
-        f"{time_delta_geomean:>9.1f}%"
-    )
-    lines.append("=" * 100)
+    # Group results by category
+    results_by_category = {}
+    uncategorized = []
+    
+    for result in results:
+        design = result['design']
+        if design in categories:
+            category = categories[design]
+            if category not in results_by_category:
+                results_by_category[category] = []
+            results_by_category[category].append(result)
+        else:
+            uncategorized.append(result)
+    
+    # Generate table for each category
+    for category in sorted(results_by_category.keys()):
+        lines.extend(generate_table_for_category(results_by_category[category], category))
+    
+    # Add uncategorized if any
+    if uncategorized:
+        lines.extend(generate_table_for_category(uncategorized, "UNCATEGORIZED"))
     
     output_text = '\n'.join(lines)
     
@@ -189,11 +236,15 @@ def main():
     workspace_root = os.path.dirname(script_dir)
     build_dir = os.path.join(workspace_root, 'build')
     output_file = os.path.join(build_dir, 'summary.txt')
+    conf_file = os.path.join(script_dir, 'benchmark.conf')
     
     if len(sys.argv) > 1:
         build_dir = sys.argv[1]
     if len(sys.argv) > 2:
         output_file = sys.argv[2]
+    
+    # Read benchmark categories
+    categories = read_benchmark_categories(conf_file)
     
     results = collect_all_results(build_dir)
     
@@ -201,7 +252,7 @@ def main():
         print("Error: No comparison results found in build directory", file=sys.stderr)
         sys.exit(1)
     
-    table = generate_table(results, output_file)
+    table = generate_table(results, categories, output_file)
     print(table)
     
     if output_file:

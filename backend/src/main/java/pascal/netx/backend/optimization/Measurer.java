@@ -110,12 +110,11 @@ public final class Measurer {
             return new Weights(graph, area, delay);
         }
 
-        int multiFaninAreaCoefficient(int size) {
-            size--;
+        double multiFaninAreaCoefficient(int size) {
             if (size <= fanin) {
                 return 1;
             } else {
-                return (int) (Math.ceil((size - fanin - 1.0) / (fanin - 1)) + 2);
+                return (size - fanin - 1.0) / (fanin - 1) + 2;
             }
         }
 
@@ -127,12 +126,11 @@ public final class Measurer {
             return 0.0;
         }
 
-        int multiFaninDelayCoefficient(int size) {
-            size--;
+        double multiFaninDelayCoefficient(int size) {
             if (size <= fanin) {
                 return 1;
             }
-            return (int) Math.floor(Math.log(size) / Math.log(fanin));
+            return Math.log(size) / Math.log(fanin);
         }
 
         public double delay(Vertex v) {
