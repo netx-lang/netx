@@ -12,6 +12,7 @@ import java.util.function.Predicate;
 import static pascal.netx.backend.optimization.model.Component.Label.CAST;
 import static pascal.netx.backend.optimization.model.Component.Label.CONCAT;
 
+
 public final class ConstantPropRule extends UniRule {
     public ConstantPropRule(Graph graph) {
         super(graph);
@@ -86,12 +87,16 @@ public final class ConstantPropRule extends UniRule {
         } else {
             return switch (vertex.label()) {
                 case SHL, ASHR, LSHR -> propagateShift(vertex);
-                case OR -> propagateAbsorbing(vertex, Constant::isMersenne, false);
+                case OR -> propagateAbsorbing(vertex, Constant::isMersenne, false)
+                        || removeRedundantConst(vertex, Constant::isZero);
                 case NOR -> propagateAbsorbing(vertex, Constant::isMersenne, true);
-                case NAND -> propagateAbsorbing(vertex, Constant::isZero, false);
+                case NAND -> propagateAbsorbing(vertex, Constant::isZero, false)
+                        || removeRedundantConst(vertex, Constant::isMersenne);
+                case AND -> propagateAbsorbing(vertex, Constant::isZero, true)
+                        || removeRedundantConst(vertex, Constant::isMersenne);
                 case MUL -> propagateAbsorbing(vertex, Constant::isZero, true)
                         || rewriteConstMultiply(vertex);
-                case AND -> propagateAbsorbing(vertex, Constant::isZero, true);
+                case XOR, ADD, XNOR -> removeRedundantConst(vertex, Constant::isZero);
                 default -> false;
             };
         }
@@ -170,6 +175,30 @@ public final class ConstantPropRule extends UniRule {
 
     private static boolean isPowerOfTwo(long x) {
         return (x & (x - 1)) == 0 && x > 0;
+    }
+
+    private boolean removeRedundantConst(Component vertex, Predicate<Constant> predicate) {
+        var inputs = graph.inputsOf(vertex);
+        if (inputs.size() <= 1) {
+            return false;
+        }
+
+        boolean found = false;
+        List<Graph.EqClass> newInputs = new ArrayList<>();
+        for (var input : inputs) {
+            if (input.contains(Constant.class, predicate)) {
+                found = true;
+            } else {
+                newInputs.add(input);
+            }
+        }
+        if (found) {
+            var dual = graph.factory().copy(vertex);
+            migrateMarkers(vertex, dual);
+            newInputs.forEach(cls -> graph.addEdge(cls, dual));
+            graph.manager().replace(vertex, dual);
+        }
+        return found;
     }
 
     private boolean propagateAbsorbing(Component vertex, Predicate<Constant> matcher, boolean zero) {

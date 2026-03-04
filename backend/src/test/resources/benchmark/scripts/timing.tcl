@@ -19,7 +19,7 @@ set netlist_base [file rootname [file tail $netlist_path]]
 set design_base  [regsub {_synth$} $netlist_base ""]
 set area_file    [file join $design_dir "${design_base}_area.txt"]
 
-set target_util 0.55
+set target_util 0.25
 set placement_density 0.70
 
 set aspect_ratio 1.0

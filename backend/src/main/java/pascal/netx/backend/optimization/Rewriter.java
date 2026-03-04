@@ -17,7 +17,6 @@ public final class Rewriter {
         this.rules = List.of(
                 new ConcatShortcutRule(graph),
                 new IdempotentRule(graph),
-                new RedundantConstRule(graph),
                 new SingletonRule(graph),
                 new AbsorptionRule(graph),
                 new DoubleNegationRule(graph),
