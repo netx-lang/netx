@@ -142,7 +142,8 @@ def generate_table_for_category(results, category_name):
     lines = []
     
     lines.append("")
-    lines.append(f"{'='*50} {category_name} {'='*50}")
+    length = len(category_name) + 2
+    lines.append(f"{'='*(50 - length//2)} {category_name} {'='*(100 - 50 + length//2 - length)}")
     lines.append(
         f"{'Design':<20} "
         f"{'Origin_Area':>12} {'Origin_Time':>12} "
@@ -151,11 +152,14 @@ def generate_table_for_category(results, category_name):
     )
     lines.append("=" * 100)
     
-    # Collect raw values for geomean calculation
-    origin_areas = []
-    opted_areas = []
-    origin_times = []
-    opted_times = []
+    # Collect ratios for geomean calculation (more meaningful than averaging absolutes)
+    area_ratios = []
+    time_ratios = []
+
+    # Collect absolute differences (opted - origin)
+    area_diff_sum = 0.0
+    time_diff_sum = 0.0
+    diff_count = 0
     
     for result in results:
         lines.append(
@@ -167,29 +171,50 @@ def generate_table_for_category(results, category_name):
             f"{result['area_delta']:>10} "
             f"{result['time_delta']:>10}"
         )
-        origin_areas.append(float(result['origin_area']))
-        opted_areas.append(float(result['opted_area']))
-        origin_times.append(float(result['origin_time']))
-        opted_times.append(float(result['opted_time']))
-    
-    # Compute geometric means of absolute values
-    if origin_areas:
-        origin_area_geomean = compute_geomean(origin_areas)
-        opted_area_geomean = compute_geomean(opted_areas)
-        origin_time_geomean = compute_geomean(origin_times)
-        opted_time_geomean = compute_geomean(opted_times)
-        
-        # Compute delta from geomeans
-        area_delta_geomean = ((opted_area_geomean - origin_area_geomean) / origin_area_geomean * 100) if origin_area_geomean > 0 else 0
-        time_delta_geomean = ((opted_time_geomean - origin_time_geomean) / origin_time_geomean * 100) if origin_time_geomean > 0 else 0
-        
+        try:
+            origin_area = float(result['origin_area'])
+            opted_area = float(result['opted_area'])
+            origin_time = float(result['origin_time'])
+            opted_time = float(result['opted_time'])
+
+            area_diff_sum += (opted_area - origin_area)
+            time_diff_sum += (opted_time - origin_time)
+            diff_count += 1
+
+            if origin_area > 0:
+                area_ratios.append(opted_area / origin_area)
+            if origin_time > 0:
+                time_ratios.append(opted_time / origin_time)
+        except (ValueError, ZeroDivisionError):
+            pass
+
+    # Report sum of absolute numeric differences (opted - origin)
+    if diff_count > 0:
         lines.append("=" * 100)
         lines.append(
+            f"{'ABS_Δ':<20} "
+            f"{'-':>12} "
+            f"{'-':>12} "
+            f"{'-':>12} "
+            f"{'-':>12} "
+            f"{area_diff_sum:>10.3f} "
+            f"{time_diff_sum:>10.3f}"
+        )
+    
+    # Compute geometric means of ratios and report as percent deltas
+    if area_ratios or time_ratios:
+        area_ratio_geomean = compute_geomean(area_ratios) if area_ratios else 1.0
+        time_ratio_geomean = compute_geomean(time_ratios) if time_ratios else 1.0
+
+        area_delta_geomean = (area_ratio_geomean - 1.0) * 100
+        time_delta_geomean = (time_ratio_geomean - 1.0) * 100
+        
+        lines.append(
             f"{'GEOMEAN':<20} "
-            f"{origin_area_geomean:>12.3f} "
-            f"{origin_time_geomean:>12.3f} "
-            f"{opted_area_geomean:>12.3f} "
-            f"{opted_time_geomean:>12.3f} "
+            f"{'-':>12} "
+            f"{'-':>12} "
+            f"{'-':>12} "
+            f"{'-':>12} "
             f"{area_delta_geomean:>9.1f}% "
             f"{time_delta_geomean:>9.1f}%"
         )

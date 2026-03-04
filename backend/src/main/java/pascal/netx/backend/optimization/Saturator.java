@@ -61,7 +61,7 @@ public final class Saturator {
         }
 
         var best = cls.stream()
-                .min(Comparator.comparing(this::preferInput).thenComparingDouble(this::scoreOf).thenComparing(Vertex::index))
+                .min(Comparator.comparing(this::scoreOf).thenComparingDouble(this::preferInput).thenComparing(Vertex::index))
                 .orElseThrow(ShallNotReachHereError::new);
         chosen.put(cls, best);
         return best;
@@ -72,12 +72,7 @@ public final class Saturator {
     }
 
     private double scoreOf(Vertex v) {
-        var cost = costs.get(v);
-        if (cost == null) {
-            System.out.println("shit");
-            return 0.0;
-        }
-        return cost.score(areaWeight, delayWeight);
+        return costs.get(v).score(areaWeight, delayWeight);
     }
 
     private record Cost(double area, double delay) {
@@ -87,88 +82,64 @@ public final class Saturator {
     }
 
     private final class CostCalculator {
-        private final Map<Vertex, Double> area = new HashMap<>();
-        private final Map<Vertex, Double> delay = new HashMap<>();
+        private static final int RECOMPUTE = 100;
+        private final Map<Vertex, Integer> count = new HashMap<>();
+        private final Set<Vertex> inStack = new HashSet<>();
 
-        private final Map<Vertex, Integer> rank = new HashMap<>();
+        private final Map<Vertex, Cost> result = new HashMap<>();
 
         Map<Vertex, Cost> computeAll() {
-            var result = new HashMap<Vertex, Cost>();
-            computeRank();
             graph.globalOut().stream()
                     .map(graph::eqClassOf)
                     .flatMap(Graph.EqClass::stream).distinct()
-                    .peek(this::computeArea)
-                    .forEach(this::computeDelay);
-            for (var key : area.keySet()) {
-                result.put(key, new Cost(area.get(key), delay.get(key)));
-            }
+                    .forEach(this::compute);
             return result;
         }
 
-        private void computeRank() {
-            Queue<Vertex> queue = new LinkedList<>();
-            graph.globalOut().stream()
-                    .map(graph::eqClassOf)
-                    .flatMap(Graph.EqClass::stream).distinct()
-                    .peek(queue::offer)
-                    .forEach(v -> rank.put(v, 0));
+        double score(Cost cost) {
+            return cost.score(areaWeight, delayWeight);
+        }
 
-            while (!queue.isEmpty()) {
-                var vertex = queue.poll();
-                for (var cls : graph.inputsOf(vertex)) {
-                    for (var pred : cls) {
-                        if (!rank.containsKey(pred)) {
-                            rank.put(pred, rank.get(vertex) + 1);
-                            queue.add(pred);
+        private Cost compute(Vertex v) {
+            count.computeIfAbsent(v, _ -> 0);
+            count.merge(v, 1, Integer::sum);
+            if (count.get(v) > RECOMPUTE) {
+                return result.get(v);
+            }
+
+            inStack.add(v);
+
+            List<Cost> toMerge = new LinkedList<>();
+            for (var cls : graph.inputsOf(v)) {
+                double best = Double.POSITIVE_INFINITY;
+                Cost bestCost = null;
+                for (var pred : cls) {
+                    if (!inStack.contains(pred)) {
+                        var predCost = compute(pred);
+                        var predScore = score(predCost);
+                        if (predScore < best) {
+                            best = predScore;
+                            bestCost = predCost;
                         }
                     }
                 }
-            }
-        }
-
-        private double computeArea(Vertex vertex) {
-            if (area.containsKey(vertex)) {
-                return area.get(vertex);
-            }
-
-            double result = 0d;
-            for (var cls : graph.inputsOf(vertex)) {
-                double best = Double.MAX_VALUE;
-                for (var pred : cls) {
-                    if (rank.get(pred) > rank.get(vertex)) {
-                        best = Math.min(best, computeArea(pred));
-                    }
-                }
-                if (best != Double.MAX_VALUE) {
-                    result += best;
+                if (bestCost != null) {
+                    toMerge.add(bestCost);
                 }
             }
-            result += weights.area(vertex);
-            area.put(vertex, result);
-            return result;
-        }
 
-        private double computeDelay(Vertex vertex) {
-            if (delay.containsKey(vertex)) {
-                return delay.get(vertex);
-            }
-
-            double result = 0d;
-            for (var cls : graph.inputsOf(vertex)) {
-                double best = Double.MAX_VALUE;
-                for (var pred : cls) {
-                    if (rank.get(pred) > rank.get(vertex)) {
-                        best = Math.min(best, computeDelay(pred));
-                    }
-                }
-                if (best != Double.MAX_VALUE) {
-                    result = Math.max(result, best);
-                }
-            }
-            result += weights.delay(vertex);
-            delay.put(vertex, result);
-            return result;
+            double predDelay = toMerge.stream().map(Cost::delay)
+                    .max(Comparator.naturalOrder()).orElse(0d);
+            double predArea = toMerge.stream().map(Cost::area)
+                    .reduce(0d, Double::sum);
+            Cost cost = new Cost(
+                    weights.area(v) + predArea,
+                    weights.delay(v) + predDelay
+            );
+            inStack.remove(v);
+            result.merge(v, cost, (existing, incoming) ->
+                    score(incoming) < score(existing) ? incoming : existing);
+            return result.get(v);
         }
     }
 }

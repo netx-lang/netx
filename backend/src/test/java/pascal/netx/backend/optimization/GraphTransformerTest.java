@@ -17,7 +17,7 @@ class GraphTransformerTest {
 
     @Test
     void sampleTest() throws IOException {
-        var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve("benchmark/frg2.json")));
+        var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve("benchmark/rv32i.json")));
         var transformer = new GraphTransformer(NotepadWriter.pathOut(Path.of("/home/nairen/tmp/test.dot")), json);
         transformer.parse();
         System.out.printf("Before optimization: %s\n", transformer.measure());
