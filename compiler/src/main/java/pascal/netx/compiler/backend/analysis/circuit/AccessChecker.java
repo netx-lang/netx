@@ -48,7 +48,7 @@ public final class AccessChecker extends CircuitAnalysis {
     private void analyze(ComponentScope scope) {
         scope.getInputs().forEach(AccessChecker::check);
         scope.getOutputs().forEach(AccessChecker::check);
-        scope.getBinding().forEachEntity(AccessChecker::check);
+        scope.forEachEntity(AccessChecker::check);
         if (scope.hasAttributes()) {
             for (var entry : scope.getAttributes().entrySet()) {
                 check(entry.getValue());

@@ -52,7 +52,7 @@ public final class AliasAnalysis extends CircuitAnalysis {
     private void rewrite() {
         List<ComponentScope> toRemove = new ArrayList<>();
         pack.forEachSubComponent(scope -> {
-            scope.getBinding().releaseIf(Predicate.not(manager::needDump));
+            scope.releaseEntityIf(Predicate.not(manager::needDump));
             scope.getInputs().replaceAll(manager::repOf);
             scope.getOutputs().replaceAll(manager::repOf);
             if (scope.hasAttributes()) {
@@ -281,7 +281,8 @@ public final class AliasAnalysis extends CircuitAnalysis {
                 }
             }
             for (var child : toRemove) {
-                scope.getBinding().bind(child.getBinding());
+                scope.mergeBindingsFrom(child);
+//                scope.getBinding().bind(child.getBinding());
                 scope.getChildren().remove(child);
             }
         }

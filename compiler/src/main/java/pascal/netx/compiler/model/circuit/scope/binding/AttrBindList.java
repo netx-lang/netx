@@ -4,7 +4,7 @@ import pascal.netx.compiler.model.circuit.Entity;
 
 import java.util.List;
 
-public sealed interface AttrBindList permits OrderedAttrBindList, MultiBinding {
+public sealed interface AttrBindList permits OrderedAttrBindList, IdEntityMap {
     static AttrBindList ofEmpty() {
         return OrderedAttrBindList.ofEmpty();
     }

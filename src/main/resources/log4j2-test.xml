@@ -2,10 +2,10 @@
 <Configuration status="WARN">
     <Properties>
         <Property name="consolePattern">
-            %d{HH:mm:ss} %highlight{%-5level}{ERROR=red} %msg%n
+            %d{HH:mm:ss} %highlight{%-5level}{ERROR=red} %msg
         </Property>
         <Property name="filePattern">
-            %d{HH:mm:ss} %-5level %msg%n
+            %d{HH:mm:ss} %-5level %msg
         </Property>
     </Properties>
     <Appenders>

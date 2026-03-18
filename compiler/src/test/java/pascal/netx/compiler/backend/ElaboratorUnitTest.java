@@ -48,7 +48,7 @@ class ElaboratorUnitTest {
                     wire x of bit(4);
                 }
                 """);
-        var data = (Signal) component.getBinding().resolve(Identifier.of("x"));
+        var data = (Signal) component.getBaseBinding().resolve(Identifier.of("x"));
         var expected = new ArrayList<>(IntStream.range(0, 4)
                 .mapToObj(BitSelector::new)
                 .map(selector -> Signal.accessOf(data, selector)).toList());

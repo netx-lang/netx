@@ -161,7 +161,7 @@ public final class WireTypeInference extends CircuitAnalysis {
 
     private void checkAllTyped() {
         pack.forEachSubComponent(scope ->
-                scope.getBinding().forEachEntity(entity -> {
+                scope.forEachEntity(entity -> {
                     if (!(entity instanceof Signal inst)) {
                         throw new ShallNotReachHereError();
                     }

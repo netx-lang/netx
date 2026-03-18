@@ -19,30 +19,22 @@
       {
         "type": "builtin", "id": "TO", "loc": "",
         "input": ["i@0"],
-          "output": [
-              "o@1[1]"
-          ]
+        "output": ["o@1[1]"]
       },
       {
         "type": "builtin", "id": "TO", "loc": "",
         "input": ["i@0"],
-          "output": [
-              "o@1[2]"
-          ]
+        "output": ["o@1[2]"]
       },
       {
         "type": "builtin", "id": "TO", "loc": "",
         "input": ["i@0"],
-          "output": [
-              "o@1[3]"
-          ]
+        "output": ["o@1[3]"]
       },
       {
         "type": "builtin", "id": "TO", "loc": "",
         "input": ["i@0"],
-          "output": [
-              "o@1[4]"
-          ]
+        "output": ["o@1[4]"]
       }
     ]
   }

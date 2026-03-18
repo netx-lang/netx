@@ -9,76 +9,68 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public final class MultiBinding implements Binding, AttrBindList {
-    private final LinkedHashMap<Identifier, Entity> bindings = new LinkedHashMap<>();
+public final class IdEntityMap implements Binding, AttrBindList {
+    private final LinkedHashMap<Identifier, Entity> map = new LinkedHashMap<>();
 
-    private MultiBinding() {
+    private IdEntityMap() {
 
     }
 
-    public static MultiBinding ofEmpty() {
-        return new MultiBinding();
+    public static IdEntityMap ofEmpty() {
+        return new IdEntityMap();
     }
 
-    public static MultiBinding of(Identifier identifier, Entity entity) {
-        var binding = new MultiBinding();
+    public static IdEntityMap of(Identifier identifier, Entity entity) {
+        var binding = new IdEntityMap();
         binding.bind(identifier, entity);
         return binding;
     }
 
-    public MultiBinding copyOf() {
-        var binding = new MultiBinding();
-        binding.bindings.putAll(bindings);
+    public IdEntityMap copyOf() {
+        var binding = new IdEntityMap();
+        binding.map.putAll(map);
         return binding;
     }
 
     public void forEach(Consumer<Map.Entry<Identifier, Entity>> consumer) {
-        bindings.entrySet().forEach(consumer);
+        map.entrySet().forEach(consumer);
     }
 
     @Override
     public void bind(Identifier identifier, Entity entity) {
-        bindings.put(identifier, entity);
-    }
-
-    @Override
-    public void bind(Binding binding) {
-        switch (binding) {
-            case MonoBinding single -> bindings.put(single.key(), single.value());
-            case MultiBinding map -> bindings.putAll(map.bindings);
-        }
+        map.put(identifier, entity);
     }
 
     @Override
     public void releaseIf(Predicate<? super Entity> predicate) {
-        bindings.values().removeIf(predicate);
+        map.values().removeIf(predicate);
     }
 
     @Override
     @Nullable
     public Entity lookup(Identifier identifier) {
-        return bindings.get(identifier);
+        return map.get(identifier);
     }
 
     @Override
     @Nonnull
     public Entity resolve(Identifier identifier) {
-        return Objects.requireNonNull(bindings.get(identifier));
+        return Objects.requireNonNull(map.get(identifier));
     }
 
     @Override
     public List<Entity> getArguments() {
-        return new ArrayList<>(bindings.values());
+        return new ArrayList<>(map.values());
     }
 
     @Override
     public int size() {
-        return bindings.size();
+        return map.size();
     }
 
     @Override
     public boolean isEmpty() {
-        return bindings.isEmpty();
+        return map.isEmpty();
     }
 
     @Override
@@ -88,6 +80,6 @@ public final class MultiBinding implements Binding, AttrBindList {
 
     @Override
     public void forEachEntity(Consumer<Entity> consumer) {
-        bindings.values().forEach(consumer);
+        map.values().forEach(consumer);
     }
 }

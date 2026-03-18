@@ -83,7 +83,7 @@ public final class NxonDumper {
 
     static private Collection<Wire> getDefinedWiresIn(ComponentScope scope) {
         var wires = new ArrayList<Wire>();
-        scope.getBinding().forEachEntity(entity -> {
+        scope.forEachEntity(entity -> {
             if (entity instanceof Wire wire && isDefinedIn(scope, wire)) {
                 wires.add(wire);
             }

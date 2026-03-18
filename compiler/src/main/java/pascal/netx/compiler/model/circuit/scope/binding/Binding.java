@@ -8,11 +8,9 @@ import javax.annotation.Nullable;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public sealed interface Binding permits MultiBinding, MonoBinding {
+public sealed interface Binding permits IdEntityMap {
 
     void bind(Identifier identifier, Entity entity);
-
-    void bind(Binding binding);
 
     void releaseIf(Predicate<? super Entity> predicate);
 
