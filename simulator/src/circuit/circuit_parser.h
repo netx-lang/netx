@@ -305,7 +305,7 @@ namespace nxon {
             NOT, AND, NAND, OR, NOR, XOR, SHL, LSHR, ASHR, ADD, SUB, MUL, DIV, MOD, CONCAT, ULT, UGT, ULE, UGE, SLT,
             SGT, SLE, SGE,
             EQ,
-            NEQ, UCAST, CAST, REGISTER, ASYNC_REGISTER, TO
+            NE, UCAST, CAST, REGISTER, ASYNC_REGISTER, TO
         };
 
         const std::map<std::string, builtin_type> builtin_type_map{
@@ -333,7 +333,7 @@ namespace nxon {
             {"SLE", builtin_type::SLE},
             {"SGE", builtin_type::SGE},
             {"EQ", builtin_type::EQ},
-            {"NEQ", builtin_type::NEQ},
+            {"NE", builtin_type::NE},
             {"CAST", builtin_type::CAST},
             {"UCAST", builtin_type::UCAST},
             {"TO", builtin_type::TO},
@@ -446,7 +446,7 @@ namespace nxon {
                     parse_binary(input, output, context, rule_factory::eq_rule);
                     break;
                 }
-                case builtin_type::NEQ: {
+                case builtin_type::NE: {
                     parse_binary(input, output, context, rule_factory::neq_rule);
                     break;
                 }
