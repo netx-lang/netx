@@ -282,7 +282,6 @@ public final class AliasAnalysis extends CircuitAnalysis {
             }
             for (var child : toRemove) {
                 scope.mergeBindingsFrom(child);
-//                scope.getBinding().bind(child.getBinding());
                 scope.getChildren().remove(child);
             }
         }

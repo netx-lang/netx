@@ -9,10 +9,7 @@ import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -53,8 +50,13 @@ public abstract sealed class Scope permits ComponentScope, PackageScope, RepoSco
     }
 
     public void forEachEntity(Consumer<Entity> consumer) {
+        Set<Entity> visited = new HashSet<>();
         for (var binding : bindings) {
-            binding.forEachEntity(consumer);
+            binding.forEachEntity(entity -> {
+                if (visited.add(entity)) {
+                    consumer.accept(entity);
+                }
+            });
         }
     }
 
