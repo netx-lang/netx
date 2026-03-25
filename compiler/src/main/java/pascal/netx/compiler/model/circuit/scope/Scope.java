@@ -7,6 +7,7 @@ import pascal.netx.compiler.model.circuit.scope.binding.Binding;
 import pascal.netx.compiler.model.circuit.scope.binding.IdEntityMap;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
+import pascal.netx.util.lang.SourceLoc;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -17,6 +18,7 @@ public abstract sealed class Scope permits ComponentScope, PackageScope, RepoSco
     private final LinkedList<Binding> bindings;
     private final List<Scope> children;
     private Scope parent;
+    protected SourceLoc instantiateLoc;
 
     protected Scope(Scope parent) {
         this.parent = parent;
@@ -33,6 +35,10 @@ public abstract sealed class Scope permits ComponentScope, PackageScope, RepoSco
         this.parent.children.removeIf(child -> child == this);
         parent.addChild(this);
         this.parent = parent;
+    }
+
+    public void setInstantiateLoc(SourceLoc instantiateLoc) {
+        this.instantiateLoc = instantiateLoc;
     }
 
     public List<Scope> getChildren() {

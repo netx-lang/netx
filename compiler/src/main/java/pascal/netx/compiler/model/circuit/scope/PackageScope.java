@@ -8,6 +8,7 @@ import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.lang.Identifier;
+import pascal.netx.util.lang.SourceLoc;
 
 import javax.annotation.Nullable;
 import java.math.BigInteger;
@@ -29,8 +30,10 @@ public final class PackageScope extends Scope {
         this.defs = new PackageDefManager();
     }
 
-    public static PackageScope newPackage(RepoScope parent) {
-        return new PackageScope(parent);
+    public static PackageScope newPackage(RepoScope parent, SourceLoc loc) {
+        var result = new PackageScope(parent);
+        result.setInstantiateLoc(loc);
+        return result;
     }
 
     public ComponentScope instantiateTop(Identifier identifier) {
@@ -38,6 +41,7 @@ public final class PackageScope extends Scope {
             throw new ShallNotReachHereError();
         }
         top = ComponentScope.newComponent(this, identifier);
+        top.setInstantiateLoc(this.instantiateLoc);
         return top;
     }
 
@@ -144,13 +148,13 @@ public final class PackageScope extends Scope {
         }
 
         public ImportRef getImport(Identifier id) {
-            return importDef.get(id).copy();
+            return importDef.get(id).copy(id.getSourceLoc());
         }
 
         public void addImport(ImportNode node) {
             var ref = node.getReference();
             var id = node.hasAlias() ? node.getAlias() : ref.getLast();
-            importDef.put(id, ImportRef.of(ref, node.getSourceLoc()));
+            importDef.put(id, ImportRef.of(ref));
         }
 
         // ------ Module Information for Common Components ------

@@ -13,6 +13,7 @@ import pascal.netx.compiler.model.type.Hole;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
+import pascal.netx.util.lang.SourceLoc;
 
 import java.util.*;
 
@@ -32,14 +33,14 @@ public final class NxonDumper {
         node.put("type", type);
     }
 
-    private static void setDefID(ObjectNode node, Identifier id) {
+    private static void setDefID(ObjectNode node, Identifier id, SourceLoc loc) {
         node.put("id", id.name());
-        node.put("loc", id.getSourceLoc().toString());
+        node.put("loc", loc.toString());
     }
 
-    private static void setBuiltinID(ObjectNode node, Identifier id) {
+    private static void setBuiltinID(ObjectNode node, Identifier id, SourceLoc loc) {
         node.put("id", id.name());
-        node.put("loc", id.getSourceLoc().toString());
+        node.put("loc", loc.toString());
     }
 
     private static ArrayNode makeArrayIn(ObjectNode node, String key) {
@@ -112,7 +113,7 @@ public final class NxonDumper {
         public ObjectNode dump() {
             var result = createObjectNode();
             setType(result, "component");
-            setDefID(result, component.getIdentifier());
+            setDefID(result, component.getIdentifier(), component.getSourceLoc());
 
             dumpInstIO(result, "input", component.getInputs());
             dumpInstIO(result, "output", component.getOutputs());
@@ -145,7 +146,7 @@ public final class NxonDumper {
         private ObjectNode dumpAlias(ComponentScope.Alias alias) {
             var result = createObjectNode();
             setType(result, "builtin");
-            setDefID(result, Identifier.of("TO"));
+            setDefID(result, Identifier.of("TO"), component.getSourceLoc());
             dumpInstIO(result, "input", List.of(alias.rhs()));
             dumpInstIO(result, "output", List.of(alias.lhs()));
             return result;
@@ -154,7 +155,7 @@ public final class NxonDumper {
         private ObjectNode instantiateBuiltin(ComponentScope sub, Identifier instID) {
             var builtin = createObjectNode();
             setType(builtin, "builtin");
-            setBuiltinID(builtin, instID);
+            setBuiltinID(builtin, instID, sub.getSourceLoc());
             dumpInstIO(builtin, "input", sub.getInputs());
             dumpInstIO(builtin, "output", sub.getOutputs());
             if (ATTRIBUTED.contains(BuiltinComponent.of(instID))) {

@@ -17,7 +17,7 @@ public sealed class Wire implements Data permits Clock {
     private final int index;
     private Type type;
 
-    public Wire(Identifier id, ComponentScope parent, Type type, int index) {
+    protected Wire(Identifier id, ComponentScope parent, Type type, int index) {
         this.parent = parent;
         this.id = id;
         this.index = index;

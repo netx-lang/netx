@@ -35,7 +35,7 @@ import static pascal.netx.compiler.model.circuit.Utils.requireEqSize;
 
 public record Elaborator(PackageScope scope, PackageNode node, Configuration config) {
     public Elaborator(RepoScope repo, PackageNode node, Configuration config) {
-        this(PackageScope.newPackage(repo), node, config);
+        this(PackageScope.newPackage(repo, node.getSourceLoc()), node, config);
     }
 
     public PackageScope elaborate() {

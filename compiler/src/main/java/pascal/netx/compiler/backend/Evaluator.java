@@ -48,10 +48,10 @@ public final class Evaluator {
         Expr expr;
         if (needDeclareInPlace) {
             mode = EvaluationMode.DECLARE_IN_PLACE;
-            expr = castToCircuitExpr(evaluate(node));
+            expr = castToCircuitExpr(evaluate(node), node.getSourceLoc());
             mode = EvaluationMode.COMMON;
         } else {
-            expr = castToCircuitExpr(evaluate(node));
+            expr = castToCircuitExpr(evaluate(node), node.getSourceLoc());
         }
         new Connector(scope).connect(expr);
     }
@@ -251,7 +251,7 @@ public final class Evaluator {
                 yield ParallelExpr.from(result);
             }
             case Expr expr -> DecoratedExpr.of(decorator, expr);
-            case Signal signal -> DecoratedExpr.of(decorator, SignalRef.of(signal));
+            case Signal signal -> DecoratedExpr.of(decorator, SignalRef.of(signal, base.getSourceLoc()));
             default -> {
                 Logger.error("Expected instantiate expr(s) but got {}", operand);
                 throw new CompileCancellationException();
@@ -301,7 +301,7 @@ public final class Evaluator {
     private Entity evaluateNamedPortExpr(NamedPortExpr expr) {
         var ports = new pascal.netx.compiler.model.circuit.expr.NamedPortExpr();
         for (var assign : expr.getPorts()) {
-            var rhs = castToCircuitExpr(evaluate(assign.rhs()));
+            var rhs = castToCircuitExpr(evaluate(assign.rhs()), expr.getSourceLoc());
             if (assign.isDefault()) {
                 ports.setDefaultExpr(rhs);
             } else {
@@ -312,8 +312,8 @@ public final class Evaluator {
     }
 
     private Entity evaluateSequentialExpr(BinaryExpr expr) {
-        var rhs = castToCircuitExpr(evaluate(expr.getRhs()));
-        var lhs = castToCircuitExpr(evaluate(expr.getLhs()));
+        var rhs = castToCircuitExpr(evaluate(expr.getRhs()), expr.getSourceLoc());
+        var lhs = castToCircuitExpr(evaluate(expr.getLhs()), expr.getSourceLoc());
         return SequentialExpr.of(lhs, rhs);
     }
 

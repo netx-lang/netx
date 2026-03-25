@@ -10,13 +10,13 @@ public final class ImportRef extends PrimaryExpr implements InstantiationRef {
     private final List<Identifier> references;
     private final SourceLoc sourceLoc;
 
-    public ImportRef(List<Identifier> references, SourceLoc sourceLoc) {
+    private ImportRef(List<Identifier> references, SourceLoc sourceLoc) {
         this.references = references;
         this.sourceLoc = sourceLoc;
     }
 
-    public static ImportRef of(List<Identifier> references, SourceLoc sourceLoc) {
-        return new ImportRef(references, sourceLoc);
+    public static ImportRef of(List<Identifier> references) {
+        return new ImportRef(references, SourceLoc.none());
     }
 
     @Override
@@ -24,7 +24,7 @@ public final class ImportRef extends PrimaryExpr implements InstantiationRef {
         return sourceLoc;
     }
 
-    public ImportRef copy() {
+    public ImportRef copy(SourceLoc sourceLoc) {
         var result = new ImportRef(references, sourceLoc);
         if (attrBindList != null) {
             result.attrBindList = attrBindList;

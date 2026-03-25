@@ -19,7 +19,7 @@ public sealed interface WireConstraint permits BinaryConstraint, ConcatConstrain
         if (signal instanceof Data data) {
             for (var scopeName : describeParentScopes(data.getParent())) {
                 builder.append("\n")
-                        .append("      in scope ")
+                        .append("      in ")
                         .append(scopeName);
             }
         }
@@ -39,7 +39,7 @@ public sealed interface WireConstraint permits BinaryConstraint, ConcatConstrain
     private static List<String> describeParentScopes(ComponentScope scope) {
         List<String> scopes = new LinkedList<>();
         for (var current = scope; current != null; ) {
-            scopes.addFirst(current.getIdentifier().toStringWithLoc());
+            scopes.addLast(current.getIdentifier().name() + " (instantiated at " + current.getSourceLoc() + ")");
             current = current.getParent() instanceof ComponentScope parent ? parent : null;
         }
         return scopes;

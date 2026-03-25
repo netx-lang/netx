@@ -97,7 +97,7 @@ public final class ComponentScope extends Scope {
     }
 
     public SourceLoc getSourceLoc() {
-        return identifier.getSourceLoc();
+        return instantiateLoc;
     }
 
     public Identifier getIdentifier() {

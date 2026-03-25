@@ -5,13 +5,15 @@ import pascal.netx.util.lang.SourceLoc;
 
 public final class SignalRef extends PrimaryExpr {
     private final Signal signal;
+    private final SourceLoc refLoc;
 
-    private SignalRef(Signal signal) {
+    private SignalRef(Signal signal, SourceLoc refLoc) {
         this.signal = signal;
+        this.refLoc = refLoc;
     }
 
-    public static SignalRef of(Signal source) {
-        return new SignalRef(source);
+    public static SignalRef of(Signal source, SourceLoc refLoc) {
+        return new SignalRef(source, refLoc);
     }
 
     public Signal getInstance() {
@@ -20,7 +22,7 @@ public final class SignalRef extends PrimaryExpr {
 
     @Override
     public SourceLoc getSourceLoc() {
-        return signal.getSourceLoc();
+        return refLoc;
     }
 
     @Override
