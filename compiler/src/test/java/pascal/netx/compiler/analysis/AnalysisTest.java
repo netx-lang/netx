@@ -2,14 +2,25 @@ package pascal.netx.compiler.analysis;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
+import pascal.netx.compiler.NXCompiler;
 import pascal.netx.compiler.backend.analysis.ast.SourceLocChecker;
+import pascal.netx.compiler.backend.analysis.circuit.constraint.EqualTypeConstraint;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXBuilder;
 import pascal.netx.compiler.io.NXParser;
+import pascal.netx.compiler.model.circuit.scope.ComponentScope;
+import pascal.netx.compiler.model.circuit.scope.PackageScope;
+import pascal.netx.compiler.model.circuit.scope.RepoScope;
+import pascal.netx.compiler.model.circuit.signal.Signal;
+import pascal.netx.compiler.model.circuit.signal.Wire;
+import pascal.netx.compiler.model.circuit.signal.selector.BitSelector;
+import pascal.netx.compiler.model.type.BitType;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.compiler.utils.TypeCheckingException;
+import pascal.netx.util.lang.Identifier;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static pascal.netx.test.TestUtils.*;
@@ -428,5 +439,32 @@ class AnalysisTest {
                 }
                 """;
         testSugar(expected, code);
+    }
+
+    @Test
+    void testEqualTypeConstraintErrorFormatsScopeChainOnSeparateLines() {
+        var repo = new RepoScope();
+        var pack = PackageScope.newPackage(repo);
+        var lhsTop = ComponentScope.newComponent(pack, Identifier.of("lhs_top"));
+        var lhsParent = ComponentScope.newComponent(lhsTop, Identifier.of("lhs_parent"));
+        var rhsTop = ComponentScope.newComponent(pack, Identifier.of("rhs_top"));
+        var rhsMid = ComponentScope.newComponent(rhsTop, Identifier.of("rhs_mid"));
+        var rhsParent = ComponentScope.newComponent(rhsMid, Identifier.of("rhs_parent"));
+        var indexer = new NXCompiler.WireIndexer(new AtomicInteger()::incrementAndGet);
+        var factory = new Wire.Factory(BitType.of(1), indexer);
+        var lhs = factory.create(lhsParent, Identifier.of("lhs"));
+        var rhs = Signal.accessOf(factory.create(rhsParent, Identifier.of("rhs")), new BitSelector(0));
+
+        var error = new EqualTypeConstraint(lhs, rhs).error();
+
+        assertEquals("""
+                Type mismatch:
+                  lhs: lhs@()
+                      in scope lhs_top@()
+                      in scope lhs_parent@()
+                  rhs: rhs@()[0]
+                      in scope rhs_top@()
+                      in scope rhs_mid@()
+                      in scope rhs_parent@()""", error);
     }
 }

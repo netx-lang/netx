@@ -21,6 +21,9 @@ public record ConcatConstraint(Signal lhs, List<Signal> rhs) implements WireCons
 
     @Override
     public String error() {
-        return String.format("Type mismatch: %s and %s", lhs, rhs);
+        return "Type mismatch:\n"
+                + WireConstraint.describeSignalBlock("lhs", lhs)
+                + "\n"
+                + WireConstraint.describeSignalListBlock("rhs", rhs);
     }
 }
