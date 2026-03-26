@@ -5,6 +5,7 @@ import pascal.netx.backend.AbstractNxonTransformer;
 import pascal.netx.backend.NxonParseUtils;
 import pascal.netx.backend.model.Reference;
 import pascal.netx.backend.model.WireReference;
+import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.nxon.NxonType;
 import pascal.netx.util.print.NotepadWriter;
@@ -287,6 +288,17 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
                 notepad.print(")");
             }
             case UCAST, TO -> notepad.print(input.getFirst());
+            case NOR, NAND, XNOR -> {
+                var delimiter = switch (builtin) {
+                    case NOR -> " | ";
+                    case NAND -> " & ";
+                    case XNOR -> " ^ ";
+                    default -> throw new ShallNotReachHereError();
+                };
+                notepad.print("~(");
+                notepad.print(String.join(delimiter, input));
+                notepad.print(")");
+            }
             default -> {
                 var delimiter = " %s ".formatted(BuiltinComponent.VERILOG_OP.get(builtin));
                 notepad.print(String.join(delimiter, input));
