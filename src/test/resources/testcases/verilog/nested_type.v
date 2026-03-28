@@ -1,9 +1,11 @@
 module top(
-  _0, 2'h0, 2'h3, _1, _2, _3, _4, _5, _6, _7, _8, _9
+  _0, io_cons0, io_cons1, _1, _2, _3, _4, _5, _6, _7, _8, _9
 );
 
 /*============================== DATA ==============================*/
 
+output wire [1:0] io_cons0;
+output wire [1:0] io_cons1;
 /* "top"; "nested_type.nx:1:0" */
   output wire [1:0] _1; // nested_type.nx:14:11:b.b[0].left
   output wire [1:0] _2; // nested_type.nx:14:11:b.b[0].right
@@ -22,6 +24,8 @@ module top(
 
 /*============================== CONNECTION ==============================*/
 
+assign io_cons0 = 2'h0;
+assign io_cons1 = 2'h3;
 /*
   COMPONENT "top"; "nested_type.nx:1:0"
   input: d@0
