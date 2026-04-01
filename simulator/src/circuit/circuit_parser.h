@@ -18,21 +18,28 @@
 
 namespace nxon {
     struct parse_context_common {
+        [[nodiscard]] id_t require_name(this auto &&self, const std::string &name) {
+            if (const auto iter = self.name_map.find(name); iter != self.name_map.end()) {
+                return iter->second;
+            }
+            throw std::out_of_range("Unknown wire name: " + name);
+        }
+
         void advance_input_clocks(this auto &&self) {
             self.flip_input_clocks();
             self.flip_input_clocks();
         }
 
         [[nodiscard]] value_t get(this auto &&self, const std::string &name) {
-            return self.iget(self.name_map.at(name));
+            return self.iget(self.require_name(name));
         }
 
         void flip(this auto &&self, const std::string &name) {
-            self.iflip(self.name_map.at(name));
+            self.iflip(self.require_name(name));
         }
 
         void set(this auto &&self, const std::string &name, const value_t &value) {
-            self.iset(self.name_map.at(name), value);
+            self.iset(self.require_name(name), value);
         }
 
         void flip_input_clocks(this auto &&self) {
@@ -40,15 +47,15 @@ namespace nxon {
         }
 
         void stashed_flip(this auto &&self, const std::string &name) {
-            self.stashed_iflip(self.name_map.at(name));
+            self.stashed_iflip(self.require_name(name));
         }
 
         void stashed_set(this auto &&self, const std::string &name, const value_t &value) {
-            self.stashed_iset(self.name_map.at(name), value);
+            self.stashed_iset(self.require_name(name), value);
         }
 
         size_t size(this auto &&self, const std::string &name) {
-            return self.isize(self.name_map.at(name));
+            return self.isize(self.require_name(name));
         }
     };
 
