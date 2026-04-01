@@ -30,10 +30,12 @@ namespace nxon {
         }
 
         void iset(const id_t id, const value_t &value) {
+            this->validate_value_size(id, value);
             partitioned->update(id, value);
         }
 
         void iset_batch(const value_batch &batch) {
+            for (const auto &[id, value]: batch) this->validate_value_size(id, value);
             partitioned->update_batch(batch);
         }
 
@@ -46,10 +48,12 @@ namespace nxon {
         }
 
         void stashed_iset(const id_t id, const value_t &value) {
+            this->validate_value_size(id, value);
             partitioned->broadcast(id, value);
         }
 
         void stashed_iset_batch(const value_batch &batch) {
+            for (const auto &[id, value]: batch) this->validate_value_size(id, value);
             partitioned->broadcast_batch(batch);
         }
 

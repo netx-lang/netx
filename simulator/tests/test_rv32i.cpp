@@ -120,10 +120,10 @@ namespace nxon::impl {
             ),
             a(a), b(b), alu_ctl(alu_ctl), result(result), zero(zero), less(less) {}
 
-        indirect_id_set perform(value_storage &values) const override {
-            const auto a_val = *a.get(values);
-            const auto b_val = *b.get(values);
-            const auto ctl = static_cast<uint64_t>(*alu_ctl.get(values));
+        id_set perform(value_storage &values) const override {
+            const auto a_val = a.get(values);
+            const auto b_val = b.get(values);
+            const auto ctl = static_cast<uint64_t>(alu_ctl.get(values));
 
             value_t res;
             switch (ctl) {
@@ -147,21 +147,19 @@ namespace nxon::impl {
             }
 
             std::vector<id_t> changes;
-            if (result.check(values, res)) {
-                result.put(values, res);
+            if (result.update_if_changed(values, res)) {
                 changes.insert(changes.end(), result.outcomes().begin(), result.outcomes().end());
             }
 
-            if (const auto next_zero = value_t{1, ctl == 0b0010 || ctl == 0b1010 ? a_val == b_val : static_cast<uint64_t>(res) == 0}; zero.check(values, next_zero)) {
-                zero.put(values, next_zero);
+            if (const auto next_zero = value_t{1, ctl == 0b0010 || ctl == 0b1010 ? a_val == b_val : static_cast<uint64_t>(res) == 0};
+                zero.update_if_changed(values, next_zero)) {
                 changes.insert(changes.end(), zero.outcomes().begin(), zero.outcomes().end());
             }
 
-            if (const auto next_less = value_t{1, static_cast<uint64_t>(res)}; less.check(values, next_less)) {
-                less.put(values, next_less);
+            if (const auto next_less = value_t{1, static_cast<uint64_t>(res)}; less.update_if_changed(values, next_less)) {
                 changes.insert(changes.end(), less.outcomes().begin(), less.outcomes().end());
             }
-            return indirect_id_set(id_set{changes.begin(), changes.end()});
+            return id_set{changes.begin(), changes.end()};
         }
 
         static rule_t parse(const parse_context &ctx, const nlohmann::json &json) {
@@ -183,66 +181,94 @@ namespace nxon::impl {
 const static auto magic_instr = value_t{32, 0xdead10cc};
 const static auto TEST_PATH = std::filesystem::path(std::string(RESOURCE_PATH)) / "rv32i";
 
-std::unique_ptr<parse_context> parse_circuit(const bool using_native, const bool using_partition) {
+native_map make_native_map(const bool using_native) {
+    return using_native
+        ? native_map{{"ALU", std::function(nxon::impl::alu_rule::parse)}}
+        : native_map{};
+}
+
+parse_context make_parse_context(const bool using_native) {
+    std::string json;
+    const auto file_path = TEST_PATH / "rv32i.json";
+    std::getline(std::ifstream(file_path), json);
+    return parse_circuit(json, make_native_map(using_native));
+}
+
+auto make_partitioned_parse_context(const bool using_native) {
     std::string json;
     const auto file_path = TEST_PATH / "rv32i.json";
     std::getline(std::ifstream(file_path), json);
 
-    const native_map map = using_native
-        ? native_map{{"ALU", std::function(nxon::impl::alu_rule::parse)}}
-        : native_map{};
-
-    if (using_partition) {
-        partitioned_parse_context ctx;
-        parse_circuit(ctx, json, map);
-        ctx.init_partition();
-        return std::make_unique<parse_context>(std::move(ctx));
-    }
-    return std::make_unique<parse_context>(parse_circuit(json, map));
+    partitioned_parse_context ctx;
+    parse_circuit(ctx, json, make_native_map(using_native));
+    ctx.init_partition();
+    return ctx;
 }
 
-void stimuli(nxon::parse_context ctx) {
+template<typename Context>
+void stimuli(Context ctx) {
     using namespace std::chrono;
     const auto start = high_resolution_clock::now();
 
-    for (const std::filesystem::path path = TEST_PATH / "testcases";
+    int passed = 0, total = 0;
+    const auto high = value_t{1, 1};
+    for (const std::filesystem::path path = TEST_PATH / "custom_cases";
         const auto& entry : std::filesystem::directory_iterator(path)) {
-        std::filesystem::path file_path = entry.path();
+        constexpr int max_cycles = 100000;
+        const std::filesystem::path& file_path = entry.path();
         if (file_path.extension() == ".data") {
             continue;
         }
 
+        const auto data_path = file_path.parent_path() / file_path.stem();
         const auto instr_mem = new Memory(std::ifstream(file_path));
-        const auto data_mem = new Memory(std::ifstream(file_path.replace_extension(".data")));
+        const auto data_mem  = new Memory(std::ifstream(data_path.string() + ".data"));
 
-        ctx.flip("clk");
+        total++;
         ctx.set("rst", value_t{1, 1});
-        ctx.apply_stash();
         ctx.flip("clk");
         ctx.flip("clk");
+
         ctx.set("rst", value_t{1, 0});
 
-        for (int i = 0 ; i != 1000; ++i) {
-            const auto instr = instr_mem->read_word(ctx.get("imem_addr"));
-            ctx.stashed_flip("clk");
-            ctx.stashed_set("instr", instr);
-            ctx.apply_stash();
+        bool seen_magic = false;
+        int drain_cycles = 0;
+        for (int i = 0; i != max_cycles; ++i) {
+            const auto fetch_pc = ctx.get("imem_addr");
+            const auto instr = instr_mem->read_word(fetch_pc);
 
-            if (instr == magic_instr) {
-                EXPECT_EQ(static_cast<unsigned>(ctx.get("data[10]")), 0x00c0ffee);
-                break;
-            }
+            ctx.set("instr", instr);
 
-            auto d_mem_op = ctx.get("dmem_op");
+            auto d_mem_op   = ctx.get("dmem_op");
             auto d_mem_addr = ctx.get("dmem_addr");
-            if (ctx.get("dmem_wr") == value_t{1, 1}) {
+            if (ctx.get("dmem_wr") == high) {
                 auto d_mem_in = ctx.get("dmem_in");
                 data_mem->write_with_op(d_mem_op, d_mem_addr, d_mem_in);
             }
-            ctx.stashed_flip("clk");
-            ctx.stashed_set("dmem_out", data_mem->read_with_op(d_mem_op, d_mem_addr));
-            ctx.apply_stash();
+
+            if (!seen_magic &&
+                ctx.get("ifid.valid") == high &&
+                ctx.get("ifid.instr") == magic_instr) {
+                seen_magic = true;
+                drain_cycles = 128;
+            }
+
+            if (seen_magic && drain_cycles == 0) {
+                if (static_cast<unsigned>(ctx.get("x10")) == 0x00c0ffee) {
+                    passed++;
+                }
+                break;
+            }
+
+            if (seen_magic) {
+                drain_cycles--;
+            }
+
+            ctx.set("dmem_out", data_mem->read_with_op(d_mem_op, d_mem_addr));
+            ctx.flip("clk");
+            ctx.flip("clk");
         }
+
         delete instr_mem;
         delete data_mem;
     }
@@ -250,20 +276,21 @@ void stimuli(nxon::parse_context ctx) {
     const auto end = high_resolution_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
     std::cout << "Elapsed time: " << elapsed_seconds.count() << "s\n";
+    assert(passed == total);
 }
 
 TEST(IntegrationTest, RV32I_NP) {
-    stimuli(*parse_circuit(true, true));
+    stimuli(make_partitioned_parse_context(true));
 }
 
 TEST(IntegrationTest, RV32I_N) {
-    stimuli(*parse_circuit(true, false));
+    stimuli(make_parse_context(true));
 }
 
 TEST(IntegrationTest, RV32I_P) {
-    stimuli(*parse_circuit(false, true));
+    stimuli(make_partitioned_parse_context(false));
 }
 
 TEST(IntegrationTest, RV32I) {
-    stimuli(*parse_circuit(false, false));
+    stimuli(make_parse_context(false));
 }

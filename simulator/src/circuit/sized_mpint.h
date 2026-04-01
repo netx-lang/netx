@@ -8,6 +8,7 @@
 #include <concepts>
 #include <string>
 #include <algorithm>
+#include <array>
 #include <unordered_map>
 #include <mutex>
 #include <shared_mutex>
@@ -26,15 +27,26 @@ namespace nxon::impl {
 
         base_t content;
         size_t _size;
-        mutable const base_t *mask_ptr = nullptr;
 
         [[nodiscard]] const base_t &mask() const {
-            if (mask_ptr == nullptr)
-                mask_ptr = &mask(_size);
-            return *mask_ptr;
+            return mask(_size);
         }
 
         [[nodiscard]] static const base_t &mask(const size_t _size) {
+            if constexpr (std::unsigned_integral<base_t>) {
+                static const base_t zero = 0;
+                static const auto masks = [] {
+                    std::array<base_t, sizeof(base_t) * 8 + 1> result{};
+                    result[0] = 0;
+                    for (size_t bits = 1; bits < result.size(); ++bits)
+                        result[bits] = (result[bits - 1] << 1) | 1;
+                    return result;
+                }();
+                if (_size == 0) return zero;
+                if (_size >= masks.size()) return masks.back();
+                return masks[_size];
+            }
+
             static std::unordered_map<size_t, base_t> mask_cache;
             static std::shared_mutex mask_mutex; {
                 std::shared_lock lock(mask_mutex);
@@ -234,7 +246,50 @@ namespace nxon::impl {
             return operator<=>(other);
         }
 
-        [[nodiscard]] bool operator==(const sized_mpint &other) const = default;
+        [[nodiscard]] bool operator==(const sized_mpint &other) const {
+            return _size == other._size && content == other.content;
+        }
+
+        [[nodiscard]] sized_mpint extract_unchecked(const size_t from, const size_t to) const {
+            return {to + 1 - from, content >> from, 0};
+        }
+
+        [[nodiscard]] sized_mpint extract(const size_t from, const size_t to) const {
+            bound_check(from, to);
+            return extract_unchecked(from, to);
+        }
+
+        [[nodiscard]] bool slice_equals_unchecked(const size_t from, const size_t to, const sized_mpint &other) const {
+            const auto len = to + 1 - from;
+            if (len != other.size()) return false;
+            if constexpr (std::unsigned_integral<base_t>) {
+                const auto masked = (content >> from) & mask(len);
+                return masked == other.content;
+            } else {
+                base_t masked = content;
+                masked >>= from;
+                masked &= mask(len);
+                return masked == other.content;
+            }
+        }
+
+        [[nodiscard]] bool slice_equals(const size_t from, const size_t to, const sized_mpint &other) const {
+            bound_check(from, to);
+            return slice_equals_unchecked(from, to, other);
+        }
+
+        void assign_slice_unchecked(const size_t from, const size_t to, sized_mpint other) {
+            auto &other_ref = other.content;
+            other_ref <<= from;
+            content &= ~(mask(to + 1 - from) << from);
+            content |= other_ref;
+        }
+
+        void assign_slice(const size_t from, const size_t to, sized_mpint other) {
+            bound_check(from, to);
+            if (to + 1 - from != other.size()) throw std::invalid_argument("Sizes don't match");
+            assign_slice_unchecked(from, to, std::move(other));
+        }
 
         [[nodiscard]] auto slice(size_t from, size_t to);
 
@@ -484,12 +539,7 @@ namespace nxon::impl {
 
         [[nodiscard]] sized_mpint<Backend> from_slice() const {
             if (len == 1) {
-                static sized_mpint<Backend> high = {1, 1u};
-                static sized_mpint<Backend> low = {1, 0u};
-                if (ref.content & mask) {
-                    return high;
-                }
-                return low;
+                return {1, static_cast<unsigned>(static_cast<bool>(ref.content & mask))};
             }
             return {len, ref.content >> from, 0};
         }
@@ -531,12 +581,7 @@ namespace nxon::impl {
         sized_mpint_slice &operator=(sized_mpint_slice &&) = delete;
 
         sized_mpint_slice &operator=(sized_mpint<Backend> other) {
-            if (this->length() != other.size()) throw std::invalid_argument("Sizes don't match");
-            auto &other_ref = other.content;
-            other_ref <<= this->from;
-            auto &this_ref = ref.content;
-            this_ref &= ~(sized_mpint<Backend>::mask(this->len) << this->from);
-            this_ref |= other_ref;
+            ref.assign_slice(this->from, this->from + this->len - 1, std::move(other));
             return *this;
         }
 

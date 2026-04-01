@@ -7,83 +7,17 @@
 
 #include "circuit_def.h"
 #include <atomic>
+#include <ranges>
+#include <cassert>
 #include <memory>
 #include <utility>
 #include <algorithm>
-#include <set>
+#include <compare>
 #include <variant>
 #include <vector>
-#include <boost/lambda2.hpp>
-#include <functional>
 
 namespace nxon {
     namespace impl {
-        template<typename T>
-        class potential_holder {
-            using const_reference = const T &;
-
-            std::variant<const T *, T, std::monostate> value;
-
-            [[no_unique_address]] struct {
-                const_reference operator()(const T *ptr) const {
-                    return *ptr;
-                }
-
-                const_reference operator()(const T &ref) const {
-                    return ref;
-                }
-
-                [[noreturn]] const_reference operator()(std::monostate) const {
-                    throw std::runtime_error("potential_holder does not have a value");
-                }
-            } get_ref_visitor;
-
-            [[no_unique_address]] struct {
-                T operator()(T &ref) const {
-                    return std::move(ref);
-                }
-
-                T operator()(const T *ptr) const {
-                    return *ptr;
-                }
-
-                [[noreturn]] T operator()(std::monostate) const {
-                    throw std::runtime_error("potential_holder does not have a value");
-                }
-            } move_out_visitor;
-
-        public:
-            explicit potential_holder(const T &v) : value(&v) {
-            }
-
-            explicit potential_holder(T &&v) : value(std::in_place_type<T>, std::move(v)) {
-            }
-
-            potential_holder(const potential_holder &) = delete;
-
-            potential_holder &operator=(const potential_holder &) = delete;
-
-            potential_holder(potential_holder &&) = default;
-
-            potential_holder &operator=(potential_holder &&) = default;
-
-            decltype(auto) operator*() const {
-                return std::visit(get_ref_visitor, value);
-            }
-
-            decltype(auto) operator->() const {
-                return &operator*();
-            }
-
-            T release() {
-                auto result = std::visit(move_out_visitor, value);
-                value = std::monostate{};
-                return result;
-            }
-        };
-
-        using indirect_id_set = potential_holder<id_set>;
-
         struct rule_impl {
             const id_set triggers;
             const id_set dependencies;
@@ -100,7 +34,7 @@ namespace nxon {
 
             virtual ~rule_impl() = default;
 
-            virtual indirect_id_set perform(value_storage &values) const = 0;
+            virtual id_set perform(value_storage &values) const = 0;
         };
 
         struct clock_impl {
@@ -112,35 +46,6 @@ namespace nxon {
             virtual ~clock_impl() = default;
 
             virtual bool triggered(value_storage &values) const = 0;
-        };
-
-        using indirect_value_t = potential_holder<value_t>;
-
-        struct source_impl {
-            const id_set dependencies;
-            const size_t len;
-
-            explicit source_impl(id_set dependencies, const size_t len) : dependencies(std::move(dependencies)),
-                                                                          len(len) {
-            }
-
-            virtual ~source_impl() = default;
-
-            virtual indirect_value_t get(value_storage &values) const = 0;
-        };
-
-        struct sink_impl {
-            const id_set outcomes;
-            const size_t len;
-
-            explicit sink_impl(id_set outcomes, const size_t len) : outcomes(std::move(outcomes)), len(len) {
-            }
-
-            virtual ~sink_impl() = default;
-
-            [[nodiscard]] virtual bool check(const value_storage &values, const value_t &v) const = 0;
-
-            virtual void put(value_storage &values, value_t v) const = 0;
         };
     }
 
@@ -172,61 +77,41 @@ namespace nxon {
         return instance;
     }
 
-    inline registry<impl::source_impl> &source_registry() {
-        static registry<impl::source_impl> instance;
-        return instance;
+    inline size_t next_rule_key() {
+        static std::atomic_size_t counter = 0;
+        return counter++;
     }
 
-    inline registry<impl::sink_impl> &sink_registry() {
-        static registry<impl::sink_impl> instance;
-        return instance;
-    }
-
-    class rule_t {
-        registry<impl::rule_impl>::handle_t handle;
-
-    public:
-        explicit rule_t(impl::rule_impl* impl) {
-            handle = rule_registry().add(std::unique_ptr<impl::rule_impl>(impl));
-        }
-
-        [[nodiscard]] auto& triggers() const {
-            return rule_registry().get(handle)->triggers;
-        }
-
-        [[nodiscard]] auto& dependencies() const {
-            return rule_registry().get(handle)->dependencies;
-        }
-
-        [[nodiscard]] auto& outcomes() const {
-            return rule_registry().get(handle)->outcomes;
-        }
-
-        auto perform(value_storage& values) const {
-            return rule_registry().get(handle)->perform(values);
-        }
-        
-        auto operator<=>(const rule_t& other) const {
-            return handle <=> other.handle;
-        }
-        
-        [[nodiscard]] const impl::rule_impl* get() const { return rule_registry().get(handle); }
-    };
+    class rule_t;
 
     class clock_t {
-        registry<impl::clock_impl>::handle_t handle;
+        registry<impl::clock_impl>::handle_t handle{};
+        const impl::clock_impl *impl_ptr = nullptr;
+        using triggered_fn_t = bool (*)(const impl::clock_impl *, value_storage &);
+        triggered_fn_t triggered_fn = nullptr;
         
     public:
-        explicit clock_t(impl::clock_impl* impl) {
+        clock_t() = delete;
+
+        template<typename T>
+            requires std::derived_from<T, impl::clock_impl>
+        explicit clock_t(T* impl) {
             handle = clock_registry().add(std::unique_ptr<impl::clock_impl>(impl));
+            impl_ptr = clock_registry().get(handle);
+            triggered_fn = [](const impl::clock_impl *ptr, value_storage &values) {
+                return static_cast<const T *>(ptr)->triggered(values);
+            };
         }
 
         [[nodiscard]] const id_set& dependencies() const {
-            return clock_registry().get(handle)->dependencies;
+            assert(impl_ptr != nullptr);
+            return impl_ptr->dependencies;
         }
 
         bool triggered(value_storage& values) const {
-            return clock_registry().get(handle)->triggered(values);
+            assert(impl_ptr != nullptr);
+            assert(triggered_fn != nullptr);
+            return triggered_fn(impl_ptr, values);
         }
 
         auto operator<=>(const clock_t& other) const {
@@ -235,57 +120,559 @@ namespace nxon {
     };
 
     class source_t {
-        registry<impl::source_impl>::handle_t handle;
+        enum class kind_t : uint8_t {
+            id,
+            constant,
+            select
+        };
+
+        kind_t kind;
+        id_set dependencies_;
+        size_t len_;
+        id_t id_{};
+        size_t from_{};
+        size_t to_{};
+        std::shared_ptr<const value_t> constant_;
         
     public:
-        explicit source_t(impl::source_impl* impl) {
-            handle = source_registry().add(std::unique_ptr<impl::source_impl>(impl));
+        source_t(const id_t id, const size_t len) : kind(kind_t::id), dependencies_{id}, len_(len), id_(id) {
+        }
+
+        explicit source_t(value_t value)
+            : kind(kind_t::constant), len_(value.size()),
+              constant_(std::make_shared<value_t>(std::move(value))) {
+        }
+
+        source_t(const id_t id, const size_t from, const size_t to)
+            : kind(kind_t::select), dependencies_{id}, len_(to - from + 1), id_(id), from_(from), to_(to) {
         }
 
         [[nodiscard]] const id_set& dependencies() const {
-            return source_registry().get(handle)->dependencies;
+            return dependencies_;
         }
 
         [[nodiscard]] size_t len() const {
-            return source_registry().get(handle)->len;
+            return len_;
         }
 
-        auto get(value_storage& values) const {
-            return source_registry().get(handle)->get(values);
+        [[nodiscard]] bool is_plain_id() const {
+            return kind == kind_t::id;
+        }
+
+        [[nodiscard]] id_t id() const {
+            assert(kind == kind_t::id);
+            return id_;
+        }
+
+        value_t get(value_storage& values) const {
+            switch (kind) {
+                case kind_t::id:
+                    return values.at(id_);
+                case kind_t::constant:
+                    return *constant_;
+                case kind_t::select:
+                    return values.at(id_).extract_unchecked(from_, to_);
+            }
+            std::unreachable();
         }
         
         auto operator<=>(const source_t &other) const {
-            return handle <=> other.handle;
+            if (const auto cmp = static_cast<uint8_t>(kind) <=> static_cast<uint8_t>(other.kind); cmp != 0) return cmp;
+            if (const auto cmp = len_ <=> other.len_; cmp != 0) return cmp;
+            if (const auto cmp = id_ <=> other.id_; cmp != 0) return cmp;
+            if (const auto cmp = from_ <=> other.from_; cmp != 0) return cmp;
+            if (const auto cmp = to_ <=> other.to_; cmp != 0) return cmp;
+            return std::compare_three_way{}(constant_.get(), other.constant_.get());
         }
     };
 
     class sink_t {
-        registry<impl::sink_impl>::handle_t handle;
+    public:
+        enum class kind_t : uint8_t {
+            id,
+            select,
+            signed_resize_adapter,
+            unsigned_resize_adapter
+        };
+
+    private:
+        kind_t kind;
+        id_set outcomes_;
+        size_t len_;
+        id_t id_{};
+        size_t from_{};
+        size_t to_{};
+        std::shared_ptr<const sink_t> underlying_;
         
     public:
-        explicit sink_t(impl::sink_impl* impl) {
-            handle = sink_registry().add(std::unique_ptr<impl::sink_impl>(impl));
+        sink_t(const id_t id, const size_t len) : kind(kind_t::id), outcomes_{id}, len_(len), id_(id) {
+        }
+
+        sink_t(const id_t id, const size_t from, const size_t to)
+            : kind(kind_t::select), outcomes_{id}, len_(to - from + 1), id_(id), from_(from), to_(to) {
+        }
+
+        sink_t(const kind_t kind, sink_t underlying)
+            : kind(kind), outcomes_(underlying.outcomes()), len_(underlying.len()),
+              underlying_(std::make_shared<sink_t>(std::move(underlying))) {
         }
 
         [[nodiscard]] const id_set& outcomes() const {
-            return sink_registry().get(handle)->outcomes;
+            return outcomes_;
         }
 
         [[nodiscard]] size_t len() const {
-            return sink_registry().get(handle)->len;
+            return len_;
+        }
+
+        [[nodiscard]] bool is_plain_id() const {
+            return kind == kind_t::id;
+        }
+
+        [[nodiscard]] id_t id() const {
+            assert(kind == kind_t::id);
+            return id_;
         }
 
         [[nodiscard]] bool check(const value_storage& values, const value_t& v) const {
-            return sink_registry().get(handle)->check(values, v);
+            switch (kind) {
+                case kind_t::id:
+                    return values.at(id_) != v;
+                case kind_t::select: {
+                    return !values.at(id_).slice_equals_unchecked(from_, to_, v);
+                }
+                case kind_t::signed_resize_adapter:
+                    return underlying_->check(values, v.signed_resize(len_));
+                case kind_t::unsigned_resize_adapter:
+                    return underlying_->check(values, v.unsigned_resize(len_));
+            }
+            std::unreachable();
+        }
+
+        bool update_if_changed(value_storage &values, value_t v) const {
+            switch (kind) {
+                case kind_t::id: {
+                    auto &slot = values.at(id_);
+                    if (slot == v) return false;
+                    slot = std::move(v);
+                    return true;
+                }
+                case kind_t::select: {
+                    auto &slot = values.at(id_);
+                    if (slot.slice_equals_unchecked(from_, to_, v)) return false;
+                    slot.assign_slice_unchecked(from_, to_, std::move(v));
+                    return true;
+                }
+                case kind_t::signed_resize_adapter:
+                    return underlying_->update_if_changed(values, v.signed_resize(len_));
+                case kind_t::unsigned_resize_adapter:
+                    return underlying_->update_if_changed(values, v.unsigned_resize(len_));
+            }
+            std::unreachable();
         }
 
         void put(value_storage& values, value_t v) const {
-            sink_registry().get(handle)->put(values, std::move(v));
+            switch (kind) {
+                case kind_t::id:
+                    values.at(id_) = std::move(v);
+                    return;
+                case kind_t::select:
+                    values.at(id_).assign_slice_unchecked(from_, to_, std::move(v));
+                    return;
+                case kind_t::signed_resize_adapter:
+                    underlying_->put(values, v.signed_resize(len_));
+                    return;
+                case kind_t::unsigned_resize_adapter:
+                    underlying_->put(values, v.unsigned_resize(len_));
+                    return;
+            }
+            std::unreachable();
+        }
+
+        void delay_put(value_storage& values, value_t v) const {
+            switch (kind) {
+                case kind_t::id:
+                    values.delay(id_, std::move(v));
+                    return;
+                case kind_t::select:
+                    values.delay(id_, from_, to_, std::move(v));
+                    return;
+                case kind_t::signed_resize_adapter:
+                    underlying_->delay_put(values, v.signed_resize(len_));
+                    return;
+                case kind_t::unsigned_resize_adapter:
+                    underlying_->delay_put(values, v.unsigned_resize(len_));
+                    return;
+            }
+            std::unreachable();
         }
         
         auto operator<=>(const sink_t &other) const {
-            return handle <=> other.handle;
+            if (const auto cmp = static_cast<uint8_t>(kind) <=> static_cast<uint8_t>(other.kind); cmp != 0) return cmp;
+            if (const auto cmp = len_ <=> other.len_; cmp != 0) return cmp;
+            if (const auto cmp = id_ <=> other.id_; cmp != 0) return cmp;
+            if (const auto cmp = from_ <=> other.from_; cmp != 0) return cmp;
+            if (const auto cmp = to_ <=> other.to_; cmp != 0) return cmp;
+            return std::compare_three_way{}(underlying_.get(), other.underlying_.get());
         }
+    };
+
+    namespace impl {
+        struct unary_id_rule_data {
+            id_t in;
+            id_t out;
+        };
+
+        struct unary_rule_data {
+            source_t in;
+            sink_t out;
+        };
+
+        struct binary_id_rule_data {
+            id_t a;
+            id_t b;
+            id_t out;
+        };
+
+        struct binary_rule_data {
+            source_t a;
+            source_t b;
+            sink_t out;
+        };
+
+        struct register_rule_data {
+            clock_t clk;
+            source_t in;
+            sink_t out;
+        };
+
+        struct async_register_rule_data {
+            clock_t clk;
+            source_t rst;
+            source_t in;
+            sink_t out;
+            bool high_rst;
+            value_t rst_value;
+        };
+
+        inline value_t op_id(const value_t &x) { return x; }
+        inline value_t op_not(const value_t &x) { return ~x; }
+        inline value_t op_and(const value_t &x, const value_t &y) { return x & y; }
+        inline value_t op_or(const value_t &x, const value_t &y) { return x | y; }
+        inline value_t op_xor(const value_t &x, const value_t &y) { return x ^ y; }
+        inline value_t op_shl(const value_t &x, const value_t &y) { return x << static_cast<size_t>(y); }
+        inline value_t op_lshr(const value_t &x, const value_t &y) { return x >> static_cast<size_t>(y); }
+        inline value_t op_ashr(const value_t &x, const value_t &y) { return x.arithmetic_shr(static_cast<size_t>(y)); }
+        inline value_t op_add(const value_t &x, const value_t &y) { return x + y; }
+        inline value_t op_sub(const value_t &x, const value_t &y) { return x - y; }
+        inline value_t op_mul(const value_t &x, const value_t &y) { return x * y; }
+        inline value_t op_div(const value_t &x, const value_t &y) { return x / y; }
+        inline value_t op_mod(const value_t &x, const value_t &y) { return x % y; }
+        inline value_t op_concat(const value_t &x, const value_t &y) { return x.concat(y); }
+        inline value_t op_ult(const value_t &x, const value_t &y) { return value_t{1, x < y}; }
+        inline value_t op_ugt(const value_t &x, const value_t &y) { return value_t{1, x > y}; }
+        inline value_t op_ule(const value_t &x, const value_t &y) { return value_t{1, x <= y}; }
+        inline value_t op_uge(const value_t &x, const value_t &y) { return value_t{1, x >= y}; }
+        inline value_t op_slt(const value_t &x, const value_t &y) {
+            return value_t{1, x.signed_compare(y) == std::strong_ordering::less};
+        }
+        inline value_t op_sgt(const value_t &x, const value_t &y) {
+            return value_t{1, x.signed_compare(y) == std::strong_ordering::greater};
+        }
+        inline value_t op_sle(const value_t &x, const value_t &y) {
+            const auto compared = x.signed_compare(y);
+            return value_t{1, compared == std::strong_ordering::less || compared == std::strong_ordering::equal};
+        }
+        inline value_t op_sge(const value_t &x, const value_t &y) {
+            const auto compared = x.signed_compare(y);
+            return value_t{1, compared == std::strong_ordering::greater || compared == std::strong_ordering::equal};
+        }
+        inline value_t op_eq(const value_t &x, const value_t &y) { return value_t{1, x == y}; }
+        inline value_t op_neq(const value_t &x, const value_t &y) { return value_t{1, x != y}; }
+    }
+
+    inline registry<impl::unary_rule_data> &unary_rule_registry() {
+        static registry<impl::unary_rule_data> instance;
+        return instance;
+    }
+
+    inline registry<impl::unary_id_rule_data> &unary_id_rule_registry() {
+        static registry<impl::unary_id_rule_data> instance;
+        return instance;
+    }
+
+    inline registry<impl::binary_id_rule_data> &binary_id_rule_registry() {
+        static registry<impl::binary_id_rule_data> instance;
+        return instance;
+    }
+
+    inline registry<impl::binary_rule_data> &binary_rule_registry() {
+        static registry<impl::binary_rule_data> instance;
+        return instance;
+    }
+
+    inline registry<impl::register_rule_data> &register_rule_registry() {
+        static registry<impl::register_rule_data> instance;
+        return instance;
+    }
+
+    inline registry<impl::async_register_rule_data> &async_register_rule_registry() {
+        static registry<impl::async_register_rule_data> instance;
+        return instance;
+    }
+
+    class rule_t {
+        using payload_t = std::variant<
+            std::monostate,
+            const impl::rule_impl *,
+            const impl::unary_id_rule_data *,
+            const impl::unary_rule_data *,
+            const impl::binary_id_rule_data *,
+            const impl::binary_rule_data *,
+            const impl::register_rule_data *,
+            const impl::async_register_rule_data *
+        >;
+
+        size_t order_key{};
+        id_set triggers_;
+        id_set dependencies_;
+        id_set outcomes_;
+        id_t outcome_id{};
+        payload_t payload;
+        const impl::rule_impl *impl_ptr = nullptr;
+        using perform_fn_t = id_set (*)(const payload_t &, value_storage &);
+        using fast_perform_fn_t = bool (*)(const payload_t &, value_storage &);
+        perform_fn_t perform_fn = nullptr;
+        fast_perform_fn_t fast_perform_fn = nullptr;
+
+        rule_t() = default;
+
+        template<typename Payload>
+        static const Payload &get_payload(const payload_t &payload) {
+            return *std::get<const Payload *>(payload);
+        }
+
+        template<typename Payload>
+        static rule_t make_fast_rule(
+            std::unique_ptr<Payload> data,
+            registry<Payload> &storage,
+            id_set triggers,
+            id_set dependencies,
+            id_set outcomes,
+            fast_perform_fn_t fast_perform_fn
+        ) {
+            rule_t result;
+            result.order_key = next_rule_key();
+            const auto handle = storage.add(std::move(data));
+            const auto *stored = storage.get(handle);
+            result.payload = stored;
+            result.triggers_ = std::move(triggers);
+            result.dependencies_ = std::move(dependencies);
+            result.outcomes_ = std::move(outcomes);
+            result.fast_perform_fn = fast_perform_fn;
+            return result;
+        }
+
+        static id_set perform_generic(const payload_t &payload, value_storage &values) {
+            return get_payload<impl::rule_impl>(payload).perform(values);
+        }
+
+        template<auto Op>
+        static bool perform_unary_id(const payload_t &payload, value_storage &values) {
+            const auto &rule = get_payload<impl::unary_id_rule_data>(payload);
+            const auto x = values.at(rule.in);
+            auto value = Op(x);
+            auto &slot = values.at(rule.out);
+            if (slot == value) return false;
+            slot = std::move(value);
+            return true;
+        }
+
+        template<auto Op>
+        static bool perform_unary(const payload_t &payload, value_storage &values) {
+            const auto &rule = get_payload<impl::unary_rule_data>(payload);
+            const auto x = rule.in.get(values);
+            return rule.out.update_if_changed(values, Op(x));
+        }
+
+        template<auto Op>
+        static bool perform_binary_id(const payload_t &payload, value_storage &values) {
+            const auto &rule = get_payload<impl::binary_id_rule_data>(payload);
+            const auto x = values.at(rule.a);
+            const auto y = values.at(rule.b);
+            auto value = Op(x, y);
+            auto &slot = values.at(rule.out);
+            if (slot == value) return false;
+            slot = std::move(value);
+            return true;
+        }
+
+        template<auto Op>
+        static bool perform_binary(const payload_t &payload, value_storage &values) {
+            const auto &rule = get_payload<impl::binary_rule_data>(payload);
+            const auto x = rule.a.get(values);
+            const auto y = rule.b.get(values);
+            return rule.out.update_if_changed(values, Op(x, y));
+        }
+
+        static bool perform_register(const payload_t &payload, value_storage &values) {
+            const auto &rule = get_payload<impl::register_rule_data>(payload);
+            if (!rule.clk.triggered(values)) return false;
+            auto value = rule.in.get(values);
+            if (!rule.out.check(values, value)) return false;
+            rule.out.delay_put(values, std::move(value));
+            return true;
+        }
+
+        static bool perform_async_register(const payload_t &payload, value_storage &values) {
+            const auto &rule = get_payload<impl::async_register_rule_data>(payload);
+            if (const auto rst_v = rule.rst.get(values); static_cast<bool>(rst_v) == rule.high_rst &&
+                                                     rule.out.update_if_changed(values, rule.rst_value)) {
+                return true;
+            }
+            if (!rule.clk.triggered(values)) return false;
+            auto value = rule.in.get(values);
+            if (!rule.out.check(values, value)) return false;
+            rule.out.delay_put(values, std::move(value));
+            return true;
+        }
+
+    public:
+        template<typename T>
+            requires std::derived_from<T, impl::rule_impl>
+        explicit rule_t(T* impl) {
+            order_key = next_rule_key();
+            const auto handle = rule_registry().add(std::unique_ptr<impl::rule_impl>(impl));
+            impl_ptr = rule_registry().get(handle);
+            payload = impl_ptr;
+            triggers_ = impl_ptr->triggers;
+            dependencies_ = impl_ptr->dependencies;
+            outcomes_ = impl_ptr->outcomes;
+            perform_fn = &perform_generic;
+            fast_perform_fn = nullptr;
+        }
+
+        template<auto Op>
+        static rule_t make_unary(const source_t &in, const sink_t &out) {
+            if (in.is_plain_id() && out.is_plain_id()) {
+                auto data = std::make_unique<impl::unary_id_rule_data>(impl::unary_id_rule_data{
+                    .in = in.id(),
+                    .out = out.id()
+                });
+                auto result = make_fast_rule(std::move(data), unary_id_rule_registry(),
+                                             in.dependencies(), in.dependencies(), out.outcomes(),
+                                             &perform_unary_id<Op>);
+                result.outcome_id = *out.outcomes().begin();
+                return result;
+            }
+            auto data = std::make_unique<impl::unary_rule_data>(impl::unary_rule_data{
+                .in = in,
+                .out = out
+            });
+            auto result = make_fast_rule(std::move(data), unary_rule_registry(),
+                                         in.dependencies(), in.dependencies(), out.outcomes(),
+                                         &perform_unary<Op>);
+            result.outcome_id = *out.outcomes().begin();
+            return result;
+        }
+
+        template<auto Op>
+        static rule_t make_binary(const source_t &a, const source_t &b, const sink_t &out) {
+            if (a.is_plain_id() && b.is_plain_id() && out.is_plain_id()) {
+                auto data = std::make_unique<impl::binary_id_rule_data>(impl::binary_id_rule_data{
+                    .a = a.id(),
+                    .b = b.id(),
+                    .out = out.id()
+                });
+                auto triggers = a.dependencies() + b.dependencies();
+                auto result = make_fast_rule(std::move(data), binary_id_rule_registry(),
+                                             triggers, triggers, out.outcomes(),
+                                             &perform_binary_id<Op>);
+                result.outcome_id = *out.outcomes().begin();
+                return result;
+            }
+            auto data = std::make_unique<impl::binary_rule_data>(impl::binary_rule_data{
+                .a = a,
+                .b = b,
+                .out = out
+            });
+            auto triggers = a.dependencies() + b.dependencies();
+            auto result = make_fast_rule(std::move(data), binary_rule_registry(),
+                                         triggers, triggers, out.outcomes(),
+                                         &perform_binary<Op>);
+            result.outcome_id = *out.outcomes().begin();
+            return result;
+        }
+
+        static rule_t make_register(const clock_t &clk, const source_t &in, const sink_t &out) {
+            auto data = std::make_unique<impl::register_rule_data>(impl::register_rule_data{
+                .clk = clk,
+                .in = in,
+                .out = out
+            });
+            auto result = make_fast_rule(std::move(data), register_rule_registry(),
+                                         clk.dependencies(), clk.dependencies() + in.dependencies(), out.outcomes(),
+                                         &perform_register);
+            result.outcome_id = *out.outcomes().begin();
+            return result;
+        }
+
+        static rule_t make_async_register(
+            const clock_t &clk, const source_t &rst, const source_t &in, const sink_t &out,
+            const bool high_rst, value_t rst_value
+        ) {
+            auto data = std::make_unique<impl::async_register_rule_data>(impl::async_register_rule_data{
+                .clk = clk,
+                .rst = rst,
+                .in = in,
+                .out = out,
+                .high_rst = high_rst,
+                .rst_value = std::move(rst_value)
+            });
+            auto result = make_fast_rule(std::move(data), async_register_rule_registry(),
+                                         clk.dependencies(), clk.dependencies() + rst.dependencies() + in.dependencies(),
+                                         out.outcomes(), &perform_async_register);
+            result.outcome_id = *out.outcomes().begin();
+            return result;
+        }
+
+        [[nodiscard]] auto& triggers() const {
+            return triggers_;
+        }
+
+        [[nodiscard]] auto& dependencies() const {
+            return dependencies_;
+        }
+
+        [[nodiscard]] const id_set &outcomes() const {
+            return outcomes_;
+        }
+
+        auto perform(value_storage& values) const {
+            if (fast_perform_fn != nullptr) {
+                if (fast_perform_fn(payload, values)) return outcomes_;
+                return id_set{};
+            }
+            return perform_fn(payload, values);
+        }
+
+        [[nodiscard]] bool is_fast() const {
+            return fast_perform_fn != nullptr;
+        }
+
+        [[nodiscard]] id_t fast_outcome() const {
+            return outcome_id;
+        }
+
+        bool perform_fast(value_storage &values) const {
+            return fast_perform_fn(payload, values);
+        }
+
+        auto operator<=>(const rule_t& other) const {
+            return order_key <=> other.order_key;
+        }
+
+        [[nodiscard]] const impl::rule_impl* get() const { return impl_ptr; }
     };
 
     namespace impl {
@@ -305,129 +692,6 @@ namespace nxon {
             }
         };
 
-        struct id_source final : source_impl {
-            const id_t id;
-
-            explicit id_source(id_t id, const size_t len)
-                : source_impl({id}, len), id(id) {
-            }
-
-            indirect_value_t get(value_storage &values) const override {
-                return indirect_value_t(values[id]);
-            }
-        };
-
-        struct constant_source final : source_impl {
-            const value_t value;
-
-            explicit constant_source(value_t value) : source_impl({}, value.size()), value(std::move(value)) {
-            }
-
-            indirect_value_t get(value_storage &) const override {
-                return indirect_value_t{value};
-            }
-        };
-
-        struct id_sink final : sink_impl {
-            const id_t id;
-
-            explicit id_sink(id_t id, const size_t len)
-                : sink_impl({id}, len), id(id) {
-            }
-
-            [[nodiscard]] bool check(const value_storage &values, const value_t &v) const override {
-                assert(len == v.size());
-                return values.at(id) != v;
-            }
-
-            void put(value_storage &values, value_t v) const override {
-                assert(len == v.size());
-                values[id] = std::move(v);
-            }
-        };
-
-        struct select_source final : source_impl {
-            const id_t id;
-            const size_t from;
-            const size_t to;
-            const size_t len;
-
-            /**
-             *
-             * @param id Input id
-             * @param from From index (inclusive)
-             * @param to To index (inclusive)
-             */
-            select_source(id_t id, const size_t from, const size_t to)
-                : source_impl({id}, to - from + 1), id(id),
-                  from((assert(from <= to), from)), to(to), len(to - from + 1) {
-            }
-
-            indirect_value_t get(value_storage &values) const override {
-                return indirect_value_t(values[id].slice(from, to).from_slice());
-            }
-        };
-
-        struct select_sink final : sink_impl {
-            const id_t id;
-            const size_t from;
-            const size_t to;
-            const size_t len;
-
-            /**
-             *
-             * @param id Output id
-             * @param from From index (inclusive)
-             * @param to To index (inclusive)
-             */
-            select_sink(id_t id, const size_t from, const size_t to)
-                : sink_impl({id}, to - from + 1), id(id),
-                  from((assert(from <= to), from)), to(to), len(to - from + 1) {
-            }
-
-            [[nodiscard]] bool check(const value_storage &values, const value_t &v) const override {
-                assert(len == v.size());
-                const auto out = values.at(id).slice(from, to);
-                return out.from_slice() != v;
-            }
-
-            void put(value_storage &values, value_t v) const override {
-                assert(len == v.size());
-                values[id].slice(from, to) = std::move(v);
-            }
-        };
-
-        struct signed_resize_sink_adapter final : sink_impl {
-            const sink_t underlying;
-
-            explicit signed_resize_sink_adapter(const sink_t underlying)
-                : sink_impl(underlying.outcomes(), underlying.len()), underlying(underlying) {
-            }
-
-            [[nodiscard]] bool check(const value_storage &values, const value_t &v) const override {
-                return underlying.check(values, v.signed_resize(len));
-            }
-
-            void put(value_storage &values, const value_t v) const override {
-                underlying.put(values, v.signed_resize(len));
-            }
-        };
-
-        struct unsigned_resize_sink_adapter final : sink_impl {
-            const sink_t underlying;
-
-            explicit unsigned_resize_sink_adapter(const sink_t underlying)
-                : sink_impl(underlying.outcomes(), underlying.len()), underlying(underlying) {
-            }
-
-            [[nodiscard]] bool check(const value_storage &values, const value_t &v) const override {
-                return underlying.check(values, v.unsigned_resize(len));
-            }
-
-            void put(value_storage &values, const value_t v) const override {
-                underlying.put(values, v.unsigned_resize(len));
-            }
-        };
     }
 
     namespace data_factory {
@@ -436,311 +700,35 @@ namespace nxon {
         }
 
         [[nodiscard]] inline source_t id_source(const id_t id, const size_t len) {
-            return source_t{new impl::id_source(id, len)};
+            return source_t{id, len};
         }
 
         [[nodiscard]] inline sink_t id_sink(const id_t id, const size_t len) {
-            return sink_t{new impl::id_sink(id, len)};
+            return sink_t{id, len};
         }
 
         [[nodiscard]] inline source_t select_source(const id_t id, const size_t from, const size_t to) {
-            return source_t{new impl::select_source(id, from, to)};
+            return source_t{id, from, to};
         }
 
         [[nodiscard]] inline sink_t select_sink(const id_t id, const size_t from, const size_t to) {
-            return sink_t{new impl::select_sink(id, from, to)};
+            return sink_t{id, from, to};
         }
 
         [[nodiscard]] inline source_t constant_source(value_t value) {
-            return source_t{new impl::constant_source(std::move(value))};
+            return source_t{std::move(value)};
         }
 
-        [[nodiscard]] inline sink_t signed_resize_sink_adapter(const sink_t sink) {
-            return sink_t{new impl::signed_resize_sink_adapter(sink)};
+        [[nodiscard]] inline sink_t signed_resize_sink_adapter(const sink_t &sink) {
+            return sink_t{sink_t::kind_t::signed_resize_adapter, sink};
         }
 
-        [[nodiscard]] inline sink_t unsigned_resize_sink_adapter(const sink_t sink) {
-            return sink_t{new impl::unsigned_resize_sink_adapter(sink)};
-        }
-    }
-
-    namespace impl {
-        const id_set EMPTY_ID_SET;
-
-        struct binary_rule final : rule_impl {
-            const source_t a;
-            const source_t b;
-            const sink_t out;
-            const std::function<value_t(const value_t &, const value_t &)> op;
-
-            binary_rule(const source_t a, const source_t b, const sink_t out,
-                        std::function<value_t(const value_t &, const value_t &)> op)
-                : rule_impl(a.dependencies() + b.dependencies(), out.outcomes()),
-                            a(a), b(b), out(out), op(std::move(op)) {
-            }
-
-            indirect_id_set perform(value_storage &values) const override {
-                const auto x = a.get(values);
-                const auto y = b.get(values);
-                if (auto value = op(*x, *y); out.check(values, value)) {
-                    out.put(values, std::move(value));
-                    return indirect_id_set(out.outcomes());
-                }
-                return indirect_id_set(EMPTY_ID_SET);
-            }
-        };
-
-        struct unary_rule final : rule_impl {
-            const source_t in;
-            const sink_t out;
-            const std::function<value_t(const value_t &)> op;
-
-            unary_rule(const source_t x, const sink_t out,
-                       std::function<value_t(const value_t &)> op)
-                : rule_impl(x.dependencies(), out.outcomes()), in(x), out(out), op(std::move(op)) {
-            }
-
-            indirect_id_set perform(value_storage &values) const override {
-                const auto x = in.get(values);
-                if (auto value = op(*x); out.check(values, value)) {
-                    out.put(values, std::move(value));
-                    return indirect_id_set(out.outcomes());
-                }
-                return indirect_id_set(EMPTY_ID_SET);
-            }
-        };
-
-        struct register_rule final : rule_impl {
-            const clock_t clk;
-            const source_t in;
-            const sink_t out;
-
-            register_rule(const clock_t clk, const source_t in, const sink_t out)
-                : rule_impl(clk.dependencies(), clk.dependencies() + in.dependencies(), out.outcomes()),
-                  clk(clk), in(in), out(out) {
-            }
-
-            indirect_id_set perform(value_storage &values) const override {
-                if (auto value = in.get(values); clk.triggered(values) && out.check(values, *value)) {
-                    values.delay([value = value.release(), out = out](auto &cur_values) {
-                        out.put(cur_values, std::move(value));
-                    });
-                    return indirect_id_set(out.outcomes());
-                }
-                return indirect_id_set(EMPTY_ID_SET);
-            }
-        };
-
-        struct async_register_rule final : rule_impl {
-            const clock_t clk;
-            const source_t rst;
-            const source_t in;
-            const sink_t out;
-
-            const bool high_rst;
-            const value_t rst_value;
-
-            async_register_rule(const clock_t clk, const source_t rst, const source_t in, const sink_t out,
-                                const bool high_rst, value_t rst_value)
-                : rule_impl(clk.dependencies(), clk.dependencies() + rst.dependencies() + in.dependencies(),
-                            out.outcomes()),
-                  clk(clk), rst(rst), in(in), out(out),
-                  high_rst(high_rst), rst_value(std::move(rst_value)) {
-            }
-
-            indirect_id_set perform(value_storage &values) const override {
-                if (const auto rst_v = rst.get(values); static_cast<bool>(*rst_v) == high_rst && out.check(
-                                                            values, rst_value)) {
-                    out.put(values, rst_value);
-                    return indirect_id_set(out.outcomes());
-                }
-
-                if (auto value = in.get(values); clk.triggered(values) && out.check(values, *value)) {
-                    values.delay([value = value.release(), out = out](auto &cur_values) {
-                        out.put(cur_values, std::move(value));
-                    });
-                    return indirect_id_set(out.outcomes());
-                }
-
-                return indirect_id_set(EMPTY_ID_SET);
-            }
-        };
-    }
-
-    namespace rule_factory {
-        using boost::lambda2::_1;
-        using boost::lambda2::_2;
-
-        [[nodiscard]] inline rule_t id_rule(const source_t in, const sink_t out) {
-            return rule_t{new impl::unary_rule(in, out, _1)};
-        }
-
-        [[nodiscard]] inline rule_t not_rule(const source_t in, const sink_t out) {
-            return rule_t{new impl::unary_rule(in, out, ~_1)};
-        }
-
-        [[nodiscard]] inline rule_t and_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{new impl::binary_rule(a, b, out, _1 & _2)};
-        }
-
-        [[nodiscard]] inline rule_t or_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{new impl::binary_rule(a, b, out, _1 | _2)};
-        }
-
-        [[nodiscard]] inline rule_t xor_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{new impl::binary_rule(a, b, out, _1 ^ _2)};
-        }
-
-        [[nodiscard]] inline rule_t shl_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{
-                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
-                    return x << static_cast<size_t>(y);
-                })
-            };
-        }
-
-        [[nodiscard]] inline rule_t logical_shr_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{
-                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
-                    return x >> static_cast<size_t>(y);
-                })
-            };
-        }
-
-        [[nodiscard]] inline rule_t arithmetic_shr_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{
-                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
-                    return x.arithmetic_shr(static_cast<size_t>(y));
-                })
-            };
-        }
-
-        [[nodiscard]] inline rule_t add_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{new impl::binary_rule(a, b, out, _1 + _2)};
-        }
-
-        [[nodiscard]] inline rule_t sub_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{new impl::binary_rule(a, b, out, _1 - _2)};
-        }
-
-        [[nodiscard]] inline rule_t mul_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{new impl::binary_rule(a, b, out, _1 * _2)};
-        }
-
-        [[nodiscard]] inline rule_t div_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{new impl::binary_rule(a, b, out, _1 / _2)};
-        }
-
-        [[nodiscard]] inline rule_t mod_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{new impl::binary_rule(a, b, out, _1 % _2)};
-        }
-
-        [[nodiscard]] inline rule_t concat_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{
-                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
-                    return x.concat(y);
-                })
-            };
-        }
-
-        [[nodiscard]] inline rule_t unsigned_lt_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{
-                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
-                    return value_t{1, x < y};
-                })
-            };
-        }
-
-        [[nodiscard]] inline rule_t unsigned_gt_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{
-                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
-                    return value_t{1, x > y};
-                })
-            };
-        }
-
-        [[nodiscard]] inline rule_t unsigned_le_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{
-                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
-                    return value_t{1, x <= y};
-                })
-            };
-        }
-
-        [[nodiscard]] inline rule_t unsigned_ge_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{
-                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
-                    return value_t{1, x >= y};
-                })
-            };
-        }
-
-        [[nodiscard]] inline rule_t signed_lt_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{
-                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
-                    return value_t{1, x.signed_compare(y) == std::strong_ordering::less};
-                })
-            };
-        }
-
-        [[nodiscard]] inline rule_t signed_gt_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{
-                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
-                    return value_t{1, x.signed_compare(y) == std::strong_ordering::greater};
-                })
-            };
-        }
-
-        [[nodiscard]] inline rule_t signed_le_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{
-                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
-                    auto compared = x.signed_compare(y);
-                    return value_t{
-                        1, compared == std::strong_ordering::less || compared == std::strong_ordering::equal
-                    };
-                })
-            };
-        }
-
-        [[nodiscard]] inline rule_t signed_ge_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{
-                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
-                    auto compared = x.signed_compare(y);
-                    return value_t{
-                        1, compared == std::strong_ordering::greater || compared == std::strong_ordering::equal
-                    };
-                })
-            };
-        }
-
-        [[nodiscard]] inline rule_t eq_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{
-                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
-                    return value_t{1, x == y};
-                })
-            };
-        }
-
-        [[nodiscard]] inline rule_t neq_rule(const source_t a, const source_t b, const sink_t out) {
-            return rule_t{
-                new impl::binary_rule(a, b, out, [](auto &x, auto &y) {
-                    return value_t{1, x != y};
-                })
-            };
-        }
-
-        [[nodiscard]] inline rule_t register_rule(const clock_t clk, const source_t in, const sink_t out) {
-            return rule_t{new impl::register_rule(clk, in, out)};
-        }
-
-        [[nodiscard]] inline rule_t async_register_rule(
-            const clock_t clk, const source_t rst, const source_t in, const sink_t out,
-            const bool high_rst, value_t rst_value) {
-            return rule_t{new impl::async_register_rule( clk, rst, in, out, high_rst, std::move(rst_value))};
+        [[nodiscard]] inline sink_t unsigned_resize_sink_adapter(const sink_t &sink) {
+            return sink_t{sink_t::kind_t::unsigned_resize_adapter, sink};
         }
     }
 
-    using rule_storage = impl::id_based_map<std::vector<rule_t> >;
+    using rule_index_storage = impl::id_based_map<std::vector<size_t> >;
 
 #ifdef NX_COUNT_PERFORM
     inline std::atomic_uint32_t perform_cnt = 0;
@@ -748,68 +736,131 @@ namespace nxon {
 
     class rule_set {
         std::vector<rule_t> all_rules;
-        rule_storage trigger_rules;
+        rule_index_storage trigger_rules;
 
-        void collect_rules(std::vector<rule_t> &to_perform, const id_t id) const {
-            if (!trigger_rules.contains(id)) return;
-            for (auto &rule: trigger_rules[id])
-                to_perform.emplace_back(rule);
+        template<bool TrackChanged>
+        static void record_changes(std::vector<id_t> &to_consider_swap, std::vector<id_t> &changed, const id_set &ids) {
+            if (!ids.empty()) {
+                if (ids.size() == 1) {
+                    to_consider_swap.push_back(*ids.begin());
+                } else {
+                    impl::append_range_compat(to_consider_swap, ids);
+                }
+            }
+            if constexpr (TrackChanged) {
+                if (!ids.empty()) {
+                    if (ids.size() == 1) {
+                        changed.push_back(*ids.begin());
+                    } else {
+                        impl::append_range_compat(changed, ids);
+                    }
+                }
+            }
         }
 
-        id_set perform_rules(value_storage &values, std::vector<rule_t> to_perform, const bool to_fixed = true) const {
-            std::vector<id_t> changed;
+        template<bool TrackChanged>
+        static void record_single_change(std::vector<id_t> &to_consider_swap, std::vector<id_t> &changed,
+                                         const id_t id) {
+            to_consider_swap.push_back(id);
+            if constexpr (TrackChanged) {
+                changed.push_back(id);
+            }
+        }
 
-            std::vector<id_t> to_consider, to_consider_swap;
-            do {
-                std::ranges::sort(to_consider);
-                auto [last, end] = std::ranges::unique(to_consider);
-                to_consider.erase(last, end);
+        void collect_rules(std::vector<size_t> &to_perform, const id_t id) const {
+            if (!trigger_rules.contains(id)) return;
+            const auto &rules = trigger_rules[id];
+            if (rules.empty()) return;
+            if (rules.size() == 1) {
+                to_perform.push_back(rules.front());
+                return;
+            }
+            impl::append_range_compat(to_perform, rules);
+        }
 
-                for (const id_t id: to_consider) collect_rules(to_perform, id);
-
-                for (const auto &rule: to_perform) {
+        template<bool TrackChanged>
+        void perform_rule(const rule_t &rule, value_storage &values,
+                          std::vector<id_t> &to_consider_swap, std::vector<id_t> &changed) const {
 #ifdef NX_COUNT_PERFORM
-                    ++perform_cnt;
+            ++perform_cnt;
 #endif
-                    const auto rule_changed = rule.perform(values);
-#ifdef __cpp_lib_containers_ranges
-                    to_consider_swap.append_range(*rule_changed);
-                    changed.append_range(*rule_changed);
-#else
-                    to_consider_swap.insert(to_consider_swap.end(), rule_changed->begin(), rule_changed->end());
-                    changed.insert(changed.end(), rule_changed->begin(), rule_changed->end());
-#endif
+            if (rule.is_fast()) {
+                if (!rule.perform_fast(values)) return;
+                record_single_change<TrackChanged>(to_consider_swap, changed, rule.fast_outcome());
+            } else {
+                const auto rule_changed = rule.perform(values);
+                record_changes<TrackChanged>(to_consider_swap, changed, rule_changed);
+            }
+        }
+
+        [[nodiscard]] std::vector<size_t> collect_triggered_rules(const id_set &hint) const {
+            std::vector<size_t> rule_indices;
+            size_t initial_rules = 0;
+            for (const id_t id: hint) {
+                if (trigger_rules.contains(id)) {
+                    initial_rules += trigger_rules[id].size();
+                }
+            }
+            rule_indices.reserve(initial_rules);
+            for (const id_t id: hint) collect_rules(rule_indices, id);
+            return rule_indices;
+        }
+
+        template<bool TrackChanged>
+        id_set perform_rules(value_storage &values, const std::vector<size_t> &to_perform,
+                                    const bool to_fixed = true) const {
+            std::vector<id_t> changed;
+            std::vector<id_t> to_consider, to_consider_swap;
+            bool first_pass = true;
+            do {
+                for (const id_t id: to_consider) {
+                    if (!trigger_rules.contains(id)) continue;
+                    for (const auto &rules = trigger_rules[id]; const auto rule_idx: rules)
+                        perform_rule<TrackChanged>(all_rules[rule_idx], values, to_consider_swap, changed);
+                }
+
+                if (first_pass) {
+                    for (const auto rule_idx: to_perform)
+                        perform_rule<TrackChanged>(all_rules[rule_idx], values, to_consider_swap, changed);
+                    first_pass = false;
                 }
                 values.perform_delayed();
 
                 to_consider.clear();
                 to_consider.swap(to_consider_swap);
-                to_perform.clear();
             } while (to_fixed && !to_consider.empty());
 
-            return id_set{changed.begin(), changed.end()};
+            if constexpr (TrackChanged) {
+                return id_set{std::move(changed)};
+            } else {
+                return {};
+            }
         }
 
     public:
         void add(const rule_t &new_rule) {
             all_rules.push_back(new_rule);
+            const auto new_index = all_rules.size() - 1;
             for (const id_t trigger: new_rule.triggers())
-                trigger_rules[trigger].emplace_back(new_rule);
+                trigger_rules[trigger].emplace_back(new_index);
         }
 
         id_set update(value_storage &values, const id_set &hint, const bool to_fixed = true) const {
-            std::vector<rule_t> to_perform;
-            for (const id_t id: hint) collect_rules(to_perform, id);
-            return perform_rules(values, std::move(to_perform), to_fixed);
+            return perform_rules<true>(values, collect_triggered_rules(hint), to_fixed);
         }
 
-        id_set refresh_rules(value_storage &values, const std::vector<rule_t> &to_update,
-                             const bool to_fixed = true) const {
-            return perform_rules(values, to_update, to_fixed);
+        void update_discard(value_storage &values, const id_set &hint, const bool to_fixed = true) const {
+            static_cast<void>(perform_rules<false>(values, collect_triggered_rules(hint), to_fixed));
         }
 
-        id_set refresh_all_rules(value_storage &values, const bool to_fixed = true) const {
-            return refresh_rules(values, all_rules, to_fixed);
+        id_set run_all(value_storage &values, const bool to_fixed = true) const {
+            return perform_rules<true>(values,
+                std::views::iota(size_t{0}, all_rules.size()) | std::ranges::to<std::vector>(), to_fixed);
+        }
+
+        void run_all_discard(value_storage &values, const bool to_fixed = true) const {
+            static_cast<void>(perform_rules<false>(values,
+                std::views::iota(size_t{0}, all_rules.size()) | std::ranges::to<std::vector>(), to_fixed));
         }
 
         [[nodiscard]] std::vector<rule_t> rules() const {
