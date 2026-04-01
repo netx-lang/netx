@@ -71,11 +71,6 @@ namespace nxon::impl {
             init_mask();
         }
 
-        void bound_check(const size_t from, const size_t to) const {
-            if (from > to) throw std::invalid_argument("from > to");
-            if (to >= size()) throw std::out_of_range("to >= size");
-        }
-
         void and_mask() {
             content &= mask();
         }
@@ -255,7 +250,6 @@ namespace nxon::impl {
         }
 
         [[nodiscard]] sized_mpint extract(const size_t from, const size_t to) const {
-            bound_check(from, to);
             return extract_unchecked(from, to);
         }
 
@@ -274,7 +268,6 @@ namespace nxon::impl {
         }
 
         [[nodiscard]] bool slice_equals(const size_t from, const size_t to, const sized_mpint &other) const {
-            bound_check(from, to);
             return slice_equals_unchecked(from, to, other);
         }
 
@@ -286,7 +279,6 @@ namespace nxon::impl {
         }
 
         void assign_slice(const size_t from, const size_t to, sized_mpint other) {
-            bound_check(from, to);
             if (to + 1 - from != other.size()) throw std::invalid_argument("Sizes don't match");
             assign_slice_unchecked(from, to, std::move(other));
         }
@@ -551,7 +543,6 @@ namespace nxon::impl {
 
     template<typename Backend>
     auto sized_mpint<Backend>::slice(const size_t from, const size_t to) const {
-        bound_check(from, to);
         return const_sized_mpint_slice<Backend>(*this, from, to);
     }
 
@@ -594,7 +585,6 @@ namespace nxon::impl {
 
     template<typename Backend>
     auto sized_mpint<Backend>::slice(const size_t from, const size_t to) {
-        bound_check(from, to);
         return sized_mpint_slice{*this, from, to};
     }
 }

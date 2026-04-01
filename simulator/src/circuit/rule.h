@@ -479,10 +479,10 @@ namespace nxon {
 
         template<auto Op>
         static bool perform_unary_id(const payload_t &payload, value_storage &values) {
-            const auto &rule = get_payload<impl::unary_id_rule_data>(payload);
-            const auto x = values.at(rule.in);
+            const auto &[in, out] = get_payload<impl::unary_id_rule_data>(payload);
+            const auto x = values.at(in);
             auto value = Op(x);
-            auto &slot = values.at(rule.out);
+            auto &slot = values.at(out);
             if (slot == value) return false;
             slot = std::move(value);
             return true;
@@ -490,18 +490,18 @@ namespace nxon {
 
         template<auto Op>
         static bool perform_unary(const payload_t &payload, value_storage &values) {
-            const auto &rule = get_payload<impl::unary_rule_data>(payload);
-            const auto x = rule.in.get(values);
-            return rule.out.update_if_changed(values, Op(x));
+            const auto &[in, out] = get_payload<impl::unary_rule_data>(payload);
+            const auto x = in.get(values);
+            return out.update_if_changed(values, Op(x));
         }
 
         template<auto Op>
         static bool perform_binary_id(const payload_t &payload, value_storage &values) {
-            const auto &rule = get_payload<impl::binary_id_rule_data>(payload);
-            const auto x = values.at(rule.a);
-            const auto y = values.at(rule.b);
+            const auto &[a, b, out] = get_payload<impl::binary_id_rule_data>(payload);
+            const auto x = values.at(a);
+            const auto y = values.at(b);
             auto value = Op(x, y);
-            auto &slot = values.at(rule.out);
+            auto &slot = values.at(out);
             if (slot == value) return false;
             slot = std::move(value);
             return true;
@@ -509,31 +509,31 @@ namespace nxon {
 
         template<auto Op>
         static bool perform_binary(const payload_t &payload, value_storage &values) {
-            const auto &rule = get_payload<impl::binary_rule_data>(payload);
-            const auto x = rule.a.get(values);
-            const auto y = rule.b.get(values);
-            return rule.out.update_if_changed(values, Op(x, y));
+            const auto &[a, b, out] = get_payload<impl::binary_rule_data>(payload);
+            const auto x = a.get(values);
+            const auto y = b.get(values);
+            return out.update_if_changed(values, Op(x, y));
         }
 
         static bool perform_register(const payload_t &payload, value_storage &values) {
-            const auto &rule = get_payload<impl::register_rule_data>(payload);
-            if (!rule.clk.triggered(values)) return false;
-            auto value = rule.in.get(values);
-            if (!rule.out.check(values, value)) return false;
-            rule.out.delay_put(values, std::move(value));
+            const auto &[clk, in, out] = get_payload<impl::register_rule_data>(payload);
+            if (!clk.triggered(values)) return false;
+            auto value = in.get(values);
+            if (!out.check(values, value)) return false;
+            out.delay_put(values, std::move(value));
             return true;
         }
 
         static bool perform_async_register(const payload_t &payload, value_storage &values) {
-            const auto &rule = get_payload<impl::async_register_rule_data>(payload);
-            if (const auto rst_v = rule.rst.get(values); static_cast<bool>(rst_v) == rule.high_rst &&
-                                                     rule.out.update_if_changed(values, rule.rst_value)) {
+            const auto &[clk, rst, in, out, high_rst, rst_value] = get_payload<impl::async_register_rule_data>(payload);
+            if (const auto rst_v = rst.get(values); static_cast<bool>(rst_v) == high_rst &&
+                                                     out.update_if_changed(values, rst_value)) {
                 return true;
             }
-            if (!rule.clk.triggered(values)) return false;
-            auto value = rule.in.get(values);
-            if (!rule.out.check(values, value)) return false;
-            rule.out.delay_put(values, std::move(value));
+            if (!clk.triggered(values)) return false;
+            auto value = in.get(values);
+            if (!out.check(values, value)) return false;
+            out.delay_put(values, std::move(value));
             return true;
         }
 
