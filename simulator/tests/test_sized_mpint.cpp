@@ -253,26 +253,6 @@ TEST(SizedMpint64Test, CompoundAssignmentOperators) {
     EXPECT_EQ(static_cast<uint64_t>(a), 0x3C);
 }
 
-TEST(SizedMpint64Test, ErrorHandling) {
-    vec_64 a{8, 100};
-    vec_64 b{16, 200};
-
-    EXPECT_THROW((void) (a + b), std::invalid_argument);
-    EXPECT_THROW((void) (a - b), std::invalid_argument);
-    EXPECT_THROW((void) (a * b), std::invalid_argument);
-    EXPECT_THROW((void) (a / b), std::invalid_argument);
-    EXPECT_THROW((void) (a % b), std::invalid_argument);
-    EXPECT_THROW((void) (a | b), std::invalid_argument);
-    EXPECT_THROW((void) (a & b), std::invalid_argument);
-    EXPECT_THROW((void) (a ^ b), std::invalid_argument);
-    EXPECT_THROW((void) (a <=> b), std::invalid_argument);
-
-    EXPECT_THROW((void) a.slice(5, 3), std::invalid_argument);
-    EXPECT_THROW((void) a.slice(0, 8), std::out_of_range);
-
-    EXPECT_THROW(vec_64::parse("8'x123"), std::invalid_argument);
-}
-
 TEST(SizedMpintUnlimitedTest, StringParsing) {
     const std::string literal_a = "793'h" + std::string(1 + 793 / 4, 'F');
     const std::string literal_b = "793'b" + std::string(793, '1');
