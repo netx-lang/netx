@@ -11,6 +11,7 @@ import pascal.netx.compiler.model.ast.element.PackageElement;
 import pascal.netx.compiler.model.circuit.scope.RepoScope;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.util.lang.Identifier;
+import pascal.netx.util.lang.SourceLoc;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -83,7 +84,8 @@ public final class ProjectConfigReader {
         var groups = packages.stream().collect(Collectors.groupingBy(PackageNode::getPackageInfo));
         packages.clear();
         for (var entry : groups.entrySet()) {
-            var design = PackageNode.of(entry.getKey());
+            PackageNode design = PackageNode.of(entry.getKey())
+                    .setSourceLoc(SourceLoc.none());
             for (var node : entry.getValue()) {
                 node.getElements().forEach(design::addDefinition);
             }

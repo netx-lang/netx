@@ -4,17 +4,17 @@ module top(
 
 /*============================== DATA ==============================*/
 
-/* "top"; "async.nx:1:10" */
+/* "top"; "async.nx:1:0" */
   input wire [31:0] _2; // async.nx:2:9:i
   output wire [31:0] _3; // async.nx:2:12:o
   input wire _1; // async.nx:3:9:rst
   input wire _0; // CLOCK async.nx:4:9:clk
-/* END "top"; "async.nx:1:10" */
+/* END "top"; "async.nx:1:0" */
 
 /*============================== CONNECTION ==============================*/
 
 /*
-  COMPONENT "top"; "async.nx:1:10"
+  COMPONENT "top"; "async.nx:1:0"
   input: clk@0, rst@1, i@2
   output: o@3
 */
@@ -22,5 +22,5 @@ module top(
     if (~_1) _3 <= 0;
     else _3 <= _2;
   end // async.nx:6:9
-/* END "top"; "async.nx:1:10" */
+/* END "top"; "async.nx:1:0" */
 endmodule

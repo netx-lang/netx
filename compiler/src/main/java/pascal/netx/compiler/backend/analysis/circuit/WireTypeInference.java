@@ -1,7 +1,5 @@
 package pascal.netx.compiler.backend.analysis.circuit;
 
-import org.jgrapht.Graph;
-import org.jgrapht.graph.SimpleGraph;
 import pascal.netx.compiler.backend.analysis.circuit.constraint.*;
 import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.model.circuit.scope.ComponentScope;
@@ -11,11 +9,10 @@ import pascal.netx.compiler.model.type.BitType;
 import pascal.netx.compiler.model.type.Hole;
 import pascal.netx.compiler.model.type.Type;
 import pascal.netx.compiler.utils.TypeCheckingException;
+import pascal.netx.util.collection.UnionFind;
 import pascal.netx.util.exception.ShallNotReachHereError;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -24,7 +21,7 @@ import java.util.stream.Stream;
  * If a variable cannot be inferred, it will throw a TypeCheckingException.
  */
 public final class WireTypeInference extends CircuitAnalysis {
-    private final Graph<Signal, BinaryConstraint> graph = new SimpleGraph<>(BinaryConstraint.class);
+    private final UnionFind<Signal> equalSignals = new UnionFind<>();
     private final List<WireConstraint> constraints = new LinkedList<>();
     private final Queue<Signal> workList = new LinkedList<>();
 
@@ -68,10 +65,12 @@ public final class WireTypeInference extends CircuitAnalysis {
 
     private void addAllEqualConstraints(ComponentScope component) {
         var dataList = Stream.concat(component.getInputs().stream(), component.getOutputs().stream()).toList();
-        for (int i = 0; i < dataList.size(); i++) {
-            for (int j = i + 1; j < dataList.size(); j++) {
-                addConstraint(new EqualTypeConstraint(dataList.get(i), dataList.get(j)));
-            }
+        if (dataList.isEmpty()) {
+            return;
+        }
+        Signal representative = dataList.getFirst();
+        for (int i = 1; i < dataList.size(); i++) {
+            addConstraint(new EqualTypeConstraint(representative, dataList.get(i)));
         }
     }
 
@@ -112,9 +111,7 @@ public final class WireTypeInference extends CircuitAnalysis {
             setTypeFor(lhs, binary.expectedLhs());
         } else {
             constraints.add(binary);
-            graph.addVertex(lhs);
-            graph.addVertex(rhs);
-            graph.addEdge(lhs, rhs, binary);
+            equalSignals.union(lhs, rhs);
         }
     }
 
@@ -136,15 +133,17 @@ public final class WireTypeInference extends CircuitAnalysis {
     }
 
     private void doTypeInference() {
+        Map<Signal, List<Signal>> components = new HashMap<>();
+        for (var signal : equalSignals.elements()) {
+            components.computeIfAbsent(equalSignals.find(signal), ignored -> new LinkedList<>()).add(signal);
+        }
+
         while (!workList.isEmpty()) {
             var data = workList.poll();
-            if (graph.containsVertex(data)) {
-                for (var constraint : graph.edgesOf(data)) {
-                    Signal lhs = constraint.getLhs(), rhs = constraint.getRhs();
-                    if (lhs.hasImplicitType()) {
-                        setTypeFor(lhs, constraint.expectedLhs());
-                    } else if (rhs.hasImplicitType()) {
-                        setTypeFor(rhs, constraint.expectedRhs());
+            if (equalSignals.contains(data)) {
+                for (var signal : components.getOrDefault(equalSignals.find(data), List.of())) {
+                    if (signal != data) {
+                        setTypeFor(signal, data.getType());
                     }
                 }
             }
@@ -155,13 +154,20 @@ public final class WireTypeInference extends CircuitAnalysis {
         if (type instanceof Hole) {
             throw new ShallNotReachHereError();
         }
+        if (!signal.hasImplicitType()) {
+            if (!signal.getType().equals(type)) {
+                Logger.error("Type constraint violation: conflicting types for {}", signal);
+                throw new TypeCheckingException();
+            }
+            return;
+        }
         signal.setType(type);
         workList.add(signal);
     }
 
     private void checkAllTyped() {
         pack.forEachSubComponent(scope ->
-                scope.getBinding().forEachEntity(entity -> {
+                scope.forEachEntity(entity -> {
                     if (!(entity instanceof Signal inst)) {
                         throw new ShallNotReachHereError();
                     }

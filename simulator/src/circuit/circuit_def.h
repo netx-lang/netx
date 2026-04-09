@@ -5,18 +5,11 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <functional>
 #include <version>
 #include <unordered_map>
-#ifdef __cpp_lib_flat_set
-#include <flat_set>
-template<typename T>
-using compatible_flat_set = std::flat_set<T>;
-#else
-#include <boost/container/flat_set.hpp>
-template<typename T>
-using compatible_flat_set = boost::container::flat_set<T>;
-#endif
+#include <vector>
+#include <ranges>
+#include <algorithm>
 
 #include "sized_mpint.h"
 
@@ -29,19 +22,94 @@ namespace nxon {
     using value_t = impl::sized_mpint<NX_BACKEND>;
 
     namespace impl {
-        class id_set_impl : public compatible_flat_set<id_t> {
-            using base_t = compatible_flat_set<id_t>;
+        template<typename Container, std::ranges::input_range Range>
+        void append_range_compat(Container &container, Range &&range) {
+#ifdef __cpp_lib_containers_ranges
+            container.append_range(std::forward<Range>(range));
+#else
+            container.insert(container.end(), std::ranges::begin(range), std::ranges::end(range));
+#endif
+        }
+
+        template<typename Container, std::ranges::input_range Range>
+        void insert_range_compat(Container &container, Range &&range) {
+#ifdef __cpp_lib_containers_ranges
+            container.insert_range(std::forward<Range>(range));
+#else
+            container.insert(std::ranges::begin(range), std::ranges::end(range));
+#endif
+        }
+
+        class id_set_impl {
             using self_t = id_set_impl;
+            std::vector<id_t> content;
 
         public:
-            using base_t::base_t;
+            using value_type = id_t;
+            using size_type = std::vector<id_t>::size_type;
+            using iterator = std::vector<id_t>::iterator;
+            using const_iterator = std::vector<id_t>::const_iterator;
+
+            id_set_impl() = default;
+            explicit id_set_impl(std::vector<id_t> init) : content(std::move(init)) {
+            }
+
+            id_set_impl(const std::initializer_list<id_t> init) : content(init) {
+            }
+
+            template<std::input_iterator It>
+            id_set_impl(It first, It last) : content(first, last) {
+            }
+
+            [[nodiscard]] iterator begin() {
+                return content.begin();
+            }
+
+            [[nodiscard]] const_iterator begin() const {
+                return content.begin();
+            }
+
+            [[nodiscard]] iterator end() {
+                return content.end();
+            }
+
+            [[nodiscard]] const_iterator end() const {
+                return content.end();
+            }
+
+            [[nodiscard]] bool empty() const {
+                return content.empty();
+            }
+
+            [[nodiscard]] size_type size() const {
+                return content.size();
+            }
+
+            void clear() {
+                content.clear();
+            }
+
+            void insert(const id_t id) {
+                content.emplace_back(id);
+            }
+
+            template<std::input_iterator It>
+            void insert(It first, It last) {
+                content.insert(content.end(), first, last);
+            }
+
+            [[nodiscard]] bool contains(const id_t id) const {
+                return std::ranges::find(content, id) != content.end();
+            }
+
+            size_type erase(const id_t id) {
+                const auto old_size = content.size();
+                std::erase(content, id);
+                return old_size - content.size();
+            }
 
             auto &operator+=(const self_t &other) {
-#ifdef __cpp_lib_flat_set
-                insert(std::sorted_unique, other.begin(), other.end());
-#else
-                insert(boost::container::ordered_unique_range, other.begin(), other.end());
-#endif
+                insert(other.begin(), other.end());
                 return *this;
             }
 
@@ -63,6 +131,10 @@ namespace nxon {
             std::vector<mapped_type> content;
 
         public:
+            [[nodiscard]] size_type size() const {
+                return content.size();
+            }
+
             void prepare(const key_type max_id) {
                 if (content.size() <= max_id) content.resize(max_id + 1);
             }
@@ -95,15 +167,53 @@ namespace nxon {
     using value_batch = std::unordered_map<id_t, value_t>;
 
     class value_storage : public impl::id_based_map<value_t> {
-        std::vector<std::function<void(value_storage &)> > delayed;
+        struct delayed_write {
+            enum class kind_t : uint8_t {
+                id,
+                select
+            };
+
+            kind_t kind;
+            id_t id;
+            size_t from;
+            size_t to;
+            value_t value;
+        };
+
+        std::vector<delayed_write> delayed;
 
     public:
-        void delay(std::function<void(value_storage &)> func) {
-            delayed.emplace_back(std::move(func));
+        void delay(const id_t id, value_t value) {
+            delayed.emplace_back(delayed_write{
+                .kind = delayed_write::kind_t::id,
+                .id = id,
+                .from = 0,
+                .to = 0,
+                .value = std::move(value)
+            });
+        }
+
+        void delay(const id_t id, const size_t from, const size_t to, value_t value) {
+            delayed.emplace_back(delayed_write{
+                .kind = delayed_write::kind_t::select,
+                .id = id,
+                .from = from,
+                .to = to,
+                .value = std::move(value)
+            });
         }
 
         void perform_delayed() {
-            for (auto &func: delayed) func(*this);
+            for (auto &[kind, id, from, to, value]: delayed) {
+                switch (kind) {
+                    case delayed_write::kind_t::id:
+                        at(id) = std::move(value);
+                        break;
+                    case delayed_write::kind_t::select:
+                        at(id).assign_slice_unchecked(from, to, std::move(value));
+                        break;
+                }
+            }
             delayed.clear();
         }
     };

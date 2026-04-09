@@ -17,7 +17,9 @@ public sealed class Wire implements Data permits Clock {
     private final int index;
     private Type type;
 
-    public Wire(Identifier id, ComponentScope parent, Type type, int index) {
+    private int hashCache = 0;
+
+    protected Wire(Identifier id, ComponentScope parent, Type type, int index) {
         this.parent = parent;
         this.id = id;
         this.index = index;
@@ -78,7 +80,10 @@ public sealed class Wire implements Data permits Clock {
 
     @Override
     public int hashCode() {
-        return Objects.hash(index);
+        if (hashCache == 0) {
+            hashCache = Objects.hash(index);
+        }
+        return hashCache;
     }
 
     public static class Factory extends Data.Factory<Wire> {

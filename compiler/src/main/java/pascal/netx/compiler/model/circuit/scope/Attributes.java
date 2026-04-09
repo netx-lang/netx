@@ -3,7 +3,7 @@ package pascal.netx.compiler.model.circuit.scope;
 import pascal.netx.compiler.model.ast.element.AbstractComponentNode;
 import pascal.netx.compiler.model.circuit.Entity;
 import pascal.netx.compiler.model.circuit.scope.binding.AttrBindList;
-import pascal.netx.compiler.model.circuit.scope.binding.MultiBinding;
+import pascal.netx.compiler.model.circuit.scope.binding.IdEntityMap;
 import pascal.netx.compiler.model.circuit.scope.binding.OrderedAttrBindList;
 import pascal.netx.compiler.model.circuit.signal.Signal;
 import pascal.netx.util.lang.Identifier;
@@ -33,7 +33,7 @@ public final class Attributes {
                     attributes.addAttribute(node.getAttributes().get(i), args.get(i));
                 }
             }
-            case MultiBinding binding -> binding.forEach(
+            case IdEntityMap binding -> binding.forEach(
                     entry -> attributes.addAttribute(entry.getKey(), entry.getValue()));
         }
         return attributes;

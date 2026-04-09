@@ -25,6 +25,9 @@ public final class EqualTypeConstraint extends BinaryConstraint {
 
     @Override
     public String error() {
-        return String.format("Type mismatch: %s and %s", lhs, rhs);
+        return "Type mismatch:\n"
+                + WireConstraint.describeSignalBlock("lhs", lhs)
+                + "\n"
+                + WireConstraint.describeSignalBlock("rhs", rhs);
     }
 }

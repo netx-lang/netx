@@ -12,7 +12,10 @@ import pascal.netx.util.lang.Identifier;
 import pascal.netx.util.lang.SourceLoc;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 public final class ComponentScope extends Scope {
     private final boolean isInterface;
@@ -20,7 +23,7 @@ public final class ComponentScope extends Scope {
     private PackageScope pack;
 
     private final Evaluator evaluator;
-    private final Set<Alias> aliases = new LinkedHashSet<>();
+    private final List<Alias> aliases = new LinkedList<>();
     private final AssignManager manager = new AssignManager(this);
 
     private Attributes attributes;
@@ -97,7 +100,7 @@ public final class ComponentScope extends Scope {
     }
 
     public SourceLoc getSourceLoc() {
-        return identifier.getSourceLoc();
+        return instantiateLoc;
     }
 
     public Identifier getIdentifier() {
@@ -168,7 +171,7 @@ public final class ComponentScope extends Scope {
         return manager;
     }
 
-    public Set<Alias> getAliases() {
+    public List<Alias> getAliases() {
         return aliases;
     }
 

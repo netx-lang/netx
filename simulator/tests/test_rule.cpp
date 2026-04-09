@@ -16,7 +16,7 @@ TEST(RuleTest, ConstructionAndAccessors) {
     values[1] = value_t(8, 114);
     const auto src = data_factory::constant_source(value_t{8, 42});
     const auto sink = data_factory::id_sink(1, 8);
-    const auto rule = rule_factory::id_rule(src, sink);
+    const auto rule = rule_t::make_unary<&impl::op_id>(src, sink);
 
     EXPECT_EQ(rule.triggers().size(), 0);
     EXPECT_EQ(rule.dependencies().size(), 0);
@@ -29,10 +29,10 @@ TEST(RuleTest, UnaryRulePerform) {
     values[2] = value_t(8, 0xAA);
     const auto src = data_factory::constant_source(value_t{8, 0xAA});
     const auto sink = data_factory::id_sink(2, 8);
-    const auto rule = rule_factory::not_rule(src, sink);
+    const auto rule = rule_t::make_unary<&impl::op_not>(src, sink);
 
     const auto changed = rule.perform(values);
-    EXPECT_TRUE(changed->contains(2));
+    EXPECT_TRUE(changed.contains(2));
     EXPECT_EQ(static_cast<uint64_t>(values[2]), 0x55);
 }
 
@@ -42,10 +42,10 @@ TEST(RuleTest, BinaryRulePerform) {
     const auto src_a = data_factory::constant_source(value_t{8, 0xF0});
     const auto src_b = data_factory::constant_source(value_t{8, 0x0F});
     const auto sink = data_factory::id_sink(3, 8);
-    const auto rule = rule_factory::and_rule(src_a, src_b, sink);
+    const auto rule = rule_t::make_binary<&impl::op_and>(src_a, src_b, sink);
 
     const auto changed = rule.perform(values);
-    EXPECT_TRUE(changed->contains(3));
+    EXPECT_TRUE(changed.contains(3));
     EXPECT_EQ(static_cast<uint64_t>(values[3]), 0x00);
 }
 
@@ -55,11 +55,11 @@ TEST(RuleTest, RegisterRulePerform) {
     const auto clk = data_factory::id_clock(10, true);
     const auto src = data_factory::constant_source(value_t{8, 0xAB});
     const auto sink = data_factory::id_sink(4, 8);
-    const auto rule = rule_factory::register_rule(clk, src, sink);
+    const auto rule = rule_t::make_register(clk, src, sink);
 
     const auto changed = rule.perform(values);
     values.perform_delayed();
-    EXPECT_TRUE(changed->contains(4));
+    EXPECT_TRUE(changed.contains(4));
     EXPECT_EQ(static_cast<uint64_t>(values[4]), 0xAB);
 }
 
@@ -71,10 +71,10 @@ TEST(RuleTest, AsyncRegisterRulePerform) {
     const auto rst = data_factory::id_source(21, 1);
     const auto src = data_factory::constant_source(value_t{8, 0xCD});
     const auto sink = data_factory::id_sink(5, 8);
-    const auto rule = rule_factory::async_register_rule(clk, rst, src, sink, true, value_t{8, 0x00});
+    const auto rule = rule_t::make_async_register(clk, rst, src, sink, true, value_t{8, 0x00});
 
     const auto changed = rule.perform(values);
-    EXPECT_TRUE(changed->contains(5));
+    EXPECT_TRUE(changed.contains(5));
     EXPECT_EQ(static_cast<uint64_t>(values[5]), 0x00);
 }
 
@@ -83,7 +83,7 @@ TEST(RuleTest, RuleSetUpdateAndRefresh) {
     values[6] = value_t{8, 0x00};
     const auto src = data_factory::constant_source(value_t{8, 0x12});
     const auto sink = data_factory::id_sink(6, 8);
-    const auto rule = rule_factory::id_rule(src, sink);
+    const auto rule = rule_t::make_unary<&impl::op_id>(src, sink);
 
     rule_set rules;
     rules.add(rule);
@@ -93,7 +93,7 @@ TEST(RuleTest, RuleSetUpdateAndRefresh) {
     EXPECT_EQ(static_cast<uint64_t>(values[6]), 0x0);
 
     values[6] = value_t{8, 0x34};
-    const auto changed2 = rules.refresh_all_rules(values);
+    const auto changed2 = rules.run_all(values);
     EXPECT_TRUE(changed2.contains(6));
     EXPECT_EQ(static_cast<uint64_t>(values[6]), 0x12);
 }
@@ -107,23 +107,23 @@ TEST(RuleTest, ArithmeticRules) {
     const auto src_b = data_factory::id_source(101, 8);
     const auto sink = data_factory::id_sink(102, 8);
 
-    const auto add_rule = rule_factory::add_rule(src_a, src_b, sink);
+    const auto add_rule = rule_t::make_binary<&impl::op_add>(src_a, src_b, sink);
     add_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[102]), 15);
 
-    const auto sub_rule = rule_factory::sub_rule(src_a, src_b, sink);
+    const auto sub_rule = rule_t::make_binary<&impl::op_sub>(src_a, src_b, sink);
     sub_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[102]), 5);
 
-    const auto mul_rule = rule_factory::mul_rule(src_a, src_b, sink);
+    const auto mul_rule = rule_t::make_binary<&impl::op_mul>(src_a, src_b, sink);
     mul_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[102]), 50);
 
-    const auto div_rule = rule_factory::div_rule(src_a, src_b, sink);
+    const auto div_rule = rule_t::make_binary<&impl::op_div>(src_a, src_b, sink);
     div_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[102]), 2);
 
-    const auto mod_rule = rule_factory::mod_rule(src_a, src_b, sink);
+    const auto mod_rule = rule_t::make_binary<&impl::op_mod>(src_a, src_b, sink);
     mod_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[102]), 0);
 }
@@ -137,19 +137,19 @@ TEST(RuleTest, BitwiseRules) {
     const auto src_b = data_factory::id_source(111, 8);
     const auto sink = data_factory::id_sink(112, 8);
 
-    const auto and_rule = rule_factory::and_rule(src_a, src_b, sink);
+    const auto and_rule = rule_t::make_binary<&impl::op_and>(src_a, src_b, sink);
     and_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[112]), 0x00);
 
-    const auto or_rule = rule_factory::or_rule(src_a, src_b, sink);
+    const auto or_rule = rule_t::make_binary<&impl::op_or>(src_a, src_b, sink);
     or_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[112]), 0xFF);
 
-    const auto xor_rule = rule_factory::xor_rule(src_a, src_b, sink);
+    const auto xor_rule = rule_t::make_binary<&impl::op_xor>(src_a, src_b, sink);
     xor_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[112]), 0xFF);
 
-    const auto not_rule = rule_factory::not_rule(src_a, sink);
+    const auto not_rule = rule_t::make_unary<&impl::op_not>(src_a, sink);
     not_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[112]), 0x55);
 }
@@ -163,17 +163,17 @@ TEST(RuleTest, ShiftRules) {
     const auto src_b = data_factory::id_source(121, 8);
     const auto sink = data_factory::id_sink(122, 8);
 
-    const auto shl_rule = rule_factory::shl_rule(src_a, src_b, sink);
+    const auto shl_rule = rule_t::make_binary<&impl::op_shl>(src_a, src_b, sink);
     shl_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[122]), 0x3C);
 
     values[120] = value_t{8, 0xF0};
-    const auto lshr_rule = rule_factory::logical_shr_rule(src_a, src_b, sink);
+    const auto lshr_rule = rule_t::make_binary<&impl::op_lshr>(src_a, src_b, sink);
     lshr_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[122]), 0x3C);
 
     values[120] = value_t{8, 0x80};
-    const auto ashr_rule = rule_factory::arithmetic_shr_rule(src_a, src_b, sink);
+    const auto ashr_rule = rule_t::make_binary<&impl::op_ashr>(src_a, src_b, sink);
     ashr_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[122]), 0xE0);
 }
@@ -187,27 +187,27 @@ TEST(RuleTest, ComparisonRules) {
     const auto src_b = data_factory::id_source(131, 8);
     const auto sink = data_factory::id_sink(132, 1);
 
-    const auto lt_rule = rule_factory::unsigned_lt_rule(src_a, src_b, sink);
+    const auto lt_rule = rule_t::make_binary<&impl::op_ult>(src_a, src_b, sink);
     lt_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[132]), 1);
 
-    const auto gt_rule = rule_factory::unsigned_gt_rule(src_a, src_b, sink);
+    const auto gt_rule = rule_t::make_binary<&impl::op_ugt>(src_a, src_b, sink);
     gt_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[132]), 0);
 
-    const auto le_rule = rule_factory::unsigned_le_rule(src_a, src_b, sink);
+    const auto le_rule = rule_t::make_binary<&impl::op_ule>(src_a, src_b, sink);
     le_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[132]), 1);
 
-    const auto ge_rule = rule_factory::unsigned_ge_rule(src_a, src_b, sink);
+    const auto ge_rule = rule_t::make_binary<&impl::op_uge>(src_a, src_b, sink);
     ge_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[132]), 0);
 
-    const auto eq_rule = rule_factory::eq_rule(src_a, src_b, sink);
+    const auto eq_rule = rule_t::make_binary<&impl::op_eq>(src_a, src_b, sink);
     eq_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[132]), 0);
 
-    const auto neq_rule = rule_factory::neq_rule(src_a, src_b, sink);
+    const auto neq_rule = rule_t::make_binary<&impl::op_neq>(src_a, src_b, sink);
     neq_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[132]), 1);
 }
@@ -221,19 +221,19 @@ TEST(RuleTest, SignedComparisonRules) {
     const auto src_b = data_factory::id_source(141, 8);
     const auto sink = data_factory::id_sink(142, 1);
 
-    const auto slt_rule = rule_factory::signed_lt_rule(src_a, src_b, sink);
+    const auto slt_rule = rule_t::make_binary<&impl::op_slt>(src_a, src_b, sink);
     slt_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[142]), 1);
 
-    const auto sgt_rule = rule_factory::signed_gt_rule(src_a, src_b, sink);
+    const auto sgt_rule = rule_t::make_binary<&impl::op_sgt>(src_a, src_b, sink);
     sgt_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[142]), 0);
 
-    const auto sle_rule = rule_factory::signed_le_rule(src_a, src_b, sink);
+    const auto sle_rule = rule_t::make_binary<&impl::op_sle>(src_a, src_b, sink);
     sle_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[142]), 1);
 
-    const auto sge_rule = rule_factory::signed_ge_rule(src_a, src_b, sink);
+    const auto sge_rule = rule_t::make_binary<&impl::op_sge>(src_a, src_b, sink);
     sge_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[142]), 0);
 }
@@ -247,7 +247,7 @@ TEST(RuleTest, ConcatRule) {
     const auto src_b = data_factory::id_source(151, 8);
     const auto sink = data_factory::id_sink(152, 16);
 
-    const auto concat_rule = rule_factory::concat_rule(src_a, src_b, sink);
+    const auto concat_rule = rule_t::make_binary<&impl::op_concat>(src_a, src_b, sink);
     concat_rule.perform(values);
     EXPECT_EQ(static_cast<uint64_t>(values[152]), 0xABCD);
 }

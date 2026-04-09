@@ -45,7 +45,7 @@ public record VectorValue(BitVector value) implements Value {
     @Nonnull
     public String toString() {
         if (value.size() == 32) {
-            return String.valueOf(value.toUInt());
+            return String.valueOf(value.toULong());
         }
         return value.toString();
     }

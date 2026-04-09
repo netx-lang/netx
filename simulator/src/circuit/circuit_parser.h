@@ -18,21 +18,28 @@
 
 namespace nxon {
     struct parse_context_common {
+        [[nodiscard]] id_t require_name(this auto &&self, const std::string &name) {
+            if (const auto iter = self.name_map.find(name); iter != self.name_map.end()) {
+                return iter->second;
+            }
+            throw std::out_of_range("Unknown wire name: " + name);
+        }
+
         void advance_input_clocks(this auto &&self) {
             self.flip_input_clocks();
             self.flip_input_clocks();
         }
 
         [[nodiscard]] value_t get(this auto &&self, const std::string &name) {
-            return self.iget(self.name_map.at(name));
+            return self.iget(self.require_name(name));
         }
 
         void flip(this auto &&self, const std::string &name) {
-            self.iflip(self.name_map.at(name));
+            self.iflip(self.require_name(name));
         }
 
         void set(this auto &&self, const std::string &name, const value_t &value) {
-            self.iset(self.name_map.at(name), value);
+            self.iset(self.require_name(name), value);
         }
 
         void flip_input_clocks(this auto &&self) {
@@ -40,15 +47,15 @@ namespace nxon {
         }
 
         void stashed_flip(this auto &&self, const std::string &name) {
-            self.stashed_iflip(self.name_map.at(name));
+            self.stashed_iflip(self.require_name(name));
         }
 
         void stashed_set(this auto &&self, const std::string &name, const value_t &value) {
-            self.stashed_iset(self.name_map.at(name), value);
+            self.stashed_iset(self.require_name(name), value);
         }
 
         size_t size(this auto &&self, const std::string &name) {
-            return self.isize(self.name_map.at(name));
+            return self.isize(self.require_name(name));
         }
     };
 
@@ -68,11 +75,7 @@ namespace nxon {
         }
 
         void stashed_iset_batch(const value_batch &batch) {
-#ifdef __cpp_lib_containers_ranges
-            set_stash.insert_range(batch);
-#else
-            set_stash.insert(batch.begin(), batch.end());
-#endif
+            impl::insert_range_compat(set_stash, batch);
         }
 
         void apply_stash(this auto &&self) {
@@ -133,20 +136,36 @@ namespace nxon {
             return circuit.get_value(id);
         }
 
+        void validate_value_size(const id_t id, const value_t &value) const {
+            if (value.size() != isize(id)) throw std::invalid_argument("Sizes don't match");
+        }
+
         void iflip(const id_t id) {
-            circuit.flip(id);
+            circuit.flip_discard(id);
         }
 
         void iflip_batch(const id_set &ids) {
-            circuit.flip_batch(ids);
+            circuit.flip_batch_discard(ids);
         }
 
         void iset(const id_t id, const value_t &value) {
-            circuit.update(id, value);
+            validate_value_size(id, value);
+            circuit.update_discard(id, value);
         }
 
         void iset_batch(const value_batch &batch) {
-            circuit.update_batch(batch);
+            for (const auto &[id, value]: batch) validate_value_size(id, value);
+            circuit.update_batch_discard(batch);
+        }
+
+        void stashed_iset(const id_t id, const value_t &value) {
+            validate_value_size(id, value);
+            trivial_cached_capability::stashed_iset(id, value);
+        }
+
+        void stashed_iset_batch(const value_batch &batch) {
+            for (const auto &[id, value]: batch) validate_value_size(id, value);
+            trivial_cached_capability::stashed_iset_batch(batch);
         }
 
         size_t isize(const id_t id) const {
@@ -222,7 +241,7 @@ namespace nxon {
         }
 
         inline void parse_binary(const nlohmann::json &inputs, const nlohmann::json &outputs, parse_context &context,
-                                 rule_t (*cons)(source_t, source_t, sink_t)) {
+                                 rule_t (*cons)(const source_t &, const source_t &, const sink_t &)) {
             if (inputs.size() != 2) throw std::invalid_argument("Need exactly two inputs");
             if (outputs.size() != 1) throw std::invalid_argument("Need exactly one output");
             context.circuit.add_rule(cons(parse_source(inputs.at(0), context), parse_source(inputs.at(1), context),
@@ -233,8 +252,9 @@ namespace nxon {
             return len_sum ? a.len() + b.len() : a.len();;
         }
 
-        inline source_t binary_combine(rule_t(*cons)(source_t, source_t, sink_t), source_t a, source_t b,
-                                       parse_context & context, const bool len_sum) {
+        inline source_t binary_combine(rule_t(*cons)(const source_t &, const source_t &, const sink_t &),
+                                       const source_t &a, const source_t &b,
+                                       parse_context &context, const bool len_sum) {
             const auto new_len = binary_output_len(a, b, len_sum);
             const auto new_id = context.new_tmp_wire(new_len, "binary_mid");
             context.circuit.add_rule(cons(a, b, data_factory::id_sink(new_id, new_len)));
@@ -244,9 +264,9 @@ namespace nxon {
 
         inline void parse_variadic_binary(const nlohmann::json &inputs, const nlohmann::json &outputs,
                                           parse_context &context,
-                                          rule_t (*cons)(source_t, source_t, sink_t),
+                                          rule_t (*cons)(const source_t &, const source_t &, const sink_t &),
                                           const bool assoc = true, const bool len_sum = false,
-                                          rule_t (*last)(source_t, sink_t) = nullptr) {
+                                          rule_t (*last)(const source_t &, const sink_t &) = nullptr) {
             if (outputs.size() != 1) throw std::invalid_argument("Need exactly one output");
             sink_t output = parse_sink(outputs.at(0), context);
 
@@ -254,7 +274,7 @@ namespace nxon {
             for (auto &input: inputs) sources.push_back(parse_source(input, context));
             if (sources.empty()) throw std::invalid_argument("No sources specified");
             if (sources.size() == 1) {
-                context.circuit.add_rule(rule_factory::id_rule(sources.front(), output));
+                context.circuit.add_rule(rule_t::make_unary<&impl::op_id>(sources.front(), output));
                 return;
             }
 
@@ -305,7 +325,7 @@ namespace nxon {
             NOT, AND, NAND, OR, NOR, XOR, SHL, LSHR, ASHR, ADD, SUB, MUL, DIV, MOD, CONCAT, ULT, UGT, ULE, UGE, SLT,
             SGT, SLE, SGE,
             EQ,
-            NEQ, UCAST, CAST, REGISTER, ASYNC_REGISTER, TO
+            NE, UCAST, CAST, REGISTER, ASYNC_REGISTER, TO
         };
 
         const std::map<std::string, builtin_type> builtin_type_map{
@@ -333,7 +353,7 @@ namespace nxon {
             {"SLE", builtin_type::SLE},
             {"SGE", builtin_type::SGE},
             {"EQ", builtin_type::EQ},
-            {"NEQ", builtin_type::NEQ},
+            {"NE", builtin_type::NE},
             {"CAST", builtin_type::CAST},
             {"UCAST", builtin_type::UCAST},
             {"TO", builtin_type::TO},
@@ -348,138 +368,138 @@ namespace nxon {
             if (!builtin_type_map.contains(builtin_id)) throw std::runtime_error("Unknown builtin id " + builtin_id);
             switch (builtin_type_map.at(builtin_id)) {
                 case builtin_type::NOT: {
-                    context.circuit.add_rule(rule_factory::not_rule(parse_source(input[0], context),
-                                                                    parse_sink(output[0], context)));
+                    context.circuit.add_rule(rule_t::make_unary<&impl::op_not>(parse_source(input[0], context),
+                                                                               parse_sink(output[0], context)));
                     break;
                 }
                 case builtin_type::AND: {
-                    parse_variadic_binary(input, output, context, rule_factory::and_rule);
+                    parse_variadic_binary(input, output, context, rule_t::make_binary<&impl::op_and>);
                     break;
                 }
                 case builtin_type::NAND: {
-                    parse_variadic_binary(input, output, context, rule_factory::and_rule, true, false,
-                                          rule_factory::not_rule);
+                    parse_variadic_binary(input, output, context, rule_t::make_binary<&impl::op_and>, true, false,
+                                          rule_t::make_unary<&impl::op_not>);
                     break;
                 }
                 case builtin_type::OR: {
-                    parse_variadic_binary(input, output, context, rule_factory::or_rule);
+                    parse_variadic_binary(input, output, context, rule_t::make_binary<&impl::op_or>);
                     break;
                 }
                 case builtin_type::NOR: {
-                    parse_variadic_binary(input, output, context, rule_factory::or_rule, true, false,
-                                          rule_factory::not_rule);
+                    parse_variadic_binary(input, output, context, rule_t::make_binary<&impl::op_or>, true, false,
+                                          rule_t::make_unary<&impl::op_not>);
                     break;
                 }
                 case builtin_type::XOR: {
-                    parse_variadic_binary(input, output, context, rule_factory::xor_rule);
+                    parse_variadic_binary(input, output, context, rule_t::make_binary<&impl::op_xor>);
                     break;
                 }
                 case builtin_type::SHL: {
-                    parse_binary(input, output, context, rule_factory::shl_rule);
+                    parse_binary(input, output, context, rule_t::make_binary<&impl::op_shl>);
                     break;
                 }
                 case builtin_type::LSHR: {
-                    parse_binary(input, output, context, rule_factory::logical_shr_rule);
+                    parse_binary(input, output, context, rule_t::make_binary<&impl::op_lshr>);
                     break;
                 }
                 case builtin_type::ASHR: {
-                    parse_binary(input, output, context, rule_factory::arithmetic_shr_rule);
+                    parse_binary(input, output, context, rule_t::make_binary<&impl::op_ashr>);
                     break;
                 }
                 case builtin_type::ADD: {
-                    parse_variadic_binary(input, output, context, rule_factory::add_rule);
+                    parse_variadic_binary(input, output, context, rule_t::make_binary<&impl::op_add>);
                     break;
                 }
                 case builtin_type::SUB: {
-                    parse_variadic_binary(input, output, context, rule_factory::sub_rule, false);
+                    parse_variadic_binary(input, output, context, rule_t::make_binary<&impl::op_sub>, false);
                     break;
                 }
                 case builtin_type::MUL: {
-                    parse_variadic_binary(input, output, context, rule_factory::mul_rule);
+                    parse_variadic_binary(input, output, context, rule_t::make_binary<&impl::op_mul>);
                     break;
                 }
                 case builtin_type::DIV: {
-                    parse_variadic_binary(input, output, context, rule_factory::div_rule, false);
+                    parse_variadic_binary(input, output, context, rule_t::make_binary<&impl::op_div>, false);
                     break;
                 }
                 case builtin_type::MOD: {
-                    parse_variadic_binary(input, output, context, rule_factory::mod_rule, false);
+                    parse_variadic_binary(input, output, context, rule_t::make_binary<&impl::op_mod>, false);
                     break;
                 }
                 case builtin_type::CONCAT: {
-                    parse_variadic_binary(input, output, context, rule_factory::concat_rule, true, true);
+                    parse_variadic_binary(input, output, context, rule_t::make_binary<&impl::op_concat>, true, true);
                     break;
                 }
                 case builtin_type::ULT: {
-                    parse_binary(input, output, context, rule_factory::unsigned_lt_rule);
+                    parse_binary(input, output, context, rule_t::make_binary<&impl::op_ult>);
                     break;
                 }
                 case builtin_type::UGT: {
-                    parse_binary(input, output, context, rule_factory::unsigned_gt_rule);
+                    parse_binary(input, output, context, rule_t::make_binary<&impl::op_ugt>);
                     break;
                 }
                 case builtin_type::ULE: {
-                    parse_binary(input, output, context, rule_factory::unsigned_le_rule);
+                    parse_binary(input, output, context, rule_t::make_binary<&impl::op_ule>);
                     break;
                 }
                 case builtin_type::UGE: {
-                    parse_binary(input, output, context, rule_factory::unsigned_ge_rule);
+                    parse_binary(input, output, context, rule_t::make_binary<&impl::op_uge>);
                     break;
                 }
                 case builtin_type::SLT: {
-                    parse_binary(input, output, context, rule_factory::signed_lt_rule);
+                    parse_binary(input, output, context, rule_t::make_binary<&impl::op_slt>);
                     break;
                 }
                 case builtin_type::SGT: {
-                    parse_binary(input, output, context, rule_factory::signed_gt_rule);
+                    parse_binary(input, output, context, rule_t::make_binary<&impl::op_sgt>);
                     break;
                 }
                 case builtin_type::SLE: {
-                    parse_binary(input, output, context, rule_factory::signed_le_rule);
+                    parse_binary(input, output, context, rule_t::make_binary<&impl::op_sle>);
                     break;
                 }
                 case builtin_type::SGE: {
-                    parse_binary(input, output, context, rule_factory::signed_ge_rule);
+                    parse_binary(input, output, context, rule_t::make_binary<&impl::op_sge>);
                     break;
                 }
                 case builtin_type::EQ: {
-                    parse_binary(input, output, context, rule_factory::eq_rule);
+                    parse_binary(input, output, context, rule_t::make_binary<&impl::op_eq>);
                     break;
                 }
-                case builtin_type::NEQ: {
-                    parse_binary(input, output, context, rule_factory::neq_rule);
+                case builtin_type::NE: {
+                    parse_binary(input, output, context, rule_t::make_binary<&impl::op_neq>);
                     break;
                 }
                 case builtin_type::CAST: {
-                    context.circuit.add_rule(rule_factory::id_rule(
+                    context.circuit.add_rule(rule_t::make_unary<&impl::op_id>(
                             parse_source(input[0], context),
                             data_factory::signed_resize_sink_adapter(parse_sink(output[0], context)))
                     );
                     break;
                 }
                 case builtin_type::UCAST: {
-                    context.circuit.add_rule(rule_factory::id_rule(
+                    context.circuit.add_rule(rule_t::make_unary<&impl::op_id>(
                             parse_source(input[0], context),
                             data_factory::unsigned_resize_sink_adapter(parse_sink(output[0], context)))
                     );
                     break;
                 }
                 case builtin_type::TO: {
-                    context.circuit.add_rule(rule_factory::id_rule(
+                    context.circuit.add_rule(rule_t::make_unary<&impl::op_id>(
                             parse_source(input[0], context),
                             parse_sink(output[0], context))
                     );
                     break;
                 }
                 case builtin_type::REGISTER: {
-                    context.circuit.add_rule(rule_factory::register_rule(
+                    context.circuit.add_rule(rule_t::make_register(
                         parse_clock(input[0], json["attribute"]),
                         parse_source(input[1], context),
                         parse_sink(output[0], context)));
                     break;
                 }
                 case builtin_type::ASYNC_REGISTER: {
-                    context.circuit.add_rule(rule_factory::async_register_rule(
+                    context.circuit.add_rule(rule_t::make_async_register(
                         parse_clock(input[0], json["attribute"]),
                         parse_source(input[1], context),
                         parse_source(input[2], context),
@@ -640,7 +660,7 @@ namespace nxon {
         for (id_t id = 0; id < context.members_total; ++id)
             initial_values[id] = value_t(context.size_map.at(id), 0ul);
         context.circuit.put_batch(initial_values);
-        context.circuit.refresh_all();
+        context.circuit.run_all_discard();
     }
 }
 #endif //PARSER_H

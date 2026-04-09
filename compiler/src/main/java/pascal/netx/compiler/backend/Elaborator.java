@@ -15,8 +15,8 @@ import pascal.netx.compiler.model.circuit.expr.ComponentRef;
 import pascal.netx.compiler.model.circuit.scope.ComponentScope;
 import pascal.netx.compiler.model.circuit.scope.PackageScope;
 import pascal.netx.compiler.model.circuit.scope.RepoScope;
-import pascal.netx.compiler.model.circuit.scope.binding.MonoBinding;
-import pascal.netx.compiler.model.circuit.scope.binding.MultiBinding;
+import pascal.netx.compiler.model.circuit.scope.binding.Binding;
+import pascal.netx.compiler.model.circuit.scope.binding.IdEntityMap;
 import pascal.netx.compiler.model.circuit.scope.binding.OrderedAttrBindList;
 import pascal.netx.compiler.model.circuit.signal.Array;
 import pascal.netx.compiler.model.circuit.signal.Signal;
@@ -35,7 +35,7 @@ import static pascal.netx.compiler.model.circuit.Utils.requireEqSize;
 
 public record Elaborator(PackageScope scope, PackageNode node, Configuration config) {
     public Elaborator(RepoScope repo, PackageNode node, Configuration config) {
-        this(PackageScope.newPackage(repo), node, config);
+        this(PackageScope.newPackage(repo, node.getSourceLoc()), node, config);
     }
 
     public PackageScope elaborate() {
@@ -53,7 +53,7 @@ public record Elaborator(PackageScope scope, PackageNode node, Configuration con
         return scope;
     }
 
-    public static MonoBinding evaluateBinding(BindingNode binding, ComponentScope scope) {
+    public static Binding evaluateBinding(BindingNode binding, ComponentScope scope) {
         Identifier id = binding.getHead().getSymbol();
         List<Identifier> freeVariables = switch (binding.getHead()) {
             case CallExpr param -> param.getArguments().stream()
@@ -74,7 +74,7 @@ public record Elaborator(PackageScope scope, PackageNode node, Configuration con
             }
         }
 
-        return MonoBinding.of(id, macro);
+        return IdEntityMap.of(id, macro);
     }
 
     private void initializePackageDefs() {
@@ -105,7 +105,7 @@ public record Elaborator(PackageScope scope, PackageNode node, Configuration con
                         "The number of configured attributes does not match the number of top component attributes");
                 IntStream.range(0, size).forEach(i -> topScope.bind(topNode.getAttributes().get(i), attrs.get(i)));
             }
-            case MultiBinding binding -> binding.forEach(topScope::bind);
+            case IdEntityMap binding -> binding.forEach(topScope::bind);
             case null -> {
                 // do nothing
             }
@@ -191,7 +191,7 @@ public record Elaborator(PackageScope scope, PackageNode node, Configuration con
             var generator = loop.getGenerator();
             for (var entity : requireEList(evaluator.evaluate(generator.getFrom()))) {
                 int count = scope.getBindingCount();
-                scope.overrideBindings(MonoBinding.of(generator.getHead(), entity));
+                scope.overrideBindings(IdEntityMap.of(generator.getHead(), entity));
                 buildElement(loop.getElement());
 
                 // Since there could be let-bindings inside the loop body,

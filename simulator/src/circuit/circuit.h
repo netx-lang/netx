@@ -16,6 +16,37 @@ namespace nxon {
         value_storage values;
         id_set clocks;
 
+        template<bool TrackChanged>
+        auto update_ids(const id_set &hint) {
+            if constexpr (TrackChanged) {
+                return rules.update(values, hint);
+            } else {
+                rules.update_discard(values, hint);
+            }
+        }
+
+        template<bool TrackChanged>
+        auto update_one(const id_t id, value_t new_value) {
+            values[id] = std::move(new_value);
+            return update_ids<TrackChanged>({id});
+        }
+
+        template<bool TrackChanged>
+        auto flip_ids(const id_set &ids) {
+            for (const auto &id: ids) values[id].flip();
+            return update_ids<TrackChanged>(ids);
+        }
+
+        template<bool TrackChanged>
+        auto update_batch_impl(const value_batch &to_update) {
+            id_set hint;
+            for (const auto &[id, value]: to_update) {
+                hint.insert(id);
+                values[id] = value;
+            }
+            return update_ids<TrackChanged>(hint);
+        }
+
     public:
         void add_rule(const rule_t &new_rule) {
             rules.add(new_rule);
@@ -26,31 +57,39 @@ namespace nxon {
         }
 
         id_set flip(id_t id) {
-            values[id].flip();
-            return rules.update(values, {id});
+            return flip_ids<true>({id});
+        }
+
+        void flip_discard(id_t id) {
+            flip_ids<false>({id});
         }
 
         id_set flip_batch(const id_set &ids) {
-            for (const auto &id: ids) values[id].flip();
-            return rules.update(values, ids);
+            return flip_ids<true>(ids);
+        }
+
+        void flip_batch_discard(const id_set &ids) {
+            flip_ids<false>(ids);
         }
 
         id_set update(id_t id, value_t new_value) {
-            values[id] = std::move(new_value);
-            return rules.update(values, {id});
+            return update_one<true>(id, std::move(new_value));
+        }
+
+        void update_discard(id_t id, value_t new_value) {
+            update_one<false>(id, std::move(new_value));
         }
 
         id_set update_batch(const value_batch &to_update) {
-            id_set hint;
-            for (const auto &[id, value]: to_update) {
-                hint.insert(id);
-                values[id] = value;
-            }
-            return rules.update(values, hint);
+            return update_batch_impl<true>(to_update);
         }
 
-        id_set refresh_all() {
-            return rules.refresh_all_rules(values);
+        void update_batch_discard(const value_batch &to_update) {
+            update_batch_impl<false>(to_update);
+        }
+
+        void run_all_discard() {
+            rules.run_all_discard(values);
         }
 
         void put(const id_t id, value_t new_value) {

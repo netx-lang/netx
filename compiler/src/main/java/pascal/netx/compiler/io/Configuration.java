@@ -3,7 +3,7 @@ package pascal.netx.compiler.io;
 import pascal.netx.compiler.model.circuit.EList;
 import pascal.netx.compiler.model.circuit.Entity;
 import pascal.netx.compiler.model.circuit.scope.binding.AttrBindList;
-import pascal.netx.compiler.model.circuit.scope.binding.MultiBinding;
+import pascal.netx.compiler.model.circuit.scope.binding.IdEntityMap;
 import pascal.netx.compiler.model.circuit.signal.BooleanValue;
 import pascal.netx.compiler.model.circuit.signal.VectorValue;
 import pascal.netx.compiler.utils.ParseCancellationException;
@@ -87,7 +87,7 @@ public record Configuration(@Nullable Identifier topPack,
         };
 
         public Builder withArgs(List<String> literal) {
-            var bindings = MultiBinding.ofEmpty();
+            var bindings = IdEntityMap.ofEmpty();
             for (String arg : literal) {
                 String[] parts = arg.split("=");
                 if (parts.length == 2) {

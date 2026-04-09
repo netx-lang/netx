@@ -191,7 +191,9 @@ record BuiltInComponentFactory(NXCompiler.WireIndexer indexer) {
     }
 
     private ComponentScope instantiate(Scope parent, BuiltinRef ref) {
-        return ComponentScope.newComponent(parent, ref.getBuiltin().asID().setSourceLoc(ref.getSourceLoc()));
+        var scope = ComponentScope.newComponent(parent, ref.getBuiltin().asID());
+        scope.setInstantiateLoc(ref.getSourceLoc());
+        return scope;
     }
 
     private Wire newWire(ComponentScope result, String name) {

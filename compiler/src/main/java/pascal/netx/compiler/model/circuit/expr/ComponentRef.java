@@ -12,7 +12,7 @@ public final class ComponentRef extends PrimaryExpr implements InstantiationRef 
 
     private final Identifier identifier;
 
-    public ComponentRef(AbstractComponentNode definition,
+    private ComponentRef(AbstractComponentNode definition,
                         Identifier identifier, AttrBindList attrBindList) {
         this.definition = definition;
         this.identifier = identifier;

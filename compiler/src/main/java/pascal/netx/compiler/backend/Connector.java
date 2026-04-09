@@ -179,6 +179,7 @@ final class Connector {
         }
         component.setParent(scope);
         component.setPackage(scope.getPackage());
+        component.setInstantiateLoc(ref.getSourceLoc());
         return component;
     }
 
@@ -190,6 +191,7 @@ final class Connector {
         } else {
             component = factory.createBuiltInComponent(scope, ref);
         }
+        component.setInstantiateLoc(ref.getSourceLoc());
         return component;
     }
 
@@ -206,6 +208,7 @@ final class Connector {
         component.setAttributes(attributes);
         new Elaborator.ComponentElaborator(component).build(node);
         component.setSignature(Signature.of(ref, component.getInputs(), component.getOutputs()));
+        component.setInstantiateLoc(ref.getSourceLoc());
         return component;
     }
 

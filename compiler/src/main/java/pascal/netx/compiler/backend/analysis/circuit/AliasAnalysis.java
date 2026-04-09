@@ -52,7 +52,7 @@ public final class AliasAnalysis extends CircuitAnalysis {
     private void rewrite() {
         List<ComponentScope> toRemove = new ArrayList<>();
         pack.forEachSubComponent(scope -> {
-            scope.getBinding().releaseIf(Predicate.not(manager::needDump));
+            scope.releaseEntityIf(Predicate.not(manager::needDump));
             scope.getInputs().replaceAll(manager::repOf);
             scope.getOutputs().replaceAll(manager::repOf);
             if (scope.hasAttributes()) {
@@ -264,10 +264,18 @@ public final class AliasAnalysis extends CircuitAnalysis {
                     .map(ComponentScope.class::cast)
                     .collect(Collectors.groupingBy(this::hashOf));
             List<ComponentScope> toRemove = collectDuplicatedTo(scope);
+            Set<ComponentScope> removed = new HashSet<>(toRemove);
             for (var group : hashGroups.values()) {
                 for (int i = 0; i < group.size(); i++) {
+                    ComponentScope a = group.get(i);
+                    if (removed.contains(a)) {
+                        continue;
+                    }
                     for (int j = i + 1; j < group.size(); j++) {
-                        ComponentScope a = group.get(i), b = group.get(j);
+                        ComponentScope b = group.get(j);
+                        if (removed.contains(b)) {
+                            continue;
+                        }
                         if (isDuplicated(a, b)) {
                             var iterator = b.getOutputs().iterator();
                             for (var rhs : a.getOutputs()) {
@@ -276,19 +284,20 @@ public final class AliasAnalysis extends CircuitAnalysis {
                                 manager.set.union(lhs, rhs);
                             }
                             toRemove.add(b);
+                            removed.add(b);
                         }
                     }
                 }
             }
             for (var child : toRemove) {
-                scope.getBinding().bind(child.getBinding());
+                scope.mergeBindingsFrom(child);
                 scope.getChildren().remove(child);
             }
         }
 
         private int hashOf(ComponentScope scope) {
             return hashCache.computeIfAbsent(scope, o -> Objects.hash(
-                    o.getInputs(), o.getAttributes(), o.getInputs()
+                    o.getIdentifier(), o.getInputs(), o.getAttributes()
             ));
         }
 

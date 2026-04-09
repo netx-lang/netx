@@ -5,6 +5,7 @@ import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.io.PackageManager;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.util.exception.ShallNotReachHereError;
+import pascal.netx.util.lang.SourceLoc;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ public final class RepoScope extends Scope {
 
     public RepoScope() {
         super(null);
+        setInstantiateLoc(SourceLoc.none());
     }
 
     public PackageManager getManager() {

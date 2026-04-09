@@ -4,7 +4,7 @@ module top(
 
 /*============================== DATA ==============================*/
 
-/* "top"; "simple_timer.nx:1:10" */
+/* "top"; "simple_timer.nx:1:0" */
   input wire _0; // CLOCK simple_timer.nx:2:6:clk_50
   output wire [6:0] _1; // simple_timer.nx:3:6:hex[0]
   output wire [6:0] _2; // simple_timer.nx:3:6:hex[1]
@@ -422,12 +422,12 @@ module top(
       wire [6:0] _354; // simple_timer.nx:64:8:$o
     /* END "MUX"; "simple_timer.nx:36:9" */
   /* END "hex_trigger"; "simple_timer.nx:20:11" */
-/* END "top"; "simple_timer.nx:1:10" */
+/* END "top"; "simple_timer.nx:1:0" */
 
 /*============================== CONNECTION ==============================*/
 
 /*
-  COMPONENT "top"; "simple_timer.nx:1:10"
+  COMPONENT "top"; "simple_timer.nx:1:0"
   input: clk_50@0
   output: hex[0]@1, hex[1]@2, hex[2]@3, hex[3]@4, hex[4]@5, hex[5]@6, hex[6]@7, hex[7]@8
 */
@@ -452,7 +452,7 @@ module top(
         attribute: { width: "1" }
       */
         assign _18[0] = ~_15; // simple_timer.nx:75:52
-        assign _18[1] = _15; // 
+        assign _18[1] = _15; // simple_timer.nx:62:12
       /* END "DECODER"; "simple_timer.nx:62:12" */
       assign _19 = $signed(_18[0]); // simple_timer.nx:64:26
       assign _20 = _16 & _19; // simple_timer.nx:64:8
@@ -475,7 +475,7 @@ module top(
         attribute: { width: "1" }
       */
         assign _25[0] = ~_15; // simple_timer.nx:75:52
-        assign _25[1] = _15; // 
+        assign _25[1] = _15; // simple_timer.nx:62:12
       /* END "DECODER"; "simple_timer.nx:62:12" */
       assign _26 = _9 & _25[0]; // simple_timer.nx:64:8
       assign _27 = _23 & _25[1]; // simple_timer.nx:64:8
@@ -498,7 +498,7 @@ module top(
       attribute: { width: "1" }
     */
       assign _31[0] = ~_28; // simple_timer.nx:75:52
-      assign _31[1] = _28; // 
+      assign _31[1] = _28; // simple_timer.nx:62:12
     /* END "DECODER"; "simple_timer.nx:62:12" */
     assign _32 = $signed(_31[0]); // simple_timer.nx:64:26
     assign _33 = _29 & _32; // simple_timer.nx:64:8
@@ -1114,5 +1114,5 @@ module top(
       assign _8 = _324 | _326 | _328 | _330 | _332 | _334 | _336 | _338 | _340 | _342 | _344 | _346 | _348 | _350 | _352 | _354; // simple_timer.nx:63:11
     /* END "MUX"; "simple_timer.nx:36:9" */
   /* END "hex_trigger"; "simple_timer.nx:20:11" */
-/* END "top"; "simple_timer.nx:1:10" */
+/* END "top"; "simple_timer.nx:1:0" */
 endmodule

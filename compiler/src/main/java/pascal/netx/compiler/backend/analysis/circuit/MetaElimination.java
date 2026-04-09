@@ -17,8 +17,8 @@ public final class MetaElimination extends CircuitAnalysis {
     @Override
     public void analyze() {
         pack.forEachSubComponent(scope ->
-                scope.getBinding().releaseIf(Predicate.not(Signal.class::isInstance)));
+                scope.releaseEntityIf(Predicate.not(Signal.class::isInstance)));
         pack.forEachSubComponent(scope ->
-                scope.getBinding().releaseIf(Composition.class::isInstance));
+                scope.releaseEntityIf(Composition.class::isInstance));
     }
 }

@@ -4,7 +4,7 @@ module top(
 
 /*============================== DATA ==============================*/
 
-/* "top"; "adder.nx:1:10" */
+/* "top"; "adder.nx:1:0" */
   input wire [7:0] _0; // adder.nx:2:27:a
   input wire [7:0] _1; // adder.nx:2:30:b
   output wire [7:0] _2; // adder.nx:2:9:c
@@ -89,12 +89,12 @@ module top(
       /* END "half_adder"; "adder.nx:14:36" */
     /* END "full_adder"; "adder.nx:7:34" */
   /* END "adder"; "adder.nx:2:14" */
-/* END "top"; "adder.nx:1:10" */
+/* END "top"; "adder.nx:1:0" */
 
 /*============================== CONNECTION ==============================*/
 
 /*
-  COMPONENT "top"; "adder.nx:1:10"
+  COMPONENT "top"; "adder.nx:1:0"
   input: a@0, b@1
   output: c@2
 */
@@ -288,5 +288,5 @@ module top(
       assign _30 = _31 | _33; // adder.nx:14:20
     /* END "full_adder"; "adder.nx:7:34" */
   /* END "adder"; "adder.nx:2:14" */
-/* END "top"; "adder.nx:1:10" */
+/* END "top"; "adder.nx:1:0" */
 endmodule

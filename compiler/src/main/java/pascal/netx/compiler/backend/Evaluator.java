@@ -12,8 +12,7 @@ import pascal.netx.compiler.model.circuit.expr.*;
 import pascal.netx.compiler.model.circuit.scope.ComponentScope;
 import pascal.netx.compiler.model.circuit.scope.PackageScope;
 import pascal.netx.compiler.model.circuit.scope.binding.AttrBindList;
-import pascal.netx.compiler.model.circuit.scope.binding.MonoBinding;
-import pascal.netx.compiler.model.circuit.scope.binding.MultiBinding;
+import pascal.netx.compiler.model.circuit.scope.binding.IdEntityMap;
 import pascal.netx.compiler.model.circuit.scope.binding.OrderedAttrBindList;
 import pascal.netx.compiler.model.circuit.signal.*;
 import pascal.netx.compiler.model.circuit.signal.selector.BitSelector;
@@ -49,10 +48,10 @@ public final class Evaluator {
         Expr expr;
         if (needDeclareInPlace) {
             mode = EvaluationMode.DECLARE_IN_PLACE;
-            expr = castToCircuitExpr(evaluate(node));
+            expr = castToCircuitExpr(evaluate(node), node.getSourceLoc());
             mode = EvaluationMode.COMMON;
         } else {
-            expr = castToCircuitExpr(evaluate(node));
+            expr = castToCircuitExpr(evaluate(node), node.getSourceLoc());
         }
         new Connector(scope).connect(expr);
     }
@@ -175,7 +174,7 @@ public final class Evaluator {
             switch (qualifiers.pop()) {
                 case GeneratorQualifier generator -> {
                     for (var entity : requireEList(evaluate(generator.getFrom()))) {
-                        scope.overrideBindings(MonoBinding.of(generator.getHead(), entity));
+                        scope.overrideBindings(IdEntityMap.of(generator.getHead(), entity));
                         result.addAll(doListComprehension(head, new LinkedList<>(qualifiers)));
                         scope.restoreBindings();
                     }
@@ -252,7 +251,7 @@ public final class Evaluator {
                 yield ParallelExpr.from(result);
             }
             case Expr expr -> DecoratedExpr.of(decorator, expr);
-            case Signal signal -> DecoratedExpr.of(decorator, SignalRef.of(signal));
+            case Signal signal -> DecoratedExpr.of(decorator, SignalRef.of(signal, base.getSourceLoc()));
             default -> {
                 Logger.error("Expected instantiate expr(s) but got {}", operand);
                 throw new CompileCancellationException();
@@ -302,7 +301,7 @@ public final class Evaluator {
     private Entity evaluateNamedPortExpr(NamedPortExpr expr) {
         var ports = new pascal.netx.compiler.model.circuit.expr.NamedPortExpr();
         for (var assign : expr.getPorts()) {
-            var rhs = castToCircuitExpr(evaluate(assign.rhs()));
+            var rhs = castToCircuitExpr(evaluate(assign.rhs()), expr.getSourceLoc());
             if (assign.isDefault()) {
                 ports.setDefaultExpr(rhs);
             } else {
@@ -313,8 +312,8 @@ public final class Evaluator {
     }
 
     private Entity evaluateSequentialExpr(BinaryExpr expr) {
-        var rhs = castToCircuitExpr(evaluate(expr.getRhs()));
-        var lhs = castToCircuitExpr(evaluate(expr.getLhs()));
+        var rhs = castToCircuitExpr(evaluate(expr.getRhs()), expr.getSourceLoc());
+        var lhs = castToCircuitExpr(evaluate(expr.getLhs()), expr.getSourceLoc());
         return SequentialExpr.of(lhs, rhs);
     }
 
@@ -335,11 +334,11 @@ public final class Evaluator {
 
     public Entity evaluateMacroExpr(Macro marco, AttrBindList parameters) {
         var override = switch (parameters) {
-            case MultiBinding binding -> binding.copyOf();
+            case IdEntityMap binding -> binding.copyOf();
             case OrderedAttrBindList(var args) -> {
                 int size = Utils.requireEqSize(marco.identifiers(), args,
                         "Macro invocation requires all arguments to be bound");
-                var bindings = MultiBinding.ofEmpty();
+                var bindings = IdEntityMap.ofEmpty();
                 for (int i = 0; i < size; i++) {
                     bindings.bind(marco.identifiers().get(i), args.get(i));
                 }
@@ -403,7 +402,7 @@ public final class Evaluator {
             }
             return result;
         } else {
-            var result = MultiBinding.ofEmpty();
+            var result = IdEntityMap.ofEmpty();
             for (var assign : expr.getAssigns()) {
                 var argument = evaluate(assign.second());
                 result.bind(assign.first(), argument);

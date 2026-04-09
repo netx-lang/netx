@@ -80,6 +80,43 @@ class AnalysisTest {
     }
 
     @Test
+    void testTransitiveDataTypeInference() {
+        var expected = """
+                component top {
+                    wire a of bit(4);
+                    wire b of bit(4);
+                    wire c of bit(4);
+                    wire d of bit(4);
+                    wire x of bit(4);
+                    wire y of bit(4);
+                    wire z of bit(4);
+                    x <> AND <> [a, b];
+                    y <> OR <> [x, c];
+                    z <> ADD <> [y, d];
+                }
+                """;
+        var actual = """
+                component top {
+                    wire a of bit(4);
+                    wire b of bit(4);
+                    wire c of bit(4);
+                    wire d of bit(4);
+                    auto x;
+                    auto y;
+                    auto z;
+                    x <> AND <> [a, b];
+                    y <> OR <> [x, c];
+                    z <> ADD <> [y, d];
+                }
+                """;
+        var builder = NXBuilder.from(Configuration.asDefault());
+        assertEquals(
+                builder.load(expected).compileAndDump(),
+                builder.load(actual).compileAndDump()
+        );
+    }
+
+    @Test
     void testDuplicatedElimination() {
         var expected = """
                 component top: [a, b] -> [e] {

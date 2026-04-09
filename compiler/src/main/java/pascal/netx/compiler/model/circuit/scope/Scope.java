@@ -4,27 +4,27 @@ import pascal.netx.compiler.model.circuit.Entity;
 import pascal.netx.compiler.model.circuit.SystemMeta;
 import pascal.netx.compiler.model.circuit.expr.BuiltinRef;
 import pascal.netx.compiler.model.circuit.scope.binding.Binding;
-import pascal.netx.compiler.model.circuit.scope.binding.MultiBinding;
-import pascal.netx.util.exception.ShallNotReachHereError;
+import pascal.netx.compiler.model.circuit.scope.binding.IdEntityMap;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
+import pascal.netx.util.lang.SourceLoc;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public abstract sealed class Scope permits ComponentScope, PackageScope, RepoScope {
     private final LinkedList<Binding> bindings;
     private final List<Scope> children;
     private Scope parent;
+    protected SourceLoc instantiateLoc;
 
     protected Scope(Scope parent) {
         this.parent = parent;
         this.children = new ArrayList<>();
         this.bindings = new LinkedList<>();
-        this.bindings.add(MultiBinding.ofEmpty());
+        this.bindings.add(IdEntityMap.ofEmpty());
     }
 
     public Scope getParent() {
@@ -37,6 +37,10 @@ public abstract sealed class Scope permits ComponentScope, PackageScope, RepoSco
         this.parent = parent;
     }
 
+    public void setInstantiateLoc(SourceLoc instantiateLoc) {
+        this.instantiateLoc = instantiateLoc;
+    }
+
     public List<Scope> getChildren() {
         return children;
     }
@@ -45,15 +49,27 @@ public abstract sealed class Scope permits ComponentScope, PackageScope, RepoSco
         children.add(child);
     }
 
-    public Binding getBinding() {
-        if (bindings.size() != 1) {
-            throw new ShallNotReachHereError();
+    public void mergeBindingsFrom(Scope scope) {
+        for (var binding : scope.bindings) {
+            overrideBindings(binding);
         }
-        return getBaseBinding();
     }
 
-    public Binding getTopBinding() {
-        return bindings.getFirst();
+    public void forEachEntity(Consumer<Entity> consumer) {
+        Set<Entity> visited = new HashSet<>();
+        for (var binding : bindings) {
+            binding.forEachEntity(entity -> {
+                if (visited.add(entity)) {
+                    consumer.accept(entity);
+                }
+            });
+        }
+    }
+
+    public void releaseEntityIf(Predicate<Entity> predicate) {
+        for (var binding : bindings) {
+            binding.releaseIf(predicate);
+        }
     }
 
     public Binding getBaseBinding() {

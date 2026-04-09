@@ -3,8 +3,11 @@ package pascal.netx.backend.verilog;
 import com.fasterxml.jackson.databind.JsonNode;
 import pascal.netx.backend.AbstractNxonTransformer;
 import pascal.netx.backend.NxonParseUtils;
-import pascal.netx.backend.Reference;
-import pascal.netx.backend.WireReference;
+import pascal.netx.backend.model.Reference;
+import pascal.netx.backend.model.ValueReference;
+import pascal.netx.backend.model.WireReference;
+import pascal.netx.util.exception.ShallNotReachHereError;
+import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.nxon.NxonType;
 import pascal.netx.util.print.NotepadWriter;
@@ -99,23 +102,12 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
                 .map(Reference::from)
                 .forEach(ref -> {
                     if (ref instanceof WireReference wireRef && wireRef.hasSelector()) {
-                        String selector = wireRef.selector();
-                        int width = parseSelectorWidth(selector);
                         String tempName = "io" + wireRef.dump().replaceAll("[\\[\\].:]", "_");
-                        io.add(tempName);
-
-                        String decl = "%s wire %s%s;".formatted(
-                                portType.equals("input") ? "input" : "output",
-                                parseWidth(width),
-                                tempName
-                        );
-                        extraDeclarations.add(decl);
-
-                        if (portType.equals("input")) {
-                            extraAssignments.add("assign %s = %s;".formatted(wireRef.dump(), tempName));
-                        } else {
-                            extraAssignments.add("assign %s = %s;".formatted(tempName, wireRef.dump()));
-                        }
+                        addTempPort(portType, io, tempName, parseSelectorWidth(wireRef.selector()), wireRef.dump());
+                    } else if (ref instanceof ValueReference valueRef) {
+                        int width = BitVector.parse(valueRef.constant()).size();
+                        String tempName = "io_cons" + extraDeclarations.size();
+                        addTempPort(portType, io, tempName, width, valueRef.dump());
                     } else {
                         io.add(ref.dump());
                         if (ref instanceof WireReference dataRef) {
@@ -123,6 +115,16 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
                         }
                     }
                 });
+    }
+
+    private void addTempPort(String portType, List<String> io, String tempName, int width, String target) {
+        io.add(tempName);
+        extraDeclarations.add("%s wire %s%s;".formatted(portType, parseWidth(width), tempName));
+        if (portType.equals("input")) {
+            extraAssignments.add("assign %s = %s;".formatted(target, tempName));
+        } else {
+            extraAssignments.add("assign %s = %s;".formatted(tempName, target));
+        }
     }
 
     private int parseSelectorWidth(String selector) {
@@ -287,6 +289,17 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
                 notepad.print(")");
             }
             case UCAST, TO -> notepad.print(input.getFirst());
+            case NOR, NAND, XNOR -> {
+                var delimiter = switch (builtin) {
+                    case NOR -> " | ";
+                    case NAND -> " & ";
+                    case XNOR -> " ^ ";
+                    default -> throw new ShallNotReachHereError();
+                };
+                notepad.print("~(");
+                notepad.print(String.join(delimiter, input));
+                notepad.print(")");
+            }
             default -> {
                 var delimiter = " %s ".formatted(BuiltinComponent.VERILOG_OP.get(builtin));
                 notepad.print(String.join(delimiter, input));
@@ -307,4 +320,3 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
         DATA, CONNECTION
     }
 }
-

@@ -6,6 +6,7 @@ import pascal.netx.compiler.model.circuit.expr.ParallelExpr;
 import pascal.netx.compiler.model.circuit.expr.SignalRef;
 import pascal.netx.compiler.model.circuit.signal.*;
 import pascal.netx.compiler.utils.CompileCancellationException;
+import pascal.netx.util.lang.SourceLoc;
 
 import java.math.BigDecimal;
 import java.util.LinkedList;
@@ -108,11 +109,11 @@ public final class Entities {
         };
     }
 
-    public static Expr castToCircuitExpr(Entity entity) {
+    public static Expr castToCircuitExpr(Entity entity, SourceLoc loc) {
         return switch (entity) {
             case Expr expr -> expr;
-            case EList list -> makeParallelTypeFromList(list);
-            case Signal inst -> SignalRef.of(inst);
+            case EList list -> makeParallelTypeFromList(list, loc);
+            case Signal inst -> SignalRef.of(inst, loc);
             default -> {
                 Logger.error("Cannot cast {} to circuit expression", entity);
                 throw new CompileCancellationException();
@@ -120,9 +121,9 @@ public final class Entities {
         };
     }
 
-    private static ParallelExpr makeParallelTypeFromList(EList list) {
+    private static ParallelExpr makeParallelTypeFromList(EList list, SourceLoc loc) {
         List<Expr> result = new LinkedList<>();
-        list.forEach(entity -> result.add(castToCircuitExpr(entity)));
+        list.forEach(entity -> result.add(castToCircuitExpr(entity, loc)));
         return ParallelExpr.from(result);
     }
 }

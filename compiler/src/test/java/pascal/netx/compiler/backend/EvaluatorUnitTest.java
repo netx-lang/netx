@@ -2,6 +2,8 @@ package pascal.netx.compiler.backend;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static pascal.netx.test.TestUtils.compileSingleComponent;
 import static pascal.netx.test.TestUtils.testSugar;
 
 public class EvaluatorUnitTest {
@@ -119,5 +121,16 @@ public class EvaluatorUnitTest {
                 }
                 """;
         testSugar(expected, actual);
+    }
+
+    @Test
+    void testAddComplement() {
+        var code = """
+                component top : [a] -> [b] {
+                    wire a, b of bit(32);
+                    b <> ADD <> [a, 32'hFFFFFFFC];
+                }
+                """;
+        assertDoesNotThrow(() -> compileSingleComponent(code));
     }
 }

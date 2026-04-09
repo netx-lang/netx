@@ -26,7 +26,7 @@ public final class RedundantElimination extends CircuitAnalysis {
                     .map(ComponentScope.class::cast)
                     .filter(this::isRedundant).toList();
             for (var child : toRemove) {
-                scope.getBinding().bind(child.getBinding());
+                scope.mergeBindingsFrom(child);
                 scope.getChildren().remove(child);
             }
             scope.getChildren().removeIf(child -> isRedundant((ComponentScope) child));
