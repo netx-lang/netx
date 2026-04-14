@@ -2,9 +2,9 @@ package pascal.netx.backend.graphviz;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import pascal.netx.backend.AbstractNxonTransformer;
-import pascal.netx.backend.model.Reference;
-import pascal.netx.backend.model.ValueReference;
-import pascal.netx.backend.model.WireReference;
+import pascal.netx.backend.Reference;
+import pascal.netx.backend.ValueReference;
+import pascal.netx.backend.WireReference;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.print.NotepadWriter;
 import pascal.netx.util.type.Pair;
@@ -66,7 +66,7 @@ public final class DotTransformer extends AbstractNxonTransformer {
     @Override
     public void parse() {
         int total = json.get("total").intValue();
-        double ranksep = Math.min(10.0, Math.max(0.5, total / 200.0 * depthThreshold));
+        double ranksep = Math.clamp(total / 200.0 * depthThreshold, 0.5, 10.0);
         notepad.println("digraph {");
         notepad.incIndent();
         notepad.println("rankdir=\"RL\";");

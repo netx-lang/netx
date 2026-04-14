@@ -1,4 +1,4 @@
-package pascal.netx.backend.model;
+package pascal.netx.backend;
 
 public record ValueReference(String constant) implements Reference {
     @Override

@@ -1,4 +1,4 @@
-package pascal.netx.backend.model;
+package pascal.netx.backend;
 
 public sealed interface Reference permits WireReference, ValueReference {
     static Reference from(String literal) {
