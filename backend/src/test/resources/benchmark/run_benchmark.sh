@@ -6,7 +6,7 @@ SCRIPTS_DIR="${ROOT_DIR}/scripts"
 BUILD_DIR="${ROOT_DIR}/build"
 SEQUENTIAL_CONF="${SCRIPTS_DIR}/sequential.conf"
 
-MAX_JOBS=16
+MAX_JOBS=20
 
 usage() {
     cat <<EOF

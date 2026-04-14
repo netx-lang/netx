@@ -57,6 +57,3 @@ cpp-build/
 .idea/copilot.data.migration.ask2agent.xml
 .idea/copilot.data.migration.agent.xml
 .idea/copilot.data.migration.edit.xml
-
-### ASAP 7nm Cell Lib ###
-/backend/src/test/resources/benchmark/asap7sc7p5t_28/

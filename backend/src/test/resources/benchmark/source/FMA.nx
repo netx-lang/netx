@@ -1,20 +1,6 @@
 component FMA : [a, b, c] -> [y] {
   wire a, b, c, y of bit(16);
-  y <> ADD <> [c] ++ [
-    SHL <> [
-      MUX <> [b[i], a, 16'd0], i
-    ] | i in [0..16]
+  y <> ADD <> [
+    MUL <> [a, b], c
   ];
-}
-
-component MUX : [sel, a, b] -> [out] {
-  wire a, b, out of bit(16);
-  wire sel       of bit(1);
-
-  for i in [0..16] {
-    out[i] <> OR <> [
-      AND <> [a[i], sel],
-      AND <> [b[i], NOT <> sel]
-    ];
-  }
 }

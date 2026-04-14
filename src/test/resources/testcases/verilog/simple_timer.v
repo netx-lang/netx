@@ -4,6 +4,9 @@ module top(
 
 /*============================== DATA ==============================*/
 
+reg [31:0] __reg__14;
+reg __reg__9;
+reg [31:0] __reg__13;
 /* "top"; "simple_timer.nx:1:0" */
   input wire _0; // CLOCK simple_timer.nx:2:6:clk_50
   output wire [6:0] _1; // simple_timer.nx:3:6:hex[0]
@@ -426,6 +429,9 @@ module top(
 
 /*============================== CONNECTION ==============================*/
 
+assign _14 = __reg__14;
+assign _9 = __reg__9;
+assign _13 = __reg__13;
 /*
   COMPONENT "top"; "simple_timer.nx:1:0"
   input: clk_50@0
@@ -460,7 +466,7 @@ module top(
       assign _22 = 0 & _21; // simple_timer.nx:64:8
       assign _17 = _20 | _22; // simple_timer.nx:63:11
     /* END "MUX"; "simple_timer.nx:29:17" */
-    always @(posedge _0) _14 <= _17; // simple_timer.nx:27:11
+    always @(posedge _0) __reg__14 <= _17; // simple_timer.nx:27:11
     assign _23 = ~_9; // simple_timer.nx:30:38
     /*
       COMPONENT "MUX"; "simple_timer.nx:30:17"
@@ -481,7 +487,7 @@ module top(
       assign _27 = _23 & _25[1]; // simple_timer.nx:64:8
       assign _24 = _26 | _27; // simple_timer.nx:63:11
     /* END "MUX"; "simple_timer.nx:30:17" */
-    always @(posedge _0) _9 <= _24; // simple_timer.nx:27:11
+    always @(posedge _0) __reg__9 <= _24; // simple_timer.nx:27:11
   /* END "clock_divider"; "simple_timer.nx:10:11" */
   assign _28 = _13 == 8639999; // simple_timer.nx:11:33
   assign _29 = _13 + 1; // simple_timer.nx:11:66
@@ -506,7 +512,7 @@ module top(
     assign _35 = 0 & _34; // simple_timer.nx:64:8
     assign _30 = _33 | _35; // simple_timer.nx:63:11
   /* END "MUX"; "simple_timer.nx:11:22" */
-  always @(posedge _9) _13 <= _30; // simple_timer.nx:5:16
+  always @(posedge _9) __reg__13 <= _30; // simple_timer.nx:5:16
   assign _36 = _13 % 10; // simple_timer.nx:13:34
   assign _37 = $signed(_36); // simple_timer.nx:13:26
   /*

@@ -239,6 +239,7 @@ public final class GraphTransformer extends AbstractNxonTransformer {
             for (var vertex : graph.globalOut()) {
                 dump(graph.eqClassOf(vertex).getAny());
             }
+            canonicalize();
             var root = MAPPER.createObjectNode();
             var design = MAPPER.createObjectNode();
 
@@ -343,6 +344,77 @@ public final class GraphTransformer extends AbstractNxonTransformer {
                     }
 
                     components.add(node);
+                }
+            }
+        }
+
+        void canonicalize() {
+            for (var entry : references.entrySet()) {
+                var ref = Reference.from(entry.getValue());
+                if (!(ref instanceof WireReference wireRef) || !wireRef.hasSelector()) {
+                    continue;
+                }
+                var canonical = canonicalize(wireRef);
+                entry.setValue(canonical.name() + "@" + canonical.id() + canonical.selector());
+            }
+            for (var component : components) {
+                canonicalizeReferences(component.get("input"));
+                canonicalizeReferences(component.get("output"));
+            }
+        }
+
+        private WireReference canonicalize(WireReference ref) {
+            var selectors = parseSelectors(ref.selector());
+            if (selectors.size() <= 1) {
+                return ref;
+            }
+
+            var current = selectors.getFirst();
+            for (int i = 1; i < selectors.size(); i++) {
+                current = inline(current, selectors.get(i));
+            }
+            return ref.withSelector(current.toString());
+        }
+
+        private List<Selector> parseSelectors(String selectorLiteral) {
+            var selectors = new ArrayList<Selector>();
+            for (int index = 0; index < selectorLiteral.length(); ) {
+                int open = selectorLiteral.indexOf('[', index);
+                if (open < 0) {
+                    break;
+                }
+                int close = selectorLiteral.indexOf(']', open);
+                if (close < 0) {
+                    throw new ShallNotReachHereError();
+                }
+                selectors.add(parseSelector(selectorLiteral.substring(open, close + 1)));
+                index = close + 1;
+            }
+            return selectors;
+        }
+
+        private Selector inline(Selector base, Selector nested) {
+            if (nested.lsb() < 0 || nested.msb() >= base.width()) {
+                throw new ShallNotReachHereError();
+            }
+            return new Selector(base.lsb() + nested.msb(), base.lsb() + nested.lsb());
+        }
+
+        private void canonicalizeReferences(JsonNode refs) {
+            if (refs == null || !refs.isArray()) {
+                return;
+            }
+            var array = (com.fasterxml.jackson.databind.node.ArrayNode) refs;
+            for (int i = 0; i < array.size(); i++) {
+                var ref = array.get(i);
+                if (!ref.isTextual()) {
+                    continue;
+                }
+                var parsed = Reference.from(ref.textValue());
+                if (parsed instanceof WireReference wireRef && wireRef.hasSelector()) {
+                    var canonical = canonicalize(wireRef);
+                    array.set(i, MAPPER.getNodeFactory()
+                            .textNode(canonical.name() + "@" + canonical.id() + canonical.selector()));
                 }
             }
         }

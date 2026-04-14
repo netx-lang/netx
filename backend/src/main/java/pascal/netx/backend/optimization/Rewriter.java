@@ -20,7 +20,7 @@ public final class Rewriter {
                 new SingletonRule(graph),
                 new AbsorptionRule(graph),
                 new DoubleNegationRule(graph),
-                new DistributivityRule(graph),
+//                new DistributivityRule(graph),
                 new ConstantPropRule(graph)
 //                new RetimingRule(graph)
         );

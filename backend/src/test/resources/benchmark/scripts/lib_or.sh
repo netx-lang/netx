@@ -3,6 +3,8 @@
 LIB_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE_ROOT="$(cd "${LIB_SCRIPT_DIR}/.." && pwd)"
 
+source "${LIB_SCRIPT_DIR}/lib_synth.sh"
+
 # Optional OpenROAD post-processing for fanout/timing repair
 # Uses docker if openroad command is not available
 repair_design() {
@@ -28,6 +30,7 @@ repair_design() {
     local or_script="${output_dir}/${basename}_or.tcl"
     local timing_report="${output_dir}/${basename}_timing.txt"
     local or_log="${output_dir}/${basename}_or.log"
+    local area_file="${output_dir}/${basename}_area.txt"
     
     # Detect module name from netlist
     local module_name=$(grep "^module" "$synth_verilog" | head -1 | sed 's/^module \([^(]*\).*/\1/')
@@ -48,10 +51,12 @@ repair_design() {
     if [[ -f "$or_output" && $(stat -f%z "$or_output" 2>/dev/null || stat -c%s "$or_output" 2>/dev/null || echo 0) -gt 0 ]]; then
         # Success: replace original with optimized version
         mv "$or_output" "$synth_verilog"
-        return 0
     else
         # Fallback: keep original
         rm -f "$or_output" 2>/dev/null
-        return 0
     fi
+
+    recompute_mapped_area "$synth_verilog" "$area_file"
+
+    return 0
 }

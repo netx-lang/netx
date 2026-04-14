@@ -211,6 +211,13 @@ public class Main {
     )
     static final class OptimizeCommand extends BaseCommand {
         @CommandLine.Option(
+                names = {"-m", "--minimal"},
+                description = "output NXON in a single line without formatting",
+                defaultValue = "false"
+        )
+        private boolean minimal;
+
+        @CommandLine.Option(
                 names = {"--area"},
                 description = "weight for area when computing cost function",
                 defaultValue = "1"
@@ -231,7 +238,17 @@ public class Main {
                 transformer.parse();
                 transformer.rewrite();
                 transformer.saturate(area, delay);
-                new NXPrinter(notePad()).print(transformer.dumpNxon());
+
+                var node = transformer.dumpNxon();
+                if (minimal) {
+                    if (output == null) {
+                        OBJECT_MAPPER.writeValue(System.out, node);
+                    } else {
+                        OBJECT_MAPPER.writeValue(output.toAbsolutePath().normalize().toFile(), node);
+                    }
+                } else {
+                    new NXPrinter(notePad()).print(node);
+                }
             });
         }
     }

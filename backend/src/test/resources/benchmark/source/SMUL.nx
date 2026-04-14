@@ -1,8 +1,8 @@
 component SMUL : [a, b] -> [y] {
   wire a, b, y of bit(16);
   y <> ADD <> [
-    SHL <> [
-      MUX <> [b[i], a, 16'd0], i
+    MUX <> [
+      b[i], SHL <> [a, i], 16'd0
     ] | i in [0..16]
   ];
 }

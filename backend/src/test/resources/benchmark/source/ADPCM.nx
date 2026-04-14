@@ -4,19 +4,12 @@ component ADPCM : [step, delta] -> [vpdiff] {
   wire delta  of bit(3);
   wire vpdiff of bit(16);
     
-  let if_then_add(cond, adder, base) =
-    MUX <> [cond, ADD <> [base, adder], base];
-
-  vpdiff <> if_then_add (
-    delta[2], step,
-      if_then_add (
-        delta[1], LSHR <> [step, 1],
-          if_then_add (
-            delta[0], LSHR <> [step, 2],
-            LSHR <> [step, 3]
-          )
-      )
-  );
+  vpdiff <> ADD <> [
+    LSHR <> [step, 3],
+    MUX  <> [delta[2], step,              16'd0],
+    MUX  <> [delta[1], LSHR <> [step, 1], 16'd0],
+    MUX  <> [delta[0], LSHR <> [step, 2], 16'd0]
+  ];
 }
 
 component MUX : [sel, a, b] -> [out] {

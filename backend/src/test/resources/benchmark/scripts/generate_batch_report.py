@@ -34,7 +34,6 @@ def extract_chip_area_from_area_file(area_file):
 
     with open(area_file, 'r') as f:
         for line in f:
-            # Match lines like "   Chip area for module '\CORE': 693.395640"
             match = re.search(r"Chip area for module '\\[^']+':\s+([0-9]+\.[0-9]+)", line)
             if match:
                 try:
@@ -70,11 +69,17 @@ def extract_metrics_from_design(design_dir, design_name):
     """Extract metrics from a single design's log files."""
     area_file = os.path.join(design_dir, f"{design_name}_area.txt")
     or_log_file = os.path.join(design_dir, f"{design_name}_or.log")
-    
+
     area = extract_chip_area_from_area_file(area_file)
     timing = extract_timing_from_log_file(or_log_file)
-    
-    return area, timing
+
+    if area is None or timing is None:
+        return None
+
+    return {
+        'area': area,
+        'time': float(timing),
+    }
 
 def collect_all_results(build_dir):
     """Collect results from all design directories in build folder."""
@@ -95,15 +100,15 @@ def collect_all_results(build_dir):
         if not os.path.isdir(origin_dir) or not os.path.isdir(opted_dir):
             continue
         
-        origin_area, origin_time = extract_metrics_from_design(origin_dir, f"{design_name}_origin")
-        opted_area, opted_time = extract_metrics_from_design(opted_dir, f"{design_name}_opted")
-        
-        if origin_area is not None and opted_area is not None and origin_time and opted_time:
+        origin_metrics = extract_metrics_from_design(origin_dir, f"{design_name}_origin")
+        opted_metrics = extract_metrics_from_design(opted_dir, f"{design_name}_opted")
+
+        if origin_metrics and opted_metrics:
             try:
-                origin_area_float = float(origin_area)
-                opted_area_float = float(opted_area)
-                origin_time_float = float(origin_time)
-                opted_time_float = float(opted_time)
+                origin_area_float = float(origin_metrics['area'])
+                opted_area_float = float(opted_metrics['area'])
+                origin_time_float = float(origin_metrics['time'])
+                opted_time_float = float(opted_metrics['time'])
                 
                 area_delta = ((opted_area_float - origin_area_float) / origin_area_float * 100) if origin_area_float > 0 else 0
                 time_delta = ((opted_time_float - origin_time_float) / origin_time_float * 100) if origin_time_float > 0 else 0
@@ -111,13 +116,13 @@ def collect_all_results(build_dir):
                 results.append({
                     'design': design_name,
                     'origin_area': f"{origin_area_float:.3f}",
-                    'origin_time': origin_time,
+                    'origin_time': f"{origin_time_float:.3f}",
                     'opted_area': f"{opted_area_float:.3f}",
-                    'opted_time': opted_time,
+                    'opted_time': f"{opted_time_float:.3f}",
                     'area_delta': f"{area_delta:.1f}%",
                     'time_delta': f"{time_delta:.1f}%",
                     'area_delta_raw': area_delta,
-                    'time_delta_raw': time_delta
+                    'time_delta_raw': time_delta,
                 })
             except (ValueError, ZeroDivisionError):
                 pass

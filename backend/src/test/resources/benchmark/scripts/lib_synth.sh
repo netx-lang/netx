@@ -4,6 +4,29 @@ LIB_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE_ROOT="$(cd "${LIB_SCRIPT_DIR}/.." && pwd)"
 ABC_CONFIG="${LIB_SCRIPT_DIR}/abc_config.conf"
 
+recompute_mapped_area() {
+    local design="$1"
+    local output_file="$2"
+
+    (
+        cd "$WORKSPACE_ROOT" && yosys -q -p "
+            read_liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_AO_LVT_TT_ccs_211120.lib
+            read_liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_INVBUF_LVT_TT_ccs_220122.lib
+            read_liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_OA_LVT_TT_ccs_211120.lib
+            read_liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_SIMPLE_LVT_TT_ccs_211120.lib
+            read_liberty -ignore_miss_func asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_SEQ_LVT_TT_ccs_220123.lib
+            read_verilog ${design}
+            hierarchy -check -auto-top
+            tee -o ${output_file} stat \
+                -liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_AO_LVT_TT_ccs_211120.lib \
+                -liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_INVBUF_LVT_TT_ccs_220122.lib \
+                -liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_OA_LVT_TT_ccs_211120.lib \
+                -liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_SIMPLE_LVT_TT_ccs_211120.lib \
+                -liberty asap7sc7p5t_28/LIB/CCS/asap7sc7p5t_SEQ_LVT_TT_ccs_220123.lib
+        " >/dev/null 2>&1
+    )
+}
+
 synthesize_design() {
     local design=$1
     local basename=$(basename "$design" .v)

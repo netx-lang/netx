@@ -1,11 +1,7 @@
 package pascal.netx.backend.verilog;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import pascal.netx.backend.AbstractNxonTransformer;
-import pascal.netx.backend.NxonParseUtils;
-import pascal.netx.backend.model.Reference;
-import pascal.netx.backend.model.ValueReference;
-import pascal.netx.backend.model.WireReference;
+import pascal.netx.backend.*;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BitVector;
 import pascal.netx.util.lang.BuiltinComponent;
@@ -53,6 +49,8 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
     private final HashSet<Integer> globalOut = new HashSet<>();
     private final List<String> extraDeclarations = new ArrayList<>();
     private final List<String> extraAssignments = new ArrayList<>();
+    private final Map<WireReference, Integer> wireWidths = new HashMap<>();
+    private final Map<WireReference, String> registerTemps = new HashMap<>();
 
     public VerilogTransformer(NotepadWriter notepad, JsonNode json) {
         super(notepad, json);
@@ -70,6 +68,8 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
         var node = json.get("design");
         notepad.print("module ");
         prepareGlobalIO(node);
+        collectWireWidths(node);
+        collectRegisterTemps(node);
         notepad.newLine();
         notepad.println("/*%s DATA %s*/".formatted(BAR, BAR));
         notepad.newLine();
@@ -205,6 +205,44 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
         }
     }
 
+    private void collectWireWidths(JsonNode node) {
+        if (!node.has("members")) {
+            return;
+        }
+        for (var sub : node.get("members")) {
+            switch (NxonType.typeOf(sub)) {
+                case WIRE -> wireWidths.put(
+                        ((WireReference) Reference.from(sub.get("id").textValue())).withoutSelector(),
+                        sub.get("width").intValue()
+                );
+                case CLOCK -> wireWidths.put(
+                        ((WireReference) Reference.from(sub.get("id").textValue())).withoutSelector(), 1
+                );
+                case BUILTIN, COMPONENT -> collectWireWidths(sub);
+            }
+        }
+    }
+
+    private void collectRegisterTemps(JsonNode node) {
+        if (!node.has("members")) {
+            return;
+        }
+        for (var sub : node.get("members")) {
+            switch (NxonType.typeOf(sub)) {
+                case BUILTIN -> {
+                    var builtin = BuiltinComponent.of(sub.get("id").textValue());
+                    if (builtin == BuiltinComponent.REGISTER || builtin == BuiltinComponent.ASYNC_REGISTER) {
+                        var ref = ((WireReference) Reference.from(sub.get("output").get(0).textValue())).withoutSelector();
+                        declareRegisterTemp(ref);
+                    }
+                    collectRegisterTemps(sub);
+                }
+                case COMPONENT -> collectRegisterTemps(sub);
+                case WIRE, CLOCK -> { /* ignored */ }
+            }
+        }
+    }
+
     private void parseWire(JsonNode node) {
         var ref = (WireReference) Reference.from(node.get("id").textValue());
         if (globalIn.contains(ref.id())) {
@@ -241,34 +279,53 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
             var input = getArgList(node, "input");
             var output = getArgList(node, "output");
             switch (builtin) {
-                case REGISTER -> parseRegister(node, output, input);
-                case ASYNC_REGISTER -> parseAsyncRegister(node, output, input);
+                case REGISTER -> parseRegister(node, input);
+                case ASYNC_REGISTER -> parseAsyncRegister(node, input);
                 default -> parseCombinational(builtin, output, input);
             }
             notepad.println(" // %s".formatted(node.get("loc").textValue()));
         }
     }
 
-    private void parseRegister(JsonNode node, List<String> output, List<String> input) {
+    private void parseRegister(JsonNode node, List<String> input) {
         boolean pos_edge = node.get("attribute").get("pos_edge").textValue().equals("true");
         String sensitive = pos_edge ? "posedge " : "negedge ";
+        String tempReg = registerTempOf(node.get("output").get(0).textValue());
         notepad.print("always @(%s%s) ".formatted(sensitive, input.get(0)));
-        notepad.print("%s <= %s;".formatted(output.getFirst(), input.get(1)));
+        notepad.print("%s <= %s;".formatted(tempReg, input.get(1)));
     }
 
-    private void parseAsyncRegister(JsonNode node, List<String> output, List<String> input) {
+    private void parseAsyncRegister(JsonNode node, List<String> input) {
         boolean pos_edge = node.get("attribute").get("pos_edge").textValue().equals("true");
         boolean high_rst = node.get("attribute").get("high_rst").textValue().equals("true");
         String rst_value = node.get("attribute").get("rst_value").textValue();
         String clk_sensitive = pos_edge ? "posedge " : "negedge ";
         String rst_sensitive = high_rst ? "posedge " : "negedge ";
+        String tempReg = registerTempOf(node.get("output").get(0).textValue());
         notepad.println("always @(%s%s or %s%s) begin".formatted(clk_sensitive, input.get(0), rst_sensitive, input.get(1)));
         notepad.incIndent();
         notepad.print("if (%s%s) ".formatted(high_rst ? "" : "~", input.get(1)));
-        notepad.println("%s <= %s;".formatted(output.getFirst(), rst_value));
-        notepad.println("else %s <= %s;".formatted(output.getFirst(), input.get(2)));
+        notepad.println("%s <= %s;".formatted(tempReg, rst_value));
+        notepad.println("else %s <= %s;".formatted(tempReg, input.get(2)));
         notepad.decIndent();
         notepad.print("end");
+    }
+
+    private String registerTempOf(String target) {
+        return declareRegisterTemp(((WireReference) Reference.from(target)).withoutSelector());
+    }
+
+    private String declareRegisterTemp(WireReference ref) {
+        return registerTemps.computeIfAbsent(ref, key -> {
+            Integer width = wireWidths.get(key);
+            if (width == null) {
+                throw new ShallNotReachHereError();
+            }
+            String tempReg = "__reg_" + key.dump().replaceAll("[^A-Za-z0-9_]", "_");
+            extraDeclarations.add("reg %s%s;".formatted(parseWidth(width), tempReg));
+            extraAssignments.add("assign %s = %s;".formatted(key.dump(), tempReg));
+            return tempReg;
+        });
     }
 
     private void parseCombinational(BuiltinComponent builtin, List<String> output, List<String> input) {
