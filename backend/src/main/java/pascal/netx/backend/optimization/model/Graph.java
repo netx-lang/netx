@@ -19,6 +19,9 @@ public final class Graph {
     private final List<Vertex> globalOut = new ArrayList<>();
 
     private final Map<Vertex, List<EqClass>> inEdges = new HashMap<>();
+    private final Map<Vertex, LinkedHashSet<String>> sourceLocations = new HashMap<>();
+    private final Map<Vertex, LinkedHashSet<String>> sourceNames = new HashMap<>();
+    private final Map<Vertex, LinkedHashSet<String>> hierarchyPaths = new HashMap<>();
     private final VertexManager manager = new VertexManager();
     private final VertexFactory factory = new VertexFactory();
 
@@ -47,6 +50,100 @@ public final class Graph {
 
     public void retain(Set<Vertex> vertices) {
         manager.retain(vertices);
+    }
+
+    private static String formatLocations(Set<String> locations) {
+        return String.join(" | ", locations);
+    }
+
+    private static String firstName(Set<String> names) {
+        return names.stream().findFirst().orElse("");
+    }
+
+    public void recordLocation(Vertex vertex, String location) {
+        if (location == null || location.isBlank()) {
+            return;
+        }
+        sourceLocations.computeIfAbsent(vertex, _ -> new LinkedHashSet<>()).add(location);
+    }
+
+    public void inheritLocations(Vertex from, Vertex to) {
+        mergeLocations(List.of(from), to);
+    }
+
+    public void recordName(Vertex vertex, String name) {
+        if (name == null || name.isBlank()) {
+            return;
+        }
+        sourceNames.computeIfAbsent(vertex, _ -> new LinkedHashSet<>()).add(name);
+    }
+
+    public void inheritNames(Vertex from, Vertex to) {
+        mergeNames(List.of(from), to);
+    }
+
+    public void recordHierarchyPath(Vertex vertex, String path) {
+        if (path == null || path.isBlank()) {
+            return;
+        }
+        hierarchyPaths.computeIfAbsent(vertex, _ -> new LinkedHashSet<>()).add(path);
+    }
+
+    public void inheritHierarchyPaths(Vertex from, Vertex to) {
+        mergeHierarchyPaths(List.of(from), to);
+    }
+
+    public void mergeLocations(Collection<Vertex> from, Vertex to) {
+        var merged = sourceLocations.computeIfAbsent(to, _ -> new LinkedHashSet<>());
+        for (var vertex : from) {
+            merged.addAll(sourceLocations.getOrDefault(vertex, new LinkedHashSet<>()));
+        }
+    }
+
+    public void mergeNames(Collection<Vertex> from, Vertex to) {
+        var merged = sourceNames.computeIfAbsent(to, _ -> new LinkedHashSet<>());
+        for (var vertex : from) {
+            merged.addAll(sourceNames.getOrDefault(vertex, new LinkedHashSet<>()));
+        }
+    }
+
+    public void mergeHierarchyPaths(Collection<Vertex> from, Vertex to) {
+        var merged = hierarchyPaths.computeIfAbsent(to, _ -> new LinkedHashSet<>());
+        for (var vertex : from) {
+            merged.addAll(hierarchyPaths.getOrDefault(vertex, new LinkedHashSet<>()));
+        }
+    }
+
+    public String locationOf(Vertex vertex) {
+        return formatLocations(sourceLocations.getOrDefault(vertex, new LinkedHashSet<>()));
+    }
+
+    public String locationOf(EqClass cls) {
+        var merged = new LinkedHashSet<String>();
+        for (var vertex : cls) {
+            merged.addAll(sourceLocations.getOrDefault(vertex, new LinkedHashSet<>()));
+        }
+        return formatLocations(merged);
+    }
+
+    public String preferredNameOf(Vertex vertex) {
+        return firstName(sourceNames.getOrDefault(vertex, new LinkedHashSet<>()));
+    }
+
+    public String preferredNameOf(EqClass cls) {
+        var merged = new LinkedHashSet<String>();
+        for (var vertex : cls) {
+            merged.addAll(sourceNames.getOrDefault(vertex, new LinkedHashSet<>()));
+        }
+        return firstName(merged);
+    }
+
+    public Set<String> provenanceNamesOf(Vertex vertex) {
+        return Set.copyOf(sourceNames.getOrDefault(vertex, new LinkedHashSet<>()));
+    }
+
+    public Set<String> hierarchyPathsOf(Vertex vertex) {
+        return Set.copyOf(hierarchyPaths.getOrDefault(vertex, new LinkedHashSet<>()));
     }
 
     public void addEdge(Vertex from, Vertex to) {
@@ -256,6 +353,19 @@ public final class Graph {
                             cls -> (cls == uCls || cls == vCls) ? set : cls));
             unionFind.union(u, v);
             equivalence.put(unionFind.find(u), set);
+            var mergedLoc = new LinkedHashSet<String>();
+            var mergedNames = new LinkedHashSet<String>();
+            var mergedHierarchy = new LinkedHashSet<String>();
+            for (var vertex : set.elements) {
+                mergedLoc.addAll(sourceLocations.getOrDefault(vertex, new LinkedHashSet<>()));
+                mergedNames.addAll(sourceNames.getOrDefault(vertex, new LinkedHashSet<>()));
+                mergedHierarchy.addAll(hierarchyPaths.getOrDefault(vertex, new LinkedHashSet<>()));
+            }
+            for (var vertex : set.elements) {
+                sourceLocations.put(vertex, mergedLoc);
+                sourceNames.put(vertex, mergedNames);
+                hierarchyPaths.put(vertex, mergedHierarchy);
+            }
         }
 
         public void replace(Vertex u, Vertex v) {
@@ -272,6 +382,9 @@ public final class Graph {
             vertices.add(vertex);
             unionFind.add(vertex);
             equivalence.put(vertex, new EqClass(vertex));
+            sourceLocations.putIfAbsent(vertex, new LinkedHashSet<>());
+            sourceNames.putIfAbsent(vertex, new LinkedHashSet<>());
+            hierarchyPaths.putIfAbsent(vertex, new LinkedHashSet<>());
         }
 
         private boolean equivalent(Vertex u, Vertex v) {
@@ -281,6 +394,9 @@ public final class Graph {
         private void retain(Set<Vertex> retained) {
             vertices.retainAll(retained);
             equivalence.values().forEach(cls -> cls.retain(vertices));
+            sourceLocations.keySet().retainAll(vertices);
+            sourceNames.keySet().retainAll(vertices);
+            hierarchyPaths.keySet().retainAll(vertices);
         }
 
         private EqClass resolve(Vertex vertex) {
@@ -363,4 +479,3 @@ public final class Graph {
         }
     }
 }
-

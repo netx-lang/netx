@@ -38,10 +38,11 @@ public final class RetimingRule extends BidiRule {
             }
 
             var dual = graph.factory().copy(compute);
+            inheritProvenance(compute, dual);
             graph.manager().union(dual, vertex);
             for (var input : graph.inputsOf(compute)) {
                 var pushed = graph.factory().register(input.width(), reg.isPosEdge());
-                migrateMarkers(reg, pushed);
+                migrateMetadata(reg, pushed);
                 graph.addEdge(pushed, dual);
                 graph.addEdge(clock, pushed);
                 graph.addEdge(input, pushed);
@@ -50,7 +51,7 @@ public final class RetimingRule extends BidiRule {
                     mark(pushed, RETIMING_PUSH);
                 }
             }
-            migrateMarkers(compute, dual);
+            migrateMetadata(compute, dual);
             mark(compute, RETIMING_PUSH);
             mark(dual, RETIMING_PULL);
             result = true;
@@ -136,12 +137,13 @@ public final class RetimingRule extends BidiRule {
                 int width = origin.outWidth();
                 var pulled = graph.factory().register(width, isPosEdge.get());
                 var dual = graph.factory().copy(origin);
-                migrateMarkers(origin, dual);
+                inheritProvenance(origin, pulled);
+                migrateMetadata(origin, dual);
                 graph.addEdge(clock.get(), pulled);
                 graph.addEdge(dual, pulled);
                 for (var input : chosen) {
                     graph.addEdge(graph.inputsOf(input).get(1), dual);
-                    migrateMarkers(input, pulled);
+                    migrateMetadata(input, pulled);
                 }
                 graph.manager().union(pulled, origin);
                 mark(pulled, RETIMING_PUSH);

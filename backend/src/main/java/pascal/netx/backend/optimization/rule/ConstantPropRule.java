@@ -128,6 +128,7 @@ public final class ConstantPropRule extends UniRule {
             variable = inputs.iterator().next();
         } else {
             var mid = graph.factory().component(Component.Label.MUL, vertex.outWidth());
+            inheritProvenance(vertex, mid);
             inputs.forEach(cls -> graph.addEdge(cls, mid));
             variable = graph.eqClassOf(mid);
         }
@@ -140,6 +141,7 @@ public final class ConstantPropRule extends UniRule {
             graph.manager().replace(vertex, zeroConst);
         } else if (isPowerOfTwo(coef)) {
             var shiftDual = graph.factory().component(Component.Label.SHL, vertex.outWidth());
+            inheritProvenance(vertex, shiftDual);
             int shiftAmount = Long.numberOfTrailingZeros(coef);
             var shiftConst = graph.factory().constant(BitVector.fromLong(vertex.outWidth(), shiftAmount));
             graph.addEdge(variable, shiftDual);
@@ -147,6 +149,7 @@ public final class ConstantPropRule extends UniRule {
             graph.manager().union(shiftDual, vertex);
         } else if (coef < 20) {
             var repeatedDual = graph.factory().component(Component.Label.ADD, vertex.outWidth());
+            inheritProvenance(vertex, repeatedDual);
             for (int i = 0; i < coef; i++) {
                 graph.addEdge(variable, repeatedDual);
             }
@@ -154,6 +157,7 @@ public final class ConstantPropRule extends UniRule {
 
             long rem = coef;
             var shiftDual = graph.factory().component(Component.Label.ADD, vertex.outWidth());
+            inheritProvenance(vertex, shiftDual);
             while (rem > 0) {
                 var shiftAmount = Long.numberOfTrailingZeros(rem);
                 if (shiftAmount == 0) {
@@ -162,6 +166,7 @@ public final class ConstantPropRule extends UniRule {
                     continue;
                 }
                 var subShift = graph.factory().component(Component.Label.SHL, vertex.outWidth());
+                inheritProvenance(vertex, subShift);
                 var shiftConst = graph.factory().constant(BitVector.fromLong(vertex.outWidth(), shiftAmount));
                 graph.addEdge(variable, subShift);
                 graph.addEdge(shiftConst, subShift);
@@ -194,7 +199,7 @@ public final class ConstantPropRule extends UniRule {
         }
         if (found) {
             var dual = graph.factory().copy(vertex);
-            migrateMarkers(vertex, dual);
+            migrateMetadata(vertex, dual);
             newInputs.forEach(cls -> graph.addEdge(cls, dual));
             graph.manager().replace(vertex, dual);
         }
@@ -225,9 +230,11 @@ public final class ConstantPropRule extends UniRule {
             int width = vertex.outWidth();
             var input = graph.inputsOf(vertex).getFirst();
             var dual = graph.factory().component(CONCAT, width);
+            inheritProvenance(vertex, dual);
             switch (vertex.label()) {
                 case SHL -> {
                     var select = graph.factory().readSelect(new Selector(width - amount - 1, 0));
+                    inheritProvenance(vertex, select);
                     var zeros = graph.factory().constant(BitVector.fromInt(amount, 0));
                     graph.addEdge(input, select);
                     graph.addEdge(select, dual);
@@ -235,6 +242,7 @@ public final class ConstantPropRule extends UniRule {
                 }
                 case LSHR -> {
                     var select = graph.factory().readSelect(new Selector(width - 1, amount));
+                    inheritProvenance(vertex, select);
                     var zeros = graph.factory().constant(BitVector.fromInt(amount, 0));
                     graph.addEdge(input, select);
                     graph.addEdge(zeros, dual);
@@ -244,6 +252,9 @@ public final class ConstantPropRule extends UniRule {
                     var select = graph.factory().readSelect(new Selector(width - 1, amount));
                     var signSelect = graph.factory().readSelect(new Selector(width - 1, width - 1));
                     var signs = graph.factory().component(CAST, amount);
+                    inheritProvenance(vertex, select);
+                    inheritProvenance(vertex, signSelect);
+                    inheritProvenance(vertex, signs);
                     graph.addEdge(input, signSelect);
                     graph.addEdge(input, select);
                     graph.addEdge(signSelect, signs);

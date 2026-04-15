@@ -53,7 +53,7 @@ public final class ShrinkAssocRule extends UniRule {
                 for (var vertex : chosen) {
                     graph.addEdge(vertex, dual);
                 }
-                migrateMarkers(origin, dual);
+                migrateMetadata(origin, dual);
                 graph.manager().union(origin, dual);
                 mark(origin, Marker.ShrinkAssoc);
                 changed = true;

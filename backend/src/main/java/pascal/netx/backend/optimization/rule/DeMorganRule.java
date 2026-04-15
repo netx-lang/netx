@@ -56,15 +56,17 @@ public final class DeMorganRule extends BidiRule {
     }
 
     private void pushDeMorgan(Component vertex, Component origin, Component dual) {
+        inheritProvenance(vertex, dual);
         for (var in : graph.inputsOf(origin)) {
             var notIn = graph.factory().component(Component.Label.NOT, in.width());
+            inheritProvenance(vertex, notIn);
             graph.addEdge(in, notIn);
             graph.addEdge(notIn, dual);
         }
         graph.manager().union(vertex, dual);
         mark(vertex, DE_MORGAN_PUSH);
         mark(dual, DE_MORGAN_PULL);
-        migrateMarkers(vertex, dual);
+        migrateMetadata(vertex, dual);
     }
 
     @Override
@@ -112,12 +114,13 @@ public final class DeMorganRule extends BidiRule {
         private void pull(int index) {
             if (index == candidates.size()) {
                 var dual = graph.factory().component(dualLabel, origin.outWidth());
+                inheritProvenance(origin, dual);
                 for (var input : chosen) {
                     graph.addEdge(graph.inputsOf(input).getFirst(), dual);
                 }
                 graph.manager().union(origin, dual);
                 mark(dual, DE_MORGAN_PUSH);
-                migrateMarkers(origin, dual);
+                migrateMetadata(origin, dual);
             } else {
                 for (var candidate : candidates.get(index)) {
                     chosen.add(candidate);

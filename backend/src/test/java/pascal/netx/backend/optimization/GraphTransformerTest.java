@@ -8,8 +8,9 @@ import pascal.netx.util.print.NotepadWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.*;
 
 class GraphTransformerTest {
     private static final Path TEST_DIR = Path.of("src/test/resources/");
@@ -80,5 +81,69 @@ class GraphTransformerTest {
         System.out.printf("   After optimization: %s\n", transformer.measure());
         System.out.println("Time Elapsed: " + time + " ms");
         System.out.println();
+    }
+
+    @Test
+    void testDumpNxonPreservesLocations() throws IOException {
+        var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve("benchmark/adder.json")));
+        var transformer = new GraphTransformer(NotepadWriter.strOut(), json);
+        transformer.parse();
+        transformer.rewrite();
+        transformer.saturate(1, 1);
+
+        var dumped = transformer.dumpNxon();
+        assertFalse(dumped.get("design").get("loc").textValue().isBlank());
+        var members = dumped.get("design").get("members");
+        boolean hasLocatedBuiltin = false;
+        boolean hasNamedBuiltinOutput = false;
+        for (var member : members) {
+            if (Objects.equals(member.get("type").textValue(), "builtin")
+                    && !member.get("loc").textValue().isBlank()) {
+                hasLocatedBuiltin = true;
+            }
+            if (Objects.equals(member.get("type").textValue(), "builtin")) {
+                var output = member.get("output").get(0).textValue();
+                if (!output.startsWith("$o@")) {
+                    hasNamedBuiltinOutput = true;
+                }
+            }
+        }
+        assertTrue(hasLocatedBuiltin);
+        assertTrue(hasNamedBuiltinOutput);
+    }
+
+    @Test
+    void testDumpNxonPreservesHierarchyMetadata() throws IOException {
+        var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve("benchmark/ADPCM.json")));
+        var transformer = new GraphTransformer(NotepadWriter.strOut(), json);
+        transformer.parse();
+        transformer.rewrite();
+        transformer.saturate(1, 1);
+
+        var dumped = transformer.dumpNxon();
+        var members = dumped.get("design").get("members");
+        boolean hasHierarchicalWire = false;
+        boolean hasHierarchicalBuiltin = false;
+        for (var member : members) {
+            if (!member.has("attribute")) {
+                continue;
+            }
+            var attribute = member.get("attribute");
+            if (!attribute.has("hierarchy_paths")) {
+                continue;
+            }
+            for (var path : attribute.get("hierarchy_paths")) {
+                if (path.textValue().contains("/")) {
+                    if (Objects.equals(member.get("type").textValue(), "wire")) {
+                        hasHierarchicalWire = true;
+                    }
+                    if (Objects.equals(member.get("type").textValue(), "builtin")) {
+                        hasHierarchicalBuiltin = true;
+                    }
+                }
+            }
+        }
+        assertTrue(hasHierarchicalWire);
+        assertTrue(hasHierarchicalBuiltin);
     }
 }

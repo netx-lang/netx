@@ -51,7 +51,7 @@ public final class AbsorptionRule extends UniRule {
         }
 
         var dual = graph.factory().copy(parent);
-        migrateMarkers(parent, dual);
+        migrateMetadata(parent, dual);
         retained.forEach(cls -> graph.addEdge(cls, dual));
         graph.manager().replace(parent, dual);
         return true;

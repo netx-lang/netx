@@ -29,6 +29,27 @@ public abstract class GraphRule implements Rule {
         tom.or(frm);
     }
 
+    protected void migrateMetadata(Vertex from, Vertex to) {
+        migrateMarkers(from, to);
+        graph.inheritLocations(from, to);
+        graph.inheritNames(from, to);
+        graph.inheritHierarchyPaths(from, to);
+    }
+
+    protected void inheritLocation(Vertex from, Vertex to) {
+        graph.inheritLocations(from, to);
+    }
+
+    protected void inheritName(Vertex from, Vertex to) {
+        graph.inheritNames(from, to);
+    }
+
+    protected void inheritProvenance(Vertex from, Vertex to) {
+        inheritLocation(from, to);
+        inheritName(from, to);
+        graph.inheritHierarchyPaths(from, to);
+    }
+
     public enum Marker {
         DE_MORGAN_PUSH,
         DE_MORGAN_PULL,
@@ -47,4 +68,3 @@ public abstract class GraphRule implements Rule {
         }
     }
 }
-
