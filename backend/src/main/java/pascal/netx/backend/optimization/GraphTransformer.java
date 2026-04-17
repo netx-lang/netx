@@ -55,9 +55,12 @@ public final class GraphTransformer extends AbstractNxonTransformer {
 
     private void indexHierarchy(JsonNode node, String currentPath) {
         var nextPath = currentPath;
-        if (node != null && node.has("type") && "component".equals(node.get("type").textValue())) {
-            var id = node.has("id") ? node.get("id").textValue() : "";
-            nextPath = currentPath.isBlank() ? id : currentPath + "/" + id;
+        if (node != null && node.has("type")) {
+            var type = node.get("type").textValue();
+            if ("component".equals(type) || "builtin".equals(type)) {
+                var id = node.has("id") ? node.get("id").textValue() : "";
+                nextPath = currentPath.isBlank() ? id : currentPath + "/" + id;
+            }
         }
         hierarchyPaths.put(node, nextPath);
         if (node != null && node.has("members")) {
@@ -319,17 +322,12 @@ public final class GraphTransformer extends AbstractNxonTransformer {
         void dump(Vertex vertex) {
             switch (vertex) {
                 case Wire wire -> {
-                    var name = graph.preferredNameOf(wire);
-                    if (name.isBlank()) {
-                        name = wire.name().substring(0, wire.name().indexOf('@'));
-                    }
+                    var name = hierarchicalNameOf(wire, wire.name().substring(0, wire.name().indexOf('@')));
                     var def = new WireDef(
                             name,
                             indexer.get(),
                             wire.outWidth(),
-                            graph.locationOf(wire),
-                            graph.provenanceNamesOf(wire),
-                            graph.hierarchyPathsOf(wire));
+                            graph.locationOf(wire));
                     definitions.add(def);
                     references.put(wire, def.asReference());
                 }
@@ -364,19 +362,13 @@ public final class GraphTransformer extends AbstractNxonTransformer {
                     node.put("type", "builtin");
                     node.put("id", component.name());
                     node.put("loc", graph.locationOf(component));
-                    putProvenance(node, component);
 
-                    var name = graph.preferredNameOf(component);
-                    if (name.isBlank()) {
-                        name = "$o";
-                    }
+                    var name = hierarchicalNameOf(component, "$o");
                     var def = new WireDef(
                             name,
                             indexer.get(),
                             component.outWidth(),
-                            graph.locationOf(component),
-                            graph.provenanceNamesOf(component),
-                            graph.hierarchyPathsOf(component));
+                            graph.locationOf(component));
                     var ref = def.asReference();
                     outputs.add(ref);
                     definitions.add(def);
@@ -395,7 +387,9 @@ public final class GraphTransformer extends AbstractNxonTransformer {
                     node.set("output", outputs);
 
                     if (component instanceof Register reg) {
-                        var attribute = MAPPER.createObjectNode();
+                        var attribute = node.has("attribute") && node.get("attribute").isObject()
+                                ? (com.fasterxml.jackson.databind.node.ObjectNode) node.get("attribute")
+                                : MAPPER.createObjectNode();
                         if (reg.isPosEdge()) {
                             attribute.put("pos_edge", "true");
                         } else {
@@ -407,6 +401,22 @@ public final class GraphTransformer extends AbstractNxonTransformer {
                     components.add(node);
                 }
             }
+        }
+
+        private String hierarchicalNameOf(Vertex vertex, String fallbackName) {
+            var name = graph.preferredNameOf(vertex);
+            if (name.isBlank()) {
+                name = fallbackName;
+            }
+
+            var hierarchy = graph.hierarchyPathsOf(vertex).stream().findFirst().orElse("");
+            if (hierarchy.isBlank()) {
+                return name;
+            }
+            if (name.isBlank() || hierarchy.equals(name) || hierarchy.endsWith("/" + name)) {
+                return hierarchy;
+            }
+            return hierarchy + "/" + name;
         }
 
         void canonicalize() {
@@ -480,31 +490,10 @@ public final class GraphTransformer extends AbstractNxonTransformer {
             }
         }
 
-        private void putProvenance(com.fasterxml.jackson.databind.node.ObjectNode node, Vertex vertex) {
-            var attribute = node.has("attribute") && node.get("attribute").isObject()
-                    ? (com.fasterxml.jackson.databind.node.ObjectNode) node.get("attribute")
-                    : MAPPER.createObjectNode();
-            putArrayAttribute(attribute, "origin_names", graph.provenanceNamesOf(vertex));
-            putArrayAttribute(attribute, "hierarchy_paths", graph.hierarchyPathsOf(vertex));
-            node.set("attribute", attribute);
-        }
-
-        private void putArrayAttribute(com.fasterxml.jackson.databind.node.ObjectNode attribute,
-                                       String key,
-                                       Set<String> values) {
-            var array = MAPPER.createArrayNode();
-            for (var value : values) {
-                array.add(value);
-            }
-            attribute.set(key, array);
-        }
-
         private record WireDef(String name,
                                int index,
                                int width,
-                               String loc,
-                               Set<String> originNames,
-                               Set<String> hierarchyPaths) {
+                               String loc) {
             String asReference() {
                 return name + "@" + index;
             }
@@ -515,18 +504,6 @@ public final class GraphTransformer extends AbstractNxonTransformer {
                 node.put("id", asReference());
                 node.put("width", width);
                 node.put("loc", loc);
-                var attribute = MAPPER.createObjectNode();
-                var originNamesArray = MAPPER.createArrayNode();
-                for (var originName : originNames) {
-                    originNamesArray.add(originName);
-                }
-                attribute.set("origin_names", originNamesArray);
-                var hierarchyArray = MAPPER.createArrayNode();
-                for (var hierarchyPath : hierarchyPaths) {
-                    hierarchyArray.add(hierarchyPath);
-                }
-                attribute.set("hierarchy_paths", hierarchyArray);
-                node.set("attribute", attribute);
                 return node;
             }
         }

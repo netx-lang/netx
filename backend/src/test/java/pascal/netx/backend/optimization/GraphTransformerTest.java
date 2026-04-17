@@ -125,21 +125,20 @@ class GraphTransformerTest {
         boolean hasHierarchicalWire = false;
         boolean hasHierarchicalBuiltin = false;
         for (var member : members) {
-            if (!member.has("attribute")) {
-                continue;
+            if (Objects.equals(member.get("type").textValue(), "wire")
+                    && member.get("id").textValue().contains("/")) {
+                hasHierarchicalWire = true;
+                assertFalse(member.has("attribute"));
+                assertTrue(member.get("id").textValue().contains("/$o@")
+                        || member.get("id").textValue().matches(".*\\/[A-Za-z0-9_$\\[\\]]+@\\d+"));
             }
-            var attribute = member.get("attribute");
-            if (!attribute.has("hierarchy_paths")) {
-                continue;
-            }
-            for (var path : attribute.get("hierarchy_paths")) {
-                if (path.textValue().contains("/")) {
-                    if (Objects.equals(member.get("type").textValue(), "wire")) {
-                        hasHierarchicalWire = true;
-                    }
-                    if (Objects.equals(member.get("type").textValue(), "builtin")) {
-                        hasHierarchicalBuiltin = true;
-                    }
+            if (Objects.equals(member.get("type").textValue(), "builtin")
+                    && member.get("output").get(0).textValue().contains("/")) {
+                hasHierarchicalBuiltin = true;
+                assertFalse(member.has("name"));
+                if (member.has("attribute")) {
+                    assertFalse(member.get("attribute").has("hierarchy_paths"));
+                    assertFalse(member.get("attribute").has("origin_names"));
                 }
             }
         }
