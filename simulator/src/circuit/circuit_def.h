@@ -85,6 +85,10 @@ namespace nxon {
                 return content.size();
             }
 
+            void reserve(const size_type n) {
+                content.reserve(n);
+            }
+
             void clear() {
                 content.clear();
             }
@@ -106,6 +110,12 @@ namespace nxon {
                 const auto old_size = content.size();
                 std::erase(content, id);
                 return old_size - content.size();
+            }
+
+            void dedup() {
+                std::ranges::sort(content);
+                const auto [first, last] = std::ranges::unique(content);
+                content.erase(first, last);
             }
 
             auto &operator+=(const self_t &other) {
@@ -131,8 +141,78 @@ namespace nxon {
             std::vector<mapped_type> content;
 
         public:
+            class iterator {
+                friend class id_based_map;
+
+                id_based_map *owner = nullptr;
+                size_type index = 0;
+
+                iterator(id_based_map *owner, const size_type index) : owner(owner), index(index) {
+                }
+
+            public:
+                using value_type = std::pair<key_type, mapped_type &>;
+                using difference_type = std::ptrdiff_t;
+
+                iterator() = default;
+
+                value_type operator*() const {
+                    return {static_cast<key_type>(index), owner->content[index]};
+                }
+
+                iterator &operator++() {
+                    ++index;
+                    return *this;
+                }
+
+                bool operator==(const iterator &other) const = default;
+            };
+
+            class const_iterator {
+                friend class id_based_map;
+
+                const id_based_map *owner = nullptr;
+                size_type index = 0;
+
+                const_iterator(const id_based_map *owner, const size_type index) : owner(owner), index(index) {
+                }
+
+            public:
+                using value_type = std::pair<key_type, const mapped_type &>;
+                using difference_type = std::ptrdiff_t;
+
+                const_iterator() = default;
+
+                value_type operator*() const {
+                    return {static_cast<key_type>(index), owner->content[index]};
+                }
+
+                const_iterator &operator++() {
+                    ++index;
+                    return *this;
+                }
+
+                bool operator==(const const_iterator &other) const = default;
+            };
+
             [[nodiscard]] size_type size() const {
                 return content.size();
+            }
+
+            [[nodiscard]] iterator begin() {
+                return iterator(this, 0);
+            }
+
+            [[nodiscard]] iterator end() {
+                return iterator(this, content.size());
+            }
+
+            [[nodiscard]] const_iterator begin() const {
+                return const_iterator(this, 0);
+            }
+
+            [[nodiscard]] const_iterator end() const {
+                return const_iterator(this, content.size());
             }
 
             void prepare(const key_type max_id) {
@@ -158,6 +238,14 @@ namespace nxon {
 
             [[nodiscard]] bool contains(const key_type id) const {
                 return id < content.size();
+            }
+
+            [[nodiscard]] iterator find(const key_type id) {
+                return contains(id) ? iterator(this, id) : end();
+            }
+
+            [[nodiscard]] const_iterator find(const key_type id) const {
+                return contains(id) ? const_iterator(this, id) : end();
             }
         };
     }
@@ -215,6 +303,47 @@ namespace nxon {
                 }
             }
             delayed.clear();
+        }
+    };
+
+    struct sparse_value_batch {
+        id_set ids;
+        value_storage values;
+        impl::id_based_map<uint8_t> present;
+
+        [[nodiscard]] bool empty() const {
+            return ids.empty();
+        }
+
+        void clear() {
+            for (const auto id: ids) present[id] = 0;
+            ids.clear();
+        }
+
+        void reserve(const size_t n) {
+            ids.reserve(n);
+        }
+
+        void swap(sparse_value_batch &other) noexcept {
+            std::swap(ids, other.ids);
+            std::swap(values, other.values);
+            std::swap(present, other.present);
+        }
+
+        void insert_or_assign(const id_t id, const value_t &value) {
+            if (!present.contains(id) || present[id] == 0) {
+                present[id] = 1;
+                ids.insert(id);
+            }
+            values[id] = value;
+        }
+
+        void emplace(const id_t id, const value_t &value) {
+            insert_or_assign(id, value);
+        }
+
+        [[nodiscard]] const value_t &at(const id_t id) const {
+            return values.at(id);
         }
     };
 }

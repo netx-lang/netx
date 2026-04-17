@@ -15,6 +15,8 @@
 #include <compare>
 #include <variant>
 #include <vector>
+#include <optional>
+#include <unordered_set>
 
 namespace nxon {
     namespace impl {
@@ -668,6 +670,11 @@ namespace nxon {
             return fast_perform_fn(payload, values);
         }
 
+        [[nodiscard]] bool is_sequential() const {
+            return std::holds_alternative<const impl::register_rule_data *>(payload) ||
+                   std::holds_alternative<const impl::async_register_rule_data *>(payload);
+        }
+
         auto operator<=>(const rule_t& other) const {
             return order_key <=> other.order_key;
         }
@@ -735,8 +742,26 @@ namespace nxon {
 #endif
 
     class rule_set {
+        struct static_schedule {
+            std::vector<std::vector<size_t> > combinational_levels;
+            std::vector<size_t> sequential_rules;
+            std::vector<int> rule_level;
+            std::vector<std::vector<size_t> > combinational_successors;
+            impl::id_based_map<std::vector<size_t> > combinational_triggers;
+            impl::id_based_map<std::vector<size_t> > sequential_triggers;
+        };
+
+        struct static_workspace {
+            std::vector<std::vector<size_t> > pending;
+            std::vector<uint32_t> scheduled_epoch;
+            std::vector<id_t> changed_ids;
+            uint32_t epoch = 1;
+        };
+
         std::vector<rule_t> all_rules;
         rule_index_storage trigger_rules;
+        mutable std::optional<static_schedule> cached_static_schedule;
+        mutable static_workspace static_ws;
 
         template<bool TrackChanged>
         static void record_changes(std::vector<id_t> &to_consider_swap, std::vector<id_t> &changed, const id_set &ids) {
@@ -806,24 +831,108 @@ namespace nxon {
             return rule_indices;
         }
 
+        [[nodiscard]] const static_schedule &get_static_schedule() const {
+            if (cached_static_schedule.has_value()) return *cached_static_schedule;
+
+            static_schedule schedule;
+            std::unordered_map<id_t, std::vector<size_t> > producers;
+            std::vector<size_t> indegree(all_rules.size(), 0);
+            std::vector<std::vector<size_t> > edges(all_rules.size());
+            std::vector<uint8_t> is_combinational(all_rules.size(), 0);
+            schedule.rule_level.assign(all_rules.size(), -1);
+            schedule.combinational_successors.resize(all_rules.size());
+
+            for (size_t idx = 0; idx < all_rules.size(); ++idx) {
+                if (all_rules[idx].is_sequential()) {
+                    schedule.sequential_rules.emplace_back(idx);
+                    for (const auto trigger: all_rules[idx].triggers()) {
+                        schedule.sequential_triggers[trigger].emplace_back(idx);
+                    }
+                    continue;
+                }
+                is_combinational[idx] = 1;
+                for (const auto trigger: all_rules[idx].triggers()) {
+                    schedule.combinational_triggers[trigger].emplace_back(idx);
+                }
+                for (const auto out: all_rules[idx].outcomes()) producers[out].emplace_back(idx);
+            }
+
+            for (size_t idx = 0; idx < all_rules.size(); ++idx) {
+                if (!is_combinational[idx]) continue;
+                std::unordered_set<size_t> deps;
+                for (const auto dep: all_rules[idx].dependencies()) {
+                    if (const auto iter = producers.find(dep); iter != producers.end()) {
+                        deps.insert(iter->second.begin(), iter->second.end());
+                    }
+                }
+                deps.erase(idx);
+                indegree[idx] = deps.size();
+                for (const auto dep_rule: deps) edges[dep_rule].emplace_back(idx);
+            }
+
+            std::vector<size_t> current;
+            for (size_t idx = 0; idx < all_rules.size(); ++idx)
+                if (is_combinational[idx] && indegree[idx] == 0)
+                    current.emplace_back(idx);
+            while (!current.empty()) {
+                schedule.combinational_levels.emplace_back(current);
+                const auto level = static_cast<int>(schedule.combinational_levels.size() - 1);
+                for (const auto rule_idx: current) schedule.rule_level[rule_idx] = level;
+                std::vector<size_t> next;
+                for (const auto rule_idx: current) {
+                    for (const auto to: edges[rule_idx]) {
+                        if (--indegree[to] == 0) next.emplace_back(to);
+                    }
+                }
+                current.swap(next);
+            }
+
+            for (size_t idx = 0; idx < all_rules.size(); ++idx) {
+                if (!is_combinational[idx]) continue;
+                std::unordered_set<size_t> successors;
+                for (const auto out: all_rules[idx].outcomes()) {
+                    if (!trigger_rules.contains(out)) continue;
+                    for (const auto next_rule: trigger_rules[out]) {
+                        if (!is_combinational[next_rule]) continue;
+                        if (next_rule == idx) continue;
+                        successors.insert(next_rule);
+                    }
+                }
+                auto &out = schedule.combinational_successors[idx];
+                out.insert(out.end(), successors.begin(), successors.end());
+            }
+
+            cached_static_schedule = std::move(schedule);
+            return *cached_static_schedule;
+        }
+
         template<bool TrackChanged>
-        id_set perform_rules(value_storage &values, const std::vector<size_t> &to_perform,
-                                    const bool to_fixed = true) const {
+        id_set perform_rules_impl(value_storage &values, const std::vector<size_t> &to_perform,
+                                  const bool to_fixed = true) const {
             std::vector<id_t> changed;
             std::vector<id_t> to_consider, to_consider_swap;
+            changed.reserve(to_perform.size());
+            to_consider.reserve(to_perform.size());
+            to_consider_swap.reserve(to_perform.size());
             bool first_pass = true;
             do {
-                for (const id_t id: to_consider) {
-                    if (!trigger_rules.contains(id)) continue;
-                    for (const auto &rules = trigger_rules[id]; const auto rule_idx: rules)
-                        perform_rule<TrackChanged>(all_rules[rule_idx], values, to_consider_swap, changed);
+                std::vector<size_t> current_rules;
+                if (first_pass) {
+                    current_rules = to_perform;
+                    first_pass = false;
+                } else {
+                    current_rules.reserve(to_consider.size());
+                    for (const id_t id: to_consider) collect_rules(current_rules, id);
+                }
+                if (to_consider_swap.capacity() < current_rules.size()) to_consider_swap.reserve(current_rules.size());
+                if constexpr (TrackChanged) {
+                    if (changed.capacity() < changed.size() + current_rules.size())
+                        changed.reserve(changed.size() + current_rules.size());
                 }
 
-                if (first_pass) {
-                    for (const auto rule_idx: to_perform)
-                        perform_rule<TrackChanged>(all_rules[rule_idx], values, to_consider_swap, changed);
-                    first_pass = false;
-                }
+                for (const auto rule_idx: current_rules)
+                    perform_rule<TrackChanged>(all_rules[rule_idx], values, to_consider_swap, changed);
+
                 values.perform_delayed();
 
                 to_consider.clear();
@@ -846,20 +955,82 @@ namespace nxon {
         }
 
         id_set update(value_storage &values, const id_set &hint, const bool to_fixed = true) const {
-            return perform_rules<true>(values, collect_triggered_rules(hint), to_fixed);
+            return perform_rules_impl<true>(values, collect_triggered_rules(hint), to_fixed);
         }
 
-        void update_discard(value_storage &values, const id_set &hint, const bool to_fixed = true) const {
-            static_cast<void>(perform_rules<false>(values, collect_triggered_rules(hint), to_fixed));
+        void update_discard(value_storage &values, const id_set &hint) const {
+            const auto &schedule = get_static_schedule();
+
+            auto &changed_ids = static_ws.changed_ids;
+            changed_ids.clear();
+            changed_ids.reserve(hint.size() * 2);
+            for (const auto id: hint) {
+                if (!schedule.sequential_triggers.contains(id)) continue;
+                for (const auto rule_idx: schedule.sequential_triggers[id]) {
+                    if (all_rules[rule_idx].is_fast()) {
+                        if (all_rules[rule_idx].perform_fast(values)) {
+                            changed_ids.emplace_back(all_rules[rule_idx].fast_outcome());
+                        }
+                    } else {
+                        const auto changed = all_rules[rule_idx].perform(values);
+                        impl::append_range_compat(changed_ids, changed);
+                    }
+                }
+            }
+            values.perform_delayed();
+
+            auto &pending = static_ws.pending;
+            if (pending.size() != schedule.combinational_levels.size()) pending.resize(schedule.combinational_levels.size());
+            for (auto &bucket: pending) bucket.clear();
+            auto &scheduled_epoch = static_ws.scheduled_epoch;
+            if (scheduled_epoch.size() != all_rules.size()) scheduled_epoch.resize(all_rules.size(), 0);
+            if (++static_ws.epoch == 0) {
+                std::ranges::fill(scheduled_epoch, 0);
+                static_ws.epoch = 1;
+            }
+            const auto epoch = static_ws.epoch;
+            const auto enqueue_rule = [&](const size_t rule_idx) {
+                const auto level = schedule.rule_level[rule_idx];
+                if (scheduled_epoch[rule_idx] == epoch) return;
+                scheduled_epoch[rule_idx] = epoch;
+                pending[static_cast<size_t>(level)].emplace_back(rule_idx);
+            };
+            const auto enqueue_triggers = [&](const id_t id) {
+                if (!schedule.combinational_triggers.contains(id)) return;
+                for (const auto rule_idx: schedule.combinational_triggers[id]) {
+                    enqueue_rule(rule_idx);
+                }
+            };
+            for (const auto id: hint) {
+                enqueue_triggers(id);
+            }
+            for (const auto id: changed_ids) {
+                enqueue_triggers(id);
+            }
+
+            for (auto & bucket : pending) {
+                for (const auto rule_idx: bucket) {
+                    bool changed = false;
+                    if (all_rules[rule_idx].is_fast()) {
+                        changed = all_rules[rule_idx].perform_fast(values);
+                    } else {
+                        changed = !all_rules[rule_idx].perform(values).empty();
+                    }
+                    if (!changed) continue;
+                    for (const auto next_rule: schedule.combinational_successors[rule_idx]) {
+                        enqueue_rule(next_rule);
+                    }
+                }
+            }
         }
 
         id_set run_all(value_storage &values, const bool to_fixed = true) const {
-            return perform_rules<true>(values,
+            return perform_rules_impl<true>(values,
                 std::views::iota(size_t{0}, all_rules.size()) | std::ranges::to<std::vector>(), to_fixed);
         }
 
         void run_all_discard(value_storage &values, const bool to_fixed = true) const {
-            static_cast<void>(perform_rules<false>(values,
+            static_cast<void>(perform_rules_impl<false>(values,
                 std::views::iota(size_t{0}, all_rules.size()) | std::ranges::to<std::vector>(), to_fixed));
         }
 
