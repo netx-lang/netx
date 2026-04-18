@@ -19,7 +19,7 @@ class GraphTransformerTest {
     @Test
     void sampleTest() throws IOException {
         var json = MAPPER.readTree(Files.readString(TEST_DIR.resolve("benchmark/rv32i.json")));
-        var transformer = new GraphTransformer(NotepadWriter.pathOut(Path.of("/home/nairen/tmp/test.dot")), json);
+        var transformer = new GraphTransformer(NotepadWriter.strOut(), json);
         transformer.parse();
         System.out.printf("Before optimization: %s\n", transformer.measure());
 
@@ -130,7 +130,7 @@ class GraphTransformerTest {
                 hasHierarchicalWire = true;
                 assertFalse(member.has("attribute"));
                 assertTrue(member.get("id").textValue().contains("/$o@")
-                        || member.get("id").textValue().matches(".*\\/[A-Za-z0-9_$\\[\\]]+@\\d+"));
+                        || member.get("id").textValue().matches(".*/[A-Za-z0-9_$\\[\\]]+@\\d+"));
             }
             if (Objects.equals(member.get("type").textValue(), "builtin")
                     && member.get("output").get(0).textValue().contains("/")) {
