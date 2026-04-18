@@ -662,5 +662,125 @@ namespace nxon {
         context.circuit.put_batch(initial_values);
         context.circuit.run_all_discard();
     }
+
+    namespace native_parse {
+        struct io_view {
+            const parse_context &ctx;
+            const nlohmann::json &input;
+            const nlohmann::json &output;
+            const nlohmann::json *attribute = nullptr;
+
+            [[nodiscard]] const std::string &in(const size_t index) const {
+                return input.at(index).get_ref<const std::string &>();
+            }
+
+            [[nodiscard]] const std::string &out(const size_t index) const {
+                return output.at(index).get_ref<const std::string &>();
+            }
+
+            [[nodiscard]] source_t source_in(const size_t index) const {
+                return parse_source(in(index), ctx);
+            }
+
+            [[nodiscard]] sink_t sink_out(const size_t index) const {
+                return parse_sink(out(index), ctx);
+            }
+
+            [[nodiscard]] clock_t pos_clock_in(const size_t index) const {
+                return parse_clock(in(index), true);
+            }
+
+            [[nodiscard]] clock_t neg_clock_in(const size_t index) const {
+                return parse_clock(in(index), false);
+            }
+
+            [[nodiscard]] clock_t attr_clock_in(const size_t index) const {
+                if (attribute == nullptr) throw std::invalid_argument("Missing attribute for clock parsing");
+                return parse_clock(in(index), *attribute);
+            }
+        };
+
+        inline io_view io(const parse_context &ctx, const nlohmann::json &json) {
+            return io_view{
+                .ctx = ctx,
+                .input = json.at("input"),
+                .output = json.at("output"),
+                .attribute = json.contains("attribute") ? &json.at("attribute") : nullptr
+            };
+        }
+
+        template<size_t Index>
+        struct pos_clock_in_t {
+            [[nodiscard]] clock_t operator()(const io_view &view) const {
+                return view.pos_clock_in(Index);
+            }
+        };
+
+        template<size_t Index>
+        struct neg_clock_in_t {
+            [[nodiscard]] clock_t operator()(const io_view &view) const {
+                return view.neg_clock_in(Index);
+            }
+        };
+
+        template<size_t Index>
+        struct attr_clock_in_t {
+            [[nodiscard]] clock_t operator()(const io_view &view) const {
+                return view.attr_clock_in(Index);
+            }
+        };
+
+        template<size_t Index>
+        struct source_in_t {
+            [[nodiscard]] source_t operator()(const io_view &view) const {
+                return view.source_in(Index);
+            }
+        };
+
+        template<size_t Index>
+        struct sink_out_t {
+            [[nodiscard]] sink_t operator()(const io_view &view) const {
+                return view.sink_out(Index);
+            }
+        };
+
+        template<size_t Index>
+        inline constexpr pos_clock_in_t<Index> pos_clock_in{};
+
+        template<size_t Index>
+        inline constexpr neg_clock_in_t<Index> neg_clock_in{};
+
+        template<size_t Index>
+        inline constexpr attr_clock_in_t<Index> attr_clock_in{};
+
+        template<size_t Index>
+        inline constexpr source_in_t<Index> source_in{};
+
+        template<size_t Index>
+        inline constexpr sink_out_t<Index> sink_out{};
+
+        template<typename Rule, typename... Specs>
+        [[nodiscard]] rule_t make_rule(const parse_context &ctx, const nlohmann::json &json, Specs... specs) {
+            const auto view = io(ctx, json);
+            return rule_t{new Rule(specs(view)...)};
+        }
+    }
+
+    using native_parse::make_rule;
+
+    template<size_t Index>
+    inline constexpr auto pos_clock_in = native_parse::pos_clock_in<Index>;
+
+    template<size_t Index>
+    inline constexpr auto neg_clock_in = native_parse::neg_clock_in<Index>;
+
+    template<size_t Index>
+    inline constexpr auto attr_clock_in = native_parse::attr_clock_in<Index>;
+
+    template<size_t Index>
+    inline constexpr auto source_in = native_parse::source_in<Index>;
+
+    template<size_t Index>
+    inline constexpr auto sink_out = native_parse::sink_out<Index>;
 }
 #endif //PARSER_H

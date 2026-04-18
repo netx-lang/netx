@@ -20,6 +20,11 @@
 
 namespace nxon {
     namespace impl {
+        enum class rule_phase : uint8_t {
+            combinational,
+            sequential
+        };
+
         struct rule_impl {
             const id_set triggers;
             const id_set dependencies;
@@ -37,6 +42,10 @@ namespace nxon {
             virtual ~rule_impl() = default;
 
             virtual id_set perform(value_storage &values) const = 0;
+
+            [[nodiscard]] virtual rule_phase phase() const {
+                return rule_phase::combinational;
+            }
         };
 
         struct clock_impl {
@@ -671,8 +680,14 @@ namespace nxon {
         }
 
         [[nodiscard]] bool is_sequential() const {
-            return std::holds_alternative<const impl::register_rule_data *>(payload) ||
-                   std::holds_alternative<const impl::async_register_rule_data *>(payload);
+            if (std::holds_alternative<const impl::register_rule_data *>(payload) ||
+                std::holds_alternative<const impl::async_register_rule_data *>(payload)) {
+                return true;
+            }
+            if (impl_ptr != nullptr) {
+                return impl_ptr->phase() == impl::rule_phase::sequential;
+            }
+            return false;
         }
 
         auto operator<=>(const rule_t& other) const {
