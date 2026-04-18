@@ -1,0 +1,6 @@
+component FMA : [a, b, c] -> [y] {
+  wire a, b, c, y of bit(16);
+  y <> ADD <> [
+    MUL <> [a, b], c
+  ];
+}

@@ -91,6 +91,14 @@ public class UnionFind<E> {
         return componentSize;
     }
 
+    public void replace(E u, E v) {
+        for (var entry : parent.entrySet()) {
+            if (entry.getValue().equals(u)) {
+                entry.setValue(v);
+            }
+        }
+    }
+
     public Collection<E> representatives() {
         Set<E> result = new HashSet<>();
         for (var u : elements()) {

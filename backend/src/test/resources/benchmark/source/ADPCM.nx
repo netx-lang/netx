@@ -1,0 +1,25 @@
+// compute vpdiff = (delta + 0.5) * step / 4
+component ADPCM : [step, delta] -> [vpdiff] {
+  wire step   of bit(16);
+  wire delta  of bit(3);
+  wire vpdiff of bit(16);
+    
+  vpdiff <> ADD <> [
+    LSHR <> [step, 3],
+    MUX  <> [delta[2], step,              16'd0],
+    MUX  <> [delta[1], LSHR <> [step, 1], 16'd0],
+    MUX  <> [delta[0], LSHR <> [step, 2], 16'd0]
+  ];
+}
+
+component MUX : [sel, a, b] -> [out] {
+  wire a, b, out of bit(16);
+  wire sel       of bit(1);
+
+  for i in [0..16] {
+    out[i] <> OR <> [
+      AND <> [a[i], sel],
+      AND <> [b[i], NOT <> sel]
+    ];
+  }
+}

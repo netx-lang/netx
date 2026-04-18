@@ -6,3 +6,7 @@ plugins {
 dependencies {
     implementation(project(":util"))
 }
+
+tasks.test {
+    maxHeapSize = "8G"
+}

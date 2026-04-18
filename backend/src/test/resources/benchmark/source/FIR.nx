@@ -1,0 +1,13 @@
+component FIR(S) : [A, X] -> [y] {
+  wire A[8], X[8], y of bit(16);
+
+  let tap(n) = 
+    ADD <> [
+      MUL <> [A[n], X[n]],
+      if n == 0 
+      then CAST <> (1 << (S - 1))
+      else SHL <> [tap(n - 1), S]
+    ];
+
+  y <> tap(7);
+}

@@ -1,0 +1,2868 @@
+{
+  "total": 427,
+  "top_input": ["n_102GAT_31", "n_105GAT_32", "n_108GAT_33", "n_112GAT_34", "n_115GAT_35", "n_11GAT_3", "n_14GAT_4", "n_17GAT_5", "n_1GAT_0", "n_21GAT_6", "n_24GAT_7", "n_27GAT_8", "n_30GAT_9", "n_34GAT_10", "n_37GAT_11", "n_40GAT_12", "n_43GAT_13", "n_47GAT_14", "n_4GAT_1", "n_50GAT_15", "n_53GAT_16", "n_56GAT_17", "n_60GAT_18", "n_63GAT_19", "n_66GAT_20", "n_69GAT_21", "n_73GAT_22", "n_76GAT_23", "n_79GAT_24", "n_82GAT_25", "n_86GAT_26", "n_89GAT_27", "n_8GAT_2", "n_92GAT_28", "n_95GAT_29", "n_99GAT_30"],
+  "top_output": ["n_223GAT_84", "n_329GAT_133", "n_370GAT_163", "n_421GAT_188", "n_430GAT_193", "n_431GAT_194", "n_432GAT_195"],
+  "design": {
+    "type": "component",
+    "id": "C432_iscas",
+    "loc": "C432_orig.nx:1:10",
+    "input": ["n_102GAT_31@0", "n_105GAT_32@1", "n_108GAT_33@2", "n_112GAT_34@3", "n_115GAT_35@4", "n_11GAT_3@5", "n_14GAT_4@6", "n_17GAT_5@7", "n_1GAT_0@8", "n_21GAT_6@9", "n_24GAT_7@10", "n_27GAT_8@11", "n_30GAT_9@12", "n_34GAT_10@13", "n_37GAT_11@14", "n_40GAT_12@15", "n_43GAT_13@16", "n_47GAT_14@17", "n_4GAT_1@18", "n_50GAT_15@19", "n_53GAT_16@20", "n_56GAT_17@21", "n_60GAT_18@22", "n_63GAT_19@23", "n_66GAT_20@24", "n_69GAT_21@25", "n_73GAT_22@26", "n_76GAT_23@27", "n_79GAT_24@28", "n_82GAT_25@29", "n_86GAT_26@30", "n_89GAT_27@31", "n_8GAT_2@32", "n_92GAT_28@33", "n_95GAT_29@34", "n_99GAT_30@35"],
+    "output": ["n_223GAT_84@36", "n_329GAT_133@37", "n_370GAT_163@38", "n_421GAT_188@39", "n_430GAT_193@40", "n_431GAT_194@41", "n_432GAT_195@42"],
+    "members": [
+      {"type": "wire", "width": 1, "id": "n_102GAT_31@0", "loc": "C432_orig.nx:2:7"},
+      {"type": "wire", "width": 1, "id": "n_105GAT_32@1", "loc": "C432_orig.nx:2:20"},
+      {"type": "wire", "width": 1, "id": "n_108GAT_33@2", "loc": "C432_orig.nx:2:33"},
+      {"type": "wire", "width": 1, "id": "n_112GAT_34@3", "loc": "C432_orig.nx:2:46"},
+      {"type": "wire", "width": 1, "id": "n_115GAT_35@4", "loc": "C432_orig.nx:2:59"},
+      {"type": "wire", "width": 1, "id": "n_11GAT_3@5", "loc": "C432_orig.nx:2:72"},
+      {"type": "wire", "width": 1, "id": "n_14GAT_4@6", "loc": "C432_orig.nx:2:83"},
+      {"type": "wire", "width": 1, "id": "n_17GAT_5@7", "loc": "C432_orig.nx:2:94"},
+      {"type": "wire", "width": 1, "id": "n_1GAT_0@8", "loc": "C432_orig.nx:2:105"},
+      {"type": "wire", "width": 1, "id": "n_21GAT_6@9", "loc": "C432_orig.nx:2:115"},
+      {"type": "wire", "width": 1, "id": "n_24GAT_7@10", "loc": "C432_orig.nx:2:126"},
+      {"type": "wire", "width": 1, "id": "n_27GAT_8@11", "loc": "C432_orig.nx:2:137"},
+      {"type": "wire", "width": 1, "id": "n_30GAT_9@12", "loc": "C432_orig.nx:2:148"},
+      {"type": "wire", "width": 1, "id": "n_34GAT_10@13", "loc": "C432_orig.nx:2:159"},
+      {"type": "wire", "width": 1, "id": "n_37GAT_11@14", "loc": "C432_orig.nx:2:171"},
+      {"type": "wire", "width": 1, "id": "n_40GAT_12@15", "loc": "C432_orig.nx:2:183"},
+      {"type": "wire", "width": 1, "id": "n_43GAT_13@16", "loc": "C432_orig.nx:2:195"},
+      {"type": "wire", "width": 1, "id": "n_47GAT_14@17", "loc": "C432_orig.nx:2:207"},
+      {"type": "wire", "width": 1, "id": "n_4GAT_1@18", "loc": "C432_orig.nx:2:219"},
+      {"type": "wire", "width": 1, "id": "n_50GAT_15@19", "loc": "C432_orig.nx:2:229"},
+      {"type": "wire", "width": 1, "id": "n_53GAT_16@20", "loc": "C432_orig.nx:2:241"},
+      {"type": "wire", "width": 1, "id": "n_56GAT_17@21", "loc": "C432_orig.nx:2:253"},
+      {"type": "wire", "width": 1, "id": "n_60GAT_18@22", "loc": "C432_orig.nx:2:265"},
+      {"type": "wire", "width": 1, "id": "n_63GAT_19@23", "loc": "C432_orig.nx:2:277"},
+      {"type": "wire", "width": 1, "id": "n_66GAT_20@24", "loc": "C432_orig.nx:2:289"},
+      {"type": "wire", "width": 1, "id": "n_69GAT_21@25", "loc": "C432_orig.nx:2:301"},
+      {"type": "wire", "width": 1, "id": "n_73GAT_22@26", "loc": "C432_orig.nx:2:313"},
+      {"type": "wire", "width": 1, "id": "n_76GAT_23@27", "loc": "C432_orig.nx:2:325"},
+      {"type": "wire", "width": 1, "id": "n_79GAT_24@28", "loc": "C432_orig.nx:2:337"},
+      {"type": "wire", "width": 1, "id": "n_82GAT_25@29", "loc": "C432_orig.nx:2:349"},
+      {"type": "wire", "width": 1, "id": "n_86GAT_26@30", "loc": "C432_orig.nx:2:361"},
+      {"type": "wire", "width": 1, "id": "n_89GAT_27@31", "loc": "C432_orig.nx:2:373"},
+      {"type": "wire", "width": 1, "id": "n_8GAT_2@32", "loc": "C432_orig.nx:2:385"},
+      {"type": "wire", "width": 1, "id": "n_92GAT_28@33", "loc": "C432_orig.nx:2:395"},
+      {"type": "wire", "width": 1, "id": "n_95GAT_29@34", "loc": "C432_orig.nx:2:407"},
+      {"type": "wire", "width": 1, "id": "n_99GAT_30@35", "loc": "C432_orig.nx:2:419"},
+      {"type": "wire", "width": 1, "id": "n_223GAT_84@36", "loc": "C432_orig.nx:3:7"},
+      {"type": "wire", "width": 1, "id": "n_329GAT_133@37", "loc": "C432_orig.nx:3:20"},
+      {"type": "wire", "width": 1, "id": "n_370GAT_163@38", "loc": "C432_orig.nx:3:34"},
+      {"type": "wire", "width": 1, "id": "n_421GAT_188@39", "loc": "C432_orig.nx:3:48"},
+      {"type": "wire", "width": 1, "id": "n_430GAT_193@40", "loc": "C432_orig.nx:3:62"},
+      {"type": "wire", "width": 1, "id": "n_431GAT_194@41", "loc": "C432_orig.nx:3:76"},
+      {"type": "wire", "width": 1, "id": "n_432GAT_195@42", "loc": "C432_orig.nx:3:90"},
+      {"type": "wire", "width": 1, "id": "n_118GAT_53@43", "loc": "C432_orig.nx:4:17"},
+      {"type": "wire", "width": 1, "id": "n_119GAT_52@44", "loc": "C432_orig.nx:4:30"},
+      {"type": "wire", "width": 1, "id": "n_122GAT_51@45", "loc": "C432_orig.nx:4:43"},
+      {"type": "wire", "width": 1, "id": "n_123GAT_50@46", "loc": "C432_orig.nx:4:56"},
+      {"type": "wire", "width": 1, "id": "n_126GAT_49@47", "loc": "C432_orig.nx:4:69"},
+      {"type": "wire", "width": 1, "id": "n_127GAT_48@48", "loc": "C432_orig.nx:4:82"},
+      {"type": "wire", "width": 1, "id": "n_130GAT_47@49", "loc": "C432_orig.nx:4:95"},
+      {"type": "wire", "width": 1, "id": "n_131GAT_46@50", "loc": "C432_orig.nx:4:108"},
+      {"type": "wire", "width": 1, "id": "n_134GAT_45@51", "loc": "C432_orig.nx:4:121"},
+      {"type": "wire", "width": 1, "id": "n_135GAT_44@52", "loc": "C432_orig.nx:4:134"},
+      {"type": "wire", "width": 1, "id": "n_138GAT_43@53", "loc": "C432_orig.nx:4:147"},
+      {"type": "wire", "width": 1, "id": "n_139GAT_42@54", "loc": "C432_orig.nx:4:160"},
+      {"type": "wire", "width": 1, "id": "n_142GAT_41@55", "loc": "C432_orig.nx:4:173"},
+      {"type": "wire", "width": 1, "id": "n_143GAT_40@56", "loc": "C432_orig.nx:4:186"},
+      {"type": "wire", "width": 1, "id": "n_146GAT_39@57", "loc": "C432_orig.nx:4:199"},
+      {"type": "wire", "width": 1, "id": "n_147GAT_38@58", "loc": "C432_orig.nx:4:212"},
+      {"type": "wire", "width": 1, "id": "n_150GAT_37@59", "loc": "C432_orig.nx:4:225"},
+      {"type": "wire", "width": 1, "id": "n_151GAT_36@60", "loc": "C432_orig.nx:4:238"},
+      {"type": "wire", "width": 1, "id": "n_154GAT_80@61", "loc": "C432_orig.nx:4:251"},
+      {"type": "wire", "width": 1, "id": "n_157GAT_79@62", "loc": "C432_orig.nx:4:264"},
+      {"type": "wire", "width": 1, "id": "n_158GAT_78@63", "loc": "C432_orig.nx:4:277"},
+      {"type": "wire", "width": 1, "id": "n_159GAT_77@64", "loc": "C432_orig.nx:4:290"},
+      {"type": "wire", "width": 1, "id": "n_162GAT_74@65", "loc": "C432_orig.nx:4:303"},
+      {"type": "wire", "width": 1, "id": "n_165GAT_71@66", "loc": "C432_orig.nx:4:316"},
+      {"type": "wire", "width": 1, "id": "n_168GAT_68@67", "loc": "C432_orig.nx:4:329"},
+      {"type": "wire", "width": 1, "id": "n_171GAT_65@68", "loc": "C432_orig.nx:4:342"},
+      {"type": "wire", "width": 1, "id": "n_174GAT_62@69", "loc": "C432_orig.nx:4:355"},
+      {"type": "wire", "width": 1, "id": "n_177GAT_59@70", "loc": "C432_orig.nx:4:368"},
+      {"type": "wire", "width": 1, "id": "n_180GAT_56@71", "loc": "C432_orig.nx:4:381"},
+      {"type": "wire", "width": 1, "id": "n_183GAT_76@72", "loc": "C432_orig.nx:4:394"},
+      {"type": "wire", "width": 1, "id": "n_184GAT_75@73", "loc": "C432_orig.nx:4:407"},
+      {"type": "wire", "width": 1, "id": "n_185GAT_73@74", "loc": "C432_orig.nx:4:420"},
+      {"type": "wire", "width": 1, "id": "n_186GAT_72@75", "loc": "C432_orig.nx:4:433"},
+      {"type": "wire", "width": 1, "id": "n_187GAT_70@76", "loc": "C432_orig.nx:4:446"},
+      {"type": "wire", "width": 1, "id": "n_188GAT_69@77", "loc": "C432_orig.nx:4:459"},
+      {"type": "wire", "width": 1, "id": "n_189GAT_67@78", "loc": "C432_orig.nx:4:472"},
+      {"type": "wire", "width": 1, "id": "n_190GAT_66@79", "loc": "C432_orig.nx:4:485"},
+      {"type": "wire", "width": 1, "id": "n_191GAT_64@80", "loc": "C432_orig.nx:4:498"},
+      {"type": "wire", "width": 1, "id": "n_192GAT_63@81", "loc": "C432_orig.nx:4:511"},
+      {"type": "wire", "width": 1, "id": "n_193GAT_61@82", "loc": "C432_orig.nx:4:524"},
+      {"type": "wire", "width": 1, "id": "n_194GAT_60@83", "loc": "C432_orig.nx:4:537"},
+      {"type": "wire", "width": 1, "id": "n_195GAT_58@84", "loc": "C432_orig.nx:4:550"},
+      {"type": "wire", "width": 1, "id": "n_196GAT_57@85", "loc": "C432_orig.nx:4:563"},
+      {"type": "wire", "width": 1, "id": "n_197GAT_55@86", "loc": "C432_orig.nx:4:576"},
+      {"type": "wire", "width": 1, "id": "n_198GAT_54@87", "loc": "C432_orig.nx:4:589"},
+      {"type": "wire", "width": 1, "id": "n_199GAT_81@88", "loc": "C432_orig.nx:4:602"},
+      {"type": "wire", "width": 1, "id": "n_224GAT_101@89", "loc": "C432_orig.nx:4:646"},
+      {"type": "wire", "width": 1, "id": "n_227GAT_99@90", "loc": "C432_orig.nx:4:660"},
+      {"type": "wire", "width": 1, "id": "n_230GAT_97@91", "loc": "C432_orig.nx:4:673"},
+      {"type": "wire", "width": 1, "id": "n_233GAT_95@92", "loc": "C432_orig.nx:4:686"},
+      {"type": "wire", "width": 1, "id": "n_236GAT_93@93", "loc": "C432_orig.nx:4:699"},
+      {"type": "wire", "width": 1, "id": "n_239GAT_91@94", "loc": "C432_orig.nx:4:712"},
+      {"type": "wire", "width": 1, "id": "n_242GAT_102@95", "loc": "C432_orig.nx:4:725"},
+      {"type": "wire", "width": 1, "id": "n_243GAT_89@96", "loc": "C432_orig.nx:4:739"},
+      {"type": "wire", "width": 1, "id": "n_246GAT_100@97", "loc": "C432_orig.nx:4:752"},
+      {"type": "wire", "width": 1, "id": "n_247GAT_87@98", "loc": "C432_orig.nx:4:766"},
+      {"type": "wire", "width": 1, "id": "n_250GAT_98@99", "loc": "C432_orig.nx:4:779"},
+      {"type": "wire", "width": 1, "id": "n_251GAT_85@100", "loc": "C432_orig.nx:4:792"},
+      {"type": "wire", "width": 1, "id": "n_254GAT_96@101", "loc": "C432_orig.nx:4:805"},
+      {"type": "wire", "width": 1, "id": "n_255GAT_94@102", "loc": "C432_orig.nx:4:818"},
+      {"type": "wire", "width": 1, "id": "n_256GAT_92@103", "loc": "C432_orig.nx:4:831"},
+      {"type": "wire", "width": 1, "id": "n_257GAT_90@104", "loc": "C432_orig.nx:4:844"},
+      {"type": "wire", "width": 1, "id": "n_258GAT_88@105", "loc": "C432_orig.nx:4:857"},
+      {"type": "wire", "width": 1, "id": "n_259GAT_86@106", "loc": "C432_orig.nx:4:870"},
+      {"type": "wire", "width": 1, "id": "n_260GAT_120@107", "loc": "C432_orig.nx:4:883"},
+      {"type": "wire", "width": 1, "id": "n_263GAT_119@108", "loc": "C432_orig.nx:4:897"},
+      {"type": "wire", "width": 1, "id": "n_264GAT_118@109", "loc": "C432_orig.nx:4:911"},
+      {"type": "wire", "width": 1, "id": "n_267GAT_116@110", "loc": "C432_orig.nx:4:925"},
+      {"type": "wire", "width": 1, "id": "n_270GAT_114@111", "loc": "C432_orig.nx:4:939"},
+      {"type": "wire", "width": 1, "id": "n_273GAT_112@112", "loc": "C432_orig.nx:4:953"},
+      {"type": "wire", "width": 1, "id": "n_276GAT_110@113", "loc": "C432_orig.nx:4:967"},
+      {"type": "wire", "width": 1, "id": "n_279GAT_108@114", "loc": "C432_orig.nx:4:981"},
+      {"type": "wire", "width": 1, "id": "n_282GAT_106@115", "loc": "C432_orig.nx:4:995"},
+      {"type": "wire", "width": 1, "id": "n_285GAT_104@116", "loc": "C432_orig.nx:4:1009"},
+      {"type": "wire", "width": 1, "id": "n_288GAT_117@117", "loc": "C432_orig.nx:4:1023"},
+      {"type": "wire", "width": 1, "id": "n_289GAT_115@118", "loc": "C432_orig.nx:4:1037"},
+      {"type": "wire", "width": 1, "id": "n_290GAT_113@119", "loc": "C432_orig.nx:4:1051"},
+      {"type": "wire", "width": 1, "id": "n_291GAT_111@120", "loc": "C432_orig.nx:4:1065"},
+      {"type": "wire", "width": 1, "id": "n_292GAT_109@121", "loc": "C432_orig.nx:4:1079"},
+      {"type": "wire", "width": 1, "id": "n_293GAT_107@122", "loc": "C432_orig.nx:4:1093"},
+      {"type": "wire", "width": 1, "id": "n_294GAT_105@123", "loc": "C432_orig.nx:4:1107"},
+      {"type": "wire", "width": 1, "id": "n_295GAT_103@124", "loc": "C432_orig.nx:4:1121"},
+      {"type": "wire", "width": 1, "id": "n_296GAT_122@125", "loc": "C432_orig.nx:4:1135"},
+      {"type": "wire", "width": 1, "id": "n_300GAT_130@126", "loc": "C432_orig.nx:4:1154"},
+      {"type": "wire", "width": 1, "id": "n_301GAT_129@127", "loc": "C432_orig.nx:4:1168"},
+      {"type": "wire", "width": 1, "id": "n_302GAT_128@128", "loc": "C432_orig.nx:4:1182"},
+      {"type": "wire", "width": 1, "id": "n_303GAT_127@129", "loc": "C432_orig.nx:4:1196"},
+      {"type": "wire", "width": 1, "id": "n_304GAT_126@130", "loc": "C432_orig.nx:4:1210"},
+      {"type": "wire", "width": 1, "id": "n_305GAT_125@131", "loc": "C432_orig.nx:4:1224"},
+      {"type": "wire", "width": 1, "id": "n_306GAT_124@132", "loc": "C432_orig.nx:4:1238"},
+      {"type": "wire", "width": 1, "id": "n_307GAT_123@133", "loc": "C432_orig.nx:4:1252"},
+      {"type": "wire", "width": 1, "id": "n_308GAT_121@134", "loc": "C432_orig.nx:4:1266"},
+      {"type": "wire", "width": 1, "id": "n_330GAT_151@135", "loc": "C432_orig.nx:4:1308"},
+      {"type": "wire", "width": 1, "id": "n_331GAT_149@136", "loc": "C432_orig.nx:4:1322"},
+      {"type": "wire", "width": 1, "id": "n_332GAT_147@137", "loc": "C432_orig.nx:4:1336"},
+      {"type": "wire", "width": 1, "id": "n_333GAT_145@138", "loc": "C432_orig.nx:4:1350"},
+      {"type": "wire", "width": 1, "id": "n_334GAT_150@139", "loc": "C432_orig.nx:4:1364"},
+      {"type": "wire", "width": 1, "id": "n_335GAT_143@140", "loc": "C432_orig.nx:4:1378"},
+      {"type": "wire", "width": 1, "id": "n_336GAT_148@141", "loc": "C432_orig.nx:4:1392"},
+      {"type": "wire", "width": 1, "id": "n_337GAT_141@142", "loc": "C432_orig.nx:4:1406"},
+      {"type": "wire", "width": 1, "id": "n_338GAT_146@143", "loc": "C432_orig.nx:4:1420"},
+      {"type": "wire", "width": 1, "id": "n_339GAT_139@144", "loc": "C432_orig.nx:4:1434"},
+      {"type": "wire", "width": 1, "id": "n_340GAT_144@145", "loc": "C432_orig.nx:4:1448"},
+      {"type": "wire", "width": 1, "id": "n_341GAT_137@146", "loc": "C432_orig.nx:4:1462"},
+      {"type": "wire", "width": 1, "id": "n_342GAT_142@147", "loc": "C432_orig.nx:4:1476"},
+      {"type": "wire", "width": 1, "id": "n_343GAT_135@148", "loc": "C432_orig.nx:4:1490"},
+      {"type": "wire", "width": 1, "id": "n_344GAT_140@149", "loc": "C432_orig.nx:4:1504"},
+      {"type": "wire", "width": 1, "id": "n_345GAT_138@150", "loc": "C432_orig.nx:4:1518"},
+      {"type": "wire", "width": 1, "id": "n_346GAT_136@151", "loc": "C432_orig.nx:4:1532"},
+      {"type": "wire", "width": 1, "id": "n_347GAT_134@152", "loc": "C432_orig.nx:4:1546"},
+      {"type": "wire", "width": 1, "id": "n_348GAT_160@153", "loc": "C432_orig.nx:4:1560"},
+      {"type": "wire", "width": 1, "id": "n_349GAT_159@154", "loc": "C432_orig.nx:4:1574"},
+      {"type": "wire", "width": 1, "id": "n_350GAT_158@155", "loc": "C432_orig.nx:4:1588"},
+      {"type": "wire", "width": 1, "id": "n_351GAT_157@156", "loc": "C432_orig.nx:4:1602"},
+      {"type": "wire", "width": 1, "id": "n_352GAT_156@157", "loc": "C432_orig.nx:4:1616"},
+      {"type": "wire", "width": 1, "id": "n_353GAT_155@158", "loc": "C432_orig.nx:4:1630"},
+      {"type": "wire", "width": 1, "id": "n_354GAT_154@159", "loc": "C432_orig.nx:4:1644"},
+      {"type": "wire", "width": 1, "id": "n_355GAT_153@160", "loc": "C432_orig.nx:4:1658"},
+      {"type": "wire", "width": 1, "id": "n_356GAT_152@161", "loc": "C432_orig.nx:4:1672"},
+      {"type": "wire", "width": 1, "id": "n_357GAT_161@162", "loc": "C432_orig.nx:4:1686"},
+      {"type": "wire", "width": 1, "id": "n_371GAT_172@163", "loc": "C432_orig.nx:4:1714"},
+      {"type": "wire", "width": 1, "id": "n_372GAT_171@164", "loc": "C432_orig.nx:4:1728"},
+      {"type": "wire", "width": 1, "id": "n_373GAT_170@165", "loc": "C432_orig.nx:4:1742"},
+      {"type": "wire", "width": 1, "id": "n_374GAT_169@166", "loc": "C432_orig.nx:4:1756"},
+      {"type": "wire", "width": 1, "id": "n_375GAT_168@167", "loc": "C432_orig.nx:4:1770"},
+      {"type": "wire", "width": 1, "id": "n_376GAT_167@168", "loc": "C432_orig.nx:4:1784"},
+      {"type": "wire", "width": 1, "id": "n_377GAT_166@169", "loc": "C432_orig.nx:4:1798"},
+      {"type": "wire", "width": 1, "id": "n_378GAT_165@170", "loc": "C432_orig.nx:4:1812"},
+      {"type": "wire", "width": 1, "id": "n_379GAT_164@171", "loc": "C432_orig.nx:4:1826"},
+      {"type": "wire", "width": 1, "id": "n_380GAT_181@172", "loc": "C432_orig.nx:4:1840"},
+      {"type": "wire", "width": 1, "id": "n_381GAT_180@173", "loc": "C432_orig.nx:4:1854"},
+      {"type": "wire", "width": 1, "id": "n_386GAT_179@174", "loc": "C432_orig.nx:4:1868"},
+      {"type": "wire", "width": 1, "id": "n_393GAT_178@175", "loc": "C432_orig.nx:4:1882"},
+      {"type": "wire", "width": 1, "id": "n_399GAT_177@176", "loc": "C432_orig.nx:4:1896"},
+      {"type": "wire", "width": 1, "id": "n_404GAT_176@177", "loc": "C432_orig.nx:4:1915"},
+      {"type": "wire", "width": 1, "id": "n_407GAT_175@178", "loc": "C432_orig.nx:4:1929"},
+      {"type": "wire", "width": 1, "id": "n_411GAT_174@179", "loc": "C432_orig.nx:4:1943"},
+      {"type": "wire", "width": 1, "id": "n_414GAT_173@180", "loc": "C432_orig.nx:4:1957"},
+      {"type": "wire", "width": 1, "id": "n_415GAT_187@181", "loc": "C432_orig.nx:4:1971"},
+      {"type": "wire", "width": 1, "id": "n_416GAT_182@182", "loc": "C432_orig.nx:4:1985"},
+      {"type": "wire", "width": 1, "id": "n_417GAT_186@183", "loc": "C432_orig.nx:4:1999"},
+      {"type": "wire", "width": 1, "id": "n_418GAT_185@184", "loc": "C432_orig.nx:4:2013"},
+      {"type": "wire", "width": 1, "id": "n_419GAT_184@185", "loc": "C432_orig.nx:4:2027"},
+      {"type": "wire", "width": 1, "id": "n_420GAT_183@186", "loc": "C432_orig.nx:4:2041"},
+      {"type": "wire", "width": 1, "id": "n_422GAT_192@187", "loc": "C432_orig.nx:4:2055"},
+      {"type": "wire", "width": 1, "id": "n_425GAT_190@188", "loc": "C432_orig.nx:4:2069"},
+      {"type": "wire", "width": 1, "id": "n_428GAT_191@189", "loc": "C432_orig.nx:4:2083"},
+      {"type": "wire", "width": 1, "id": "n_429GAT_189@190", "loc": "C432_orig.nx:4:2097"},
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:6:17",
+        "input": ["n_108GAT_33@2"],
+        "output": ["n_151GAT_36@60"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:7:17",
+        "input": ["n_102GAT_31@0"],
+        "output": ["n_150GAT_37@59"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:9:33",
+        "input": ["n_154GAT_80@61"],
+        "output": ["$o@191"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@191", "loc": "C432_orig.nx:9:33"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:9:25",
+        "input": ["$o@191", "n_223GAT_84@36"],
+        "output": ["$o@192"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@192", "loc": "C432_orig.nx:9:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:9:88",
+        "input": ["n_223GAT_84@36"],
+        "output": ["$o@193"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@193", "loc": "C432_orig.nx:9:88"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:9:67",
+        "input": ["n_154GAT_80@61", "$o@193"],
+        "output": ["$o@194"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@194", "loc": "C432_orig.nx:9:67"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:9:18",
+        "input": ["$o@192", "$o@194"],
+        "output": ["n_224GAT_101@89"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:10:17",
+        "input": ["n_30GAT_9@12"],
+        "output": ["n_127GAT_48@48"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:11:17",
+        "input": ["n_24GAT_7@10"],
+        "output": ["n_126GAT_49@47"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:12:18",
+        "input": ["n_407GAT_175@178"],
+        "output": ["n_419GAT_184@185"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:14:25",
+        "input": ["n_189GAT_67@78"],
+        "output": ["$o@195"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@195", "loc": "C432_orig.nx:14:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:14:45",
+        "input": ["n_236GAT_93@93"],
+        "output": ["$o@196"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@196", "loc": "C432_orig.nx:14:45"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:14:18",
+        "input": ["$o@195", "$o@196"],
+        "output": ["n_273GAT_112@112"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:15:24",
+        "input": ["n_17GAT_5@7"],
+        "output": ["n_123GAT_50@46"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:15:42",
+        "input": ["n_122GAT_51@45"],
+        "output": ["$o@197"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@197", "loc": "C432_orig.nx:15:42"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:15:17",
+        "input": ["n_123GAT_50@46", "$o@197"],
+        "output": ["n_159GAT_77@64"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:16:25",
+        "input": ["n_135GAT_44@52"],
+        "output": ["$o@198"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@198", "loc": "C432_orig.nx:16:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:16:45",
+        "input": ["n_60GAT_18@22"],
+        "output": ["$o@199"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@199", "loc": "C432_orig.nx:16:45"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:16:17",
+        "input": ["$o@198", "$o@199"],
+        "output": ["n_189GAT_67@78"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:17:25",
+        "input": ["n_300GAT_130@126"],
+        "output": ["$o@200"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@200", "loc": "C432_orig.nx:17:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:17:46",
+        "input": ["n_330GAT_151@135"],
+        "output": ["$o@201"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@201", "loc": "C432_orig.nx:17:46"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:17:18",
+        "input": ["$o@200", "$o@201"],
+        "output": ["n_348GAT_160@153"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:18:25",
+        "input": ["n_21GAT_6@9"],
+        "output": ["$o@202"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@202", "loc": "C432_orig.nx:18:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:18:43",
+        "input": ["n_329GAT_133@37"],
+        "output": ["$o@203"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@203", "loc": "C432_orig.nx:18:43"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:18:18",
+        "input": ["$o@202", "$o@203"],
+        "output": ["n_336GAT_148@141"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:19:25",
+        "input": ["n_66GAT_20@24"],
+        "output": ["$o@204"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@204", "loc": "C432_orig.nx:19:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:19:44",
+        "input": ["n_370GAT_163@38"],
+        "output": ["$o@205"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@205", "loc": "C432_orig.nx:19:44"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:19:18",
+        "input": ["$o@204", "$o@205"],
+        "output": ["n_375GAT_168@167"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:20:25",
+        "input": ["n_11GAT_3@5"],
+        "output": ["n_122GAT_51@45"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:20:43",
+        "input": ["n_223GAT_84@36"],
+        "output": ["$o@206"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@206", "loc": "C432_orig.nx:20:43"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:20:18",
+        "input": ["n_122GAT_51@45", "$o@206"],
+        "output": ["n_246GAT_100@97"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:21:25",
+        "input": ["n_158GAT_78@63"],
+        "output": ["$o@207"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@207", "loc": "C432_orig.nx:21:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:21:45",
+        "input": ["n_224GAT_101@89"],
+        "output": ["$o@208"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@208", "loc": "C432_orig.nx:21:45"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:21:18",
+        "input": ["$o@207", "$o@208"],
+        "output": ["n_263GAT_119@108"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:23:25",
+        "input": ["n_119GAT_52@44"],
+        "output": ["$o@209"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@209", "loc": "C432_orig.nx:23:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:23:45",
+        "input": ["n_14GAT_4@6"],
+        "output": ["$o@210"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@210", "loc": "C432_orig.nx:23:45"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:23:17",
+        "input": ["$o@209", "$o@210"],
+        "output": ["n_158GAT_78@63"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:24:25",
+        "input": ["n_195GAT_58@84"],
+        "output": ["$o@211"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@211", "loc": "C432_orig.nx:24:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:24:45",
+        "input": ["n_247GAT_87@98"],
+        "output": ["$o@212"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@212", "loc": "C432_orig.nx:24:45"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:24:18",
+        "input": ["$o@211", "$o@212"],
+        "output": ["n_282GAT_106@115"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:25:52",
+        "input": ["n_379GAT_164@171"],
+        "output": ["$o@213"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@213", "loc": "C432_orig.nx:25:52"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:25:80",
+        "input": ["n_347GAT_134@152"],
+        "output": ["$o@214"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@214", "loc": "C432_orig.nx:25:80"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:25:101",
+        "input": ["n_259GAT_86@106"],
+        "output": ["$o@215"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@215", "loc": "C432_orig.nx:25:101"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:25:73",
+        "input": ["$o@214", "$o@215"],
+        "output": ["$o@216"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@216", "loc": "C432_orig.nx:25:73"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:25:45",
+        "input": ["$o@213", "$o@216"],
+        "output": ["$o@217"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@217", "loc": "C432_orig.nx:25:45"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:25:18",
+        "input": ["n_151GAT_36@60", "$o@217"],
+        "output": ["n_414GAT_173@180"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:26:25",
+        "input": ["n_131GAT_46@50"],
+        "output": ["$o@218"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@218", "loc": "C432_orig.nx:26:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:26:45",
+        "input": ["n_53GAT_16@20"],
+        "output": ["$o@219"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@219", "loc": "C432_orig.nx:26:45"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:26:17",
+        "input": ["$o@218", "$o@219"],
+        "output": ["n_188GAT_69@77"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:27:25",
+        "input": ["n_82GAT_25@29"],
+        "output": ["n_143GAT_40@56"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:27:51",
+        "input": ["n_377GAT_166@169"],
+        "output": ["$o@220"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@220", "loc": "C432_orig.nx:27:51"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:27:79",
+        "input": ["n_345GAT_138@150"],
+        "output": ["$o@221"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@221", "loc": "C432_orig.nx:27:79"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:27:100",
+        "input": ["n_257GAT_90@104"],
+        "output": ["$o@222"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@222", "loc": "C432_orig.nx:27:100"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:27:72",
+        "input": ["$o@221", "$o@222"],
+        "output": ["$o@223"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@223", "loc": "C432_orig.nx:27:72"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:27:44",
+        "input": ["$o@220", "$o@223"],
+        "output": ["$o@224"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@224", "loc": "C432_orig.nx:27:44"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:27:18",
+        "input": ["n_143GAT_40@56", "$o@224"],
+        "output": ["n_407GAT_175@178"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:28:32",
+        "input": ["n_165GAT_71@66"],
+        "output": ["$o@225"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@225", "loc": "C432_orig.nx:28:32"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:28:24",
+        "input": ["$o@225", "n_223GAT_84@36"],
+        "output": ["$o@226"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@226", "loc": "C432_orig.nx:28:24"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:28:66",
+        "input": ["n_165GAT_71@66", "$o@193"],
+        "output": ["$o@227"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@227", "loc": "C432_orig.nx:28:66"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:28:17",
+        "input": ["$o@226", "$o@227"],
+        "output": ["n_233GAT_95@92"]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:29:172",
+        "input": ["n_349GAT_159@154", "n_348GAT_160@153"],
+        "output": ["$o@228"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@228", "loc": "C432_orig.nx:29:172"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:29:150",
+        "input": ["n_350GAT_158@155", "$o@228"],
+        "output": ["$o@229"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@229", "loc": "C432_orig.nx:29:150"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:29:128",
+        "input": ["n_351GAT_157@156", "$o@229"],
+        "output": ["$o@230"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@230", "loc": "C432_orig.nx:29:128"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:29:106",
+        "input": ["n_352GAT_156@157", "$o@230"],
+        "output": ["$o@231"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@231", "loc": "C432_orig.nx:29:106"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:29:84",
+        "input": ["n_353GAT_155@158", "$o@231"],
+        "output": ["$o@232"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@232", "loc": "C432_orig.nx:29:84"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:29:62",
+        "input": ["n_354GAT_154@159", "$o@232"],
+        "output": ["$o@233"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@233", "loc": "C432_orig.nx:29:62"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:29:40",
+        "input": ["n_355GAT_153@160", "$o@233"],
+        "output": ["$o@234"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@234", "loc": "C432_orig.nx:29:40"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:29:18",
+        "input": ["n_356GAT_152@161", "$o@234"],
+        "output": ["n_357GAT_161@162"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:30:25",
+        "input": ["n_95GAT_29@34"],
+        "output": ["n_147GAT_38@58"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:30:51",
+        "input": ["n_378GAT_165@170"],
+        "output": ["$o@235"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@235", "loc": "C432_orig.nx:30:51"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:30:79",
+        "input": ["n_346GAT_136@151"],
+        "output": ["$o@236"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@236", "loc": "C432_orig.nx:30:79"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:30:100",
+        "input": ["n_258GAT_88@105"],
+        "output": ["$o@237"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@237", "loc": "C432_orig.nx:30:100"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:30:72",
+        "input": ["$o@236", "$o@237"],
+        "output": ["$o@238"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@238", "loc": "C432_orig.nx:30:72"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:30:44",
+        "input": ["$o@235", "$o@238"],
+        "output": ["$o@239"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@239", "loc": "C432_orig.nx:30:44"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:30:18",
+        "input": ["n_147GAT_38@58", "$o@239"],
+        "output": ["n_411GAT_174@179"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:31:46",
+        "input": ["n_8GAT_2@32"],
+        "output": ["$o@240"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@240", "loc": "C432_orig.nx:31:46"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:31:18",
+        "input": ["$o@203", "$o@240"],
+        "output": ["n_334GAT_150@139"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:32:9",
+        "input": ["n_199GAT_81@88"],
+        "output": ["n_223GAT_84@36"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:33:25",
+        "input": ["n_198GAT_54@87"],
+        "output": ["$o@241"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@241", "loc": "C432_orig.nx:33:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:33:45",
+        "input": ["n_251GAT_85@100"],
+        "output": ["$o@242"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@242", "loc": "C432_orig.nx:33:45"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:33:18",
+        "input": ["$o@241", "$o@242"],
+        "output": ["n_295GAT_103@124"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:34:9",
+        "input": ["n_296GAT_122@125"],
+        "output": ["n_329GAT_133@37"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:35:25",
+        "input": ["n_186GAT_72@75"],
+        "output": ["$o@243"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@243", "loc": "C432_orig.nx:35:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:35:45",
+        "input": ["n_230GAT_97@91"],
+        "output": ["$o@244"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@244", "loc": "C432_orig.nx:35:45"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:35:18",
+        "input": ["$o@243", "$o@244"],
+        "output": ["n_289GAT_115@118"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:36:33",
+        "input": ["n_285GAT_104@116"],
+        "output": ["$o@245"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@245", "loc": "C432_orig.nx:36:33"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:36:25",
+        "input": ["$o@245", "n_329GAT_133@37"],
+        "output": ["$o@246"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@246", "loc": "C432_orig.nx:36:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:36:91",
+        "input": ["n_329GAT_133@37"],
+        "output": ["$o@247"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@247", "loc": "C432_orig.nx:36:91"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:36:69",
+        "input": ["n_285GAT_104@116", "$o@247"],
+        "output": ["$o@248"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@248", "loc": "C432_orig.nx:36:69"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:36:18",
+        "input": ["$o@246", "$o@248"],
+        "output": ["n_343GAT_135@148"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:37:33",
+        "input": ["n_270GAT_114@111"],
+        "output": ["$o@249"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@249", "loc": "C432_orig.nx:37:33"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:37:25",
+        "input": ["$o@249", "n_329GAT_133@37"],
+        "output": ["$o@250"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@250", "loc": "C432_orig.nx:37:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:37:69",
+        "input": ["n_270GAT_114@111", "$o@247"],
+        "output": ["$o@251"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@251", "loc": "C432_orig.nx:37:69"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:37:18",
+        "input": ["$o@250", "$o@251"],
+        "output": ["n_333GAT_145@138"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:38:9",
+        "input": ["n_357GAT_161@162"],
+        "output": ["n_370GAT_163@38"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:39:25",
+        "input": ["n_115GAT_35@4"],
+        "output": ["$o@252"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@252", "loc": "C432_orig.nx:39:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:39:18",
+        "input": ["$o@252", "$o@205"],
+        "output": ["n_379GAT_164@171"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:40:17",
+        "input": ["n_416GAT_182@182"],
+        "output": ["$o@253"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@253", "loc": "C432_orig.nx:40:17"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:40:38",
+        "input": ["n_415GAT_187@181"],
+        "output": ["$o@254"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@254", "loc": "C432_orig.nx:40:38"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:40:9",
+        "input": ["$o@253", "$o@254"],
+        "output": ["n_421GAT_188@39"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:41:25",
+        "input": ["n_56GAT_17@21"],
+        "output": ["n_135GAT_44@52"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:41:51",
+        "input": ["n_375GAT_168@167"],
+        "output": ["$o@255"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@255", "loc": "C432_orig.nx:41:51"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:41:79",
+        "input": ["n_342GAT_142@147"],
+        "output": ["$o@256"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@256", "loc": "C432_orig.nx:41:79"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:41:100",
+        "input": ["n_255GAT_94@102"],
+        "output": ["$o@257"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@257", "loc": "C432_orig.nx:41:100"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:41:72",
+        "input": ["$o@256", "$o@257"],
+        "output": ["$o@258"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@258", "loc": "C432_orig.nx:41:72"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:41:44",
+        "input": ["$o@255", "$o@258"],
+        "output": ["$o@259"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@259", "loc": "C432_orig.nx:41:44"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:41:18",
+        "input": ["n_135GAT_44@52", "$o@259"],
+        "output": ["n_399GAT_177@176"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:42:25",
+        "input": ["n_183GAT_76@72"],
+        "output": ["$o@260"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@260", "loc": "C432_orig.nx:42:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:42:45",
+        "input": ["n_227GAT_99@90"],
+        "output": ["$o@261"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@261", "loc": "C432_orig.nx:42:45"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:42:18",
+        "input": ["$o@260", "$o@261"],
+        "output": ["n_264GAT_118@109"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:43:16",
+        "input": ["n_399GAT_177@176"],
+        "output": ["$o@262"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@262", "loc": "C432_orig.nx:43:16"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:43:44",
+        "input": ["n_422GAT_192@187"],
+        "output": ["$o@263"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@263", "loc": "C432_orig.nx:43:44"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:43:72",
+        "input": ["n_386GAT_179@174"],
+        "output": ["$o@264"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@264", "loc": "C432_orig.nx:43:72"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:43:93",
+        "input": ["n_381GAT_180@173"],
+        "output": ["$o@265"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@265", "loc": "C432_orig.nx:43:93"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:43:65",
+        "input": ["$o@264", "$o@265"],
+        "output": ["$o@266"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@266", "loc": "C432_orig.nx:43:65"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:43:37",
+        "input": ["$o@263", "$o@266"],
+        "output": ["$o@267"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@267", "loc": "C432_orig.nx:43:37"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:43:9",
+        "input": ["$o@262", "$o@267"],
+        "output": ["n_430GAT_193@40"]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:44:18",
+        "input": ["$o@199", "$o@203"],
+        "output": ["n_342GAT_142@147"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:45:25",
+        "input": ["n_69GAT_21@25"],
+        "output": ["n_139GAT_42@54"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:45:51",
+        "input": ["n_376GAT_167@168"],
+        "output": ["$o@268"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@268", "loc": "C432_orig.nx:45:51"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:45:79",
+        "input": ["n_344GAT_140@149"],
+        "output": ["$o@269"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@269", "loc": "C432_orig.nx:45:79"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:45:100",
+        "input": ["n_256GAT_92@103"],
+        "output": ["$o@270"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@270", "loc": "C432_orig.nx:45:100"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:45:72",
+        "input": ["$o@269", "$o@270"],
+        "output": ["$o@271"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@271", "loc": "C432_orig.nx:45:72"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:45:44",
+        "input": ["$o@268", "$o@271"],
+        "output": ["$o@272"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@272", "loc": "C432_orig.nx:45:44"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:45:18",
+        "input": ["n_139GAT_42@54", "$o@272"],
+        "output": ["n_404GAT_176@177"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:46:45",
+        "input": ["n_1GAT_0@8"],
+        "output": ["n_118GAT_53@43"]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:46:18",
+        "input": ["$o@206", "n_118GAT_53@43"],
+        "output": ["n_242GAT_102@95"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:47:16",
+        "input": ["n_428GAT_191@189"],
+        "output": ["$o@273"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@273", "loc": "C432_orig.nx:47:16"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:47:44",
+        "input": ["n_425GAT_190@188"],
+        "output": ["$o@274"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@274", "loc": "C432_orig.nx:47:44"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:47:65",
+        "input": ["$o@264", "$o@265"],
+        "output": ["$o@275"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@275", "loc": "C432_orig.nx:47:65"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:47:37",
+        "input": ["$o@274", "$o@275"],
+        "output": ["$o@276"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@276", "loc": "C432_orig.nx:47:37"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:47:9",
+        "input": ["$o@273", "$o@276"],
+        "output": ["n_431GAT_194@41"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:48:50",
+        "input": ["n_372GAT_171@164"],
+        "output": ["$o@277"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@277", "loc": "C432_orig.nx:48:50"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:48:78",
+        "input": ["n_336GAT_148@141"],
+        "output": ["$o@278"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@278", "loc": "C432_orig.nx:48:78"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:48:99",
+        "input": ["n_246GAT_100@97"],
+        "output": ["$o@279"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@279", "loc": "C432_orig.nx:48:99"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:48:71",
+        "input": ["$o@278", "$o@279"],
+        "output": ["$o@280"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@280", "loc": "C432_orig.nx:48:71"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:48:43",
+        "input": ["$o@277", "$o@280"],
+        "output": ["$o@281"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@281", "loc": "C432_orig.nx:48:43"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:48:18",
+        "input": ["n_123GAT_50@46", "$o@281"],
+        "output": ["n_381GAT_180@173"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:50:25",
+        "input": ["n_308GAT_121@134"],
+        "output": ["$o@282"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@282", "loc": "C432_orig.nx:50:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:50:46",
+        "input": ["n_343GAT_135@148"],
+        "output": ["$o@283"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@283", "loc": "C432_orig.nx:50:46"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:50:18",
+        "input": ["$o@282", "$o@283"],
+        "output": ["n_356GAT_152@161"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:51:42",
+        "input": ["n_126GAT_49@47"],
+        "output": ["$o@284"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@284", "loc": "C432_orig.nx:51:42"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:51:17",
+        "input": ["n_127GAT_48@48", "$o@284"],
+        "output": ["n_162GAT_74@65"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:52:25",
+        "input": ["n_40GAT_12@15"],
+        "output": ["$o@285"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@285", "loc": "C432_orig.nx:52:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:52:18",
+        "input": ["$o@285", "$o@205"],
+        "output": ["n_373GAT_170@165"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:53:16",
+        "input": ["n_429GAT_189@190"],
+        "output": ["$o@286"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@286", "loc": "C432_orig.nx:53:16"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:53:65",
+        "input": ["$o@263", "$o@265"],
+        "output": ["$o@287"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@287", "loc": "C432_orig.nx:53:65"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:53:37",
+        "input": ["$o@274", "$o@287"],
+        "output": ["$o@288"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@288", "loc": "C432_orig.nx:53:37"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:53:9",
+        "input": ["$o@286", "$o@288"],
+        "output": ["n_432GAT_195@42"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:54:25",
+        "input": ["n_305GAT_125@131"],
+        "output": ["$o@289"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@289", "loc": "C432_orig.nx:54:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:54:46",
+        "input": ["n_337GAT_141@142"],
+        "output": ["$o@290"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@290", "loc": "C432_orig.nx:54:46"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:54:18",
+        "input": ["$o@289", "$o@290"],
+        "output": ["n_353GAT_155@158"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:55:18",
+        "input": ["n_404GAT_176@177"],
+        "output": ["n_418GAT_185@184"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:56:18",
+        "input": ["n_294GAT_105@123"],
+        "output": ["n_307GAT_123@133"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:57:43",
+        "input": ["n_138GAT_43@53"],
+        "output": ["$o@291"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@291", "loc": "C432_orig.nx:57:43"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:57:17",
+        "input": ["n_139GAT_42@54", "$o@291"],
+        "output": ["n_171GAT_65@68"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:58:33",
+        "input": ["n_267GAT_116@110"],
+        "output": ["$o@292"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@292", "loc": "C432_orig.nx:58:33"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:58:25",
+        "input": ["$o@292", "n_329GAT_133@37"],
+        "output": ["$o@293"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@293", "loc": "C432_orig.nx:58:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:58:69",
+        "input": ["n_267GAT_116@110", "$o@247"],
+        "output": ["$o@294"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@294", "loc": "C432_orig.nx:58:69"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:58:18",
+        "input": ["$o@293", "$o@294"],
+        "output": ["n_332GAT_147@137"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:59:18",
+        "input": ["n_290GAT_113@119"],
+        "output": ["n_303GAT_127@129"]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:60:18",
+        "input": ["$o@219", "$o@205"],
+        "output": ["n_374GAT_169@166"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:61:25",
+        "input": ["n_86GAT_26@30"],
+        "output": ["$o@295"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@295", "loc": "C432_orig.nx:61:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:61:18",
+        "input": ["$o@295", "$o@203"],
+        "output": ["n_345GAT_138@150"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:63:25",
+        "input": ["n_419GAT_184@185"],
+        "output": ["$o@296"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@296", "loc": "C432_orig.nx:63:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:63:53",
+        "input": ["n_393GAT_178@175"],
+        "output": ["n_417GAT_186@183"]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:63:46",
+        "input": ["n_417GAT_186@183", "$o@262"],
+        "output": ["$o@297"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@297", "loc": "C432_orig.nx:63:46"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:63:18",
+        "input": ["$o@296", "$o@297"],
+        "output": ["n_428GAT_191@189"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:65:25",
+        "input": ["n_187GAT_70@76"],
+        "output": ["$o@298"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@298", "loc": "C432_orig.nx:65:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:65:45",
+        "input": ["n_233GAT_95@92"],
+        "output": ["$o@299"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@299", "loc": "C432_orig.nx:65:45"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:65:18",
+        "input": ["$o@298", "$o@299"],
+        "output": ["n_270GAT_114@111"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:66:32",
+        "input": ["n_162GAT_74@65"],
+        "output": ["$o@300"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@300", "loc": "C432_orig.nx:66:32"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:66:24",
+        "input": ["$o@300", "n_223GAT_84@36"],
+        "output": ["$o@301"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@301", "loc": "C432_orig.nx:66:24"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:66:66",
+        "input": ["n_162GAT_74@65", "$o@193"],
+        "output": ["$o@302"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@302", "loc": "C432_orig.nx:66:66"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:66:17",
+        "input": ["$o@301", "$o@302"],
+        "output": ["n_230GAT_97@91"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:68:32",
+        "input": ["n_171GAT_65@68"],
+        "output": ["$o@303"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@303", "loc": "C432_orig.nx:68:32"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:68:24",
+        "input": ["$o@303", "n_223GAT_84@36"],
+        "output": ["$o@304"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@304", "loc": "C432_orig.nx:68:24"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:68:66",
+        "input": ["n_171GAT_65@68", "$o@193"],
+        "output": ["$o@305"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@305", "loc": "C432_orig.nx:68:66"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:68:17",
+        "input": ["$o@304", "$o@305"],
+        "output": ["n_239GAT_91@94"]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:69:172",
+        "input": ["n_264GAT_118@109", "n_260GAT_120@107"],
+        "output": ["$o@306"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@306", "loc": "C432_orig.nx:69:172"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:69:150",
+        "input": ["n_267GAT_116@110", "$o@306"],
+        "output": ["$o@307"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@307", "loc": "C432_orig.nx:69:150"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:69:128",
+        "input": ["n_270GAT_114@111", "$o@307"],
+        "output": ["$o@308"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@308", "loc": "C432_orig.nx:69:128"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:69:106",
+        "input": ["n_273GAT_112@112", "$o@308"],
+        "output": ["$o@309"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@309", "loc": "C432_orig.nx:69:106"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:69:84",
+        "input": ["n_276GAT_110@113", "$o@309"],
+        "output": ["$o@310"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@310", "loc": "C432_orig.nx:69:84"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:69:62",
+        "input": ["n_279GAT_108@114", "$o@310"],
+        "output": ["$o@311"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@311", "loc": "C432_orig.nx:69:62"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:69:40",
+        "input": ["n_282GAT_106@115", "$o@311"],
+        "output": ["$o@312"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@312", "loc": "C432_orig.nx:69:40"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:69:18",
+        "input": ["n_285GAT_104@116", "$o@312"],
+        "output": ["n_296GAT_122@125"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:70:32",
+        "input": ["n_168GAT_68@67"],
+        "output": ["$o@313"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@313", "loc": "C432_orig.nx:70:32"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:70:24",
+        "input": ["$o@313", "n_223GAT_84@36"],
+        "output": ["$o@314"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@314", "loc": "C432_orig.nx:70:24"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:70:66",
+        "input": ["n_168GAT_68@67", "$o@193"],
+        "output": ["$o@315"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@315", "loc": "C432_orig.nx:70:66"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:70:17",
+        "input": ["$o@314", "$o@315"],
+        "output": ["n_236GAT_93@93"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:71:25",
+        "input": ["n_196GAT_57@85"],
+        "output": ["$o@316"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@316", "loc": "C432_orig.nx:71:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:71:18",
+        "input": ["$o@316", "$o@212"],
+        "output": ["n_294GAT_105@123"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:72:18",
+        "input": ["n_263GAT_119@108"],
+        "output": ["n_300GAT_130@126"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:73:25",
+        "input": ["n_302GAT_128@128"],
+        "output": ["$o@317"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@317", "loc": "C432_orig.nx:73:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:73:46",
+        "input": ["n_332GAT_147@137"],
+        "output": ["$o@318"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@318", "loc": "C432_orig.nx:73:46"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:73:18",
+        "input": ["$o@317", "$o@318"],
+        "output": ["n_350GAT_158@155"]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:74:164",
+        "input": ["n_159GAT_77@64", "n_154GAT_80@61"],
+        "output": ["$o@319"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@319", "loc": "C432_orig.nx:74:164"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:74:143",
+        "input": ["n_162GAT_74@65", "$o@319"],
+        "output": ["$o@320"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@320", "loc": "C432_orig.nx:74:143"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:74:122",
+        "input": ["n_165GAT_71@66", "$o@320"],
+        "output": ["$o@321"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@321", "loc": "C432_orig.nx:74:122"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:74:101",
+        "input": ["n_168GAT_68@67", "$o@321"],
+        "output": ["$o@322"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@322", "loc": "C432_orig.nx:74:101"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:74:80",
+        "input": ["n_171GAT_65@68", "$o@322"],
+        "output": ["$o@323"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@323", "loc": "C432_orig.nx:74:80"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:74:59",
+        "input": ["n_174GAT_62@69", "$o@323"],
+        "output": ["$o@324"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@324", "loc": "C432_orig.nx:74:59"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:74:38",
+        "input": ["n_177GAT_59@70", "$o@324"],
+        "output": ["$o@325"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@325", "loc": "C432_orig.nx:74:38"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:74:17",
+        "input": ["n_180GAT_56@71", "$o@325"],
+        "output": ["n_199GAT_81@88"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:75:24",
+        "input": ["n_4GAT_1@18"],
+        "output": ["n_119GAT_52@44"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:75:41",
+        "input": ["n_118GAT_53@43"],
+        "output": ["$o@326"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@326", "loc": "C432_orig.nx:75:41"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:75:17",
+        "input": ["n_119GAT_52@44", "$o@326"],
+        "output": ["n_154GAT_80@61"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:76:24",
+        "input": ["n_43GAT_13@16"],
+        "output": ["n_131GAT_46@50"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:76:43",
+        "input": ["n_130GAT_47@49"],
+        "output": ["$o@327"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@327", "loc": "C432_orig.nx:76:43"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:76:17",
+        "input": ["n_131GAT_46@50", "$o@327"],
+        "output": ["n_165GAT_71@66"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:77:25",
+        "input": ["n_105GAT_32@1"],
+        "output": ["$o@328"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@328", "loc": "C432_orig.nx:77:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:77:18",
+        "input": ["$o@328", "$o@205"],
+        "output": ["n_378GAT_165@170"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:78:25",
+        "input": ["n_73GAT_22@26"],
+        "output": ["$o@329"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@329", "loc": "C432_orig.nx:78:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:78:18",
+        "input": ["$o@329", "$o@203"],
+        "output": ["n_344GAT_140@149"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:79:43",
+        "input": ["n_142GAT_41@55"],
+        "output": ["$o@330"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@330", "loc": "C432_orig.nx:79:43"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:79:17",
+        "input": ["n_143GAT_40@56", "$o@330"],
+        "output": ["n_174GAT_62@69"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:80:44",
+        "input": ["n_150GAT_37@59"],
+        "output": ["$o@331"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@331", "loc": "C432_orig.nx:80:44"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:80:17",
+        "input": ["n_151GAT_36@60", "$o@331"],
+        "output": ["n_180GAT_56@71"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:81:25",
+        "input": ["n_197GAT_55@86"],
+        "output": ["$o@332"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@332", "loc": "C432_orig.nx:81:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:81:18",
+        "input": ["$o@332", "$o@242"],
+        "output": ["n_285GAT_104@116"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:82:25",
+        "input": ["n_193GAT_61@82"],
+        "output": ["$o@333"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@333", "loc": "C432_orig.nx:82:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:82:45",
+        "input": ["n_243GAT_89@96"],
+        "output": ["$o@334"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@334", "loc": "C432_orig.nx:82:45"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:82:18",
+        "input": ["$o@333", "$o@334"],
+        "output": ["n_279GAT_108@114"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:83:25",
+        "input": ["n_371GAT_172@163"],
+        "output": ["$o@335"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@335", "loc": "C432_orig.nx:83:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:83:53",
+        "input": ["n_334GAT_150@139"],
+        "output": ["$o@336"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@336", "loc": "C432_orig.nx:83:53"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:83:81",
+        "input": ["n_242GAT_102@95"],
+        "output": ["$o@337"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@337", "loc": "C432_orig.nx:83:81"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:83:74",
+        "input": ["$o@337", "n_119GAT_52@44"],
+        "output": ["$o@338"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@338", "loc": "C432_orig.nx:83:74"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:83:46",
+        "input": ["$o@336", "$o@338"],
+        "output": ["$o@339"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@339", "loc": "C432_orig.nx:83:46"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:83:18",
+        "input": ["$o@335", "$o@339"],
+        "output": ["n_380GAT_181@172"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:86:33",
+        "input": ["n_264GAT_118@109"],
+        "output": ["$o@340"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@340", "loc": "C432_orig.nx:86:33"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:86:25",
+        "input": ["$o@340", "n_329GAT_133@37"],
+        "output": ["$o@341"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@341", "loc": "C432_orig.nx:86:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:86:69",
+        "input": ["n_264GAT_118@109", "$o@247"],
+        "output": ["$o@342"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@342", "loc": "C432_orig.nx:86:69"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:86:18",
+        "input": ["$o@341", "$o@342"],
+        "output": ["n_331GAT_149@136"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:91:53",
+        "input": ["n_418GAT_185@184"],
+        "output": ["$o@343"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@343", "loc": "C432_orig.nx:91:53"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:91:74",
+        "input": ["n_417GAT_186@183", "$o@264"],
+        "output": ["$o@344"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@344", "loc": "C432_orig.nx:91:74"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:91:46",
+        "input": ["$o@343", "$o@344"],
+        "output": ["$o@345"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@345", "loc": "C432_orig.nx:91:46"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:91:18",
+        "input": ["$o@262", "$o@345"],
+        "output": ["n_425GAT_190@188"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:92:18",
+        "input": ["n_293GAT_107@122"],
+        "output": ["n_306GAT_124@132"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:93:33",
+        "input": ["n_282GAT_106@115"],
+        "output": ["$o@346"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@346", "loc": "C432_orig.nx:93:33"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:93:25",
+        "input": ["$o@346", "n_329GAT_133@37"],
+        "output": ["$o@347"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@347", "loc": "C432_orig.nx:93:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:93:69",
+        "input": ["n_282GAT_106@115", "$o@247"],
+        "output": ["$o@348"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@348", "loc": "C432_orig.nx:93:69"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:93:18",
+        "input": ["$o@347", "$o@348"],
+        "output": ["n_341GAT_137@146"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:94:33",
+        "input": ["n_273GAT_112@112"],
+        "output": ["$o@349"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@349", "loc": "C432_orig.nx:94:33"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:94:25",
+        "input": ["$o@349", "n_329GAT_133@37"],
+        "output": ["$o@350"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@350", "loc": "C432_orig.nx:94:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:94:69",
+        "input": ["n_273GAT_112@112", "$o@247"],
+        "output": ["$o@351"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@351", "loc": "C432_orig.nx:94:69"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:94:18",
+        "input": ["$o@350", "$o@351"],
+        "output": ["n_335GAT_143@140"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:95:18",
+        "input": ["n_289GAT_115@118"],
+        "output": ["n_302GAT_128@128"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:96:32",
+        "input": ["n_180GAT_56@71"],
+        "output": ["$o@352"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@352", "loc": "C432_orig.nx:96:32"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:96:24",
+        "input": ["$o@352", "n_223GAT_84@36"],
+        "output": ["$o@353"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@353", "loc": "C432_orig.nx:96:24"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:96:66",
+        "input": ["n_180GAT_56@71", "$o@193"],
+        "output": ["$o@354"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@354", "loc": "C432_orig.nx:96:66"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:96:17",
+        "input": ["$o@353", "$o@354"],
+        "output": ["n_251GAT_85@100"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:97:25",
+        "input": ["n_147GAT_38@58"],
+        "output": ["$o@355"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@355", "loc": "C432_orig.nx:97:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:97:17",
+        "input": ["$o@355", "$o@328"],
+        "output": ["n_196GAT_57@85"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:98:45",
+        "input": ["n_99GAT_30@35"],
+        "output": ["$o@356"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@356", "loc": "C432_orig.nx:98:45"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:98:17",
+        "input": ["$o@355", "$o@356"],
+        "output": ["n_195GAT_58@84"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:99:25",
+        "input": ["n_191GAT_64@80"],
+        "output": ["$o@357"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@357", "loc": "C432_orig.nx:99:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:99:45",
+        "input": ["n_239GAT_91@94"],
+        "output": ["$o@358"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@358", "loc": "C432_orig.nx:99:45"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:99:18",
+        "input": ["$o@357", "$o@358"],
+        "output": ["n_276GAT_110@113"]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:100:17",
+        "input": ["n_150GAT_37@59", "$o@206"],
+        "output": ["n_259GAT_86@106"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:101:25",
+        "input": ["n_194GAT_60@83"],
+        "output": ["$o@359"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@359", "loc": "C432_orig.nx:101:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:101:18",
+        "input": ["$o@359", "$o@334"],
+        "output": ["n_293GAT_107@122"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:102:25",
+        "input": ["n_92GAT_28@33"],
+        "output": ["$o@360"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@360", "loc": "C432_orig.nx:102:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:102:18",
+        "input": ["$o@360", "$o@205"],
+        "output": ["n_377GAT_166@169"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:103:24",
+        "input": ["n_89GAT_27@31"],
+        "output": ["n_146GAT_39@57"]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:103:17",
+        "input": ["n_146GAT_39@57", "$o@206"],
+        "output": ["n_258GAT_88@105"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:105:33",
+        "input": ["n_279GAT_108@114"],
+        "output": ["$o@361"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@361", "loc": "C432_orig.nx:105:33"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:105:25",
+        "input": ["$o@361", "n_329GAT_133@37"],
+        "output": ["$o@362"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@362", "loc": "C432_orig.nx:105:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:105:69",
+        "input": ["n_279GAT_108@114", "$o@247"],
+        "output": ["$o@363"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@363", "loc": "C432_orig.nx:105:69"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:105:18",
+        "input": ["$o@362", "$o@363"],
+        "output": ["n_339GAT_139@144"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:106:25",
+        "input": ["n_420GAT_183@186"],
+        "output": ["$o@364"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@364", "loc": "C432_orig.nx:106:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:106:74",
+        "input": ["n_417GAT_186@183", "$o@264"],
+        "output": ["$o@365"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@365", "loc": "C432_orig.nx:106:74"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:106:46",
+        "input": ["n_419GAT_184@185", "$o@365"],
+        "output": ["$o@366"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@366", "loc": "C432_orig.nx:106:46"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:106:18",
+        "input": ["$o@364", "$o@366"],
+        "output": ["n_429GAT_189@190"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:107:51",
+        "input": ["n_374GAT_169@166"],
+        "output": ["$o@367"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@367", "loc": "C432_orig.nx:107:51"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:107:79",
+        "input": ["n_340GAT_144@145"],
+        "output": ["$o@368"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@368", "loc": "C432_orig.nx:107:79"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:107:100",
+        "input": ["n_254GAT_96@101"],
+        "output": ["$o@369"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@369", "loc": "C432_orig.nx:107:100"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:107:72",
+        "input": ["$o@368", "$o@369"],
+        "output": ["$o@370"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@370", "loc": "C432_orig.nx:107:72"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:107:44",
+        "input": ["$o@367", "$o@370"],
+        "output": ["$o@371"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@371", "loc": "C432_orig.nx:107:44"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:107:18",
+        "input": ["n_131GAT_46@50", "$o@371"],
+        "output": ["n_393GAT_178@175"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:109:17",
+        "input": ["n_76GAT_23@27"],
+        "output": ["n_142GAT_41@55"]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:110:18",
+        "input": ["$o@356", "$o@203"],
+        "output": ["n_346GAT_136@151"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:111:25",
+        "input": ["n_151GAT_36@60"],
+        "output": ["$o@372"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@372", "loc": "C432_orig.nx:111:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:111:17",
+        "input": ["$o@372", "$o@252"],
+        "output": ["n_198GAT_54@87"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:112:43",
+        "input": ["n_134GAT_45@51"],
+        "output": ["$o@373"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@373", "loc": "C432_orig.nx:112:43"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:112:17",
+        "input": ["n_135GAT_44@52", "$o@373"],
+        "output": ["n_168GAT_68@67"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:113:32",
+        "input": ["n_177GAT_59@70"],
+        "output": ["$o@374"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@374", "loc": "C432_orig.nx:113:32"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:113:24",
+        "input": ["$o@374", "n_223GAT_84@36"],
+        "output": ["$o@375"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@375", "loc": "C432_orig.nx:113:24"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:113:66",
+        "input": ["n_177GAT_59@70", "$o@193"],
+        "output": ["$o@376"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@376", "loc": "C432_orig.nx:113:66"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:113:17",
+        "input": ["$o@375", "$o@376"],
+        "output": ["n_247GAT_87@98"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:114:25",
+        "input": ["n_303GAT_127@129"],
+        "output": ["$o@377"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@377", "loc": "C432_orig.nx:114:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:114:46",
+        "input": ["n_333GAT_145@138"],
+        "output": ["$o@378"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@378", "loc": "C432_orig.nx:114:46"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:114:18",
+        "input": ["$o@377", "$o@378"],
+        "output": ["n_351GAT_157@156"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:115:25",
+        "input": ["n_34GAT_10@13"],
+        "output": ["$o@379"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@379", "loc": "C432_orig.nx:115:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:115:18",
+        "input": ["$o@379", "$o@203"],
+        "output": ["n_338GAT_146@143"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:116:45",
+        "input": ["n_112GAT_34@3"],
+        "output": ["$o@380"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@380", "loc": "C432_orig.nx:116:45"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:116:17",
+        "input": ["$o@372", "$o@380"],
+        "output": ["n_197GAT_55@86"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:117:25",
+        "input": ["n_47GAT_14@17"],
+        "output": ["$o@381"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@381", "loc": "C432_orig.nx:117:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:117:18",
+        "input": ["$o@381", "$o@203"],
+        "output": ["n_340GAT_144@145"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:121:24",
+        "input": ["n_37GAT_11@14"],
+        "output": ["n_130GAT_47@49"]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:121:17",
+        "input": ["n_130GAT_47@49", "$o@206"],
+        "output": ["n_254GAT_96@101"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:122:25",
+        "input": ["n_306GAT_124@132"],
+        "output": ["$o@382"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@382", "loc": "C432_orig.nx:122:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:122:46",
+        "input": ["n_339GAT_139@144"],
+        "output": ["$o@383"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@383", "loc": "C432_orig.nx:122:46"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:122:18",
+        "input": ["$o@382", "$o@383"],
+        "output": ["n_354GAT_154@159"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:123:25",
+        "input": ["n_157GAT_79@62"],
+        "output": ["$o@384"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@384", "loc": "C432_orig.nx:123:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:123:18",
+        "input": ["$o@384", "$o@208"],
+        "output": ["n_260GAT_120@107"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:124:25",
+        "input": ["n_417GAT_186@183"],
+        "output": ["$o@385"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@385", "loc": "C432_orig.nx:124:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:124:18",
+        "input": ["$o@385", "$o@264"],
+        "output": ["n_422GAT_192@187"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:125:25",
+        "input": ["n_139GAT_42@54"],
+        "output": ["$o@386"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@386", "loc": "C432_orig.nx:125:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:125:17",
+        "input": ["$o@386", "$o@329"],
+        "output": ["n_191GAT_64@80"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:126:45",
+        "input": ["n_79GAT_24@28"],
+        "output": ["$o@387"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@387", "loc": "C432_orig.nx:126:45"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:126:17",
+        "input": ["$o@386", "$o@387"],
+        "output": ["n_192GAT_63@81"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:127:25",
+        "input": ["n_143GAT_40@56"],
+        "output": ["$o@388"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@388", "loc": "C432_orig.nx:127:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:127:17",
+        "input": ["$o@388", "$o@295"],
+        "output": ["n_193GAT_61@82"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:128:18",
+        "input": ["n_292GAT_109@121"],
+        "output": ["n_305GAT_125@131"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:129:32",
+        "input": ["n_174GAT_62@69"],
+        "output": ["$o@389"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@389", "loc": "C432_orig.nx:129:32"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:129:24",
+        "input": ["$o@389", "n_223GAT_84@36"],
+        "output": ["$o@390"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@390", "loc": "C432_orig.nx:129:24"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:129:66",
+        "input": ["n_174GAT_62@69", "$o@193"],
+        "output": ["$o@391"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@391", "loc": "C432_orig.nx:129:66"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:129:17",
+        "input": ["$o@390", "$o@391"],
+        "output": ["n_243GAT_89@96"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:130:25",
+        "input": ["n_192GAT_63@81"],
+        "output": ["$o@392"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@392", "loc": "C432_orig.nx:130:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:130:18",
+        "input": ["$o@392", "$o@358"],
+        "output": ["n_292GAT_109@121"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:131:18",
+        "input": ["n_288GAT_117@117"],
+        "output": ["n_301GAT_129@127"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:134:25",
+        "input": ["n_184GAT_75@73"],
+        "output": ["$o@393"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@393", "loc": "C432_orig.nx:134:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:134:18",
+        "input": ["$o@393", "$o@261"],
+        "output": ["n_288GAT_117@117"]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:135:18",
+        "input": ["$o@387", "$o@205"],
+        "output": ["n_376GAT_167@168"]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:136:18",
+        "input": ["$o@205", "$o@210"],
+        "output": ["n_371GAT_172@163"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:137:25",
+        "input": ["n_188GAT_69@77"],
+        "output": ["$o@394"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@394", "loc": "C432_orig.nx:137:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:137:18",
+        "input": ["$o@394", "$o@299"],
+        "output": ["n_290GAT_113@119"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:138:50",
+        "input": ["n_373GAT_170@165"],
+        "output": ["$o@395"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@395", "loc": "C432_orig.nx:138:50"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:138:78",
+        "input": ["n_338GAT_146@143"],
+        "output": ["$o@396"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@396", "loc": "C432_orig.nx:138:78"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:138:99",
+        "input": ["n_250GAT_98@99"],
+        "output": ["$o@397"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@397", "loc": "C432_orig.nx:138:99"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:138:71",
+        "input": ["$o@396", "$o@397"],
+        "output": ["$o@398"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@398", "loc": "C432_orig.nx:138:71"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:138:43",
+        "input": ["$o@395", "$o@398"],
+        "output": ["$o@399"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@399", "loc": "C432_orig.nx:138:43"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:138:18",
+        "input": ["n_127GAT_48@48", "$o@399"],
+        "output": ["n_386GAT_179@174"]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:139:17",
+        "input": ["n_142GAT_41@55", "$o@206"],
+        "output": ["n_257GAT_90@104"]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:140:17",
+        "input": ["$o@388", "$o@360"],
+        "output": ["n_194GAT_60@83"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:141:18",
+        "input": ["n_291GAT_111@120"],
+        "output": ["n_304GAT_126@130"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:142:25",
+        "input": ["n_304GAT_126@130"],
+        "output": ["$o@400"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@400", "loc": "C432_orig.nx:142:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:142:46",
+        "input": ["n_335GAT_143@140"],
+        "output": ["$o@401"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@401", "loc": "C432_orig.nx:142:46"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:142:18",
+        "input": ["$o@400", "$o@401"],
+        "output": ["n_352GAT_156@157"]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:143:150",
+        "input": ["n_386GAT_179@174", "n_381GAT_180@173"],
+        "output": ["$o@402"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@402", "loc": "C432_orig.nx:143:150"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:143:128",
+        "input": ["n_393GAT_178@175", "$o@402"],
+        "output": ["$o@403"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@403", "loc": "C432_orig.nx:143:128"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:143:106",
+        "input": ["n_399GAT_177@176", "$o@403"],
+        "output": ["$o@404"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@404", "loc": "C432_orig.nx:143:106"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:143:84",
+        "input": ["n_404GAT_176@177", "$o@404"],
+        "output": ["$o@405"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@405", "loc": "C432_orig.nx:143:84"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:143:62",
+        "input": ["n_407GAT_175@178", "$o@405"],
+        "output": ["$o@406"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@406", "loc": "C432_orig.nx:143:62"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:143:40",
+        "input": ["n_411GAT_174@179", "$o@406"],
+        "output": ["$o@407"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@407", "loc": "C432_orig.nx:143:40"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:143:18",
+        "input": ["n_414GAT_173@180", "$o@407"],
+        "output": ["n_416GAT_182@182"]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:144:17",
+        "input": ["$o@198", "$o@204"],
+        "output": ["n_190GAT_66@79"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:145:32",
+        "input": ["n_159GAT_77@64"],
+        "output": ["$o@408"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@408", "loc": "C432_orig.nx:145:32"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:145:24",
+        "input": ["$o@408", "n_223GAT_84@36"],
+        "output": ["$o@409"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@409", "loc": "C432_orig.nx:145:24"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:145:66",
+        "input": ["n_159GAT_77@64", "$o@193"],
+        "output": ["$o@410"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@410", "loc": "C432_orig.nx:145:66"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:145:17",
+        "input": ["$o@409", "$o@410"],
+        "output": ["n_227GAT_99@90"]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:146:17",
+        "input": ["$o@218", "$o@381"],
+        "output": ["n_187GAT_70@76"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:148:17",
+        "input": ["n_63GAT_19@23"],
+        "output": ["n_138GAT_43@53"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:149:18",
+        "input": ["n_411GAT_174@179"],
+        "output": ["n_420GAT_183@186"]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:150:17",
+        "input": ["n_138GAT_43@53", "$o@206"],
+        "output": ["n_256GAT_92@103"]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:151:17",
+        "input": ["n_126GAT_49@47", "$o@206"],
+        "output": ["n_250GAT_98@99"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:152:18",
+        "input": ["n_380GAT_181@172"],
+        "output": ["n_415GAT_187@181"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:153:25",
+        "input": ["n_301GAT_129@127"],
+        "output": ["$o@411"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@411", "loc": "C432_orig.nx:153:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:153:46",
+        "input": ["n_331GAT_149@136"],
+        "output": ["$o@412"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@412", "loc": "C432_orig.nx:153:46"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:153:18",
+        "input": ["$o@411", "$o@412"],
+        "output": ["n_349GAT_159@154"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:154:25",
+        "input": ["n_185GAT_73@74"],
+        "output": ["$o@413"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@413", "loc": "C432_orig.nx:154:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:154:18",
+        "input": ["$o@413", "$o@244"],
+        "output": ["n_267GAT_116@110"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:155:33",
+        "input": ["n_276GAT_110@113"],
+        "output": ["$o@414"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@414", "loc": "C432_orig.nx:155:33"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:155:25",
+        "input": ["$o@414", "n_329GAT_133@37"],
+        "output": ["$o@415"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@415", "loc": "C432_orig.nx:155:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:155:69",
+        "input": ["n_276GAT_110@113", "$o@247"],
+        "output": ["$o@416"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@416", "loc": "C432_orig.nx:155:69"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:155:18",
+        "input": ["$o@415", "$o@416"],
+        "output": ["n_337GAT_141@142"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:156:33",
+        "input": ["n_260GAT_120@107"],
+        "output": ["$o@417"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@417", "loc": "C432_orig.nx:156:33"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:156:25",
+        "input": ["$o@417", "n_329GAT_133@37"],
+        "output": ["$o@418"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@418", "loc": "C432_orig.nx:156:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:156:69",
+        "input": ["n_260GAT_120@107", "$o@247"],
+        "output": ["$o@419"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@419", "loc": "C432_orig.nx:156:69"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:156:18",
+        "input": ["$o@418", "$o@419"],
+        "output": ["n_330GAT_151@135"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:157:24",
+        "input": ["n_50GAT_15@19"],
+        "output": ["n_134GAT_45@51"]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:157:17",
+        "input": ["n_134GAT_45@51", "$o@206"],
+        "output": ["n_255GAT_94@102"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:158:25",
+        "input": ["n_127GAT_48@48"],
+        "output": ["$o@420"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@420", "loc": "C432_orig.nx:158:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:158:17",
+        "input": ["$o@420", "$o@379"],
+        "output": ["n_185GAT_73@74"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:159:25",
+        "input": ["n_190GAT_66@79"],
+        "output": ["$o@421"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@421", "loc": "C432_orig.nx:159:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:159:18",
+        "input": ["$o@421", "$o@196"],
+        "output": ["n_291GAT_111@120"]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:162:17",
+        "input": ["$o@420", "$o@285"],
+        "output": ["n_186GAT_72@75"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:163:25",
+        "input": ["n_307GAT_123@133"],
+        "output": ["$o@422"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@422", "loc": "C432_orig.nx:163:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:163:46",
+        "input": ["n_341GAT_137@146"],
+        "output": ["$o@423"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@423", "loc": "C432_orig.nx:163:46"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:163:18",
+        "input": ["$o@422", "$o@423"],
+        "output": ["n_355GAT_153@160"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:164:25",
+        "input": ["n_123GAT_50@46"],
+        "output": ["$o@424"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@424", "loc": "C432_orig.nx:164:25"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:164:17",
+        "input": ["$o@424", "$o@202"],
+        "output": ["n_183GAT_76@72"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:165:45",
+        "input": ["n_27GAT_8@11"],
+        "output": ["$o@425"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@425", "loc": "C432_orig.nx:165:45"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:165:17",
+        "input": ["$o@424", "$o@425"],
+        "output": ["n_184GAT_75@73"]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:168:18",
+        "input": ["$o@425", "$o@205"],
+        "output": ["n_372GAT_171@164"]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:169:18",
+        "input": ["$o@380", "$o@203"],
+        "output": ["n_347GAT_134@152"]
+      },
+      {
+        "type": "builtin", "id": "AND", "loc": "C432_orig.nx:170:17",
+        "input": ["$o@209", "$o@240"],
+        "output": ["n_157GAT_79@62"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:171:43",
+        "input": ["n_146GAT_39@57"],
+        "output": ["$o@426"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@426", "loc": "C432_orig.nx:171:43"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "OR", "loc": "C432_orig.nx:171:17",
+        "input": ["n_147GAT_38@58", "$o@426"],
+        "output": ["n_177GAT_59@70"]
+      },
+      {
+        "type": "builtin", "id": "NOT", "loc": "C432_orig.nx:172:18",
+        "input": ["n_295GAT_103@124"],
+        "output": ["n_308GAT_121@134"]
+      }
+    ]
+  }
+}

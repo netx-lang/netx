@@ -3,9 +3,11 @@ package pascal.netx;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import pascal.netx.backend.graphviz.DotTransformer;
+import pascal.netx.backend.optimization.GraphTransformer;
 import pascal.netx.backend.verilog.VerilogTransformer;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXBuilder;
+import pascal.netx.compiler.io.NXPrinter;
 import pascal.netx.util.print.NotepadWriter;
 import picocli.CommandLine;
 
@@ -21,6 +23,7 @@ public class Main {
     static void main(String[] args) {
         var cmd = new CommandLine(new NetXApp())
                 .addSubcommand("compile", new CompileCommand())
+                .addSubcommand("opt", new OptimizeCommand())
                 .addSubcommand("dump", new DumpCommand());
         int exitCode = cmd.execute(args);
         System.exit(exitCode);
@@ -198,6 +201,55 @@ public class Main {
             public Integer call() {
                 return handleExecution(() -> new DotTransformer(notePad(), getSourceNode(), depth).parse());
             }
+        }
+    }
+
+    @CommandLine.Command(
+            name = "opt",
+            usageHelpAutoWidth = true,
+            description = "Optimize the NXON representation"
+    )
+    static final class OptimizeCommand extends BaseCommand {
+        @CommandLine.Option(
+                names = {"-m", "--minimal"},
+                description = "output NXON in a single line without formatting",
+                defaultValue = "false"
+        )
+        private boolean minimal;
+
+        @CommandLine.Option(
+                names = {"--area"},
+                description = "weight for area when computing cost function",
+                defaultValue = "1"
+        )
+        private double area;
+
+        @CommandLine.Option(
+                names = {"--delay"},
+                description = "weight for delay when computing cost function",
+                defaultValue = "1"
+        )
+        private double delay;
+
+        @Override
+        public Integer call() {
+            return handleExecution(() -> {
+                var transformer = new GraphTransformer(notePad(), getSourceNode());
+                transformer.parse();
+                transformer.rewrite();
+                transformer.saturate(area, delay);
+
+                var node = transformer.dumpNxon();
+                if (minimal) {
+                    if (output == null) {
+                        OBJECT_MAPPER.writeValue(System.out, node);
+                    } else {
+                        OBJECT_MAPPER.writeValue(output.toAbsolutePath().normalize().toFile(), node);
+                    }
+                } else {
+                    new NXPrinter(notePad()).print(node);
+                }
+            });
         }
     }
 }

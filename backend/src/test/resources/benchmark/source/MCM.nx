@@ -1,0 +1,5 @@
+component MCM(args) : [x] -> [Y] {
+  wire x of bit(32);
+  wire Y[length(args)] of bit(32);
+  Y <> [MUL <> [x, arg] | arg in args];
+}

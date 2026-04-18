@@ -1,0 +1,31 @@
+{
+  "total": 5,
+  "top_input": ["a", "b", "c"],
+  "top_output": ["y"],
+  "design": {
+    "type": "component",
+    "id": "FMA",
+    "loc": "FMA.nx:1:0",
+    "input": ["a@0", "b@1", "c@2"],
+    "output": ["y@3"],
+    "members": [
+      {"type": "wire", "width": 16, "id": "a@0", "loc": "FMA.nx:2:7"},
+      {"type": "wire", "width": 16, "id": "b@1", "loc": "FMA.nx:2:10"},
+      {"type": "wire", "width": 16, "id": "c@2", "loc": "FMA.nx:2:13"},
+      {"type": "wire", "width": 16, "id": "y@3", "loc": "FMA.nx:2:16"},
+      {
+        "type": "builtin", "id": "MUL", "loc": "FMA.nx:4:4",
+        "input": ["a@0", "b@1"],
+        "output": ["$o@4"],
+        "members": [
+          {"type": "wire", "width": 16, "id": "$o@4", "loc": "FMA.nx:4:4"}
+        ]
+      },
+      {
+        "type": "builtin", "id": "ADD", "loc": "FMA.nx:3:7",
+        "input": ["$o@4", "c@2"],
+        "output": ["y@3"]
+      }
+    ]
+  }
+}

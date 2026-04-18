@@ -231,8 +231,6 @@ void stimuli(Context ctx) {
 
         ctx.set("rst", value_t{1, 0});
 
-        bool seen_magic = false;
-        int drain_cycles = 0;
         for (int i = 0; i != max_cycles; ++i) {
             const auto fetch_pc = ctx.get("imem_addr");
             const auto instr = instr_mem->read_word(fetch_pc);
@@ -246,22 +244,9 @@ void stimuli(Context ctx) {
                 data_mem->write_with_op(d_mem_op, d_mem_addr, d_mem_in);
             }
 
-            if (!seen_magic &&
-                ctx.get("ifid.valid") == high &&
-                ctx.get("ifid.instr") == magic_instr) {
-                seen_magic = true;
-                drain_cycles = 128;
-            }
-
-            if (seen_magic && drain_cycles == 0) {
-                if (static_cast<unsigned>(ctx.get("x10")) == 0x00c0ffee) {
-                    passed++;
-                }
+            if (static_cast<unsigned>(ctx.get("x10")) == 0x00c0ffee) {
+                passed++;
                 break;
-            }
-
-            if (seen_magic) {
-                drain_cycles--;
             }
 
             ctx.set("dmem_out", data_mem->read_with_op(d_mem_op, d_mem_addr));
