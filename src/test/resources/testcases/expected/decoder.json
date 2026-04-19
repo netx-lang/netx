@@ -5,7 +5,7 @@
   "design": {
     "type": "component",
     "id": "top",
-    "loc": "decoder.nx:1:10",
+    "loc": "decoder.nx:1:0",
     "input": ["input@0"],
     "output": ["output@1"],
     "members": [

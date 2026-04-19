@@ -5,7 +5,7 @@
   "design": {
     "type": "component",
     "id": "Divide_by_3",
-    "loc": "divide_by_3.nx:1:10",
+    "loc": "divide_by_3.nx:1:0",
     "input": ["clk@0"],
     "output": ["clk_3@1"],
     "members": [
@@ -40,19 +40,19 @@
       },
       {
         "type": "builtin", "id": "REGISTER", "loc": "divide_by_3.nx:5:29",
-        "input": ["$o@7", "clk@0"],
+        "input": ["clk@0", "$o@7"],
         "output": ["a@2"],
         "attribute": {"pos_edge": "true"}
       },
       {
         "type": "builtin", "id": "REGISTER", "loc": "divide_by_3.nx:5:29",
-        "input": ["a@2", "clk@0"],
+        "input": ["clk@0", "a@2"],
         "output": ["b@3"],
         "attribute": {"pos_edge": "true"}
       },
       {
         "type": "builtin", "id": "REGISTER", "loc": "divide_by_3.nx:5:29",
-        "input": ["b@3", "clk@0"],
+        "input": ["clk@0", "b@3"],
         "output": ["c@4"],
         "attribute": {"pos_edge": "false"}
       },

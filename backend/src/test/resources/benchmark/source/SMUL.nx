@@ -1,17 +1,18 @@
 component SMUL : [a, b] -> [y] {
-  wire a, b, y of bit(16);
+  wire a, b of bit(16);
+  wire y of bit(32);
   y <> ADD <> [
     MUX <> [
-      b[i], SHL <> [a, i], 16'd0
+      b[i], SHL <> [CAST(32) <> a, i], 32'd0
     ] | i in [0..16]
   ];
 }
 
 component MUX : [sel, a, b] -> [out] {
-  wire a, b, out of bit(16);
+  wire a, b, out of bit(32);
   wire sel       of bit(1);
 
-  for i in [0..16] {
+  for i in [0..32] {
     out[i] <> OR <> [
       AND <> [a[i], sel],
       AND <> [b[i], NOT <> sel]

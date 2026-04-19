@@ -5,7 +5,7 @@
   "design": {
     "type": "component",
     "id": "top",
-    "loc": "bundle.nx:6:10",
+    "loc": "bundle.nx:1:0",
     "input": ["pin[0].valid@0", "pin[0].load@1", "pin[1].valid@2", "pin[1].load@3", "pin[2].valid@4", "pin[2].load@5", "pin[3].valid@6", "pin[3].load@7"],
     "output": ["pout.valid@8", "pout.load@9"],
     "members": [

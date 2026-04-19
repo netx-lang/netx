@@ -5,7 +5,7 @@
   "design": {
     "type": "component",
     "id": "top",
-    "loc": "enum.nx:14:10",
+    "loc": "enum.nx:1:0",
     "input": ["i@0", "rst@1", "clk@2"],
     "output": ["state@3"],
     "members": [

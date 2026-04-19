@@ -5,7 +5,7 @@
   "design": {
     "type": "component",
     "id": "top",
-    "loc": "adder.nx:1:10",
+    "loc": "adder.nx:1:0",
     "input": ["a@0", "b@1"],
     "output": ["c@2"],
     "members": [

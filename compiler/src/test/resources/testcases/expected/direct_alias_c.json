@@ -5,7 +5,7 @@
   "design": {
     "type": "component",
     "id": "top",
-    "loc": "test.nx:1:10",
+    "loc": "test.nx:1:0",
     "input": ["i@0"],
     "output": ["i@0[4]"],
     "members": [

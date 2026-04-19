@@ -5,7 +5,7 @@
   "design": {
     "type": "component",
     "id": "counter",
-    "loc": "counter.nx:1:10",
+    "loc": "counter.nx:1:0",
     "input": ["clk@0", "rst@1"],
     "output": ["count@2"],
     "members": [

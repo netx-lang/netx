@@ -5,7 +5,7 @@
   "design": {
     "type": "component",
     "id": "test",
-    "loc": "bind_1.nx:1:10",
+    "loc": "bind_1.nx:1:0",
     "input": ["a@0", "b@1", "c@2"],
     "output": ["d@3"],
     "members": [

@@ -5,7 +5,7 @@
   "design": {
     "type": "component",
     "id": "top",
-    "loc": "simple_timer.nx:1:10",
+    "loc": "simple_timer.nx:1:0",
     "input": ["clk_50@0"],
     "output": ["hex[0]@1", "hex[1]@2", "hex[2]@3", "hex[3]@4", "hex[4]@5", "hex[5]@6", "hex[6]@7", "hex[7]@8"],
     "members": [
@@ -62,7 +62,7 @@
                     "output": ["mask@18[0]"]
                   },
                   {
-                    "type": "builtin", "id": "TO", "loc": "",
+                    "type": "builtin", "id": "TO", "loc": "simple_timer.nx:62:12",
                     "input": ["code@15"],
                     "output": ["mask@18[1]"]
                   }
@@ -139,7 +139,7 @@
                     "output": ["mask@25[0]"]
                   },
                   {
-                    "type": "builtin", "id": "TO", "loc": "",
+                    "type": "builtin", "id": "TO", "loc": "simple_timer.nx:62:12",
                     "input": ["code@15"],
                     "output": ["mask@25[1]"]
                   }
@@ -208,7 +208,7 @@
                 "output": ["mask@31[0]"]
               },
               {
-                "type": "builtin", "id": "TO", "loc": "",
+                "type": "builtin", "id": "TO", "loc": "simple_timer.nx:62:12",
                 "input": ["code@28"],
                 "output": ["mask@31[1]"]
               }

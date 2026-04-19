@@ -7,7 +7,7 @@
   "design": {
     "type": "component",
     "id": "top",
-    "loc": "attr_3.nx:1:10",
+    "loc": "attr_3.nx:1:0",
     "input": [
     ],
     "output": [

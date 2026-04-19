@@ -6,7 +6,7 @@
   "design": {
     "type": "component",
     "id": "frege",
-    "loc": "frege.nx:2:10",
+    "loc": "frege.nx:2:0",
     "input": [
     ],
     "output": ["result@0"],

@@ -7,7 +7,7 @@
   "design": {
     "type": "component",
     "id": "test",
-    "loc": "bind_2.nx:1:10",
+    "loc": "bind_2.nx:1:0",
     "input": [
     ],
     "output": [
