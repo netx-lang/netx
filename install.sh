@@ -98,9 +98,9 @@ check_requirements
 # Build the distribution
 echo "Building NetX distribution..."
 if [ "$PLATFORM" = "windows" ]; then
-    ./gradlew.bat installDist buildCMake
+    ./gradlew.bat --no-daemon installDist buildCMake
 else
-    ./gradlew installDist buildCMake
+    ./gradlew --no-daemon installDist buildCMake
 fi
 
 echo "Building Rust analysis prototype..."

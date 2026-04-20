@@ -159,16 +159,24 @@ namespace {
         );
         std::vector<std::thread> workers;
         std::vector<sample_accumulator> partials(worker_count);
+        std::vector<nxon::parse_context> contexts;
         workers.reserve(worker_count > 0 ? worker_count - 1 : 0);
+        contexts.reserve(worker_count > 0 ? worker_count - 1 : 0);
+
+        // Clone worker-local simulation contexts before any thread starts mutating
+        // circuit state. Copying `main_ctx` concurrently with live sampling would
+        // race on internal vectors/maps and can corrupt allocator state.
+        for (size_t worker = 1; worker < worker_count; ++worker) {
+            contexts.push_back(main_ctx);
+        }
 
         const uint64_t base = samples / worker_count;
         const uint64_t extra = samples % worker_count;
         for (size_t worker = 1; worker < worker_count; ++worker) {
             const uint64_t worker_samples = base + (worker < extra ? 1 : 0);
             workers.emplace_back([&, worker, worker_samples] {
-                auto local_ctx = main_ctx;
                 partials[worker] = sample_worker(
-                    local_ctx,
+                    contexts[worker - 1],
                     inputs,
                     wires,
                     worker_samples,
