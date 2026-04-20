@@ -40,6 +40,15 @@ LIB_DIR="$INSTALL_DIR/lib"
 echo "NetX Installation Script"
 echo "Platform: $PLATFORM"
 echo "Install directory: $INSTALL_DIR"
+if [ -n "${CMAKE:-}" ]; then
+    echo "CMake: $CMAKE"
+fi
+if [ -n "${CC:-}" ]; then
+    echo "C compiler: $CC"
+fi
+if [ -n "${CXX:-}" ]; then
+    echo "C++ compiler: $CXX"
+fi
 echo
 
 # Check for required tools
@@ -64,6 +73,16 @@ check_requirements() {
         exit 1
     fi
 
+    if [ -n "${CC:-}" ] && ! command -v "$CC" >/dev/null 2>&1; then
+        echo "Error: CC is set to '$CC' but that executable is not on PATH."
+        exit 1
+    fi
+
+    if [ -n "${CXX:-}" ] && ! command -v "$CXX" >/dev/null 2>&1; then
+        echo "Error: CXX is set to '$CXX' but that executable is not on PATH."
+        exit 1
+    fi
+
     echo "Requirements check passed."
 }
 
@@ -72,6 +91,9 @@ create_directories() {
     echo "Creating directories..."
     mkdir -p "$BIN_DIR" "$LIB_DIR"
 }
+
+# Validate toolchain before starting any build work.
+check_requirements
 
 # Build the distribution
 echo "Building NetX distribution..."
@@ -86,8 +108,6 @@ echo "Building Rust analysis prototype..."
     cd prob-analysis
     cargo build --release
 )
-
-check_requirements
 create_directories
 
 # Copy all JAR files to lib directory (separate, not bundled)

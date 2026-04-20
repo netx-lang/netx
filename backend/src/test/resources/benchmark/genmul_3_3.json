@@ -5,7 +5,7 @@
   "design": {
     "type": "component",
     "id": "Mult_3_3",
-    "loc": "genmul_3_3.nx:66:10",
+    "loc": "genmul_3_3.nx:1:0",
     "input": ["In1@0", "In2@1"],
     "output": ["Out@2"],
     "members": [
@@ -213,17 +213,17 @@
             ]
           },
           {
-            "type": "builtin", "id": "TO", "loc": "",
+            "type": "builtin", "id": "TO", "loc": "genmul_3_3.nx:81:16",
             "input": ["P0@3"],
             "output": ["R1@8[0]"]
           },
           {
-            "type": "builtin", "id": "TO", "loc": "",
+            "type": "builtin", "id": "TO", "loc": "genmul_3_3.nx:81:16",
             "input": ["P3@6[1]"],
             "output": ["R2@9[0]"]
           },
           {
-            "type": "builtin", "id": "TO", "loc": "",
+            "type": "builtin", "id": "TO", "loc": "genmul_3_3.nx:81:16",
             "input": ["P4@7"],
             "output": ["R2@9[1]"]
           }
@@ -304,17 +304,17 @@
         ]
       },
       {
-        "type": "builtin", "id": "TO", "loc": "",
+        "type": "builtin", "id": "TO", "loc": "genmul_3_3.nx:1:0",
         "input": ["R1@8[0]"],
         "output": ["Out@2[0]"]
       },
       {
-        "type": "builtin", "id": "TO", "loc": "",
+        "type": "builtin", "id": "TO", "loc": "genmul_3_3.nx:1:0",
         "input": ["R1@8[1]"],
         "output": ["Out@2[1]"]
       },
       {
-        "type": "builtin", "id": "TO", "loc": "",
+        "type": "builtin", "id": "TO", "loc": "genmul_3_3.nx:1:0",
         "input": ["R1@8[2]"],
         "output": ["Out@2[2]"]
       }

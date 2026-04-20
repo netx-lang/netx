@@ -5,7 +5,7 @@
   "design": {
     "type": "component",
     "id": "MCM",
-    "loc": "MCM.nx:1:10",
+    "loc": "MCM.nx:1:0",
     "input": ["x@0"],
     "output": ["Y[0]@1", "Y[1]@2"],
     "members": [

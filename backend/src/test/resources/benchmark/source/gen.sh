@@ -6,10 +6,22 @@ nx compile MCM.nx --top MCM --attrs 'args=[3, 7, 21]'  --output ../MCM_3_7_21.js
 nx compile MCM.nx --top MCM --attrs 'args=[5, 93]'     --output ../MCM_5_93.json
 nx compile MCM.nx --top MCM --attrs 'args=[7, 19, 31]' --output ../MCM_7_19_31.json
 
+python3 ../scripts/verilog_to_nx.py EPFL/adder.v
+python3 ../scripts/verilog_to_nx.py EPFL/bar.v
+python3 ../scripts/verilog_to_nx.py EPFL/max.v
+python3 ../scripts/verilog_to_nx.py EPFL/cavlc.v
+python3 ../scripts/verilog_to_nx.py EPFL/sin.v
+python3 ../scripts/verilog_to_nx.py EPFL/square.v
+python3 ../scripts/verilog_to_nx.py EPFL/multiplier.v
+python3 ../scripts/verilog_to_nx.py EPFL/log2.v
 nx compile EPFL/adder.nx --output ../adder.json
 nx compile EPFL/bar.nx --output ../bar.json
 nx compile EPFL/max.nx --output ../max.json
 nx compile EPFL/cavlc.nx --output ../cavlc.json
+nx compile EPFL/sin.nx --output ../sin.json
+nx compile EPFL/square.nx --output ../square.json
+nx compile EPFL/multiplier.nx --output ../multiplier.json
+nx compile EPFL/log2.nx --output ../log2.json
 
 nx compile genmul/genmul_3_3.nx --top Mult_3_3 --output ../genmul_3_3.json
 nx compile genmul/genmul_5_5.nx --top Mult_5_5 --output ../genmul_5_5.json

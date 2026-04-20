@@ -5,7 +5,7 @@
   "design": {
     "type": "component",
     "id": "top",
-    "loc": "cavlc.nx:1:10",
+    "loc": "cavlc.nx:1:0",
     "input": ["ctable_0@0", "ctable_1@1", "ctable_2@2", "totalcoeffs_0@3", "totalcoeffs_1@4", "totalcoeffs_2@5", "totalcoeffs_3@6", "totalcoeffs_4@7", "trailingones_0@8", "trailingones_1@9"],
     "output": ["coeff_token_0@10", "coeff_token_1@11", "coeff_token_2@12", "coeff_token_3@13", "coeff_token_4@14", "coeff_token_5@15", "ctoken_len_0@16", "ctoken_len_1@17", "ctoken_len_2@18", "ctoken_len_3@19", "ctoken_len_4@20"],
     "members": [

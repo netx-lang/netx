@@ -5,7 +5,7 @@
   "design": {
     "type": "component",
     "id": "b12",
-    "loc": "b12.nx:1:10",
+    "loc": "b12.nx:1:0",
     "input": ["K_0@0", "K_1@1", "K_2@2", "K_3@3", "START@4", "clk@5"],
     "output": ["NLOSS_REG@6", "NL_REG_0@7", "NL_REG_1@8", "NL_REG_2@9", "NL_REG_3@10", "SPEAKER_REG@11"],
     "members": [

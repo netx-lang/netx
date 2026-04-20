@@ -40,9 +40,16 @@ tasks.register("configureCMake", Exec::class) {
     group = "build"
     description = "Configures the C++ project using CMake."
     workingDir = cppBuildDir
-    commandLine = listOf(
+    val configureArgs = mutableListOf(
         "cmake", cmakeSourceDir.absolutePath, "-DCMAKE_BUILD_TYPE=Release", "-DTESTING=OFF"
     )
+    System.getenv("CC")?.takeIf { it.isNotBlank() }?.let {
+        configureArgs += "-DCMAKE_C_COMPILER=$it"
+    }
+    System.getenv("CXX")?.takeIf { it.isNotBlank() }?.let {
+        configureArgs += "-DCMAKE_CXX_COMPILER=$it"
+    }
+    commandLine = configureArgs
     doFirst {
         cppBuildDir.mkdirs()
     }

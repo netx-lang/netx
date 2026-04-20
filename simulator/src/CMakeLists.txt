@@ -15,12 +15,16 @@ add_subdirectory(circuit)
 add_executable(nxsim_cli cli.cpp)
 target_link_libraries(nxsim_cli PRIVATE nxsim cli::cli)
 
+add_executable(nxsim_mc mc.cpp)
+target_link_libraries(nxsim_mc PRIVATE nxsim)
+
 # Suppress Warning when using GCC with Boost and LTO
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_INTERPROCEDURAL_OPTIMIZATION)
     target_link_options(nxsim_cli PRIVATE -Wno-error=maybe-uninitialized)
+    target_link_options(nxsim_mc PRIVATE -Wno-error=maybe-uninitialized)
 endif()
 
-install(TARGETS nxsim nxsim_cli
+install(TARGETS nxsim nxsim_cli nxsim_mc
         EXPORT nxsimTargets
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
