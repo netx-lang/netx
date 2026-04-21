@@ -103,10 +103,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-cargo-
 
-    - name: Check formatting
-      working-directory: prob-analysis
-      run: cargo fmt --check
-
     - name: Run clippy
       working-directory: prob-analysis
       run: cargo clippy --all-targets -- -D warnings

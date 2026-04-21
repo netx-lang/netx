@@ -107,6 +107,7 @@ namespace {
 
     struct wire_stat {
         std::string signal;
+        nxon::id_t node_id = 0;
         size_t width = 1;
         double expectation = 0.0;
     };
@@ -119,7 +120,7 @@ namespace {
     sample_accumulator sample_worker(
         nxon::parse_context &ctx,
         const std::vector<std::string> &inputs,
-        const std::vector<std::pair<std::string, nxon::id_t>> &wires,
+        const std::vector<wire_stat> &wires,
         const uint64_t samples,
         const uint64_t seed
     ) {
@@ -134,8 +135,7 @@ namespace {
                 ctx.set(input, random_value(ctx.size(input), rng));
             }
             for (size_t i = 0; i < wires.size(); ++i) {
-                const auto &[name, id] = wires[i];
-                const auto value = ctx.iget(id);
+                const auto value = ctx.iget(wires[i].node_id);
                 if (static_cast<bool>(value)) {
                     result.high_counts[i] += 1;
                 }
@@ -148,7 +148,7 @@ namespace {
     std::vector<wire_stat> sample_probabilities(
         nxon::parse_context &main_ctx,
         const std::vector<std::string> &inputs,
-        const std::vector<std::pair<std::string, nxon::id_t>> &wires,
+        const std::vector<wire_stat> &wires,
         const uint64_t samples,
         const uint64_t seed,
         const size_t threads
@@ -204,8 +204,9 @@ namespace {
         const double scale = samples == 0 ? 0.0 : 1.0 / static_cast<double>(samples);
         for (size_t i = 0; i < wires.size(); ++i) {
             result.push_back({
-                .signal = wires[i].first,
-                .width = main_ctx.isize(wires[i].second),
+                .signal = wires[i].signal,
+                .node_id = wires[i].node_id,
+                .width = main_ctx.isize(wires[i].node_id),
                 .expectation = sums[i] * scale
             });
         }
@@ -236,20 +237,26 @@ int main(const int argc, char *argv[]) {
             inputs.push_back(item.get<std::string>());
         }
 
-        std::vector<std::pair<std::string, nxon::id_t>> wires;
+        std::vector<wire_stat> wires;
         if (opts.outputs_only) {
             wires.reserve(root.at("top_output").size());
             for (const auto &item : root.at("top_output")) {
                 const auto name = item.get<std::string>();
-                wires.emplace_back(name, ctx.require_name(name));
+                wires.push_back({
+                    .signal = name,
+                    .node_id = ctx.require_name(name)
+                });
             }
         } else {
             wires.reserve(ctx.name_of_map.size());
             for (const auto &[id, name] : ctx.name_of_map) {
-                wires.emplace_back(name, id);
+                wires.push_back({
+                    .signal = name,
+                    .node_id = id
+                });
             }
         }
-        std::ranges::sort(wires, {}, [](const auto &entry) { return entry.second; });
+        std::ranges::sort(wires, {}, [](const auto &entry) { return entry.node_id; });
 
         const auto probabilities = sample_probabilities(ctx, inputs, wires, opts.samples, opts.seed, opts.threads);
         const auto finished = std::chrono::steady_clock::now();
@@ -266,6 +273,7 @@ int main(const int argc, char *argv[]) {
         for (const auto &wire : probabilities) {
             result["wires"].push_back({
                 {"signal", wire.signal},
+                {"node_id", wire.node_id},
                 {"width", wire.width},
                 {"expectation", wire.expectation}
             });

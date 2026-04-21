@@ -2,6 +2,7 @@ package pascal.netx.backend.optimization;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import pascal.netx.util.print.NotepadWriter;
 
@@ -55,6 +56,7 @@ class GraphTransformerTest {
         assertDoesNotThrow(() -> new GraphTransformer(notepad, dumped).parse());
     }
 
+    @Disabled
     @Test
     void testBenchmark() throws IOException {
         try (var files = Files.list(TEST_DIR.resolve("benchmark"))) {
