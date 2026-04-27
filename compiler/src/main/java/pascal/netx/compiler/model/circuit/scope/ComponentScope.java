@@ -2,10 +2,12 @@ package pascal.netx.compiler.model.circuit.scope;
 
 import pascal.netx.compiler.backend.Evaluator;
 import pascal.netx.compiler.backend.analysis.circuit.AssignManager;
+import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.model.circuit.Entity;
 import pascal.netx.compiler.model.circuit.Signature;
 import pascal.netx.compiler.model.circuit.expr.ComponentRef;
 import pascal.netx.compiler.model.circuit.signal.Signal;
+import pascal.netx.compiler.model.circuit.signal.VectorValue;
 import pascal.netx.util.exception.ShallNotReachHereError;
 import pascal.netx.util.lang.BuiltinComponent;
 import pascal.netx.util.lang.Identifier;
@@ -85,6 +87,9 @@ public final class ComponentScope extends Scope {
                 entity = pack.defs().getImport(id);
             } else {
                 entity = pack.defs().lookupEnum(id);
+                if (entity == null) {
+                    entity = lookupImportedEnumField(id);
+                }
             }
         }
 
@@ -93,6 +98,22 @@ public final class ComponentScope extends Scope {
             entity = parent.resolveIdentifierInPack(id);
         }
         return entity;
+    }
+
+    @Nullable
+    private VectorValue lookupImportedEnumField(Identifier id) {
+        VectorValue result = null;
+        var manager = pack.getProject().getManager();
+        for (var ref : pack.defs().imports()) {
+            var importedEnum = manager.resolveImportedEnum(ref);
+            if (importedEnum != null && importedEnum.fields().containsKey(id)) {
+                if (result != null) {
+                    Logger.warn("Enum field '{}' is ambiguous", id);
+                }
+                result = importedEnum.fields().get(id);
+            }
+        }
+        return result;
     }
 
     public boolean isInterface() {

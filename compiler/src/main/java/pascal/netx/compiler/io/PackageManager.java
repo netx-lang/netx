@@ -2,9 +2,9 @@ package pascal.netx.compiler.io;
 
 import pascal.netx.compiler.NXCompiler;
 import pascal.netx.compiler.model.ast.PackageNode;
-import pascal.netx.compiler.model.ast.element.ComponentNode;
-import pascal.netx.compiler.model.ast.element.ImportNode;
+import pascal.netx.compiler.model.ast.element.*;
 import pascal.netx.compiler.model.circuit.expr.ImportRef;
+import pascal.netx.compiler.model.circuit.scope.Enum;
 import pascal.netx.compiler.model.circuit.scope.RepoScope;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.util.exception.ShallNotReachHereError;
@@ -54,6 +54,39 @@ public final class PackageManager {
         };
     }
 
+    public PackageNode resolveImportedPackage(ImportRef ref) {
+        return dispatchCompiler(ref).getPackManager().resolvePackage(ref.packageRef());
+    }
+
+    public AbstractComponentNode resolveImportedComponent(ImportRef ref) {
+        var pack = resolveImportedPackage(ref);
+        return pack.getElements().stream()
+                .filter(AbstractComponentNode.class::isInstance)
+                .map(AbstractComponentNode.class::cast)
+                .filter(component -> component.getIdentifier().equals(ref.componentRef()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public InterfaceNode resolveImportedInterface(ImportRef ref) {
+        var component = resolveImportedComponent(ref);
+        if (component instanceof InterfaceNode node) {
+            return node;
+        }
+        return null;
+    }
+
+    public Enum resolveImportedEnum(ImportRef ref) {
+        var pack = resolveImportedPackage(ref);
+        return pack.getElements().stream()
+                .filter(EnumNode.class::isInstance)
+                .map(EnumNode.class::cast)
+                .filter(_enum -> _enum.getName().equals(ref.componentRef()))
+                .findFirst()
+                .map(Enum::from)
+                .orElse(null);
+    }
+
     public List<Identifier> resolveWildcard(ImportNode node) {
         if (!node.isWildcard()) {
             throw new ShallNotReachHereError();
@@ -61,8 +94,8 @@ public final class PackageManager {
 
         var reference = node.getReference();
         return switch (reference.size()) {
-            case 1 -> findAllComponentsIn(resolvePackage(reference.getFirst()));
-            case 2 -> findAllComponentsIn(
+            case 1 -> findAllImportablesIn(resolvePackage(reference.getFirst()));
+            case 2 -> findAllImportablesIn(
                     resolveRepo(reference.get(0))
                             .getPackManager()
                             .resolvePackage(reference.get(1)));
@@ -73,12 +106,19 @@ public final class PackageManager {
         };
     }
 
-    public List<Identifier> findAllComponentsIn(PackageNode node) {
+    public List<Identifier> findAllImportablesIn(PackageNode node) {
         return node.getElements().stream()
-                .filter(ComponentNode.class::isInstance)
-                .map(ComponentNode.class::cast)
-                .map(ComponentNode::getIdentifier)
+                .map(this::extractImportableIdentifier)
+                .filter(Objects::nonNull)
                 .toList();
+    }
+
+    private Identifier extractImportableIdentifier(PackageElement element) {
+        return switch (element) {
+            case AbstractComponentNode component -> component.getIdentifier();
+            case EnumNode _enum -> _enum.getName();
+            case ImportNode _import -> null;
+        };
     }
 
     public void addExternalRepo(Identifier name, NXCompiler compiler) {

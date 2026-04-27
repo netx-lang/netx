@@ -1,0 +1,7 @@
+[project]
+name = "enum_app"
+version = "0.1.0"
+include = ["top.nx"]
+
+[dependencies]
+my_lib = { path = "lib", version = ">=0.1.0" }

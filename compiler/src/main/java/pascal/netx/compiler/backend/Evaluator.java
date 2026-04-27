@@ -89,8 +89,21 @@ public final class Evaluator {
             if (pack.defs().hasEnum(id)) {
                 return pack.defs().getEnum(id).fields().get(expr.getField());
             }
+            if (pack.defs().hasImport(id)) {
+                var importedEnum = compilerOf(pack).getPackManager().resolveImportedEnum(pack.defs().getImport(id));
+                if (importedEnum != null) {
+                    return importedEnum.fields().get(expr.getField());
+                }
+            }
         }
-        var bundle = requireDataBundle(evaluate(expr.getBase()));
+        var base = evaluate(expr.getBase());
+        if (base instanceof ImportRef ref) {
+            var importedEnum = compilerOf(pack).getPackManager().resolveImportedEnum(ref);
+            if (importedEnum != null) {
+                return importedEnum.fields().get(expr.getField());
+            }
+        }
+        var bundle = requireDataBundle(base);
         return bundle.getField(expr.getField());
     }
 

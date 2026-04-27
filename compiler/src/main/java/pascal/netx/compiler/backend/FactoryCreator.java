@@ -64,6 +64,7 @@ public final class FactoryCreator {
 
     private Data.Factory<?> createFromIdentifierExpr(IdentifierExpr expr) {
         var id = expr.getIdentifier();
+        var manager = compilerOf(scope).getPackManager();
 
         if (id.name().equals("clock")) {
             return createClockFactory(List.of());
@@ -74,13 +75,26 @@ public final class FactoryCreator {
             return createBundleFactory(pack.defs().getInterface(id), AttrBindList.ofEmpty());
         } else if (pack.defs().hasEnum(id)) {
             return new Wire.Factory(BitType.of(pack.defs().getEnum(id).width()), indexer);
+        } else if (pack.defs().hasImport(id)) {
+            var ref = pack.defs().getImport(id);
+            var importedInterface = manager.resolveImportedInterface(ref);
+            if (importedInterface != null) {
+                return createBundleFactory(importedInterface, AttrBindList.ofEmpty());
+            }
+            var importedEnum = manager.resolveImportedEnum(ref);
+            if (importedEnum != null) {
+                return new Wire.Factory(BitType.of(importedEnum.width()), indexer);
+            }
         } else {
             Logger.error("Unknown interface type {}", id);
             throw new CompileCancellationException();
         }
+        Logger.error("Unknown interface type {}", id);
+        throw new CompileCancellationException();
     }
 
     private Data.Factory<?> createFromCallExpr(CallExpr expr) {
+        var manager = compilerOf(scope).getPackManager();
         return switch (expr.getHead().name()) {
             case "bit" -> createWireFactory(expr.getArguments());
             case "clock" -> createClockFactory(expr.getArguments());
@@ -89,6 +103,12 @@ public final class FactoryCreator {
                 if (pack.defs().hasInterface(expr.getHead())) {
                     var def = pack.defs().getInterface(expr.getHead());
                     yield createBundleFactory(def, evaluator.evaluateArguments(expr));
+                }
+                if (pack.defs().hasImport(expr.getHead())) {
+                    var importedInterface = manager.resolveImportedInterface(pack.defs().getImport(expr.getHead()));
+                    if (importedInterface != null) {
+                        yield createBundleFactory(importedInterface, evaluator.evaluateArguments(expr));
+                    }
                 }
                 Logger.error("Unknown data type {}", expr);
                 throw new CompileCancellationException();
