@@ -143,7 +143,7 @@ public final class WireTypeInference extends CircuitAnalysis {
             if (equalSignals.contains(data)) {
                 for (var signal : components.getOrDefault(equalSignals.find(data), List.of())) {
                     if (signal != data) {
-                        setTypeFor(signal, data.getType());
+                        setTypeFor(signal, data.getType(), new EqualTypeConstraint(signal, data));
                     }
                 }
             }
@@ -151,12 +151,27 @@ public final class WireTypeInference extends CircuitAnalysis {
     }
 
     private void setTypeFor(Signal signal, Type type) {
+        setTypeFor(signal, type, null);
+    }
+
+    private void setTypeFor(Signal signal, Type type, WireConstraint sourceConstraint) {
         if (type instanceof Hole) {
             throw new ShallNotReachHereError();
         }
         if (!signal.hasImplicitType()) {
             if (!signal.getType().equals(type)) {
-                Logger.error("Type constraint violation: conflicting types for {}", signal);
+                StringBuilder message = new StringBuilder("Type constraint violation: conflicting types:\n")
+                        .append(WireConstraint.describeSignalBlock("signal", signal))
+                        .append("\n")
+                        .append("  current type: ").append(signal.getType())
+                        .append("\n")
+                        .append("  inferred type: ").append(type);
+                if (sourceConstraint != null) {
+                    message.append("\n")
+                            .append("  caused by: ")
+                            .append(sourceConstraint.error().replace("\n", "\n  "));
+                }
+                Logger.error(message.toString());
                 throw new TypeCheckingException();
             }
             return;
