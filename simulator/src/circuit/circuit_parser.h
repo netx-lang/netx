@@ -107,6 +107,7 @@ namespace nxon {
         std::unordered_map<id_t, size_t> size_map;
         std::unordered_map<id_t, std::string> name_of_map;
         std::unordered_map<std::string, id_t> name_map;
+        std::unordered_map<std::string, size_t> next_name_suffix;
         component_hierarchy root_hierarchy;
         component_hierarchy *cur_hierarchy = &root_hierarchy;
 
@@ -114,11 +115,12 @@ namespace nxon {
             size_map.emplace(id, size);
             if (name_map.contains(org_name)) {
                 static constexpr char DELIMITER = '#';
-                size_t suffix = 1;
-                while (name_map.contains(std::format("{}{}{}", org_name, DELIMITER, suffix)))
-                    ++suffix;
-                org_name += DELIMITER;
-                org_name += std::to_string(suffix);
+                const auto base_name = org_name;
+                auto &suffix = next_name_suffix[base_name];
+                if (suffix == 0) suffix = 1;
+                do {
+                    org_name = std::format("{}{}{}", base_name, DELIMITER, suffix++);
+                } while (name_map.contains(org_name));
             }
             name_of_map.emplace(id, org_name);
             name_map.emplace(org_name, id);

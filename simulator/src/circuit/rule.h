@@ -979,20 +979,29 @@ namespace nxon {
             auto &changed_ids = static_ws.changed_ids;
             changed_ids.clear();
             changed_ids.reserve(hint.size() * 2);
-            for (const auto id: hint) {
-                if (!schedule.sequential_triggers.contains(id)) continue;
-                for (const auto rule_idx: schedule.sequential_triggers[id]) {
-                    if (all_rules[rule_idx].is_fast()) {
-                        if (all_rules[rule_idx].perform_fast(values)) {
-                            changed_ids.emplace_back(all_rules[rule_idx].fast_outcome());
+            std::vector<id_t> sequential_hints;
+            std::vector<id_t> next_sequential_hints;
+            sequential_hints.reserve(hint.size());
+            impl::append_range_compat(sequential_hints, hint);
+            while (!sequential_hints.empty()) {
+                next_sequential_hints.clear();
+                for (const auto id: sequential_hints) {
+                    if (!schedule.sequential_triggers.contains(id)) continue;
+                    for (const auto rule_idx: schedule.sequential_triggers[id]) {
+                        if (all_rules[rule_idx].is_fast()) {
+                            if (all_rules[rule_idx].perform_fast(values)) {
+                                next_sequential_hints.emplace_back(all_rules[rule_idx].fast_outcome());
+                            }
+                        } else {
+                            const auto changed = all_rules[rule_idx].perform(values);
+                            impl::append_range_compat(next_sequential_hints, changed);
                         }
-                    } else {
-                        const auto changed = all_rules[rule_idx].perform(values);
-                        impl::append_range_compat(changed_ids, changed);
                     }
                 }
+                values.perform_delayed();
+                impl::append_range_compat(changed_ids, next_sequential_hints);
+                sequential_hints.swap(next_sequential_hints);
             }
-            values.perform_delayed();
 
             auto &pending = static_ws.pending;
             if (pending.size() != schedule.combinational_levels.size()) pending.resize(schedule.combinational_levels.size());
