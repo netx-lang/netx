@@ -3,6 +3,7 @@ package pascal.netx.compiler.io;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import pascal.netx.compiler.model.circuit.Entity;
 import pascal.netx.compiler.model.circuit.scope.Attributes;
 import pascal.netx.compiler.model.circuit.scope.ComponentScope;
 import pascal.netx.compiler.model.circuit.scope.PackageScope;
@@ -92,6 +93,52 @@ public final class NxonDumper {
         return wires;
     }
 
+    static private Set<Wire> getReferencedWiresIn(ComponentScope scope) {
+        var wires = new LinkedHashSet<Wire>();
+        scope.getInputs().forEach(signal -> collectReferencedWires(signal, wires));
+        scope.getOutputs().forEach(signal -> collectReferencedWires(signal, wires));
+        collectReferencedWires(scope.getAttributes(), wires);
+        scope.getAliases().forEach(alias -> {
+            collectReferencedWires(alias.lhs(), wires);
+            collectReferencedWires(alias.rhs(), wires);
+        });
+        scope.getChildren().stream()
+                .map(ComponentScope.class::cast)
+                .forEach(child -> {
+                    child.getInputs().forEach(signal -> collectReferencedWires(signal, wires));
+                    child.getOutputs().forEach(signal -> collectReferencedWires(signal, wires));
+                    collectReferencedWires(child.getAttributes(), wires);
+                });
+        return wires;
+    }
+
+    static private void collectReferencedWires(Attributes attributes, Set<Wire> wires) {
+        if (attributes == null) {
+            return;
+        }
+        for (var entry : attributes.entrySet()) {
+            collectReferencedWires(entry.getValue(), wires);
+        }
+    }
+
+    static private void collectReferencedWires(Entity entity, Set<Wire> wires) {
+        if (entity instanceof Signal signal) {
+            collectReferencedWires(signal, wires);
+        }
+    }
+
+    static private void collectReferencedWires(Signal signal, Set<Wire> wires) {
+        switch (signal) {
+            case Wire wire -> wires.add(wire);
+            case Access access -> wires.add(access.base());
+            case Composition composition -> composition.getElements()
+                    .forEach(data -> collectReferencedWires(data, wires));
+            case Value _ -> {
+                // Constants do not need declarations.
+            }
+        }
+    }
+
     static private boolean isDefinedIn(ComponentScope component, Wire wire) {
         Scope scope = wire.getParent();
         while (scope != null) {
@@ -122,7 +169,10 @@ public final class NxonDumper {
             }
 
             List<ObjectNode> needDump = new LinkedList<>();
-            getDefinedWiresIn(component).forEach(wire -> needDump.add(defineWire(wire)));
+            var referenced = getReferencedWiresIn(component);
+            getDefinedWiresIn(component).stream()
+                    .filter(referenced::contains)
+                    .forEach(wire -> needDump.add(defineWire(wire)));
             component.getChildren().stream()
                     .map(ComponentScope.class::cast)
                     .forEach(child -> {
@@ -161,7 +211,10 @@ public final class NxonDumper {
             if (ATTRIBUTED.contains(BuiltinComponent.of(instID))) {
                 dumpInstAttr(builtin, sub.getAttributes());
             }
-            List<Wire> needDump = new LinkedList<>(getDefinedWiresIn(sub));
+            var referenced = getReferencedWiresIn(sub);
+            List<Wire> needDump = getDefinedWiresIn(sub).stream()
+                    .filter(referenced::contains)
+                    .toList();
             if (!needDump.isEmpty()) {
                 var subarray = makeMembersIn(builtin);
                 needDump.forEach(c -> subarray.add(defineWire(c)));
