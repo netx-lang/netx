@@ -6,6 +6,7 @@
 #define SIZED_MPINT_H
 
 #include <concepts>
+#include <limits>
 #include <string>
 #include <algorithm>
 #include <array>
@@ -33,10 +34,15 @@ namespace nxon::impl {
         }
 
         [[nodiscard]] static const base_t &mask(const size_t _size) {
-            if constexpr (std::unsigned_integral<base_t>) {
+            if constexpr (
+                std::numeric_limits<base_t>::is_specialized
+                && std::numeric_limits<base_t>::is_bounded
+                && std::numeric_limits<base_t>::is_integer
+            ) {
                 static const base_t zero = 0;
+                constexpr size_t bit_count = std::numeric_limits<base_t>::digits;
                 static const auto masks = [] {
-                    std::array<base_t, sizeof(base_t) * 8 + 1> result{};
+                    std::array<base_t, bit_count + 1> result{};
                     result[0] = 0;
                     for (size_t bits = 1; bits < result.size(); ++bits)
                         result[bits] = (result[bits - 1] << 1) | 1;
@@ -243,6 +249,10 @@ namespace nxon::impl {
 
         [[nodiscard]] bool operator==(const sized_mpint &other) const {
             return _size == other._size && content == other.content;
+        }
+
+        [[nodiscard]] bool test_bit_unchecked(const size_t bit) const {
+            return static_cast<bool>((content >> bit) & 1u);
         }
 
         [[nodiscard]] sized_mpint extract_unchecked(const size_t from, const size_t to) const {

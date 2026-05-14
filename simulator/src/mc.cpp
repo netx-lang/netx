@@ -211,7 +211,7 @@ namespace {
         double bit_weight = 1.0 / range;
         double normalized = 0.0;
         for (size_t bit = 0; bit < width; ++bit) {
-            if (static_cast<bool>(value.extract_unchecked(bit, bit))) {
+            if (value.test_bit_unchecked(bit)) {
                 normalized += bit_weight;
             }
             bit_weight *= 2.0;
