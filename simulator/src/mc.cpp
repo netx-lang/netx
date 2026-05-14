@@ -1,9 +1,12 @@
 #include <chrono>
 #include <cmath>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <limits>
 #include <optional>
 #include <random>
+#include <filesystem>
 #include <string>
 #include <thread>
 #include <unordered_map>
@@ -12,7 +15,19 @@
 #include <nlohmann/json.hpp>
 
 #include <boost/multiprecision/cpp_int.hpp>
+#if defined(NXSIM_MC_BACKEND_U64)
+#define NX_BACKEND uint64_t
+#define NXSIM_MC_BACKEND_NAME "uint64"
+#elif defined(NXSIM_MC_BACKEND_U128)
+#define NX_BACKEND boost::multiprecision::uint128_t
+#define NXSIM_MC_BACKEND_NAME "uint128"
+#elif defined(NXSIM_MC_BACKEND_U256)
+#define NX_BACKEND boost::multiprecision::uint256_t
+#define NXSIM_MC_BACKEND_NAME "uint256"
+#else
 #define NX_BACKEND boost::multiprecision::cpp_int
+#define NXSIM_MC_BACKEND_NAME "cpp_int"
+#endif
 #include "simulation.h"
 
 namespace {
@@ -22,10 +37,8 @@ namespace {
         std::string path;
         uint64_t samples = 1ull << 26;
         uint64_t seed = 0x4e5853494dULL;
-        uint64_t cycles = 0;
-        uint64_t warmup_cycles = 0;
         size_t threads = std::thread::hardware_concurrency();
-        bool outputs_only = true;
+        bool snapshot_powers_of_two = false;
         std::string config_path;
     };
 
@@ -62,6 +75,44 @@ namespace {
         std::unordered_map<std::string, bool> reset_signals;
     };
 
+    class progress_bar {
+        static constexpr uint64_t interval = 1024;
+        static constexpr size_t width = 32;
+
+        std::string label;
+        uint64_t total;
+        uint64_t last_reported = 0;
+
+    public:
+        progress_bar(std::string path, const uint64_t samples)
+            : label(std::filesystem::path(path).stem().string()), total(samples) {
+        }
+
+        void update(const uint64_t completed, const bool force = false) {
+            if (total == 0) return;
+            if (completed == last_reported && (!force || completed == total)) return;
+            if (!force && completed != total && completed - last_reported < interval) return;
+            last_reported = completed;
+
+            const double fraction = static_cast<double>(completed) / static_cast<double>(total);
+            const auto filled = std::min(
+                width,
+                static_cast<size_t>(std::floor(fraction * static_cast<double>(width)))
+            );
+            std::cerr << '\r' << std::left << std::setw(24) << label
+                      << " [" << NXSIM_MC_BACKEND_NAME << "] [";
+            for (size_t i = 0; i < width; ++i) {
+                std::cerr << (i < filled ? '=' : ' ');
+            }
+            std::cerr << "] " << completed << '/' << total
+                      << " (" << static_cast<unsigned>(std::floor(fraction * 100.0)) << "%)"
+                      << std::flush;
+            if (completed == total) {
+                std::cerr << std::endl;
+            }
+        }
+    };
+
     struct input_driver {
         std::string signal;
         std::string compiled_signal;
@@ -80,23 +131,12 @@ namespace {
                 result.samples = std::stoull(argv[++i]);
             } else if (arg == "--seed" && i + 1 < argc) {
                 result.seed = std::stoull(argv[++i]);
-            } else if (arg == "--cycles" && i + 1 < argc) {
-                result.cycles = std::stoull(argv[++i]);
-            } else if (arg == "--warmup-cycles" && i + 1 < argc) {
-                result.warmup_cycles = std::stoull(argv[++i]);
             } else if ((arg == "--threads" || arg == "-j") && i + 1 < argc) {
                 result.threads = std::stoull(argv[++i]);
             } else if (arg == "--config" && i + 1 < argc) {
                 result.config_path = argv[++i];
-            } else if (arg == "--scope" && i + 1 < argc) {
-                const std::string scope = argv[++i];
-                if (scope == "outputs") {
-                    result.outputs_only = true;
-                } else if (scope == "all-named") {
-                    result.outputs_only = false;
-                } else {
-                    throw std::invalid_argument("Expected --scope outputs|all-named");
-                }
+            } else if (arg == "--snapshot" || arg == "--snapshot-powers-of-two") {
+                result.snapshot_powers_of_two = true;
             } else if (result.path.empty()) {
                 result.path = arg;
             } else {
@@ -104,7 +144,7 @@ namespace {
             }
         }
         if (result.path.empty()) {
-            throw std::invalid_argument("Usage: nxsim_mc <path to NXON file> [--samples N] [--seed S] [--threads T] [--cycles C] [--warmup-cycles C] [--config PATH] [--scope outputs|all-named]");
+            throw std::invalid_argument("Usage: nxsim_mc <path to NXON file> [--samples N] [--seed S] [--threads T] [--config PATH] [--snapshot]");
         }
         if (result.threads == 0) result.threads = 1;
         return result;
@@ -554,10 +594,67 @@ namespace {
     };
 
     struct sample_accumulator {
-        std::vector<uint64_t> high_counts;
         std::vector<double> sums;
         uint64_t observations = 0;
     };
+
+    json snapshot_wires_json(
+        nxon::parse_context &ctx,
+        const std::vector<wire_stat> &wires,
+        const sample_accumulator &accumulator
+    ) {
+        json result = json::array();
+        const double scale = accumulator.observations == 0
+            ? 0.0
+            : 1.0 / static_cast<double>(accumulator.observations);
+        for (size_t i = 0; i < wires.size(); ++i) {
+            result.push_back({
+                {"signal", wires[i].signal},
+                {"node_id", wires[i].node_id},
+                {"width", ctx.isize(wires[i].node_id)},
+                {"expectation", accumulator.sums[i] * scale}
+            });
+        }
+        return result;
+    }
+
+    std::vector<wire_stat> accumulator_probabilities(
+        nxon::parse_context &ctx,
+        const std::vector<wire_stat> &wires,
+        const sample_accumulator &accumulator
+    ) {
+        std::vector<wire_stat> result;
+        result.reserve(wires.size());
+        const double scale = accumulator.observations == 0
+            ? 0.0
+            : 1.0 / static_cast<double>(accumulator.observations);
+        for (size_t i = 0; i < wires.size(); ++i) {
+            result.push_back({
+                .signal = wires[i].signal,
+                .node_id = wires[i].node_id,
+                .width = ctx.isize(wires[i].node_id),
+                .expectation = accumulator.sums[i] * scale
+            });
+        }
+        return result;
+    }
+
+    std::vector<uint64_t> snapshot_targets(const uint64_t observations) {
+        std::vector<uint64_t> targets;
+        if (observations == 0) {
+            return targets;
+        }
+        uint64_t current = 1;
+        while (current < observations) {
+            targets.push_back(current);
+            if (current > std::numeric_limits<uint64_t>::max() / 2) {
+                break;
+            }
+            current *= 2;
+        }
+        targets.push_back(observations);
+        return targets;
+    }
 
     void observe_wires(
         nxon::parse_context &ctx,
@@ -566,9 +663,6 @@ namespace {
     ) {
         for (size_t i = 0; i < wires.size(); ++i) {
             const auto value = ctx.iget(wires[i].node_id);
-            if (static_cast<bool>(value)) {
-                result.high_counts[i] += 1;
-            }
             result.sums[i] += normalized_unsigned_value(value);
         }
         result.observations += 1;
@@ -580,31 +674,20 @@ namespace {
         const std::vector<wire_stat> &wires,
         const uint64_t samples,
         const uint64_t seed,
-        const uint64_t cycles,
-        const uint64_t warmup_cycles,
         const simulator_config &config,
         const uint64_t start_sample
     ) {
         std::mt19937_64 rng(seed);
         sample_accumulator result{
-            .high_counts = std::vector<uint64_t>(wires.size(), 0),
             .sums = std::vector<double>(wires.size(), 0.0)
         };
 
         drive_inputs(ctx, inputs, config, rng, false);
-        const uint64_t segment_offset_cycles = cycles == 0 ? 0 : start_sample * cycles;
-        advance_random_cycles(ctx, inputs, config, rng, warmup_cycles + segment_offset_cycles);
+        advance_random_cycles(ctx, inputs, config, rng, start_sample);
         for (uint64_t iter = 0; iter < samples; ++iter) {
-            if (cycles == 0) {
-                drive_inputs(ctx, inputs, config, rng, false);
-                observe_wires(ctx, wires, result);
-            } else {
-                for (uint64_t cycle = 0; cycle < cycles; ++cycle) {
-                    drive_inputs(ctx, inputs, config, rng, false);
-                    ctx.advance_input_clocks();
-                    observe_wires(ctx, wires, result);
-                }
-            }
+            drive_inputs(ctx, inputs, config, rng, false);
+            ctx.advance_input_clocks();
+            observe_wires(ctx, wires, result);
         }
         return result;
     }
@@ -616,8 +699,6 @@ namespace {
         const uint64_t samples,
         const uint64_t seed,
         const size_t threads,
-        const uint64_t cycles,
-        const uint64_t warmup_cycles,
         const simulator_config &config
     ) {
         initialize_simulation_context(main_ctx, inputs, config, seed);
@@ -645,33 +726,29 @@ namespace {
             const uint64_t worker_samples = base + (worker < extra ? 1 : 0);
             const uint64_t start_sample =
                 base * worker + std::min<uint64_t>(static_cast<uint64_t>(worker), extra);
-            workers.emplace_back([&, worker, worker_samples] {
+            workers.emplace_back([&, worker, worker_samples, start_sample] {
                 partials[worker] = sample_worker(
                     contexts[worker - 1],
                     inputs,
                     wires,
                     worker_samples,
                     seed + 0x9e3779b97f4a7c15ULL * static_cast<uint64_t>(worker),
-                    cycles,
-                    warmup_cycles,
                     config,
                     start_sample
                 );
             });
         }
         const uint64_t main_samples = base + (0 < extra ? 1 : 0);
-        partials[0] = sample_worker(main_ctx, inputs, wires, main_samples, seed, cycles, warmup_cycles, config, 0);
+        partials[0] = sample_worker(main_ctx, inputs, wires, main_samples, seed, config, 0);
         for (auto &worker : workers) {
             worker.join();
         }
 
-        std::vector<uint64_t> high_counts(wires.size(), 0);
         std::vector<double> sums(wires.size(), 0.0);
         uint64_t observations = 0;
         for (const auto &partial : partials) {
             observations += partial.observations;
             for (size_t i = 0; i < wires.size(); ++i) {
-                high_counts[i] += partial.high_counts[i];
                 sums[i] += partial.sums[i];
             }
         }
@@ -688,6 +765,66 @@ namespace {
             });
         }
         return result;
+    }
+
+    struct snapshot_sample_result {
+        std::vector<wire_stat> probabilities;
+        json snapshots = json::array();
+    };
+
+    snapshot_sample_result sample_probabilities_with_snapshots(
+        nxon::parse_context &ctx,
+        const std::vector<input_driver> &inputs,
+        const std::vector<wire_stat> &wires,
+        const uint64_t samples,
+        const uint64_t seed,
+        const simulator_config &config,
+        const std::string &source_path,
+        const std::chrono::steady_clock::time_point parsed,
+        const std::chrono::steady_clock::time_point started
+    ) {
+        initialize_simulation_context(ctx, inputs, config, seed);
+        std::mt19937_64 rng(seed);
+        drive_inputs(ctx, inputs, config, rng, false);
+
+        const uint64_t observations = samples;
+        const auto targets = snapshot_targets(observations);
+        size_t next_target_index = 0;
+
+        sample_accumulator accumulator{
+            .sums = std::vector<double>(wires.size(), 0.0)
+        };
+        json snapshots = json::array();
+        progress_bar progress(source_path, samples);
+
+        auto maybe_record_snapshot = [&] {
+            while (next_target_index < targets.size()
+                   && accumulator.observations >= targets[next_target_index]) {
+                const auto now = std::chrono::steady_clock::now();
+                snapshots.push_back({
+                    {"samples", accumulator.observations},
+                    {"effective_cycles", accumulator.observations},
+                    {"runtime_ms", std::chrono::duration_cast<std::chrono::milliseconds>(now - parsed).count()},
+                    {"parse_ms", std::chrono::duration_cast<std::chrono::milliseconds>(parsed - started).count()},
+                    {"wires", snapshot_wires_json(ctx, wires, accumulator)}
+                });
+                ++next_target_index;
+            }
+        };
+
+        for (uint64_t sample = 0; sample < samples; ++sample) {
+            drive_inputs(ctx, inputs, config, rng, false);
+            ctx.advance_input_clocks();
+            observe_wires(ctx, wires, accumulator);
+            maybe_record_snapshot();
+            progress.update(accumulator.observations);
+        }
+        progress.update(accumulator.observations, true);
+
+        return {
+            .probabilities = accumulator_probabilities(ctx, wires, accumulator),
+            .snapshots = std::move(snapshots)
+        };
     }
 }
 
@@ -728,51 +865,53 @@ int main(const int argc, char *argv[]) {
         );
 
         std::vector<wire_stat> wires;
-        if (opts.outputs_only) {
-            wires.reserve(root.at("top_output").size());
-            for (const auto &item : root.at("top_output")) {
-                const auto name = item.get<std::string>();
-                wires.push_back({
-                    .signal = name,
-                    .node_id = ctx.require_name(name)
-                });
-            }
-        } else {
-            wires.reserve(ctx.name_of_map.size());
-            for (const auto &[id, name] : ctx.name_of_map) {
-                wires.push_back({
-                    .signal = name,
-                    .node_id = id
-                });
-            }
+        wires.reserve(ctx.name_of_map.size());
+        for (const auto &[id, name] : ctx.name_of_map) {
+            wires.push_back({
+                .signal = name,
+                .node_id = id
+            });
         }
         std::ranges::sort(wires, {}, [](const auto &entry) { return entry.node_id; });
 
-        const auto probabilities = sample_probabilities(
-            ctx,
-            inputs,
-            wires,
-            opts.samples,
-            opts.seed,
-            opts.threads,
-            opts.cycles,
-            opts.warmup_cycles,
-            simulator_config
-        );
+        std::vector<wire_stat> probabilities;
+        json snapshots = json::array();
+        if (opts.snapshot_powers_of_two) {
+            const auto snapshot_result = sample_probabilities_with_snapshots(
+                ctx,
+                inputs,
+                wires,
+                opts.samples,
+                opts.seed,
+                simulator_config,
+                opts.path,
+                parsed,
+                started
+            );
+            probabilities = snapshot_result.probabilities;
+            snapshots = snapshot_result.snapshots;
+        } else {
+            probabilities = sample_probabilities(
+                ctx,
+                inputs,
+                wires,
+                opts.samples,
+                opts.seed,
+                opts.threads,
+                simulator_config
+            );
+        }
         const auto finished = std::chrono::steady_clock::now();
 
         json result;
         result["source"] = opts.path;
-        const uint64_t cycles_per_sample = std::max<uint64_t>(1, opts.cycles);
-        const uint64_t observations = opts.samples * cycles_per_sample;
-        result["samples"] = observations;
-        result["effective_cycles"] = observations;
+        result["samples"] = opts.samples;
+        result["effective_cycles"] = opts.samples;
         result["seed"] = opts.seed;
         result["threads"] = opts.threads;
-        result["cycles"] = opts.cycles;
-        result["warmup_cycles"] = opts.warmup_cycles;
+        result["backend"] = NXSIM_MC_BACKEND_NAME;
         result["reset_cycles"] = simulator_config.reset_cycles;
-        result["scope"] = opts.outputs_only ? "outputs" : "all-named";
+        result["snapshot_powers_of_two"] = opts.snapshot_powers_of_two;
         result["parse_ms"] = std::chrono::duration_cast<std::chrono::milliseconds>(parsed - started).count();
         result["runtime_ms"] = std::chrono::duration_cast<std::chrono::milliseconds>(finished - parsed).count();
         result["wires"] = json::array();
@@ -784,6 +923,7 @@ int main(const int argc, char *argv[]) {
                 {"expectation", wire.expectation}
             });
         }
+        result["snapshots"] = std::move(snapshots);
 
         std::cout << result.dump(2) << std::endl;
         return 0;
