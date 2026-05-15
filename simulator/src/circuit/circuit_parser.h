@@ -107,21 +107,11 @@ namespace nxon {
         std::unordered_map<id_t, size_t> size_map;
         std::unordered_map<id_t, std::string> name_of_map;
         std::unordered_map<std::string, id_t> name_map;
-        std::unordered_map<std::string, size_t> next_name_suffix;
         component_hierarchy root_hierarchy;
         component_hierarchy *cur_hierarchy = &root_hierarchy;
 
         void new_wire(const id_t id, const size_t size, std::string org_name) {
             size_map.emplace(id, size);
-            if (name_map.contains(org_name)) {
-                static constexpr char DELIMITER = '#';
-                const auto base_name = org_name;
-                auto &suffix = next_name_suffix[base_name];
-                if (suffix == 0) suffix = 1;
-                do {
-                    org_name = std::format("{}{}{}", base_name, DELIMITER, suffix++);
-                } while (name_map.contains(org_name));
-            }
             name_of_map.emplace(id, org_name);
             name_map.emplace(org_name, id);
             cur_hierarchy->wires.emplace_back(id);
