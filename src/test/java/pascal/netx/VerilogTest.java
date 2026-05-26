@@ -1,6 +1,7 @@
 package pascal.netx;
 
 import org.junit.jupiter.api.Test;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import pascal.netx.backend.verilog.VerilogTransformer;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXBuilder;
@@ -11,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class VerilogTest {
     private static final boolean GENERATE_EXPECTED = false;
@@ -40,6 +42,37 @@ public class VerilogTest {
     @Test
     void testAsync() throws IOException {
         test("async");
+    }
+
+    @Test
+    void testRegisterOutputSelector() throws IOException {
+        var design = new ObjectMapper().readTree("""
+                {
+                  "design": {
+                    "type": "component",
+                    "id": "top",
+                    "loc": "test.nx:1:0",
+                    "input": ["clk@0", "in@1"],
+                    "output": ["out@2"],
+                    "members": [
+                      { "type": "clock", "id": "clk@0", "loc": "test.nx:2:9" },
+                      { "type": "wire", "width": 1, "id": "in@1", "loc": "test.nx:2:14" },
+                      { "type": "wire", "width": 4, "id": "out@2", "loc": "test.nx:2:18" },
+                      {
+                        "type": "builtin",
+                        "id": "REGISTER",
+                        "loc": "test.nx:3:7",
+                        "input": ["clk@0", "in@1"],
+                        "output": ["out@2[3]"],
+                        "attribute": { "pos_edge": "true" }
+                      }
+                    ]
+                  }
+                }
+                """);
+        var notepad = NotepadWriter.strOut();
+        new VerilogTransformer(notepad, design).parse();
+        assertTrue(notepad.toString().contains("always @(posedge _0) __reg__2[3] <= _1;"));
     }
 
     private static void test(String other) throws IOException {

@@ -290,7 +290,7 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
     private void parseRegister(JsonNode node, List<String> input) {
         boolean pos_edge = node.get("attribute").get("pos_edge").textValue().equals("true");
         String sensitive = pos_edge ? "posedge " : "negedge ";
-        String tempReg = registerTempOf(node.get("output").get(0).textValue());
+        String tempReg = registerTargetOf(node.get("output").get(0).textValue());
         notepad.print("always @(%s%s) ".formatted(sensitive, input.get(0)));
         notepad.print("%s <= %s;".formatted(tempReg, input.get(1)));
     }
@@ -301,7 +301,7 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
         String rst_value = node.get("attribute").get("rst_value").textValue();
         String clk_sensitive = pos_edge ? "posedge " : "negedge ";
         String rst_sensitive = high_rst ? "posedge " : "negedge ";
-        String tempReg = registerTempOf(node.get("output").get(0).textValue());
+        String tempReg = registerTargetOf(node.get("output").get(0).textValue());
         notepad.println("always @(%s%s or %s%s) begin".formatted(clk_sensitive, input.get(0), rst_sensitive, input.get(1)));
         notepad.incIndent();
         notepad.print("if (%s%s) ".formatted(high_rst ? "" : "~", input.get(1)));
@@ -311,8 +311,9 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
         notepad.print("end");
     }
 
-    private String registerTempOf(String target) {
-        return declareRegisterTemp(((WireReference) Reference.from(target)).withoutSelector());
+    private String registerTargetOf(String target) {
+        var ref = (WireReference) Reference.from(target);
+        return declareRegisterTemp(ref.withoutSelector()) + ref.selector();
     }
 
     private String declareRegisterTemp(WireReference ref) {
