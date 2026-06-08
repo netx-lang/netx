@@ -39,6 +39,24 @@ class NxonDumperUnitTest {
         assertFalse(hasMemberIdStartingWith(members, "q@"));
     }
 
+    private static boolean hasToAlias(JsonNode members, String inputPrefix, String outputPrefix, String outputSuffix) {
+        return StreamSupport.stream(members.spliterator(), false)
+                .filter(member -> "builtin".equals(textOf(member.get("type")))
+                        && "TO".equals(textOf(member.get("id"))))
+                .anyMatch(member -> {
+                    var input = member.get("input");
+                    var output = member.get("output");
+                    if (input == null || output == null || input.isEmpty() || output.isEmpty()) {
+                        return false;
+                    }
+                    var inputRef = textOf(input.get(0));
+                    var outputRef = textOf(output.get(0));
+                    return (inputPrefix.isEmpty() || inputRef.startsWith(inputPrefix))
+                            && (outputPrefix.isEmpty() || outputRef.startsWith(outputPrefix))
+                            && outputRef.endsWith(outputSuffix);
+                });
+    }
+
     private static JsonNode findComponent(JsonNode node, String id) {
         if (node == null || node.isMissingNode()) {
             return null;
@@ -65,6 +83,28 @@ class NxonDumperUnitTest {
                         || "clock".equals(textOf(member.get("type"))))
                 .map(member -> textOf(member.get("id")))
                 .anyMatch(id -> id.startsWith(prefix));
+    }
+
+    @Test
+    void testSelectedAssignmentKeepsDirectionAfterVectorAlias() {
+        var code = """
+                component top : [a] -> [out] {
+                    wire a, t of bit(1);
+                    wire x, y, out of bit(4);
+
+                    t <> AND <> [a, a];
+                    x[3] <> t;
+                    y <> x;
+                    out <> y;
+                }
+                """;
+        var dump = assertDoesNotThrow(() -> NXBuilder.from(Configuration.asDefault())
+                .load(code)
+                .compileAndDump());
+        var members = dump.get("design").get("members");
+
+        assertTrue(hasToAlias(members, "t@", "", "[3]"));
+        assertFalse(hasToAlias(members, "", "t@", "[3]"));
     }
 
     private static String textOf(JsonNode node) {

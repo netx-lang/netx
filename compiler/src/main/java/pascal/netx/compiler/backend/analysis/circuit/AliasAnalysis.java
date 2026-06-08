@@ -129,27 +129,28 @@ public final class AliasAnalysis extends CircuitAnalysis {
                 }
             };
             for (var alias : scope.getAliases()) {
-                if (alias.lhs() instanceof Access access && needDump(access.base())) {
-                    if (isValidDump(alias.rhs())) {
-                        addNew.accept(new ComponentScope.Alias(access, alias.rhs()));
-                    } else if (isNotIdentity(repOf(alias.rhs()), access)) {
-                        addNew.accept(new ComponentScope.Alias(access, repOf(alias.rhs())));
-                    }
-                } else if (alias.rhs() instanceof Access access) {
-                    var lhs = repOf(alias.lhs());
-                    if (isValidDump(alias.rhs()) && isNotIdentity(lhs, access)) {
-                        addNew.accept(new ComponentScope.Alias(lhs, alias.rhs()));
-                    } else {
-                        var rhs = repOf(alias.rhs());
-                        if (isValidDump(rhs) && isNotIdentity(lhs, rhs)) {
-                            addNew.accept(new ComponentScope.Alias(lhs, rhs));
-                        }
+                if (alias.lhs() instanceof Access || alias.rhs() instanceof Access) {
+                    var lhs = normalizeAliasSide(alias.lhs());
+                    var rhs = normalizeAliasSide(alias.rhs());
+                    if (isValidDump(lhs) && isNotIdentity(lhs, rhs)) {
+                        addNew.accept(new ComponentScope.Alias(lhs, rhs));
                     }
                 }
             }
             newAlias.removeIf(alias -> alias.lhs().equals(alias.rhs()));
             scope.getAliases().clear();
             scope.getAliases().addAll(newAlias);
+        }
+
+        private Signal normalizeAliasSide(Signal signal) {
+            if (isValidDump(signal)) {
+                return signal;
+            }
+            var representative = repOf(signal);
+            if (isValidDump(representative)) {
+                return representative;
+            }
+            return signal;
         }
 
         boolean isValidDump(Signal signal) {
