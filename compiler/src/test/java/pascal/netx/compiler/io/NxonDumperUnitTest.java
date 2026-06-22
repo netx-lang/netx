@@ -107,6 +107,28 @@ class NxonDumperUnitTest {
         assertFalse(hasToAlias(members, "", "t@", "[3]"));
     }
 
+    @Test
+    void testSelectedAssignmentKeepsDirectionWithSimplifiedConsumer() {
+        var code = """
+                component top : [in_1] -> [out] {
+                    wire in_1, tmp_214710, tmp_112690, out of bit(1);
+                    wire _069645_ of bit(2);
+
+                    tmp_112690 <> AND <> [1'b1, _069645_[1]];
+                    tmp_214710 <> NOT <> [in_1];
+                    _069645_[1] <> tmp_214710;
+                    out <> tmp_112690;
+                }
+                """;
+        var dump = assertDoesNotThrow(() -> NXBuilder.from(Configuration.asDefault())
+                .load(code)
+                .compileAndDump());
+        var members = dump.get("design").get("members");
+
+        assertTrue(hasToAlias(members, "tmp_214710@", "_069645_@", "[1]"));
+        assertFalse(hasToAlias(members, "_069645_@", "tmp_214710@", ""));
+    }
+
     private static String textOf(JsonNode node) {
         return node == null ? "" : node.asText();
     }

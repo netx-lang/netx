@@ -9,7 +9,6 @@
     "input": ["i@0", "rst@1", "clk@2"],
     "output": ["state@3"],
     "members": [
-      {"type": "wire", "width": 1, "id": "$o@4", "loc": "enum.nx:21:5"},
       {"type": "wire", "width": 1, "id": "i@0", "loc": "enum.nx:15:8"},
       {"type": "wire", "width": 1, "id": "rst@1", "loc": "enum.nx:15:11"},
       {"type": "clock", "id": "clk@2", "loc": "enum.nx:16:8"},
@@ -17,7 +16,10 @@
       {
         "type": "builtin", "id": "EQ", "loc": "enum.nx:19:25",
         "input": ["i@0", "1'h1"],
-        "output": ["$o@4"]
+        "output": ["$o@4"],
+        "members": [
+          {"type": "wire", "width": 1, "id": "$o@4", "loc": "enum.nx:19:25"}
+        ]
       },
       {
         "type": "builtin", "id": "NOT", "loc": "enum.nx:22:13",

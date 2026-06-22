@@ -120,13 +120,20 @@ public final class AliasAnalysis extends CircuitAnalysis {
         void clearIn(ComponentScope scope) {
             Set<ComponentScope.Alias> newAlias = new LinkedHashSet<>();
             Consumer<ComponentScope.Alias> addNew = (alias) -> {
-                if (!newAlias.contains(alias) && !newAlias.contains(alias.flip())) {
-                    if (alias.lhs() instanceof Value) {
-                        newAlias.add(alias.flip());
+                alias = normalizeAliasDirection(alias);
+                if (newAlias.contains(alias)) {
+                    return;
+                }
+
+                var flipped = alias.flip();
+                if (newAlias.contains(flipped)) {
+                    if (preferAliasDirection(alias, flipped)) {
+                        newAlias.remove(flipped);
                     } else {
-                        newAlias.add(alias);
+                        return;
                     }
                 }
+                newAlias.add(alias);
             };
             for (var alias : scope.getAliases()) {
                 if (alias.lhs() instanceof Access || alias.rhs() instanceof Access) {
@@ -140,6 +147,21 @@ public final class AliasAnalysis extends CircuitAnalysis {
             newAlias.removeIf(alias -> alias.lhs().equals(alias.rhs()));
             scope.getAliases().clear();
             scope.getAliases().addAll(newAlias);
+        }
+
+        private ComponentScope.Alias normalizeAliasDirection(ComponentScope.Alias alias) {
+            if (alias.lhs() instanceof Value) {
+                return alias.flip();
+            }
+            return alias;
+        }
+
+        private boolean preferAliasDirection(ComponentScope.Alias candidate, ComponentScope.Alias existing) {
+            return isSelectedAssignment(candidate) && !isSelectedAssignment(existing);
+        }
+
+        private boolean isSelectedAssignment(ComponentScope.Alias alias) {
+            return alias.lhs() instanceof Access && !(alias.rhs() instanceof Access);
         }
 
         private Signal normalizeAliasSide(Signal signal) {
@@ -475,7 +497,7 @@ public final class AliasAnalysis extends CircuitAnalysis {
 
         private void setAsTo(ComponentScope scope, Signal input) {
             transformComponent(scope, BuiltinComponent.TO, input);
-            addBuiltinAlias(scope, input, scope.getOutputs().getFirst());
+            addBuiltinAlias(scope, scope.getOutputs().getFirst(), input);
         }
 
         private void setAsNot(ComponentScope scope, Signal input) {
