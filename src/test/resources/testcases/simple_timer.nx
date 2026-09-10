@@ -27,7 +27,7 @@ component clock_divider(max): [clk_50] -> [clk] {
 	let REG = REGISTER(true) <> [clk_50#, TO];
 	let ctl = EQ <> [count, max / 2 - 1];
 	count <> REG <> MUX(1) <> [ctl, ADD <> [count, 1], 0];
-	clk   <> REG <> MUX(1) <> [ctl, clk, NOT <> clk];
+	clk   <> AS_CLK <> REG <> MUX(1) <> [ctl, AS_BIT <> clk, NOT <> AS_BIT <> clk];
 }
 
 component hex_trigger: [num] -> [code] {

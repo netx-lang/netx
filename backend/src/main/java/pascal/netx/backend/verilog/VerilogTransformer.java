@@ -346,7 +346,7 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
                 notepad.print(input.getFirst());
                 notepad.print(")");
             }
-            case UCAST, TO -> notepad.print(input.getFirst());
+            case UCAST, TO, AS_CLK, AS_BIT -> notepad.print(input.getFirst());
             case NOR, NAND, XNOR -> {
                 var delimiter = switch (builtin) {
                     case NOR -> " | ";

@@ -60,6 +60,8 @@ record BuiltInComponentFactory(NXCompiler.WireIndexer indexer) {
             case DUP -> createDupComponent(parent, ref);
             case SPLIT -> createSplitComponent(parent, ref);
             case TO -> createIdentityComponent(parent, ref);
+            case AS_CLK -> createClockConversionComponent(parent, ref, true);
+            case AS_BIT -> createClockConversionComponent(parent, ref, false);
             case UCAST, CAST -> createCastComponent(parent, ref);
             case NOT -> createNotComponent(parent, ref);
             case OR, AND, XOR, NOR, NAND, XNOR, CONCAT, ADD, MUL -> createMultiInputComponent(parent, ref, 2);
@@ -138,6 +140,19 @@ record BuiltInComponentFactory(NXCompiler.WireIndexer indexer) {
             int width = requireVectorValue(ref.getArgList().get("width", 0)).toInt();
             result.addInput(newWire(result, "i"));
             result.addOutput(newWire(result, "o", BitType.of(width)));
+        }
+        return result;
+    }
+
+    private ComponentScope createClockConversionComponent(Scope parent, BuiltinRef ref, boolean toClock) {
+        Utils.requireEqSize(0, ref.getArgList(), ref.getBuiltin() + " requires no arguments");
+        var result = instantiate(parent, ref);
+        if (toClock) {
+            result.addInput(newWire(result, "i", BitType.forBoolean()));
+            result.addOutput(newClock(result));
+        } else {
+            result.addInput(newClock(result));
+            result.addOutput(newWire(result, "o", BitType.forBoolean()));
         }
         return result;
     }

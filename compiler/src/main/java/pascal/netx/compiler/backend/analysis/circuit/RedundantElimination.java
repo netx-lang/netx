@@ -37,7 +37,7 @@ public final class RedundantElimination extends CircuitAnalysis {
     private boolean isRedundant(ComponentScope scope) {
         if (scope.isBuiltin()) {
             return switch (scope.asBuiltin()) {
-                case UCAST, CAST -> isRedundantCast(scope);
+                case UCAST, CAST, AS_CLK, AS_BIT -> isRedundantCast(scope);
                 case CONCAT -> isRedundantConcat(scope);
                 case SPLIT, DUP -> true;
                 default -> false;

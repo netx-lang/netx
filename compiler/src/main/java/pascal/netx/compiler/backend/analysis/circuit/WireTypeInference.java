@@ -53,6 +53,7 @@ public final class WireTypeInference extends CircuitAnalysis {
             case SGE, SGT, SLE, SLT, UGE, UGT, ULE, ULT, EQ, NE -> addInputEqualConstraints(component);
             case CONCAT -> addConstraintForConcat(component);
             case REGISTER -> addContainsForRegister(component);
+            case AS_CLK, AS_BIT -> { }
         }
     }
 

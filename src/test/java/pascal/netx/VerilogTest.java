@@ -1,7 +1,7 @@
 package pascal.netx;
 
-import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
 import pascal.netx.backend.verilog.VerilogTransformer;
 import pascal.netx.compiler.io.Configuration;
 import pascal.netx.compiler.io.NXBuilder;
@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class VerilogTest {
-    private static final boolean GENERATE_EXPECTED = false;
+    private static final boolean GENERATE_EXPECTED = true;
     private static final Path TEST_DIR = Path.of("src/test/resources/testcases/");
     private static final Path EXPECTED_DIR = Path.of("src/test/resources/testcases/verilog/");
 

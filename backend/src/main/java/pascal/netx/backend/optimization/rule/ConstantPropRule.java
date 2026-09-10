@@ -45,7 +45,7 @@ public final class ConstantPropRule extends UniRule {
             BitVector result = switch (vertex.label()) {
                 case CAST -> cast(inputs.getFirst(), true);
                 case UCAST -> cast(inputs.getFirst(), false);
-                case TO -> inputs.getFirst();
+                case TO, AS_CLK, AS_BIT -> inputs.getFirst();
                 case CONCAT -> inputs.stream().reduce(BitVector::concat).orElseThrow();
                 case SELECT -> {
                     assert vertex instanceof ReadSelect;

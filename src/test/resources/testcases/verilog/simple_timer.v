@@ -33,7 +33,7 @@ reg [31:0] __reg__10;
       wire [31:0] _18; // simple_timer.nx:64:26:$o
       wire [31:0] _19; // simple_timer.nx:64:8:$o
     /* END "MUX"; "simple_timer.nx:29:17" */
-    /* "MUX"; "simple_timer.nx:30:17" */
+    /* "MUX"; "simple_timer.nx:30:27" */
       wire [1:0] _22; // simple_timer.nx:60:9:mask
       wire _20; // simple_timer.nx:61:9:input[1]
       wire _21; // simple_timer.nx:61:19:out
@@ -41,7 +41,7 @@ reg [31:0] __reg__10;
       /* END "DECODER"; "simple_timer.nx:62:12" */
       wire _23; // simple_timer.nx:64:8:$o
       wire _24; // simple_timer.nx:64:8:$o
-    /* END "MUX"; "simple_timer.nx:30:17" */
+    /* END "MUX"; "simple_timer.nx:30:27" */
   /* END "clock_divider"; "simple_timer.nx:10:11" */
   /* "MUX"; "simple_timer.nx:11:22" */
     wire _25; // simple_timer.nx:59:9:code
@@ -464,9 +464,9 @@ assign _10 = __reg__10;
       assign _14 = _17 | _19; // simple_timer.nx:63:11
     /* END "MUX"; "simple_timer.nx:29:17" */
     always @(posedge _0) __reg__11 <= _14; // simple_timer.nx:27:11
-    assign _20 = ~_9; // simple_timer.nx:30:38
+    assign _20 = ~_9; // simple_timer.nx:30:58
     /*
-      COMPONENT "MUX"; "simple_timer.nx:30:17"
+      COMPONENT "MUX"; "simple_timer.nx:30:27"
       input: code@12, ms_clk@9, input[1]@20
       output: out@21
       attribute: { width: "1" }
@@ -483,7 +483,7 @@ assign _10 = __reg__10;
       assign _23 = _9 & _22[0]; // simple_timer.nx:64:8
       assign _24 = _20 & _22[1]; // simple_timer.nx:64:8
       assign _21 = _23 | _24; // simple_timer.nx:63:11
-    /* END "MUX"; "simple_timer.nx:30:17" */
+    /* END "MUX"; "simple_timer.nx:30:27" */
     always @(posedge _0) __reg__9 <= _21; // simple_timer.nx:27:11
   /* END "clock_divider"; "simple_timer.nx:10:11" */
   assign _25 = _10 == 8639999; // simple_timer.nx:11:33

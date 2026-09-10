@@ -26,7 +26,7 @@ public sealed class Component extends AbstractVertex permits ReadSelect, Registe
 
     public enum Label {
         REGISTER, ASYNC_REGISTER,
-        CAST, UCAST, TO,
+        CAST, UCAST, TO, AS_CLK, AS_BIT,
         CONCAT, SELECT,
         OR, NOT, AND, XOR, NOR, NAND, XNOR,
         EQ, NE, SLT, SLE, SGT, SGE, ULT, ULE, UGT, UGE,

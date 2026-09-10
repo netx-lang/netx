@@ -34,6 +34,6 @@ assign _4 = __reg__4;
   always @(posedge _0) __reg__2 <= _7; // divide_by_3.nx:5:29
   always @(posedge _0) __reg__3 <= _2; // divide_by_3.nx:5:29
   always @(negedge _0) __reg__4 <= _3; // divide_by_3.nx:5:29
-  assign _1 = _3 | _4; // divide_by_3.nx:11:13
+  assign _1 = _3 | _4; // divide_by_3.nx:11:23
 /* END "Divide_by_3"; "divide_by_3.nx:1:0" */
 endmodule

@@ -390,7 +390,7 @@ public final class AliasAnalysis extends CircuitAnalysis {
             pack.forEachSubComponent(scope -> {
                 if (scope.isBuiltin()) {
                     switch (scope.asBuiltin()) {
-                        case CAST, UCAST -> extractFromCast(scope);
+                        case CAST, UCAST, AS_CLK, AS_BIT -> extractFromCast(scope);
                         case CONCAT -> extractFromConcat(scope);
                         case OR -> extractFromOr(scope);
                         case NOR -> extractFromNor(scope);

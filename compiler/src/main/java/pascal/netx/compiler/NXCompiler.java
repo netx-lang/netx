@@ -55,6 +55,9 @@ public final class NXCompiler {
         elaborate();
         var manager = new CircuitAnalysisManager(repo);
         manager.analyze(MetaElimination.class);
+        for (var pack : repo.packages()) {
+            new ClockTypeChecker(pack).analyze();
+        }
         manager.analyze(WireTypeInference.class);
         manager.analyze(AccessChecker.class);
         manager.analyze(CompositionBlaster.class);
