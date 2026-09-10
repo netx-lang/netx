@@ -67,12 +67,6 @@ check_requirements() {
         exit 1
     fi
 
-    if ! command -v cargo >/dev/null 2>&1; then
-        echo "Error: Rust cargo is required but not installed."
-        echo "Please install Rust and cargo and try again."
-        exit 1
-    fi
-
     if [ -n "${CC:-}" ] && ! command -v "$CC" >/dev/null 2>&1; then
         echo "Error: CC is set to '$CC' but that executable is not on PATH."
         exit 1
@@ -103,11 +97,6 @@ else
     ./gradlew --no-daemon installDist buildCMake
 fi
 
-echo "Building Rust analysis prototype..."
-(
-    cd prob-analysis
-    cargo build --release
-)
 create_directories
 
 # Copy all JAR files to lib directory (separate, not bundled)
@@ -174,15 +163,6 @@ else
 
     # Update the script to use the correct lib path
     sed -i "s|APP_HOME=.*|APP_HOME=\"$INSTALL_DIR\"|" "$BIN_DIR/nx"
-fi
-
-echo "Installing Rust analysis executable..."
-RUST_ANALYSIS_BIN="prob-analysis/target/release/nxprob"
-if [ -f "$RUST_ANALYSIS_BIN" ]; then
-    cp "$RUST_ANALYSIS_BIN" "$BIN_DIR/nxprob"
-    chmod +x "$BIN_DIR/nxprob" 2>/dev/null || true
-else
-    echo "Warning: Rust analysis executable not found at $RUST_ANALYSIS_BIN"
 fi
 
 # Function to detect user's shell and get config file

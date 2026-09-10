@@ -108,23 +108,6 @@ Here, we have the following subcommands:
       dot -T pdf output.dot -o output.pdf
       ```
 
-### Clock Types
-
-NetX rejects implicit conversions between clock and bit signals. Use `AS_BIT` to
-manipulate a clock as a one-bit value and `AS_CLK` to convert a one-bit value into
-a clock explicitly:
-
-```text
-wire clk_in, clk_out of clock();
-wire gated of bit(1);
-gated <> AND <> [AS_BIT <> clk_in, enable];
-clk_out <> AS_CLK <> gated;
-```
-
-Both primitives are zero-cost conversions and produce direct connections in the
-generated hardware. Clock-to-clock connections, register clock inputs, and clock
-forwarding through inferred wires, `TO`, or `DUP` remain supported.
-
 ### Package Mangement
 
 The package manager is built into the `nx` command, allowing you to manage NetX packages easily.

@@ -4,7 +4,6 @@
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/backend/src/test/resources/benchmark/asap7sc7p5t_28" vcs="" />
     <mapping directory="$PROJECT_DIR$/backend/src/test/resources/benchmark/source/rv32i/build/std" vcs="" />
-    <mapping directory="$PROJECT_DIR$/prob-analysis/baseline/symbfuzz" vcs="" />
     <mapping directory="$PROJECT_DIR$/simulator/cmake-build-debug/_deps/cli-src" vcs="" />
     <mapping directory="$PROJECT_DIR$/simulator/cmake-build-release/_deps/cli-src" vcs="" />
     <mapping directory="$PROJECT_DIR$/src/test/resources/testcases/project/build/std" vcs="" />
