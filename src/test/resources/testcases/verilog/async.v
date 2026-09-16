@@ -4,13 +4,14 @@ module top(
 
 /*============================== DATA ==============================*/
 
-reg [31:0] __reg__3;
 /* "top"; "async.nx:1:0" */
   input wire [31:0] _2; // async.nx:2:9:i
   output wire [31:0] _3; // async.nx:2:12:o
   input wire _1; // async.nx:3:9:rst
   input wire _0; // CLOCK async.nx:4:9:clk
 /* END "top"; "async.nx:1:0" */
+
+reg [31:0] __reg__3; // _3 (async.nx:2:12)
 
 /*============================== CONNECTION ==============================*/
 

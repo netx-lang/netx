@@ -49,7 +49,9 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
     private final HashSet<Integer> globalOut = new HashSet<>();
     private final List<String> extraDeclarations = new ArrayList<>();
     private final List<String> extraAssignments = new ArrayList<>();
+    private final List<String> registerDeclarations = new ArrayList<>();
     private final Map<WireReference, Integer> wireWidths = new HashMap<>();
+    private final Map<WireReference, String> wireLocs = new HashMap<>();
     private final Map<WireReference, String> registerTemps = new HashMap<>();
 
     public VerilogTransformer(NotepadWriter notepad, JsonNode json) {
@@ -75,6 +77,10 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
         notepad.newLine();
         extraDeclarations.forEach(notepad::println);
         parseComponent(node, ParseMode.DATA);
+        if (!registerDeclarations.isEmpty()) {
+            notepad.newLine();
+            registerDeclarations.forEach(notepad::println);
+        }
         notepad.newLine();
         notepad.println("/*%s CONNECTION %s*/".formatted(BAR, BAR));
         notepad.newLine();
@@ -211,13 +217,20 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
         }
         for (var sub : node.get("members")) {
             switch (NxonType.typeOf(sub)) {
-                case WIRE -> wireWidths.put(
-                        ((WireReference) Reference.from(sub.get("id").textValue())).withoutSelector(),
-                        sub.get("width").intValue()
-                );
-                case CLOCK -> wireWidths.put(
-                        ((WireReference) Reference.from(sub.get("id").textValue())).withoutSelector(), 1
-                );
+                case WIRE -> {
+                    var ref = ((WireReference) Reference.from(sub.get("id").textValue())).withoutSelector();
+                    wireWidths.put(ref, sub.get("width").intValue());
+                    if (sub.has("loc")) {
+                        wireLocs.put(ref, sub.get("loc").textValue());
+                    }
+                }
+                case CLOCK -> {
+                    var ref = ((WireReference) Reference.from(sub.get("id").textValue())).withoutSelector();
+                    wireWidths.put(ref, 1);
+                    if (sub.has("loc")) {
+                        wireLocs.put(ref, sub.get("loc").textValue());
+                    }
+                }
                 case BUILTIN, COMPONENT -> collectWireWidths(sub);
             }
         }
@@ -323,7 +336,11 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
                 throw new ShallNotReachHereError();
             }
             String tempReg = "__reg_" + key.dump().replaceAll("[^A-Za-z0-9_]", "_");
-            extraDeclarations.add("reg %s%s;".formatted(parseWidth(width), tempReg));
+            String loc = wireLocs.get(key);
+            String comment = loc == null
+                    ? " // %s".formatted(key.dump())
+                    : " // %s (%s)".formatted(key.dump(), loc);
+            registerDeclarations.add("reg %s%s;%s".formatted(parseWidth(width), tempReg, comment));
             extraAssignments.add("assign %s = %s;".formatted(key.dump(), tempReg));
             return tempReg;
         });

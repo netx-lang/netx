@@ -4,9 +4,6 @@ module top(
 
 /*============================== DATA ==============================*/
 
-reg [31:0] __reg__11;
-reg __reg__9;
-reg [31:0] __reg__10;
 /* "top"; "simple_timer.nx:1:0" */
   input wire _0; // CLOCK simple_timer.nx:2:6:clk_50
   output wire [6:0] _1; // simple_timer.nx:3:6:hex[0]
@@ -423,6 +420,10 @@ reg [31:0] __reg__10;
     /* END "MUX"; "simple_timer.nx:36:9" */
   /* END "hex_trigger"; "simple_timer.nx:20:11" */
 /* END "top"; "simple_timer.nx:1:0" */
+
+reg [31:0] __reg__11; // _11 (simple_timer.nx:25:6)
+reg __reg__9; // _9 (simple_timer.nx:7:6)
+reg [31:0] __reg__10; // _10 (simple_timer.nx:8:6)
 
 /*============================== CONNECTION ==============================*/
 

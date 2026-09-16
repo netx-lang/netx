@@ -4,9 +4,6 @@ module Divide_by_3(
 
 /*============================== DATA ==============================*/
 
-reg __reg__2;
-reg __reg__3;
-reg __reg__4;
 /* "Divide_by_3"; "divide_by_3.nx:1:0" */
   input wire _0; // CLOCK divide_by_3.nx:2:9:clk
   output wire _1; // CLOCK divide_by_3.nx:2:14:clk_3
@@ -17,6 +14,10 @@ reg __reg__4;
   wire _6; // divide_by_3.nx:8:38:$o
   wire _7; // divide_by_3.nx:8:20:$o
 /* END "Divide_by_3"; "divide_by_3.nx:1:0" */
+
+reg __reg__2; // _2 (divide_by_3.nx:3:9)
+reg __reg__3; // _3 (divide_by_3.nx:3:12)
+reg __reg__4; // _4 (divide_by_3.nx:3:15)
 
 /*============================== CONNECTION ==============================*/
 
