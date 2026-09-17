@@ -39,6 +39,20 @@ sudo apt update
 sudo apt install -y openjdk-25-jdk g++-15 cmake libboost-all-dev nlohmann-json3-dev
 ```
 
+### Development with Nix
+
+On Linux (x86_64 or aarch64), with Nix's `nix-command` and `flakes` enabled:
+
+```bash
+nix develop
+./gradlew test
+./gradlew installDist buildCMake
+```
+
+With direnv and nix-direnv configured, run `direnv allow` to load the environment
+automatically. Dependencies are pinned in `flake.lock`; update them with
+`nix flake update nixpkgs`. The first build requires network access.
+
 ### Installation
 
 To install NetX, use the cross-platform installation script:
