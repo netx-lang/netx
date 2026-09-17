@@ -9,6 +9,19 @@ NetX is a novel hardware description language (HDL) that employs a schematic pro
 
 The NetX toolchain includes a compiler, a package manager, a simulator, and a visualizer implemented in this repository.
 
+## Pre-built binaries
+
+The [releases page](https://github.com/pascal-lab/NetX/releases) provides
+self-contained archives for Linux (x64/arm64), macOS (x64/arm64) and Windows
+(x64). Each archive bundles a trimmed JVM (`jlink`), so **no JDK or C++
+toolchain is required** — just unpack it and put `bin/` on your `PATH`:
+
+```bash
+# linux-x64 as an example
+tar -xzf netx-0.1.0-linux-x64.tar.gz
+export PATH="$PWD/netx-0.1.0-linux-x64/bin:$PATH"
+nx --version
+```
 ## Build and Installation
 
 ### Prerequisites

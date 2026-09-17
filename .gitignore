@@ -58,3 +58,6 @@ cpp-build/
 .idea/copilot.data.migration.ask2agent.xml
 .idea/copilot.data.migration.agent.xml
 .idea/copilot.data.migration.edit.xml
+### Python (packaging scripts) ###
+__pycache__/
+*.pyc

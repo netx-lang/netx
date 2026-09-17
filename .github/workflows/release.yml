@@ -1,0 +1,259 @@
+name: Release
+
+# Builds relocatable archives (with a bundled JVM) for every supported platform
+# and attaches them to a GitHub Release. Push a tag to cut a release:
+#
+#     git tag v0.1.0 && git push origin v0.1.0
+#
+# See RELEASING.md for what ends up inside each archive and for the follow-up
+# steps (winget / Scoop / Homebrew).
+
+on:
+  push:
+    tags:
+      - 'v*'
+  # Lets you dry-run the pipeline from the Actions tab without tagging.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  JAVA_VERSION: '25'
+
+jobs:
+  version:
+    name: Resolve version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+    steps:
+      - id: ver
+        shell: bash
+        run: |
+          ref="${{ github.ref_name }}"
+          if [[ "$ref" == v* ]]; then
+            echo "version=${ref#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=0.0.0-dev" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    name: Build ${{ matrix.os }}-${{ matrix.arch }}
+    needs: version
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux x64 is built on 24.04 because Boost >= 1.80 and C++23 need a
+          # recent toolchain; that means glibc >= 2.39 at runtime.
+          - { os: linux,   arch: x64,   runner: ubuntu-24.04 }
+          - { os: linux,   arch: arm64, runner: ubuntu-24.04-arm }
+          # macos-13 (the old Intel image) is being retired; macos-15-intel is its
+          # x86_64 replacement. macos-15 / macos-14 are Apple Silicon.
+          - { os: macos,   arch: x64,   runner: macos-15-intel }
+          - { os: macos,   arch: arm64, runner: macos-15 }
+          - { os: windows, arch: x64,   runner: windows-2022 }
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      # No host-CPU tuning, and no optional KaHIP partitioner (which would make
+      # platforms differ silently).
+      NXSIM_CMAKE_ARGS: -DNXSIM_NATIVE_ARCH=OFF -DNXSIM_KAHIP=OFF
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Install C++ dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-14 cmake ninja-build libboost-all-dev nlohmann-json3-dev
+          echo "CC=gcc-14" >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+
+      - name: Install C++ dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          # libomp: AppleClang ships no OpenMP implementation; the CMakeLists finds
+          # it through `brew --prefix libomp` (and prefers the static archive).
+          brew install boost nlohmann-json cmake ninja libomp
+
+      - name: Install C++ dependencies (Windows)
+        if: runner.os == 'Windows'
+        id: msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-boost
+            mingw-w64-x86_64-nlohmann-json
+
+      - name: Point the build at MinGW-w64 (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # The C++ side is built with MinGW-w64 GCC, which is what install.sh
+          # already assumes on Windows (Git Bash / MSYS2). MSVC would need a port:
+          # simulator/CMakeLists.txt uses GCC/Clang flags (MSVC reads -Wall as /Wall
+          # and -Werror as /Werror but has no -Wextra, -fno-rtti, -ffast-math or
+          # -fno-finite-math-only), and CMake cannot find OpenMP for MSVC here while
+          # MinGW ships libgomp. MSYS2's Boost/nlohmann-json are prebuilt, so nothing
+          # gets compiled (unlike vcpkg's `boost` meta-port).
+          #
+          # Never hard-code the prefix: the runner image also ships a MinGW toolchain
+          # in C:\mingw64, which is *not* where pacman installed our packages. Ask the
+          # action where its MSYS2 is, and pin CC/CXX to absolute paths so the
+          # compiler and the Boost headers cannot come from different prefixes.
+          $root = "${{ steps.msys2.outputs.msys2-location }}"
+          if (-not $root) { Write-Host '::error::the setup-msys2 step reported no location'; exit 1 }
+          $mingw = "$root/mingw64"
+          if (-not (Test-Path "$mingw/include/boost/version.hpp")) {
+            Write-Host "::error::mingw-w64-x86_64-boost is not under $mingw"
+            & "$root/usr/bin/pacman.exe" -Ql mingw-w64-x86_64-boost 2>$null |
+              Select-String 'version.hpp' | Select-Object -First 5 | ForEach-Object { Write-Host "  $_" }
+            exit 1
+          }
+          Write-Host "MinGW prefix: $mingw"
+          $mingwWin = $mingw.Replace('/', '\')
+          Add-Content -Path $env:GITHUB_PATH -Value "$mingwWin\bin"
+          Add-Content -Path $env:GITHUB_ENV -Value "CC=$mingwWin\bin\gcc.exe"
+          Add-Content -Path $env:GITHUB_ENV -Value "CXX=$mingwWin\bin\g++.exe"
+          # CMAKE_PREFIX_PATH so find_package(nlohmann_json) sees MSYS2's package too.
+          Add-Content -Path $env:GITHUB_ENV -Value "NXSIM_CMAKE_ARGS=$env:NXSIM_CMAKE_ARGS -G Ninja -DCMAKE_PREFIX_PATH=$mingw -DNXSIM_BOOST_INCLUDE_DIR=$mingw/include"
+          Add-Content -Path $env:GITHUB_ENV -Value "NXSIM_MINGW_BIN=$mingw/bin"
+
+      - name: Build toolchain
+        shell: bash
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon installDist buildCMake -Pversion="$VERSION"
+
+      - name: Build the bundled runtime (jlink)
+        shell: bash
+        run: |
+          # jdeps prints "split package" warnings on *stdout*, so keep only the
+          # last line — otherwise the garbage ends up in --add-modules.
+          modules=$(jdeps --multi-release "$JAVA_VERSION" --ignore-missing-deps \
+                     --print-module-deps --module-path build/install/nx/lib \
+                     build/install/nx/lib/*.jar 2>/dev/null | tail -n 1 | tr -d '\r')
+          case "$modules" in
+            *[!a-z0-9.,]*) echo "unexpected jdeps output: $modules" >&2; exit 1 ;;
+            '') echo "jdeps produced no modules" >&2; exit 1 ;;
+          esac
+          echo "jlink modules: $modules"
+          # Must run with the same JDK the jars were compiled with (setup-java
+          # puts it first on PATH); a different jlink silently makes a runtime
+          # that cannot load the classes.
+          jlink --add-modules "$modules,jdk.unsupported" \
+                --strip-debug --no-header-files --no-man-pages \
+                --compress=zip-6 --output build/runtime
+
+      - name: Assemble archive
+        shell: bash
+        run: |
+          bundle=""
+          if [ "${{ matrix.os }}" = "windows" ]; then
+            # MinGW links libstdc++/libgcc/libwinpthread/libgomp from the toolchain,
+            # which end users do not have, so ship them next to the executables.
+            bundle="--bundle-dlls $NXSIM_MINGW_BIN"
+          fi
+          python3 packaging/assemble.py \
+            --version "$VERSION" --os "${{ matrix.os }}" --arch "${{ matrix.arch }}" \
+            --dist build/install/nx --cmake-build build/nxsim --runtime build/runtime \
+            --out dist $bundle
+
+      - name: Smoke test the archive
+        shell: bash
+        run: |
+          stage="dist/netx-$VERSION-${{ matrix.os }}-${{ matrix.arch }}"
+          bin="$stage/bin/nx"
+          if [ "${{ matrix.os }}" = "windows" ]; then
+            bin="$stage/bin/nx.bat"
+          fi
+
+          out=$("$bin" --version)
+          echo "$out"
+          case "$out" in
+            *"$VERSION"*) ;;
+            *) echo "::error::packaged nx reports '$out', expected version $VERSION"; exit 1 ;;
+          esac
+
+          # The point of the release archive is that nothing has to be installed,
+          # so make sure the runtime and headers really made it in.
+          [ -d "$stage/lib/runtime" ] || { echo "::error::no bundled JVM"; exit 1; }
+          [ -f "$stage/include/nxsim/simulation.h" ] || { echo "::error::nxsim headers missing"; exit 1; }
+
+          # The exported CMake package is what consumers of the SDK link against,
+          # so it must not reference optional dependencies we deliberately left
+          # out — otherwise `find_package(nxsim)` breaks on machines without them.
+          if grep -rqi kahip "$stage/lib/cmake/nxsim"; then
+            echo "::error::exported nxsim CMake package references KaHIP; releases build with -DNXSIM_KAHIP=OFF"
+            exit 1
+          fi
+          # ... and no absolute path from the build machine may leak into it either
+          # (e.g. /usr/include or C:/boost); consumers bring their own Boost.
+          if grep -rnE 'INTERFACE_INCLUDE_DIRECTORIES "(/|[A-Za-z]:/)' "$stage/lib/cmake/nxsim"; then
+            echo "::error::exported nxsim package leaks build-machine include paths"
+            exit 1
+          fi
+
+          if [ "${{ matrix.os }}" = "windows" ]; then
+            # Running the simulator is the real test that the exe and its bundled
+            # MinGW runtime DLLs actually load on a machine without the toolchain.
+            sim=$("$stage/bin/nxsim_cli.exe" 2>&1 || true)
+            case "$sim" in
+              *Usage*) ;;
+              *) echo "::error::nxsim_cli.exe did not run: $sim"; exit 1 ;;
+            esac
+          fi
+          if [ "${{ matrix.os }}" = "linux" ]; then
+            missing=$(ldd "$stage/bin/nxsim_cli" 2>/dev/null | grep 'not found' || true)
+            [ -z "$missing" ] || { echo "::error::nxsim_cli has missing libraries: $missing"; exit 1; }
+          fi
+          if [ "${{ matrix.os }}" = "macos" ]; then
+            # A Homebrew dylib path here would break the archive on machines
+            # without Homebrew, so make sure libomp got linked statically.
+            brew=$(otool -L "$stage/bin/nxsim_cli" | tail -n +2 | awk '{print $1}' | grep -E '^/opt/homebrew|^/usr/local' || true)
+            [ -z "$brew" ] || { echo "::error::nxsim_cli links Homebrew dylibs: $brew"; exit 1; }
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: netx-${{ matrix.os }}-${{ matrix.arch }}
+          path: |
+            dist/*.tar.gz
+            dist/*.zip
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Checksums
+        working-directory: artifacts
+        run: |
+          sha256sum *.tar.gz *.zip > SHA256SUMS 2>/dev/null || true
+          cat SHA256SUMS
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+          generate_release_notes: true
+          fail_on_unmatched_files: true

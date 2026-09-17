@@ -49,6 +49,9 @@ fi
 if [ -n "${CXX:-}" ]; then
     echo "C++ compiler: $CXX"
 fi
+if [ -n "${NXSIM_CMAKE_ARGS:-}" ]; then
+    echo "Extra CMake args: $NXSIM_CMAKE_ARGS"
+fi
 echo
 
 # Check for required tools
@@ -57,7 +60,14 @@ check_requirements() {
 
     if ! command -v java >/dev/null 2>&1; then
         echo "Error: Java is required but not installed."
-        echo "Please install Java 17 or later and try again."
+        echo "Please install JDK 25 or later and try again."
+        exit 1
+    fi
+
+    # NetX compiles to Java 25 class files; older JDKs cannot run the CLI.
+    java_major=$(java -version 2>&1 | sed -n 's/.*version "\([0-9]*\).*/\1/p' | head -1)
+    if [ -n "$java_major" ] && [ "$java_major" -lt 25 ]; then
+        echo "Error: JDK 25 or later is required (found Java $java_major)."
         exit 1
     fi
 

@@ -34,12 +34,24 @@ public class Main {
         void execute() throws Exception;
     }
 
+    /**
+     * Reports the version the build baked into the jar manifest, so a release
+     * only has to bump the Gradle version instead of editing this file.
+     */
+    static final class VersionProvider implements CommandLine.IVersionProvider {
+        @Override
+        public String[] getVersion() {
+            var version = Main.class.getPackage().getImplementationVersion();
+            return new String[]{"NetX CLI " + (version == null ? "dev" : version)};
+        }
+    }
+
     @CommandLine.Command(
             name = "NetX",
             description = "Main CLI for the NetX tool",
             mixinStandardHelpOptions = true,
             usageHelpAutoWidth = true,
-            version = "NetX CLI 0.1.0"
+            versionProvider = VersionProvider.class
     )
     static class NetXApp implements Callable<Integer> {
         @CommandLine.Spec

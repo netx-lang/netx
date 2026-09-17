@@ -4,7 +4,8 @@ plugins {
 }
 
 group = "pascal.netx"
-version = "1.0-SNAPSHOT"
+// Override from the command line (`-Pversion=…`); CI derives it from the git tag.
+version = providers.gradleProperty("version").getOrElse("0.1.0")
 
 repositories {
     mavenCentral()

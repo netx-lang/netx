@@ -14,24 +14,26 @@
 
 void launch_cli(auto &parsed) {
     auto rootMenu = std::make_unique<cli::Menu>("nxsim");
-    rootMenu->Insert("iset", [&](std::ostream &out, const id_t id, const std::string &rep) {
-        const auto val = nxon::value_t::parse_fixed(parsed.isize(id), rep);
+    rootMenu->Insert("iset", [&](std::ostream &out, const nxon::id_t id, const std::string &rep) {
+        const auto val = nxon::value_t::parse(rep);
         parsed.iset(id, val);
         out << id << ": " << val << std::endl;
-    }, "Set the value of the given wire", {"wire id", "N(d/b/o/h), e.g. 10, 10d, ABh, 001b"});
-    rootMenu->Insert("iget", [&](std::ostream &out, const id_t id) {
+    }, "Set the value of the given wire (literal width must match wire)",
+       {"wire id", "NetX literal: \"8'hAB\", \"4'b0011\", \"8'o77\", \"8'd10\", or 10 (32-bit)"});
+    rootMenu->Insert("iget", [&](std::ostream &out, const nxon::id_t id) {
         out << id << ": " << parsed.iget(id) << std::endl;
     }, "Get the value of the given wire", {"wire id"});
-    rootMenu->Insert("iflip", [&](std::ostream &out, const id_t id) {
+    rootMenu->Insert("iflip", [&](std::ostream &out, const nxon::id_t id) {
         parsed.iflip(id);
         out << id << ": " << parsed.iget(id) << std::endl;
     }, "Flip the given wire", {"wire id"});
 
     rootMenu->Insert("set", [&](std::ostream &out, const std::string &name, const std::string &rep) {
-        const auto val = nxon::value_t::parse_fixed(parsed.size(name), rep);
+        const auto val = nxon::value_t::parse(rep);
         parsed.set(name, val);
         out << name << ": " << val << std::endl;
-    }, "Set the value of the given wire", {"wire name", "N(d/b/o/h), e.g. 10, 10d, ABh, 001b"});
+    }, "Set the value of the given wire (literal width must match wire)",
+       {"wire name", "NetX literal: \"8'hAB\", \"4'b0011\", \"8'o77\", \"8'd10\", or 10 (32-bit)"});
     rootMenu->Insert("get", [&](std::ostream &out, const std::string &name) {
         out << name << ": " << parsed.get(name) << std::endl;
     }, "Get the value of the given wire", {"wire name"});

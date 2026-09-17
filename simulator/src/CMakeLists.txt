@@ -2,7 +2,13 @@ cmake_minimum_required(VERSION 3.28)
 project(nxsim_src VERSION 1.0 LANGUAGES CXX)
 
 add_library(nxsim INTERFACE simulation.h)
-target_include_directories(nxsim INTERFACE ${Boost_INCLUDE_DIRS})
+# BUILD_INTERFACE: Boost belongs to the build, not to the installed package. Without
+# this the exported CMake config bakes a machine-specific path (e.g. /usr/include or
+# C:/boost) into INTERFACE_INCLUDE_DIRECTORIES, which breaks consumers elsewhere.
+# SYSTEM: Boost/nlohmann are third-party headers, so their warnings must not become
+# errors under our -Werror (AppleClang warns about infinity() in Boost.Graph when
+# -ffast-math is on, for instance; -isystem silences that, -I does not).
+target_include_directories(nxsim SYSTEM INTERFACE $<BUILD_INTERFACE:${Boost_INCLUDE_DIRS}>)
 if (KAHIP)
     message("Link KaHIP to nxsim")
     target_link_libraries(nxsim INTERFACE kahip)
