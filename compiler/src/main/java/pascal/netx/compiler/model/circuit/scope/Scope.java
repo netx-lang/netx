@@ -13,9 +13,11 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public abstract sealed class Scope permits ComponentScope, PackageScope, RepoScope {
-    private final LinkedList<Binding> bindings;
+    private LinkedList<Binding> bindings;
+    private boolean lexicalBindings;
     private final List<Scope> children;
     private Scope parent;
     protected SourceLoc instantiateLoc;
@@ -92,6 +94,25 @@ public abstract sealed class Scope permits ComponentScope, PackageScope, RepoSco
         bindings.removeFirst();
     }
 
+    /** Isolate lexical lookup while keeping the active circuit construction scope. */
+    public <T> T withLexicalBindings(Binding binding, Supplier<T> action) {
+        var previous = bindings;
+        var previousLexical = lexicalBindings;
+        bindings = new LinkedList<>();
+        bindings.add(binding);
+        lexicalBindings = true;
+        try {
+            return action.get();
+        } finally {
+            bindings = previous;
+            lexicalBindings = previousLexical;
+        }
+    }
+
+    protected boolean hasLexicalBindings() {
+        return lexicalBindings;
+    }
+
     public int getBindingCount() {
         return bindings.size();
     }
@@ -103,6 +124,9 @@ public abstract sealed class Scope permits ComponentScope, PackageScope, RepoSco
             if (entity != null) {
                 return entity;
             }
+        }
+        if (lexicalBindings) {
+            return null;
         }
         if (BuiltinComponent.isBuiltin(id)) {
             return BuiltinRef.of(BuiltinComponent.of(id), id.getSourceLoc());

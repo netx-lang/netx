@@ -2,6 +2,7 @@ package pascal.netx.compiler.model.circuit.scope;
 
 import pascal.netx.compiler.io.Logger;
 import pascal.netx.compiler.model.ast.element.EnumNode;
+import pascal.netx.compiler.model.circuit.Entity;
 import pascal.netx.compiler.model.circuit.signal.VectorValue;
 import pascal.netx.compiler.utils.CompileCancellationException;
 import pascal.netx.util.lang.BitVector;
@@ -13,7 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-public record Enum(Identifier name, int width, Map<Identifier, VectorValue> fields) {
+public record Enum(Identifier name, int width, Map<Identifier, VectorValue> fields) implements Entity {
     public static Enum from(EnumNode node) {
         checkUniqueEnumFields(node);
         Map<Identifier, VectorValue> enumMap = new HashMap<>();

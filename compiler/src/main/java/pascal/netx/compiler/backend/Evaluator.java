@@ -84,19 +84,10 @@ public final class Evaluator {
     }
 
     private Entity evaluateFieldExpr(FieldExpr expr) {
-        if (expr.getBase() instanceof IdentifierExpr idExpr) {
-            var id = idExpr.getIdentifier();
-            if (pack.defs().hasEnum(id)) {
-                return pack.defs().getEnum(id).fields().get(expr.getField());
-            }
-            if (pack.defs().hasImport(id)) {
-                var importedEnum = compilerOf(pack).getPackManager().resolveImportedEnum(pack.defs().getImport(id));
-                if (importedEnum != null) {
-                    return importedEnum.fields().get(expr.getField());
-                }
-            }
-        }
         var base = evaluate(expr.getBase());
+        if (base instanceof pascal.netx.compiler.model.circuit.scope.Enum enumeration) {
+            return enumeration.fields().get(expr.getField());
+        }
         if (base instanceof ImportRef ref) {
             var importedEnum = compilerOf(pack).getPackManager().resolveImportedEnum(ref);
             if (importedEnum != null) {
@@ -345,23 +336,36 @@ public final class Evaluator {
         return BooleanValue.of(needEqual == isEqual);
     }
 
-    public Entity evaluateMacroExpr(Macro marco, AttrBindList parameters) {
+    public Entity evaluateMacroExpr(Macro macro, AttrBindList parameters) {
         var override = switch (parameters) {
-            case IdEntityMap binding -> binding.copyOf();
+            case IdEntityMap binding -> {
+                Utils.requireEqSize(macro.identifiers(), binding.getArguments(),
+                        "Macro invocation requires all arguments to be bound");
+                for (var id : macro.identifiers()) {
+                    if (binding.lookup(id) == null) {
+                        Logger.error("Missing macro argument {}", id);
+                        throw new CompileCancellationException();
+                    }
+                }
+                yield binding.copyOf();
+            }
             case OrderedAttrBindList(var args) -> {
-                int size = Utils.requireEqSize(marco.identifiers(), args,
+                int size = Utils.requireEqSize(macro.identifiers(), args,
                         "Macro invocation requires all arguments to be bound");
                 var bindings = IdEntityMap.ofEmpty();
                 for (int i = 0; i < size; i++) {
-                    bindings.bind(marco.identifiers().get(i), args.get(i));
+                    bindings.bind(macro.identifiers().get(i), args.get(i));
                 }
                 yield bindings;
             }
         };
-        scope.overrideBindings(override);
-        var result = evaluate(marco.expr());
-        scope.restoreBindings();
-        return result;
+        var environment = IdEntityMap.ofEmpty();
+        macro.captures().forEach(environment::bind);
+        if (macro.self() != null) {
+            environment.bind(macro.self(), macro);
+        }
+        override.forEach(entry -> environment.bind(entry.getKey(), entry.getValue()));
+        return scope.withLexicalBindings(environment, () -> evaluate(macro.expr()));
     }
 
     public Entity evaluateSystemMetaExpr(SystemMeta meta, AttrBindList parameters) {
@@ -396,10 +400,7 @@ public final class Evaluator {
         return switch (prototype) {
             case Macro macro -> evaluateMacroExpr(macro, arguments);
             case SystemMeta systemMeta -> evaluateSystemMetaExpr(systemMeta, arguments);
-            case PrimaryExpr atom -> {
-                atom.setArgList(arguments);
-                yield atom;
-            }
+            case PrimaryExpr atom -> atom.withArgList(arguments);
             default -> {
                 Logger.error("Expected callable but got {}", prototype);
                 throw new CompileCancellationException();

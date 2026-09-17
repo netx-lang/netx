@@ -71,7 +71,7 @@ public final class ComponentScope extends Scope {
     @Nullable
     public Entity resolveIdentifier(Identifier id) {
         Entity entity = lookup(id);
-        if (entity == null) {
+        if (entity == null && !hasLexicalBindings()) {
             entity = resolveIdentifierInPack(id);
         }
         return entity;
@@ -85,6 +85,8 @@ public final class ComponentScope extends Scope {
                 entity = ComponentRef.of(pack.defs().getComponent(id), id);
             } else if (pack.defs().hasImport(id)) {
                 entity = pack.defs().getImport(id);
+            } else if (pack.defs().hasEnum(id)) {
+                entity = pack.defs().getEnum(id);
             } else {
                 entity = pack.defs().lookupEnum(id);
                 if (entity == null) {

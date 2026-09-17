@@ -9,6 +9,7 @@ import pascal.netx.compiler.model.ast.expr.CallExpr;
 import pascal.netx.compiler.model.ast.expr.ExprNode;
 import pascal.netx.compiler.model.ast.expr.IdentifierExpr;
 import pascal.netx.compiler.model.circuit.EList;
+import pascal.netx.compiler.model.circuit.Entity;
 import pascal.netx.compiler.model.circuit.Macro;
 import pascal.netx.compiler.model.circuit.Signature;
 import pascal.netx.compiler.model.circuit.expr.ComponentRef;
@@ -25,6 +26,7 @@ import pascal.netx.util.lang.Identifier;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -55,25 +57,25 @@ public record Elaborator(PackageScope scope, PackageNode node, Configuration con
 
     public static Binding evaluateBinding(BindingNode binding, ComponentScope scope) {
         Identifier id = binding.getHead().getSymbol();
-        List<Identifier> freeVariables = switch (binding.getHead()) {
+        List<Identifier> parameters = switch (binding.getHead()) {
             case CallExpr param -> param.getArguments().stream()
                     .map(IdentifierExpr.class::cast)
                     .map(IdentifierExpr::getIdentifier).toList();
             case IdentifierExpr _ -> List.of();
         };
-        var macro = Macro.of(freeVariables, binding.getExpr());
-
-        // Check whether the macro is closed under the current scope
-        var frees = FreeVariableDetector.detect(macro.expr());
-        macro.identifiers().forEach(frees::remove);
-        frees.remove(id);
-        for (var id1 : frees) {
-            if (scope.resolveIdentifier(id1) == null) {
-                Logger.error("Macro {} is not closed, missing variable {}", macro.expr(), id1);
+        var self = binding.getHead() instanceof CallExpr ? id : null;
+        var frees = FreeVariableDetector.detect(binding);
+        var captures = new LinkedHashMap<Identifier, Entity>();
+        for (var free : frees) {
+            var entity = scope.resolveIdentifier(free);
+            if (entity == null) {
+                Logger.error(binding.getSourceLoc(), "Macro {} is not closed, missing variable {}",
+                        binding.getExpr(), free);
                 throw new CompileCancellationException();
             }
+            captures.put(free, entity);
         }
-
+        var macro = new Macro(binding.getExpr(), parameters, captures, self);
         return IdEntityMap.of(id, macro);
     }
 
