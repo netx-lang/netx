@@ -155,7 +155,7 @@ Moreover, you can import other packages by adding them to the `_next.toml` file,
 
 ```toml
 [dependencies]
-std = { version = "0.1.0", git = "git@github.com:pascal-lab/NetX-std.git" }
+std = { version = "0.1.0", git = "git@github.com:netx-lang/netx-std.git" }
 ```
 The package manager will automatically download the package from the specified Git repository, resolve its dependencies, and make it available for compilation.
 
@@ -184,6 +184,6 @@ To enable parallel simulation, remember to link against OpenMP by adding the `-f
 For more details on how to use the `nxsim` library, refer to [NetX Simulator Documentation](https://github.com/pascal-lab/NetX/blob/main/simulator/README.md).
 
 
-Check the testbenches in the [NetX standard library](https://github.com/pascal-lab/NetX-std) for examples. More examples
+Check the testbenches in the [NetX standard library](https://github.com/netx-lang/netx-std) for examples. More examples
 can be found in [NetX-FFT](https://github.com/naiiren/NetX-FFT)
 and [NetX-RISC-V](https://github.com/naiiren/NetX-RISC-V).
