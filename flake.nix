@@ -15,7 +15,7 @@
           pkgs = import nixpkgs { inherit system; };
         in
         {
-          default = (pkgs.mkShell.override { stdenv = pkgs.gcc14Stdenv; }) {
+          default = pkgs.mkShell {
             packages = with pkgs; [
               jdk25
               git
