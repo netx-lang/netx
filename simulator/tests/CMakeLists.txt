@@ -19,5 +19,6 @@ add_test(NAME nxsim_unit_tests COMMAND nxsim_unit_tests)
 add_test(NAME nxsim_rv32i_test COMMAND nxsim_rv32i_test)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_INTERPROCEDURAL_OPTIMIZATION)
+    target_link_options(nxsim_unit_tests PRIVATE -Wno-error=stringop-overflow)
     target_link_options(nxsim_rv32i_test PRIVATE -Wno-error=maybe-uninitialized)
 endif()
