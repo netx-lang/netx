@@ -15,7 +15,7 @@
           pkgs = import nixpkgs { inherit system; };
         in
         {
-          default = (pkgs.mkShell.override { stdenv = pkgs.gcc14Stdenv; }) {
+          default = pkgs.mkShell {
             packages = with pkgs; [
               jdk25
               git
@@ -34,6 +34,10 @@
             ];
 
             JAVA_HOME = "${pkgs.jdk25}";
+            # The gcc wrapper appends -D_FORTIFY_SOURCE=2 after all user flags, which
+            # glibc flags as a #warning under -O0 (Debug builds with sanitizers), and
+            # -Werror turns that into a hard error. Disable it for local dev builds.
+            hardeningDisable = [ "fortify" ];
             # Keep CMake's setup hook from selecting a source directory on entry.
             dontUseCmakeConfigure = true;
           };
