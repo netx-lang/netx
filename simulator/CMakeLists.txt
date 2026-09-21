@@ -121,6 +121,11 @@ FetchContent_MakeAvailable(cli)
 
 add_subdirectory(src)
 
+# The simulator performance suite lives in the shared netx-lang/benchmarks
+# repository, not here: it consumes an installed nxsim and runs the same design
+# corpus the rest of the project benchmarks against. See simulator/benchmark/ for
+# the base-vs-head comparison runner.
+
 option(TESTING "Enable testing" ON)
 if (TESTING)
     find_package(GTest REQUIRED)
