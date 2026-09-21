@@ -1,0 +1,52 @@
+# Benchmark designs consumed from netx-lang/benchmarks.
+# Keep this file declarative: paths and compiler options belong here, while
+# execution and reporting live in benchmark.py.
+
+default_designs = [
+  "rv32i",
+  "ddr2",
+  "ethmac",
+  "sha256",
+  "axi",
+  "fft",
+  "aes128",
+]
+
+[design.rv32i]
+directory = "rv32i"
+top = "CORE"
+source = "rv32i/main.cpp"
+working_directory = "rv32i"
+
+[design.ddr2]
+directory = "ddr2"
+top = "DDR2"
+source = "ddr2/main.cpp"
+
+[design.ethmac]
+directory = "ethmac"
+top = "ETHMAC"
+source = "ethmac/main.cpp"
+attributes = ["frame_capacity=9"]
+
+[design.sha256]
+directory = "sha256"
+top = "SHA256"
+source = "sha256/main.cpp"
+
+[design.axi]
+directory = "axi/axi_test"
+top = "AXI_RAM_TEST_TOP"
+source = "axi/axi_test/main.cpp"
+
+[design.fft]
+directory = "fft"
+top = "fft8"
+source = "fft/main.cpp"
+flags = ["-fopenmp"]
+
+[design.aes128]
+directory = "aes128"
+top = "AES128"
+source = "aes128/main.cpp"
+flags = ["-lcrypto"]

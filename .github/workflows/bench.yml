@@ -1,115 +1,190 @@
 name: Benchmark
 
-# Continuous nxsim benchmark. Results are deterministic (Callgrind with cache
-# simulation), so the stored baseline and the PR run are comparable across
-# machines. Reporting/history/alerts are handled by github-action-benchmark.
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
     paths:
       - 'simulator/**'
+      - 'compiler/**'
+      - 'backend/**'
+      - 'src/**'
+      - 'util/**'
+      - 'build.gradle*'
+      - 'buildSrc/**'
+      - 'gradle/**'
+      - 'gradle.properties'
+      - 'settings.gradle*'
+      - 'gradlew*'
       - '.github/workflows/bench.yml'
   workflow_dispatch:
     inputs:
       designs:
-        description: 'Space-separated design list'
+        description: 'Space-separated designs; empty uses designs.toml defaults'
         required: false
-        default: 'rv32i ddr2 ethmac sha256 axi fft aes128 chain fanin fanout register_bank'
+        default: ''
 
 permissions:
   contents: read
 
 concurrency:
-  group: bench-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  JAVA_VERSION: '25'
+  group: bench-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  compare:
-    name: Benchmark
-    # Fork PRs cannot read the deploy key, so they are skipped.
+  measure:
+    # JGit needs the private netx-std deploy key. Forks cannot access it.
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
-    permissions:
-      contents: write
-      pull-requests: write
+    timeout-minutes: 120
+    env:
+      CXX: g++-15
+      BENCHMARKS_REF: f99ac1239e339db7699dcdce3b4dd31b28350a49
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
         with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'temurin'
+          persist-credentials: false
 
-      - name: Install C++ toolchain
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: temurin
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Install benchmark dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y software-properties-common
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
           sudo apt-get update
-          sudo apt-get install -y g++-15 cmake build-essential valgrind \
-              libboost-all-dev nlohmann-json3-dev libssl-dev
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-15 20
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-15 20
-          g++ --version
+          sudo apt-get install -y g++-15 valgrind libboost-all-dev nlohmann-json3-dev libssl-dev
+          "$CXX" --version
+          valgrind --version
+
+      - name: Check runner
+        run: python3 -m unittest discover -s simulator/benchmark -p 'test_*.py'
 
       - name: Build nx compiler
         run: ./gradlew installDist --no-daemon
 
-      - name: Clone benchmark designs
-        run: git clone --depth 1 https://github.com/netx-lang/benchmarks.git "$RUNNER_TEMP/benchmarks"
+      - name: Checkout pinned benchmark corpus
+        uses: actions/checkout@v4
+        with:
+          repository: netx-lang/benchmarks
+          ref: ${{ env.BENCHMARKS_REF }}
+          path: .benchmark-corpus
+          persist-credentials: false
 
-      # nx fetches netx-std with JGit, which reads ~/.ssh/id_* directly and does not
-      # use the SSH agent (no ConnectorFactory provider is registered on the
-      # classpath), so webfactory/ssh-agent would not work here.
-      - name: Set up netx-std deploy key
+      # JGit reads key files directly; this project does not register an SSH
+      # agent ConnectorFactory. The host key below is GitHub's published Ed25519
+      # key (https://api.github.com/meta), not an unauthenticated keyscan result.
+      - name: Configure netx-std access
         env:
-          NETX_STD_DEPLOY_KEY: ${{ secrets.NETX_STD_DEPLOY_KEY }}
+          DEPLOY_KEY: ${{ secrets.NETX_STD_DEPLOY_KEY }}
         run: |
-          mkdir -p ~/.ssh && chmod 700 ~/.ssh
-          printf '%s\n' "$NETX_STD_DEPLOY_KEY" > ~/.ssh/id_ed25519
+          test -n "$DEPLOY_KEY" || { echo 'NETX_STD_DEPLOY_KEY is required'; exit 1; }
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
+          printf '%s\n' 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
-      - name: Run benchmark
+      - name: Measure
         env:
-          NETX_BENCHMARKS_DIR: ${{ runner.temp }}/benchmarks
+          NETX_BENCHMARKS_DIR: ${{ github.workspace }}/.benchmark-corpus
           NX_BIN: ${{ github.workspace }}/build/install/nx/bin/nx
-          BENCH_MODE: callgrind
-          BENCH_FORMAT: gh-action
-        run: |
-          if [ "${{ github.event_name }}" = workflow_dispatch ]; then
-            export BENCH_DESIGNS="${{ github.event.inputs.designs }}"
-          fi
-          simulator/benchmark/compare.sh HEAD > bench.json
-          cat bench.json
+          BENCH_DESIGNS: ${{ inputs.designs }}
+        run: python3 simulator/benchmark/benchmark.py HEAD --format json --output-dir benchmark-results
 
-      - name: Store / compare benchmark
-        uses: benchmark-action/github-action-benchmark@v1
+      - name: Remove deploy key
+        if: always()
+        run: rm -f ~/.ssh/id_ed25519
+
+      - name: Show summary
+        if: always()
+        run: |
+          if test -f benchmark-results/summary.md; then
+            cat benchmark-results/summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          tool: 'customSmallerIsBetter'
-          output-file-path: bench.json
+          name: nxsim-benchmark
+          path: benchmark-results/
+          if-no-files-found: warn
+          retention-days: 14
+
+  # This job only consumes reports; it never builds or executes PR code.
+  report-pr:
+    needs: measure
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+      - name: Check for baseline
+        id: baseline
+        run: |
+          remote_branch=$(git ls-remote --heads origin gh-pages)
+          if test -n "$remote_branch"; then
+            echo 'exists=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'No main benchmark baseline yet; see the measurement artifact.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/download-artifact@v4
+        with:
+          name: nxsim-benchmark
+          path: benchmark-results
+      - uses: benchmark-action/github-action-benchmark@4322e5726e6334590d251fc4f92bec0efafc45dc # v1.22.2
+        if: steps.baseline.outputs.exists == 'true'
+        with:
+          tool: customSmallerIsBetter
+          output-file-path: benchmark-results/bench.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: ${{ github.event_name == 'push' }}
-          comment-always: ${{ github.event_name == 'pull_request' }}
+          auto-push: false
+          comment-always: true
           alert-threshold: '105%'
           fail-on-alert: false
           summary-always: true
 
-      - name: Upload JSON report
-        if: always()
-        uses: actions/upload-artifact@v4
+  publish:
+    needs: measure
+    # Manual runs, including runs on main, never update the history.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Initialize history on first publication
+        id: history
+        run: |
+          remote_branch=$(git ls-remote --heads origin gh-pages)
+          if test -z "$remote_branch"; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git switch --orphan gh-pages
+            git commit --allow-empty -m 'Initialize benchmark history'
+            git checkout "$GITHUB_SHA"
+            echo 'new=true' >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/download-artifact@v4
         with:
           name: nxsim-benchmark
-          path: bench.json
-          if-no-files-found: ignore
+          path: benchmark-results
+      - uses: benchmark-action/github-action-benchmark@4322e5726e6334590d251fc4f92bec0efafc45dc # v1.22.2
+        with:
+          tool: customSmallerIsBetter
+          output-file-path: benchmark-results/bench.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          skip-fetch-gh-pages: ${{ steps.history.outputs.new == 'true' }}
+          summary-always: true
+          fail-on-alert: false
