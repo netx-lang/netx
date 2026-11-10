@@ -27,6 +27,53 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+# CMake asks the compiler for its implicit include directories while it detects the
+# compiler ABI and then leaves them off the compile lines. That detection fails with
+# some MinGW-w64 toolchains ("Detecting CXX compiler ABI info - failed" on MSYS2), and
+# the fallout is not cosmetic: with the list empty, CMake passes the SYSTEM include dir
+# of Boost/nlohmann_json as `-isystem <prefix>/include`, i.e. in *front* of libstdc++'s
+# headers. mingw-w64 ships its CRT headers in that same <prefix>/include (there is no
+# <prefix>/<triplet>/include any more), so the `#include_next <stdlib.h>` in <cstdlib>
+# can no longer reach stdlib.h:
+#
+#   include/c++/16.2.0/cstdlib:83:15: fatal error: stdlib.h: No such file or directory
+#
+# Ask the compiler ourselves and add whatever CMake did not already know about.
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    set(_nxsim_probe "${CMAKE_CURRENT_BINARY_DIR}/nxsim-implicit-include-probe.cpp")
+    file(WRITE "${_nxsim_probe}" "\n")
+    execute_process(
+            COMMAND "${CMAKE_CXX_COMPILER}" -E -x c++ -v "${_nxsim_probe}"
+            OUTPUT_QUIET
+            ERROR_VARIABLE _nxsim_verbose
+            RESULT_VARIABLE _nxsim_verbose_result)
+    file(REMOVE "${_nxsim_probe}")
+    if (_nxsim_verbose_result EQUAL 0)
+        string(REPLACE "\n" ";" _nxsim_verbose_lines "${_nxsim_verbose}")
+        set(_nxsim_implicit_dirs "")
+        set(_nxsim_in_search_list OFF)
+        foreach (_line IN LISTS _nxsim_verbose_lines)
+            if (_line MATCHES "include <\\.\\.\\.> search starts here:")
+                set(_nxsim_in_search_list ON)
+            elseif (_nxsim_in_search_list AND _line MATCHES "End of search list")
+                set(_nxsim_in_search_list OFF)
+            elseif (_nxsim_in_search_list)
+                string(STRIP "${_line}" _line)
+                string(REGEX REPLACE " \\(framework directory\\)$" "" _line "${_line}")
+                if (_line AND NOT _line STREQUAL ".")
+                    list(APPEND _nxsim_implicit_dirs "${_line}")
+                endif ()
+            endif ()
+        endforeach ()
+        foreach (_dir IN LISTS _nxsim_implicit_dirs)
+            if (NOT _dir IN_LIST CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES)
+                list(APPEND CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES "${_dir}")
+            endif ()
+        endforeach ()
+        message(STATUS "Compiler implicit include dirs: ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}")
+    endif ()
+endif ()
+
 # Disable FindBoost module
 if (POLICY CMP0167)
     cmake_policy(SET CMP0167 NEW)
