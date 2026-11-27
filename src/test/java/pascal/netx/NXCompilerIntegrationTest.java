@@ -1,12 +1,10 @@
 package pascal.netx;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static pascal.netx.test.TestUtils.*;
 
 class NXCompilerIntegrationTest {
-    @Disabled
     @Test
     void testProjectBuild() {
         testGen(EXPECTED_DIR.resolve("project.json"), TEST_DIR.resolve("project").resolve("_netx.toml"));
