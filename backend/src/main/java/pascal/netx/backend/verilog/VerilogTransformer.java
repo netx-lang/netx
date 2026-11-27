@@ -69,8 +69,8 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
     public void parse() {
         var node = json.get("design");
         notepad.print("module ");
-        prepareGlobalIO(node);
         collectWireWidths(node);
+        prepareGlobalIO(node);
         collectRegisterTemps(node);
         notepad.newLine();
         notepad.println("/*%s DATA %s*/".formatted(BAR, BAR));
@@ -94,37 +94,45 @@ public final class VerilogTransformer extends AbstractNxonTransformer {
         notepad.print(escape(json.get("design").get("id").textValue()));
         notepad.println("(");
         notepad.incIndent();
-        List<String> io = new ArrayList<>();
+        Set<String> io = new LinkedHashSet<>();
         processIOPorts(node, "input", io, globalIn);
         processIOPorts(node, "output", io, globalOut);
-        notepad.println(String.join(", ", io.stream().distinct().toList()));
+        notepad.println(String.join(", ", io));
         notepad.decIndent();
         notepad.println(");");
     }
 
-    private void processIOPorts(JsonNode node, String portType, List<String> io, HashSet<Integer> globalSet) {
+    private void processIOPorts(JsonNode node, String portType, Set<String> io, HashSet<Integer> globalSet) {
         NxonParseUtils.streamOf(node, portType)
                 .map(JsonNode::textValue)
                 .map(Reference::from)
                 .forEach(ref -> {
-                    if (ref instanceof WireReference wireRef && wireRef.hasSelector()) {
-                        String tempName = "io" + wireRef.dump().replaceAll("[\\[\\].:]", "_");
-                        addTempPort(portType, io, tempName, parseSelectorWidth(wireRef.selector()), wireRef.dump());
-                    } else if (ref instanceof ValueReference valueRef) {
-                        int width = BitVector.parse(valueRef.constant()).size();
-                        String tempName = "io_cons" + extraDeclarations.size();
-                        addTempPort(portType, io, tempName, width, valueRef.dump());
-                    } else {
-                        io.add(ref.dump());
-                        if (ref instanceof WireReference dataRef) {
-                            globalSet.add(dataRef.id());
+                    switch (ref) {
+                        case WireReference wireRef when wireRef.hasSelector() -> {
+                            String tempName = "io" + wireRef.dump().replaceAll("[\\[\\].:]", "_");
+                            addTempPort(portType, io, tempName, parseSelectorWidth(wireRef.selector()), wireRef.dump());
+                        }
+                        case WireReference wire -> {
+                            if (io.add(wire.dump())) {
+                                globalSet.add(wire.id());
+                            } else {
+                                addTempPort(portType, io, wire.dump(), wireWidths.get(wire), wire.dump());
+                            }
+                        }
+                        case ValueReference valueRef -> {
+                            int width = BitVector.parse(valueRef.constant()).size();
+                            String tempName = "io_cons" + extraDeclarations.size();
+                            addTempPort(portType, io, tempName, width, valueRef.dump());
                         }
                     }
                 });
     }
 
-    private void addTempPort(String portType, List<String> io, String tempName, int width, String target) {
-        io.add(tempName);
+    private void addTempPort(String portType, Set<String> io, String tempName, int width, String target) {
+        if (!io.add(tempName)) {
+            tempName = "io_alias" + io.size();
+            io.add(tempName);
+        }
         extraDeclarations.add("%s wire %s%s;".formatted(portType, parseWidth(width), tempName));
         if (portType.equals("input")) {
             extraAssignments.add("assign %s = %s;".formatted(target, tempName));
